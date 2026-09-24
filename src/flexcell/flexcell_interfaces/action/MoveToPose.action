@@ -65,6 +65,10 @@ uint16 error_code
 int32 moveit_error_code
 # Raw MoveItErrorCodes.val, preserved for diagnosis.
 
+int32 controller_error_code
+# Raw control_msgs/FollowJointTrajectory error_code when the trajectory was
+# executed through the controller action backend (0 = SUCCESSFUL).
+
 geometry_msgs/PoseStamped reached_pose
 bool has_reached_pose
 # reached_pose is measured from real joint state / TF, NOT from MoveIt's
@@ -85,6 +89,20 @@ uint64 world_revision_after
 bool execution_started
 # True once a trajectory was handed to the controller. Distinguishes
 # "never moved" from "moved and then failed".
+
+bool preempted
+# True only when a running trajectory was measurably cut short: the stop
+# request was accepted by the component that owned the trajectory AND the
+# achieved joint state did not reach the planned endpoint.
+
+bool stop_confirmed
+# Strict stop confirmation. Requires ALL of:
+#   1. a stop request was really sent to the trajectory owner
+#   2. downstream accepted it (goals_canceling >= 1)
+#   3. joint velocities actually reached rest
+#   4. the robot did NOT reach the planned trajectory endpoint
+#   5. the state could be re-read afterwards
+# A robot that is merely stationary does NOT satisfy this.
 
 string evidence_id
 # Key into the structured JSONL log for this request.

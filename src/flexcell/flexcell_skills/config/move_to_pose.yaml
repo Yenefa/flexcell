@@ -9,6 +9,10 @@ move_to_pose_server:
     planning_service: /plan_kinematic_path
     ik_service: /compute_ik
     execute_action: /execute_trajectory
+    # Verified cancellable path. MoveIt 2.12.4's /execute_trajectory accepts
+    # cancel requests but never acts on them (see docs/DAY2_MOVETOPOSE.md).
+    execution_backend: controller_action
+    controller_action: /arm_controller/follow_joint_trajectory
     joint_states_topic: /joint_states
 
     # --- time budgets (server owns the hard bounds) ---

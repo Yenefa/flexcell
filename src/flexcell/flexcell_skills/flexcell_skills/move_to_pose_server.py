@@ -30,6 +30,7 @@ from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 from rclpy.time import Time
 
+from control_msgs.action import FollowJointTrajectory
 from geometry_msgs.msg import Pose, PoseStamped, Vector3
 from moveit_msgs.action import ExecuteTrajectory
 from moveit_msgs.msg import (
@@ -109,6 +110,12 @@ class MoveToPoseServer(Node):
         self.declare_parameter('ik_service', '/compute_ik')
         self.declare_parameter('ik_timeout_s', 1.0)
         self.declare_parameter('execute_action', '/execute_trajectory')
+        # Verified stop path: the ros2_control controller action honours cancel
+        # (measured stop latency ~50 ms). MoveIt 2.12.4's /execute_trajectory does
+        # not - see docs/DAY2_MOVETOPOSE.md.
+        self.declare_parameter('execution_backend', 'controller_action')
+        self.declare_parameter('controller_action',
+                               '/arm_controller/follow_joint_trajectory')
         self.declare_parameter('joint_states_topic', '/joint_states')
 
         self.declare_parameter('default_deadline_ms', 20000)
@@ -149,6 +156,8 @@ class MoveToPoseServer(Node):
         self._ik_srv = gp('ik_service').value
         self._ik_timeout = float(gp('ik_timeout_s').value)
         self._exec_act = gp('execute_action').value
+        self._backend = gp('execution_backend').value
+        self._fjt_action = gp('controller_action').value
         self._js_topic = gp('joint_states_topic').value
 
         self._default_deadline_ms = int(gp('default_deadline_ms').value)
@@ -211,6 +220,8 @@ class MoveToPoseServer(Node):
             GetPositionIK, self._ik_srv, callback_group=self._cbg)
         self._exec_client = ActionClient(
             self, ExecuteTrajectory, self._exec_act, callback_group=self._cbg)
+        self._fjt_client = ActionClient(
+            self, FollowJointTrajectory, self._fjt_action, callback_group=self._cbg)
 
         self._server = ActionServer(
             self,
@@ -256,7 +267,7 @@ class MoveToPoseServer(Node):
         rec['wall_ts'] = time.time()
         rec.setdefault('feedback_phases', list(self._current_phases))
         rec.setdefault('moveit_error_code',
-                       rec.get('moveit_execution_error_code',
+                       rec.get('execution_error_code',
                                rec.get('moveit_planning_error_code', 0)))
         js = self._js
         if js is not None:
@@ -293,6 +304,9 @@ class MoveToPoseServer(Node):
         r.world_revision_before = 0
         r.world_revision_after = 0
         r.execution_started = False
+        r.controller_error_code = 0
+        r.preempted = False
+        r.stop_confirmed = False
         r.evidence_id = ''
         r.detail = detail
         return r
@@ -549,67 +563,51 @@ class MoveToPoseServer(Node):
 
             # ================= EXECUTING =================
             self._feedback(goal_handle, F.PHASE_EXECUTING, t_start)
-            if not self._exec_client.wait_for_server(timeout_sec=2.0):
-                res = self._result(R.OUTCOME_FAILED, R.ERR_STATE_UNAVAILABLE,
-                                   detail='execute action %s unavailable' % self._exec_act)
-                res.evidence_id = evidence
-                rec.update(outcome='FAILED', error_code=R.ERR_STATE_UNAVAILABLE)
-                self._log(rec)
-                goal_handle.abort()
-                return res
-
-            exec_goal = ExecuteTrajectory.Goal()
-            exec_goal.trajectory = traj
+            rec['execution_backend'] = self._backend
             rec['execution_start'] = time.time()
             execution_started = True
-            send_fut = self._exec_client.send_goal_async(exec_goal)
-            st = self._wait(send_fut, goal_handle,
-                            min(deadline_t, time.monotonic() + self._exec_timeout))
-            if st != 'done':
-                return self._stop_and_finish(
-                    goal_handle, rec, evidence, rid, t_start, execution_started,
-                    'cancel' if st == 'cancel' else 'timeout',
-                    exec_goal_handle=(send_fut.result() if send_fut.done() else None),
-                    exec_result_future=None,
-                    planned_final_positions=planned_final_positions,
-                    traj_joint_names=traj_joint_names)
-            egh = send_fut.result()
-            if egh is None or not egh.accepted:
-                res = self._result(R.OUTCOME_FAILED, R.ERR_CONTROLLER_REJECTED,
-                                   detail='trajectory rejected by the controller manager')
-                res.evidence_id = evidence
+
+            send_status, egh, res_fut, why = self._send_for_execution(traj, deadline_t)
+            if send_status != 'sent':
+                err = (R.ERR_CONTROLLER_REJECTED if send_status == 'rejected'
+                       else R.ERR_STATE_UNAVAILABLE if send_status == 'unavailable'
+                       else R.ERR_EXECUTION_TIMEOUT)
+                res = self._result(R.OUTCOME_FAILED, err, detail=why)
                 res.execution_started = execution_started
-                rec.update(outcome='FAILED', error_code=R.ERR_CONTROLLER_REJECTED)
+                res.evidence_id = evidence
+                rec.update(outcome='FAILED', error_code=err,
+                           execution_send_status=send_status)
                 self._log(rec)
                 goal_handle.abort()
                 return res
 
-            res_fut = egh.get_result_async()
             st = self._wait(res_fut, goal_handle,
                             min(deadline_t, time.monotonic() + self._exec_timeout))
             if st != 'done':
                 return self._stop_and_finish(
-                    goal_handle, rec, evidence, rid, t_start, execution_started,
+                    goal_handle, rec, evidence, t_start, execution_started,
                     'cancel' if st == 'cancel' else 'timeout',
-                    exec_goal_handle=egh, exec_result_future=res_fut,
+                    backend_goal_handle=egh, result_future=res_fut,
                     planned_final_positions=planned_final_positions,
                     traj_joint_names=traj_joint_names)
 
-            ecode = int(res_fut.result().result.error_code.val)
-            rec['moveit_execution_error_code'] = ecode
+            ecode = self._backend_result_code(res_fut.result().result)
             rec['execution_end'] = time.time()
-            if ecode != MoveItErrorCodes.SUCCESS:
+            rec['execution_error_code'] = ecode
+            if not self._backend_code_is_success(ecode):
+                # never auto-resend after a failed motion; re-acquire real state first
+                rest, why2 = self._arm_at_rest()
                 err = (R.ERR_EXECUTION_TIMEOUT if ecode == MoveItErrorCodes.TIMED_OUT
                        else R.ERR_EXECUTION_FAILED)
-                # never auto-resend after a failed motion; re-acquire real state first
-                rest, why = self._arm_at_rest()
-                res = self._result(R.OUTCOME_FAILED, err, ecode,
-                                   detail='MoveIt execution failed (%s); arm %s'
-                                          % (self._err_name(err), why))
+                res = self._result(R.OUTCOME_FAILED, err,
+                                   detail='execution failed (code %d); arm %s' % (ecode, why2))
+                if self._backend == 'controller_action':
+                    res.controller_error_code = ecode
+                else:
+                    res.moveit_error_code = ecode
                 res.execution_started = execution_started
                 res.evidence_id = evidence
-                rec.update(outcome='FAILED', error_code=err, moveit_error_code=ecode,
-                           arm_at_rest=rest)
+                rec.update(outcome='FAILED', error_code=err, arm_at_rest=rest)
                 self._log(rec)
                 goal_handle.abort()
                 return res
@@ -683,70 +681,118 @@ class MoveToPoseServer(Node):
             self._busy = False
 
     # ------------------------------------------------------------- stopping
-    def _stop_and_finish(self, goal_handle, rec, evidence, rid, t_start,
-                         execution_started, reason, exec_goal_handle=None,
-                         exec_result_future=None, planned_final_positions=None,
-                         traj_joint_names=None):
+    # ------------------------------------------------------------- execution backends
+    def _send_for_execution(self, traj, deadline_t):
+        """Hand the planned trajectory to the selected execution backend.
+
+        controller_action  : FlexCell owns the controller goal -> cancel is real
+        moveit_execute_trajectory : legacy path; MoveIt 2.12.4 does not preempt
+        """
+        if self._backend == 'controller_action':
+            if not self._fjt_client.wait_for_server(timeout_sec=2.0):
+                return ('unavailable', None, None,
+                        'controller action %s unavailable' % self._fjt_action)
+            g = FollowJointTrajectory.Goal()
+            g.trajectory = traj.joint_trajectory
+            sf = self._fjt_client.send_goal_async(g)
+            st = self._wait(sf, None, min(deadline_t, time.monotonic() + 5.0))
+            if st != 'done':
+                return ('send_timeout', None, None, 'no response from controller action')
+            gh = sf.result()
+            if gh is None or not gh.accepted:
+                return ('rejected', None, None, 'controller rejected the trajectory')
+            return ('sent', gh, gh.get_result_async(), '')
+
+        if not self._exec_client.wait_for_server(timeout_sec=2.0):
+            return ('unavailable', None, None,
+                    'execute action %s unavailable' % self._exec_act)
+        g = ExecuteTrajectory.Goal()
+        g.trajectory = traj
+        sf = self._exec_client.send_goal_async(g)
+        st = self._wait(sf, None, min(deadline_t, time.monotonic() + 5.0))
+        if st != 'done':
+            return ('send_timeout', None, None, 'no response from execute action')
+        gh = sf.result()
+        if gh is None or not gh.accepted:
+            return ('rejected', None, None, 'trajectory rejected by the controller manager')
+        return ('sent', gh, gh.get_result_async(), '')
+
+    def _backend_result_code(self, result):
+        if self._backend == 'controller_action':
+            return int(result.error_code)  # FollowJointTrajectory: plain int
+        return int(result.error_code.val)
+
+    def _backend_code_is_success(self, code):
+        if self._backend == 'controller_action':
+            return code == 0  # FollowJointTrajectory.SUCCESSFUL
+        return code == MoveItErrorCodes.SUCCESS
+
+    def _stop_and_finish(self, goal_handle, rec, evidence, t_start, execution_started,
+                         reason, backend_goal_handle=None, result_future=None,
+                         planned_final_positions=None, traj_joint_names=None):
         """Cancel/timeout during execution: STOP, then CONFIRM the robot stopped.
 
-        "Received a cancel request" is NOT "the robot has stopped". We must ask the
-        controller to stop AND observe the robot come to rest before claiming anything.
+        Strict stop confirmation - ALL FIVE required:
+          1. a stop request was really sent to the component owning the trajectory
+          2. downstream accepted it (goals_canceling >= 1)
+          3. joint velocities actually reached rest
+          4. the robot did NOT reach the planned trajectory endpoint
+          5. the state could be re-read afterwards
+
+        A merely stationary robot is NOT confirmation: it may simply have finished
+        the original trajectory.
         """
         self._feedback(goal_handle, F.PHASE_STOPPING, t_start)
         rec['stop_reason'] = reason
+        rec['execution_backend'] = self._backend
 
-        preempted = False
-        already_completed = False
-
-        # Ask the controller to stop. The cancel RESPONSE is not authoritative -
-        # it can be slow or empty. The authoritative signal is the execution
-        # result's error code (PREEMPTED means the trajectory really was cut short).
-        if exec_goal_handle is not None:
+        # ---- (1)+(2) real stop request, and was it accepted? ----
+        stop_request_sent = False
+        stop_accepted = False
+        if backend_goal_handle is not None:
             try:
-                cf = exec_goal_handle.cancel_goal_async()
+                cf = backend_goal_handle.cancel_goal_async()
+                stop_request_sent = True
                 self._wait(cf, None, time.monotonic() + self._stop_timeout)
-                rec['cancel_response_received'] = bool(cf.done())
                 if cf.done() and cf.result() is not None:
-                    resp = cf.result()
-                    gc = getattr(resp, 'goals_canceling', None) or []
-                    rec['cancel_goals_canceling'] = len(gc)
+                    gc = getattr(cf.result(), 'goals_canceling', None) or []
+                    rec['stop_goals_canceling'] = len(gc)
+                    stop_accepted = len(gc) > 0
+                else:
+                    rec['stop_response'] = 'no response within %.1fs' % self._stop_timeout
             except Exception as exc:  # noqa: BLE001
-                rec['cancel_error'] = str(exc)
+                rec['stop_request_error'] = str(exc)
         else:
-            rec['cancel_error'] = 'no execute goal handle available to cancel'
+            rec['stop_request_error'] = 'no backend goal handle: no stop request could be sent'
+        rec['stop_request_sent'] = stop_request_sent
+        rec['stop_request_accepted'] = stop_accepted
 
-        if exec_result_future is not None:
-            self._wait(exec_result_future, None,
-                       time.monotonic() + self._stop_result_timeout)
-            if exec_result_future.done():
+        # ---- did the backend goal terminate? ----
+        terminated = False
+        if result_future is not None:
+            self._wait(result_future, None, time.monotonic() + self._stop_result_timeout)
+            if result_future.done():
+                terminated = True
                 try:
-                    code = int(exec_result_future.result().result.error_code.val)
+                    code = self._backend_result_code(result_future.result().result)
                     rec['execution_termination_error_code'] = code
-                    if code == MoveItErrorCodes.PREEMPTED:
-                        preempted = True
-                    elif code == MoveItErrorCodes.SUCCESS:
-                        already_completed = True
-                    else:
-                        preempted = True  # terminated, but not cleanly
                 except Exception as exc:  # noqa: BLE001
                     rec['execution_result_error'] = str(exc)
-            else:
-                rec['execution_termination_error_code'] = None
-                rec['execution_result_timeout'] = True
+        rec['execution_terminated'] = terminated
 
-        confirmed = False
+        # ---- (3) velocities actually reached rest ----
+        at_rest = False
         why = 'not checked'
         stop_deadline = time.monotonic() + self._stop_timeout
         while time.monotonic() < stop_deadline:
-            ok, why = self._arm_at_rest()
-            if ok:
-                confirmed = True
+            at_rest, why = self._arm_at_rest()
+            if at_rest:
                 break
             time.sleep(0.05)
+        rec['robot_at_rest'] = at_rest
+        rec['robot_at_rest_detail'] = why
 
-        # Measure, do not trust: compare the ACHIEVED joint state against the
-        # planned trajectory's final waypoint. A large deviation means the motion
-        # really was cut short, whatever the action result error code claims.
+        # ---- (4) did the robot avoid the planned endpoint? ----
         cut_short = None
         if planned_final_positions and traj_joint_names:
             js, _age = self._joint_state()
@@ -758,23 +804,41 @@ class MoveToPoseServer(Node):
                 if devs:
                     cut_short = max(devs)
                     rec['max_deviation_from_planned_end_rad'] = cut_short
-        if cut_short is not None and cut_short > self._cut_short_rad:
-            preempted = True
-            already_completed = False
+        avoided = cut_short is not None and cut_short > self._cut_short_rad
+        rec['avoided_planned_endpoint'] = avoided
 
-        rec['stop_confirmed'] = confirmed
-        rec['stop_mode'] = ('preempted' if preempted
-                            else 'already_completed' if already_completed
-                            else 'settled' if confirmed else 'unconfirmed')
+        # ---- (5) state re-readable ----
+        js2, age2 = self._joint_state()
+        state_readable = js2 is not None and age2 is not None and age2 <= self._js_max_age
+        rec['state_readable'] = state_readable
 
-        if not confirmed:
-            # Cannot prove the arm stopped -> STATE_UNKNOWN, latch motion off.
+        preempted = stop_accepted and avoided
+        stop_confirmed = (stop_request_sent and stop_accepted and at_rest
+                          and avoided and state_readable)
+        rec['preempted'] = preempted
+        rec['stop_confirmed'] = stop_confirmed
+
+        if stop_confirmed:
+            rec['stop_mode'] = 'preempted'
+        elif stop_request_sent and at_rest and state_readable and not avoided:
+            rec['stop_mode'] = 'already_completed'
+        else:
+            rec['stop_mode'] = 'unconfirmed'
+
+        if rec['stop_mode'] == 'unconfirmed':
+            # Cannot prove what happened -> STATE_UNKNOWN and close the motion gate.
             self._motion_blocked = True
-            self._motion_blocked_reason = 'cancel/timeout (%s) with unconfirmed stop' % reason
-            res = self._result(R.OUTCOME_STATE_UNKNOWN, R.ERR_STATE_UNKNOWN,
-                               detail='%s but stop NOT confirmed (%s); motion latched off '
-                                      'until state is reconfirmed' % (reason, why))
+            self._motion_blocked_reason = '%s with unconfirmed stop' % reason
+            res = self._result(
+                R.OUTCOME_STATE_UNKNOWN, R.ERR_STATE_UNKNOWN,
+                detail=('%s: stop NOT confirmed (sent=%s accepted=%s at_rest=%s '
+                        'avoided_endpoint=%s state_readable=%s); motion latched off '
+                        'until the state is reconfirmed'
+                        % (reason, stop_request_sent, stop_accepted, at_rest,
+                           avoided, state_readable)))
             res.execution_started = execution_started
+            res.preempted = False
+            res.stop_confirmed = False
             res.evidence_id = evidence
             rec.update(outcome='STATE_UNKNOWN', error_code=R.ERR_STATE_UNKNOWN)
             self._log(rec)
@@ -783,12 +847,15 @@ class MoveToPoseServer(Node):
 
         err = R.ERR_EXECUTION_TIMEOUT if reason == 'timeout' else R.ERR_CANCELED
         outcome = R.OUTCOME_FAILED if reason == 'timeout' else R.OUTCOME_CANCELED
-        note = ('preempted by cancel' if preempted
-                else 'trajectory had already completed before the cancel took effect'
-                if already_completed else 'settled after stop request')
-        res = self._result(outcome, err,
-                           detail='%s; stop confirmed (%s)' % (reason, note))
+        if rec['stop_mode'] == 'preempted':
+            note = 'preempted; stop confirmed'
+        else:
+            note = ('the trajectory had already completed before the stop request took '
+                    'effect; nothing was preempted')
+        res = self._result(outcome, err, detail='%s; %s' % (reason, note))
         res.execution_started = execution_started
+        res.preempted = preempted
+        res.stop_confirmed = stop_confirmed
         res.evidence_id = evidence
         rec.update(outcome='CANCELED' if outcome == R.OUTCOME_CANCELED else 'FAILED',
                    error_code=err)

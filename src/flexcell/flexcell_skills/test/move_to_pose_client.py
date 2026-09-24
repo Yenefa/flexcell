@@ -43,6 +43,7 @@ class Client(Node):
         self.cli = ActionClient(self, MoveToPose, '/move_to_pose')
         self.phases = []
         self.gh = None
+        self.executing_t0 = None
 
     def fb(self, msg):
         p = msg.feedback.phase
@@ -50,6 +51,8 @@ class Client(Node):
         if not self.phases or self.phases[-1] != name:
             self.phases.append(name)
             print('FEEDBACK %-10s elapsed_ms=%d' % (name, msg.feedback.elapsed_ms), flush=True)
+        if p == MoveToPose.Feedback.PHASE_EXECUTING and self.executing_t0 is None:
+            self.executing_t0 = time.monotonic()
 
     def run(self, args):
         if not self.cli.wait_for_server(timeout_sec=10.0):
@@ -89,11 +92,17 @@ class Client(Node):
         cancel_sent = False
         while not res_fut.done():
             rclpy.spin_once(self, timeout_sec=0.05)
-            if args.cancel_after and not cancel_sent:
-                if time.monotonic() - t0 >= args.cancel_after:
-                    print('CANCEL_REQUESTED after %.2fs' % args.cancel_after, flush=True)
-                    self.gh.cancel_goal_async()
-                    cancel_sent = True
+            if not cancel_sent and args.cancel_after and time.monotonic() - t0 >= args.cancel_after:
+                print('CANCEL_REQUESTED after %.2fs (wall)' % args.cancel_after, flush=True)
+                self.gh.cancel_goal_async()
+                cancel_sent = True
+            if (not cancel_sent and args.cancel_after_executing
+                    and self.executing_t0 is not None
+                    and time.monotonic() - self.executing_t0 >= args.cancel_after_executing):
+                print('CANCEL_REQUESTED %.2fs into EXECUTING' % args.cancel_after_executing,
+                      flush=True)
+                self.gh.cancel_goal_async()
+                cancel_sent = True
             if time.monotonic() - t0 > args.timeout:
                 print('CLIENT_TIMEOUT after %.1fs' % args.timeout)
                 break
@@ -141,6 +150,7 @@ def main():
     ap.add_argument('--request-id', default='')
     ap.add_argument('--expected-revision', type=int, default=0)
     ap.add_argument('--cancel-after', type=float, default=0.0)
+    ap.add_argument('--cancel-after-executing', type=float, default=0.0)
     ap.add_argument('--timeout', type=float, default=90.0)
     args = ap.parse_args()
 
