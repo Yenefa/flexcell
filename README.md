@@ -39,8 +39,11 @@ See docs/ORIGIN.md for the full framing.
 - [ ] **Day 2** - expose Plan/Execute as an agent-callable skill interface
 - [ ] **Week 1** - deterministic skills (observe / pick / place / verify) + FSM
 - [ ] **Week 1 (parallel)** - standalone NVIDIA Development Agent sandbox
-- [ ] **Week 2+** - DecisionPolicy abstraction (FSM / Jev / LLM) - see issue #1
+- [ ] **Week 2** - DecisionPolicy abstraction and FSM / Jev / LLM benchmark - see issue #1
+  depends on: Skill Server, Deterministic Executor, Verifier, Canonical WorldState
 - [ ] **Later** - Isaac ROS / Isaac Sim / VLA, only when a measured bottleneck justifies it
+
+> **0 lines of Jev before the deterministic robot baseline works.**
 
 ---
 
