@@ -3,6 +3,10 @@ build/
 install/
 log/
 
+# upstream sources are reproduced via agentic_workcell.repos (see README)
+/src/*
+!/src/flexcell/
+
 # python
 __pycache__/
 *.pyc
@@ -11,4 +15,3 @@ __pycache__/
 .vscode/
 .idea/
 .DS_Store
-src/

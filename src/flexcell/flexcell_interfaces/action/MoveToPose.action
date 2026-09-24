@@ -1,0 +1,104 @@
+# ============================================================================
+# FlexCell :: MoveToPose
+#
+# Typed boundary between a caller (Human / FSM / future Runtime Agent) and the
+# deterministic robot software. Replaces "Human -> RViz -> Plan -> Execute"
+# with a request/result contract that reports planning state, execution state,
+# cancellation, timeout, failure cause and the ACTUALLY reached pose.
+#
+# Everything below the Task Policy must work correctly without an LLM.
+# ============================================================================
+
+# ------------------------------- Goal -------------------------------
+string request_id
+# Caller correlation id. Server generates one when empty.
+
+geometry_msgs/PoseStamped target
+# Target end-effector pose. header.frame_id must be resolvable via TF.
+# OpenMANIPULATOR-X has 4 revolute joints (+ gripper): NOT every 6-DoF pose
+# is reachable. Unreachable goals must fail explicitly, never be relaxed
+# silently into a success.
+
+string motion_profile_id
+# Server-side whitelist key (e.g. "demo_slow"). Callers may NOT supply raw
+# velocity/acceleration scaling - the server owns motion limits.
+
+uint64 expected_world_revision
+# 0 = gate not enabled (no WorldState yet, Day 2 fixed-scene mode).
+# Never fake this value. The gate is wired in before the Runtime Agent lands.
+
+uint32 deadline_ms
+# 0 = server default. Server clamps to a hard upper bound.
+
+---
+# ------------------------------ Result ------------------------------
+
+# ---- outcome ----
+uint8 OUTCOME_SUCCEEDED     = 0
+uint8 OUTCOME_FAILED        = 1
+uint8 OUTCOME_CANCELED      = 2
+uint8 OUTCOME_STATE_UNKNOWN = 3
+uint8 outcome
+
+# ---- error taxonomy ----
+uint16 ERR_NONE                   = 0
+# request / state (rejected before any motion)
+uint16 ERR_INVALID_GOAL           = 1
+uint16 ERR_FRAME_UNAVAILABLE      = 2
+uint16 ERR_STALE_WORLD            = 3
+uint16 ERR_RESOURCE_BUSY          = 4
+# planning
+uint16 ERR_IK_UNREACHABLE         = 10
+uint16 ERR_NO_COLLISION_FREE_PLAN = 11
+uint16 ERR_PLANNING_TIMEOUT       = 12
+# execution
+uint16 ERR_CONTROLLER_REJECTED    = 20
+uint16 ERR_EXECUTION_FAILED       = 21
+uint16 ERR_EXECUTION_TIMEOUT      = 22
+# result / verification
+uint16 ERR_POSE_NOT_REACHED       = 30
+uint16 ERR_STATE_UNAVAILABLE      = 31
+uint16 ERR_CANCELED               = 32
+uint16 ERR_STATE_UNKNOWN          = 33
+uint16 error_code
+
+int32 moveit_error_code
+# Raw MoveItErrorCodes.val, preserved for diagnosis.
+
+geometry_msgs/PoseStamped reached_pose
+bool has_reached_pose
+# reached_pose is measured from real joint state / TF, NOT from MoveIt's
+# notion of success.
+
+float64 position_error_m
+float64 orientation_error_rad
+# NaN when not measurable.
+
+bool orientation_enforced
+# False when the active kinematics solver is position-only. This is reported
+# explicitly so a relaxed orientation is never silent.
+
+uint64 world_revision_before
+uint64 world_revision_after
+# 0 = scene revision unavailable in Day 2 fixed-scene mode.
+
+bool execution_started
+# True once a trajectory was handed to the controller. Distinguishes
+# "never moved" from "moved and then failed".
+
+string evidence_id
+# Key into the structured JSONL log for this request.
+
+string detail
+# Human-readable diagnostic. Not for machine logic.
+
+---
+# ----------------------------- Feedback -----------------------------
+uint8 PHASE_VALIDATING = 0
+uint8 PHASE_PLANNING   = 1
+uint8 PHASE_EXECUTING  = 2
+uint8 PHASE_CHECKING   = 3
+uint8 PHASE_STOPPING   = 4
+uint8 phase
+
+uint32 elapsed_ms

@@ -36,7 +36,7 @@ See docs/ORIGIN.md for the full framing.
 ## Roadmap
 
 - [x] **Day 1** - Gazebo Harmonic + MoveIt 2 Plan & Execute, verified on-machine
-- [ ] **Day 2** - expose Plan/Execute as an agent-callable skill interface
+- [x] **Day 2** - MoveToPose ROS 2 Action (typed request -> MoveIt -> Gazebo -> measured result) - see docs/DAY2_MOVETOPOSE.md
 - [ ] **Week 1** - deterministic skills (observe / pick / place / verify) + FSM
 - [ ] **Week 1 (parallel)** - standalone NVIDIA Development Agent sandbox
 - [ ] **Week 2** - DecisionPolicy abstraction and FSM / Jev / LLM benchmark - see issue #1
@@ -68,10 +68,12 @@ See DAY1_REPORT.md for the full environment, every problem hit, and the fixes.
     |- README.md
     |- DAY1_REPORT.md          # Day 1 report
     |- docs/ORIGIN.md          # origin & motivation (living document)
+    |- docs/DAY2_MOVETOPOSE.md  # Day 2 contract, verification, known blocker
     |- plan_execute.py         # MoveIt Plan & Execute driver
     |- agentic_workcell.repos  # upstream repos (vcstool)
     |- scripts/                # provisioning + launch scripts
-    |- src/                    # upstream sources (not tracked)
+    |- src/flexcell/           # OUR packages (tracked)
+    |- src/                    # upstream clones (ignored, via .repos)
 
 ## Reproduce
 
