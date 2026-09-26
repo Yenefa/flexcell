@@ -15,19 +15,19 @@ Gazebo Harmonic and planned/executed through MoveIt 2 - built so that an **agent
 
 An agent (coding agent or runtime agent) invokes the workcell's capabilities as **skills**:
 discrete, callable robot actions such as "plan and execute to this joint state". The agent
-decides *what* to do; the workcell guarantees *how* it is executed safely.
+decides _what_ to do; the workcell guarantees _how_ it is executed safely.
 
     agent  ->  skill layer  ->  MoveIt 2  ->  ros2_control  ->  Gazebo / real arm
 
 **This skill layer is ours, and it is not vendor-specific.** In particular it does not depend
-on NVIDIA's Isaac ROS Agent Skills - those live in the *development* plane, a different layer:
+on NVIDIA's Isaac ROS Agent Skills - those live in the _development_ plane, a different layer:
 
-| | NVIDIA Isaac ROS Agent Skills | flexcell skills |
-|---|---|---|
-| What | instruction packs letting coding assistants operate Isaac ROS tooling | runtime robot capabilities the agent invokes |
-| Layer | development plane (authoring / tooling) | runtime plane (control) |
-| Requires | Isaac ROS 5.0, CUDA 13.2+, driver 595+, ROS 2 Lyrical | ROS 2 Jazzy (this repo) |
-| Status | not used yet; planned as a separate sandbox | Day 2 work |
+|          | NVIDIA Isaac ROS Agent Skills                                         | flexcell skills                              |
+| -------- | --------------------------------------------------------------------- | -------------------------------------------- |
+| What     | instruction packs letting coding assistants operate Isaac ROS tooling | runtime robot capabilities the agent invokes |
+| Layer    | development plane (authoring / tooling)                               | runtime plane (control)                      |
+| Requires | Isaac ROS 5.0, CUDA 13.2+, driver 595+, ROS 2 Lyrical                 | ROS 2 Jazzy (this repo)                      |
+| Status   | not used yet; planned as a separate sandbox                           | Day 2 work                                   |
 
 See docs/ORIGIN.md for the full framing.
 
@@ -37,28 +37,52 @@ See docs/ORIGIN.md for the full framing.
 
 - [x] **Day 1** - Gazebo Harmonic + MoveIt 2 Plan & Execute, verified on-machine
 - [x] **Day 2** - MoveToPose ROS 2 Action (typed request -> MoveIt -> Gazebo -> measured result) - see docs/DAY2_MOVETOPOSE.md
-- [ ] **Week 1** - deterministic skills (observe / pick / place / verify) + FSM
+- [x] **Week 1** - deterministic skills (observe / pick / place / verify) + FSM
 - [ ] **Week 1 (parallel)** - standalone NVIDIA Development Agent sandbox
-- [ ] **Week 2** - DecisionPolicy abstraction and FSM / Jev / LLM benchmark - see issue #1
-  depends on: Skill Server, Deterministic Executor, Verifier, Canonical WorldState
-- [ ] **Later** - Isaac ROS / Isaac Sim / VLA, only when a measured bottleneck justifies it
+- [x] **Week 1.5** - Deterministic Demo Hardening (lifecycle CLI, strict health gate, dual-object scenario, bounded recovery + failure injection)
+- [ ] **Week 2 (M2)** - Runtime Decision Foundation - ratified design in docs/WEEK2_PREPARATION.md; tracked via issues #2-#12, RFCs #14/#16 - see docs/ROADMAP.md
+- [ ] **M3** - Confidence-Gated Hybrid Agent Benchmark - RFC #15
+- [ ] **Later** - Isaac ROS / Isaac Sim / VLA, only when a measured bottleneck justifies it; real robot backend; vision integration
 
 > **0 lines of Jev before the deterministic robot baseline works.**
 
 ---
 
-## Status - Day 1 complete
+## Project management
 
-| Item | State |
-|---|---|
-| Ubuntu 24.04 + ROS 2 Jazzy | OK |
-| Gazebo Harmonic 8.15.0 | OK |
-| OpenMANIPULATOR-X (ROBOTIS jazzy source) | OK, 6 colcon packages |
-| Gazebo model + 3 controllers active | OK |
-| MoveIt 2 Plan | OK, error_code = 1 |
-| MoveIt 2 Execute | OK, error_code = 1 |
-| Real motion in Gazebo physics | OK, verified via link poses |
-| /joint_states consistent with plan | OK |
+The repository is the single source of truth — GitHub-native workflow (Issues, Milestones,
+Project board), no external PM tools. Every important idea must have a traceable path:
+discussion → Issue/ADR → milestone task → implementation → experiment evidence → docs update.
+
+- [docs/ROADMAP.md](docs/ROADMAP.md) — long-term phases & milestones (M1 done / M2 current / M3 future)
+- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — execution calendar + maintenance policy
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system architecture (current vs target)
+- [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) — experiment log with evidence locations
+- [docs/ADR/](docs/ADR/) — architecture decision records (ADR-001: simulation manipulation backend)
+- [docs/WEEK2_PREPARATION.md](docs/WEEK2_PREPARATION.md) — ratified Week-2 design of record
+- Milestones: **M1** Deterministic Workcell Baseline (done) · **M2** Runtime Decision
+  Foundation (current; sub-milestones M2.1/M2.2/M2.3) · **M3** Hybrid Agent Benchmark (future)
+
+**Maintenance rule:** before coding — which Issue? which ADR? which docs need updating?
+After coding — update the Issue, record evidence in EXPERIMENTS.md, link the commit.
+
+---
+
+## Status
+
+Current: **Week-1.5 accepted; M2 Runtime Decision Foundation is the active milestone** —
+see [docs/ROADMAP.md](docs/ROADMAP.md). The table below is the Day-1 verification record.
+
+| Item                                     | State                       |
+| ---------------------------------------- | --------------------------- |
+| Ubuntu 24.04 + ROS 2 Jazzy               | OK                          |
+| Gazebo Harmonic 8.15.0                   | OK                          |
+| OpenMANIPULATOR-X (ROBOTIS jazzy source) | OK, 6 colcon packages       |
+| Gazebo model + 3 controllers active      | OK                          |
+| MoveIt 2 Plan                            | OK, error_code = 1          |
+| MoveIt 2 Execute                         | OK, error_code = 1          |
+| Real motion in Gazebo physics            | OK, verified via link poses |
+| /joint_states consistent with plan       | OK                          |
 
 See DAY1_REPORT.md for the full environment, every problem hit, and the fixes.
 
@@ -103,4 +127,3 @@ See DAY1_REPORT.md for the full environment, every problem hit, and the fixes.
 - CUDA toolkit is intentionally NOT installed - nothing in Day 1 needs it.
 - Isaac ROS 5.0 requires CUDA 13.2+ / driver 595+ / ROS 2 Lyrical, so it cannot share this
   Jazzy environment. It belongs in a separate Docker-isolated sandbox, not in this workspace.
-
