@@ -1,0 +1,24 @@
+# Deterministic pick-and-place task, driven by a strict FSM (no LLM).
+string object_name
+geometry_msgs/PoseStamped place_pose
+string motion_profile_id
+bool skip_verify
+---
+uint8 OUTCOME_SUCCEEDED=0
+uint8 OUTCOME_FAILED=1
+uint8 OUTCOME_CANCELED=2
+uint8 outcome
+uint16 ERR_NONE=0
+uint16 ERR_OBJECT_UNKNOWN=21
+uint16 ERR_SKILL_FAILED=50
+uint16 ERR_RESOURCE_BUSY=41
+uint16 ERR_CANCELED=32
+uint16 error_code
+string[] fsm_trace                 # ordered state names visited
+bool object_at_place
+float64 final_position_error_m
+string evidence_id
+string detail
+---
+string state
+uint32 elapsed_ms

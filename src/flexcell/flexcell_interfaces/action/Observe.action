@@ -1,0 +1,14 @@
+# Observe the workcell: ground-truth object poses + robot end-effector state.
+bool refresh                 # force a fresh ground-truth sample
+float64 max_age_s            # 0 = server default
+---
+uint8 OUTCOME_SUCCEEDED=0
+uint8 OUTCOME_FAILED=1
+uint8 outcome
+uint16 ERR_NONE=0
+uint16 ERR_WORLD_STATE_UNAVAILABLE=3
+uint16 error_code
+flexcell_interfaces/WorldState world_state
+string detail
+---
+uint32 elapsed_ms

@@ -1,0 +1,34 @@
+# Place a carried object: approach -> (detach + open gripper) -> verify drop -> retreat.
+string object_name           # must currently be carried by the arm
+geometry_msgs/PoseStamped place_pose
+string motion_profile_id
+uint64 expected_world_revision
+uint32 deadline_ms
+---
+uint8 OUTCOME_SUCCEEDED=0
+uint8 OUTCOME_FAILED=1
+uint8 OUTCOME_CANCELED=2
+uint8 outcome
+uint16 ERR_NONE=0
+uint16 ERR_INVALID_GOAL=1
+uint16 ERR_OBJECT_UNKNOWN=21
+uint16 ERR_NOT_CARRIED=24
+uint16 ERR_PLACE_FAILED=25
+uint16 ERR_MOTION_FAILED=30
+uint16 ERR_IK_UNREACHABLE=10
+uint16 ERR_RESOURCE_BUSY=41
+uint16 ERR_CANCELED=32
+uint16 error_code
+uint16 motion_error_code
+geometry_msgs/Pose object_pose_after
+bool released
+string evidence_id
+string detail
+---
+uint8 PHASE_VALIDATING=0
+uint8 PHASE_APPROACHING=1
+uint8 PHASE_RELEASING=2
+uint8 PHASE_VERIFYING=3
+uint8 PHASE_RETREATING=4
+uint8 phase
+uint32 elapsed_ms

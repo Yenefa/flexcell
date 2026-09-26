@@ -1,0 +1,21 @@
+# Verify an object's actual (ground-truth) pose against an expectation.
+string object_name
+geometry_msgs/Pose expected_pose     # world frame
+float64 position_tolerance_m         # 0 = server default
+---
+uint8 OUTCOME_VERIFIED=0
+uint8 OUTCOME_MISMATCH=1
+uint8 OUTCOME_FAILED=2
+uint8 outcome
+uint16 ERR_NONE=0
+uint16 ERR_OBJECT_UNKNOWN=21
+uint16 ERR_WORLD_STATE_UNAVAILABLE=22
+uint16 error_code
+bool verified
+geometry_msgs/Pose measured_pose
+bool has_measured_pose
+float64 position_error_m
+string evidence_id
+string detail
+---
+uint32 elapsed_ms

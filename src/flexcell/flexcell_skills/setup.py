@@ -24,6 +24,12 @@ setup(
     entry_points={
         'console_scripts': [
             'move_to_pose_server = flexcell_skills.move_to_pose_server:main',
+            'observe_server = flexcell_skills.observe_server:main',
+            'pick_server = flexcell_skills.pick_server:main',
+            'place_server = flexcell_skills.place_server:main',
+            'verify_server = flexcell_skills.verify_server:main',
+            'task_fsm_server = flexcell_skills.task_fsm_server:main',
+            'carry_server = flexcell_skills.carry_server:main',
         ],
     },
 )

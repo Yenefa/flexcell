@@ -1,0 +1,34 @@
+# Pick an object: approach -> (close gripper + attach) -> lift, with measured checks.
+string object_name
+string motion_profile_id     # whitelist key, callers never send raw scaling
+uint64 expected_world_revision
+uint32 deadline_ms           # 0 = default
+---
+uint8 OUTCOME_SUCCEEDED=0
+uint8 OUTCOME_FAILED=1
+uint8 OUTCOME_CANCELED=2
+uint8 outcome
+uint16 ERR_NONE=0
+uint16 ERR_INVALID_GOAL=1
+uint16 ERR_OBJECT_UNKNOWN=21
+uint16 ERR_WORLD_STATE_UNAVAILABLE=22
+uint16 ERR_GRASP_FAILED=23
+uint16 ERR_MOTION_FAILED=30
+uint16 ERR_IK_UNREACHABLE=10
+uint16 ERR_RESOURCE_BUSY=41
+uint16 ERR_CANCELED=32
+uint16 error_code
+uint16 motion_error_code     # propagated MoveToPose error, 0 if none
+geometry_msgs/Pose object_pose_before
+geometry_msgs/Pose object_pose_after
+bool grasp_attached
+string evidence_id
+string detail
+---
+uint8 PHASE_VALIDATING=0
+uint8 PHASE_OBSERVING=1
+uint8 PHASE_APPROACHING=2
+uint8 PHASE_GRASPING=3
+uint8 PHASE_LIFTING=4
+uint8 phase
+uint32 elapsed_ms

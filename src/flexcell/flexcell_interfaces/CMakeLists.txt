@@ -7,7 +7,14 @@ find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/WorldObject.msg"
+  "msg/WorldState.msg"
   "action/MoveToPose.action"
+  "action/Observe.action"
+  "action/PickObject.action"
+  "action/PlaceObject.action"
+  "action/VerifyObject.action"
+  "action/RunPickPlace.action"
   DEPENDENCIES geometry_msgs std_msgs
 )
 
