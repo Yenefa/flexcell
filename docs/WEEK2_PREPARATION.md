@@ -1,6 +1,6 @@
 # Week-2 Preparation — Architecture Reconnaissance & Design (NO CODE CHANGES)
 
-> **Status: DESIGN ONLY.** Nothing in this document has been implemented. No runtime
+> **Status: RATIFIED 2026-09-26 (chief review, §0.5) — implementation NOT started.** No runtime
 > behavior, skill, Gazebo, carry backend, or FSM code was touched — the repository is
 > exactly the Week-1.5 delivery baseline `7956d63` (pushed, remote-verified).
 >
@@ -34,6 +34,27 @@
 - **基准设计（§4）**：A/B/C/D 四格（FSM/LLM/Jev/Hybrid）× 7 场景族，7 项指标定义到测量点，策略输入级离线回放（issue#1 补充 C）。
 - **Jev 可行性（§5）**：真实产品（TypeSafe AI，2026-09-15 发布，Choice/Noul/Score 三原语，官方称比 LLM 快 ~200×——vendor claim 已按 issue#1 打折标注）；官方云服务**未对中国大陆开放** → 建议适配层后端可替换（官方 SDK / APUS MIT 本地复现两条腿）。API 细节（确切 schema/鉴权/定价/是否输出完整分布）= 待 vendor 文档与离线 spike，标注 UNKNOWN 处不臆断。
 - **待大统领决策（§6）**：v2 schema 冻结批准、LLM provider/model 选型、Jev 后端路线（官方 vs 本地复现）、Hybrid 阈值策略、扰动场景轨道归属。
+
+---
+
+## 0.5 Ratification — chief review verdicts (2026-09-26)
+
+All six §6 decisions are settled. Merged into the design as follows:
+
+| # | Decision | Verdict | Design delta |
+|---|---|---|---|
+| ① | WorldState v2 schema | ✅ approved | **+ new principle: policy input serialization must be versioned** (`WorldStateSchemaVersion=2` on every envelope) — replay records key on it; readers dispatch or refuse on unknown versions (§3.4) |
+| ② | FSMPolicy parity bar | ✅ approved, **priority raised** | the baseline foundation — trace-shape parity is the regression bar for the whole executor refactor (§2.5) |
+| ③ | LLM provider/model | ⏸ deferred | no LLM integration until DecisionPolicy interface + Scenario runner + Replay exist; otherwise API spend buys nothing (§2.4, §4) |
+| ④ | Jev backend | ✅ **backend-abstracted** | `JevPolicy` → pluggable `JevBackend` interface with two implementations: `TypeSafeBackend` (official API) and `LocalReproductionBackend` (APUS-style). Never bind one vendor — region limits, network reality, vendor-risk all observed (§5) |
+| ⑤ | Hybrid threshold | ⏸ no fixed value | `threshold ∈ {0.5, 0.7, 0.9}` as an **experimental variable** (sweep), not a hand-picked constant (§2.4, §4) |
+| ⑥ | S7 perturbation track | ✅ kept in primary | the likely place where Hybrid shows real value; S1-S5 FSM probably wins and that is normal — the research question is **not** "AI beats if-else" but "when the environment changes beyond hand-coded range, does hybrid decisioning win" (§4.2) |
+
+**Ratified implementation order:** WorldState → Decision Interface → FSMPolicy → Scenario
+Replay → Jev → LLM.
+
+**Research north star (chief's framing):** the core variable is no longer "how accurately
+it grasps" but "how to choose the correct action under uncertainty" — Agentic Robotics.
 
 ---
 
@@ -302,12 +323,13 @@ policies see it ONLY through the canonical structure, never by reading logs.
 | Policy | Input handling | Decision rule | Confidence source | Failure mode |
 |---|---|---|---|---|
 | `FSMPolicy` | canonical state + history | encodes today's logic as pure rules: leg plan → next action; error ∈ recoverable set ∧ budget remains → OBSERVE+retry; PLACE failure → ABORT; budget exhausted → ABORT | 1.0 on plan steps; recovery branches flagged via reason_code | none (reference implementation) |
-| `JevPolicy` | canonical serialization rendered into Jev `state` + a `Choice` question over the allowed-action menu (§5) | top choice from Jev response; map to ActionKind | Jev-reported probability (routing signal until calibrated) | parse/OOV/timeout → typed `policy_failure` → FSM fallback |
-| `LLMPolicy` | **identical** canonical JSON embedded verbatim in a fixed prompt template + action menu + output JSON-schema (structured output enforced) | model's single choice | model self-reported confidence (parsed from structured output; calibration expected to be poor — measured, not assumed) | unparseable/timeout → FSM fallback; all calls logged with tokens |
+| `JevPolicy` | canonical serialization rendered into Jev `state` + a `Choice` question over the allowed-action menu (§5) — **backend-agnostic (ratified ④)**: talks to a `JevBackend` interface; concrete `TypeSafeBackend` / `LocalReproductionBackend` are pluggable | top choice from backend response; map to ActionKind | backend-reported probability (routing signal until calibrated) | parse/OOV/timeout/backend-unreachable → typed `policy_failure` → FSM fallback |
+| `LLMPolicy` | **identical** canonical JSON embedded verbatim in a fixed prompt template + action menu + output JSON-schema (structured output enforced) | model's single choice | model self-reported confidence (parsed from structured output; calibration expected to be poor — measured, not assumed) | unparseable/timeout → FSM fallback; all calls logged with tokens. **DEFERRED (ratified ③): starts only after interface + scenario runner + replay exist** |
 | `HybridRouter` | receives both backends' views | Jev first: if `p_max ≥ τ_high` → pass through; if `p_max < τ_low` or gate-invalid → escalate to LLM; LLM choice gate-checked too; both fail → FSM fallback | Jev p_max; escalation counters recorded | inherits backends' fallbacks; escalation rate is a first-class metric |
 
-`τ_high/τ_low` start as configuration and are later tuned **only** from the calibration
-phase (§4 metric 7) — never hand-tuned to make the hybrid look good.
+**Thresholds (ratified ⑤):** `τ ∈ {0.5, 0.7, 0.9}` is an **experimental variable**
+(swept in the benchmark), not a hand-picked constant. Calibration data (§4 metric 7) —
+not intuition — decides whether any τ is ever promoted to a fixed configuration.
 
 ### 2.5 Executor integration point (how `task_fsm_server` evolves — future work, not now)
 
@@ -432,8 +454,13 @@ WorldState.
 ### 3.4 Serialization contract (the fairness core)
 
 - Canonical JSON: fixed field order, sorted map keys, explicit nulls, rounded floats
-  (documented precision), UTF-8, schema_version envelope:
-  `{"schema_version":"2.0","world_state":{...},"task_context":{...}}`.
+  (documented precision), UTF-8, versioned envelope:
+  `{"WorldStateSchemaVersion": 2, "world_state": {...}, "task_context": {...}}`.
+  **Versioning principle (ratified ①):** the schema may evolve, but the policy input
+  serialization is always versioned — every recorded `policy_input` carries
+  `WorldStateSchemaVersion`, the replay store indexes by it, and readers must dispatch
+  to a matching adapter or refuse explicitly. Unknown versions are never silently
+  interpreted; old recordings stay replayable through version adapters.
 - `notes[]` and any free text are **stripped** from the policy-facing bytes.
 - The **same serialized bytes** are: parsed back by `FSMPolicy`, passed as Jev `state`,
   and embedded verbatim in the LLM prompt. No policy receives one extra byte of
@@ -469,7 +496,7 @@ only variable is the policy.
 | S4 | unreachable place target (typed IK fail path) | none | 10 → 30 |
 | S5 | retry-exhaustion (`scenario:always`) | `always` | 10 → 30 |
 | S6 | cold-start episodes (lifecycle start→demo→stop per episode) | none | 5 → 10 |
-| S7 | off-canonical initial placement (adaptation probe) | none (perturbed world) | stretch — needs chief decision (§6) |
+| S7 | off-canonical initial placement (adaptation probe) | none (perturbed world) | **KEPT in primary (ratified ⑥)** — the likely place where Hybrid differentiates; S1-S5 FSM probably wins and that is normal |
 
 Episode = one full lifecycle-scoped demo run with recorded inputs/outputs (§4.3
 replay record). Environment snapshot (load, uptime — the delivery-acceptance lesson)
@@ -529,10 +556,13 @@ Web sources: Xinhua (2026-09-21), CNR (2026-09-20), Aliyun developer community
 | What latency constraints exist? | Vendor claim: up to ~200× faster than frontier LLMs on classification-style tasks (and ~1/400 cost) — **vendor-run numbers, treat with issue #1's caveat**. APUS local reproduction (single-token logits, no autoregressive decode; local Qwen3.5-9B) runs real-time on a laptop. FlexCell-side budget: decisions are task-level, skills take seconds (pick ≈7s, deadlines 30-90s), so a **≤500ms fast-path decision budget adds no measurable task latency**; LLM escalation ≤5s. | **ADEQUATE BUDGET (by our side); measured p95 UNKNOWN** | no independent benchmark; spike on replay store will measure |
 | Is remote-only usage acceptable for FlexCell? | **Cloud API: impractical today** — TypeSafe service is not open to mainland China (CNR), and our WSL network blackholes even github.com. **Local/self-hosted: viable** — APUS MIT reproduction (cross-platform, GPU-optional, offline) demonstrates the Jev paradigm on local models; and architecturally remote-only *would* be acceptable (task-level, not control-rate) if availability handling + FSM fallback + evidence logging are in place. | **REMOTE = NO (today, this network); LOCAL BACKEND = YES** | backend choice is a chief decision (§6); JevPolicy adapter must be backend-agnostic either way |
 
-Resolution path (when implementation is authorized): ① obtain vendor doc + trial key or
-stand up the APUS local reproduction; ② offline spike against the §4 replay store
-(no robot): schema fit, distribution-vs-top1, latency p95, cost, calibration;
-③ only then on-robot cells C/D.
+Resolution path (ratified ④ — backend-abstracted, never vendor-bound): ① define the
+`JevBackend` interface (spawn/classify/score + health + cost telemetry) with two
+planned implementations: `TypeSafeBackend` (official SDK — blocked on mainland access,
+kept pluggable) and `LocalReproductionBackend` (APUS-style local model, MIT,
+GPU-optional); ② offline spike of BOTH against the §4 replay store (no robot):
+schema fit, distribution-vs-top1, latency p95, cost, calibration; ③ only then on-robot
+cells C/D. The research never depends on one service being reachable.
 
 Explicitly UNKNOWN (not assumed): vendor pricing; exact input size limits; distribution
 completeness; official-API SLA; whether the vendor ever opens mainland access.
@@ -541,21 +571,18 @@ completeness; official-API SLA; whether the vendor ever opens mainland access.
 
 ## 6. Open questions
 
-### For the chief (decisions needed before implementation)
+### Decisions — RATIFIED by chief review 2026-09-26 (see §0.5 for deltas)
 
-1. **WorldState v2 freeze** — ratify §3.3 (additive schema + TaskContext + single-source
-   zones) as the freeze RFC required by supplement A?
-2. **FSMPolicy parity bar** — confirm: FSMPolicy must reproduce current traces
-   shape-for-shape (my recommendation: yes; it is the regression guarantee).
-3. **LLM provider/model for cell B** — pin provider, model, version, price snapshot
-   (DeepSeek via opencode/zen gateway was the earlier working assumption — confirm).
-4. **Jev backend route** — official API (not accessible from mainland today) vs
-   APUS-style local reproduction vs "defer cells C/D until access resolves".
-5. **Hybrid thresholds** — fixed config first, auto-tuned later from calibration
-   (recommended), or skip Hybrid until C and B individually clear a minimum bar?
-6. **S7 perturbation track** — include off-canonical placements in the primary
-   benchmark (this is where non-FSM policies could actually differentiate) or keep
-   primary pristine and make it a separate track?
+1. **WorldState v2 freeze** — ✅ approved, **+ versioned policy-input serialization
+   principle** (`WorldStateSchemaVersion=2`).
+2. **FSMPolicy parity bar** — ✅ approved, priority **raised** (baseline foundation).
+3. **LLM provider/model** — ⏸ **deferred** until interface + scenario runner + replay
+   exist (order: WorldState → Decision Interface → FSMPolicy → Scenario Replay → Jev → LLM).
+4. **Jev backend** — ✅ backend-abstracted: `JevBackend` interface + `TypeSafeBackend`
+   / `LocalReproductionBackend`, never vendor-bound.
+5. **Hybrid thresholds** — ⏸ no fixed value; `τ ∈ {0.5, 0.7, 0.9}` swept as an
+   experimental variable.
+6. **S7 perturbation track** — ✅ kept in primary (where Hybrid may show real value).
 
 ### Technical unknowns
 
