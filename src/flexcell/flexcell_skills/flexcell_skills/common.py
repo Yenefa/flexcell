@@ -133,6 +133,33 @@ def sample_gz_pose(model_name, timeout_s=6.0, world='empty', max_age_s=1.0):
         time.sleep(0.05)
 
 
+def sample_gz_pose_age(model_name, timeout_s=6.0, world='empty', max_age_s=1.0):
+    """Same contract as sample_gz_pose, additionally returning sample freshness.
+
+    Returns ((position[3], quat[4]), age_s, None) or (None, -1.0, error).
+    age_s = seconds since the pose stream last saw this entity (>= 0); it is
+    the honest freshness signal behind WorldState v2 `pose_age_s`. The existing
+    sample_gz_pose signature is untouched - verify_server and observe_server
+    keep their current behavior.
+    """
+    _ensure_gz_pose_stream(world)
+    deadline = time.monotonic() + timeout_s
+    while True:
+        with _GZ_STREAM['lock']:
+            entry = _GZ_STREAM['poses'].get(model_name)
+        if entry is not None and time.monotonic() - entry[2] <= max_age_s:
+            return (entry[0], entry[1]), max(0.0, time.monotonic() - entry[2]), None
+        if time.monotonic() >= deadline:
+            with _GZ_STREAM['lock']:
+                flowing = time.monotonic() - _GZ_STREAM['last_rx'] <= 3.0
+            if not flowing:
+                return None, -1.0, ('pose stream is not flowing (no fresh entity '
+                                    'updates; gz transport may be wedged)')
+            return None, -1.0, ('model %r not seen in pose stream within %.1fs'
+                                % (model_name, timeout_s))
+        time.sleep(0.05)
+
+
 def gz_publish(topic, msgtype='gz.msgs.Empty', payload='', timeout_s=5.0):
     """Publish one message on a gz topic via the CLI. Returns (ok, detail)."""
     try:

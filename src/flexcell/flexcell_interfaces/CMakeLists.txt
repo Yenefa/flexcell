@@ -7,6 +7,10 @@ find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/Assignment.msg"
+  "msg/TaskConstraints.msg"
+  "msg/HistoryEntry.msg"
+  "msg/TaskContext.msg"
   "msg/WorldObject.msg"
   "msg/WorldState.msg"
   "msg/RobotStateSummary.msg"

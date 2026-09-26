@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""FlexCell Observe skill server v2 (Week-1.5).
+"""FlexCell Observe skill server v2 (Week-1.5; snapshot schema v2 since issue #3).
 
-Canonical WorldState snapshot with STRUCTURED fields (schema frozen v1.5):
+Canonical WorldState snapshot with STRUCTURED fields (schema v2):
   robot   : joint names/positions + end-effector pose
   objects : ground-truth poses + availability
   carry   : what the carry BACKEND believes (never physical evidence)
@@ -29,9 +29,11 @@ from std_msgs.msg import Header
 from tf2_ros import Buffer, TransformListener
 
 from flexcell_interfaces.action import Observe
-from flexcell_interfaces.msg import CarryState, RobotStateSummary, WorldObject, WorldState, ZoneState
+from flexcell_interfaces.msg import (
+    CarryState, RobotStateSummary, TaskContext, WorldObject, WorldState, ZoneState)
 
-from flexcell_skills.common import JsonlLog, dist3, new_evidence, pose_msg, sample_gz_pose
+from flexcell_skills.common import (
+    JsonlLog, dist3, new_evidence, pose_msg, sample_gz_pose_age)
 
 R = Observe.Result
 
@@ -130,9 +132,10 @@ class ObserveServer(Node):
         objects = []
         moved_any = False
         for name in self._tracked:
-            sampled, err = sample_gz_pose(name)
+            sampled, age_s, err = sample_gz_pose_age(name)
             wo = WorldObject()
             wo.name = name
+            wo.klass = 'box'
             wo.size = self._sizes[name]
             if sampled is None:
                 wo.available = False
@@ -150,6 +153,7 @@ class ObserveServer(Node):
             self._last[name] = position
             wo.available = True
             wo.pose = pose_msg(position, quat)
+            wo.pose_age_s = age_s
             objects.append(wo)
 
         # robot summary
@@ -166,6 +170,12 @@ class ObserveServer(Node):
                     positions.append(float(self._js.position[idx[j]]))
             robot.joint_names = names
             robot.positions = positions
+            for n in self._js.name:                  # v2: gripper aperture (first gripper* joint)
+                if 'gripper' in n:
+                    robot.gripper_joint_name = n
+                    robot.gripper_position = float(self._js.position[idx[n]])
+                    robot.has_gripper_state = True
+                    break
         try:
             tr = self._tf_buffer.lookup_transform(
                 self._base, self._ee, Time(), Duration(seconds=1.0))
@@ -196,19 +206,20 @@ class ObserveServer(Node):
             c.x, c.y, c.z = z['x'], z['y'], z['z']
             zs.center = c
             zs.radius = z['radius']
-            occupied = None
+            occupant = ''
             for wo in objects:
                 if not wo.available:
                     continue
                 d = dist3([wo.pose.position.x, wo.pose.position.y, wo.pose.position.z],
                           [z['x'], z['y'], z['z']])
                 if d <= z['radius']:
-                    occupied = True
+                    occupant = wo.name
                     break
-            if occupied is None:
+            if not occupant:
                 zs.occupancy = ZoneState.OCCUPANCY_FREE
             else:
                 zs.occupancy = ZoneState.OCCUPANCY_OCCUPIED
+            zs.occupied_by = occupant
             zones.append(zs)
 
         if moved_any:
@@ -220,10 +231,12 @@ class ObserveServer(Node):
         ws.header.frame_id = self._base
         ws.revision = self._revision
         ws.source = self._source
+        ws.schema_version = '2.0'
         ws.robot = robot
         ws.objects = objects
         ws.carry = carry
         ws.zones = zones
+        ws.task = TaskContext()   # executor-owned at decide() time (ADR-002); default here
         ws.notes = notes
         return ws
 
