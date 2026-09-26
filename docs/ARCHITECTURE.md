@@ -21,6 +21,36 @@ Models may only decide **task-level actions**; they never control joints, trajec
 parameters, or safety. That separation is enforced by the deterministic gate (#6), not by
 policy goodwill.
 
+## Pipeline: current vs future (M2.1 boundary freeze, ADR-002)
+
+    CURRENT (Week-1.5, frozen):
+
+        w1_client / admin
+              │  /run_demo · /run_pick_place
+              ▼
+        task_fsm_server  (hard-coded FSM + bounded recovery)
+              │  /observe · /pick_object · /place_object · /verify_object
+              ▼
+        Skills (observe · pick · place · verify · carry · move_to_pose)
+              │
+              ▼
+        MoveIt 2 → ros2_control → Gazebo Harmonic (ADR-001 backend)
+
+    FUTURE (M2+; default decision_policy=fsm is trace-identical to CURRENT):
+
+        Policy (FSM │ Jev │ LLM │ Hybrid)
+              │  Decision objects — the only channel down
+              ▼
+        Executor  (safety gate · dispatch · budget accounting · evidence)
+              │  typed skill actions
+              ▼
+        Skills → ROS  (verification stays policy-blind, skill-side)
+
+Boundary rules B1-B6 (typed channels, budget ceiling, gate-before-dispatch,
+policy-blind verification, parity bar, replaceable parts) are frozen in
+[ADR/ADR-002-runtime-decision-layer-boundary.md](ADR/ADR-002-runtime-decision-layer-boundary.md);
+the line-anchored extraction map for `task_fsm_server.py` is its Appendix A.
+
 ## The three separated concerns
 
 ### Decision layer — WHAT to do next (models allowed here)
