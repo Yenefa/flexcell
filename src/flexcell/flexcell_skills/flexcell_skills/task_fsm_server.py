@@ -1,15 +1,22 @@
 #!/usr/bin/env python3
-"""FlexCell deterministic pick-and-place task FSM (Week 1).
+"""FlexCell deterministic pick-and-place task FSM (Week 1; policy seam since #4).
 
-Strict sequential FSM over the four skills:
+Strict sequential task over the four skills:
 
     OBSERVE -> PICK -> PLACE -> VERIFY
 
-No LLM, no Jev, no planning policy - exactly the deterministic baseline the
-upstream roadmap requires before any Task Policy work. One task at a time
-(single-arm mutual exclusion). Cancellation is honoured between states; a
-canceled mid-task leaves the robot in the state the skills left it in and
-reports honestly.
+The task decisions (sequencing, recoverability, retry budgeting) are ROUTED
+through the DecisionPolicy interface (issue #4, ADR-002): the executor asks
+`FSMPolicy.decide()` at every decision point and consumes the returned
+`Decision` objects. With the default `decision_policy=fsm` the policy encodes
+exactly the frozen Week-1.5 semantics, so behavior is trace-equivalent (B5).
+Every decision is logged to `decisions.jsonl` with evidence references
+(world revision + observe evidence id + decide latency).
+
+No LLM, no Jev - FSMPolicy is the deterministic baseline the upstream roadmap
+requires. One task at a time (single-arm mutual exclusion). Cancellation is
+honoured between states; a canceled mid-task leaves the robot in the state the
+skills left it in and reports honestly.
 """
 
 import json
@@ -30,6 +37,11 @@ from flexcell_interfaces.action import (
     Observe, PickObject, PlaceObject, RunDemo, RunPickPlace, VerifyObject)
 
 from flexcell_skills.common import JsonlLog, new_evidence
+from flexcell_skills.decision_policy import (
+    ACTION_ABORT, ACTION_OBSERVE, ACTION_PICK, ACTION_PLACE, ACTION_VERIFY,
+    Constraints, FSMPolicy, HistoryRecord, PolicyStateError, TaskGoal,
+    RC_BUDGET_EXHAUSTED, RC_OBSERVE_FAILED, RC_RECOVERABLE_RETRY,
+    RC_VERIFY_BUDGET_EXHAUSTED, RC_VERIFY_MISMATCH_RETRY)
 
 R = RunPickPlace.Result
 
@@ -78,7 +90,7 @@ class TaskFsmServer(Node):
             cancel_callback=lambda gh: CancelResponse.ACCEPT,
             callback_group=ReentrantCallbackGroup())
 
-        # ---------------- Week-1.5 demo FSM ----------------
+        # ---------------- Week-1.5 demo task (policy seam since #4) ----------------
         self.declare_parameter('object_a', 'target_box_a')
         self.declare_parameter('object_b', 'target_box_b')
         self.declare_parameter('zone_1_x', 0.12)
@@ -91,6 +103,8 @@ class TaskFsmServer(Node):
         self.declare_parameter('demo_verify_tolerance_m', 0.06)
         self.declare_parameter('demo_log_file', 'demo_runs.jsonl')
         self.declare_parameter('task_state_topic', '/flexcell/task_state')
+        self.declare_parameter('decision_policy', 'fsm')
+        self.declare_parameter('decision_log_file', 'decisions.jsonl')
 
         gp2 = self.get_parameter
         self._obj_a = gp2('object_a').value
@@ -106,6 +120,15 @@ class TaskFsmServer(Node):
         self._demo_log = JsonlLog(self, gp2('log_dir').value,
                                   gp2('demo_log_file').value)
         self._demo_busy = False
+
+        policy_name = gp2('decision_policy').value
+        if policy_name != 'fsm':
+            raise ValueError(
+                'unknown decision_policy %r (only "fsm" is implemented; '
+                'jev/llm/hybrid follow the ratified order)' % policy_name)
+        self._policy = FSMPolicy()
+        self._decision_log = JsonlLog(self, gp2('log_dir').value,
+                                      gp2('decision_log_file').value)
 
         # latched task state so lifecycle reset / diagnostics can read it
         qos = QoSProfile(depth=1)
@@ -123,13 +146,12 @@ class TaskFsmServer(Node):
             callback_group=ReentrantCallbackGroup())
 
         self.get_logger().info(
-            'Task FSM v2 up | demo: %s->zone_1, %s->zone_2 | recovery budget=%d'
-            % (self._obj_a, self._obj_b, self._budget))
+            'Task FSM v3 up | demo: %s->zone_1, %s->zone_2 | recovery budget=%d | '
+            'policy=%s v%s' % (self._obj_a, self._obj_b, self._budget,
+                               self._policy.name, self._policy.version))
 
     def _publish_task_state(self, state):
         self._state_pub.publish(StringMsg(data=state))
-
-        self.get_logger().info('Task FSM server up | OBSERVE->PICK->PLACE->VERIFY')
 
     def _call_skill(self, cli, goal, state, trace, rec, deadline_s, goal_handle=None, t0=None):
         """Call one skill; returns (result, None) or (None, detail)."""
@@ -296,16 +318,14 @@ class TaskFsmServer(Node):
             self._busy = False
 
     # =================================================================
-    # Week-1.5 deterministic demo:
-    #   OBSERVE -> PICK A -> PLACE A -> VERIFY A
-    #   -> OBSERVE -> PICK B -> PLACE B -> VERIFY B
-    # Bounded recovery: recoverable failures get REOBSERVE + one retry
-    # (budget=1); non-recoverable failures abort with a typed error. Every
-    # step lands in the per-run demo evidence JSONL.
+    # Week-1.5 demo task, policy-driven (issue #4 / ADR-002):
+    #   decisions come from FSMPolicy (frozen Week-1.5 semantics) at every
+    #   decision point; the executor gates, dispatches, records. Bounded
+    #   recovery: recoverable pick failures get REOBSERVE + one retry
+    #   (budget=1); place failures abort; verify mismatches get one
+    #   re-verification. Every decision lands in decisions.jsonl with
+    #   evidence references; every step lands in the demo evidence JSONL.
     # =================================================================
-
-    # PickObject error codes that a REOBSERVE+RETRY may plausibly fix
-    RECOVERABLE_PICK = frozenset({22, 23, 30})  # WORLD_STATE_UNAVAIL/GRASP_FAILED/MOTION_FAILED
 
     def _demo_call(self, cli, goal, label, goal_handle, t0, deadline_s):
         """Run one skill for the demo; returns (result, None) or (None, err_detail)."""
@@ -389,30 +409,134 @@ class TaskFsmServer(Node):
         self._demo_busy = True
         self._publish_task_state('BUSY')
         try:
-            plan = [('A', self._obj_a, 'zone_1', self._zones['zone_1']),
-                    ('B', self._obj_b, 'zone_2', self._zones['zone_2'])]
-            for tag, obj, zone_id, zone in plan:
-                # ---------- OBSERVE ----------
-                og = Observe.Goal()
-                og.refresh = True
-                r, err = self._demo_call(self._cli_observe, og, 'OBSERVE_%s' % tag,
-                                         goal_handle, t0, 30.0)
-                steps.append({'state': 'OBSERVE_%s' % tag, 'skill': 'observe',
-                              'ok': err is None and r is not None and
-                              int(r.outcome) == Observe.Result.OUTCOME_SUCCEEDED,
-                              'error': err or '', 'attempt': 1})
-                if err or int(r.outcome) != Observe.Result.OUTCOME_SUCCEEDED:
-                    return finish(RunDemo.Result.OUTCOME_FAILED,
-                                  RunDemo.Result.ERR_SKILL_FAILED,
-                                  'OBSERVE_%s failed: %s' % (tag, err or r.detail))
+            # ---- decision inputs (ADR-002: executor assembles, policy decides) ----
+            goal_obj = TaskGoal(
+                goal_id=run_id,
+                scenario_id=scenario,
+                assignments=((self._obj_a, 'zone_1'), (self._obj_b, 'zone_2')),
+            )
+            constraints = Constraints(
+                allowed_actions=frozenset((
+                    ACTION_OBSERVE, ACTION_PICK, ACTION_PLACE, ACTION_VERIFY,
+                    'WAIT', ACTION_ABORT)),
+                recovery_budget=self._budget,
+                verify_tolerance_m=self._demo_tol,
+                motion_profile_id='demo_slow',
+                max_world_age_s=0.0,
+            )
+            zone_of = dict(goal_obj.assignments)
+            world = None
+            history = []
+            decision_seq = 0
+            tag = 'A'
+            attempt = 1
+            vattempt = 1
+            last_world_revision = 0
+            last_observe_evidence = ''
+            last_fail_label = ''
+            abort_error = RunDemo.Result.ERR_SKILL_FAILED
+            abort_detail = ''
 
-                # ---------- PICK with bounded recovery ----------
-                attempt = 1
-                while True:
-                    pg = PickObject.Goal()
-                    pg.object_name = obj
-                    pg.motion_profile_id = 'demo_slow'
+            def tag_of(object_id):
+                return 'A' if object_id == self._obj_a else 'B'
+
+            while True:
+                # cancellation is honoured at decision boundaries (the original
+                # demo loop never checked it - safety delta, documented in #4)
+                if goal_handle.is_cancel_requested:
+                    return finish(RunDemo.Result.OUTCOME_CANCELED,
+                                  RunDemo.Result.ERR_CANCELED,
+                                  'canceled (trace=%s)' % ','.join(trace))
+                # completion is structural (all assignments verified), not a decision
+                verified_legs = sum(
+                    1 for d in history
+                    if d.action == ACTION_VERIFY and d.outcome == 0)
+                if verified_legs >= len(goal_obj.assignments):
+                    return finish(RunDemo.Result.OUTCOME_SUCCEEDED,
+                                  RunDemo.Result.ERR_NONE,
+                                  'demo done: A->zone_1 (%.4fm), B->zone_2 (%.4fm)'
+                                  % (res.zone_a_error_m, res.zone_b_error_m))
+
+                # ---- ask the policy WHAT next ----
+                t_dec = time.monotonic()
+                decision = self._policy.decide(world, goal_obj, constraints,
+                                               tuple(history))
+                d_ms = int((time.monotonic() - t_dec) * 1000)
+                decision_seq += 1
+                self._decision_log.write({
+                    'run_id': run_id, 'scenario_id': scenario,
+                    'seq': decision_seq,
+                    'action': decision.action, 'target': decision.target,
+                    'confidence': decision.confidence,
+                    'reason_code': decision.reason_code,
+                    'explanation': decision.explanation,
+                    'policy': self._policy.name,
+                    'policy_version': self._policy.version,
+                    'world_revision': last_world_revision,
+                    'observe_evidence_id': last_observe_evidence,
+                    'decide_latency_ms': d_ms,
+                })
+
+                if decision.target and tag_of(decision.target) != tag:
+                    tag = tag_of(decision.target)   # leg transition
+                    attempt = 1
+                    vattempt = 1
+
+                # ---------------- OBSERVE (leg start / recovery) ----------------
+                if decision.action == ACTION_OBSERVE:
+                    if decision.reason_code == RC_RECOVERABLE_RETRY:
+                        trace.append('RECOVERY:REOBSERVE+RETRY(after %s)' % last_fail_label)
+                        label = 'REOBSERVE_%s' % tag
+                    elif decision.reason_code == RC_VERIFY_MISMATCH_RETRY:
+                        trace.append('RECOVERY:REOBSERVE+REVERIFY(after %s)' % last_fail_label)
+                        label = 'REOBSERVE_%s' % tag
+                    else:
+                        label = 'OBSERVE_%s' % tag
+                    og = Observe.Goal()
+                    og.refresh = True
+                    r, err = self._demo_call(self._cli_observe, og, label,
+                                             goal_handle, t0, 30.0)
+                    o_outcome = int(r.outcome) if r is not None else 255
+                    o_evidence = getattr(r, 'evidence_id', '') if r else ''
+                    if decision.reason_code == RC_VERIFY_MISMATCH_RETRY:
+                        # frozen behavior: the verify-path reobserve result is
+                        # ignored - the re-verify decides
+                        history.append(HistoryRecord(
+                            action=ACTION_OBSERVE, target=decision.target,
+                            outcome=o_outcome, error_code=0, attempt=vattempt,
+                            world_revision=last_world_revision,
+                            evidence_id=o_evidence))
+                        continue
+                    o_ok = (err is None and r is not None and
+                            o_outcome == Observe.Result.OUTCOME_SUCCEEDED)
+                    steps.append({'state': label, 'skill': 'observe',
+                                  'ok': o_ok, 'error': err or '', 'attempt': attempt})
+                    if err or o_outcome != Observe.Result.OUTCOME_SUCCEEDED:
+                        abort_error = RunDemo.Result.ERR_SKILL_FAILED
+                        abort_detail = '%s failed: %s' % (label, err or r.detail)
+                        history.append(HistoryRecord(
+                            action=ACTION_OBSERVE, target=decision.target,
+                            outcome=255, error_code=-1, attempt=attempt,
+                            world_revision=last_world_revision, evidence_id=''))
+                        continue
+                    world = r.world_state
+                    last_world_revision = int(r.world_state.revision)
+                    # Observe.action carries no evidence_id field - defensive
+                    # getattr keeps the decision log honest if it is added later
+                    last_observe_evidence = getattr(r, 'evidence_id', '')
+                    history.append(HistoryRecord(
+                        action=ACTION_OBSERVE, target=decision.target,
+                        outcome=0, error_code=0, attempt=attempt,
+                        world_revision=last_world_revision,
+                        evidence_id=getattr(r, 'evidence_id', '')))
+                    continue
+
+                # ---------------- PICK (bounded recovery via policy) ----------------
+                if decision.action == ACTION_PICK:
                     label = 'PICK_%s(attempt=%d)' % (tag, attempt)
+                    pg = PickObject.Goal()
+                    pg.object_name = decision.target
+                    pg.motion_profile_id = constraints.motion_profile_id
                     r, err = self._demo_call(self._cli_pick, pg, label,
                                              goal_handle, t0, 90.0)
                     pick_ok = (err is None and r is not None and
@@ -423,67 +547,79 @@ class TaskFsmServer(Node):
                                   'error': err or (r.detail if r else ''),
                                   'error_code': code, 'attempt': attempt,
                                   'evidence_id': getattr(r, 'evidence_id', '') if r else ''})
+                    trace.append('%s:%s' % (label, 'OK' if pick_ok else 'FAIL:%s' % ename))
                     if pick_ok:
-                        trace.append('%s:OK' % label)
-                        break
-                    trace.append('%s:FAIL:%s' % (label, ename))
-                    recoverable = (err is None and code in self.RECOVERABLE_PICK)
-                    if not recoverable or attempt > self._budget:
-                        ecode = (RunDemo.Result.ERR_RECOVERY_EXHAUSTED
-                                 if recoverable and attempt > self._budget
-                                 else RunDemo.Result.ERR_SKILL_FAILED)
-                        return finish(RunDemo.Result.OUTCOME_FAILED, ecode,
-                                      '%s failed (%s): %s'
-                                      % (label, ename, err or r.detail))
-                    trace.append('RECOVERY:REOBSERVE+RETRY(after %s)' % label)
-                    og = Observe.Goal()
-                    og.refresh = True
-                    ro, oerr = self._demo_call(self._cli_observe, og,
-                                               'REOBSERVE_%s' % tag,
-                                               goal_handle, t0, 30.0)
-                    steps.append({'state': 'REOBSERVE_%s' % tag, 'skill': 'observe',
-                                  'ok': oerr is None, 'error': oerr or '',
-                                  'attempt': attempt})
-                    if oerr or int(ro.outcome) != Observe.Result.OUTCOME_SUCCEEDED:
-                        return finish(RunDemo.Result.OUTCOME_FAILED,
-                                      RunDemo.Result.ERR_SKILL_FAILED,
-                                      'REOBSERVE_%s failed: %s' % (tag, oerr or ro.detail))
-                    attempt += 1
+                        history.append(HistoryRecord(
+                            action=ACTION_PICK, target=decision.target,
+                            outcome=0, error_code=0, attempt=attempt,
+                            world_revision=last_world_revision,
+                            evidence_id=r.evidence_id))
+                    else:
+                        last_fail_label = label
+                        abort_error = RunDemo.Result.ERR_SKILL_FAILED
+                        abort_detail = '%s failed (%s): %s' % (label, ename, err or r.detail)
+                        history.append(HistoryRecord(
+                            action=ACTION_PICK, target=decision.target,
+                            outcome=(int(r.outcome) if r is not None else 255),
+                            error_code=code, attempt=attempt,
+                            world_revision=last_world_revision,
+                            evidence_id=getattr(r, 'evidence_id', '') if r else ''))
+                    continue
 
-                # ---------- PLACE (carried box: no auto-retry, typed abort) ----------
-                zone_pose = PoseStamped()
-                zone_pose.header.frame_id = 'world'
-                zone_pose.pose.position.x = zone[0]
-                zone_pose.pose.position.y = zone[1]
-                zone_pose.pose.position.z = zone[2]
-                zone_pose.pose.orientation.w = 1.0
-                pg = PlaceObject.Goal()
-                pg.object_name = obj
-                pg.place_pose = zone_pose
-                pg.motion_profile_id = 'demo_slow'
-                r, err = self._demo_call(self._cli_place, pg, 'PLACE_%s' % tag,
-                                         goal_handle, t0, 90.0)
-                place_ok = (err is None and r is not None and
-                            int(r.outcome) == PlaceObject.Result.OUTCOME_SUCCEEDED)
-                steps.append({'state': 'PLACE_%s' % tag, 'skill': 'place',
-                              'ok': place_ok,
-                              'error': err or (r.detail if r else ''),
-                              'evidence_id': getattr(r, 'evidence_id', '') if r else ''})
-                trace.append('PLACE_%s:%s' % (tag, 'OK' if place_ok else 'FAIL'))
-                if not place_ok:
-                    return finish(RunDemo.Result.OUTCOME_FAILED,
-                                  RunDemo.Result.ERR_SKILL_FAILED,
-                                  'PLACE_%s failed: %s'
-                                  % (tag, err or (r.detail if r else '')))
+                # ---------------- PLACE (failure aborts: carried box) ----------------
+                if decision.action == ACTION_PLACE:
+                    label = 'PLACE_%s' % tag
+                    zx, zy, zz = self._zones[zone_of[decision.target]]
+                    zone_pose = PoseStamped()
+                    zone_pose.header.frame_id = 'world'
+                    zone_pose.pose.position.x = zx
+                    zone_pose.pose.position.y = zy
+                    zone_pose.pose.position.z = zz
+                    zone_pose.pose.orientation.w = 1.0
+                    pg = PlaceObject.Goal()
+                    pg.object_name = decision.target
+                    pg.place_pose = zone_pose
+                    pg.motion_profile_id = constraints.motion_profile_id
+                    r, err = self._demo_call(self._cli_place, pg, label,
+                                             goal_handle, t0, 90.0)
+                    place_ok = (err is None and r is not None and
+                                int(r.outcome) == PlaceObject.Result.OUTCOME_SUCCEEDED)
+                    steps.append({'state': label, 'skill': 'place', 'ok': place_ok,
+                                  'error': err or (r.detail if r else ''),
+                                  'evidence_id': getattr(r, 'evidence_id', '') if r else ''})
+                    trace.append('%s:%s' % (label, 'OK' if place_ok else 'FAIL'))
+                    if place_ok:
+                        history.append(HistoryRecord(
+                            action=ACTION_PLACE, target=decision.target,
+                            outcome=0, error_code=0, attempt=attempt,
+                            world_revision=last_world_revision,
+                            evidence_id=getattr(r, 'evidence_id', '') if r else ''))
+                    else:
+                        abort_error = RunDemo.Result.ERR_SKILL_FAILED
+                        abort_detail = 'PLACE_%s failed: %s' % (tag, err or (r.detail if r else ''))
+                        history.append(HistoryRecord(
+                            action=ACTION_PLACE, target=decision.target,
+                            outcome=(int(r.outcome) if r is not None else 255),
+                            error_code=(int(r.error_code) if r is not None else -1),
+                            attempt=attempt,
+                            world_revision=last_world_revision,
+                            evidence_id=getattr(r, 'evidence_id', '') if r else ''))
+                    continue
 
-                # ---------- VERIFY with one bounded reobserve+reverify ----------
-                vattempt = 1
-                while True:
+                # ---------------- VERIFY (bounded re-verification via policy) ----------------
+                if decision.action == ACTION_VERIFY:
+                    label = 'VERIFY_%s(attempt=%d)' % (tag, vattempt)
+                    zx, zy, zz = self._zones[zone_of[decision.target]]
+                    zone_pose = PoseStamped()
+                    zone_pose.header.frame_id = 'world'
+                    zone_pose.pose.position.x = zx
+                    zone_pose.pose.position.y = zy
+                    zone_pose.pose.position.z = zz
+                    zone_pose.pose.orientation.w = 1.0
                     vg = VerifyObject.Goal()
-                    vg.object_name = obj
+                    vg.object_name = decision.target
                     vg.expected_pose = zone_pose.pose
                     vg.position_tolerance_m = self._demo_tol
-                    label = 'VERIFY_%s(attempt=%d)' % (tag, vattempt)
                     r, err = self._demo_call(self._cli_verify, vg, label,
                                              goal_handle, t0, 30.0)
                     verify_results[tag.lower()] = r
@@ -498,23 +634,36 @@ class TaskFsmServer(Node):
                                   'evidence_id': getattr(r, 'evidence_id', '') if r else ''})
                     trace.append('%s:%s' % (label, 'OK' if v_ok else 'FAIL'))
                     if v_ok:
-                        break
-                    if vattempt > self._budget:
-                        return finish(RunDemo.Result.OUTCOME_FAILED,
-                                      RunDemo.Result.ERR_RECOVERY_EXHAUSTED,
-                                      'VERIFY_%s still mismatched after budget: %s'
-                                      % (tag, err or r.detail))
-                    trace.append('RECOVERY:REOBSERVE+REVERIFY(after %s)' % label)
-                    og = Observe.Goal()
-                    og.refresh = True
-                    self._demo_call(self._cli_observe, og, 'REOBSERVE_%s' % tag,
-                                    goal_handle, t0, 30.0)
-                    vattempt += 1
+                        history.append(HistoryRecord(
+                            action=ACTION_VERIFY, target=decision.target,
+                            outcome=0, error_code=0, attempt=vattempt,
+                            world_revision=last_world_revision,
+                            evidence_id=getattr(r, 'evidence_id', '') if r else ''))
+                    else:
+                        last_fail_label = label
+                        abort_error = RunDemo.Result.ERR_RECOVERY_EXHAUSTED
+                        abort_detail = 'VERIFY_%s still mismatched after budget: %s' % (
+                            tag, err or r.detail)
+                        history.append(HistoryRecord(
+                            action=ACTION_VERIFY, target=decision.target,
+                            outcome=(int(r.outcome) if r is not None else 255),
+                            error_code=(int(r.error_code) if r is not None else -1),
+                            attempt=vattempt,
+                            world_revision=last_world_revision,
+                            evidence_id=getattr(r, 'evidence_id', '') if r else ''))
+                    continue
 
-            return finish(RunDemo.Result.OUTCOME_SUCCEEDED, RunDemo.Result.ERR_NONE,
-                          'demo done: A->zone_1 (%.4fm), B->zone_2 (%.4fm)'
-                          % (res.zone_a_error_m, res.zone_b_error_m))
+                # ---------------- WAIT / unknown ----------------
+                if decision.action == 'WAIT':
+                    continue
+                raise PolicyStateError(
+                    'policy returned unsupported action %r' % decision.action)
 
+        except PolicyStateError as exc:
+            self.get_logger().error('policy state error: %s' % exc)
+            return finish(RunDemo.Result.OUTCOME_FAILED,
+                          RunDemo.Result.ERR_SKILL_FAILED,
+                          'policy state error: %s' % exc)
         finally:
             self._demo_busy = False
             self._publish_task_state('IDLE')
