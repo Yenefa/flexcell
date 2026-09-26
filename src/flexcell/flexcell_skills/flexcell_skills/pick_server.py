@@ -22,6 +22,8 @@ from rclpy.node import Node
 
 from geometry_msgs.msg import PoseStamped, Vector3
 from std_msgs.msg import Empty as EmptyMsg
+from std_msgs.msg import String as StringMsg
+import json
 from tf2_ros import Buffer, TransformListener
 from rclpy.duration import Duration
 from rclpy.time import Time
@@ -59,6 +61,7 @@ class PickServer(Node):
         self.declare_parameter('attach_radius_m', 0.20)
         self.declare_parameter('carry_start_topic', '/flexcell/carry_start')
         self.declare_parameter('carry_stop_topic', '/flexcell/carry_stop')
+        self.declare_parameter('inject_topic', '/flexcell/inject')
         self.declare_parameter('box_follow_min_m', 0.03)
         self.declare_parameter('object_size', [0.035, 0.035, 0.035])
         self.declare_parameter('base_frame', 'world')
@@ -80,9 +83,18 @@ class PickServer(Node):
         self._raise = float(gp('grasp_raise_m').value)
         self._attach_radius = float(gp('attach_radius_m').value)
         self._carry_start = self.create_publisher(
-            Vector3, gp('carry_start_topic').value, 10)
+            StringMsg, gp('carry_start_topic').value, 10)
         self._carry_stop = self.create_publisher(
             EmptyMsg, gp('carry_stop_topic').value, 10)
+
+        # ---- deterministic failure injection (Week-1.5) ----
+        # payload "<scenario_id>:<once|always>" or "" to disable; attempts are
+        # counted per (scenario, object) so a retry (attempt 2) passes "once".
+        self._inject_scenario = ''
+        self._inject_mode = ''
+        self._inject_counts = {}
+        self.create_subscription(
+            StringMsg, gp('inject_topic').value, self._on_inject, 10)
         self._follow_min = float(gp('box_follow_min_m').value)
         self._size = list(gp('object_size').value)
         self._base = gp('base_frame').value
@@ -131,6 +143,39 @@ class PickServer(Node):
         if err is not None:
             return None, 0, err
         return res, int(res.error_code), res.detail
+
+    def _on_inject(self, msg):
+        payload = (msg.data or '').strip()
+        if not payload:
+            self._inject_scenario = ''
+            self._inject_mode = ''
+            self._inject_counts = {}
+            self.get_logger().info('failure injection DISABLED')
+            return
+        if ':' in payload:
+            scenario, mode = payload.split(':', 1)
+        else:
+            scenario, mode = payload, 'once'
+        if mode not in ('once', 'always'):
+            self.get_logger().error('bad inject mode %r (payload=%r)' % (mode, payload))
+            return
+        self._inject_scenario = scenario
+        self._inject_mode = mode
+        self._inject_counts = {}
+        self.get_logger().info(
+            'failure injection ARMED scenario=%s mode=%s' % (scenario, mode))
+
+    def _injection_check(self, object_name):
+        """Return a detail string when this attempt must fail deterministically."""
+        if not self._inject_scenario:
+            return None
+        key = '%s|%s' % (self._inject_scenario, object_name)
+        attempt = self._inject_counts.get(key, 0) + 1
+        self._inject_counts[key] = attempt
+        if self._inject_mode == 'once' and attempt > 1:
+            return None
+        return ('injected failure (scenario=%s mode=%s attempt=%d)'
+                % (self._inject_scenario, self._inject_mode, attempt))
 
     def _release_everything(self, name):
         self._carry_stop.publish(EmptyMsg())
@@ -185,11 +230,20 @@ class PickServer(Node):
                               'motion_profile_id %r not in whitelist %s'
                               % (profile, self._profiles))
 
+            # deterministic failure injection happens BEFORE any motion, so a
+            # recoverable injected failure leaves the world untouched
+            inj = self._injection_check(goal.object_name)
+            if inj is not None:
+                rec['injected'] = True
+                return finish(R.OUTCOME_FAILED, R.ERR_GRASP_FAILED, inj)
+
             # ---------- OBSERVING ----------
             self._feedback(goal_handle, 'OBSERVING', t0)
             sampled, err = sample_gz_pose(goal.object_name)
             if sampled is None:
-                return finish(R.OUTCOME_FAILED, R.ERR_OBJECT_UNKNOWN,
+                code = (R.ERR_WORLD_STATE_UNAVAILABLE
+                        if 'not flowing' in err else R.ERR_OBJECT_UNKNOWN)
+                return finish(R.OUTCOME_FAILED, code,
                               'observe failed: %s' % err)
             box_pos, box_quat = sampled
             res.object_pose_before = pose_msg(box_pos, box_quat)
@@ -252,7 +306,11 @@ class PickServer(Node):
 
             # engage the carry servo at the MEASURED gripper-to-object offset
             offset = [box_pos[i] - ee_pos[i] for i in range(3)]
-            self._carry_start.publish(Vector3(x=offset[0], y=offset[1], z=offset[2]))
+            self._carry_start.publish(StringMsg(data=json.dumps({
+                'object': goal.object_name,
+                'offset': offset,
+                'frame': self._base,
+            })))
             rec['carry_offset'] = offset
             time.sleep(0.5)   # let the servo pin the object before lifting
 

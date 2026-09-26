@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
-"""FlexCell Observe skill server (Week 1).
+"""FlexCell Observe skill server v2 (Week-1.5).
 
-Ground-truth world snapshot: tracked object poses (gz ground truth) +
-end-effector pose (TF). Bumps the canonical world revision whenever a tracked
-object moves past an epsilon. Deterministic; no LLM anywhere.
+Canonical WorldState snapshot with STRUCTURED fields (schema frozen v1.5):
+  robot   : joint names/positions + end-effector pose
+  objects : ground-truth poses + availability
+  carry   : what the carry BACKEND believes (never physical evidence)
+  zones   : semantic demo zones, occupancy derived from ground truth
+  source  : always SIMULATION_GROUND_TRUTH in this stage
+
+Bumps the canonical world revision whenever a tracked object moves past an
+epsilon. Deterministic; no LLM anywhere.
 """
 
 import time
@@ -14,20 +20,22 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.duration import Duration
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
+from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
 from rclpy.time import Time
 
-from geometry_msgs.msg import PoseStamped
+from geometry_msgs.msg import Point, Pose
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Header
 from tf2_ros import Buffer, TransformListener
 
 from flexcell_interfaces.action import Observe
-from flexcell_interfaces.msg import WorldObject, WorldState
+from flexcell_interfaces.msg import CarryState, RobotStateSummary, WorldObject, WorldState, ZoneState
 
-from flexcell_skills.common import JsonlLog, dist3, gz_publish, new_evidence, pose_msg, sample_gz_pose
+from flexcell_skills.common import JsonlLog, dist3, new_evidence, pose_msg, sample_gz_pose
 
 R = Observe.Result
-F = Observe.Feedback
+
+ARM_JOINTS = ['joint1', 'joint2', 'joint3', 'joint4']
 
 
 class ObserveServer(Node):
@@ -35,13 +43,15 @@ class ObserveServer(Node):
     def __init__(self):
         super().__init__('observe_server')
 
-        self.declare_parameter('tracked_objects', ['target_box'])
+        self.declare_parameter('tracked_objects', ['target_box_a', 'target_box_b'])
         self.declare_parameter('move_epsilon_m', 0.002)
         self.declare_parameter('base_frame', 'world')
         self.declare_parameter('end_effector_link', 'end_effector_link')
         self.declare_parameter('joint_states_topic', '/joint_states')
         self.declare_parameter('world_state_topic', '/flexcell/world_state')
-        self.declare_parameter('attach_topic', '/flexcell/target_box/attach')
+        self.declare_parameter('carry_state_topic', '/flexcell/carry_state')
+        self.declare_parameter('zones', ['zone_1', 'zone_2'])
+        self.declare_parameter('source', 'SIMULATION_GROUND_TRUTH')
         self.declare_parameter('log_dir', '~/.ros/flexcell')
         self.declare_parameter('log_file', 'observe.jsonl')
 
@@ -50,20 +60,34 @@ class ObserveServer(Node):
         self._eps = float(gp('move_epsilon_m').value)
         self._base = gp('base_frame').value
         self._ee = gp('end_effector_link').value
+        self._source = gp('source').value
         self._log = JsonlLog(self, gp('log_dir').value, gp('log_file').value)
-        attach_topic = gp('attach_topic').value
 
-        # sizes: one param per tracked object (lists of lists are not ROS params)
+        # per-object sizes and per-zone specs (lists of lists are not ROS params)
         self._sizes = {}
         for name in self._tracked:
             key = 'object_%s_size' % name
             self.declare_parameter(key, [0.035, 0.035, 0.035])
             self._sizes[name] = list(gp(key).value)
+        self._zones = []
+        for zid in list(gp('zones').value):
+            self.declare_parameter('zone_%s_x' % zid, 0.0)
+            self.declare_parameter('zone_%s_y' % zid, 0.0)
+            self.declare_parameter('zone_%s_z' % zid, 0.0175)
+            self.declare_parameter('zone_%s_radius' % zid, 0.06)
+            self._zones.append({
+                'id': zid,
+                'x': float(gp('zone_%s_x' % zid).value),
+                'y': float(gp('zone_%s_y' % zid).value),
+                'z': float(gp('zone_%s_z' % zid).value),
+                'radius': float(gp('zone_%s_radius' % zid).value),
+            })
 
         # ---------------- state ----------------
         self._revision = 0
         self._last = {}          # name -> position[3]
         self._js = None
+        self._carry = None       # last latched CarryState from the backend
         self._seq = 0
 
         self._cbg = ReentrantCallbackGroup()
@@ -71,6 +95,13 @@ class ObserveServer(Node):
         self._tf_listener = TransformListener(self._tf_buffer, self, spin_thread=False)
         self.create_subscription(
             JointState, gp('joint_states_topic').value, self._on_js, 50,
+            callback_group=self._cbg)
+
+        qos = QoSProfile(depth=1)
+        qos.durability = QoSDurabilityPolicy.TRANSIENT_LOCAL
+        qos.reliability = QoSReliabilityPolicy.RELIABLE
+        self.create_subscription(
+            CarryState, gp('carry_state_topic').value, self._on_carry, qos,
             callback_group=self._cbg)
 
         self._pub = self.create_publisher(
@@ -84,19 +115,30 @@ class ObserveServer(Node):
             callback_group=self._cbg)
 
         self.get_logger().info(
-            'Observe server up | tracked=%s eps=%.4fm base=%s ee=%s'
-            % (self._tracked, self._eps, self._base, self._ee))
+            'Observe server v2 up | tracked=%s zones=%s eps=%.4fm source=%s'
+            % (self._tracked, [z['id'] for z in self._zones], self._eps, self._source))
 
     def _on_js(self, msg):
         self._js = msg
 
-    def _snapshot(self, refresh):
+    def _on_carry(self, msg):
+        self._carry = msg
+
+    # ------------------------------------------------------------ snapshot
+    def _snapshot(self):
         notes = []
         objects = []
         moved_any = False
         for name in self._tracked:
             sampled, err = sample_gz_pose(name)
+            wo = WorldObject()
+            wo.name = name
+            wo.size = self._sizes[name]
             if sampled is None:
+                wo.available = False
+                wo.pose = Pose()
+                wo.pose.orientation.w = 1.0
+                objects.append(wo)
                 notes.append('%s: unavailable (%s)' % (name, err))
                 continue
             position, quat = sampled
@@ -106,23 +148,69 @@ class ObserveServer(Node):
                 if last is not None:
                     moved_any = True
             self._last[name] = position
-            wo = WorldObject()
-            wo.name = name
+            wo.available = True
             wo.pose = pose_msg(position, quat)
-            wo.size = self._sizes[name]
             objects.append(wo)
 
-        ee_note = 'ee: unavailable'
+        # robot summary
+        robot = RobotStateSummary()
+        robot.ee_frame = self._ee
+        robot.ee_pose = Pose()
+        robot.ee_pose.orientation.w = 1.0
+        if self._js is not None:
+            idx = {n: i for i, n in enumerate(self._js.name)}
+            names, positions = [], []
+            for j in ARM_JOINTS:
+                if j in idx:
+                    names.append(j)
+                    positions.append(float(self._js.position[idx[j]]))
+            robot.joint_names = names
+            robot.positions = positions
         try:
             tr = self._tf_buffer.lookup_transform(
                 self._base, self._ee, Time(), Duration(seconds=1.0))
             t = tr.transform.translation
-            ee_note = 'ee: [%.4f %.4f %.4f]' % (t.x, t.y, t.z)
+            robot.ee_pose = pose_msg([t.x, t.y, t.z],
+                                     [tr.transform.rotation.x, tr.transform.rotation.y,
+                                      tr.transform.rotation.z, tr.transform.rotation.w])
         except Exception as exc:  # noqa: BLE001
-            ee_note = 'ee: lookup failed (%s)' % exc
-        notes.append(ee_note)
-        if self._js is not None:
-            notes.append('joints: %d states' % len(self._js.name))
+            notes.append('ee: lookup failed (%s)' % exc)
+
+        # carry backend state (backend belief, NOT physical evidence)
+        carry = CarryState()
+        carry.header.stamp = self.get_clock().now().to_msg()
+        carry.header.frame_id = self._base
+        carry.engaged = False
+        carry.offset = [0.0, 0.0, 0.0]
+        if self._carry is not None:
+            carry = self._carry
+            if carry.engaged:
+                notes.append('carry: backend engaged on %s' % carry.object_id)
+
+        # zones: occupancy derived from ground truth (never faked)
+        zones = []
+        for z in self._zones:
+            zs = ZoneState()
+            zs.id = z['id']
+            c = Point()
+            c.x, c.y, c.z = z['x'], z['y'], z['z']
+            zs.center = c
+            zs.radius = z['radius']
+            occupied = None
+            for wo in objects:
+                if not wo.available:
+                    continue
+                d = dist3([wo.pose.position.x, wo.pose.position.y, wo.pose.position.z],
+                          [z['x'], z['y'], z['z']])
+                if d <= z['radius']:
+                    occupied = True
+                    break
+            if occupied is None:
+                zs.occupancy = ZoneState.OCCUPANCY_FREE
+            else:
+                zs.occupancy = ZoneState.OCCUPANCY_OCCUPIED
+            zones.append(zs)
+
         if moved_any:
             notes.append('revision bumped: tracked object moved past %.3fm' % self._eps)
 
@@ -131,35 +219,29 @@ class ObserveServer(Node):
         ws.header.stamp = self.get_clock().now().to_msg()
         ws.header.frame_id = self._base
         ws.revision = self._revision
+        ws.source = self._source
+        ws.robot = robot
         ws.objects = objects
+        ws.carry = carry
+        ws.zones = zones
         ws.notes = notes
-        return ws, None
+        return ws
 
     def _execute(self, goal_handle):
-        t0 = time.monotonic()
-        goal = goal_handle.request
+        t_start = time.monotonic()
         self._seq += 1
-        rid, evidence = new_evidence(goal.request_id if hasattr(goal, 'request_id') else '', self._seq)
+        rid, evidence = new_evidence('', self._seq)
 
-        ws, err = self._snapshot(bool(goal.refresh))
+        ws = self._snapshot()
         res = R()
         rec = {
             'request_id': rid,
             'evidence_id': evidence,
-            'refresh': bool(goal.refresh),
             'revision': self._revision,
-            'notes': list(ws.notes) if ws is not None else [],
+            'available': [o.name for o in ws.objects if o.available],
+            'carry_engaged': ws.carry.engaged,
+            'zones': {z.id: int(z.occupancy) for z in ws.zones},
         }
-        if err is not None:
-            res.outcome = R.OUTCOME_FAILED
-            res.error_code = R.ERR_WORLD_STATE_UNAVAILABLE
-            res.detail = err
-            res.world_state = WorldState()
-            rec.update(outcome='FAILED', error_code=res.error_code)
-            self._log.write(rec)
-            goal_handle.abort()
-            return res
-
         self._pub.publish(ws)
         res.outcome = R.OUTCOME_SUCCEEDED
         res.error_code = R.ERR_NONE

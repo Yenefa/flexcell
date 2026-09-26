@@ -18,9 +18,10 @@ from rclpy.node import Node
 from rclpy.parameter import Parameter
 
 from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import String as StringMsg
 
 from flexcell_interfaces.action import (
-    Observe, PickObject, PlaceObject, RunPickPlace, VerifyObject)
+    Observe, PickObject, PlaceObject, RunDemo, RunPickPlace, VerifyObject)
 
 SPEC = {
     'observe': (Observe, '/observe'),
@@ -28,6 +29,7 @@ SPEC = {
     'place': (PlaceObject, '/place_object'),
     'verify': (VerifyObject, '/verify_object'),
     'task': (RunPickPlace, '/run_pick_place'),
+    'demo': (RunDemo, '/run_demo'),
 }
 
 
@@ -40,18 +42,38 @@ def name_of(cls, prefix, value):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument('--action', required=True, choices=sorted(SPEC))
+    ap.add_argument('--action', required=True, choices=sorted(SPEC) + ['inject'])
     ap.add_argument('--object', default='target_box')
     ap.add_argument('--pose', nargs=3, type=float, default=[0.12, -0.15, 0.0175])
     ap.add_argument('--tol', type=float, default=0.0)
     ap.add_argument('--skip-verify', action='store_true')
+    ap.add_argument('--scenario', default='week1_demo_v1')
+    ap.add_argument('--inject', default='')
     ap.add_argument('--timeout', type=float, default=150.0)
     args = ap.parse_args()
 
-    cls, act = SPEC[args.action]
     rclpy.init()
     n = Node('w1_client')
     n.set_parameters([Parameter('use_sim_time', value=True)])
+
+    # failure injection is a topic, not an action
+    if args.action == 'inject':
+        pub = n.create_publisher(StringMsg, '/flexcell/inject', 10)
+        import time as _t
+        deadline = _t.time() + 5.0
+        while pub.get_subscription_count() == 0 and _t.time() < deadline:
+            _t.sleep(0.1)
+        if pub.get_subscription_count() == 0:
+            print('INJECT WARNING: no subscriber matched; payload may be lost')
+        for _ in range(5):
+            pub.publish(StringMsg(data=args.inject))
+            _t.sleep(0.2)
+        print('INJECT set to %r' % args.inject)
+        n.destroy_node()
+        rclpy.shutdown()
+        return 0
+
+    cls, act = SPEC[args.action]
     from rclpy.action import ActionClient
     cli = ActionClient(n, cls, act)
 
@@ -85,6 +107,9 @@ def main():
         g.motion_profile_id = 'demo_slow'
         g.skip_verify = args.skip_verify
         extra['skip_verify'] = args.skip_verify
+    elif args.action == 'demo':
+        g.scenario_id = args.scenario
+        extra['scenario_id'] = args.scenario
 
     print('SENDING action=%s object=%s pose=%s' % (args.action, args.object, args.pose),
           flush=True)
@@ -116,12 +141,27 @@ def main():
     if args.action == 'observe':
         ws = r.world_state
         out['revision'] = int(ws.revision)
-        out['objects'] = [{'name': o.name,
+        out['source'] = ws.source
+        out['objects'] = [{'name': o.name, 'available': bool(o.available),
                            'position': [round(o.pose.position.x, 4),
                                         round(o.pose.position.y, 4),
                                         round(o.pose.position.z, 4)]}
                           for o in ws.objects]
+        out['carry'] = {'engaged': bool(ws.carry.engaged),
+                        'object_id': ws.carry.object_id}
+        out['zones'] = [{'id': z.id, 'occupancy': int(z.occupancy)}
+                        for z in ws.zones]
+        out['ee'] = [round(ws.robot.ee_pose.position.x, 4),
+                     round(ws.robot.ee_pose.position.y, 4),
+                     round(ws.robot.ee_pose.position.z, 4)]
         out['notes'] = list(ws.notes)
+    if args.action == 'demo':
+        out['fsm_trace'] = list(r.fsm_trace)
+        out['object_a_at_zone'] = bool(r.object_a_at_zone)
+        out['object_b_at_zone'] = bool(r.object_b_at_zone)
+        out['zone_a_error_m'] = r.zone_a_error_m
+        out['zone_b_error_m'] = r.zone_b_error_m
+        out['run_id'] = r.run_id
     if args.action == 'pick':
         out['grasp_attached'] = bool(r.grasp_attached)
         out['motion_error_code'] = int(r.motion_error_code)

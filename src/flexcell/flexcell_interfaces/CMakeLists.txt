@@ -9,12 +9,16 @@ find_package(std_msgs REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/WorldObject.msg"
   "msg/WorldState.msg"
+  "msg/RobotStateSummary.msg"
+  "msg/CarryState.msg"
+  "msg/ZoneState.msg"
   "action/MoveToPose.action"
   "action/Observe.action"
   "action/PickObject.action"
   "action/PlaceObject.action"
   "action/VerifyObject.action"
   "action/RunPickPlace.action"
+  "action/RunDemo.action"
   DEPENDENCIES geometry_msgs std_msgs
 )
 

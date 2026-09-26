@@ -11,6 +11,7 @@ import math
 import os
 import re
 import subprocess
+import threading
 import time
 import uuid
 
@@ -40,72 +41,96 @@ def rpy_to_quat(roll, pitch, yaw):
     )
 
 
-def sample_gz_pose(model_name, timeout_s=10.0):
-    """Ground-truth model pose via the gz CLI.
+# ---------------------------------------------------------------- gz ground truth
+# One persistent Pose_V subscriber feeds every sample request. The gz CLI
+# (`gz model -p`) races its own discovery handshake on every invocation and
+# silently returns empty output under session churn (measured 2026-09-26).
+# The gz-transport SUBSCRIPTION handshake is also one-shot and can fail at
+# process startup (measured: observe's stream flowed while pick's never
+# connected), so the listener self-heals: no data in 6s -> rebuild the node;
+# stream stale >10s (e.g. world restart) -> reconnect.
+_GZ_STREAM = {
+    'lock': threading.Lock(),
+    'poses': {},          # name -> (position[3], quat[4], last_seen_monotonic)
+    'last_rx': 0.0,
+    'thread': None,
+    'world': None,
+}
 
-    Returns ((position[3], quat[4]), None) or (None, error).
+
+def _gz_stream_loop(world):
+    import gz.transport13 as gz_transport
+    # importing the nested-class modules registers them in protobuf BEFORE any
+    # callback deserializes a Pose_V - without this the callback thread dies
+    # with "No message class registered for 'gz.msgs.Pose'" (and can segfault)
+    from gz.msgs10 import pose_v_pb2, pose_pb2, header_pb2  # noqa: F401
+    while True:
+        node = gz_transport.Node()
+        got_first = threading.Event()
+
+        def cb(msg):
+            now = time.monotonic()
+            with _GZ_STREAM['lock']:
+                for ent in msg.pose:
+                    _GZ_STREAM['poses'][ent.name] = (
+                        [ent.position.x, ent.position.y, ent.position.z],
+                        [ent.orientation.x, ent.orientation.y,
+                         ent.orientation.z, ent.orientation.w],
+                        now)
+                _GZ_STREAM['last_rx'] = now
+            got_first.set()
+
+        node.subscribe(type(pose_v_pb2.Pose_V()),
+                       '/world/%s/dynamic_pose/info' % world, cb)
+        got_first.wait(6.0)
+        while True:
+            time.sleep(1.0)
+            with _GZ_STREAM['lock']:
+                stale = time.monotonic() - _GZ_STREAM['last_rx'] > 10.0
+            if stale:
+                break   # rebuild the subscription with a fresh node
+
+
+def _ensure_gz_pose_stream(world='empty'):
+    with _GZ_STREAM['lock']:
+        if _GZ_STREAM['thread'] is not None and _GZ_STREAM['world'] == world:
+            return
+        t = threading.Thread(target=_gz_stream_loop, args=(world,), daemon=True)
+        _GZ_STREAM['thread'] = t
+        _GZ_STREAM['world'] = world
+        t.start()
+    deadline = time.monotonic() + 4.0
+    while time.monotonic() < deadline:
+        with _GZ_STREAM['lock']:
+            if _GZ_STREAM['last_rx'] > 0:
+                return
+        time.sleep(0.1)
+
+
+def sample_gz_pose(model_name, timeout_s=6.0, world='empty', max_age_s=1.0):
+    """Ground-truth model pose from the live gz Pose_V stream.
+
+    Returns ((position[3], quat[4]), None) or (None, error). The error
+    distinguishes 'pose stream is not flowing' (global observation failure,
+    recoverable) from 'not seen in pose stream' (object-specific, e.g. the
+    object was removed from the world).
     """
-    try:
-        proc = subprocess.run(
-            ['gz', 'model', '-m', model_name, '-p'],
-            capture_output=True, text=True, timeout=timeout_s)
-    except (subprocess.TimeoutExpired, FileNotFoundError) as exc:
-        return None, 'gz model failed: %s' % exc
-    out = proc.stdout
-    if proc.returncode != 0 or 'not found' in (proc.stderr or '').lower():
-        return None, 'model %r not found in gz world' % model_name
-    m = re.search(r'XYZ[^\n]*\n\s*\[([^\]]+)\]\s*\n\s*\[([^\]]+)\]', out)
-    if not m:
-        return None, 'pose parse failed on: %r' % out[:120]
-    try:
-        xyz = [float(v) for v in m.group(1).split()]
-        rpy = [float(v) for v in m.group(2).split()]
-    except ValueError as exc:
-        return None, 'pose numbers unparsable: %s' % exc
-    return (xyz, list(rpy_to_quat(*rpy))), None
-
-
-_ATTACH_STATE_FILE = '/tmp/flexcell_attach_state'
-
-
-class AttachGate:
-    """Deterministic on/off control for the DetachableJoint toggle trigger.
-
-    The gz trigger topic toggles attach/detach on EVERY message, and one-shot
-    `gz topic -p` publishes can be lost to discovery races (measured
-    2026-09-26: an entire grasp chain silently no-oped that way). This gate
-    keeps a persistent gz publisher alive inside the server process and tracks
-    the logical state in a side file, so callers request a DESIRED state
-    instead of a toggle. 50_start_detached.sh deletes the file on world
-    reload because a fresh world always starts detached.
-    """
-
-    def __init__(self, topic, logger):
-        import gz.transport13 as gz_transport
-        from gz.msgs10 import empty_pb2
-        self._empty = empty_pb2.Empty()
-        self._gz_node = gz_transport.Node()
-        self._pub = self._gz_node.advertise(topic, self._empty)
-        self._log = logger
-
-    def set_attach(self, want):
-        state = '0'
-        try:
-            with open(_ATTACH_STATE_FILE) as fh:
-                state = fh.read().strip() or '0'
-        except OSError:
-            pass
-        want_s = '1' if want else '0'
-        if state == want_s:
-            return True, 'already %s' % want_s
-        if not self._pub.publish(self._empty):
-            return False, 'gz publish returned False'
-        try:
-            with open(_ATTACH_STATE_FILE, 'w') as fh:
-                fh.write(want_s)
-        except OSError as exc:
-            return False, 'state file write failed: %s' % exc
-        return True, 'toggled to %s' % want_s
+    _ensure_gz_pose_stream(world)
+    deadline = time.monotonic() + timeout_s
+    while True:
+        with _GZ_STREAM['lock']:
+            entry = _GZ_STREAM['poses'].get(model_name)
+        if entry is not None and time.monotonic() - entry[2] <= max_age_s:
+            return (entry[0], entry[1]), None
+        if time.monotonic() >= deadline:
+            with _GZ_STREAM['lock']:
+                flowing = time.monotonic() - _GZ_STREAM['last_rx'] <= 3.0
+            if not flowing:
+                return None, ('pose stream is not flowing (no fresh entity '
+                              'updates; gz transport may be wedged)')
+            return None, ('model %r not seen in pose stream within %.1fs'
+                          % (model_name, timeout_s))
+        time.sleep(0.05)
 
 
 def gz_publish(topic, msgtype='gz.msgs.Empty', payload='', timeout_s=5.0):

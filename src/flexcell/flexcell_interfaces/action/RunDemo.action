@@ -1,0 +1,31 @@
+# Week-1.5 canonical deterministic demo task (no LLM, no policy layer):
+#   OBSERVE -> PICK A -> PLACE A -> VERIFY A
+#   -> OBSERVE -> PICK B -> PLACE B -> VERIFY B -> DONE
+# Objects and zones come from server config (object_A/object_B, zone_1/zone_2).
+# Recovery is bounded: recoverable failures get REOBSERVE + one retry (budget=1);
+# non-recoverable failures abort the task with a typed error.
+string scenario_id                   # free-form tag, lands in the demo evidence record
+---
+uint8 OUTCOME_SUCCEEDED=0
+uint8 OUTCOME_FAILED=1
+uint8 OUTCOME_CANCELED=2
+uint8 outcome
+uint16 ERR_NONE=0
+uint16 ERR_SKILL_FAILED=50
+uint16 ERR_RESOURCE_BUSY=41
+uint16 ERR_RECOVERY_EXHAUSTED=51
+uint16 ERR_CANCELED=32
+uint16 error_code
+string scenario_id
+string run_id
+string[] fsm_trace                   # e.g. PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED / RECOVERY:REOBSERVE+RETRY
+bool object_a_at_zone
+bool object_b_at_zone
+float64 zone_a_error_m
+float64 zone_b_error_m
+float64 duration_s
+string evidence_id
+string detail
+---
+string state
+uint32 elapsed_ms
