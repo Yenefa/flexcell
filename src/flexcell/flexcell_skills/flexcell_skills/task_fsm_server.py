@@ -40,7 +40,9 @@ from flexcell_interfaces.action import (
 from flexcell_skills.common import JsonlLog, crash_detail, new_evidence
 from flexcell_skills.skill_contract import (
     check_pick, check_place, check_verify)
+from flexcell_skills.canonical_state import serialize_envelope
 from flexcell_skills.contracts.error_codes import task_abort_error_code
+from flexcell_skills.contracts.episode import EpisodeRecorder, EpisodeStore
 from flexcell_skills.contracts.recovery import (
     RECIPE_PICK, RECIPE_VERIFY, recovery_eligible)
 from flexcell_skills.contracts.skill_result import previous_skill_result
@@ -113,6 +115,7 @@ class TaskFsmServer(Node):
         self.declare_parameter('recovery_budget', 1)
         self.declare_parameter('demo_verify_tolerance_m', 0.06)
         self.declare_parameter('demo_log_file', 'demo_runs.jsonl')
+        self.declare_parameter('episode_dir', '~/.ros/flexcell/episodes')
         self.declare_parameter('task_state_topic', '/flexcell/task_state')
         self.declare_parameter('decision_policy', 'fsm')
         self.declare_parameter('decision_log_file', 'decisions.jsonl')
@@ -130,6 +133,8 @@ class TaskFsmServer(Node):
         self._demo_tol = float(gp2('demo_verify_tolerance_m').value)
         self._demo_log = JsonlLog(self, gp2('log_dir').value,
                                   gp2('demo_log_file').value)
+        self._episodes = EpisodeStore(gp2('episode_dir').value,
+                                      self.get_logger())
 
         policy_name = gp2('decision_policy').value
         if policy_name != 'fsm':
@@ -433,8 +438,29 @@ class TaskFsmServer(Node):
         steps = []
         res = RunDemo.Result()
         verify_results = {}
+        # episode recorder (issue #7 / §4.4): the exact policy input at every
+        # decide() call, persisted for offline policy-input replay
+        episode = EpisodeRecorder(scenario, run_id, self._policy.name,
+                                  self._policy.version)
 
         def finish(outcome, error, detail):
+            res.outcome = outcome
+            res.error_code = error
+            res.scenario_id = scenario
+            res.run_id = run_id
+            res.detail = detail
+            res.fsm_trace = trace
+            res.duration_s = time.monotonic() - t0
+            res.evidence_id = evidence
+            self._episodes.write(episode.to_dict(final_state={
+                'outcome': str(outcome), 'error_code': int(error),
+                'detail': detail, 'fsm_trace': list(trace),
+                'object_a_at_zone': res.object_a_at_zone,
+                'object_b_at_zone': res.object_b_at_zone,
+                'zone_a_error_m': res.zone_a_error_m,
+                'zone_b_error_m': res.zone_b_error_m,
+                'duration_s': res.duration_s,
+            }))
             res.outcome = outcome
             res.error_code = error
             res.scenario_id = scenario
@@ -523,9 +549,16 @@ class TaskFsmServer(Node):
                                   % (res.zone_a_error_m, res.zone_b_error_m))
 
                 # ---- ask the policy WHAT next ----
+                # issue #7: persist the EXACT policy input before decide()
+                world_canonical = (serialize_envelope(world)
+                                   if world is not None else None)
+                episode.begin_step(world_canonical, goal_obj, constraints,
+                                   history)
                 t_dec = time.monotonic()
                 decision = self._policy.decide(world, goal_obj, constraints,
                                                tuple(history))
+                d_ms = int((time.monotonic() - t_dec) * 1000)
+                episode.record_decision(decision, d_ms)
                 d_ms = int((time.monotonic() - t_dec) * 1000)
                 decision_seq += 1
                 prev = (previous_skill_result(history[-1].action,
@@ -591,6 +624,12 @@ class TaskFsmServer(Node):
                                              goal_handle, t0, 30.0)
                     o_outcome = int(r.outcome) if r is not None else 255
                     o_evidence = getattr(r, 'evidence_id', '') if r else ''
+                    episode.record_executor_result(
+                        outcome=(int(r.outcome) if r is not None else None),
+                        error_code=(int(getattr(r, 'error_code', 0))
+                                    if r is not None else None),
+                        detail=(err or getattr(r, 'detail', '')),
+                        evidence_id=o_evidence)
                     if decision.reason_code == RC_VERIFY_MISMATCH_RETRY:
                         # frozen behavior: the verify-path reobserve result is
                         # ignored - the re-verify decides
@@ -638,6 +677,11 @@ class TaskFsmServer(Node):
                     pick_ok = (err is None and r is not None and
                                int(r.outcome) == PickObject.Result.OUTCOME_SUCCEEDED)
                     code = int(r.error_code) if (err is None and r is not None) else -1
+                    episode.record_executor_result(
+                        outcome=(int(r.outcome) if r is not None else None),
+                        error_code=(code if r is not None else None),
+                        detail=(err or (r.detail if r else '')),
+                        evidence_id=getattr(r, 'evidence_id', '') if r else '')
                     ename = err or err_name(PickObject.Result, 'ERR_', code)
                     steps.append({'state': label, 'skill': 'pick', 'ok': pick_ok,
                                   'error': err or (r.detail if r else ''),
@@ -695,6 +739,11 @@ class TaskFsmServer(Node):
                                              goal_handle, t0, 90.0)
                     place_ok = (err is None and r is not None and
                                 int(r.outcome) == PlaceObject.Result.OUTCOME_SUCCEEDED)
+                    episode.record_executor_result(
+                        outcome=(int(r.outcome) if r is not None else None),
+                        error_code=(int(r.error_code) if r is not None else None),
+                        detail=(err or (r.detail if r else '')),
+                        evidence_id=getattr(r, 'evidence_id', '') if r else '')
                     steps.append({'state': label, 'skill': 'place', 'ok': place_ok,
                                   'error': err or (r.detail if r else ''),
                                   'evidence_id': getattr(r, 'evidence_id', '') if r else ''})
@@ -752,6 +801,12 @@ class TaskFsmServer(Node):
                                              goal_handle, t0, 30.0)
                     v_ok = (err is None and r is not None and
                             int(r.outcome) == VerifyObject.Result.OUTCOME_VERIFIED)
+                    episode.record_executor_result(
+                        outcome=(int(r.outcome) if r is not None else None),
+                        error_code=(int(getattr(r, 'error_code', 0))
+                                    if r is not None else None),
+                        detail=(err or getattr(r, 'detail', '')),
+                        evidence_id=getattr(r, 'evidence_id', '') if r else '')
                     if v_ok:
                         violation = check_verify(r)
                         if violation is not None:
@@ -802,6 +857,7 @@ class TaskFsmServer(Node):
                 # error" via the PolicyStateError path - the dead abort_error
                 # assignments this branch replaces were its residue).
                 if decision.action == ACTION_ABORT:
+                    episode.record_executor_result()
                     return finish(RunDemo.Result.OUTCOME_FAILED,
                                   task_abort_error_code(decision.reason_code),
                                   'policy abort (%s): %s (trace=%s)'
@@ -810,6 +866,7 @@ class TaskFsmServer(Node):
 
                 # ---------------- WAIT / unknown ----------------
                 if decision.action == 'WAIT':
+                    episode.record_executor_result()
                     continue
                 raise PolicyStateError(
                     'policy returned unsupported action %r' % decision.action)
