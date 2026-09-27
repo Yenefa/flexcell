@@ -37,6 +37,8 @@ from flexcell_interfaces.action import (
     Observe, PickObject, PlaceObject, RunDemo, RunPickPlace, VerifyObject)
 
 from flexcell_skills.common import JsonlLog, crash_detail, new_evidence
+from flexcell_skills.skill_contract import (
+    check_pick, check_place, check_verify)
 from flexcell_skills.decision_policy import (
     ACTION_ABORT, ACTION_OBSERVE, ACTION_PICK, ACTION_PLACE, ACTION_VERIFY,
     Constraints, FSMPolicy, HistoryRecord, PolicyStateError, TaskGoal,
@@ -262,6 +264,10 @@ class TaskFsmServer(Node):
                               'PICK failed: %s (%s)' % (err_name(
                                   PickObject.Result, 'ERR_', int(result.error_code)),
                                   result.detail))
+            violation = check_pick(result)
+            if violation is not None:
+                return finish(R.OUTCOME_FAILED, R.ERR_SKILL_CONTRACT_VIOLATION,
+                              'post-condition violation on PICK: %s' % violation)
 
             # ---------- PLACE ----------
             if goal_handle.is_cancel_requested:
@@ -284,6 +290,12 @@ class TaskFsmServer(Node):
                               'PLACE failed: %s (%s)' % (err_name(
                                   PlaceObject.Result, 'ERR_', int(result.error_code)),
                                   result.detail))
+            violation = check_place(
+                result, place_position=[pp.x, pp.y, pp.z],
+                tolerance_m=self._tol)
+            if violation is not None:
+                return finish(R.OUTCOME_FAILED, R.ERR_SKILL_CONTRACT_VIOLATION,
+                              'post-condition violation on PLACE: %s' % violation)
 
             # ---------- VERIFY ----------
             res.object_at_place = False
@@ -305,6 +317,10 @@ class TaskFsmServer(Node):
                 return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
                               'VERIFY failed: %s' % err)
             if int(result.outcome) == VerifyObject.Result.OUTCOME_VERIFIED:
+                violation = check_verify(result)
+                if violation is not None:
+                    return finish(R.OUTCOME_FAILED, R.ERR_SKILL_CONTRACT_VIOLATION,
+                                  'post-condition violation on VERIFY: %s' % violation)
                 res.object_at_place = True
                 res.final_position_error_m = result.position_error_m
                 return finish(R.OUTCOME_SUCCEEDED, R.ERR_NONE,
@@ -554,6 +570,18 @@ class TaskFsmServer(Node):
                                   'evidence_id': getattr(r, 'evidence_id', '') if r else ''})
                     trace.append('%s:%s' % (label, 'OK' if pick_ok else 'FAIL:%s' % ename))
                     if pick_ok:
+                        violation = check_pick(r)
+                        if violation is not None:
+                            steps.append({'state': label, 'skill': 'pick',
+                                          'ok': False, 'error': violation,
+                                          'error_code': RunDemo.Result.ERR_SKILL_CONTRACT_VIOLATION,
+                                          'attempt': attempt,
+                                          'evidence_id': getattr(r, 'evidence_id', '')})
+                            trace.append('%s:FAIL:ERR_SKILL_CONTRACT_VIOLATION' % label)
+                            return finish(RunDemo.Result.OUTCOME_FAILED,
+                                          RunDemo.Result.ERR_SKILL_CONTRACT_VIOLATION,
+                                          'post-condition violation on %s: %s'
+                                          % (label, violation))
                         history.append(HistoryRecord(
                             action=ACTION_PICK, target=decision.target,
                             outcome=0, error_code=0, attempt=attempt,
@@ -594,6 +622,19 @@ class TaskFsmServer(Node):
                                   'evidence_id': getattr(r, 'evidence_id', '') if r else ''})
                     trace.append('%s:%s' % (label, 'OK' if place_ok else 'FAIL'))
                     if place_ok:
+                        violation = check_place(
+                            r, place_position=[zx, zy, zz],
+                            tolerance_m=self._demo_tol)
+                        if violation is not None:
+                            steps.append({'state': label, 'skill': 'place',
+                                          'ok': False, 'error': violation,
+                                          'error_code': RunDemo.Result.ERR_SKILL_CONTRACT_VIOLATION,
+                                          'evidence_id': getattr(r, 'evidence_id', '') if r else ''})
+                            trace.append('%s:FAIL:ERR_SKILL_CONTRACT_VIOLATION' % label)
+                            return finish(RunDemo.Result.OUTCOME_FAILED,
+                                          RunDemo.Result.ERR_SKILL_CONTRACT_VIOLATION,
+                                          'post-condition violation on %s: %s'
+                                          % (label, violation))
                         history.append(HistoryRecord(
                             action=ACTION_PLACE, target=decision.target,
                             outcome=0, error_code=0, attempt=attempt,
@@ -627,9 +668,21 @@ class TaskFsmServer(Node):
                     vg.position_tolerance_m = self._demo_tol
                     r, err = self._demo_call(self._cli_verify, vg, label,
                                              goal_handle, t0, 30.0)
-                    verify_results[tag.lower()] = r
                     v_ok = (err is None and r is not None and
                             int(r.outcome) == VerifyObject.Result.OUTCOME_VERIFIED)
+                    if v_ok:
+                        violation = check_verify(r)
+                        if violation is not None:
+                            steps.append({'state': label, 'skill': 'verify',
+                                          'ok': False, 'error': violation,
+                                          'attempt': vattempt,
+                                          'evidence_id': getattr(r, 'evidence_id', '')})
+                            trace.append('%s:FAIL:ERR_SKILL_CONTRACT_VIOLATION' % label)
+                            return finish(RunDemo.Result.OUTCOME_FAILED,
+                                          RunDemo.Result.ERR_SKILL_CONTRACT_VIOLATION,
+                                          'post-condition violation on %s: %s'
+                                          % (label, violation))
+                    verify_results[tag.lower()] = r
                     steps.append({'state': label, 'skill': 'verify', 'ok': v_ok,
                                   'error': err or (r.detail if r else ''),
                                   'attempt': vattempt,
