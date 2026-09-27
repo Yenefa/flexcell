@@ -34,11 +34,13 @@ Checklist (ratified order — check off as issues close):
 - [ ] WorldState v2 freeze + versioned canonical serializer — #3 (contract RFC #16)
 - [ ] DecisionPolicy interface + Decision/TaskGoal/Constraints/TaskHistory types — #4 (RFC #14)
 - [ ] FSMPolicy + executor seam (`decision_policy: fsm|jev|llm|hybrid`, default=fsm) + trace-shape parity — #5
-- [ ] Deterministic safety gate + invalid-decision accounting — #6
+- [x] Deterministic safety gate + invalid-decision accounting — #6
+      (`contracts/safety_gate.py` + executor wiring + planted-proposal test hook;
+      2026-09-28)
 - [x] Episode record + policy-input replay store — #7 (partial: contract
-  `contracts/episode.py` + executor recorder + offline replay runner
-  `setup/93_replay.py` landed 2026-09-28; the scenario runner that arms
-  injection schedules and batches episodes remains)
+      `contracts/episode.py` + executor recorder + offline replay runner
+      `setup/93_replay.py` landed 2026-09-28; the scenario runner that arms
+      injection schedules and batches episodes remains)
 - [ ] Benchmark harness + metrics report generator — #8
 - [ ] S7 perturbation scenario builder — #9
 - [ ] JevPolicy + pluggable JevBackend (TypeSafeBackend | LocalReproductionBackend) — #10

@@ -43,13 +43,15 @@ from flexcell_skills.skill_contract import (
 from flexcell_skills.canonical_state import serialize_envelope
 from flexcell_skills.contracts.error_codes import task_abort_error_code
 from flexcell_skills.contracts.episode import EpisodeRecorder, EpisodeStore
+from flexcell_skills.contracts.safety_gate import (
+    metrics as safety_metrics, sanitize as sanitize_decision, validate)
 from flexcell_skills.contracts.recovery import (
     RECIPE_PICK, RECIPE_VERIFY, recovery_eligible)
 from flexcell_skills.contracts.skill_result import previous_skill_result
 from flexcell_skills.decision_policy import (
     ACTION_ABORT, ACTION_OBSERVE, ACTION_PICK, ACTION_PLACE, ACTION_VERIFY,
-    Constraints, FSMPolicy, HistoryRecord, PolicyStateError, TaskGoal,
-    RC_BUDGET_EXHAUSTED, RC_OBSERVE_FAILED, RC_RECOVERABLE_RETRY,
+    Constraints, Decision, FSMPolicy, HistoryRecord, PolicyStateError,
+    TaskGoal, RC_BUDGET_EXHAUSTED, RC_OBSERVE_FAILED, RC_RECOVERABLE_RETRY,
     RC_VERIFY_BUDGET_EXHAUSTED, RC_VERIFY_MISMATCH_RETRY)
 
 R = RunPickPlace.Result
@@ -60,6 +62,21 @@ def err_name(cls, prefix, value):
         if k.startswith(prefix) and isinstance(v, int) and v == value:
             return k
     return str(value)
+
+
+def _parse_planted(spec):
+    """Test-hook parser (issue #6 AC): "ACTION[:target]" -> planted Decision.
+
+    Read PER RUN from the plant_out_of_contract parameter, so a runtime
+    `ros2 param set` arms the deterministic out-of-contract proposal for the
+    next demo.  Empty/None -> no planting.
+    """
+    spec = str(spec or '').strip()
+    if not spec:
+        return None
+    action, _, target = spec.partition(':')
+    return Decision(action.strip(), target.strip() or '',
+                    explanation='planted out-of-contract proposal (issue #6 AC)')
 
 
 class TaskFsmServer(Node):
@@ -119,6 +136,10 @@ class TaskFsmServer(Node):
         self.declare_parameter('task_state_topic', '/flexcell/task_state')
         self.declare_parameter('decision_policy', 'fsm')
         self.declare_parameter('decision_log_file', 'decisions.jsonl')
+        # test hook (issue #6 AC): "ACTION[:target]" - the FIRST decision the
+        # executor receives is replaced by this planted out-of-contract
+        # proposal, so the safety gate's rejection is demonstrable end-to-end
+        self.declare_parameter('plant_out_of_contract', '')
 
         gp2 = self.get_parameter
         self._obj_a = gp2('object_a').value
@@ -442,6 +463,16 @@ class TaskFsmServer(Node):
         # decide() call, persisted for offline policy-input replay
         episode = EpisodeRecorder(scenario, run_id, self._policy.name,
                                   self._policy.version)
+        # safety-gate accounting (issue #6): per-run, executor-owned counters
+        safety_evaluated = 0
+        safety_rejected = 0
+        planted = _parse_planted(
+            self.get_parameter('plant_out_of_contract').value)
+        if planted is not None:
+            self.get_logger().warn(
+                'SAFETY TEST HOOK armed: first decision will be planted '
+                '(%r -> %r)' % (planted.action, planted.target))
+        planted_used = False
 
         def finish(outcome, error, detail):
             res.outcome = outcome
@@ -460,6 +491,7 @@ class TaskFsmServer(Node):
                 'zone_a_error_m': res.zone_a_error_m,
                 'zone_b_error_m': res.zone_b_error_m,
                 'duration_s': res.duration_s,
+                'safety': safety_metrics(safety_evaluated, safety_rejected),
             }))
             res.outcome = outcome
             res.error_code = error
@@ -558,13 +590,66 @@ class TaskFsmServer(Node):
                 decision = self._policy.decide(world, goal_obj, constraints,
                                                tuple(history))
                 d_ms = int((time.monotonic() - t_dec) * 1000)
+                if planted is not None and not planted_used:
+                    # issue #6 AC test hook: the executor receives the planted
+                    # out-of-contract proposal instead of the policy's output
+                    decision = planted
+                    planted_used = True
                 episode.record_decision(decision, d_ms)
-                d_ms = int((time.monotonic() - t_dec) * 1000)
+
+                # ---- safety gate (issue #6): deterministic, BEFORE dispatch.
+                # Consumes the policy-facing view (canonical envelope), never
+                # the planning-scene belief; free text cannot pass (sanitize
+                # is what the dispatcher would see).
+                safety_evaluated += 1
                 decision_seq += 1
+                # prev / recovery_audit (the policy-facing view of the last
+                # skill result and the recovery context) are needed by BOTH
+                # the gate's rejection record and the regular decision log -
+                # compute them before the gate
                 prev = (previous_skill_result(history[-1].action,
                                               history[-1].outcome,
                                               history[-1].error_code)
                         if history else None)
+                recovery_audit = None
+                world_dict = (json.loads(world_canonical)
+                              if world_canonical is not None else None)
+                gate_ok, gate_reason = validate(decision, goal_obj, world_dict,
+                                                constraints)
+                if not gate_ok:
+                    safety_rejected += 1
+                    self._decision_log.write({
+                        'run_id': run_id, 'scenario_id': scenario,
+                        'seq': decision_seq,
+                        'previous_skill_result': prev,
+                        'recovery': recovery_audit,
+                        'action': decision.action, 'target': decision.target,
+                        'confidence': decision.confidence,
+                        'reason_code': decision.reason_code,
+                        'explanation': decision.explanation,
+                        'policy': self._policy.name,
+                        'policy_version': self._policy.version,
+                        'world_revision': last_world_revision,
+                        'observe_evidence_id': last_observe_evidence,
+                        'decide_latency_ms': d_ms,
+                        'dispatched': False,
+                        'safety_rejection': gate_reason,
+                    })
+                    episode.record_executor_result(
+                        detail='safety rejection: %s' % gate_reason,
+                        post_condition='SAFETY_REJECTED')
+                    return finish(RunDemo.Result.OUTCOME_FAILED,
+                                  RunDemo.Result.ERR_SAFETY_REJECTED,
+                                  'safety gate rejected %s on %r: %s'
+                                  % (decision.action, decision.target,
+                                     gate_reason))
+                dispatch_view = sanitize_decision(decision)
+                # the dispatch sites read ONLY action/target - the sanitized
+                # assert proves free text (explanation) can never reach a
+                # skill goal (issue #6 §2.6)
+                assert dispatch_view == {'action': decision.action,
+                                         'target': decision.target}
+                d_ms = int((time.monotonic() - t_dec) * 1000)
                 recovery_audit = None
                 if (history and decision.reason_code in (
                         RC_RECOVERABLE_RETRY, RC_VERIFY_MISMATCH_RETRY,
@@ -601,6 +686,8 @@ class TaskFsmServer(Node):
                     'world_revision': last_world_revision,
                     'observe_evidence_id': last_observe_evidence,
                     'decide_latency_ms': d_ms,
+                    'dispatched': True,
+                    'safety_rejection': None,
                 })
 
                 if decision.target and tag_of(decision.target) != tag:
@@ -706,6 +793,13 @@ class TaskFsmServer(Node):
                             outcome=0, error_code=0, attempt=attempt,
                             world_revision=last_world_revision,
                             evidence_id=r.evidence_id))
+                        # executor-owned world update (issue #6): the pick
+                        # attached the object, but the canonical world dates
+                        # from the last observe - the gate's PLACE carried
+                        # check needs the carry state the executor knows
+                        if world is not None:
+                            world.carry.engaged = True
+                            world.carry.object_id = decision.target
                     else:
                         last_fail_label = label
                         if goal_handle.is_cancel_requested:
@@ -767,6 +861,11 @@ class TaskFsmServer(Node):
                             outcome=0, error_code=0, attempt=attempt,
                             world_revision=last_world_revision,
                             evidence_id=getattr(r, 'evidence_id', '') if r else ''))
+                        # executor-owned world update (issue #6): the object
+                        # was released into the zone
+                        if world is not None:
+                            world.carry.engaged = False
+                            world.carry.object_id = ''
                     else:
                         if goal_handle.is_cancel_requested:
                             return finish(RunDemo.Result.OUTCOME_CANCELED,
