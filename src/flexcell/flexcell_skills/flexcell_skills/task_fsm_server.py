@@ -39,6 +39,8 @@ from flexcell_interfaces.action import (
 from flexcell_skills.common import JsonlLog, crash_detail, new_evidence
 from flexcell_skills.skill_contract import (
     check_pick, check_place, check_verify)
+from flexcell_skills.contracts.recovery import (
+    RECIPE_PICK, RECIPE_VERIFY, recovery_eligible)
 from flexcell_skills.contracts.skill_result import previous_skill_result
 from flexcell_skills.decision_policy import (
     ACTION_ABORT, ACTION_OBSERVE, ACTION_PICK, ACTION_PLACE, ACTION_VERIFY,
@@ -489,10 +491,33 @@ class TaskFsmServer(Node):
                                               history[-1].outcome,
                                               history[-1].error_code)
                         if history else None)
+                recovery_audit = None
+                if (history and decision.reason_code in (
+                        RC_RECOVERABLE_RETRY, RC_VERIFY_MISMATCH_RETRY,
+                        RC_BUDGET_EXHAUSTED)):
+                    last_rec = history[-1]
+                    recovery_audit = {
+                        'recipe': (RECIPE_PICK
+                                   if decision.reason_code == RC_RECOVERABLE_RETRY
+                                   else (RECIPE_VERIFY
+                                         if decision.reason_code == RC_VERIFY_MISMATCH_RETRY
+                                         else 'BUDGET_EXHAUSTED')),
+                        'eligible': recovery_eligible(
+                            last_rec.action, last_rec.error_code,
+                            last_rec.outcome),
+                        'error_code': int(last_rec.error_code),
+                        'canonical_error_code': (
+                            prev['canonical_error_code'] if prev else None),
+                        'attempt': (vattempt
+                                    if decision.reason_code == RC_VERIFY_MISMATCH_RETRY
+                                    else attempt),
+                        'budget_cap': constraints.recovery_budget,
+                    }
                 self._decision_log.write({
                     'run_id': run_id, 'scenario_id': scenario,
                     'seq': decision_seq,
                     'previous_skill_result': prev,
+                    'recovery': recovery_audit,
                     'action': decision.action, 'target': decision.target,
                     'confidence': decision.confidence,
                     'reason_code': decision.reason_code,

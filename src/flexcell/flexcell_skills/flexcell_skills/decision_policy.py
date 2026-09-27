@@ -23,6 +23,10 @@ probabilistic policies (Jev/LLM, later per the ratified order).
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
+from flexcell_skills.contracts.recovery import (
+    RECOVERABLE_PICK_ERRORS,      # noqa: F401  re-exported (frozen set)
+    recovery_eligible)
+
 # ---------------------------------------------------------------- action menu
 ACTION_OBSERVE = 'OBSERVE'
 ACTION_PICK = 'PICK'
@@ -45,9 +49,8 @@ RC_OBSERVE_FAILED = 'OBSERVE_FAILED'              # leg-start / recovery observe
 
 OUTCOME_NONE = 255                                # no typed outcome (plumbing failure)
 
-# PickObject error codes a REOBSERVE+RETRY may plausibly fix (frozen set,
-# moved verbatim from task_fsm_server.py:308).
-RECOVERABLE_PICK_ERRORS = frozenset({22, 23, 30})
+# Frozen set owned by contracts/recovery.py (verbatim from
+# task_fsm_server.py:308) and re-exported above for compatibility.
 
 
 class PolicyStateError(RuntimeError):
@@ -171,8 +174,8 @@ class FSMPolicy(DecisionPolicy):
                 idx += 1
                 if rec.outcome == 0:
                     break
-                recoverable = (rec.outcome != OUTCOME_NONE
-                               and rec.error_code in RECOVERABLE_PICK_ERRORS)
+                recoverable = recovery_eligible(ACTION_PICK, rec.error_code,
+                                                rec.outcome)
                 if not recoverable or (attempt - 1) >= constraints.recovery_budget:
                     return Decision(
                         ACTION_ABORT, object_id,
