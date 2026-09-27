@@ -41,14 +41,14 @@
 
 All six §6 decisions are settled. Merged into the design as follows:
 
-| # | Decision | Verdict | Design delta |
-|---|---|---|---|
-| ① | WorldState v2 schema | ✅ approved | **+ new principle: policy input serialization must be versioned** (`WorldStateSchemaVersion=2` on every envelope) — replay records key on it; readers dispatch or refuse on unknown versions (§3.4) |
-| ② | FSMPolicy parity bar | ✅ approved, **priority raised** | the baseline foundation — trace-shape parity is the regression bar for the whole executor refactor (§2.5) |
-| ③ | LLM provider/model | ⏸ deferred | no LLM integration until DecisionPolicy interface + Scenario runner + Replay exist; otherwise API spend buys nothing (§2.4, §4) |
-| ④ | Jev backend | ✅ **backend-abstracted** | `JevPolicy` → pluggable `JevBackend` interface with two implementations: `TypeSafeBackend` (official API) and `LocalReproductionBackend` (APUS-style). Never bind one vendor — region limits, network reality, vendor-risk all observed (§5) |
-| ⑤ | Hybrid threshold | ⏸ no fixed value | `threshold ∈ {0.5, 0.7, 0.9}` as an **experimental variable** (sweep), not a hand-picked constant (§2.4, §4) |
-| ⑥ | S7 perturbation track | ✅ kept in primary | the likely place where Hybrid shows real value; S1-S5 FSM probably wins and that is normal — the research question is **not** "AI beats if-else" but "when the environment changes beyond hand-coded range, does hybrid decisioning win" (§4.2) |
+| #   | Decision              | Verdict                          | Design delta                                                                                                                                                                                                                                    |
+| --- | --------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ①   | WorldState v2 schema  | ✅ approved                      | **+ new principle: policy input serialization must be versioned** (`WorldStateSchemaVersion=2` on every envelope) — replay records key on it; readers dispatch or refuse on unknown versions (§3.4)                                             |
+| ②   | FSMPolicy parity bar  | ✅ approved, **priority raised** | the baseline foundation — trace-shape parity is the regression bar for the whole executor refactor (§2.5)                                                                                                                                       |
+| ③   | LLM provider/model    | ⏸ deferred                       | no LLM integration until DecisionPolicy interface + Scenario runner + Replay exist; otherwise API spend buys nothing (§2.4, §4)                                                                                                                 |
+| ④   | Jev backend           | ✅ **backend-abstracted**        | `JevPolicy` → pluggable `JevBackend` interface with two implementations: `TypeSafeBackend` (official API) and `LocalReproductionBackend` (APUS-style). Never bind one vendor — region limits, network reality, vendor-risk all observed (§5)    |
+| ⑤   | Hybrid threshold      | ⏸ no fixed value                 | `threshold ∈ {0.5, 0.7, 0.9}` as an **experimental variable** (sweep), not a hand-picked constant (§2.4, §4)                                                                                                                                    |
+| ⑥   | S7 perturbation track | ✅ kept in primary               | the likely place where Hybrid shows real value; S1-S5 FSM probably wins and that is normal — the research question is **not** "AI beats if-else" but "when the environment changes beyond hand-coded range, does hybrid decisioning win" (§4.2) |
 
 **Ratified implementation order:** WorldState → Decision Interface → FSMPolicy → Scenario
 Replay → Jev → LLM.
@@ -91,10 +91,10 @@ budgets, profiles, topics — all parameters cited below come from there unless 
 
 Two action servers in one node:
 
-| Server | Purpose | Sequence |
-|---|---|---|
-| `run_pick_place` (Week-1) | single object pick-and-place | OBSERVE → PICK → PLACE → VERIFY; cancel honored between states; `skip_verify` option (`task_fsm_server.py:167-296`) |
-| `run_demo` (Week-1.5) | canonical dual-object demo | for each leg in plan `[('A',obj_a,'zone_1'), ('B',obj_b,'zone_2')]`: OBSERVE(refresh) → PICK(+bounded recovery) → PLACE (no retry, typed abort) → VERIFY(+bounded reverify) (`task_fsm_server.py:337-520`) |
+| Server                    | Purpose                      | Sequence                                                                                                                                                                                                   |
+| ------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `run_pick_place` (Week-1) | single object pick-and-place | OBSERVE → PICK → PLACE → VERIFY; cancel honored between states; `skip_verify` option (`task_fsm_server.py:167-296`)                                                                                        |
+| `run_demo` (Week-1.5)     | canonical dual-object demo   | for each leg in plan `[('A',obj_a,'zone_1'), ('B',obj_b,'zone_2')]`: OBSERVE(refresh) → PICK(+bounded recovery) → PLACE (no retry, typed abort) → VERIFY(+bounded reverify) (`task_fsm_server.py:337-520`) |
 
 Key mechanics relevant to a DecisionPolicy layer:
 
@@ -121,15 +121,15 @@ next" decisions (§2.5).
 
 ### 1.3 Skill interfaces (all typed, all evidence-carrying)
 
-| Action | Goal (essentials) | Result (essentials) | Notes |
-|---|---|---|---|
-| `MoveToPose` | target pose, `motion_profile_id` (whitelist), `expected_world_revision`, `deadline_ms` | outcome, 13-code error taxonomy, `reached_pose` **measured from TF**, `position_error_m`, `stop_confirmed` (5-condition strict stop), `world_revision_before/after`, `evidence_id` | the Day-2 contract; "everything below the Task Policy must work without an LLM" (`.action:9`) |
-| `Observe` | `refresh`, `max_age_s` | `WorldState` snapshot, `evidence_id` | single producer of canonical state |
-| `PickObject` | `object_name`, profile, `expected_world_revision`, `deadline_ms` | outcome, `ERR_GRASP_FAILED=23` etc., `object_pose_before/after`, `grasp_attached`, `evidence_id` | internal rise check: `box_follow_min_m: 0.03` (`week1.yaml:40`) |
-| `PlaceObject` | `object_name` (must be carried), `place_pose`, profile | outcome, `ERR_NOT_CARRIED=24` etc., `object_pose_after`, `released`, `evidence_id` | drop check `place_tolerance_m: 0.06` |
-| `VerifyObject` | `object_name`, `expected_pose`, `position_tolerance_m` | `OUTCOME_VERIFIED/MISMATCH/FAILED`, `measured_pose`, `position_error_m`, `evidence_id` | MISMATCH is an honest result, not a server failure (`verify_server.py:100`) |
-| `RunDemo` | `scenario_id` | run_id, `fsm_trace`, per-zone truth, duration, `evidence_id` | the executor's demo task |
-| `RunPickPlace` | object + place pose | fsm_trace, `object_at_place`, `final_position_error_m`, `evidence_id` | single-object task |
+| Action         | Goal (essentials)                                                                      | Result (essentials)                                                                                                                                                                | Notes                                                                                         |
+| -------------- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `MoveToPose`   | target pose, `motion_profile_id` (whitelist), `expected_world_revision`, `deadline_ms` | outcome, 13-code error taxonomy, `reached_pose` **measured from TF**, `position_error_m`, `stop_confirmed` (5-condition strict stop), `world_revision_before/after`, `evidence_id` | the Day-2 contract; "everything below the Task Policy must work without an LLM" (`.action:9`) |
+| `Observe`      | `refresh`, `max_age_s`                                                                 | `WorldState` snapshot, `evidence_id`                                                                                                                                               | single producer of canonical state                                                            |
+| `PickObject`   | `object_name`, profile, `expected_world_revision`, `deadline_ms`                       | outcome, `ERR_GRASP_FAILED=23` etc., `object_pose_before/after`, `grasp_attached`, `evidence_id`                                                                                   | internal rise check: `box_follow_min_m: 0.03` (`week1.yaml:40`)                               |
+| `PlaceObject`  | `object_name` (must be carried), `place_pose`, profile                                 | outcome, `ERR_NOT_CARRIED=24` etc., `object_pose_after`, `released`, `evidence_id`                                                                                                 | drop check `place_tolerance_m: 0.06`                                                          |
+| `VerifyObject` | `object_name`, `expected_pose`, `position_tolerance_m`                                 | `OUTCOME_VERIFIED/MISMATCH/FAILED`, `measured_pose`, `position_error_m`, `evidence_id`                                                                                             | MISMATCH is an honest result, not a server failure (`verify_server.py:100`)                   |
+| `RunDemo`      | `scenario_id`                                                                          | run_id, `fsm_trace`, per-zone truth, duration, `evidence_id`                                                                                                                       | the executor's demo task                                                                      |
+| `RunPickPlace` | object + place pose                                                                    | fsm_trace, `object_at_place`, `final_position_error_m`, `evidence_id`                                                                                                              | single-object task                                                                            |
 
 The **action space a policy chooses from is already finite and typed** — exactly the
 "bounded question" shape issue #1 describes (its example set: PICK_A / PICK_B /
@@ -162,7 +162,7 @@ Distribution: published on `/flexcell/world_state` (depth-1) **and** returned in
 ### 1.5 Logging / evidence system
 
 - Per-server JSONL in `~/.ros/flexcell/`: `observe/pick/place/verify/carry/task_fsm/
-  demo_runs/move_to_pose`. One line per request; `new_evidence()` mints
+demo_runs/move_to_pose`. One line per request; `new_evidence()` mints
   `request_id` + `evidence_id` (`common.py`); the executor links run → steps → skill
   evidence_ids (`task_fsm_server.py:400-425,465-471,486-498`).
 - Injection audit: injected attempts are marked `"injected": true` in pick.jsonl
@@ -192,29 +192,29 @@ success** — the property that makes policy benchmarking trustworthy.
 
 **Ready now (no change needed):**
 
-| # | Asset | Why it matters for policies |
-|---|---|---|
-| R1 | Finite, typed, mutually-exclusive action space (7 action servers, single-task mutex) | the "bounded question" issue #1 defines is already the runtime shape |
-| R2 | Canonical WorldState v1.5: single producer, revision counter, source tag, frozen schema | same-state-to-all-policies is mostly a serialization exercise (§3) |
-| R3 | Full typed error taxonomy on every skill | the raw material for the deterministic safety gate and for policy features |
-| R4 | Evidence chain (run_id → step evidence_id) per request | benchmark episode logging builds directly on it |
-| R5 | Verifier doctrine (measured-not-inherited, 5 layers) | success ground truth independent of the decider |
-| R6 | World-revision gates on Pick/Place/MoveToPose goals | stale-decision protection exists below the policy layer |
-| R7 | Bounded-recovery machinery (REOBSERVE+RETRY, budget, recoverable-error classes) | its *mechanics* are reusable; only its *decision* gets extracted |
-| R8 | Lifecycle + strict health gates | reproducible episode boundaries for the benchmark |
-| R9 | Failure-injection channel (`/flexcell/inject`, scenario:once/always) | seeded fault schedules for the benchmark, already audit-logged |
+| #   | Asset                                                                                   | Why it matters for policies                                                |
+| --- | --------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| R1  | Finite, typed, mutually-exclusive action space (7 action servers, single-task mutex)    | the "bounded question" issue #1 defines is already the runtime shape       |
+| R2  | Canonical WorldState v1.5: single producer, revision counter, source tag, frozen schema | same-state-to-all-policies is mostly a serialization exercise (§3)         |
+| R3  | Full typed error taxonomy on every skill                                                | the raw material for the deterministic safety gate and for policy features |
+| R4  | Evidence chain (run_id → step evidence_id) per request                                  | benchmark episode logging builds directly on it                            |
+| R5  | Verifier doctrine (measured-not-inherited, 5 layers)                                    | success ground truth independent of the decider                            |
+| R6  | World-revision gates on Pick/Place/MoveToPose goals                                     | stale-decision protection exists below the policy layer                    |
+| R7  | Bounded-recovery machinery (REOBSERVE+RETRY, budget, recoverable-error classes)         | its _mechanics_ are reusable; only its _decision_ gets extracted           |
+| R8  | Lifecycle + strict health gates                                                         | reproducible episode boundaries for the benchmark                          |
+| R9  | Failure-injection channel (`/flexcell/inject`, scenario:once/always)                    | seeded fault schedules for the benchmark, already audit-logged             |
 
 **Gaps (designed in §2/§3, not yet implemented):**
 
-| # | Gap | Consequence today |
-|---|---|---|
-| G1 | Sequencing/recovery/budgets hard-coded in `task_fsm_server.py` | no policy seam; "what next" is not a callable |
-| G2 | No `TaskGoal` / `Constraints` representation | goal = hard-coded plan + server params |
-| G3 | No `Decision` object or policy-facing action enum | nothing for a policy to return |
-| G4 | WorldState lacks task context: previous action/result, retry counters, remaining plan, deadline, available-action menu, injection-active flag (issue#1 supplement A list) | policies would have to mine JSONL logs — forbidden by design |
-| G5 | Zone definitions duplicated (observe_server params vs task_fsm_server params, same values) | single-source risk to fix in v2 |
-| G6 | Gripper position not in RobotStateSummary (4 arm joints only) | policies can't see grasp aperture |
-| G7 | No benchmark harness / policy-input replay store | supplement C unmet until built |
+| #   | Gap                                                                                                                                                                       | Consequence today                                            |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| G1  | Sequencing/recovery/budgets hard-coded in `task_fsm_server.py`                                                                                                            | no policy seam; "what next" is not a callable                |
+| G2  | No `TaskGoal` / `Constraints` representation                                                                                                                              | goal = hard-coded plan + server params                       |
+| G3  | No `Decision` object or policy-facing action enum                                                                                                                         | nothing for a policy to return                               |
+| G4  | WorldState lacks task context: previous action/result, retry counters, remaining plan, deadline, available-action menu, injection-active flag (issue#1 supplement A list) | policies would have to mine JSONL logs — forbidden by design |
+| G5  | Zone definitions duplicated (observe_server params vs task_fsm_server params, same values)                                                                                | single-source risk to fix in v2                              |
+| G6  | Gripper position not in RobotStateSummary (4 arm joints only)                                                                                                             | policies can't see grasp aperture                            |
+| G7  | No benchmark harness / policy-input replay store                                                                                                                          | supplement C unmet until built                               |
 
 ---
 
@@ -240,7 +240,7 @@ Skill Server → Robot   (safety envelope, MoveIt, ros2_control — deterministi
   on low confidence. In the primary benchmark it appears as `LLMPolicy` (per-step) and
   inside `HybridRouter` (escalation target).
 - **Deterministic Executor**: parameter validation, safety envelope, revision gates,
-  MoveIt, collision, trajectories, timeouts, retry-budget *accounting*. Never a model.
+  MoveIt, collision, trajectories, timeouts, retry-budget _accounting_. Never a model.
 
 ### 2.2 Types (python sketch; ROS msg equivalents proposed in §3)
 
@@ -320,12 +320,12 @@ policies see it ONLY through the canonical structure, never by reading logs.
 
 ### 2.4 The four implementations (design notes, not code)
 
-| Policy | Input handling | Decision rule | Confidence source | Failure mode |
-|---|---|---|---|---|
-| `FSMPolicy` | canonical state + history | encodes today's logic as pure rules: leg plan → next action; error ∈ recoverable set ∧ budget remains → OBSERVE+retry; PLACE failure → ABORT; budget exhausted → ABORT | 1.0 on plan steps; recovery branches flagged via reason_code | none (reference implementation) |
-| `JevPolicy` | canonical serialization rendered into Jev `state` + a `Choice` question over the allowed-action menu (§5) — **backend-agnostic (ratified ④)**: talks to a `JevBackend` interface; concrete `TypeSafeBackend` / `LocalReproductionBackend` are pluggable | top choice from backend response; map to ActionKind | backend-reported probability (routing signal until calibrated) | parse/OOV/timeout/backend-unreachable → typed `policy_failure` → FSM fallback |
-| `LLMPolicy` | **identical** canonical JSON embedded verbatim in a fixed prompt template + action menu + output JSON-schema (structured output enforced) | model's single choice | model self-reported confidence (parsed from structured output; calibration expected to be poor — measured, not assumed) | unparseable/timeout → FSM fallback; all calls logged with tokens. **DEFERRED (ratified ③): starts only after interface + scenario runner + replay exist** |
-| `HybridRouter` | receives both backends' views | Jev first: if `p_max ≥ τ_high` → pass through; if `p_max < τ_low` or gate-invalid → escalate to LLM; LLM choice gate-checked too; both fail → FSM fallback | Jev p_max; escalation counters recorded | inherits backends' fallbacks; escalation rate is a first-class metric |
+| Policy         | Input handling                                                                                                                                                                                                                                          | Decision rule                                                                                                                                                          | Confidence source                                                                                                       | Failure mode                                                                                                                                              |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FSMPolicy`    | canonical state + history                                                                                                                                                                                                                               | encodes today's logic as pure rules: leg plan → next action; error ∈ recoverable set ∧ budget remains → OBSERVE+retry; PLACE failure → ABORT; budget exhausted → ABORT | 1.0 on plan steps; recovery branches flagged via reason_code                                                            | none (reference implementation)                                                                                                                           |
+| `JevPolicy`    | canonical serialization rendered into Jev `state` + a `Choice` question over the allowed-action menu (§5) — **backend-agnostic (ratified ④)**: talks to a `JevBackend` interface; concrete `TypeSafeBackend` / `LocalReproductionBackend` are pluggable | top choice from backend response; map to ActionKind                                                                                                                    | backend-reported probability (routing signal until calibrated)                                                          | parse/OOV/timeout/backend-unreachable → typed `policy_failure` → FSM fallback                                                                             |
+| `LLMPolicy`    | **identical** canonical JSON embedded verbatim in a fixed prompt template + action menu + output JSON-schema (structured output enforced)                                                                                                               | model's single choice                                                                                                                                                  | model self-reported confidence (parsed from structured output; calibration expected to be poor — measured, not assumed) | unparseable/timeout → FSM fallback; all calls logged with tokens. **DEFERRED (ratified ③): starts only after interface + scenario runner + replay exist** |
+| `HybridRouter` | receives both backends' views                                                                                                                                                                                                                           | Jev first: if `p_max ≥ τ_high` → pass through; if `p_max < τ_low` or gate-invalid → escalate to LLM; LLM choice gate-checked too; both fail → FSM fallback             | Jev p_max; escalation counters recorded                                                                                 | inherits backends' fallbacks; escalation rate is a first-class metric                                                                                     |
 
 **Thresholds (ratified ⑤):** `τ ∈ {0.5, 0.7, 0.9}` is an **experimental variable**
 (swept in the benchmark), not a hand-picked constant. Calibration data (§4 metric 7) —
@@ -368,44 +368,55 @@ Checks before dispatch, all hard-coded:
 - no field of any skill goal may originate from policy `explanation` or any free text.
 
 Rejections are typed (`ERR_INVALID_DECISION` proposal), logged with the full decision
-object, and counted. This implements issue #1's acceptance item: *"a Jev proposal
-violating a hard constraint is rejected deterministically"*.
+object, and counted. This implements issue #1's acceptance item: _"a Jev proposal
+violating a hard constraint is rejected deterministically"_.
 
 ---
 
 ## 3. Canonical WorldState proposal (v2 — additive freeze candidate)
 
+> **IMPLEMENTED (issue #3, M2.1):** msgs landed as proposed (additive; +TaskContext /
+> Assignment / TaskConstraints / HistoryEntry; gripper / klass / pose_age_s /
+> occupied_by / schema_version), plus the versioned deterministic serializer
+> `flexcell_skills/canonical_state.py` (`WorldStateSchemaVersion=2`, `notes[]`
+> stripped) with 13 unit tests; observe_server fills the new additive fields;
+> TaskContext runtime assembly stays with the executor (#4/#5). Runtime acceptance:
+> health gate green, happy demo `OUTCOME_SUCCEEDED` (zone errors within baseline
+> range) on the v2 contract, live-envelope probe validated against the real
+> `/observe` snapshot. Executor wiring of TaskContext happens with the
+> DecisionPolicy seam (#4/#5), per ADR-002.
+
 ### 3.1 Audit of v1.5 (exact fields, verbatim from msg definitions)
 
-| Field | Type | Producer logic | Policy-relevant? |
-|---|---|---|---|
-| `header` | stamp + frame_id(world) | now() per snapshot | freshness gate |
-| `revision` | uint64 | bumps on tracked-object move > 0.002m | stale-decision protection |
-| `source` | string | constant `SIMULATION_GROUND_TRUTH` | mixing guard |
-| `robot` | RobotStateSummary: joint_names[4]/positions, ee_pose (TF), ee_frame | /joint_states + TF (1s timeout) | yes (grasp approach) |
-| `objects` | WorldObject[]: name, pose(gt), size, available | gz stream per tracked object | yes (core) |
-| `carry` | CarryState: engaged, object_id, reference_frame, offset | latched backend topic | **belief only** — dispatch must re-verify physically |
-| `zones` | ZoneState[]: id, center, radius, occupancy {NA/FREE/OCCUPIED} | derived from gt | yes (task progress) |
-| `notes` | string[] | free-text diagnostics | **NO — excluded from policy view** |
+| Field      | Type                                                                | Producer logic                        | Policy-relevant?                                     |
+| ---------- | ------------------------------------------------------------------- | ------------------------------------- | ---------------------------------------------------- |
+| `header`   | stamp + frame_id(world)                                             | now() per snapshot                    | freshness gate                                       |
+| `revision` | uint64                                                              | bumps on tracked-object move > 0.002m | stale-decision protection                            |
+| `source`   | string                                                              | constant `SIMULATION_GROUND_TRUTH`    | mixing guard                                         |
+| `robot`    | RobotStateSummary: joint_names[4]/positions, ee_pose (TF), ee_frame | /joint_states + TF (1s timeout)       | yes (grasp approach)                                 |
+| `objects`  | WorldObject[]: name, pose(gt), size, available                      | gz stream per tracked object          | yes (core)                                           |
+| `carry`    | CarryState: engaged, object_id, reference_frame, offset             | latched backend topic                 | **belief only** — dispatch must re-verify physically |
+| `zones`    | ZoneState[]: id, center, radius, occupancy {NA/FREE/OCCUPIED}       | derived from gt                       | yes (task progress)                                  |
+| `notes`    | string[]                                                            | free-text diagnostics                 | **NO — excluded from policy view**                   |
 
 ### 3.2 Missing fields / fields hidden in notes, logs and config
 
 Issue #1 supplement A requires policies to see, without log mining:
 
-| Required | Where it lives today | Verdict |
-|---|---|---|
-| scene_revision / observation timestamp | `revision` / `header.stamp` | present ✓ |
-| object IDs / classes / poses | objects (names only, no class) | class missing → add |
-| zone occupancy | zones | present ✓ |
-| current task status | `/flexcell/task_state` latched topic | **outside WorldState** → add |
-| previous action / result | `task_fsm.jsonl` / `demo_runs.jsonl` | **hidden in logs** → add |
-| retry counters | `demo_runs.jsonl` steps | **hidden in logs** → add |
-| remaining task / time constraints | executor params + action request | **not represented** → add |
-| available skills / actions | implicit (server presence) | **not represented** → add menu |
-| injected fault state | `/flexcell/inject` (write-only); `"injected": true` in pick.jsonl | **not visible to policies** → add flag |
-| gripper state | `/joint_states` has it; `ARM_JOINTS` filter drops it (`observe_server.py:38`) | add to RobotStateSummary |
-| object→zone assignment progress | only in demo runs | add (plan/completed legs) |
-| per-object observation freshness | only snapshot-level stamp | add per-object age |
+| Required                               | Where it lives today                                                          | Verdict                                |
+| -------------------------------------- | ----------------------------------------------------------------------------- | -------------------------------------- |
+| scene_revision / observation timestamp | `revision` / `header.stamp`                                                   | present ✓                              |
+| object IDs / classes / poses           | objects (names only, no class)                                                | class missing → add                    |
+| zone occupancy                         | zones                                                                         | present ✓                              |
+| current task status                    | `/flexcell/task_state` latched topic                                          | **outside WorldState** → add           |
+| previous action / result               | `task_fsm.jsonl` / `demo_runs.jsonl`                                          | **hidden in logs** → add               |
+| retry counters                         | `demo_runs.jsonl` steps                                                       | **hidden in logs** → add               |
+| remaining task / time constraints      | executor params + action request                                              | **not represented** → add              |
+| available skills / actions             | implicit (server presence)                                                    | **not represented** → add menu         |
+| injected fault state                   | `/flexcell/inject` (write-only); `"injected": true` in pick.jsonl             | **not visible to policies** → add flag |
+| gripper state                          | `/joint_states` has it; `ARM_JOINTS` filter drops it (`observe_server.py:38`) | add to RobotStateSummary               |
+| object→zone assignment progress        | only in demo runs                                                             | add (plan/completed legs)              |
+| per-object observation freshness       | only snapshot-level stamp                                                     | add per-object age                     |
 
 Also found: zone geometry is **duplicated** in `observe_server` params
 (`week1.yaml:13-21`) and `task_fsm_server` params (`week1.yaml:103-108`) — same values,
@@ -476,27 +487,27 @@ WorldState.
 
 ### 4.1 Cells
 
-| Cell | Policy | Notes |
-|---|---|---|
-| A | `FSMPolicy` | deterministic baseline; must be ≥ every other cell on task success before anything enters the critical path (issue#1 + HANDOFF) |
-| B | `LLMPolicy` | per-step LLM decisions, structured output |
-| C | `JevPolicy` | fast decision model behind the same interface |
-| D | `HybridRouter` | Jev fast-path + LLM escalation |
+| Cell | Policy         | Notes                                                                                                                           |
+| ---- | -------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| A    | `FSMPolicy`    | deterministic baseline; must be ≥ every other cell on task success before anything enters the critical path (issue#1 + HANDOFF) |
+| B    | `LLMPolicy`    | per-step LLM decisions, structured output                                                                                       |
+| C    | `JevPolicy`    | fast decision model behind the same interface                                                                                   |
+| D    | `HybridRouter` | Jev fast-path + LLM escalation                                                                                                  |
 
 Same executor, same skills, same verifier, same WorldState bytes, same budgets. The
 only variable is the policy.
 
 ### 4.2 Scenario suite (seeded; reuses `/flexcell/inject`)
 
-| ID | Scenario | Injection | Runs/cell (min → preferred) |
-|---|---|---|---|
-| S1 | canonical happy demo (`week1_demo_v1`) | none | 20 → 50 |
-| S2 | injected failure, PICK_A first attempt | `once` | 20 → 50 |
-| S3 | injected failure, PICK_B first attempt | `once` | 20 → 50 |
-| S4 | unreachable place target (typed IK fail path) | none | 10 → 30 |
-| S5 | retry-exhaustion (`scenario:always`) | `always` | 10 → 30 |
-| S6 | cold-start episodes (lifecycle start→demo→stop per episode) | none | 5 → 10 |
-| S7 | off-canonical initial placement (adaptation probe) | none (perturbed world) | **KEPT in primary (ratified ⑥)** — the likely place where Hybrid differentiates; S1-S5 FSM probably wins and that is normal |
+| ID  | Scenario                                                    | Injection              | Runs/cell (min → preferred)                                                                                                 |
+| --- | ----------------------------------------------------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| S1  | canonical happy demo (`week1_demo_v1`)                      | none                   | 20 → 50                                                                                                                     |
+| S2  | injected failure, PICK_A first attempt                      | `once`                 | 20 → 50                                                                                                                     |
+| S3  | injected failure, PICK_B first attempt                      | `once`                 | 20 → 50                                                                                                                     |
+| S4  | unreachable place target (typed IK fail path)               | none                   | 10 → 30                                                                                                                     |
+| S5  | retry-exhaustion (`scenario:always`)                        | `always`               | 10 → 30                                                                                                                     |
+| S6  | cold-start episodes (lifecycle start→demo→stop per episode) | none                   | 5 → 10                                                                                                                      |
+| S7  | off-canonical initial placement (adaptation probe)          | none (perturbed world) | **KEPT in primary (ratified ⑥)** — the likely place where Hybrid differentiates; S1-S5 FSM probably wins and that is normal |
 
 Episode = one full lifecycle-scoped demo run with recorded inputs/outputs (§4.3
 replay record). Environment snapshot (load, uptime — the delivery-acceptance lesson)
@@ -504,15 +515,15 @@ is recorded per episode; runs are interleaved across cells to avoid time-of-day 
 
 ### 4.3 Metrics (definitions + measurement points)
 
-| # | Metric | Definition / measurement point |
-|---|---|---|
-| 1 | task success rate | `RunDemo.outcome == SUCCEEDED` per episode; Wilson 95% CI; n≥20 gives ±~19pp, n≥50 ±~11pp — prefer 50 |
-| 2 | recovery success | injected episodes recovered (final SUCCEEDED) / injected |
-| 3 | decision latency | wall time around `decide()` only; report p50/p95/p99 + distribution; dispatch/executor time measured separately |
-| 4 | LLM invocation count | per episode and per task-leg; tokens (in/out) logged per call |
-| 5 | cost | tokens × pinned price table (provider/model/date); Jev cost if vendor-priced (UNKNOWN today) |
-| 6 | invalid actions | safety-gate (§2.6) rejections per 1000 decisions, with typed reasons |
-| 7 | confidence calibration | reliability diagram + ECE (10 bins); Brier score where full distributions exist (C; D's fast path); risk-coverage curve on threshold sweep; wrong-autonomous-decision rate as threshold rises (supplement B) |
+| #   | Metric                 | Definition / measurement point                                                                                                                                                                               |
+| --- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | task success rate      | `RunDemo.outcome == SUCCEEDED` per episode; Wilson 95% CI; n≥20 gives ±~19pp, n≥50 ±~11pp — prefer 50                                                                                                        |
+| 2   | recovery success       | injected episodes recovered (final SUCCEEDED) / injected                                                                                                                                                     |
+| 3   | decision latency       | wall time around `decide()` only; report p50/p95/p99 + distribution; dispatch/executor time measured separately                                                                                              |
+| 4   | LLM invocation count   | per episode and per task-leg; tokens (in/out) logged per call                                                                                                                                                |
+| 5   | cost                   | tokens × pinned price table (provider/model/date); Jev cost if vendor-priced (UNKNOWN today)                                                                                                                 |
+| 6   | invalid actions        | safety-gate (§2.6) rejections per 1000 decisions, with typed reasons                                                                                                                                         |
+| 7   | confidence calibration | reliability diagram + ECE (10 bins); Brier score where full distributions exist (C; D's fast path); risk-coverage curve on threshold sweep; wrong-autonomous-decision rate as threshold rises (supplement B) |
 
 ### 4.4 Replay & record (supplement C)
 
@@ -548,13 +559,13 @@ Research date: 2026-09-26/27. In-repo source: issue #1 (body + supplement commen
 Web sources: Xinhua (2026-09-21), CNR (2026-09-20), Aliyun developer community
 ("Jev in the Wild", 2026-09-26; Jev primer, 2026-09-26) — retrieved via 豆包 search.
 
-| Question | Answer | Status | Basis / gap |
-|---|---|---|---|
-| What is Jev's actual interface? | **Choice / Noul / Score** primitives ("选哪个 / 是不是 / 打几分"): Choice = select one from a candidate set with per-option criteria, returning the choice **with probability/confidence**; Noul = yes/no; Score = numeric. Official Python/JS SDK (`typesafe-sdk`), call shape `client.system_one(state=..., questions={...})`. | **CONFIRMED (shape)** | Multiple independent secondary sources; exact request schema, auth, quotas, pricing = **UNKNOWN** until vendor doc / spike |
-| Can it consume structured state? | Designed for it: `state` payload + typed questions; the APUS open-source reproduction shows numbered candidate-action sets derived from structured page state (browser-use domain). FlexCell mapping: canonical WorldState JSON → `state`; allowed-action menu → Choice criteria. | **YES (design-intent, evidenced)** | No published robotics input schema; token/size limits UNKNOWN |
-| Can it output confidence? | Yes — probability/confidence returned with the typed answer. Whether the **full distribution** over candidates (issue #1's assumed shape) or only top-1+confidence is returned = **UNKNOWN** (spike will answer; affects Brier vs ECE choice in §4.3-7) | **PARTIAL** | supplement B forbids assuming calibration; measured ECE/risk-coverage required before routing claims |
-| What latency constraints exist? | Vendor claim: up to ~200× faster than frontier LLMs on classification-style tasks (and ~1/400 cost) — **vendor-run numbers, treat with issue #1's caveat**. APUS local reproduction (single-token logits, no autoregressive decode; local Qwen3.5-9B) runs real-time on a laptop. FlexCell-side budget: decisions are task-level, skills take seconds (pick ≈7s, deadlines 30-90s), so a **≤500ms fast-path decision budget adds no measurable task latency**; LLM escalation ≤5s. | **ADEQUATE BUDGET (by our side); measured p95 UNKNOWN** | no independent benchmark; spike on replay store will measure |
-| Is remote-only usage acceptable for FlexCell? | **Cloud API: impractical today** — TypeSafe service is not open to mainland China (CNR), and our WSL network blackholes even github.com. **Local/self-hosted: viable** — APUS MIT reproduction (cross-platform, GPU-optional, offline) demonstrates the Jev paradigm on local models; and architecturally remote-only *would* be acceptable (task-level, not control-rate) if availability handling + FSM fallback + evidence logging are in place. | **REMOTE = NO (today, this network); LOCAL BACKEND = YES** | backend choice is a chief decision (§6); JevPolicy adapter must be backend-agnostic either way |
+| Question                                      | Answer                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Status                                                     | Basis / gap                                                                                                                |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| What is Jev's actual interface?               | **Choice / Noul / Score** primitives ("选哪个 / 是不是 / 打几分"): Choice = select one from a candidate set with per-option criteria, returning the choice **with probability/confidence**; Noul = yes/no; Score = numeric. Official Python/JS SDK (`typesafe-sdk`), call shape `client.system_one(state=..., questions={...})`.                                                                                                                                                   | **CONFIRMED (shape)**                                      | Multiple independent secondary sources; exact request schema, auth, quotas, pricing = **UNKNOWN** until vendor doc / spike |
+| Can it consume structured state?              | Designed for it: `state` payload + typed questions; the APUS open-source reproduction shows numbered candidate-action sets derived from structured page state (browser-use domain). FlexCell mapping: canonical WorldState JSON → `state`; allowed-action menu → Choice criteria.                                                                                                                                                                                                  | **YES (design-intent, evidenced)**                         | No published robotics input schema; token/size limits UNKNOWN                                                              |
+| Can it output confidence?                     | Yes — probability/confidence returned with the typed answer. Whether the **full distribution** over candidates (issue #1's assumed shape) or only top-1+confidence is returned = **UNKNOWN** (spike will answer; affects Brier vs ECE choice in §4.3-7)                                                                                                                                                                                                                            | **PARTIAL**                                                | supplement B forbids assuming calibration; measured ECE/risk-coverage required before routing claims                       |
+| What latency constraints exist?               | Vendor claim: up to ~200× faster than frontier LLMs on classification-style tasks (and ~1/400 cost) — **vendor-run numbers, treat with issue #1's caveat**. APUS local reproduction (single-token logits, no autoregressive decode; local Qwen3.5-9B) runs real-time on a laptop. FlexCell-side budget: decisions are task-level, skills take seconds (pick ≈7s, deadlines 30-90s), so a **≤500ms fast-path decision budget adds no measurable task latency**; LLM escalation ≤5s. | **ADEQUATE BUDGET (by our side); measured p95 UNKNOWN**    | no independent benchmark; spike on replay store will measure                                                               |
+| Is remote-only usage acceptable for FlexCell? | **Cloud API: impractical today** — TypeSafe service is not open to mainland China (CNR), and our WSL network blackholes even github.com. **Local/self-hosted: viable** — APUS MIT reproduction (cross-platform, GPU-optional, offline) demonstrates the Jev paradigm on local models; and architecturally remote-only _would_ be acceptable (task-level, not control-rate) if availability handling + FSM fallback + evidence logging are in place.                                | **REMOTE = NO (today, this network); LOCAL BACKEND = YES** | backend choice is a chief decision (§6); JevPolicy adapter must be backend-agnostic either way                             |
 
 Resolution path (ratified ④ — backend-abstracted, never vendor-bound): ① define the
 `JevBackend` interface (spawn/classify/score + health + cost telemetry) with two
