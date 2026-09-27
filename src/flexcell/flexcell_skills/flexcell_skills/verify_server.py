@@ -74,11 +74,16 @@ class VerifyServer(Node):
             self._log.write(rec)
             if succeed:
                 goal_handle.succeed()
+            elif outcome == R.OUTCOME_CANCELED:
+                goal_handle.canceled()
             else:
                 goal_handle.abort()
             return res
 
         try:
+            if goal_handle.is_cancel_requested:
+                return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
+                              'canceled before verify', False)
             sampled, err = sample_gz_pose(goal.object_name)
             if sampled is None:
                 return finish(R.OUTCOME_FAILED, R.ERR_OBJECT_UNKNOWN, err, False)

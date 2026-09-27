@@ -113,10 +113,15 @@ class CarryServer(Node):
         self._stop_evt.set()
         if self._thread is not None:
             self._thread.join(timeout=2.0)
+        # state copies ride with the thread (audit P2): a replaced thread must
+        # never pin the NEW object with a stale loop reading shared attrs
+        stop_evt = threading.Event()
         self._object_id = object_id
         self._offset = offset
-        self._stop_evt = threading.Event()
-        self._thread = threading.Thread(target=self._loop, daemon=True)
+        self._stop_evt = stop_evt
+        self._thread = threading.Thread(target=self._loop,
+                                        args=(object_id, offset, stop_evt),
+                                        daemon=True)
         self._thread.start()
         self.get_logger().info(
             'carry ENGAGED object=%s offset=[%.3f %.3f %.3f]'
@@ -142,22 +147,54 @@ class CarryServer(Node):
         except Exception:  # noqa: BLE001 - keep the last pinned pose on TF gaps
             return None
 
-    def _loop(self):
-        while not self._stop_evt.is_set():
+    @staticmethod
+    def _request_ok(rep):
+        """Interpret a gz set_pose request reply (audit P2: the return value
+        used to be discarded - an engage whose every request failed looked
+        identical to one pinning at 10Hz)."""
+        if rep is None:
+            return False
+        if isinstance(rep, tuple):
+            rep = rep[-1]
+        return bool(getattr(rep, 'data', rep))
+
+    def _loop(self, object_id, offset, stop_evt):
+        consecutive_fail = 0
+        while not stop_evt.is_set():
             ee = self._ee()
-            if ee is not None and self._offset is not None:
+            if ee is not None and offset is not None:
                 req = self._Pose()
-                req.name = self._object_id
-                req.position.x = ee[0] + self._offset[0]
-                req.position.y = ee[1] + self._offset[1]
-                req.position.z = ee[2] + self._offset[2]
+                req.name = object_id
+                req.position.x = ee[0] + offset[0]
+                req.position.y = ee[1] + offset[1]
+                req.position.z = ee[2] + offset[2]
                 req.orientation.w = 1.0
                 try:
-                    self._gz_node.request(self._service, req, self._Pose,
-                                          self._Boolean, 300)
+                    # short timeout: a blocking 300ms wait on a failing
+                    # service silently stretched the servo from 10Hz to ~2Hz
+                    # and the box crept to its pinned pose over seconds
+                    rep = self._gz_node.request(self._service, req, self._Pose,
+                                                self._Boolean, 100)
                 except Exception as exc:  # noqa: BLE001 - servo must not die
-                    self.get_logger().warn('set_pose failed: %s' % exc)
-            self._stop_evt.wait(self._period)
+                    consecutive_fail += 1
+                    if consecutive_fail <= 3 or consecutive_fail % 20 == 0:
+                        self.get_logger().warn(
+                            'set_pose failed (%d consecutive): %s'
+                            % (consecutive_fail, exc))
+                else:
+                    if self._request_ok(rep):
+                        consecutive_fail = 0
+                    else:
+                        consecutive_fail += 1
+                        if consecutive_fail <= 3 or consecutive_fail % 20 == 0:
+                            self.get_logger().warn(
+                                'set_pose rejected (%d consecutive)' % consecutive_fail)
+                if consecutive_fail > 0 and (consecutive_fail <= 3
+                                             or consecutive_fail % 20 == 0):
+                    self._log.write({'event': 'set_pose_fail',
+                                     'object': object_id,
+                                     'consecutive': consecutive_fail})
+            stop_evt.wait(self._period)
 
 
 def main(args=None):

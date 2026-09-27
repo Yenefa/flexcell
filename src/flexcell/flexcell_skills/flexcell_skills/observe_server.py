@@ -264,11 +264,16 @@ class ObserveServer(Node):
             self._log.write(rec)
             if outcome == R.OUTCOME_SUCCEEDED:
                 goal_handle.succeed()
+            elif outcome == R.OUTCOME_CANCELED:
+                goal_handle.canceled()
             else:
                 goal_handle.abort()
             return res
 
         try:
+            if goal_handle.is_cancel_requested:
+                return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
+                              'canceled before snapshot')
             ws = self._snapshot()
             rec.update(
                 revision=self._revision,

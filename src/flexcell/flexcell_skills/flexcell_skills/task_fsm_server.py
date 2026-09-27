@@ -20,6 +20,7 @@ skills left it in and reports honestly.
 """
 
 import json
+import threading
 import time
 import uuid
 
@@ -39,6 +40,7 @@ from flexcell_interfaces.action import (
 from flexcell_skills.common import JsonlLog, crash_detail, new_evidence
 from flexcell_skills.skill_contract import (
     check_pick, check_place, check_verify)
+from flexcell_skills.contracts.error_codes import task_abort_error_code
 from flexcell_skills.contracts.recovery import (
     RECIPE_PICK, RECIPE_VERIFY, recovery_eligible)
 from flexcell_skills.contracts.skill_result import previous_skill_result
@@ -85,7 +87,11 @@ class TaskFsmServer(Node):
         self._skill_wait = float(gp('skill_wait_s').value)
         self._log = JsonlLog(self, gp('log_dir').value, gp('log_file').value)
 
-        self._busy = False
+        # one atomic admission gate for BOTH task actions - they drive the
+        # same arm (audit P1-3: the old per-action check-then-set flags were
+        # racy and mutually blind; RunDemo and RunPickPlace could run
+        # concurrently on one robot)
+        self._admission = threading.Lock()
         self._seq = 0
 
         self._server = ActionServer(
@@ -124,7 +130,6 @@ class TaskFsmServer(Node):
         self._demo_tol = float(gp2('demo_verify_tolerance_m').value)
         self._demo_log = JsonlLog(self, gp2('log_dir').value,
                                   gp2('demo_log_file').value)
-        self._demo_busy = False
 
         policy_name = gp2('decision_policy').value
         if policy_name != 'fsm':
@@ -179,6 +184,23 @@ class TaskFsmServer(Node):
             return None, '%s goal rejected' % state
         rf = gh.get_result_async()
         while not rf.done():
+            if goal_handle is not None and goal_handle.is_cancel_requested:
+                # outer cancel: stop the skill's motion and surface its
+                # CANCELED result (audit P0-3 - skills used to run to
+                # completion while the caller waited)
+                gh.cancel_goal_async()
+                t_c = time.monotonic()
+                while not rf.done() and time.monotonic() - t_c < 15.0:
+                    time.sleep(0.05)
+                if not rf.done():
+                    return None, '%s canceled: stop confirmation timeout' % state
+                result = rf.result().result
+                rec['%s_result' % state.lower()] = {
+                    'outcome': int(result.outcome),
+                    'error_code': int(getattr(result, 'error_code', 0)),
+                    'detail': getattr(result, 'detail', ''),
+                }
+                return result, None
             if time.monotonic() - t0 > deadline_s:
                 gh.cancel_goal_async()
                 return None, '%s result timeout (cancel sent)' % state
@@ -225,10 +247,9 @@ class TaskFsmServer(Node):
             return res
 
         # ---------- admission ----------
-        if self._busy:
+        if not self._admission.acquire(blocking=False):
             return finish(R.OUTCOME_FAILED, R.ERR_RESOURCE_BUSY,
                           'another task is active')
-        self._busy = True
         try:
             if not goal.object_name:
                 return finish(R.OUTCOME_FAILED, R.ERR_OBJECT_UNKNOWN,
@@ -246,6 +267,9 @@ class TaskFsmServer(Node):
             if err:
                 return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
                               'OBSERVE failed: %s' % err)
+            if goal_handle.is_cancel_requested:
+                return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
+                              'canceled during OBSERVE (trace=%s)' % ','.join(trace))
             if int(result.outcome) != Observe.Result.OUTCOME_SUCCEEDED:
                 return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
                               'OBSERVE failed: %s' % result.detail)
@@ -262,6 +286,9 @@ class TaskFsmServer(Node):
             if err:
                 return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
                               'PICK failed: %s' % err)
+            if goal_handle.is_cancel_requested:
+                return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
+                              'canceled during PICK (trace=%s)' % ','.join(trace))
             if int(result.outcome) != PickObject.Result.OUTCOME_SUCCEEDED:
                 return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
                               'PICK failed: %s (%s)' % (err_name(
@@ -288,6 +315,10 @@ class TaskFsmServer(Node):
             if err:
                 return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
                               'PLACE failed: %s' % err)
+            if goal_handle.is_cancel_requested:
+                return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
+                              'canceled during PLACE (box still carried; '
+                              'trace=%s)' % ','.join(trace))
             if int(result.outcome) != PlaceObject.Result.OUTCOME_SUCCEEDED:
                 return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
                               'PLACE failed: %s (%s)' % (err_name(
@@ -319,6 +350,9 @@ class TaskFsmServer(Node):
             if err:
                 return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
                               'VERIFY failed: %s' % err)
+            if goal_handle.is_cancel_requested:
+                return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
+                              'canceled during VERIFY (trace=%s)' % ','.join(trace))
             if int(result.outcome) == VerifyObject.Result.OUTCOME_VERIFIED:
                 violation = check_verify(result)
                 if violation is not None:
@@ -339,7 +373,7 @@ class TaskFsmServer(Node):
             return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
                           crash_detail(exc))
         finally:
-            self._busy = False
+            self._admission.release()
 
     # =================================================================
     # Week-1.5 demo task, policy-driven (issue #4 / ADR-002):
@@ -372,6 +406,16 @@ class TaskFsmServer(Node):
         rf = gh.get_result_async()
         t_r = time.monotonic()
         while not rf.done():
+            if goal_handle is not None and goal_handle.is_cancel_requested:
+                # outer cancel: stop the skill's motion and surface its
+                # CANCELED result (audit P0-3)
+                gh.cancel_goal_async()
+                t_c = time.monotonic()
+                while not rf.done() and time.monotonic() - t_c < 15.0:
+                    time.sleep(0.05)
+                if not rf.done():
+                    return None, '%s canceled: stop confirmation timeout' % label
+                return rf.result().result, None
             if time.monotonic() - t_r > deadline_s:
                 gh.cancel_goal_async()
                 return None, '%s result timeout (cancel sent)' % label
@@ -426,11 +470,10 @@ class TaskFsmServer(Node):
                 goal_handle.abort()
             return res
 
-        if self._demo_busy:
+        if not self._admission.acquire(blocking=False):
             return finish(RunDemo.Result.OUTCOME_FAILED,
                           RunDemo.Result.ERR_RESOURCE_BUSY,
                           'another demo task is active')
-        self._demo_busy = True
         self._publish_task_state('BUSY')
         try:
             # ---- decision inputs (ADR-002: executor assembles, policy decides) ----
@@ -458,8 +501,6 @@ class TaskFsmServer(Node):
             last_world_revision = 0
             last_observe_evidence = ''
             last_fail_label = ''
-            abort_error = RunDemo.Result.ERR_SKILL_FAILED
-            abort_detail = ''
 
             def tag_of(object_id):
                 return 'A' if object_id == self._obj_a else 'B'
@@ -564,8 +605,11 @@ class TaskFsmServer(Node):
                     steps.append({'state': label, 'skill': 'observe',
                                   'ok': o_ok, 'error': err or '', 'attempt': attempt})
                     if err or o_outcome != Observe.Result.OUTCOME_SUCCEEDED:
-                        abort_error = RunDemo.Result.ERR_SKILL_FAILED
-                        abort_detail = '%s failed: %s' % (label, err or r.detail)
+                        if goal_handle.is_cancel_requested:
+                            return finish(RunDemo.Result.OUTCOME_CANCELED,
+                                          RunDemo.Result.ERR_CANCELED,
+                                          'canceled during %s (trace=%s)'
+                                          % (label, ','.join(trace)))
                         history.append(HistoryRecord(
                             action=ACTION_OBSERVE, target=decision.target,
                             outcome=255, error_code=-1, attempt=attempt,
@@ -620,8 +664,11 @@ class TaskFsmServer(Node):
                             evidence_id=r.evidence_id))
                     else:
                         last_fail_label = label
-                        abort_error = RunDemo.Result.ERR_SKILL_FAILED
-                        abort_detail = '%s failed (%s): %s' % (label, ename, err or r.detail)
+                        if goal_handle.is_cancel_requested:
+                            return finish(RunDemo.Result.OUTCOME_CANCELED,
+                                          RunDemo.Result.ERR_CANCELED,
+                                          'canceled during %s (trace=%s)'
+                                          % (label, ','.join(trace)))
                         history.append(HistoryRecord(
                             action=ACTION_PICK, target=decision.target,
                             outcome=(int(r.outcome) if r is not None else 255),
@@ -672,8 +719,12 @@ class TaskFsmServer(Node):
                             world_revision=last_world_revision,
                             evidence_id=getattr(r, 'evidence_id', '') if r else ''))
                     else:
-                        abort_error = RunDemo.Result.ERR_SKILL_FAILED
-                        abort_detail = 'PLACE_%s failed: %s' % (tag, err or (r.detail if r else ''))
+                        if goal_handle.is_cancel_requested:
+                            return finish(RunDemo.Result.OUTCOME_CANCELED,
+                                          RunDemo.Result.ERR_CANCELED,
+                                          'canceled during PLACE_%s (box state '
+                                          'unchanged by the failed place; '
+                                          'trace=%s)' % (tag, ','.join(trace)))
                         history.append(HistoryRecord(
                             action=ACTION_PLACE, target=decision.target,
                             outcome=(int(r.outcome) if r is not None else 255),
@@ -730,9 +781,11 @@ class TaskFsmServer(Node):
                             evidence_id=getattr(r, 'evidence_id', '') if r else ''))
                     else:
                         last_fail_label = label
-                        abort_error = RunDemo.Result.ERR_RECOVERY_EXHAUSTED
-                        abort_detail = 'VERIFY_%s still mismatched after budget: %s' % (
-                            tag, err or r.detail)
+                        if goal_handle.is_cancel_requested:
+                            return finish(RunDemo.Result.OUTCOME_CANCELED,
+                                          RunDemo.Result.ERR_CANCELED,
+                                          'canceled during %s (trace=%s)'
+                                          % (label, ','.join(trace)))
                         history.append(HistoryRecord(
                             action=ACTION_VERIFY, target=decision.target,
                             outcome=(int(r.outcome) if r is not None else 255),
@@ -741,6 +794,19 @@ class TaskFsmServer(Node):
                             world_revision=last_world_revision,
                             evidence_id=getattr(r, 'evidence_id', '') if r else ''))
                     continue
+
+                # ---------------- ABORT (typed policy abort) ----------------
+                # The policy owns the abort verdict; the executor owns the
+                # typed task code (audit P1-2: BUDGET_EXHAUSTED-class aborts
+                # used to degenerate into ERR_SKILL_FAILED + "policy state
+                # error" via the PolicyStateError path - the dead abort_error
+                # assignments this branch replaces were its residue).
+                if decision.action == ACTION_ABORT:
+                    return finish(RunDemo.Result.OUTCOME_FAILED,
+                                  task_abort_error_code(decision.reason_code),
+                                  'policy abort (%s): %s (trace=%s)'
+                                  % (decision.reason_code, decision.explanation,
+                                     ','.join(trace)))
 
                 # ---------------- WAIT / unknown ----------------
                 if decision.action == 'WAIT':
@@ -759,7 +825,7 @@ class TaskFsmServer(Node):
             return finish(RunDemo.Result.OUTCOME_FAILED,
                           RunDemo.Result.ERR_SKILL_FAILED, crash_detail(exc))
         finally:
-            self._demo_busy = False
+            self._admission.release()
             self._publish_task_state('IDLE')
 
 

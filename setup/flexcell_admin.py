@@ -47,7 +47,7 @@ CANONICAL = {
     'target_box_a': (0.22, 0.0, 0.0175),
     'target_box_b': (0.20, -0.18, 0.0175),
 }
-WORKSPACE = '/home/ros/agentic_workcell_ws'
+WORKSPACE = os.environ.get('FLEXCELL_WS', '/home/ros/agentic_workcell_ws')
 
 
 def gz_models():

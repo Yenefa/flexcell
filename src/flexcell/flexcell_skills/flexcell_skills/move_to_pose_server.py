@@ -19,6 +19,7 @@ Explicitly NOT here: Runtime Agent, Jev, benchmarks, pick/place, full WorldState
 import json
 import math
 import os
+import threading
 import time
 import uuid
 
@@ -49,6 +50,8 @@ from shape_msgs.msg import SolidPrimitive
 from tf2_ros import Buffer, TransformListener
 
 from flexcell_interfaces.action import MoveToPose
+from flexcell_skills.common import crash_detail
+from flexcell_skills.contracts.trajectory import trajectory_summary
 
 R = MoveToPose.Result
 F = MoveToPose.Feedback
@@ -199,7 +202,7 @@ class MoveToPoseServer(Node):
         # ---------------- state ----------------
         self._js = None
         self._js_wall = 0.0
-        self._busy = False
+        self._admission = threading.Lock()
         self._motion_blocked = False
         self._motion_blocked_reason = ''
         self._seq = 0
@@ -414,7 +417,9 @@ class MoveToPoseServer(Node):
         }
 
         # ---------- admission: single-arm mutual exclusion ----------
-        if self._busy:
+        # atomic lock (audit P1-3): the old check-then-set flag was a TOCTOU
+        # race under the multithreaded executor
+        if not self._admission.acquire(blocking=False):
             res = self._result(R.OUTCOME_FAILED, R.ERR_RESOURCE_BUSY,
                                detail='another MoveToPose goal is active')
             res.evidence_id = evidence
@@ -422,7 +427,6 @@ class MoveToPoseServer(Node):
             self._log(rec)
             goal_handle.abort()
             return res
-        self._busy = True
         execution_started = False
         try:
             # ================= VALIDATING =================
@@ -544,17 +548,19 @@ class MoveToPoseServer(Node):
 
             traj = mpr.trajectory
             traj_joint_names = list(traj.joint_trajectory.joint_names)
-            npts = len(traj.joint_trajectory.points)
+            # audit P0-1: summarize the trajectory WITHOUT indexing it, then
+            # refuse unusable trajectories.  The old code evaluated
+            # points[-1] before its own npts == 0 guard - an empty planner
+            # trajectory escaped as an unhandled IndexError and rclpy's
+            # fallback default Result reported outcome=0 = OUTCOME_SUCCEEDED
+            # (the M2.2 Step-0 ghost class, on the one server still missing
+            # the guard).
+            npts, planned_final_positions, planned_dur = trajectory_summary(traj)
             rec['planning_waypoints'] = npts
-            try:
-                last = traj.joint_trajectory.points[-1].time_from_start
-                rec['planned_duration_s'] = last.sec + last.nanosec * 1e-9
-            except Exception:
-                rec['planned_duration_s'] = None
-            planned_final_positions = list(traj.joint_trajectory.points[-1].positions)
-            if npts == 0:
+            rec['planned_duration_s'] = planned_dur
+            if npts == 0 or planned_final_positions is None:
                 res = self._result(R.OUTCOME_FAILED, R.ERR_NO_COLLISION_FREE_PLAN, mcode,
-                                   detail='planner returned an empty trajectory')
+                                   detail='planner returned an empty/unreadable trajectory')
                 res.evidence_id = evidence
                 rec.update(outcome='FAILED', error_code=R.ERR_NO_COLLISION_FREE_PLAN)
                 self._log(rec)
@@ -677,8 +683,21 @@ class MoveToPoseServer(Node):
                 goal_handle.abort()
             return res
 
+        except Exception as exc:  # crash guard (audit P0-1): move_to_pose was
+            # the one server still missing it - rclpy's fallback for a raising
+            # execute callback is a default Result whose outcome=0 reads as
+            # OUTCOME_SUCCEEDED
+            rec.update(outcome='FAILED', error_code=R.ERR_INTERNAL,
+                       detail=crash_detail(exc),
+                       elapsed_ms=int((time.monotonic() - t_start) * 1000))
+            self._log(rec)
+            res = self._result(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                               detail=crash_detail(exc))
+            res.evidence_id = evidence
+            goal_handle.abort()
+            return res
         finally:
-            self._busy = False
+            self._admission.release()
 
     # ------------------------------------------------------------- stopping
     # ------------------------------------------------------------- execution backends

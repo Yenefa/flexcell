@@ -7,11 +7,19 @@
 # Note: reset 判据看 JSON "ok"，RC 仅参考（139=退出竞态，踩坑日记 B 级 2026-09-26）。
 set -o pipefail
 
-E=/mnt/f/flexcell-stage/setup/acceptance/week15/delivery_20260926
-CLI=/tmp/flexcell_cli
-WS=/home/ros/agentic_workcell_ws
+# Audit P1-7: artifacts land in a versioned session dir (never overwritten).
+# An outer driver can pin one session across all phases via FLEXCELL_SESSION.
+source "$(dirname "$0")/lib_gate.sh"
+if [ -n "${FLEXCELL_SESSION:-}" ]; then
+  E="$FLEXCELL_SESSION"
+else
+  gate_init delivery66
+  E="$GATE_SESSION"
+fi
+CLI=${FLEXCELL_CLI:-/tmp/flexcell_cli}
+WS=${FLEXCELL_WS:-/home/ros/agentic_workcell_ws}
 CLIENT=src/flexcell/flexcell_skills/test/w1_client.py
-J=/home/ros/.ros/flexcell
+J="$HOME/.ros/flexcell"
 mkdir -p "$E"
 
 cap() { # cap <file> <label> <cmd...> — transcript to file, one-line digest to stdout
@@ -69,6 +77,7 @@ do_reset() { # do_reset <file>
   cap "$1" "flexcell reset" bash "$CLI" reset
   echo "--- reset JSON digest (tail) ---"
   reset_digest "$1"
+  gate_flood "$E/$1" || return 1   # audit P1-8: no unregistered-gz-class flood
   grep -q '"ok": true' "$E/$1"
 }
 
@@ -102,7 +111,15 @@ phase_reset1() { do_reset 66_reset1.out; }
 
 phase_demo() {
   env_ros
-  cap 66_demo_happy.out "happy demo week1_demo_v1" timeout 170 python3 "$CLIENT" --action demo --scenario week1_demo_v1
+  # audit P1-6: the happy demo runs UNDER the independent referee - the
+  # gate below no longer trusts only the server's self-reported outcome
+  cap 66_demo_happy.out "referee-wrapped happy demo week1_demo_v1" \
+    timeout 240 python3 setup/92_referee.py --object target_box_a \
+      --zone 0.12 -0.15 0.0175 --demo
+  gate_check referee_consistent "$E/66_demo_happy.out" '"verdict": "CONSISTENT"'
+  gate_check happy_outcome "$E/66_demo_happy.out" '"outcome": "OUTCOME_SUCCEEDED"'
+  gate_check happy_zone_a "$E/66_demo_happy.out" '"object_a_at_zone": true'
+  gate_check happy_zone_b "$E/66_demo_happy.out" '"object_b_at_zone": true'
   grep -E '"outcome"|object_a_at_zone|object_b_at_zone|zone_a_error_m|zone_b_error_m|run_id|wall_seconds|"duration_s"' \
     "$E/66_demo_happy.out" | head -12 | tee "$E/66_demo_happy_key.out"
   tail -n 1 "$J/demo_runs.jsonl" > "$E/66_run_record_happy.jsonl"

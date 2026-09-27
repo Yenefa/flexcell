@@ -47,6 +47,34 @@ STATUS_CANCELED = 4   # outcome=2 must not masquerade as FAILURE (chief-approved
 PLUMBING_ERROR_CODE = -1   # task_fsm records -1 when no typed skill result exists
 PLUMBING_OUTCOME = 255     # decision_policy.OUTCOME_NONE
 
+# ---------------------------------------------------------------- task-level codes
+# Task-level codes are deliberately outside the skill taxonomy: they live on
+# RunDemo/RunPickPlace results and are produced by the EXECUTOR, not by any
+# skill server.  50/51 reuse the legacy values.
+TASK_ERR_SKILL_FAILED = 50
+TASK_ERR_RECOVERY_EXHAUSTED = 51
+
+# FSMPolicy ABORT reason codes (decision_policy.py RC_*) that mean "a recovery
+# budget is spent".  The executor maps policy ABORT decisions to typed task
+# codes through task_abort_error_code instead of degenerating into the
+# catch-all PolicyStateError path (M2.3 audit P1-2: the typed semantics were
+# silently lost when the policy seam landed - 87c_exhaust recorded
+# ERR_SKILL_FAILED + "policy state error" where ERR_RECOVERY_EXHAUSTED was
+# the frozen meaning).
+_BUDGET_ABORT_REASONS = frozenset(('BUDGET_EXHAUSTED', 'VERIFY_BUDGET_EXHAUSTED'))
+
+
+def task_abort_error_code(reason_code):
+    """Policy ABORT decision -> typed task-level error code.
+
+    BUDGET_EXHAUSTED / VERIFY_BUDGET_EXHAUSTED -> ERR_RECOVERY_EXHAUSTED;
+    everything else (NON_RECOVERABLE, OBSERVE_FAILED, unknown) fails closed
+    to ERR_SKILL_FAILED.
+    """
+    return (TASK_ERR_RECOVERY_EXHAUSTED if reason_code in _BUDGET_ABORT_REASONS
+            else TASK_ERR_SKILL_FAILED)
+
+
 _SKILLS = ('OBSERVE', 'PICK', 'PLACE', 'VERIFY')
 
 # (legacy error_code, outcome-or-None) -> canonical;  None outcome = any outcome.
@@ -56,6 +84,7 @@ _OBSERVE_MAP = {
     (0, 0): ERR_OK,
     (2, None): ERR_INTERNAL,
     (3, None): ERR_WORLD_STATE_UNAVAILABLE,
+    (32, None): ERR_CANCELED,      # OUTCOME_CANCELED (audit P0-3 cancel semantics)
 }
 _PICK_MAP = {
     (0, 0): ERR_OK,
@@ -80,6 +109,7 @@ _VERIFY_MAP = {
     (2, None): ERR_INTERNAL,
     (21, None): ERR_OBJECT_NOT_FOUND,
     (22, None): ERR_WORLD_STATE_UNAVAILABLE,
+    (32, None): ERR_CANCELED,      # OUTCOME_CANCELED=3 (audit P0-3 cancel semantics)
 }
 _MAPS = {
     'OBSERVE': _OBSERVE_MAP,
@@ -115,14 +145,15 @@ def canonicalize(skill, error_code, outcome):
 def status_from_outcome(skill, outcome):
     """outcome -> status.  THE single derivation rule for finish().
 
-    Asymmetry note: outcome=2 means CANCELED for OBSERVE/PICK/PLACE but
-    FAILED for VERIFY (whose vocabulary is VERIFIED/MISMATCH/FAILED and
-    which has no CANCELED path today).
+    Asymmetry note: outcome=2 means CANCELED for OBSERVE/PICK/PLACE; VERIFY
+    (vocabulary VERIFIED/MISMATCH/FAILED/CANCELED) cancels on outcome=3.
     """
     o = int(outcome)
     if skill == 'VERIFY':
         if o == 0:
             return STATUS_SUCCESS
+        if o == 3:
+            return STATUS_CANCELED     # OUTCOME_CANCELED (added with P0-3)
         return STATUS_FAILURE          # MISMATCH(1) / FAILED(2)
     if o == 0:
         return STATUS_SUCCESS

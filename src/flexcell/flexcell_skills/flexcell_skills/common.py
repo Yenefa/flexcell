@@ -55,6 +55,7 @@ _GZ_STREAM = {
     'last_rx': 0.0,
     'thread': None,
     'world': None,
+    'last_start': 0.0,    # restart backoff bookkeeping (thread-death self-heal)
 }
 
 
@@ -93,8 +94,17 @@ def _gz_stream_loop(world):
 
 def _ensure_gz_pose_stream(world='empty'):
     with _GZ_STREAM['lock']:
-        if _GZ_STREAM['thread'] is not None and _GZ_STREAM['world'] == world:
+        t = _GZ_STREAM['thread']
+        if t is not None and t.is_alive() and _GZ_STREAM['world'] == world:
             return
+        now = time.monotonic()
+        if (t is not None and not t.is_alive()
+                and now - _GZ_STREAM['last_start'] < 1.0):
+            return   # died moments ago; avoid restart churn
+        # self-heal (audit P2): a dead stream thread used to stay dead forever
+        # - the process silently lost its ground-truth source while
+        # _GZ_STREAM['thread'] still looked occupied
+        _GZ_STREAM['last_start'] = now
         t = threading.Thread(target=_gz_stream_loop, args=(world,), daemon=True)
         _GZ_STREAM['thread'] = t
         _GZ_STREAM['world'] = world
@@ -228,6 +238,23 @@ def wait_future(future, timeout_s):
     return 'done'
 
 
+def interruptible_sleep(seconds, cancel_check=None, step=0.05):
+    """Sleep in small steps; return True as soon as cancel_check() fires.
+
+    Skill servers use this instead of time.sleep() so a cancel landing during
+    a settle/engage pause is noticed within ~step seconds instead of after
+    the full sleep (audit P0-3).
+    """
+    end = time.monotonic() + seconds
+    while True:
+        if cancel_check is not None and cancel_check():
+            return True
+        remaining = end - time.monotonic()
+        if remaining <= 0.0:
+            return cancel_check is not None and cancel_check()
+        time.sleep(min(step, remaining))
+
+
 class MoveToPoseClient:
     """Blocking helper around the Day-2 MoveToPose action."""
 
@@ -239,7 +266,7 @@ class MoveToPoseClient:
         return self._cli.wait_for_server(timeout_sec=timeout_s)
 
     def call(self, position, profile='demo_slow', deadline_ms=30000,
-             timeout_s=60.0, frame='world', request_id=''):
+             timeout_s=60.0, frame='world', request_id='', cancel_check=None):
         g = MoveToPose.Goal()
         g.target = PoseStamped()
         g.target.header.frame_id = frame
@@ -260,6 +287,18 @@ class MoveToPoseClient:
         rf = gh.get_result_async()
         t0 = time.monotonic()
         while not rf.done():
+            if cancel_check is not None and cancel_check():
+                # caller cancel: forward it so the arm actually stops
+                # (preempt + stop confirmation), then surface the server's
+                # CANCELED result (audit P0-3 - the motion used to run to
+                # completion and the caller still got SUCCEEDED)
+                gh.cancel_goal_async()
+                t_c = time.monotonic()
+                while not rf.done() and time.monotonic() - t_c < 15.0:
+                    time.sleep(0.05)
+                if not rf.done():
+                    return None, 'move_to_pose canceled: stop confirmation timeout'
+                return rf.result().result, None
             if time.monotonic() - t0 > timeout_s:
                 gh.cancel_goal_async()
                 return None, 'move_to_pose result timeout (cancel sent)'

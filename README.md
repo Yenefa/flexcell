@@ -73,6 +73,19 @@ After coding — update the Issue, record evidence in EXPERIMENTS.md, link the c
 Current: **Week-1.5 accepted; M2 Runtime Decision Foundation is the active milestone** —
 see [docs/ROADMAP.md](docs/ROADMAP.md). The table below is the Day-1 verification record.
 
+### Evidence quality (M2.3 audit, 2026-09-28)
+
+A full audit (code + evidence chain + external tech scan) found the
+architecture sound but the historical "all green" claims overstated: the
+real steady state was "retried to green" (first-attempt success ~30-50% on
+several batteries), some parity artifacts read FAIL on disk, and the
+batteries could not red-flag anything. The remediation commit (P0-1..3
+runtime fixes, hard gates in the batteries, independent referee, measured
+parity) addresses the causes; until episode recording lands (#7), treat
+every pre-audit acceptance claim in HANDOFF / acceptance/ as **unverified
+unless re-run under the gated batteries**. See docs/P2_DECISION_MEMO.md for
+the open route decisions.
+
 | Item                                     | State                       |
 | ---------------------------------------- | --------------------------- |
 | Ubuntu 24.04 + ROS 2 Jazzy               | OK                          |

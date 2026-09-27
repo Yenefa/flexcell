@@ -60,13 +60,16 @@ Windows side first, or fetch it from WSL directly):
    colcon build --symlink-install --packages-select flexcell_interfaces flexcell_skills
    source /opt/ros/jazzy/setup.bash && source install/setup.bash
    ```
-5. Offline test ladder (no GUI needed):
+5. Offline test ladder (no GUI needed) — or just `colcon test
+--packages-select flexcell_skills`, which runs all six suites since the
+   M2.3 audit remediation (wired in via `tests_require`):
    ```
    python3 src/flexcell/flexcell_skills/test/test_canonical_state.py     # 13
    python3 src/flexcell/flexcell_skills/test/test_decision_policy.py     # 15
    python3 src/flexcell/flexcell_skills/test/test_skill_contract.py      # 13
    python3 src/flexcell/flexcell_skills/test/test_contracts.py           # 17
    python3 src/flexcell/flexcell_skills/test/test_recovery.py            # 15
+   python3 src/flexcell/flexcell_skills/test/test_runtime_guards.py      # 13
    python3 setup/82_undefined_attr_check.py src/flexcell                 # static
    ```
 
@@ -88,23 +91,27 @@ real GPU (D3D12 - RTX 4060 / RX 6800).
 
 ## 4. Verification ladder (in order; stop at the first red)
 
+Since the M2.3 audit remediation the batteries carry HARD GATES
+(`setup/lib_gate.sh`): any failed case exits non-zero, every run writes into
+a versioned `sessions/<suite>_<sha>_<ts>/` dir (never overwritten; set
+`FLEXCELL_SESSION` to pin one session across the 66 phases), and reset
+artifacts are gated on the `gz.msgs.Pose` traceback flood. Machine paths can
+be overridden with `FLEXCELL_WS` / `FLEXCELL_STAGE`.
+
 1. `bash /tmp/flexcell_cli start` → `START OK` + `flexcell health` = 12 OK
    (~40 s on the 13500H).
 2. `flexcell reset` → `"ok": true`.
-3. Happy demo:
-   `python3 src/flexcell/flexcell_skills/test/w1_client.py --action demo --scenario week1_demo_v1`
-   → `OUTCOME_SUCCEEDED`, zone errors ≲ 13 mm, both places genuine
-   (`place.jsonl`: released=true + drop-error detail).
-4. Parity: the demo's `fsm_trace` must equal
-   `setup/acceptance/week15/delivery_20260926/66_run_record_happy.jsonl`'s
-   fsm_trace byte-for-byte (labels are machine-independent; zone errors are
-   physics and vary within tolerance).
-5. Battery: `bash setup/61_w15_acceptance.sh happy|recovery|exhaust|invalid|reset`
-   (evidence lands in the acceptance dir; `attempt` labels in traces are
-   frozen - do not "fix" them).
-6. Day-2 regression: `bash setup/32_day2_acceptance.sh regression`
-   (MOTION_DETECTED = True; run it with the arm OFF the all-zero home - e.g.
-   after a demo - or case10's all-joints check structurally fails).
+3. Happy demo under the independent referee (recomputes box_rise /
+   zone_error from the raw gz stream and cross-checks the servers' jsonl):
+   `python3 setup/92_referee.py --object target_box_a --zone 0.12 -0.15 0.0175 --demo`
+   → `"verdict": "CONSISTENT"`.
+4. Battery: `bash setup/61_w15_acceptance.sh all` (happy / recovery /
+   exhaust — exhaust must return the TYPED `ERR_RECOVERY_EXHAUSTED` — /
+   invalid; hard-gated).
+5. Day-2 battery: `bash setup/32_day2_acceptance.sh happy_a happy_b
+invalid_workspace invalid_quat invalid_profile stale_world ik_unreachable
+timeout cancel regression` (hard-gated; case10 needs the arm OFF the
+   all-zero home).
 
 ## 5. What is intentionally NOT in the repo
 

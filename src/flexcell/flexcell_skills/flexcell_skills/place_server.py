@@ -7,6 +7,7 @@ is verified by ground truth: the box must settle within tolerance of the place
 pose, otherwise PLACE_FAILED - honest either way.
 """
 
+import threading
 import time
 
 import rclpy
@@ -22,7 +23,8 @@ from flexcell_interfaces.action import PlaceObject
 from flexcell_skills.contracts.skill_result import derive_status
 from flexcell_skills.common import (
     GripperClient, JsonlLog, MoveToPoseClient, PlanningSceneOps,
-    crash_detail, dist3, new_evidence, pose_msg, sample_gz_pose)
+    crash_detail, dist3, interruptible_sleep, new_evidence, pose_msg,
+    sample_gz_pose)
 
 R = PlaceObject.Result
 F = PlaceObject.Feedback
@@ -77,7 +79,7 @@ class PlaceServer(Node):
         self._default_profile = gp('default_motion_profile').value
         self._log = JsonlLog(self, gp('log_dir').value, gp('log_file').value)
 
-        self._busy = False
+        self._admission = threading.Lock()
         self._seq = 0
 
         self._server = ActionServer(
@@ -97,9 +99,10 @@ class PlaceServer(Node):
         fb.elapsed_ms = int((time.monotonic() - t0) * 1000)
         gh.publish_feedback(fb)
 
-    def _motion(self, position, profile, request_id):
+    def _motion(self, position, profile, request_id, cancel_check=None):
         res, err = self._m2p.call(position, profile=profile,
-                                  deadline_ms=self._deadline, request_id=request_id)
+                                  deadline_ms=self._deadline, request_id=request_id,
+                                  cancel_check=cancel_check)
         if err is not None:
             return None, 0, err
         return res, int(res.error_code), res.detail
@@ -138,10 +141,9 @@ class PlaceServer(Node):
             return res
 
         # ---------- admission ----------
-        if self._busy:
+        if not self._admission.acquire(blocking=False):
             return finish(R.OUTCOME_FAILED, R.ERR_RESOURCE_BUSY,
                           'another place goal is active')
-        self._busy = True
         try:
             # ---------- VALIDATING ----------
             self._feedback(goal_handle, 'VALIDATING', t0)
@@ -167,6 +169,7 @@ class PlaceServer(Node):
                               % (goal.object_name, err or 'not in attached state'))
 
             place_pos = [pp.x, pp.y, pp.z]
+            cancel_requested = lambda: goal_handle.is_cancel_requested  # noqa: E731
 
             # ---------- APPROACHING ----------
             self._feedback(goal_handle, 'APPROACHING', t0)
@@ -175,19 +178,32 @@ class PlaceServer(Node):
             box_target_z = place_pos[2] + self._clearance
             ee_z = box_target_z + self._carry
             hover = [pp.x, pp.y, ee_z + self._hover]
-            mres, merr_code, detail = self._motion(hover, profile, rid + '-hover')
+            mres, merr_code, detail = self._motion(hover, profile, rid + '-hover',
+                                                   cancel_check=cancel_requested)
             if mres is None or int(mres.outcome) != R.OUTCOME_SUCCEEDED:
+                if goal_handle.is_cancel_requested:
+                    return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
+                                  'canceled during hover (motion stopped; box '
+                                  'still carried)')
                 return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
                               'hover motion failed: %s' % detail,
                               motion_err=merr_code)
             descend = [pp.x, pp.y, ee_z]
-            mres, merr_code, detail = self._motion(descend, profile, rid + '-descend')
+            mres, merr_code, detail = self._motion(descend, profile, rid + '-descend',
+                                                   cancel_check=cancel_requested)
             if mres is None or int(mres.outcome) != R.OUTCOME_SUCCEEDED:
+                if goal_handle.is_cancel_requested:
+                    return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
+                                  'canceled during descend (motion stopped; box '
+                                  'still carried)')
                 return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
                               'descend motion failed: %s' % detail,
                               motion_err=merr_code)
 
             # ---------- RELEASING ----------
+            if goal_handle.is_cancel_requested:
+                return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
+                              'canceled before RELEASING (box still carried)')
             self._feedback(goal_handle, 'RELEASING', t0)
             # release: stop the carry servo first, then free the planning scene
             self._carry_stop.publish(EmptyMsg())
@@ -204,7 +220,9 @@ class PlaceServer(Node):
 
             # ---------- VERIFYING (internal, ground truth) ----------
             self._feedback(goal_handle, 'VERIFYING', t0)
-            time.sleep(self._settle)
+            if interruptible_sleep(self._settle, cancel_requested):
+                return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
+                              'canceled during settle (object already released)')
             sampled, err = sample_gz_pose(goal.object_name)
             if sampled is None:
                 return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
@@ -218,8 +236,13 @@ class PlaceServer(Node):
             # ---------- RETREATING ----------
             self._feedback(goal_handle, 'RETREATING', t0)
             up = [descend[0], descend[1], descend[2] + self._retreat]
-            mres, merr_code, detail = self._motion(up, profile, rid + '-retreat')
+            mres, merr_code, detail = self._motion(up, profile, rid + '-retreat',
+                                                   cancel_check=cancel_requested)
             if mres is None or int(mres.outcome) != R.OUTCOME_SUCCEEDED:
+                if goal_handle.is_cancel_requested:
+                    return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
+                                  'canceled during retreat (object already '
+                                  'placed at %.3fm error)' % drop_err)
                 # object is already placed; report the retreat failure honestly
                 return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
                               'object dropped (place_err=%.3f) but retreat failed: %s'
@@ -237,7 +260,7 @@ class PlaceServer(Node):
             # Result has outcome=0, which reads as OUTCOME_SUCCEEDED
             return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL, crash_detail(exc))
         finally:
-            self._busy = False
+            self._admission.release()
 
 
 

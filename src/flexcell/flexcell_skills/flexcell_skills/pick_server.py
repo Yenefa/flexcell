@@ -12,6 +12,7 @@ is future hardening. Success is still measured: the box must physically rise
 with the arm, otherwise GRASP_FAILED.
 """
 
+import threading
 import time
 
 import rclpy
@@ -33,7 +34,8 @@ from flexcell_interfaces.action import PickObject
 from flexcell_skills.contracts.skill_result import derive_status
 from flexcell_skills.common import (
     GripperClient, JsonlLog, MoveToPoseClient, PlanningSceneOps,
-    crash_detail, dist3, new_evidence, pose_msg, sample_gz_pose)
+    crash_detail, dist3, interruptible_sleep, new_evidence, pose_msg,
+    sample_gz_pose)
 
 R = PickObject.Result
 F = PickObject.Feedback
@@ -108,7 +110,7 @@ class PickServer(Node):
         self._tf_buffer = Buffer()
         self._tf_listener = TransformListener(self._tf_buffer, self, spin_thread=False)
 
-        self._busy = False
+        self._admission = threading.Lock()
         self._seq = 0
 
         self._server = ActionServer(
@@ -138,9 +140,10 @@ class PickServer(Node):
         fb.elapsed_ms = int((time.monotonic() - t0) * 1000)
         gh.publish_feedback(fb)
 
-    def _motion(self, position, profile, request_id):
+    def _motion(self, position, profile, request_id, cancel_check=None):
         res, err = self._m2p.call(position, profile=profile,
-                                  deadline_ms=self._deadline, request_id=request_id)
+                                  deadline_ms=self._deadline, request_id=request_id,
+                                  cancel_check=cancel_check)
         if err is not None:
             return None, 0, err
         return res, int(res.error_code), res.detail
@@ -216,10 +219,9 @@ class PickServer(Node):
             return res
 
         # ---------- admission ----------
-        if self._busy:
+        if not self._admission.acquire(blocking=False):
             return finish(R.OUTCOME_FAILED, R.ERR_RESOURCE_BUSY,
                           'another pick goal is active')
-        self._busy = True
         attached = False
         try:
             # ---------- VALIDATING ----------
@@ -267,16 +269,21 @@ class PickServer(Node):
                 goal.object_name, box_pos, self._size)
             rec['scene_box_added'] = bool(scene_added)
 
+            cancel_requested = lambda: goal_handle.is_cancel_requested  # noqa: E731
+
             def try_approach():
                 hover = [box_pos[0], box_pos[1], box_pos[2] + self._hover]
-                r1 = self._motion(hover, profile, rid + '-hover')
+                r1 = self._motion(hover, profile, rid + '-hover',
+                                  cancel_check=cancel_requested)
                 if r1[0] is None or int(r1[0].outcome) != R.OUTCOME_SUCCEEDED:
                     return r1
                 grasp_t = [box_pos[0], box_pos[1], box_pos[2] + self._grasp_dz]
-                return self._motion(grasp_t, profile, rid + '-grasp')
+                return self._motion(grasp_t, profile, rid + '-grasp',
+                                    cancel_check=cancel_requested)
 
             mres, merr_code, detail = try_approach()
-            if (mres is None or int(mres.outcome) != R.OUTCOME_SUCCEEDED) and scene_added:
+            if (mres is None or int(mres.outcome) != R.OUTCOME_SUCCEEDED) \
+                    and scene_added and not goal_handle.is_cancel_requested:
                 # fallback: drop scene awareness and retry once (knock risk
                 # accepted, reported in detail)
                 self._scene.remove(goal.object_name)
@@ -284,6 +291,9 @@ class PickServer(Node):
                 rec['scene_box_fallback'] = True
                 mres, merr_code, detail = try_approach()
             if mres is None or int(mres.outcome) != R.OUTCOME_SUCCEEDED:
+                if goal_handle.is_cancel_requested:
+                    return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
+                                  'canceled during approach (motion stopped)')
                 return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
                               'approach failed: %s' % detail,
                               motion_err=merr_code)
@@ -315,7 +325,14 @@ class PickServer(Node):
                 'frame': self._base,
             })))
             rec['carry_offset'] = offset
-            time.sleep(0.5)   # let the servo pin the object before lifting
+            if interruptible_sleep(0.5, cancel_requested):
+                # cancel while the carry servo pins the object: leave the
+                # servo engaged (the box hangs from the EE) - releasing here
+                # would drop it uncontrolled
+                return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
+                              'canceled while engaging carry (box pinned to '
+                              'EE; servo left engaged)')
+            # time.sleep replaced by interruptible_sleep (audit P0-3)
 
             sok, serr = self._scene.attach(goal.object_name)
             if not sok:
@@ -323,13 +340,21 @@ class PickServer(Node):
                 return finish(R.OUTCOME_FAILED, R.ERR_GRASP_FAILED,
                               'planning-scene attach failed: %s' % serr)
             attached = True
-            time.sleep(0.5)
+            if interruptible_sleep(0.5, cancel_requested):
+                return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
+                              'canceled after attach (box attached and '
+                              'carried; not released)')
 
             # ---------- LIFTING ----------
             self._feedback(goal_handle, 'LIFTING', t0)
             lift = [grasp[0], grasp[1], grasp[2] + self._raise]
-            mres, merr_code, detail = self._motion(lift, profile, rid + '-lift')
+            mres, merr_code, detail = self._motion(lift, profile, rid + '-lift',
+                                                   cancel_check=cancel_requested)
             if mres is None or int(mres.outcome) != R.OUTCOME_SUCCEEDED:
+                if goal_handle.is_cancel_requested:
+                    return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
+                                  'canceled during lift (motion stopped; box '
+                                  'attached and carried)')
                 return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
                               'lift motion failed: %s' % detail,
                               motion_err=merr_code)
@@ -338,6 +363,17 @@ class PickServer(Node):
             if sampled is None:
                 return finish(R.OUTCOME_FAILED, R.ERR_GRASP_FAILED,
                               'post-lift observe failed: %s' % err)
+            # sample AFTER a settle: at motion end the carry servo (10Hz
+            # set_pose) may not have pulled the box to its pinned height yet,
+            # so an immediate sample understates the true rise (audit
+            # referee finding: rise 4.9cm reported vs 9.6cm true plateau;
+            # 0.5s still undershot at 5.7cm - the servo pulls the box up in
+            # steps, ~2s reaches the plateau)
+            interruptible_sleep(2.0, cancel_requested)
+            sampled, err = sample_gz_pose(goal.object_name)
+            if sampled is None:
+                return finish(R.OUTCOME_FAILED, R.ERR_GRASP_FAILED,
+                              'post-settle observe failed: %s' % err)
             box_after, box_quat = sampled
             res.object_pose_after = pose_msg(box_after, box_quat)
             rec['box_after'] = box_after
@@ -361,7 +397,7 @@ class PickServer(Node):
             # Result has outcome=0, which reads as OUTCOME_SUCCEEDED
             return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL, crash_detail(exc))
         finally:
-            self._busy = False
+            self._admission.release()
 
 
 
