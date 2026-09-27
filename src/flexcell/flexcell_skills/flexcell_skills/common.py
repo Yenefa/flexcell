@@ -194,6 +194,20 @@ def new_evidence(request_id, seq):
     return rid, '%s-%s' % (rid, uuid.uuid4().hex[:8])
 
 
+def crash_detail(exc):
+    """One-line crash report for the execute-callback crash guard (issue #20).
+
+    rclpy's fallback for a raising execute callback is a default Result whose
+    outcome=0 reads as SUCCEEDED/VERIFIED - the Week-1 PLACE ghost success.
+    Skill servers convert unhandled exceptions into typed ERR_INTERNAL
+    failures carrying this detail instead.
+    """
+    import traceback
+    tail = ' | '.join(
+        line.strip() for line in traceback.format_exc().strip().splitlines()[-3:])
+    return 'unhandled exception: %s: %s (%s)' % (type(exc).__name__, exc, tail)
+
+
 def pose_msg(position, quat):
     p = Pose()
     p.position.x, p.position.y, p.position.z = position

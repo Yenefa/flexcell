@@ -32,7 +32,7 @@ from flexcell_interfaces.action import PickObject
 
 from flexcell_skills.common import (
     GripperClient, JsonlLog, MoveToPoseClient, PlanningSceneOps,
-    dist3, new_evidence, pose_msg, sample_gz_pose)
+    crash_detail, dist3, new_evidence, pose_msg, sample_gz_pose)
 
 R = PickObject.Result
 F = PickObject.Feedback
@@ -353,8 +353,13 @@ class PickServer(Node):
                           'picked %s: attached, measured rise %.3fm'
                           % (goal.object_name, rise))
 
+        except Exception as exc:  # crash guard (issue #20): a raising execute
+            # callback must become a typed FAILURE - rclpy's fallback default
+            # Result has outcome=0, which reads as OUTCOME_SUCCEEDED
+            return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL, crash_detail(exc))
         finally:
             self._busy = False
+
 
 
 def main(args=None):

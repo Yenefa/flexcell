@@ -33,7 +33,8 @@ from flexcell_interfaces.msg import (
     CarryState, RobotStateSummary, TaskContext, WorldObject, WorldState, ZoneState)
 
 from flexcell_skills.common import (
-    JsonlLog, dist3, new_evidence, pose_msg, sample_gz_pose_age)
+    JsonlLog, crash_detail, dist3, new_evidence, pose_msg,
+    sample_gz_pose_age)
 
 R = Observe.Result
 
@@ -244,26 +245,37 @@ class ObserveServer(Node):
         t_start = time.monotonic()
         self._seq += 1
         rid, evidence = new_evidence('', self._seq)
-
-        ws = self._snapshot()
         res = R()
-        rec = {
-            'request_id': rid,
-            'evidence_id': evidence,
-            'revision': self._revision,
-            'available': [o.name for o in ws.objects if o.available],
-            'carry_engaged': ws.carry.engaged,
-            'zones': {z.id: int(z.occupancy) for z in ws.zones},
-        }
-        self._pub.publish(ws)
-        res.outcome = R.OUTCOME_SUCCEEDED
-        res.error_code = R.ERR_NONE
-        res.world_state = ws
-        res.detail = '; '.join(ws.notes)
-        rec.update(outcome='SUCCEEDED', detail=res.detail, evidence_id=evidence)
-        self._log.write(rec)
-        goal_handle.succeed()
-        return res
+        rec = {'request_id': rid, 'evidence_id': evidence}
+        try:
+            ws = self._snapshot()
+            rec.update(
+                revision=self._revision,
+                available=[o.name for o in ws.objects if o.available],
+                carry_engaged=ws.carry.engaged,
+                zones={z.id: int(z.occupancy) for z in ws.zones},
+            )
+            self._pub.publish(ws)
+            res.outcome = R.OUTCOME_SUCCEEDED
+            res.error_code = R.ERR_NONE
+            res.world_state = ws
+            res.detail = '; '.join(ws.notes)
+            rec.update(outcome='SUCCEEDED', detail=res.detail)
+            self._log.write(rec)
+            goal_handle.succeed()
+            return res
+        except Exception as exc:  # crash guard (issue #20): a raising execute
+            # callback must become a typed FAILURE - rclpy's fallback default
+            # Result has outcome=0, which reads as OUTCOME_SUCCEEDED
+            res.outcome = R.OUTCOME_FAILED
+            res.error_code = R.ERR_INTERNAL
+            res.detail = crash_detail(exc)
+            rec.update(outcome='FAILED', error_code=int(R.ERR_INTERNAL),
+                       detail=res.detail,
+                       elapsed_ms=int((time.monotonic() - t_start) * 1000))
+            self._log.write(rec)
+            goal_handle.abort()
+            return res
 
 
 def main(args=None):

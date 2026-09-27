@@ -36,7 +36,7 @@ from std_msgs.msg import String as StringMsg
 from flexcell_interfaces.action import (
     Observe, PickObject, PlaceObject, RunDemo, RunPickPlace, VerifyObject)
 
-from flexcell_skills.common import JsonlLog, new_evidence
+from flexcell_skills.common import JsonlLog, crash_detail, new_evidence
 from flexcell_skills.decision_policy import (
     ACTION_ABORT, ACTION_OBSERVE, ACTION_PICK, ACTION_PLACE, ACTION_VERIFY,
     Constraints, FSMPolicy, HistoryRecord, PolicyStateError, TaskGoal,
@@ -314,6 +314,11 @@ class TaskFsmServer(Node):
             return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
                           'VERIFY mismatch: %s' % result.detail)
 
+        except Exception as exc:  # crash guard (issue #20): rclpy's
+            # fallback for a raising execute callback is a default Result
+            # with outcome=0 = OUTCOME_SUCCEEDED - never let that happen
+            return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
+                          crash_detail(exc))
         finally:
             self._busy = False
 
@@ -664,6 +669,11 @@ class TaskFsmServer(Node):
             return finish(RunDemo.Result.OUTCOME_FAILED,
                           RunDemo.Result.ERR_SKILL_FAILED,
                           'policy state error: %s' % exc)
+        except Exception as exc:  # crash guard (issue #20): rclpy's fallback
+            # for a raising execute callback is a default Result with
+            # outcome=0 = OUTCOME_SUCCEEDED - never let that happen
+            return finish(RunDemo.Result.OUTCOME_FAILED,
+                          RunDemo.Result.ERR_SKILL_FAILED, crash_detail(exc))
         finally:
             self._demo_busy = False
             self._publish_task_state('IDLE')

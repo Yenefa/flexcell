@@ -16,7 +16,8 @@ from rclpy.node import Node
 
 from flexcell_interfaces.action import VerifyObject
 
-from flexcell_skills.common import JsonlLog, dist3, new_evidence, pose_msg, sample_gz_pose
+from flexcell_skills.common import (
+    JsonlLog, crash_detail, dist3, new_evidence, pose_msg, sample_gz_pose)
 
 R = VerifyObject.Result
 
@@ -59,47 +60,61 @@ class VerifyServer(Node):
             'tolerance_m': goal.position_tolerance_m or self._default_tol,
         }
 
-        sampled, err = sample_gz_pose(goal.object_name)
-        if sampled is None:
-            res.outcome = R.OUTCOME_FAILED
-            res.error_code = R.ERR_OBJECT_UNKNOWN
-            res.detail = err
+        try:
+            sampled, err = sample_gz_pose(goal.object_name)
+            if sampled is None:
+                res.outcome = R.OUTCOME_FAILED
+                res.error_code = R.ERR_OBJECT_UNKNOWN
+                res.detail = err
+                res.evidence_id = evidence
+                rec.update(outcome='FAILED', error_code=res.error_code, detail=err)
+                self._log.write(rec)
+                goal_handle.abort()
+                return res
+
+            position, quat = sampled
+            exp = goal.expected_pose
+            ep = [exp.position.x, exp.position.y, exp.position.z]
+            error = dist3(position, ep)
+            tol = goal.position_tolerance_m if goal.position_tolerance_m > 0 else self._default_tol
+            verified = error <= tol
+
+            res.measured_pose = pose_msg(position, quat)
+            res.has_measured_pose = True
+            res.position_error_m = error
+            res.verified = verified
             res.evidence_id = evidence
-            rec.update(outcome='FAILED', error_code=res.error_code, detail=err)
+            rec.update(measured=position, expected=ep, position_error_m=error,
+                       verified=verified)
+            if verified:
+                res.outcome = R.OUTCOME_VERIFIED
+                res.error_code = R.ERR_NONE
+                res.detail = 'measured within %.3fm of expected (err=%.4f)' % (tol, error)
+                rec['outcome'] = 'VERIFIED'
+                goal_handle.succeed()
+            else:
+                res.outcome = R.OUTCOME_MISMATCH
+                res.error_code = R.ERR_NONE
+                res.detail = ('measured [%s] outside %.3fm of expected [%s] (err=%.4f)'
+                              % (['%.3f' % v for v in position], tol,
+                                 ['%.3f' % v for v in ep], error))
+                rec['outcome'] = 'MISMATCH'
+                goal_handle.succeed()  # a mismatch is a valid, honest verification result
+            self._log.write(rec)
+            return res
+        except Exception as exc:  # crash guard (issue #20): a raising execute
+            # callback must become a typed FAILURE - rclpy's fallback default
+            # Result has outcome=0, which for VerifyObject reads as VERIFIED
+            res.outcome = R.OUTCOME_FAILED
+            res.error_code = R.ERR_INTERNAL
+            res.detail = crash_detail(exc)
+            res.evidence_id = evidence
+            rec.update(outcome='FAILED', error_code=int(R.ERR_INTERNAL),
+                       detail=res.detail,
+                       elapsed_ms=int((time.monotonic() - t0) * 1000))
             self._log.write(rec)
             goal_handle.abort()
             return res
-
-        position, quat = sampled
-        exp = goal.expected_pose
-        ep = [exp.position.x, exp.position.y, exp.position.z]
-        error = dist3(position, ep)
-        tol = goal.position_tolerance_m if goal.position_tolerance_m > 0 else self._default_tol
-        verified = error <= tol
-
-        res.measured_pose = pose_msg(position, quat)
-        res.has_measured_pose = True
-        res.position_error_m = error
-        res.verified = verified
-        res.evidence_id = evidence
-        rec.update(measured=position, expected=ep, position_error_m=error,
-                   verified=verified)
-        if verified:
-            res.outcome = R.OUTCOME_VERIFIED
-            res.error_code = R.ERR_NONE
-            res.detail = 'measured within %.3fm of expected (err=%.4f)' % (tol, error)
-            rec['outcome'] = 'VERIFIED'
-            goal_handle.succeed()
-        else:
-            res.outcome = R.OUTCOME_MISMATCH
-            res.error_code = R.ERR_NONE
-            res.detail = ('measured [%s] outside %.3fm of expected [%s] (err=%.4f)'
-                          % (['%.3f' % v for v in position], tol,
-                             ['%.3f' % v for v in ep], error))
-            rec['outcome'] = 'MISMATCH'
-            goal_handle.succeed()  # a mismatch is a valid, honest verification result
-        self._log.write(rec)
-        return res
 
 
 def main(args=None):

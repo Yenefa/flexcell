@@ -21,7 +21,7 @@ from flexcell_interfaces.action import PlaceObject
 
 from flexcell_skills.common import (
     GripperClient, JsonlLog, MoveToPoseClient, PlanningSceneOps,
-    dist3, new_evidence, pose_msg, sample_gz_pose)
+    crash_detail, dist3, new_evidence, pose_msg, sample_gz_pose)
 
 R = PlaceObject.Result
 F = PlaceObject.Feedback
@@ -123,6 +123,7 @@ class PlaceServer(Node):
             res.evidence_id = evidence
             rec.update(outcome=str(outcome), error_code=int(error),
                        motion_error_code=int(motion_err), detail=detail,
+                       released=bool(res.released),
                        elapsed_ms=int((time.monotonic() - t0) * 1000))
             self._log.write(rec)
             if outcome == R.OUTCOME_SUCCEEDED:
@@ -192,10 +193,6 @@ class PlaceServer(Node):
             if not sok:
                 return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
                               'planning-scene detach failed: %s' % serr)
-            ok, derr = self._gate.set_attach(False)   # desired: detached
-            if not ok:
-                return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
-                              'detach trigger failed: %s' % derr)
             gres, gerr = self._gripper.command(self._gripper_open)
             if gerr is not None:
                 return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
@@ -232,8 +229,13 @@ class PlaceServer(Node):
             return finish(R.OUTCOME_SUCCEEDED, R.ERR_NONE,
                           'placed %s: drop error %.3fm' % (goal.object_name, drop_err))
 
+        except Exception as exc:  # crash guard (issue #20): a raising execute
+            # callback must become a typed FAILURE - rclpy's fallback default
+            # Result has outcome=0, which reads as OUTCOME_SUCCEEDED
+            return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL, crash_detail(exc))
         finally:
             self._busy = False
+
 
 
 def main(args=None):
