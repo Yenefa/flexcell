@@ -30,6 +30,7 @@ from rclpy.time import Time
 
 from flexcell_interfaces.action import PickObject
 
+from flexcell_skills.contracts.skill_result import derive_status
 from flexcell_skills.common import (
     GripperClient, JsonlLog, MoveToPoseClient, PlanningSceneOps,
     crash_detail, dist3, new_evidence, pose_msg, sample_gz_pose)
@@ -196,12 +197,14 @@ class PickServer(Node):
 
         def finish(outcome, error, detail, motion_err=0):
             res.outcome = outcome
+            res.status = derive_status('PICK', outcome)
             res.error_code = error
             res.motion_error_code = motion_err
             res.detail = detail
             res.evidence_id = evidence
             rec.update(outcome=str(outcome), error_code=int(error),
                        motion_error_code=int(motion_err), detail=detail,
+                       status=int(res.status),
                        elapsed_ms=int((time.monotonic() - t0) * 1000))
             self._log.write(rec)
             if outcome == R.OUTCOME_SUCCEEDED:

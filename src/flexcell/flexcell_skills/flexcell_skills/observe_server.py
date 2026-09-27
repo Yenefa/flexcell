@@ -35,6 +35,7 @@ from flexcell_interfaces.msg import (
 from flexcell_skills.common import (
     JsonlLog, crash_detail, dist3, new_evidence, pose_msg,
     sample_gz_pose_age)
+from flexcell_skills.contracts.skill_result import derive_status
 
 R = Observe.Result
 
@@ -247,6 +248,26 @@ class ObserveServer(Node):
         rid, evidence = new_evidence('', self._seq)
         res = R()
         rec = {'request_id': rid, 'evidence_id': evidence}
+
+        def finish(outcome, error, detail, world_state=None):
+            # single finalization point (SkillResult v2: status derives here)
+            res.outcome = outcome
+            res.status = derive_status('OBSERVE', outcome)
+            res.error_code = error
+            res.detail = detail
+            res.evidence_id = evidence
+            if world_state is not None:
+                res.world_state = world_state
+            rec.update(outcome=str(outcome), error_code=int(error),
+                       status=int(res.status), detail=detail,
+                       elapsed_ms=int((time.monotonic() - t_start) * 1000))
+            self._log.write(rec)
+            if outcome == R.OUTCOME_SUCCEEDED:
+                goal_handle.succeed()
+            else:
+                goal_handle.abort()
+            return res
+
         try:
             ws = self._snapshot()
             rec.update(
@@ -256,26 +277,12 @@ class ObserveServer(Node):
                 zones={z.id: int(z.occupancy) for z in ws.zones},
             )
             self._pub.publish(ws)
-            res.outcome = R.OUTCOME_SUCCEEDED
-            res.error_code = R.ERR_NONE
-            res.world_state = ws
-            res.detail = '; '.join(ws.notes)
-            rec.update(outcome='SUCCEEDED', detail=res.detail)
-            self._log.write(rec)
-            goal_handle.succeed()
-            return res
+            return finish(R.OUTCOME_SUCCEEDED, R.ERR_NONE,
+                          '; '.join(ws.notes), world_state=ws)
         except Exception as exc:  # crash guard (issue #20): a raising execute
             # callback must become a typed FAILURE - rclpy's fallback default
             # Result has outcome=0, which reads as OUTCOME_SUCCEEDED
-            res.outcome = R.OUTCOME_FAILED
-            res.error_code = R.ERR_INTERNAL
-            res.detail = crash_detail(exc)
-            rec.update(outcome='FAILED', error_code=int(R.ERR_INTERNAL),
-                       detail=res.detail,
-                       elapsed_ms=int((time.monotonic() - t_start) * 1000))
-            self._log.write(rec)
-            goal_handle.abort()
-            return res
+            return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL, crash_detail(exc))
 
 
 def main(args=None):

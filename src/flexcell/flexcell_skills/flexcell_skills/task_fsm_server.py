@@ -39,6 +39,7 @@ from flexcell_interfaces.action import (
 from flexcell_skills.common import JsonlLog, crash_detail, new_evidence
 from flexcell_skills.skill_contract import (
     check_pick, check_place, check_verify)
+from flexcell_skills.contracts.skill_result import previous_skill_result
 from flexcell_skills.decision_policy import (
     ACTION_ABORT, ACTION_OBSERVE, ACTION_PICK, ACTION_PLACE, ACTION_VERIFY,
     Constraints, FSMPolicy, HistoryRecord, PolicyStateError, TaskGoal,
@@ -484,9 +485,14 @@ class TaskFsmServer(Node):
                                                tuple(history))
                 d_ms = int((time.monotonic() - t_dec) * 1000)
                 decision_seq += 1
+                prev = (previous_skill_result(history[-1].action,
+                                              history[-1].outcome,
+                                              history[-1].error_code)
+                        if history else None)
                 self._decision_log.write({
                     'run_id': run_id, 'scenario_id': scenario,
                     'seq': decision_seq,
+                    'previous_skill_result': prev,
                     'action': decision.action, 'target': decision.target,
                     'confidence': decision.confidence,
                     'reason_code': decision.reason_code,

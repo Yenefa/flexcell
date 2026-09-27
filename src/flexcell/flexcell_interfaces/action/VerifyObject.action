@@ -11,7 +11,13 @@ uint16 ERR_NONE=0
 uint16 ERR_INTERNAL=2
 uint16 ERR_OBJECT_UNKNOWN=21
 uint16 ERR_WORLD_STATE_UNAVAILABLE=22
+uint8 STATUS_NONE=0
+uint8 STATUS_SUCCESS=1
+uint8 STATUS_FAILURE=2
+uint8 STATUS_SKIPPED=3
+uint8 STATUS_CANCELED=4
 uint16 error_code
+uint8 status
 bool verified
 geometry_msgs/Pose measured_pose
 bool has_measured_pose

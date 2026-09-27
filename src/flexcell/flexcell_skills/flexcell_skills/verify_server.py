@@ -18,6 +18,7 @@ from flexcell_interfaces.action import VerifyObject
 
 from flexcell_skills.common import (
     JsonlLog, crash_detail, dist3, new_evidence, pose_msg, sample_gz_pose)
+from flexcell_skills.contracts.skill_result import derive_status
 
 R = VerifyObject.Result
 
@@ -60,17 +61,27 @@ class VerifyServer(Node):
             'tolerance_m': goal.position_tolerance_m or self._default_tol,
         }
 
+        def finish(outcome, error, detail, succeed):
+            # single finalization point (SkillResult v2: status derives here)
+            res.outcome = outcome
+            res.status = derive_status('VERIFY', outcome)
+            res.error_code = error
+            res.detail = detail
+            res.evidence_id = evidence
+            rec.update(outcome=str(outcome), error_code=int(error),
+                       status=int(res.status), detail=detail,
+                       elapsed_ms=int((time.monotonic() - t0) * 1000))
+            self._log.write(rec)
+            if succeed:
+                goal_handle.succeed()
+            else:
+                goal_handle.abort()
+            return res
+
         try:
             sampled, err = sample_gz_pose(goal.object_name)
             if sampled is None:
-                res.outcome = R.OUTCOME_FAILED
-                res.error_code = R.ERR_OBJECT_UNKNOWN
-                res.detail = err
-                res.evidence_id = evidence
-                rec.update(outcome='FAILED', error_code=res.error_code, detail=err)
-                self._log.write(rec)
-                goal_handle.abort()
-                return res
+                return finish(R.OUTCOME_FAILED, R.ERR_OBJECT_UNKNOWN, err, False)
 
             position, quat = sampled
             exp = goal.expected_pose
@@ -83,38 +94,22 @@ class VerifyServer(Node):
             res.has_measured_pose = True
             res.position_error_m = error
             res.verified = verified
-            res.evidence_id = evidence
             rec.update(measured=position, expected=ep, position_error_m=error,
                        verified=verified)
             if verified:
-                res.outcome = R.OUTCOME_VERIFIED
-                res.error_code = R.ERR_NONE
-                res.detail = 'measured within %.3fm of expected (err=%.4f)' % (tol, error)
-                rec['outcome'] = 'VERIFIED'
-                goal_handle.succeed()
-            else:
-                res.outcome = R.OUTCOME_MISMATCH
-                res.error_code = R.ERR_NONE
-                res.detail = ('measured [%s] outside %.3fm of expected [%s] (err=%.4f)'
-                              % (['%.3f' % v for v in position], tol,
-                                 ['%.3f' % v for v in ep], error))
-                rec['outcome'] = 'MISMATCH'
-                goal_handle.succeed()  # a mismatch is a valid, honest verification result
-            self._log.write(rec)
-            return res
+                return finish(R.OUTCOME_VERIFIED, R.ERR_NONE,
+                              'measured within %.3fm of expected (err=%.4f)' % (tol, error),
+                              True)
+            # a mismatch is a valid, honest verification result
+            return finish(R.OUTCOME_MISMATCH, R.ERR_NONE,
+                          ('measured [%s] outside %.3fm of expected [%s] (err=%.4f)'
+                           % (['%.3f' % v for v in position], tol,
+                              ['%.3f' % v for v in ep], error)),
+                          True)
         except Exception as exc:  # crash guard (issue #20): a raising execute
             # callback must become a typed FAILURE - rclpy's fallback default
             # Result has outcome=0, which for VerifyObject reads as VERIFIED
-            res.outcome = R.OUTCOME_FAILED
-            res.error_code = R.ERR_INTERNAL
-            res.detail = crash_detail(exc)
-            res.evidence_id = evidence
-            rec.update(outcome='FAILED', error_code=int(R.ERR_INTERNAL),
-                       detail=res.detail,
-                       elapsed_ms=int((time.monotonic() - t0) * 1000))
-            self._log.write(rec)
-            goal_handle.abort()
-            return res
+            return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL, crash_detail(exc), False)
 
 
 def main(args=None):
