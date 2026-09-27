@@ -1,0 +1,13 @@
+=== w1_4_pick_unknown | 2026-09-26T16:59:14+08:00 | EXPECT: OBJECT_UNKNOWN ===
+SENDING action=pick object=no_such_box pose=[0.12, -0.15, 0.0175]
+RESULT {
+  "action": "pick",
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_OBJECT_UNKNOWN",
+  "detail": "observe failed: pose parse failed on: '\\nRequesting state for world [empty]...\\n\\nNo model named <no_such_box> was found\\n'",
+  "wall_seconds": 1.492,
+  "grasp_attached": false,
+  "motion_error_code": 0
+}
+RC=1

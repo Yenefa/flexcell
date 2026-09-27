@@ -1,0 +1,8 @@
+  "outcome": "OUTCOME_SUCCEEDED",
+  "error_code": "ERR_NONE",
+  "fsm_trace": [
+    "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+    "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED",
+    "RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1))",
+    "PICK_B(attempt=2):OK",
+  "run_id": "recovery_demo_v1-cafa860b",

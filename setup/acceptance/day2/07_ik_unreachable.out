@@ -1,0 +1,26 @@
+=== case7 ik_unreachable target=(0.42,0,0.10) inside box beyond reach | 2026-09-27T03:16:53+08:00 | EXPECT: error_code=IK_UNREACHABLE execution_started=false fast-fail~1s ===
+SENDING request_id=case7_ik_unreachable frame=world pose=['0.4200', '0.0000', '0.1000', '0.0000', '0.0000', '0.0000', '1.0000'] profile=demo_slow deadline=20000
+FEEDBACK VALIDATING elapsed_ms=0
+FEEDBACK PLANNING   elapsed_ms=0
+RESULT {
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_IK_UNREACHABLE",
+  "error_code_val": 10,
+  "moveit_error_code": 0,
+  "has_reached_pose": false,
+  "position_error_m": NaN,
+  "orientation_error_rad": NaN,
+  "orientation_enforced": false,
+  "execution_started": false,
+  "world_revision_before": 0,
+  "world_revision_after": 0,
+  "evidence_id": "case7_ik_unreachable-36aaff0a",
+  "detail": "IK pre-check failed: NO_IK_SOLUTION for link end_effector_link",
+  "phases": [
+    "VALIDATING",
+    "PLANNING"
+  ],
+  "wall_seconds": 1.061
+}
+RC=1

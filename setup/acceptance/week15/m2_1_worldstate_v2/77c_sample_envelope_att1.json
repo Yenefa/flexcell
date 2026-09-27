@@ -1,0 +1,99 @@
+{
+  "WorldStateSchemaVersion": 2,
+  "task_context": {
+    "available_actions": [],
+    "constraints": {
+      "allowed_actions": [],
+      "max_world_age_s": 0.0,
+      "motion_profile_id": "",
+      "recovery_budget": 0,
+      "verify_tolerance_m": 0.0
+    },
+    "deadline_remaining_s": 0.0,
+    "fault_injection_active": false,
+    "goal_id": "",
+    "history": [],
+    "last_action": "",
+    "last_action_world_revision": 0,
+    "last_error_code": 0,
+    "last_outcome": 0,
+    "plan_completed": [],
+    "plan_remaining": [],
+    "recovery_budget_remaining": 0,
+    "retry_counts": [],
+    "scenario_id": "",
+    "task_state": ""
+  },
+  "world_state": {
+    "carry": {
+      "engaged": false,
+      "object_id": "",
+      "offset": [0.0, 0.0, 0.0],
+      "reference_frame": "world"
+    },
+    "header": {
+      "frame_id": "world",
+      "stamp": { "nanosec": 85000000, "sec": 101 }
+    },
+    "objects": [
+      {
+        "available": true,
+        "klass": "box",
+        "name": "target_box_a",
+        "pose": {
+          "orientation": { "w": 1.0, "x": -0.0, "y": -0.0, "z": -0.0 },
+          "position": { "x": 0.113620272, "y": -0.145491347, "z": 0.01749964 }
+        },
+        "pose_age_s": 0.020430141,
+        "size": [0.035, 0.035, 0.035]
+      },
+      {
+        "available": true,
+        "klass": "box",
+        "name": "target_box_b",
+        "pose": {
+          "orientation": { "w": 1.0, "x": 0.0, "y": -0.0, "z": -0.0 },
+          "position": { "x": 0.208158166, "y": -0.184040756, "z": 0.016865923 }
+        },
+        "pose_age_s": 0.020558511,
+        "size": [0.035, 0.035, 0.035]
+      }
+    ],
+    "revision": 6,
+    "robot": {
+      "ee_frame": "end_effector_link",
+      "ee_pose": {
+        "orientation": {
+          "w": 0.930056252,
+          "x": -0.030549194,
+          "y": -0.079495229,
+          "z": -0.357411
+        },
+        "position": { "x": 0.209501069, "y": -0.178096228, "z": 0.271419129 }
+      },
+      "gripper_joint_name": "gripper_left_joint",
+      "gripper_position": 0.02,
+      "has_gripper_state": true,
+      "joint_names": ["joint1", "joint2", "joint3", "joint4"],
+      "positions": [-0.733780103, 0.098690289, -0.655423899, 0.386200951]
+    },
+    "schema_version": "2.0",
+    "source": "SIMULATION_GROUND_TRUTH",
+    "zones": [
+      {
+        "center": { "x": 0.0, "y": 0.0, "z": 0.0175 },
+        "id": "zone_1",
+        "occupancy": 0,
+        "occupied_by": "",
+        "radius": 0.06
+      },
+      {
+        "center": { "x": 0.0, "y": 0.0, "z": 0.0175 },
+        "id": "zone_2",
+        "occupancy": 0,
+        "occupied_by": "",
+        "radius": 0.06
+      }
+    ]
+  }
+}

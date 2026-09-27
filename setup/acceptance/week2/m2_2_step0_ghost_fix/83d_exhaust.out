@@ -1,0 +1,20 @@
+SENDING action=demo object=target_box pose=[0.12, -0.15, 0.0175]
+RESULT {
+  "action": "demo",
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_SKILL_FAILED",
+  "detail": "policy state error: policy returned unsupported action 'ABORT'",
+  "wall_seconds": 0.544,
+  "fsm_trace": [
+    "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+    "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+    "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED"
+  ],
+  "object_a_at_zone": false,
+  "object_b_at_zone": false,
+  "zone_a_error_m": NaN,
+  "zone_b_error_m": NaN,
+  "run_id": "exhaust_demo_v1-a35390d6",
+  "scenario_id": "exhaust_demo_v1"
+}

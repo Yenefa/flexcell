@@ -1,0 +1,11 @@
+=== w1_6_busy | 2026-09-26T17:02:09+08:00 | EXPECT: first SUCCEEDED, second RESOURCE_BUSY ===
+second-task RC=1
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_RESOURCE_BUSY",
+  "detail": "another task is active",
+--- first task result ---
+first-task RC=0
+  "outcome": "OUTCOME_SUCCEEDED",
+  "object_at_place": true,
+  "final_position_error_m": 0.006523980533386035,

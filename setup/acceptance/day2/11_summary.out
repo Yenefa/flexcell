@@ -1,0 +1,30 @@
+=== Day-2 MoveToPose acceptance summary | 2026-09-26T14:25:58+08:00 ===
+battery: F:/flexcell-stage/setup/32_day2_acceptance.sh | upstream HEAD a6b00e7 | server: flexcell_skills move_to_pose.launch.py
+
+00_ee_probe_baseline.out | outcome=<n/a> error_code=  detail=
+01_happy_a.out | outcome=OUTCOME_SUCCEEDED error_code=ERR_NONE "position_error_m": 0.006109803350622907 detail=planning + execution + measured pose within tolerance
+02_happy_b.out | outcome=OUTCOME_SUCCEEDED error_code=ERR_NONE "position_error_m": 0.00815288675840473 detail=planning + execution + measured pose within tolerance
+03_invalid_workspace.out | outcome=OUTCOME_FAILED error_code=ERR_INVALID_GOAL "position_error_m":  detail=target [0.000 0.000 0.900] outside workspace [-0.45..0.45, -0.45..0.45, -0.15..0.75]
+04_invalid_quat.out | outcome=OUTCOME_FAILED error_code=ERR_INVALID_GOAL "position_error_m":  detail=quaternion not normalized (norm=0.500000)
+05_invalid_profile.out | outcome=OUTCOME_FAILED error_code=ERR_INVALID_GOAL "position_error_m":  detail=motion_profile_id 'turbo' not in whitelist ['demo_default', 'demo_slow', 'demo_veryslow']
+06_stale_world.out | outcome=OUTCOME_FAILED error_code=ERR_STALE_WORLD "position_error_m":  detail=expected_world_revision=7 but the world revision gate is not enabled in Day 2 fixed-scene 
+07_ik_unreachable.out | outcome=OUTCOME_FAILED error_code=ERR_IK_UNREACHABLE "position_error_m":  detail=IK pre-check failed: NO_IK_SOLUTION for link end_effector_link
+08_timeout.out | outcome=OUTCOME_FAILED error_code=ERR_EXECUTION_TIMEOUT "position_error_m":  detail=timeout; preempted; stop confirmed
+09_cancel.out | outcome=OUTCOME_CANCELED error_code=ERR_CANCELED "position_error_m":  detail=cancel; preempted; stop confirmed
+10_day1_regression.out | outcome=<n/a> error_code=  detail=
+
+--- plan_execute regression lines ---
+=== case10 day1_regression plan_execute.py 0.0 -0.9 0.9 0.5 | 2026-09-26T14:13:47+08:00 | EXPECT: PLAN/EXECUTE error_code=1 MOTION_DETECTED=True ===
+PLAN error_code = 1  planning_time = 0.0073
+EXECUTE error_code = 1
+MOTION_DETECTED = True
+
+--- server alive check ---
+1504 /usr/bin/python3 /home/ros/agentic_workcell_ws/install/flexcell_skills/lib/flexcell_skills/move_to_pose_server --ros-args -r __node:=move_to_pose_server --params-file /home/ros/agentic_workcell_ws/install/flexcell_skills/share/flexcell_skills/config/move_to_pose.yaml --params-file /tmp/launch_params_ppvwyzxv
+
+--- server log tail ---
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [move_to_pose_server-1]: process started with pid [1504]
+[move_to_pose_server-1] [INFO] [1790402678.524703661] [move_to_pose_server]: MoveToPose server up | group=arm ee=end_effector_link base=world | pos_tol=0.020m ori_enforced=False
+[move_to_pose_server-1] [WARN] [1790402678.526331016] [move_to_pose_server]: orientation NOT enforced: the active kinematics solver is position-only. This is reported explicitly in every result (orientation_enforced=false).
+[move_to_pose_server-1] [INFO] [1790402678.527846462] [move_to_pose_server]: structured log: /home/ros/.ros/flexcell/move_to_pose.jsonl

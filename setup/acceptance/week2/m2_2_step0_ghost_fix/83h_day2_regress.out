@@ -1,0 +1,15 @@
+=== case10 day1_regression plan_execute.py 0.0 -0.9 0.9 0.5 | 2026-09-27T15:48:21+08:00 | EXPECT: PLAN/EXECUTE error_code=1 MOTION_DETECTED=True ===
+waiting for /move_action and /execute_trajectory ...
+BEFORE /joint_states: {'joint1': 0.2162, 'joint2': 0.0255, 'joint3': -0.206, 'joint4': -0.5348}
+PLAN error_code = 1  planning_time = 0.0359
+PLANNED joints: ['joint1', 'joint2', 'joint3', 'joint4']
+PLANNED waypoints: 15
+PLANNED final positions: [0.0008, -0.8926, 0.9032, 0.4912]
+PLANNED duration: 1.332 s
+EXECUTE error_code = 1
+AFTER  /joint_states: {'joint1': 0.0008, 'joint2': -0.8926, 'joint3': 0.9032, 'joint4': 0.4912}
+DELTA  /joint_states: {'joint1': -0.2154, 'joint2': -0.9181, 'joint3': 1.1092, 'joint4': 1.026}
+MOTION_DETECTED = True
+RC = 0
+RC=0
+REGRESS_RC=0

@@ -1,0 +1,15 @@
+INJECT set to ''
+run 1 | outcome=OUTCOME_SUCCEEDED duration=42.768s zone_a_err=0.007617972178810016m zone_b_err=0.008825627160203676m
+run 2 | outcome=OUTCOME_SUCCEEDED duration=29.323s zone_a_err=0.008563362148034985m zone_b_err=0.008194440245309196m
+run 3 | outcome=OUTCOME_SUCCEEDED duration=29.097s zone_a_err=0.005437965352446005m zone_b_err=0.004915341300015374m
+run 4 | outcome=OUTCOME_SUCCEEDED duration=21.163s zone_a_err=0.008477652958160312m zone_b_err=0.017888352342065296m
+run 5 | outcome=OUTCOME_SUCCEEDED duration=21.491s zone_a_err=0.007798760708221656m zone_b_err=0.012447924471966573m
+--- duplicate server check ---
+observe_server: 1
+pick_server: 1
+place_server: 1
+verify_server: 1
+task_fsm_server: 1
+carry_server: 1
+move_to_pose_server: 1
+success count: 5

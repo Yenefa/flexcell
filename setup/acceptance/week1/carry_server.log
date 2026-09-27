@@ -1,0 +1,20 @@
+[INFO] [1790414268.310717790] [carry_server]: Carry servo up | model=target_box service=/world/empty/set_pose period=0.10s
+Traceback (most recent call last):
+  File "/home/ros/agentic_workcell_ws/install/flexcell_skills/lib/flexcell_skills/carry_server", line 33, in <module>
+    sys.exit(load_entry_point('flexcell-skills', 'console_scripts', 'carry_server')())
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ros/agentic_workcell_ws/build/flexcell_skills/flexcell_skills/carry_server.py", line 127, in main
+    def _on_stop(self, _msg):
+        ^^^^^^^^^
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 359, in spin
+    self._spin_once_impl()
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 991, in _spin_once_impl
+    handler, entity, node = self.wait_for_ready_callbacks(
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 877, in wait_for_ready_callbacks
+    return next(self._cb_iter)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 757, in _wait_for_ready_callbacks
+    wait_set = _rclpy.WaitSet(
+               ^^^^^^^^^^^^^^^
+rclpy._rclpy_pybind11.RCLError: failed to initialize wait set: the given context is not valid, either rcl_init() was not called or rcl_shutdown() was called., at ./src/rcl/wait.c:130

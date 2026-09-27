@@ -1,0 +1,22 @@
+=== w1_5_place_not_carried | 2026-09-26T16:59:18+08:00 | EXPECT: NOT_CARRIED ===
+SENDING action=place object=target_box pose=[0.2, 0.0, 0.0175]
+Traceback (most recent call last):
+  File "/home/ros/agentic_workcell_ws/src/flexcell/flexcell_skills/test/w1_client.py", line 151, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/ros/agentic_workcell_ws/src/flexcell/flexcell_skills/test/w1_client.py", line 94, in main
+    rclpy.spin_once(n, timeout_sec=0.05)
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/__init__.py", line 226, in spin_once
+    executor.spin_once(timeout_sec=timeout_sec)
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 926, in spin_once
+    self._spin_once_impl(timeout_sec)
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 907, in _spin_once_impl
+    handler, entity, node = self.wait_for_ready_callbacks(
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 877, in wait_for_ready_callbacks
+    return next(self._cb_iter)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 785, in _wait_for_ready_callbacks
+    raise ExternalShutdownException()
+rclpy.executors.ExternalShutdownException
+RC=124

@@ -1,0 +1,34 @@
+=== M2.1 code commit | 2026-09-27T01:05:51+08:00 ===
+--- ff-sync docs from code-clone ---
+From /mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone
+ * branch            main       -> FETCH_HEAD
+Already up to date.
+a6dd5a2 M2.1 architecture freeze: ADR-002 runtime decision layer boundary + task_fsm_server extraction map; ARCHITECTURE current/future pipelines
+--- sync code from staging (F:) ---
+--- staged ---
+M  src/flexcell/flexcell_interfaces/CMakeLists.txt
+A  src/flexcell/flexcell_interfaces/msg/Assignment.msg
+A  src/flexcell/flexcell_interfaces/msg/HistoryEntry.msg
+M  src/flexcell/flexcell_interfaces/msg/RobotStateSummary.msg
+A  src/flexcell/flexcell_interfaces/msg/TaskConstraints.msg
+A  src/flexcell/flexcell_interfaces/msg/TaskContext.msg
+M  src/flexcell/flexcell_interfaces/msg/WorldObject.msg
+M  src/flexcell/flexcell_interfaces/msg/WorldState.msg
+M  src/flexcell/flexcell_interfaces/msg/ZoneState.msg
+A  src/flexcell/flexcell_skills/flexcell_skills/canonical_state.py
+M  src/flexcell/flexcell_skills/flexcell_skills/common.py
+M  src/flexcell/flexcell_skills/flexcell_skills/observe_server.py
+A  src/flexcell/flexcell_skills/test/test_canonical_state.py
+[main e8ab099] M2.1: WorldState v2 contract (issue #3) - additive msgs + versioned canonical serializer + 13 tests
+ 13 files changed, 672 insertions(+), 16 deletions(-)
+ create mode 100644 src/flexcell/flexcell_interfaces/msg/Assignment.msg
+ create mode 100644 src/flexcell/flexcell_interfaces/msg/HistoryEntry.msg
+ create mode 100644 src/flexcell/flexcell_interfaces/msg/TaskConstraints.msg
+ create mode 100644 src/flexcell/flexcell_interfaces/msg/TaskContext.msg
+ create mode 100644 src/flexcell/flexcell_skills/flexcell_skills/canonical_state.py
+ create mode 100644 src/flexcell/flexcell_skills/test/test_canonical_state.py
+COMMIT_RC=0
+e8ab099 M2.1: WorldState v2 contract (issue #3) - additive msgs + versioned canonical serializer + 13 tests
+a6dd5a2 M2.1 architecture freeze: ADR-002 runtime decision layer boundary + task_fsm_server extraction map; ARCHITECTURE current/future pipelines
+HEAD=e8ab099c25820fa50e476d39beec0deff1dd6fc3
+porcelain=0

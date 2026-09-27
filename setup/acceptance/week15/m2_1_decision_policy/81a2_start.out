@@ -1,0 +1,37 @@
+=== flexcell start | 2026-09-27T02:55:56+08:00 ===
+== flexcell start ==
+launched gazebo (pid 346, pgid 346)
+READY: gz world + 6 models (0s)
+launched moveit (pid 599, pgid 599)
+READY: 3 controllers active (0s)
+launched move_to_pose (pid 720, pgid 720)
+launched fleet (pid 721, pgid 721)
+READY: skill fleet (0s)
+== strict health check ==
+{
+  "ok": true,
+  "checks": {
+    "action /move_to_pose": "OK",
+    "action /observe": "OK",
+    "action /pick_object": "OK",
+    "action /place_object": "OK",
+    "action /verify_object": "OK",
+    "action /run_demo": "OK",
+    "action /run_pick_place": "OK",
+    "controller arm_controller": "OK",
+    "controller gripper_controller": "OK",
+    "controller joint_state_broadcaster": "OK",
+    "service /get_planning_scene": "OK",
+    "gz world models": "OK",
+    "object target_box_a pose": "OK ['0.220', '0.000', '0.017']",
+    "object target_box_b pose": "OK ['0.200', '-0.180', '0.017']",
+    "carry_state publishers": "OK (1)",
+    "task_state": "IDLE",
+    "carry_engaged": false
+  },
+  "hard_fail": [],
+  "busy": false
+}
+START OK
+START_DURATION_S=29
+RC=0

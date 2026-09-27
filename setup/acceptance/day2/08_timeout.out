@@ -1,0 +1,30 @@
+=== case8 timeout deadline=800ms on far target (0.25,0.15,0.15) | 2026-09-27T03:16:58+08:00 | EXPECT: error_code=EXECUTION_TIMEOUT preempted=true stop_confirmed=true phases include STOPPING ===
+SENDING request_id=case8_timeout frame=world pose=['0.2500', '0.1500', '0.1500', '0.0000', '0.0000', '0.0000', '1.0000'] profile=demo_slow deadline=800
+FEEDBACK VALIDATING elapsed_ms=0
+FEEDBACK PLANNING   elapsed_ms=0
+FEEDBACK EXECUTING  elapsed_ms=76
+FEEDBACK STOPPING   elapsed_ms=801
+RESULT {
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_EXECUTION_TIMEOUT",
+  "error_code_val": 22,
+  "moveit_error_code": 0,
+  "has_reached_pose": false,
+  "position_error_m": NaN,
+  "orientation_error_rad": NaN,
+  "orientation_enforced": false,
+  "execution_started": true,
+  "world_revision_before": 0,
+  "world_revision_after": 0,
+  "evidence_id": "case8_timeout-02b14cb0",
+  "detail": "timeout; preempted; stop confirmed",
+  "phases": [
+    "VALIDATING",
+    "PLANNING",
+    "EXECUTING",
+    "STOPPING"
+  ],
+  "wall_seconds": 0.98
+}
+RC=1

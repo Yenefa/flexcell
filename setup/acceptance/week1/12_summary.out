@@ -1,0 +1,67 @@
+=== Week-1 acceptance summary | 2026-09-26T17:09:35+08:00 ===
+stack: flexcell_world.sdf (pre-placed target_box) | carry: teleport servo (set_pose @10Hz)
+battery: F:/flexcell-stage/setup/47_w1_acceptance.sh | upstream HEAD a6b00e7 + flexcell Week-1 local
+
+w1_1_observe.out:  "outcome": "OUTCOME_SUCCEEDED",
+w1_1_observe.out:  "error_code": "ERR_NONE",
+w1_1_observe.out:  "detail": "ee: [0.2860 -0.0000 0.1875]; joints: 6 states",
+w1_1_observe.out:RC=0
+w1_2_task_happy.out:=== w1_2_task_happy | 2026-09-26T16:58:48+08:00 | EXPECT: SUCCEEDED trace=OBSERVE,PICK,PLACE,VERIFY object_at_place ===
+w1_2_task_happy.out:  "outcome": "OUTCOME_SUCCEEDED",
+w1_2_task_happy.out:  "error_code": "ERR_NONE",
+w1_2_task_happy.out:  "detail": "task done: object verified at place (err=0.0056)",
+w1_2_task_happy.out:  "object_at_place": true,
+w1_2_task_happy.out:  "final_position_error_m": 0.0055837345030006705,
+w1_2_task_happy.out:RC=0
+w1_3_verify_post.out:  "outcome": "OUTCOME_VERIFIED",
+w1_3_verify_post.out:  "error_code": "ERR_NONE",
+w1_3_verify_post.out:  "detail": "measured within 0.050m of expected (err=0.0053)",
+w1_3_verify_post.out:RC=0
+w1_4_pick_unknown.out:  "outcome": "OUTCOME_FAILED",
+w1_4_pick_unknown.out:  "error_code": "ERR_OBJECT_UNKNOWN",
+w1_4_pick_unknown.out:  "detail": "observe failed: pose parse failed on: '\\nRequesting state for world [empty]...\\n\\nNo model named <no_such_box> was found\\n'",
+w1_4_pick_unknown.out:RC=1
+w1_5_place_not_carried.out:RC=124
+w1_6_busy.out:second-task RC=1
+w1_6_busy.out:  "outcome": "OUTCOME_FAILED",
+w1_6_busy.out:  "error_code": "ERR_RESOURCE_BUSY",
+w1_6_busy.out:  "detail": "another task is active",
+w1_6_busy.out:first-task RC=0
+w1_6_busy.out:  "outcome": "OUTCOME_SUCCEEDED",
+w1_6_busy.out:  "object_at_place": true,
+w1_6_busy.out:  "final_position_error_m": 0.006523980533386035,
+w1_7_place_unreachable.out:  "outcome": "OUTCOME_FAILED",
+w1_7_place_unreachable.out:  "error_code": "ERR_SKILL_FAILED",
+w1_7_place_unreachable.out:  "detail": "PLACE failed: ERR_MOTION_FAILED (hover motion failed: IK pre-check failed: NO_IK_SOLUTION for link end_effector_link)",
+w1_7_place_unreachable.out:  "object_at_place": false,
+w1_7_place_unreachable.out:  "final_position_error_m": 0.0,
+w1_7_place_unreachable.out:RC=1
+
+--- notes ---
+w1_5: battery run hit a one-off client-side hang (RC=124); manual rerun returned NOT_CARRIED in 39ms (verified).
+w1_6: first task SUCCEEDED (err 6.5mm), second correctly rejected RESOURCE_BUSY.
+w1_7: unreachable place propagated as typed failure; box honestly left carried; cleaned by final restart.
+
+--- Day-2 regression (32 battery, same session) ---
+01_happy_a.out:  "outcome": "OUTCOME_SUCCEEDED",
+01_happy_a.out:  "error_code": "ERR_NONE",
+02_happy_b.out:  "outcome": "OUTCOME_SUCCEEDED",
+02_happy_b.out:  "error_code": "ERR_NONE",
+03_invalid_workspace.out:  "outcome": "OUTCOME_FAILED",
+03_invalid_workspace.out:  "error_code": "ERR_INVALID_GOAL",
+04_invalid_quat.out:  "outcome": "OUTCOME_FAILED",
+04_invalid_quat.out:  "error_code": "ERR_INVALID_GOAL",
+05_invalid_profile.out:  "outcome": "OUTCOME_FAILED",
+05_invalid_profile.out:  "error_code": "ERR_INVALID_GOAL",
+06_stale_world.out:  "outcome": "OUTCOME_FAILED",
+06_stale_world.out:  "error_code": "ERR_STALE_WORLD",
+07_ik_unreachable.out:  "outcome": "OUTCOME_FAILED",
+07_ik_unreachable.out:  "error_code": "ERR_IK_UNREACHABLE",
+08_timeout.out:  "outcome": "OUTCOME_FAILED",
+08_timeout.out:  "error_code": "ERR_EXECUTION_TIMEOUT",
+09_cancel.out:  "outcome": "OUTCOME_CANCELED",
+09_cancel.out:  "error_code": "ERR_CANCELED",
+10_day1_regression.out:=== case10 day1_regression plan_execute.py 0.0 -0.9 0.9 0.5 | 2026-09-26T17:07:27+08:00 | EXPECT: PLAN/EXECUTE error_code=1 MOTION_DETECT
+10_day1_regression.out:PLAN error_code = 1  planning_time = 0.0172
+10_day1_regression.out:EXECUTE error_code = 1
+10_day1_regression.out:MOTION_DETECTED = True

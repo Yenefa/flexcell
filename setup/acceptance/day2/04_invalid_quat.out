@@ -1,0 +1,21 @@
+=== case4 invalid_quat q=(0,0,0,0.5) non-normalized | 2026-09-27T03:16:44+08:00 | EXPECT: INVALID_GOAL ===
+SENDING request_id=case4_invalid_quat frame=world pose=['0.2000', '0.0500', '0.2000', '0.0000', '0.0000', '0.0000', '0.5000'] profile=demo_slow deadline=20000
+RESULT {
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_INVALID_GOAL",
+  "error_code_val": 1,
+  "moveit_error_code": 0,
+  "has_reached_pose": false,
+  "position_error_m": NaN,
+  "orientation_error_rad": NaN,
+  "orientation_enforced": false,
+  "execution_started": false,
+  "world_revision_before": 0,
+  "world_revision_after": 0,
+  "evidence_id": "case4_invalid_quat-24410053",
+  "detail": "quaternion not normalized (norm=0.500000)",
+  "phases": [],
+  "wall_seconds": 0.028
+}
+RC=1

@@ -1,0 +1,24 @@
+=== case3 invalid_workspace target=(0,0,0.90) z>0.75 | 2026-09-27T03:16:41+08:00 | EXPECT: outcome=FAILED error_code=INVALID_GOAL execution_started=false ===
+SENDING request_id=case3_invalid_ws frame=world pose=['0.0000', '0.0000', '0.9000', '0.0000', '0.0000', '0.0000', '1.0000'] profile=demo_slow deadline=20000
+FEEDBACK VALIDATING elapsed_ms=0
+RESULT {
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_INVALID_GOAL",
+  "error_code_val": 1,
+  "moveit_error_code": 0,
+  "has_reached_pose": false,
+  "position_error_m": NaN,
+  "orientation_error_rad": NaN,
+  "orientation_enforced": false,
+  "execution_started": false,
+  "world_revision_before": 0,
+  "world_revision_after": 0,
+  "evidence_id": "case3_invalid_ws-93362892",
+  "detail": "target [0.000 0.000 0.900] outside workspace [-0.45..0.45, -0.45..0.45, -0.15..0.75]",
+  "phases": [
+    "VALIDATING"
+  ],
+  "wall_seconds": 0.062
+}
+RC=1

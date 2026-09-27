@@ -1,0 +1,39 @@
+  "ok": true,
+    "carry_disengaged": true,
+    "scene_cleared": true,
+    "arm_home": true,
+    "canonical target_box_a": "OK ['0.2200', '0.0000', '0.0175']",
+    "canonical target_box_b": "OK ['0.2000', '-0.1800', '0.0175']"
+INJECT set to 'exhaust_demo_v1:always'
+=== 61_C_exhausted | 2026-09-27T03:02:42+08:00 | scenario=exhaust_demo_v1 ===
+SENDING action=demo object=target_box pose=[0.12, -0.15, 0.0175]
+RESULT {
+  "action": "demo",
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_SKILL_FAILED",
+  "detail": "policy state error: policy returned unsupported action 'ABORT'",
+  "wall_seconds": 0.419,
+  "fsm_trace": [
+    "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+    "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+    "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED"
+  ],
+  "object_a_at_zone": false,
+  "object_b_at_zone": false,
+  "zone_a_error_m": NaN,
+  "zone_b_error_m": NaN,
+  "run_id": "exhaust_demo_v1-41f6187e",
+  "scenario_id": "exhaust_demo_v1"
+}
+RC=1
+  "outcome": "OUTCOME_FAILED",
+  "error_code": "ERR_SKILL_FAILED",
+  "fsm_trace": [
+    "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+  "ok": true,
+    "carry_disengaged": true,
+    "scene_cleared": true,
+    "arm_home": true,
+    "canonical target_box_a": "OK ['0.2200', '0.0000', '0.0175']",
+    "canonical target_box_b": "OK ['0.2000', '-0.1800', '0.0175']"

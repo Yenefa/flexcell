@@ -1,0 +1,122 @@
+[INFO] [launch]: All log files can be found below /home/ros/.ros/log/2026-09-26-12-43-08-879811-localhost-20
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [parameter_bridge-1]: process started with pid [41]
+[INFO] [gazebo-2]: process started with pid [42]
+[INFO] [robot_state_publisher-3]: process started with pid [43]
+[INFO] [create-4]: process started with pid [44]
+[create-4] [INFO] [1790397789.523588395] [ros_gz_sim]: Requesting list of world names.
+[robot_state_publisher-3] [INFO] [1790397789.539049852] [robot_state_publisher]: Robot initialized
+[parameter_bridge-1] [INFO] [1790397789.545835869] [ros_gz_bridge]: Creating GZ->ROS Bridge: [/clock (gz.msgs.Clock) -> /clock (rosgraph_msgs/msg/Clock)] (Lazy 0)
+[gazebo-2] QStandardPaths: wrong permissions on runtime directory /mnt/wslg/runtime-dir, 0777 instead of 0700
+[create-4] [INFO] [1790397790.368926714] [ros_gz_sim]: Entity creation successful.
+[INFO] [create-4]: process has finished cleanly [pid 44]
+[INFO] [spawner-5]: process started with pid [146]
+[spawner-5] [INFO] [1790397791.131781009] [spawner_joint_state_broadcaster]: waiting for service /controller_manager/list_controllers to become available...
+[gazebo-2] [INFO] [1790397792.013533826] [gz_ros_control]: [gz_ros2_control] Fixed joint ['world_fixed'] (Entity='33') is skipped.
+[gazebo-2] [INFO] [1790397792.019653279] [gz_ros_control]: Loading controller_manager
+[gazebo-2] [INFO] [1790397792.058092112] [controller_manager]: Using ROS clock for triggering controller manager cycles.
+[gazebo-2] [WARN] [1790397792.058177782] [controller_manager]: The resource manager is not yet initialized, will wait for the robot description to initialize it..
+[gazebo-2] [INFO] [1790397792.074040338] [controller_manager]: Subscribing to '/robot_description' topic for robot description.
+[gazebo-2] [WARN] [1790397792.074156114] [gz_ros_control]: Waiting RM to load and initialize hardware...
+[gazebo-2] [INFO] [1790397792.453356328] [controller_manager]: Received robot description from topic.
+[gazebo-2] [INFO] [1790397792.453499294] [controller_manager]: Enforcing command limits is disabled. Command limits from URDF will be ignored.
+[gazebo-2] [INFO] [1790397792.458757902] [gz_ros_control]: The position_proportional_gain has been set to: 0.1
+[gazebo-2] [INFO] [1790397792.458833253] [gz_ros_control]: Loading joint: joint1
+[gazebo-2] [INFO] [1790397792.458842971] [gz_ros_control]: 	State:
+[gazebo-2] [INFO] [1790397792.458852459] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1790397792.458857207] [gz_ros_control]: 		 velocity
+[gazebo-2] [INFO] [1790397792.458863830] [gz_ros_control]: 		 effort
+[gazebo-2] [INFO] [1790397792.458867847] [gz_ros_control]: 	Command:
+[gazebo-2] [INFO] [1790397792.458871955] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1790397792.458883757] [gz_ros_control]: Loading joint: joint2
+[gazebo-2] [INFO] [1790397792.458887674] [gz_ros_control]: 	State:
+[gazebo-2] [INFO] [1790397792.458891091] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1790397792.458894567] [gz_ros_control]: 		 velocity
+[gazebo-2] [INFO] [1790397792.458898404] [gz_ros_control]: 		 effort
+[gazebo-2] [INFO] [1790397792.458902412] [gz_ros_control]: 	Command:
+[gazebo-2] [INFO] [1790397792.458905608] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1790397792.458917490] [gz_ros_control]: Loading joint: joint3
+[gazebo-2] [INFO] [1790397792.458921277] [gz_ros_control]: 	State:
+[gazebo-2] [INFO] [1790397792.458924543] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1790397792.458927789] [gz_ros_control]: 		 velocity
+[gazebo-2] [INFO] [1790397792.458931015] [gz_ros_control]: 		 effort
+[gazebo-2] [INFO] [1790397792.458934912] [gz_ros_control]: 	Command:
+[gazebo-2] [INFO] [1790397792.458938229] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1790397792.458946284] [gz_ros_control]: Loading joint: joint4
+[gazebo-2] [INFO] [1790397792.458949890] [gz_ros_control]: 	State:
+[gazebo-2] [INFO] [1790397792.458953126] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1790397792.458956433] [gz_ros_control]: 		 velocity
+[gazebo-2] [INFO] [1790397792.458959649] [gz_ros_control]: 		 effort
+[gazebo-2] [INFO] [1790397792.458962985] [gz_ros_control]: 	Command:
+[gazebo-2] [INFO] [1790397792.458966201] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1790397792.458973895] [gz_ros_control]: Loading joint: gripper_left_joint
+[gazebo-2] [INFO] [1790397792.458977802] [gz_ros_control]: 	State:
+[gazebo-2] [INFO] [1790397792.458981549] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1790397792.458985146] [gz_ros_control]: 		 velocity
+[gazebo-2] [INFO] [1790397792.458988643] [gz_ros_control]: 		 effort
+[gazebo-2] [INFO] [1790397792.458991999] [gz_ros_control]: 	Command:
+[gazebo-2] [INFO] [1790397792.458995475] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1790397792.459003851] [gz_ros_control]: Loading joint: gripper_right_joint
+[gazebo-2] [INFO] [1790397792.459009401] [gz_ros_control]: Joint 'gripper_right_joint'is mimicking joint 'gripper_left_joint' with multiplier: 1 and offset: 0
+[gazebo-2] [INFO] [1790397792.459014110] [gz_ros_control]: 	State:
+[gazebo-2] [INFO] [1790397792.459017777] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1790397792.459021143] [gz_ros_control]: 		 velocity
+[gazebo-2] [INFO] [1790397792.459025652] [gz_ros_control]: 		 effort
+[gazebo-2] [INFO] [1790397792.459029178] [gz_ros_control]: 	Command:
+[gazebo-2] [INFO] [1790397792.459152188] [controller_manager]: Initialize hardware 'OpenManipulatorXSystem' 
+[gazebo-2] [WARN] [1790397792.459178346] [controller_manager.hardware_component.system.OpenManipulatorXSystem]: Executor is not available during hardware component initialization for 'OpenManipulatorXSystem'. Skipping node creation!
+[gazebo-2] [INFO] [1790397792.459250661] [controller_manager]: Successful initialization of hardware 'OpenManipulatorXSystem'
+[gazebo-2] [INFO] [1790397792.459364333] [controller_manager]: Activating component 'OpenManipulatorXSystem'.
+[gazebo-2] [INFO] [1790397792.459457948] [resource_manager]: 'configure' hardware 'OpenManipulatorXSystem' 
+[gazebo-2] [INFO] [1790397792.459466023] [gz_ros_control]: System Successfully configured!
+[gazebo-2] [INFO] [1790397792.459473246] [resource_manager]: Successful 'configure' of hardware 'OpenManipulatorXSystem'
+[gazebo-2] [INFO] [1790397792.459482103] [resource_manager]: 'activate' hardware 'OpenManipulatorXSystem' 
+[gazebo-2] [INFO] [1790397792.459496700] [resource_manager]: Successful 'activate' of hardware 'OpenManipulatorXSystem'
+[gazebo-2] [WARN] [1790397792.459575798] [controller_manager]: Component 'OpenManipulatorXSystem' does not have read or write statistics initialized, skipping registration.
+[gazebo-2] [INFO] [1790397792.459583562] [controller_manager]: Resource Manager has been successfully initialized. Starting Controller Manager services...
+[gazebo-2] [INFO] [1790397792.635116472] [controller_manager]: Loading controller : 'joint_state_broadcaster' of type 'joint_state_broadcaster/JointStateBroadcaster'
+[gazebo-2] [INFO] [1790397792.635206921] [controller_manager]: Loading controller 'joint_state_broadcaster'
+[gazebo-2] [INFO] [1790397792.644691411] [controller_manager]: Controller 'joint_state_broadcaster' node arguments: --ros-args --params-file /home/ros/agentic_workcell_ws/install/open_manipulator_bringup/share/open_manipulator_bringup/config/open_manipulator_x/hardware_controller_manager.yaml -p use_sim_time:=true --param use_sim_time:=true 
+[spawner-5] [INFO] [1790397792.662489366] [spawner_joint_state_broadcaster]: Loaded joint_state_broadcaster
+[gazebo-2] [INFO] [1790397792.663779351] [controller_manager]: Configuring controller: 'joint_state_broadcaster'
+[gazebo-2] [INFO] [1790397792.663988461] [joint_state_broadcaster]: 'joints' or 'interfaces' parameter is empty. All available state interfaces will be published
+[gazebo-2] [INFO] [1790397792.680914351] [controller_manager]: Activating controllers: [ joint_state_broadcaster ]
+[gazebo-2] [1;31m[Err] [Physics.cc:1906] [0m[1;31mAttempting to create a mimic constraint for joint [[0m[1;31mgripper_right_joint[0m[1;31m] but the chosen physics engine does not support [0m[1;31mmimic constraints, so no constraint will be [0m[1;31mcreated.[0m[1;31m[0m
+[gazebo-2] [WARN] [1790397794.334592210] [gz_ros_control]:  Desired controller update period (0.01 s) is slower than the gazebo simulation period (0.005 s).
+[gazebo-2] [INFO] [1790397794.337964360] [controller_manager]: Successfully switched controllers!
+[spawner-5] [INFO] [1790397794.346824085] [spawner_joint_state_broadcaster]: Configured and activated joint_state_broadcaster
+[INFO] [spawner-5]: process has finished cleanly [pid 146]
+[INFO] [spawner-6]: process started with pid [260]
+[INFO] [spawner-7]: process started with pid [261]
+[spawner-6] [INFO] [1790397795.247578973] [spawner_arm_controller]: waiting for service /controller_manager/list_controllers to become available...
+[gazebo-2] [INFO] [1790397795.500382391] [controller_manager]: Loading controller : 'arm_controller' of type 'joint_trajectory_controller/JointTrajectoryController'
+[gazebo-2] [INFO] [1790397795.500463442] [controller_manager]: Loading controller 'arm_controller'
+[gazebo-2] [INFO] [1790397795.510856386] [controller_manager]: Controller 'arm_controller' node arguments: --ros-args --params-file /home/ros/agentic_workcell_ws/install/open_manipulator_bringup/share/open_manipulator_bringup/config/open_manipulator_x/hardware_controller_manager.yaml -p use_sim_time:=true --param use_sim_time:=true 
+[spawner-6] [INFO] [1790397795.546668441] [spawner_arm_controller]: Loaded arm_controller
+[gazebo-2] [INFO] [1790397795.548509944] [controller_manager]: Configuring controller: 'arm_controller'
+[gazebo-2] [INFO] [1790397795.548771852] [arm_controller]: No specific joint names are used for command interfaces. Using 'joints' parameter.
+[gazebo-2] [INFO] [1790397795.548853946] [arm_controller]: Command interfaces are [position] and state interfaces are [position velocity].
+[gazebo-2] [INFO] [1790397795.548903628] [arm_controller]: Using 'splines' interpolation method.
+[gazebo-2] [INFO] [1790397795.553058227] [arm_controller]: Goals with partial set of joints are allowed
+[gazebo-2] [INFO] [1790397795.553123298] [arm_controller]: Action status changes will be monitored at 20.00 Hz.
+[gazebo-2] [INFO] [1790397795.565221655] [arm_controller]: Setting initial scaling factor to 1.000000
+[gazebo-2] [INFO] [1790397795.565281256] [arm_controller]: No scaling interface set. This controller will not read speed scaling from the hardware.
+[gazebo-2] [INFO] [1790397795.576441009] [controller_manager]: Activating controllers: [ arm_controller ]
+[gazebo-2] [INFO] [1790397795.584201725] [controller_manager]: Successfully switched controllers!
+[spawner-6] [INFO] [1790397795.596142516] [spawner_arm_controller]: Configured and activated arm_controller
+[spawner-7] [INFO] [1790397795.778920718] [spawner_gripper_controller]: waiting for service /controller_manager/list_controllers to become available...
+[INFO] [spawner-6]: process has finished cleanly [pid 260]
+[gazebo-2] [INFO] [1790397796.032400850] [controller_manager]: Loading controller : 'gripper_controller' of type 'position_controllers/GripperActionController'
+[gazebo-2] [INFO] [1790397796.032511516] [controller_manager]: Loading controller 'gripper_controller'
+[gazebo-2] [INFO] [1790397796.038789544] [controller_manager]: Controller 'gripper_controller' node arguments: --ros-args --params-file /home/ros/agentic_workcell_ws/install/open_manipulator_bringup/share/open_manipulator_bringup/config/open_manipulator_x/hardware_controller_manager.yaml -p use_sim_time:=true --param use_sim_time:=true 
+[gazebo-2] [WARN] [1790397796.062495239] [gripper_controller]: [Deprecated]: the `position_controllers/GripperActionController` and `effort_controllers::GripperActionController` controllers are replaced by 'parallel_gripper_controllers/GripperActionController' controller
+[spawner-7] [INFO] [1790397796.066911347] [spawner_gripper_controller]: Loaded gripper_controller
+[gazebo-2] [INFO] [1790397796.068984933] [controller_manager]: Configuring controller: 'gripper_controller'
+[gazebo-2] [INFO] [1790397796.069131436] [gripper_controller]: Action status changes will be monitored at 20.000000 Hz.
+[gazebo-2] [INFO] [1790397796.080182690] [controller_manager]: Activating controllers: [ gripper_controller ]
+[gazebo-2] [INFO] [1790397796.092098142] [controller_manager]: Successfully switched controllers!
+[spawner-7] [INFO] [1790397796.098158345] [spawner_gripper_controller]: Configured and activated gripper_controller
+[INFO] [spawner-7]: process has finished cleanly [pid 261]
+[gazebo-2] [INFO] [1790398248.586709597] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1790398248.586852203] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1790398249.789151028] [arm_controller]: Goal reached, success!

@@ -1,0 +1,25 @@
+=== 61_A_happy | 2026-09-26T19:37:29+08:00 | scenario=week1_demo_v1 ===
+SENDING action=demo object=target_box pose=[0.12, -0.15, 0.0175]
+RESULT {
+  "action": "demo",
+  "outcome": "OUTCOME_SUCCEEDED",
+  "outcome_val": 0,
+  "error_code": "ERR_NONE",
+  "detail": "demo done: A->zone_1 (0.0000m), B->zone_2 (0.0000m)",
+  "wall_seconds": 21.227,
+  "fsm_trace": [
+    "PICK_A(attempt=1):OK",
+    "PLACE_A:OK",
+    "VERIFY_A(attempt=1):OK",
+    "PICK_B(attempt=1):OK",
+    "PLACE_B:OK",
+    "VERIFY_B(attempt=1):OK"
+  ],
+  "object_a_at_zone": true,
+  "object_b_at_zone": true,
+  "zone_a_error_m": 0.007949244033019923,
+  "zone_b_error_m": 0.009355668124849207,
+  "run_id": "week1_demo_v1-44104749",
+  "scenario_id": "week1_demo_v1"
+}
+RC=0

@@ -1,0 +1,23 @@
+=== flexcell health (strict) | 2026-09-27T00:49:17+08:00 ===
+Traceback (most recent call last):
+  File "/mnt/f/flexcell-stage/setup/flexcell_admin.py", line 342, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/mnt/f/flexcell-stage/setup/flexcell_admin.py", line 333, in main
+    return node.health(strict=not args.no_strict)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/mnt/f/flexcell-stage/setup/flexcell_admin.py", line 139, in health
+    out = subprocess.run(['ros2', 'control', 'list_controllers'],
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['ros2', 'control', 'list_controllers']' timed out after 20 seconds
+RC=1

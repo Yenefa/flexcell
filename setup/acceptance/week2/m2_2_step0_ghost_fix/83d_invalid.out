@@ -1,0 +1,18 @@
+=== 83d_invalid | 2026-09-27T05:39:22+08:00 | EXPECT: typed IK failure ===
+SENDING action=task object=target_box_a pose=[0.42, 0.0, 0.0175]
+RESULT {
+  "action": "task",
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_SKILL_FAILED",
+  "detail": "PICK failed: ERR_GRASP_FAILED (box did not follow the lift (rise=0.023m < 0.030m); released for safety)",
+  "wall_seconds": 6.522,
+  "fsm_trace": [
+    "OBSERVE",
+    "PICK"
+  ],
+  "object_at_place": false,
+  "final_position_error_m": 0.0,
+  "skip_verify": false
+}
+RC=1

@@ -1,0 +1,18 @@
+=== 61_D_invalid | 2026-09-26T19:45:25+08:00 | EXPECT: typed failure (IK unreachable) ===
+SENDING action=task object=target_box_a pose=[0.42, 0.0, 0.0175]
+RESULT {
+  "action": "task",
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_SKILL_FAILED",
+  "detail": "PICK failed: ERR_GRASP_FAILED (injected failure (scenario=exhaust_demo_v1 mode=always attempt=3))",
+  "wall_seconds": 0.232,
+  "fsm_trace": [
+    "OBSERVE",
+    "PICK"
+  ],
+  "object_at_place": false,
+  "final_position_error_m": 0.0,
+  "skip_verify": false
+}
+RC=1

@@ -1,0 +1,178 @@
+#!/usr/bin/env bash
+# FlexCell workcell lifecycle: start | stop | reset | status | health
+#
+# Process ownership via setsid process groups + PID files under
+# /tmp/flexcell_lifecycle/pids - no pkill -f substring matching. Every start
+# ends with a strict health check: any component missing/duplicated/not-ready
+# FAILS the start.
+set -o pipefail
+RUNTIME=/home/ros/agentic_workcell_ws
+LC=/tmp/flexcell_lifecycle
+PIDS=$LC/pids
+LOGS=$LC/logs
+WORLD=/mnt/f/flexcell-stage/worlds/flexcell_world   # launch appends .sdf itself
+ADMIN=/mnt/f/flexcell-stage/setup/flexcell_admin.py
+COMPONENTS="gazebo moveit move_to_pose fleet"
+
+source /opt/ros/jazzy/setup.bash
+source "$RUNTIME/install/setup.bash"
+cd "$RUNTIME"
+mkdir -p "$LOGS"
+
+alive_pids() {
+  local n=0
+  for f in "$PIDS"/*.pid; do
+    [ -f "$f" ] || continue
+    if kill -0 "$(cat "$f")" 2>/dev/null; then n=$((n+1)); fi
+  done
+  echo "$n"
+}
+
+gz_models_ready() {
+  local out
+  out=$(timeout 12 gz model --list 2>/dev/null)
+  for m in ground_plane open_manipulator_x target_box_a target_box_b zone_1 zone_2; do
+    echo "$out" | grep -q "$m" || return 1
+  done
+  return 0
+}
+
+controllers_ready() {
+  local out
+  out=$(timeout 15 ros2 control list_controllers 2>/dev/null)
+  [ "$(echo "$out" | grep -c 'active')" -ge 3 ]
+}
+
+launch() { # <name> <command...>
+  local name="$1"
+  shift
+  setsid nohup bash -c "$*" > "$LOGS/$name.log" 2>&1 < /dev/null &
+  echo $! > "$PIDS/$name.pid"
+  echo "launched $name (pid $!, pgid $!)"
+}
+
+cmd_start() {
+  if [ "$(alive_pids)" != "0" ]; then
+    echo "START REFUSED: flexcell already running (use: flexcell stop)"; exit 1
+  fi
+  mkdir -p "$PIDS" "$LOGS"
+  # settle: any pre-existing stack instance must be fully gone first (a dying
+  # gz server races the new one for transport ports and both lose)
+  t=0
+  while pgrep -f 'gz si[m]|move_grou[p]|robot_state_publishe[r]' > /dev/null; do
+    sleep 2; t=$((t+2))
+    if [ $t -ge 20 ]; then
+      echo "START REFUSED: pre-existing stack still alive after ${t}s (run: flexcell stop)"; exit 1
+    fi
+  done
+  echo "== flexcell start =="
+  launch gazebo "ros2 launch open_manipulator_bringup open_manipulator_x_gazebo.launch.py world:=$WORLD"
+  t=0
+  while ! gz_models_ready; do
+    sleep 2; t=$((t+2))
+    if [ $t -ge 60 ]; then echo "START FAILED: gz world not ready"; exit 1; fi
+  done
+  echo "READY: gz world + 6 models (${t}s)"
+
+  launch moveit "ros2 launch open_manipulator_moveit_config open_manipulator_x_moveit.launch.py use_sim:=true"
+  t=0
+  while ! controllers_ready; do
+    sleep 2; t=$((t+2))
+    if [ $t -ge 60 ]; then echo "START FAILED: controllers not active"; exit 1; fi
+  done
+  echo "READY: 3 controllers active (${t}s)"
+
+  launch move_to_pose "ros2 launch flexcell_skills move_to_pose.launch.py"
+  launch fleet "ros2 launch flexcell_skills week1.launch.py"
+  t=0
+  until timeout 30 python3 "$ADMIN" health --no-strict > /dev/null 2>&1; do
+    sleep 2; t=$((t+2))
+    if [ $t -ge 40 ]; then echo "START FAILED: skill fleet not ready"; exit 1; fi
+  done
+  echo "READY: skill fleet (${t}s)"
+
+  echo "== strict health check =="
+  if python3 "$ADMIN" health; then
+    echo "START OK"
+  else
+    echo "START FAILED: strict health check did not pass (see report above)"
+    exit 1
+  fi
+}
+
+cmd_stop() {
+  echo "== flexcell stop =="
+  local any=0
+  for f in "$PIDS"/*.pid; do
+    [ -f "$f" ] || continue
+    any=1
+    local pid name
+    pid=$(cat "$f"); name=$(basename "$f" .pid)
+    if kill -0 "$pid" 2>/dev/null; then
+      kill -TERM -- "-$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null
+      echo "TERM -> $name (group $pid)"
+    fi
+  done
+  if [ "$any" = "1" ]; then
+    sleep 6
+    for f in "$PIDS"/*.pid; do
+      [ -f "$f" ] || continue
+      local pid name
+      pid=$(cat "$f"); name=$(basename "$f" .pid)
+      if kill -0 "$pid" 2>/dev/null; then
+        kill -KILL -- "-$pid" 2>/dev/null || kill -KILL "$pid" 2>/dev/null
+        echo "KILL -> $name (group $pid)"
+      fi
+    done
+  fi
+  rm -rf "$PIDS"
+
+  # verification: 0 of our processes, 0 of our nodes/actions in a FRESH graph
+  sleep 4
+  ros2 daemon stop > /dev/null 2>&1
+  local residue=0
+  local nodes
+  nodes=$(timeout 15 ros2 node list 2>/dev/null)
+  for n in move_to_pose_server observe_server pick_server place_server \
+           verify_server task_fsm_server carry_server move_group rviz2 \
+           robot_state_publisher; do
+    if echo "$nodes" | grep -q "^/$n\b"; then
+      echo "RESIDUE: node /$n still in graph"; residue=1
+    fi
+  done
+  local acts
+  acts=$(timeout 15 ros2 action list 2>/dev/null)
+  for a in move_to_pose observe pick_object place_object verify_object run_demo run_pick_place; do
+    if echo "$acts" | grep -q "^/$a\b"; then
+      echo "RESIDUE: action /$a still in graph"; residue=1
+    fi
+  done
+  if [ "$residue" = "0" ]; then
+    echo "STOP OK: 0 relevant nodes, 0 duplicate actions, 0 orphans"
+  else
+    echo "STOP INCOMPLETE (see RESIDUE lines above)"; exit 1
+  fi
+}
+
+cmd_reset() {
+  echo "== flexcell reset =="
+  python3 "$ADMIN" reset
+}
+
+cmd_status() {
+  echo "pid files (alive): $(alive_pids)"
+  python3 "$ADMIN" health --no-strict
+}
+
+cmd_health() {
+  python3 "$ADMIN" health
+}
+
+case "${1:-}" in
+  start) cmd_start ;;
+  stop) cmd_stop ;;
+  reset) cmd_reset ;;
+  status) cmd_status ;;
+  health) cmd_health ;;
+  *) echo "usage: flexcell start|stop|reset|status|health"; exit 2 ;;
+esac

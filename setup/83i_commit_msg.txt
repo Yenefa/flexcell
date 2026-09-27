@@ -1,0 +1,20 @@
+M2.2 Step 0 (issue #20): eliminate PLACE ghost success
+
+- place_server: remove dead _gate.set_attach path (undefined attribute since
+  b209225; its crash plus rclpy's default-Result fallback manufactured every
+  "successful" PLACE - place.jsonl had 0 genuine success records in the
+  entire project history)
+- crash guards on all four skill servers and both task_fsm execute paths:
+  unhandled exceptions now become FAILED + typed ERR_INTERNAL=2 + jsonl
+  evidence, never rclpy's default Result (whose outcome=0 reads as
+  SUCCEEDED/VERIFIED)
+- place jsonl records now carry the released flag; observe/verify crash
+  paths typed the same way
+
+Verified (acceptance/week2/m2_2_step0_ghost_fix/): place.jsonl 0 -> 9
+genuine successes (released=true, drop-error detail, evidence_id); Week-1.5
+battery green (happy byte-clean x2 vs att3 delivery baseline, recovery dual
+injection, exhaust same shape as pre-seam 61_C with BUDGET_EXHAUSTED visible
+in the decision log, invalid target typed IK propagation); 13 canonical +
+15 policy unit tests green; static no-undefined-attribute scan clean across
+14 files; Day-2 regression MOTION_DETECTED=True; clean stop 0 residue.

@@ -1,0 +1,38 @@
+=== case1 happy_a target=(0.20,0.05,0.20) q=(0,0,0,1) profile=demo_slow | 2026-09-27T03:16:33+08:00 | EXPECT: outcome=SUCCEEDED pos_err<0.02 execution_started=true ===
+SENDING request_id=case1_happy_a frame=world pose=['0.2000', '0.0500', '0.2000', '0.0000', '0.0000', '0.0000', '1.0000'] profile=demo_slow deadline=20000
+FEEDBACK VALIDATING elapsed_ms=0
+FEEDBACK PLANNING   elapsed_ms=0
+FEEDBACK EXECUTING  elapsed_ms=111
+FEEDBACK CHECKING   elapsed_ms=1553
+RESULT {
+  "outcome": "OUTCOME_SUCCEEDED",
+  "outcome_val": 0,
+  "error_code": "ERR_NONE",
+  "error_code_val": 0,
+  "moveit_error_code": 0,
+  "has_reached_pose": true,
+  "position_error_m": 0.0069955898932371995,
+  "orientation_error_rad": 0.43862617241312635,
+  "orientation_enforced": false,
+  "execution_started": true,
+  "world_revision_before": 0,
+  "world_revision_after": 0,
+  "evidence_id": "case1_happy_a-756be4f0",
+  "detail": "planning + execution + measured pose within tolerance",
+  "phases": [
+    "VALIDATING",
+    "PLANNING",
+    "EXECUTING",
+    "CHECKING"
+  ],
+  "wall_seconds": 1.586,
+  "reached_pose": {
+    "frame_id": "world",
+    "position": [
+      0.19992690821925227,
+      0.047366439722260324,
+      0.20648053206222
+    ]
+  }
+}
+RC=0

@@ -1,0 +1,23 @@
+INJECT set to ''
+=== 61_D_invalid | 2026-09-27T03:03:31+08:00 | EXPECT: typed failure (IK unreachable) ===
+SENDING action=task object=target_box_a pose=[0.42, 0.0, 0.0175]
+RESULT {
+  "action": "task",
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_SKILL_FAILED",
+  "detail": "PLACE failed: ERR_MOTION_FAILED (hover motion failed: IK pre-check failed: NO_IK_SOLUTION for link end_effector_link)",
+  "wall_seconds": 7.803,
+  "fsm_trace": [
+    "OBSERVE",
+    "PICK",
+    "PLACE"
+  ],
+  "object_at_place": false,
+  "final_position_error_m": 0.0,
+  "skip_verify": false
+}
+RC=1
+  "outcome": "OUTCOME_FAILED",
+  "error_code": "ERR_SKILL_FAILED",
+  "detail": "PLACE failed: ERR_MOTION_FAILED (hover motion failed: IK pre-check failed: NO_IK_SOLUTION for link end_effector_link)",

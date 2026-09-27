@@ -1,0 +1,25 @@
+SENDING action=demo object=target_box pose=[0.12, -0.15, 0.0175]
+RESULT {
+  "action": "demo",
+  "outcome": "OUTCOME_SUCCEEDED",
+  "outcome_val": 0,
+  "error_code": "ERR_NONE",
+  "detail": "demo done: A->zone_1 (0.0000m), B->zone_2 (0.0000m)",
+  "wall_seconds": 36.672,
+  "fsm_trace": [
+    "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+    "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+    "PICK_A(attempt=1):OK",
+    "PLACE_A:OK",
+    "VERIFY_A(attempt=1):OK",
+    "PICK_B(attempt=1):OK",
+    "PLACE_B:OK",
+    "VERIFY_B(attempt=1):OK"
+  ],
+  "object_a_at_zone": true,
+  "object_b_at_zone": true,
+  "zone_a_error_m": 0.00569266519641271,
+  "zone_b_error_m": 0.0038454274990309795,
+  "run_id": "week1_demo_v1-f10a4207",
+  "scenario_id": "week1_demo_v1"
+}

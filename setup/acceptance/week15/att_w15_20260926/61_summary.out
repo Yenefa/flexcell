@@ -1,0 +1,35 @@
+=== Week-1.5 acceptance summary | 2026-09-26T20:04:55+08:00 | scenario=week1_demo_v1 ===
+lifecycle: flexcell start/stop/reset (PID-group ownership + strict health gate)
+
+61_A_happy.out:  "outcome": "OUTCOME_SUCCEEDED",
+61_A_happy.out:  "outcome_val": 0,
+61_A_happy.out:  "error_code": "ERR_NONE",
+61_A_happy.out:    "PICK_B(attempt=1):OK",
+61_A_happy.out:  "zone_a_error_m": 0.007949244033019923,
+61_A_happy.out:  "zone_b_error_m": 0.009355668124849207,
+61_B_recovery.out:  "outcome": "OUTCOME_SUCCEEDED",
+61_B_recovery.out:  "outcome_val": 0,
+61_B_recovery.out:  "error_code": "ERR_NONE",
+61_B_recovery.out:    "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+61_B_recovery.out:    "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED",
+61_B_recovery.out:    "RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1))",
+61_B_recovery.out:    "PICK_B(attempt=2):OK",
+61_B_recovery.out:  "zone_a_error_m": 0.008637870683462218,
+61_B_recovery.out:  "zone_b_error_m": 0.004261860863624133,
+61_C_exhausted.out:  "outcome": "OUTCOME_FAILED",
+61_C_exhausted.out:  "outcome_val": 1,
+61_C_exhausted.out:  "error_code": "ERR_RECOVERY_EXHAUSTED",
+61_C_exhausted.out:    "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+61_C_exhausted.out:  "zone_a_error_m": NaN,
+61_C_exhausted.out:  "zone_b_error_m": NaN,
+61_D_invalid.out:  "outcome": "OUTCOME_FAILED",
+61_D_invalid.out:  "outcome_val": 1,
+61_D_invalid.out:  "error_code": "ERR_SKILL_FAILED",
+61_F_repeat_summary.out:run 1 | outcome=OUTCOME_SUCCEEDED duration=20.814s zone_a_err=0.006158656104059085m zone_b_err=0.006512663580080372m
+61_F_repeat_summary.out:run 2 | outcome=OUTCOME_SUCCEEDED duration=20.93s zone_a_err=0.006672360809990457m zone_b_err=0.0025717772007687973m
+61_F_repeat_summary.out:run 3 | outcome=OUTCOME_SUCCEEDED duration=38.802s zone_a_err=0.008691948536274498m zone_b_err=0.01055915933635659m
+61_F_repeat_summary.out:run 4 | outcome=OUTCOME_SUCCEEDED duration=28.87s zone_a_err=0.007369669175361666m zone_b_err=0.005108076437465626m
+61_F_repeat_summary.out:run 5 | outcome=OUTCOME_SUCCEEDED duration=21.556s zone_a_err=0.009805566507318394m zone_b_err=0.010032625459889555m
+61_F_repeat_summary.out:success count: 5
+
+Day-2 regression: 10/10 (outputs refreshed under ../day2/)

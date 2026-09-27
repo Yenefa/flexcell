@@ -1,0 +1,21 @@
+=== WSL VM environment snapshot | 2026-09-26T22:05:31+08:00 ===
+nproc: 12
+uptime/loadavg: 18.29 10.60 4.41 24/608 919
+mem: Mem:           15963        2066       13335          66         827       13896
+dev_dxg: crw-rw-rw- 1 root root 10, 125 Sep 26 22:00 /dev/dxg
+dri_cards: ls: cannot access '/dev/dri': No such file or directory
+top_cpu_processes:
+USER       PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+ros        340  171  2.2 4186884 373128 ?      Sl   22:01   6:44 /opt/ros/jazzy/lib/rviz2/rviz2 -d /home/ros/agentic_workcell_ws/install/open_manipulator_moveit_config/share/open_manipulator_moveit_config/config/moveit.rviz --ros-args -r __node:=rviz2_moveit --params-file /tmp/launch_params_ao3hqtcj --params-file /tmp/launch_params_d0mjtkom --params-file /tmp/launch_params_f31vaizw --params-file /tmp/launch_params_0zg7a7w8 --params-file /tmp/launch_params_namrza7z --params-file /tmp/launch_params_1xl0j3i4 --params-file /tmp/launch_params_93d73lqd
+ros        115  170  3.8 5993324 633860 ?      Sl   22:01   6:49 gz sim gui
+ros        114  106  1.4 3712992 244804 ?      Rl   22:01   4:15 gz sim server
+ros        927  100  0.0  11024  4580 pts/1    R+   22:05   0:00 ps aux --sort=-%cpu
+ros        496 76.1  0.5 1192308 90892 ?       Rl   22:01   2:55 /usr/bin/python3 /home/ros/agentic_workcell_ws/install/flexcell_skills/lib/flexcell_skills/observe_server --ros-args -r __node:=observe_server --params-file /tmp/launch_params_24em5pms
+ros        495 74.8  0.6 1206980 102904 ?      Rl   22:01   2:52 /usr/bin/python3 /home/ros/agentic_workcell_ws/install/flexcell_skills/lib/flexcell_skills/move_to_pose_server --ros-args -r __node:=move_to_pose_server --params-file /home/ros/agentic_workcell_ws/install/flexcell_skills/share/flexcell_skills/config/move_to_pose.yaml --params-file /tmp/launch_params_4pi94uoo
+ros        501 67.6  0.6 1514808 98944 ?       Rl   22:01   2:35 /usr/bin/python3 /home/ros/agentic_workcell_ws/install/flexcell_skills/lib/flexcell_skills/carry_server --ros-args -r __node:=carry_server --params-file /tmp/launch_params_eqy_tkhj
+ros        497 64.8  0.6 1350676 99692 ?       Rl   22:01   2:29 /usr/bin/python3 /home/ros/agentic_workcell_ws/install/flexcell_skills/lib/flexcell_skills/pick_server --ros-args -r __node:=pick_server --params-file /tmp/launch_params_5iz837xu
+ros        499 58.0  0.5 1038736 85452 ?       Rl   22:01   2:13 /usr/bin/python3 /home/ros/agentic_workcell_ws/install/flexcell_skills/lib/flexcell_skills/verify_server --ros-args -r __node:=verify_server --params-file /tmp/launch_params_ox0s0n7s
+ros        498 56.3  0.5 1201956 97748 ?       Rl   22:01   2:09 /usr/bin/python3 /home/ros/agentic_workcell_ws/install/flexcell_skills/lib/flexcell_skills/place_server --ros-args -r __node:=place_server --params-file /tmp/launch_params_mv9rrmmq
+ros        500 55.5  0.5 1042968 89704 ?       Rl   22:01   2:08 /usr/bin/python3 /home/ros/agentic_workcell_ws/install/flexcell_skills/lib/flexcell_skills/task_fsm_server --ros-args -r __node:=task_fsm_server --params-file /tmp/launch_params_mb5siwzk
+gz_gui_cpu_total_jiffies_check:
+  PID %CPU     ELAPSED COMMAND

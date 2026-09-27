@@ -1,0 +1,15 @@
+=== plan_execute acceptance run (captured console transcript, 2026-09-26 ~12:47 CST) ===
+=== DoD per DAY1_REPORT: PLAN error_code=1 + EXECUTE error_code=1 + MOTION_DETECTED=True ===
+waiting for /move_action and /execute_trajectory ...
+BEFORE /joint_states: {'joint1': -0.0, 'joint2': 0.0, 'joint3': 0.0, 'joint4': 0.0}
+PLAN error_code = 1  planning_time = 0.0194
+PLANNED joints: ['joint1', 'joint2', 'joint3', 'joint4']
+PLANNED waypoints: 13
+PLANNED final positions: [0.6048, -0.8972, 0.895, 0.4939]
+PLANNED duration: 1.198 s
+EXECUTE error_code = 1
+AFTER  /joint_states: {'joint1': 0.6048, 'joint2': -0.8972, 'joint3': 0.895, 'joint4': 0.4939}
+DELTA  /joint_states: {'joint1': 0.6048, 'joint2': -0.8972, 'joint3': 0.895, 'joint4': 0.4939}
+MOTION_DETECTED = True
+RC = 0
+RC=0

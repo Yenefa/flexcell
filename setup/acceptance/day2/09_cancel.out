@@ -1,0 +1,31 @@
+=== case9 cancel 1.0s into EXECUTING, target=(0.05,-0.28,0.18) | 2026-09-27T03:17:01+08:00 | EXPECT: outcome=CANCELED preempted=true stop_confirmed=true ===
+SENDING request_id=case9_cancel frame=world pose=['0.0500', '-0.2800', '0.1800', '0.0000', '0.0000', '0.0000', '1.0000'] profile=demo_slow deadline=20000
+FEEDBACK VALIDATING elapsed_ms=0
+FEEDBACK PLANNING   elapsed_ms=2
+FEEDBACK EXECUTING  elapsed_ms=71
+CANCEL_REQUESTED 1.00s into EXECUTING
+FEEDBACK STOPPING   elapsed_ms=1105
+RESULT {
+  "outcome": "OUTCOME_CANCELED",
+  "outcome_val": 2,
+  "error_code": "ERR_CANCELED",
+  "error_code_val": 32,
+  "moveit_error_code": 0,
+  "has_reached_pose": false,
+  "position_error_m": NaN,
+  "orientation_error_rad": NaN,
+  "orientation_enforced": false,
+  "execution_started": true,
+  "world_revision_before": 0,
+  "world_revision_after": 0,
+  "evidence_id": "case9_cancel-313a3267",
+  "detail": "cancel; preempted; stop confirmed",
+  "phases": [
+    "VALIDATING",
+    "PLANNING",
+    "EXECUTING",
+    "STOPPING"
+  ],
+  "wall_seconds": 1.297
+}
+RC=1

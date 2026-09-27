@@ -1,0 +1,123 @@
+--- DynamixelSDK already present
+--- dynamixel_interfaces already present
+--- dynamixel_hardware_interface already present
+--- open_manipulator already present
+--- COLCON_IGNORE -> open_manipulator
+--- COLCON_IGNORE -> open_manipulator_gui
+--- COLCON_IGNORE -> open_manipulator_playground
+--- COLCON_IGNORE -> open_manipulator_teleop
+--- COLCON_IGNORE -> open_manipulator_collision
+--- COLCON_IGNORE -> ros2_controller
+--- tree ---
+/home/ros/agentic_workcell_ws/src/dynamixel_hardware_interface/package.xml
+/home/ros/agentic_workcell_ws/src/dynamixel_interfaces/package.xml
+=== rosdep update ===
+reading in sources list data from /etc/ros/rosdep/sources.list.d
+Hit https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/osx-homebrew.yaml
+Hit https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/base.yaml
+Hit https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/python.yaml
+Hit https://raw.githubusercontent.com/ros/rosdistro/master/rosdep/ruby.yaml
+Hit https://raw.githubusercontent.com/ros/rosdistro/master/releases/fuerte.yaml
+Query rosdistro index https://raw.githubusercontent.com/ros/rosdistro/master/index-v4.yaml
+Skip end-of-life distro "ardent"
+Skip end-of-life distro "bouncy"
+Skip end-of-life distro "crystal"
+Skip end-of-life distro "dashing"
+Skip end-of-life distro "eloquent"
+Skip end-of-life distro "foxy"
+Skip end-of-life distro "galactic"
+Skip end-of-life distro "groovy"
+Add distro "humble"
+Skip end-of-life distro "hydro"
+Skip end-of-life distro "indigo"
+Skip end-of-life distro "iron"
+Skip end-of-life distro "jade"
+Add distro "jazzy"
+Add distro "kilted"
+Skip end-of-life distro "kinetic"
+Skip end-of-life distro "lunar"
+Add distro "lyrical"
+Skip end-of-life distro "melodic"
+Skip end-of-life distro "noetic"
+Add distro "rolling"
+updated cache in /home/ros/.ros/rosdep/sources.cache
+=== rosdep install ===
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following packages were automatically installed and are no longer required:
+  libgl1-amber-dri libglapi-mesa libxcb-dri2-0
+Use 'sudo apt autoremove' to remove them.
+The following additional packages will be installed:
+  ros-jazzy-realsense2-camera-msgs
+The following NEW packages will be installed:
+  ros-jazzy-realsense2-camera-msgs ros-jazzy-realsense2-description
+0 upgraded, 2 newly installed, 0 to remove and 131 not upgraded.
+Need to get 16.0 MB of archives.
+After this operation, 103 MB of additional disk space will be used.
+Get:1 https://mirrors.ustc.edu.cn/ros2/ubuntu noble/main amd64 ros-jazzy-realsense2-camera-msgs amd64 4.58.4-1noble.20260902.042822 [409 kB]
+Get:2 https://mirrors.ustc.edu.cn/ros2/ubuntu noble/main amd64 ros-jazzy-realsense2-description amd64 4.58.4-1noble.20260902.080515 [15.5 MB]
+Fetched 16.0 MB in 4s (4,337 kB/s)
+Selecting previously unselected package ros-jazzy-realsense2-camera-msgs.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 165424 files and directories currently installed.)
+Preparing to unpack .../ros-jazzy-realsense2-camera-msgs_4.58.4-1noble.20260902.042822_amd64.deb ...
+Unpacking ros-jazzy-realsense2-camera-msgs (4.58.4-1noble.20260902.042822) ...
+Selecting previously unselected package ros-jazzy-realsense2-description.
+Preparing to unpack .../ros-jazzy-realsense2-description_4.58.4-1noble.20260902.080515_amd64.deb ...
+Unpacking ros-jazzy-realsense2-description (4.58.4-1noble.20260902.080515) ...
+Setting up ros-jazzy-realsense2-camera-msgs (4.58.4-1noble.20260902.042822) ...
+Setting up ros-jazzy-realsense2-description (4.58.4-1noble.20260902.080515) ...
+Reading package lists...
+Building dependency tree...
+Reading state information...
+The following packages were automatically installed and are no longer required:
+  libgl1-amber-dri libglapi-mesa libxcb-dri2-0
+Use 'sudo apt autoremove' to remove them.
+The following NEW packages will be installed:
+  ros-jazzy-warehouse-ros-sqlite
+0 upgraded, 1 newly installed, 0 to remove and 131 not upgraded.
+Need to get 65.4 kB of archives.
+After this operation, 230 kB of additional disk space will be used.
+Get:1 https://mirrors.ustc.edu.cn/ros2/ubuntu noble/main amd64 ros-jazzy-warehouse-ros-sqlite amd64 1.0.9-1noble.20260903.024536 [65.4 kB]
+Fetched 65.4 kB in 1s (102 kB/s)
+Selecting previously unselected package ros-jazzy-warehouse-ros-sqlite.
+(Reading database ... (Reading database ... 5%(Reading database ... 10%(Reading database ... 15%(Reading database ... 20%(Reading database ... 25%(Reading database ... 30%(Reading database ... 35%(Reading database ... 40%(Reading database ... 45%(Reading database ... 50%(Reading database ... 55%(Reading database ... 60%(Reading database ... 65%(Reading database ... 70%(Reading database ... 75%(Reading database ... 80%(Reading database ... 85%(Reading database ... 90%(Reading database ... 95%(Reading database ... 100%(Reading database ... 165927 files and directories currently installed.)
+Preparing to unpack .../ros-jazzy-warehouse-ros-sqlite_1.0.9-1noble.20260903.024536_amd64.deb ...
+Unpacking ros-jazzy-warehouse-ros-sqlite (1.0.9-1noble.20260903.024536) ...
+Setting up ros-jazzy-warehouse-ros-sqlite (1.0.9-1noble.20260903.024536) ...
+[1mexecuting command [sudo -H apt-get install -y ros-jazzy-realsense2-description][0m
+[1mexecuting command [sudo -H apt-get install -y ros-jazzy-warehouse-ros-sqlite][0m
+#All required rosdeps installed successfully
+=== colcon build ===
+Starting >>> dynamixel_interfaces
+Starting >>> dynamixel_sdk
+Starting >>> open_manipulator_description
+Finished <<< open_manipulator_description [3.67s]
+Starting >>> open_manipulator_moveit_config
+Finished <<< open_manipulator_moveit_config [1.52s]
+Finished <<< dynamixel_sdk [6.59s]
+Finished <<< dynamixel_interfaces [13.7s]
+Starting >>> dynamixel_hardware_interface
+Finished <<< dynamixel_hardware_interface [20.5s]
+Starting >>> open_manipulator_bringup
+Finished <<< open_manipulator_bringup [2.20s]
+
+Summary: 6 packages finished [36.8s]
+=== build done ===
+COLCON_IGNORE
+dynamixel_hardware_interface
+dynamixel_interfaces
+dynamixel_sdk
+local_setup.bash
+local_setup.ps1
+local_setup.sh
+_local_setup_util_ps1.py
+_local_setup_util_sh.py
+local_setup.zsh
+open_manipulator_bringup
+open_manipulator_description
+open_manipulator_moveit_config
+setup.bash
+setup.ps1
+setup.sh
+setup.zsh

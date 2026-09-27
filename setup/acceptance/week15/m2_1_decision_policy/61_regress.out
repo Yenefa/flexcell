@@ -1,0 +1,270 @@
+=== case1 happy_a target=(0.20,0.05,0.20) q=(0,0,0,1) profile=demo_slow | 2026-09-27T03:16:33+08:00 | EXPECT: outcome=SUCCEEDED pos_err<0.02 execution_started=true ===
+SENDING request_id=case1_happy_a frame=world pose=['0.2000', '0.0500', '0.2000', '0.0000', '0.0000', '0.0000', '1.0000'] profile=demo_slow deadline=20000
+FEEDBACK VALIDATING elapsed_ms=0
+FEEDBACK PLANNING   elapsed_ms=0
+FEEDBACK EXECUTING  elapsed_ms=111
+FEEDBACK CHECKING   elapsed_ms=1553
+RESULT {
+  "outcome": "OUTCOME_SUCCEEDED",
+  "outcome_val": 0,
+  "error_code": "ERR_NONE",
+  "error_code_val": 0,
+  "moveit_error_code": 0,
+  "has_reached_pose": true,
+  "position_error_m": 0.0069955898932371995,
+  "orientation_error_rad": 0.43862617241312635,
+  "orientation_enforced": false,
+  "execution_started": true,
+  "world_revision_before": 0,
+  "world_revision_after": 0,
+  "evidence_id": "case1_happy_a-756be4f0",
+  "detail": "planning + execution + measured pose within tolerance",
+  "phases": [
+    "VALIDATING",
+    "PLANNING",
+    "EXECUTING",
+    "CHECKING"
+  ],
+  "wall_seconds": 1.586,
+  "reached_pose": {
+    "frame_id": "world",
+    "position": [
+      0.19992690821925227,
+      0.047366439722260324,
+      0.20648053206222
+    ]
+  }
+}
+RC=0
+=== case2 happy_b target=(0.15,-0.15,0.25) q=(0,0,0,1) profile=demo_slow | 2026-09-27T03:16:37+08:00 | EXPECT: outcome=SUCCEEDED pos_err<0.02 ===
+SENDING request_id=case2_happy_b frame=world pose=['0.1500', '-0.1500', '0.2500', '0.0000', '0.0000', '0.0000', '1.0000'] profile=demo_slow deadline=20000
+FEEDBACK VALIDATING elapsed_ms=0
+FEEDBACK PLANNING   elapsed_ms=0
+FEEDBACK EXECUTING  elapsed_ms=66
+FEEDBACK CHECKING   elapsed_ms=2342
+RESULT {
+  "outcome": "OUTCOME_SUCCEEDED",
+  "outcome_val": 0,
+  "error_code": "ERR_NONE",
+  "error_code_val": 0,
+  "moveit_error_code": 0,
+  "has_reached_pose": true,
+  "position_error_m": 0.007745456966648458,
+  "orientation_error_rad": 0.9496769845876311,
+  "orientation_enforced": false,
+  "execution_started": true,
+  "world_revision_before": 0,
+  "world_revision_after": 0,
+  "evidence_id": "case2_happy_b-2a9c7110",
+  "detail": "planning + execution + measured pose within tolerance",
+  "phases": [
+    "VALIDATING",
+    "PLANNING",
+    "EXECUTING",
+    "CHECKING"
+  ],
+  "wall_seconds": 2.37,
+  "reached_pose": {
+    "frame_id": "world",
+    "position": [
+      0.15312844656644056,
+      -0.15462928796398256,
+      0.24463580214294295
+    ]
+  }
+}
+RC=0
+=== case3 invalid_workspace target=(0,0,0.90) z>0.75 | 2026-09-27T03:16:41+08:00 | EXPECT: outcome=FAILED error_code=INVALID_GOAL execution_started=false ===
+SENDING request_id=case3_invalid_ws frame=world pose=['0.0000', '0.0000', '0.9000', '0.0000', '0.0000', '0.0000', '1.0000'] profile=demo_slow deadline=20000
+FEEDBACK VALIDATING elapsed_ms=0
+RESULT {
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_INVALID_GOAL",
+  "error_code_val": 1,
+  "moveit_error_code": 0,
+  "has_reached_pose": false,
+  "position_error_m": NaN,
+  "orientation_error_rad": NaN,
+  "orientation_enforced": false,
+  "execution_started": false,
+  "world_revision_before": 0,
+  "world_revision_after": 0,
+  "evidence_id": "case3_invalid_ws-93362892",
+  "detail": "target [0.000 0.000 0.900] outside workspace [-0.45..0.45, -0.45..0.45, -0.15..0.75]",
+  "phases": [
+    "VALIDATING"
+  ],
+  "wall_seconds": 0.062
+}
+RC=1
+=== case4 invalid_quat q=(0,0,0,0.5) non-normalized | 2026-09-27T03:16:44+08:00 | EXPECT: INVALID_GOAL ===
+SENDING request_id=case4_invalid_quat frame=world pose=['0.2000', '0.0500', '0.2000', '0.0000', '0.0000', '0.0000', '0.5000'] profile=demo_slow deadline=20000
+RESULT {
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_INVALID_GOAL",
+  "error_code_val": 1,
+  "moveit_error_code": 0,
+  "has_reached_pose": false,
+  "position_error_m": NaN,
+  "orientation_error_rad": NaN,
+  "orientation_enforced": false,
+  "execution_started": false,
+  "world_revision_before": 0,
+  "world_revision_after": 0,
+  "evidence_id": "case4_invalid_quat-24410053",
+  "detail": "quaternion not normalized (norm=0.500000)",
+  "phases": [],
+  "wall_seconds": 0.028
+}
+RC=1
+=== case5 invalid_profile profile=turbo not whitelisted | 2026-09-27T03:16:47+08:00 | EXPECT: INVALID_GOAL ===
+SENDING request_id=case5_invalid_profile frame=world pose=['0.2000', '0.0500', '0.2000', '0.0000', '0.0000', '0.0000', '1.0000'] profile=turbo deadline=20000
+FEEDBACK VALIDATING elapsed_ms=0
+RESULT {
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_INVALID_GOAL",
+  "error_code_val": 1,
+  "moveit_error_code": 0,
+  "has_reached_pose": false,
+  "position_error_m": NaN,
+  "orientation_error_rad": NaN,
+  "orientation_enforced": false,
+  "execution_started": false,
+  "world_revision_before": 0,
+  "world_revision_after": 0,
+  "evidence_id": "case5_invalid_profile-1d782090",
+  "detail": "motion_profile_id 'turbo' not in whitelist ['demo_default', 'demo_slow', 'demo_veryslow']",
+  "phases": [
+    "VALIDATING"
+  ],
+  "wall_seconds": 0.037
+}
+RC=1
+=== case6 stale_world expected_revision=7 with gate off | 2026-09-27T03:16:50+08:00 | EXPECT: error_code=STALE_WORLD execution_started=false ===
+SENDING request_id=case6_stale_world frame=world pose=['0.2000', '0.0500', '0.2000', '0.0000', '0.0000', '0.0000', '1.0000'] profile=demo_slow deadline=20000
+FEEDBACK VALIDATING elapsed_ms=0
+RESULT {
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_STALE_WORLD",
+  "error_code_val": 3,
+  "moveit_error_code": 0,
+  "has_reached_pose": false,
+  "position_error_m": NaN,
+  "orientation_error_rad": NaN,
+  "orientation_enforced": false,
+  "execution_started": false,
+  "world_revision_before": 0,
+  "world_revision_after": 0,
+  "evidence_id": "case6_stale_world-ca899553",
+  "detail": "expected_world_revision=7 but the world revision gate is not enabled in Day 2 fixed-scene mode; refusing rather than faking a revision",
+  "phases": [
+    "VALIDATING"
+  ],
+  "wall_seconds": 0.049
+}
+RC=1
+=== case7 ik_unreachable target=(0.42,0,0.10) inside box beyond reach | 2026-09-27T03:16:53+08:00 | EXPECT: error_code=IK_UNREACHABLE execution_started=false fast-fail~1s ===
+SENDING request_id=case7_ik_unreachable frame=world pose=['0.4200', '0.0000', '0.1000', '0.0000', '0.0000', '0.0000', '1.0000'] profile=demo_slow deadline=20000
+FEEDBACK VALIDATING elapsed_ms=0
+FEEDBACK PLANNING   elapsed_ms=0
+RESULT {
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_IK_UNREACHABLE",
+  "error_code_val": 10,
+  "moveit_error_code": 0,
+  "has_reached_pose": false,
+  "position_error_m": NaN,
+  "orientation_error_rad": NaN,
+  "orientation_enforced": false,
+  "execution_started": false,
+  "world_revision_before": 0,
+  "world_revision_after": 0,
+  "evidence_id": "case7_ik_unreachable-36aaff0a",
+  "detail": "IK pre-check failed: NO_IK_SOLUTION for link end_effector_link",
+  "phases": [
+    "VALIDATING",
+    "PLANNING"
+  ],
+  "wall_seconds": 1.061
+}
+RC=1
+=== case8 timeout deadline=800ms on far target (0.25,0.15,0.15) | 2026-09-27T03:16:58+08:00 | EXPECT: error_code=EXECUTION_TIMEOUT preempted=true stop_confirmed=true phases include STOPPING ===
+SENDING request_id=case8_timeout frame=world pose=['0.2500', '0.1500', '0.1500', '0.0000', '0.0000', '0.0000', '1.0000'] profile=demo_slow deadline=800
+FEEDBACK VALIDATING elapsed_ms=0
+FEEDBACK PLANNING   elapsed_ms=0
+FEEDBACK EXECUTING  elapsed_ms=76
+FEEDBACK STOPPING   elapsed_ms=801
+RESULT {
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_EXECUTION_TIMEOUT",
+  "error_code_val": 22,
+  "moveit_error_code": 0,
+  "has_reached_pose": false,
+  "position_error_m": NaN,
+  "orientation_error_rad": NaN,
+  "orientation_enforced": false,
+  "execution_started": true,
+  "world_revision_before": 0,
+  "world_revision_after": 0,
+  "evidence_id": "case8_timeout-02b14cb0",
+  "detail": "timeout; preempted; stop confirmed",
+  "phases": [
+    "VALIDATING",
+    "PLANNING",
+    "EXECUTING",
+    "STOPPING"
+  ],
+  "wall_seconds": 0.98
+}
+RC=1
+=== case9 cancel 1.0s into EXECUTING, target=(0.05,-0.28,0.18) | 2026-09-27T03:17:01+08:00 | EXPECT: outcome=CANCELED preempted=true stop_confirmed=true ===
+SENDING request_id=case9_cancel frame=world pose=['0.0500', '-0.2800', '0.1800', '0.0000', '0.0000', '0.0000', '1.0000'] profile=demo_slow deadline=20000
+FEEDBACK VALIDATING elapsed_ms=0
+FEEDBACK PLANNING   elapsed_ms=2
+FEEDBACK EXECUTING  elapsed_ms=71
+CANCEL_REQUESTED 1.00s into EXECUTING
+FEEDBACK STOPPING   elapsed_ms=1105
+RESULT {
+  "outcome": "OUTCOME_CANCELED",
+  "outcome_val": 2,
+  "error_code": "ERR_CANCELED",
+  "error_code_val": 32,
+  "moveit_error_code": 0,
+  "has_reached_pose": false,
+  "position_error_m": NaN,
+  "orientation_error_rad": NaN,
+  "orientation_enforced": false,
+  "execution_started": true,
+  "world_revision_before": 0,
+  "world_revision_after": 0,
+  "evidence_id": "case9_cancel-313a3267",
+  "detail": "cancel; preempted; stop confirmed",
+  "phases": [
+    "VALIDATING",
+    "PLANNING",
+    "EXECUTING",
+    "STOPPING"
+  ],
+  "wall_seconds": 1.297
+}
+RC=1
+=== case10 day1_regression plan_execute.py 0.0 -0.9 0.9 0.5 | 2026-09-27T03:17:07+08:00 | EXPECT: PLAN/EXECUTE error_code=1 MOTION_DETECTED=True ===
+waiting for /move_action and /execute_trajectory ...
+BEFORE /joint_states: {'joint1': -1.0248, 'joint2': -0.1544, 'joint3': 0.2173, 'joint4': -0.3363}
+PLAN error_code = 1  planning_time = 0.0112
+PLANNED joints: ['joint1', 'joint2', 'joint3', 'joint4']
+PLANNED waypoints: 14
+PLANNED final positions: [-0.0038, -0.8904, 0.9017, 0.4967]
+PLANNED duration: 1.278 s
+EXECUTE error_code = 1
+AFTER  /joint_states: {'joint1': -0.0038, 'joint2': -0.8904, 'joint3': 0.9017, 'joint4': 0.4967}
+DELTA  /joint_states: {'joint1': 1.021, 'joint2': -0.736, 'joint3': 0.6843, 'joint4': 0.833}
+MOTION_DETECTED = True
+RC = 0
+RC=0

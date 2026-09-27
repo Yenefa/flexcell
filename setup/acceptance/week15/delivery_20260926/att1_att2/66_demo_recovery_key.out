@@ -1,0 +1,9 @@
+  "outcome": "OUTCOME_FAILED",
+  "error_code": "ERR_RECOVERY_EXHAUSTED",
+  "detail": "PICK_B(attempt=2) failed (ERR_GRASP_FAILED): box did not follow the lift (rise=-0.000m < 0.030m); released for safety",
+  "fsm_trace": [
+    "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+    "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED",
+    "RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1))",
+    "PICK_B(attempt=2):FAIL:ERR_GRASP_FAILED"
+  "run_id": "recovery_demo_v1-5b80cee7",

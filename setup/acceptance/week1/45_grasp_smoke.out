@@ -1,0 +1,32 @@
+=== restart move_to_pose server cleanly 2026-09-26T15:18:12+08:00 ===
+5519 /usr/bin/python3 /home/ros/agentic_workcell_ws/install/flexcell_skills/lib/flexcell_skills/move_to_pose_server --ros-args -r __node:=move_to_pose_server --params-file /home/ros/agentic_workcell_ws/install/flexcell_skills/share/flexcell_skills/config/move_to_pose.yaml --params-file /tmp/launch_params_uxaej72r
+=== sanity: arm reachable via MoveToPose (move to 0.20, 0.05, 0.20) ===
+SENDING request_id=smoke_sanity frame=world pose=['0.2000', '0.0500', '0.2000', '0.0000', '0.0000', '0.0000', '1.0000'] profile=demo_slow deadline=20000
+  "outcome": "OUTCOME_SUCCEEDED",
+  "outcome_val": 0,
+  "error_code": "ERR_NONE",
+  "error_code_val": 0,
+  "moveit_error_code": 0,
+  "position_error_m": 0.008353405872988115,
+  "wall_seconds": 1.94,
+=== box pose BEFORE ===
+  - Pose [ XYZ (m) ] [ RPY (rad) ]:
+    [0.142577 0.036086 0.031605]
+=== ATTACH ===
+=== move arm to (0.15, -0.15, 0.25) carrying box ===
+SENDING request_id=smoke_carry frame=world pose=['0.1500', '-0.1500', '0.2500', '0.0000', '0.0000', '0.0000', '1.0000'] profile=demo_slow deadline=20000
+  "outcome": "OUTCOME_SUCCEEDED",
+  "outcome_val": 0,
+  "error_code": "ERR_NONE",
+  "error_code_val": 0,
+  "moveit_error_code": 0,
+  "position_error_m": 0.004222699582008246,
+  "wall_seconds": 2.432,
+=== box pose AFTER CARRY (expect z ~ 0.25 area, moved with EE) ===
+  - Pose [ XYZ (m) ] [ RPY (rad) ]:
+    [0.139770 -0.145692 0.066330]
+=== DETACH ===
+=== box pose AFTER DETACH ===
+  - Pose [ XYZ (m) ] [ RPY (rad) ]:
+    [0.143940 -0.150440 0.017476]
+SMOKE2_DONE

@@ -1,0 +1,24 @@
+=== case6 stale_world expected_revision=7 with gate off | 2026-09-27T03:16:50+08:00 | EXPECT: error_code=STALE_WORLD execution_started=false ===
+SENDING request_id=case6_stale_world frame=world pose=['0.2000', '0.0500', '0.2000', '0.0000', '0.0000', '0.0000', '1.0000'] profile=demo_slow deadline=20000
+FEEDBACK VALIDATING elapsed_ms=0
+RESULT {
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_STALE_WORLD",
+  "error_code_val": 3,
+  "moveit_error_code": 0,
+  "has_reached_pose": false,
+  "position_error_m": NaN,
+  "orientation_error_rad": NaN,
+  "orientation_enforced": false,
+  "execution_started": false,
+  "world_revision_before": 0,
+  "world_revision_after": 0,
+  "evidence_id": "case6_stale_world-ca899553",
+  "detail": "expected_world_revision=7 but the world revision gate is not enabled in Day 2 fixed-scene mode; refusing rather than faking a revision",
+  "phases": [
+    "VALIDATING"
+  ],
+  "wall_seconds": 0.049
+}
+RC=1

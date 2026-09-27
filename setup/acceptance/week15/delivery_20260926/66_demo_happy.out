@@ -1,0 +1,25 @@
+=== happy demo week1_demo_v1 | 2026-09-26T22:07:23+08:00 ===
+SENDING action=demo object=target_box pose=[0.12, -0.15, 0.0175]
+RESULT {
+  "action": "demo",
+  "outcome": "OUTCOME_SUCCEEDED",
+  "outcome_val": 0,
+  "error_code": "ERR_NONE",
+  "detail": "demo done: A->zone_1 (0.0000m), B->zone_2 (0.0000m)",
+  "wall_seconds": 24.207,
+  "fsm_trace": [
+    "PICK_A(attempt=1):OK",
+    "PLACE_A:OK",
+    "VERIFY_A(attempt=1):OK",
+    "PICK_B(attempt=1):OK",
+    "PLACE_B:OK",
+    "VERIFY_B(attempt=1):OK"
+  ],
+  "object_a_at_zone": true,
+  "object_b_at_zone": true,
+  "zone_a_error_m": 0.00592947470840419,
+  "zone_b_error_m": 0.008675578183816276,
+  "run_id": "week1_demo_v1-c225a4fa",
+  "scenario_id": "week1_demo_v1"
+}
+RC=0

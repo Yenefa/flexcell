@@ -1,0 +1,24 @@
+=== case5 invalid_profile profile=turbo not whitelisted | 2026-09-27T03:16:47+08:00 | EXPECT: INVALID_GOAL ===
+SENDING request_id=case5_invalid_profile frame=world pose=['0.2000', '0.0500', '0.2000', '0.0000', '0.0000', '0.0000', '1.0000'] profile=turbo deadline=20000
+FEEDBACK VALIDATING elapsed_ms=0
+RESULT {
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_INVALID_GOAL",
+  "error_code_val": 1,
+  "moveit_error_code": 0,
+  "has_reached_pose": false,
+  "position_error_m": NaN,
+  "orientation_error_rad": NaN,
+  "orientation_enforced": false,
+  "execution_started": false,
+  "world_revision_before": 0,
+  "world_revision_after": 0,
+  "evidence_id": "case5_invalid_profile-1d782090",
+  "detail": "motion_profile_id 'turbo' not in whitelist ['demo_default', 'demo_slow', 'demo_veryslow']",
+  "phases": [
+    "VALIDATING"
+  ],
+  "wall_seconds": 0.037
+}
+RC=1

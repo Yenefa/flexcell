@@ -1,0 +1,53 @@
+=== lifecycle log scan | 2026-09-26T21:51:07+08:00 ===
+--- fleet.log ---
+set_pose_failed=0
+unregistered_TypeError=0
+carry_ENGAGED=7
+carry_RELEASED=7
+log_bytes=10049
+--- gazebo.log ---
+set_pose_failed=0
+unregistered_TypeError=0
+carry_ENGAGED=0
+carry_RELEASED=0
+log_bytes=22361
+--- moveit.log ---
+set_pose_failed=0
+unregistered_TypeError=0
+carry_ENGAGED=0
+carry_RELEASED=0
+log_bytes=126274
+--- move_to_pose.log ---
+set_pose_failed=0
+unregistered_TypeError=0
+carry_ENGAGED=0
+carry_RELEASED=0
+log_bytes=1042
+
+=== fleet.log: set_pose failed warns (last 15) ===
+
+=== fleet.log: unregistered TypeError first+last occurrence ===
+
+=== fleet.log: carry ENGAGED/RELEASED timeline (all) ===
+17:[carry_server-6] [INFO] [1790429406.667917003] [carry_server]: carry ENGAGED object=target_box_a offset=[-0.003 -0.004 -0.166]
+30:[carry_server-6] [INFO] [1790429416.117729885] [carry_server]: carry RELEASED
+32:[carry_server-6] [INFO] [1790429420.561868278] [carry_server]: carry ENGAGED object=target_box_b offset=[-0.004 0.000 -0.156]
+33:[carry_server-6] [INFO] [1790429423.335854885] [carry_server]: carry RELEASED
+34:[carry_server-6] [INFO] [1790429430.847625331] [carry_server]: carry ENGAGED object=target_box_b offset=[0.006 0.006 -0.163]
+35:[carry_server-6] [INFO] [1790429434.009732142] [carry_server]: carry RELEASED
+39:[carry_server-6] [INFO] [1790430090.437672000] [carry_server]: carry ENGAGED object=target_box_a offset=[0.005 -0.000 -0.156]
+40:[carry_server-6] [INFO] [1790430097.451256994] [carry_server]: carry RELEASED
+54:[carry_server-6] [INFO] [1790430101.837152340] [carry_server]: carry ENGAGED object=target_box_b offset=[0.002 0.000 -0.155]
+55:[carry_server-6] [INFO] [1790430109.340733073] [carry_server]: carry RELEASED
+77:[carry_server-6] [INFO] [1790430189.951744743] [carry_server]: carry ENGAGED object=target_box_a offset=[-0.003 0.004 -0.157]
+78:[carry_server-6] [INFO] [1790430196.902681224] [carry_server]: carry RELEASED
+92:[carry_server-6] [INFO] [1790430201.096883964] [carry_server]: carry ENGAGED object=target_box_b offset=[0.005 -0.000 -0.157]
+93:[carry_server-6] [INFO] [1790430204.104233994] [carry_server]: carry RELEASED
+
+=== pick.jsonl: 6 records from end (attempt history) ===
+{"request_id": "target_box_a", "evidence_id": "target_box_a-13e58767", "object_name": "target_box_a", "profile": "demo_slow", "box_before": [0.22, 3.087082193933989e-20, 0.01749999751174475], "scene_box_added": true, "attach_gap_m": 0.1562657999164379, "carry_offset": [0.00461278744513563, -0.0002102054834952425, -0.15619756153399103], "box_after": [0.22642335721410742, 0.005356501922805438, 0.0908293152196072], "box_rise_m": 0.07332931770786245, "outcome": "0", "error_code": 0, "motion_error_code": 0, "detail": "picked target_box_a: attached, measured rise 0.073m", "elapsed_ms": 6329, "wall_ts": 1790430093.189057}
+{"request_id": "target_box_b", "evidence_id": "target_box_b-df86594f", "object_name": "target_box_b", "profile": "demo_slow", "box_before": [0.2, -0.18, 0.01749999751174475], "scene_box_added": true, "attach_gap_m": 0.15509877050569343, "carry_offset": [0.002136270637368931, 0.00048114750758249114, -0.15508331134334738], "box_after": [0.197945813118385, -0.17539286596875434, 0.07353696482826001], "box_rise_m": 0.056036967316515265, "outcome": "0", "error_code": 0, "motion_error_code": 0, "detail": "picked target_box_b: attached, measured rise 0.056m", "elapsed_ms": 6940, "wall_ts": 1790430104.6007097}
+{"request_id": "target_box_a", "evidence_id": "target_box_a-147e9ea6", "object_name": "target_box_a", "profile": "demo_slow", "injected": true, "outcome": "1", "error_code": 23, "motion_error_code": 0, "detail": "injected failure (scenario=recovery_demo_v1 mode=once attempt=1)", "elapsed_ms": 0, "wall_ts": 1790430186.2241998}
+{"request_id": "target_box_a", "evidence_id": "target_box_a-fd3493f2", "object_name": "target_box_a", "profile": "demo_slow", "box_before": [0.22, 5.398022422475495e-20, 0.01749999751174475], "scene_box_added": true, "attach_gap_m": 0.15677631678932297, "carry_offset": [-0.003250350375722688, 0.0038577652562595192, -0.1566951383281842], "box_after": [0.21817218067587324, 0.009503838146067478, 0.08602502384978107], "box_rise_m": 0.06852502633803632, "outcome": "0", "error_code": 0, "motion_error_code": 0, "detail": "picked target_box_a: attached, measured rise 0.069m", "elapsed_ms": 6135, "wall_ts": 1790430192.5126467}
+{"request_id": "target_box_b", "evidence_id": "target_box_b-8650959e", "object_name": "target_box_b", "profile": "demo_slow", "injected": true, "outcome": "1", "error_code": 23, "motion_error_code": 0, "detail": "injected failure (scenario=recovery_demo_v1 mode=once attempt=1)", "elapsed_ms": 0, "wall_ts": 1790430197.1697838}
+{"request_id": "target_box_b", "evidence_id": "target_box_b-b9db4c5c", "object_name": "target_box_b", "profile": "demo_slow", "box_before": [0.2, -0.18, 0.01749999751174475], "scene_box_added": true, "attach_gap_m": 0.1568229621888545, "carry_offset": [0.005380817615784156, -9.08952506681604e-05, -0.1567305969156181], "box_after": [0.20040906059720134, -0.17634131569006714, 0.017476991301463553], "box_rise_m": -2.300621028119773e-05, "outcome": "1", "error_code": 23, "motion_error_code": 0, "detail": "box did not follow the lift (rise=-0.000m < 0.030m); released for safety", "elapsed_ms": 6999, "wall_ts": 1790430204.3380063}

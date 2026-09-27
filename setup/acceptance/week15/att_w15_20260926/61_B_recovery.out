@@ -1,0 +1,29 @@
+=== 61_B_recovery | 2026-09-26T20:01:54+08:00 | scenario=recovery_demo_v1 ===
+SENDING action=demo object=target_box pose=[0.12, -0.15, 0.0175]
+RESULT {
+  "action": "demo",
+  "outcome": "OUTCOME_SUCCEEDED",
+  "outcome_val": 0,
+  "error_code": "ERR_NONE",
+  "detail": "demo done: A->zone_1 (0.0000m), B->zone_2 (0.0000m)",
+  "wall_seconds": 23.036,
+  "fsm_trace": [
+    "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+    "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+    "PICK_A(attempt=2):OK",
+    "PLACE_A:OK",
+    "VERIFY_A(attempt=1):OK",
+    "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED",
+    "RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1))",
+    "PICK_B(attempt=2):OK",
+    "PLACE_B:OK",
+    "VERIFY_B(attempt=1):OK"
+  ],
+  "object_a_at_zone": true,
+  "object_b_at_zone": true,
+  "zone_a_error_m": 0.008637870683462218,
+  "zone_b_error_m": 0.004261860863624133,
+  "run_id": "recovery_demo_v1-ac5f60c7",
+  "scenario_id": "recovery_demo_v1"
+}
+RC=0

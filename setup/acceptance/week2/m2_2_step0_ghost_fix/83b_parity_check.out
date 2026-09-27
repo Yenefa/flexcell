@@ -1,0 +1,10 @@
+baseline : week1_demo_v1-c225a4fa outcome 0 steps 8
+new      : week1_demo_v1-df5aa002 outcome 1 steps 10
+record keys identical : True
+fsm_trace identical   : False
+  baseline trace: ['PICK_A(attempt=1):OK', 'PLACE_A:OK', 'VERIFY_A(attempt=1):OK', 'PICK_B(attempt=1):OK', 'PLACE_B:OK', 'VERIFY_B(attempt=1):OK']
+  new      trace: ['PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED', 'RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))', 'PICK_A(attempt=1):OK', 'PLACE_A:OK', 'VERIFY_A(attempt=1):OK', 'PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED', 'RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1))', 'PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED']
+outcome identical     : False
+step count identical  : False
+PARITY: FAIL
+new zone errors: a=0.0029 b=nan (tolerance 0.060)
