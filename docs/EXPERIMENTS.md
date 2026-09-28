@@ -7,15 +7,16 @@
 
 ## Index
 
-| ID    | Experiment                                           | Outcome      | Evidence                                                              |
-| ----- | ---------------------------------------------------- | ------------ | --------------------------------------------------------------------- |
-| E-001 | Day-1 environment verification                       | PASS         | acceptance/day1 (delivery host) + [DAY1_REPORT.md](../DAY1_REPORT.md) |
-| E-002 | Day-2 MoveToPose acceptance                          | PASS 10/10   | acceptance/day2 + [DAY2_MOVETOPOSE.md](DAY2_MOVETOPOSE.md)            |
-| E-003 | Week-1 deterministic skills battery                  | PASS         | acceptance/week1                                                      |
-| E-004 | Week-1.5 demo hardening — delivery acceptance (att3) | PASS         | acceptance/week15/delivery_20260926/                                  |
-| E-005 | Week-1.5 cold-start re-verification                  | PASS         | acceptance/week15/cs_20260926/                                        |
-| E-006 | M2.3 audit remediation — runtime acceptance          | PASS (gated) | acceptance/sessions/ (FLEXCELL_STAGE) + ~/.ros/flexcell/referee.jsonl |
-| M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)           | NOT RUN      | — (RFC #15; harness #7/#8/#9)                                         |
+| ID    | Experiment                                             | Outcome      | Evidence                                                              |
+| ----- | ------------------------------------------------------ | ------------ | --------------------------------------------------------------------- |
+| E-001 | Day-1 environment verification                         | PASS         | acceptance/day1 (delivery host) + [DAY1_REPORT.md](../DAY1_REPORT.md) |
+| E-002 | Day-2 MoveToPose acceptance                            | PASS 10/10   | acceptance/day2 + [DAY2_MOVETOPOSE.md](DAY2_MOVETOPOSE.md)            |
+| E-003 | Week-1 deterministic skills battery                    | PASS         | acceptance/week1                                                      |
+| E-004 | Week-1.5 demo hardening — delivery acceptance (att3)   | PASS         | acceptance/week15/delivery_20260926/                                  |
+| E-005 | Week-1.5 cold-start re-verification                    | PASS         | acceptance/week15/cs_20260926/                                        |
+| E-006 | M2.3 audit remediation — runtime acceptance            | PASS (gated) | acceptance/sessions/ (FLEXCELL_STAGE) + ~/.ros/flexcell/referee.jsonl |
+| E-007 | Scenario runner batch (S1×2 + S2 + S5), episode replay | PASS         | ~/.ros/flexcell/episodes/batch_20260928_051219.jsonl                  |
+| M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)             | NOT RUN      | — (RFC #15; harness #7/#8/#9)                                         |
 
 ## Entries
 
@@ -106,6 +107,20 @@
   catch-up variance — contact grasping (D4) is the structural fix; the demo result
   detail prints `zone_%s_error_m` as 0.0000 while verify measures mm-scale (verify
   sampling moment to be checked in hardening).
+
+### E-007 — Scenario runner batch: S1×2 + S2 + S5 with episode replay (2026-09-28)
+
+- **Purpose**: close issue #7 — the scenario runner orchestrates reset → injection →
+  demo/task → episode collection → offline policy-input replay → batch summary, with
+  Wilson-CI success reporting (metric #1).
+- **Configuration**: headless stack, flexcell world; batch `S1:2 S2:1 S5:1`;
+  policy = FSMPolicy (replay of every recorded decision).
+- **Result**: SCENARIO RUNNER PASS — S1 2/2 SUCCEEDED (CI95 [0.34, 1.00]), S2
+  (injected first-attempt failure, recovered) 1/1 SUCCEEDED, S5 (retry exhaustion)
+  FAILED as expected with the typed abort; **all 4 episodes replayed with 0 diverged
+  decisions** (8/10/12/5 steps). Batch summary:
+  `~/.ros/flexcell/episodes/batch_20260928_051219.jsonl`.
+- **Evidence**: batch summary jsonl + the episode files it references.
 
 ## Evidence locations
 

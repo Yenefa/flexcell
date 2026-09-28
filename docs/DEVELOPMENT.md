@@ -31,16 +31,16 @@ LLM**. LLM is explicitly deferred (③) until interface + scenario runner + repl
 
 Checklist (ratified order — check off as issues close):
 
-- [ ] WorldState v2 freeze + versioned canonical serializer — #3 (contract RFC #16)
-- [ ] DecisionPolicy interface + Decision/TaskGoal/Constraints/TaskHistory types — #4 (RFC #14)
-- [ ] FSMPolicy + executor seam (`decision_policy: fsm|jev|llm|hybrid`, default=fsm) + trace-shape parity — #5
+- [x] WorldState v2 freeze + versioned canonical serializer — #3 (contract RFC #16)
+- [x] DecisionPolicy interface + Decision/TaskGoal/Constraints/TaskHistory types — #4 (RFC #14)
+- [x] FSMPolicy + executor seam (`decision_policy: fsm|jev|llm|hybrid`, default=fsm) + trace-shape parity — #5
 - [x] Deterministic safety gate + invalid-decision accounting — #6
       (`contracts/safety_gate.py` + executor wiring + planted-proposal test hook;
       2026-09-28)
-- [x] Episode record + policy-input replay store — #7 (partial: contract
-      `contracts/episode.py` + executor recorder + offline replay runner
-      `setup/93_replay.py` landed 2026-09-28; the scenario runner that arms
-      injection schedules and batches episodes remains)
+- [x] Episode record + policy-input replay store + scenario runner — #7
+      (`contracts/episode.py` + executor recorder + `setup/93_replay.py`
+      offline replay + `setup/94_scenario_runner.py` S1/S2/S4/S5 orchestration
+      with Wilson-CI batch summaries; 2026-09-28)
 - [ ] Benchmark harness + metrics report generator — #8
 - [ ] S7 perturbation scenario builder — #9
 - [ ] JevPolicy + pluggable JevBackend (TypeSafeBackend | LocalReproductionBackend) — #10
