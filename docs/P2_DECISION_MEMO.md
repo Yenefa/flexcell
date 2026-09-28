@@ -27,7 +27,9 @@ cost-based solution selection.
 
 **Proposal to ratify:** "FSM stays as the M2/M3 control arm; an MTC-backed
 skill backend is evaluated as a treatment arm in M3, behind the existing
-action contracts." → ADR-003.
+action contracts." → **DRAFT READY:
+[ADR-003](ADR/ADR-003-orchestration-substrate.md) (Proposed) — ratify or
+amend.**
 
 ## D2 — B5 (byte parity) vs M3 (policy comparison) — resolve the contradiction
 
@@ -49,8 +51,10 @@ proposes).**
   are normalized as executor-leg-local.
 - The frozen Week-1.5 baseline files stay untouched (regression guard).
 
-**Proposal to ratify:** B5 downgraded as above; amendment recorded in
-ADR-002 addendum + ROADMAP M3 entry.
+**Proposal to ratify:** B5 downgraded as above; amendment drafted as an
+**addendum in [ADR-002](ADR/ADR-002-runtime-decision-layer-boundary.md)
+(PROPOSED) — ratify or amend.** The comparison-tooling half is already
+implemented (91 + 93).
 
 ## D3 — Does M2.3 (replay harness / benchmark / S7) proceed as planned?
 

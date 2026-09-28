@@ -68,3 +68,18 @@ Replay → Jev → LLM**. Work is tracked in sub-milestones (implementation) plu
 
 The core variable is no longer "how accurately it grasps" but "how to choose the correct
 action under uncertainty" — Agentic Robotics.
+
+## Route re-evaluation triggers (2026-09-28, from the M2.3 audit §5)
+
+The stack bets are LTS-frozen to 2029 and the 2026-09-28 audit's external scan is
+current — a calendar-based re-survey adds nothing. Re-evaluation is **trigger-based**
+instead; at each trigger the relevant literature/landscape pass is redone and the
+conclusion lands in an ADR or ROADMAP update:
+
+| #   | Trigger                                                                                                                            | Re-evaluate                                                                                                    |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| T1  | **Before M3 starts** (M2 definition-of-done met)                                                                                   | Orchestration substrate (FSM vs MTC as treatment arm) — fresh literature pass, ADR-003 ratified (draft exists) |
+| T2  | **Lyrical migration window** (Jazzy EOL 2029-05 approaching, or a required feature is Lyrical-only)                                | Full stack re-selection (ROS 2 / Gazebo / MoveIt)                                                              |
+| T3  | **Real-hardware decision point** (D4 exit condition fires, or hardware bring-up is scheduled)                                      | Sim-to-real + contact-grasping literature; contact grasp mechanism choice                                      |
+| T4  | **Before implementing #11 LLMPolicy**                                                                                              | VLA / LLM-planning landscape (the fastest-moving input; the deferred item is where staleness bites hardest)    |
+| T5  | **Before any vendor number becomes load-bearing** (e.g. Jev vendor's ~200× / 1-400 cost claims, p95 UNKNOWN per WEEK2_PREPARATION) | Independent reproduction before trusting                                                                       |

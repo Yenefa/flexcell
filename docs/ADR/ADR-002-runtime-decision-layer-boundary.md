@@ -90,6 +90,32 @@ confidence, reason_code, evidence_ref)`; nothing else in, nothing else out.
 - **B5 — Parity bar (ratified ②)**: with `decision_policy=fsm` (the default), behavior
   must be trace-shape-identical to the Week-1.5 baseline (fsm_trace strings, step
   records, error codes) across happy / recovery / exhaustion scenarios.
+
+### Addendum (PROPOSED — awaiting chief ratification; M2.3 audit P2-D2, 2026-09-28)
+
+**B5 is downgraded from "behavioral equivalence proof" to "pipeline-unbroken
+regression guard."** Ratified ② was written when FSMPolicy was the only policy; as
+ratified it contradicts M3's purpose (measuring policy-quality differences requires
+behavior to differ). The amendment:
+
+1. **Pipeline guard (what B5 keeps proving)**: when a policy is swapped, the episode
+   step structure and labels match under attempt-label normalization
+   (`setup/91_measured_parity.py`, which also compares MEASURED zone errors within
+   physics tolerance) and every recorded decision replays under the policy-input
+   store (`setup/93_replay.py`). Byte-identity of self-reported `fsm_trace` strings
+   is no longer the bar.
+2. **M3 comparison metrics (what B5 stops blocking)**: task success rate,
+   **first-attempt success rate**, recovery count, decision latency (§4.3 metrics,
+   Wilson CIs) — measured values, never trace strings.
+3. The frozen Week-1.5 baseline files remain untouched as a regression reference;
+   attempt labels are executor-leg-local and normalized at comparison time, never
+   re-emitted.
+4. Rationale and the audit finding that motivated this: every captured "BYTE_PARITY"
+   artifact read FAIL on disk (the bar was already unmet in practice), and
+   trace-string equality measures self-reported narration, not behavior.
+
+Ratifying this addendum closes P2-D2 of the M2.3 audit.
+
 - **B6 — Replaceable parts**: swapping a policy, a Jev backend, or even the robot
   backend (ADR-001 rule 3) changes implementation only — the skill action contracts,
   the WorldState schema semantics, and this three-way split stay fixed.
