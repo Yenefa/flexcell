@@ -50,7 +50,11 @@ Checklist (ratified order — check off as issues close):
 - [ ] JevPolicy + pluggable JevBackend (TypeSafeBackend | LocalReproductionBackend) — #10
 - [ ] LLMPolicy — #11 (**DEFERRED ③** — do not start before the four items above exist)
 - [ ] HybridRouter + threshold sweep τ∈{0.5,0.7,0.9} + calibration report — #12
-- [ ] ADR set from the ratified Week-2 preparation — #2
+- [x] ADR set from the ratified Week-2 preparation — #2 (ADR-001 simulation
+      backend, ADR-002 decision-layer boundary + **Accepted B5 addendum**;
+      plus ADR-003 orchestration substrate — ratified with three amendments
+      2026-09-28: FSM = reference/control arm, MTC = alternative orchestration
+      behind the same skill seam, M3 entry gate)
 
 **Definition of done for M2**: every benchmark cell can run offline on the replay store;
 FSMPolicy trace parity is proven; the safety gate deterministically rejects planted

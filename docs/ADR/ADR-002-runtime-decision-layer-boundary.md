@@ -91,7 +91,10 @@ confidence, reason_code, evidence_ref)`; nothing else in, nothing else out.
   must be trace-shape-identical to the Week-1.5 baseline (fsm_trace strings, step
   records, error codes) across happy / recovery / exhaustion scenarios.
 
-### Addendum (PROPOSED — awaiting chief ratification; M2.3 audit P2-D2, 2026-09-28)
+### Addendum (Accepted 2026-09-28 — endorsed in the same chief review that ratified
+
+ADR-003: "trace-string equality would kill the benchmark at the root once Jev /
+Hybrid / MTC make genuinely different decisions"; M2.3 audit P2-D2)
 
 **B5 is downgraded from "behavioral equivalence proof" to "pipeline-unbroken
 regression guard."** Ratified ② was written when FSMPolicy was the only policy; as

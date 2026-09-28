@@ -25,11 +25,13 @@ cost-based solution selection.
   as **ADR-003** (orchestration substrate: FSM as control arm / MTC as
   treatment arm, or full replacement) before M3 starts.
 
-**Proposal to ratify:** "FSM stays as the M2/M3 control arm; an MTC-backed
-skill backend is evaluated as a treatment arm in M3, behind the existing
-action contracts." → **DRAFT READY:
-[ADR-003](ADR/ADR-003-orchestration-substrate.md) (Proposed) — ratify or
-amend.**
+**RATIFIED 2026-09-28 (chief review, three amendments folded in):** "FSM is
+retained as the deterministic **reference/control arm — not the assumed optimal
+orchestration substrate**; MTC enters as an **alternative orchestration
+implementation behind the same skill seam** (not a mere backend — MTC never
+crosses the decision-layer boundary); **M3 entry gate**: the treatment arm only
+starts after the replay/benchmark infrastructure exists (all now landed). See
+[ADR-003](ADR/ADR-003-orchestration-substrate.md) (Accepted) — D1 CLOSED.
 
 ## D2 — B5 (byte parity) vs M3 (policy comparison) — resolve the contradiction
 
@@ -51,10 +53,11 @@ proposes).**
   are normalized as executor-leg-local.
 - The frozen Week-1.5 baseline files stay untouched (regression guard).
 
-**Proposal to ratify:** B5 downgraded as above; amendment drafted as an
-**addendum in [ADR-002](ADR/ADR-002-runtime-decision-layer-boundary.md)
-(PROPOSED) — ratify or amend.** The comparison-tooling half is already
-implemented (91 + 93).
+**RATIFIED 2026-09-28 (same chief review):** B5 downgraded to a
+pipeline-unbroken regression guard via the **Accepted** addendum in
+[ADR-002](ADR/ADR-002-runtime-decision-layer-boundary.md); M3 compares
+measured metrics. The comparison-tooling half is implemented (91 + 93).
+See [ADR-003](ADR/ADR-003-orchestration-substrate.md) — D2 CLOSED.
 
 ## D3 — Does M2.3 (replay harness / benchmark / S7) proceed as planned?
 
