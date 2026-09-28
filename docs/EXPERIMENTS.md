@@ -16,6 +16,7 @@
 | E-005 | Week-1.5 cold-start re-verification                    | PASS         | acceptance/week15/cs_20260926/                                        |
 | E-006 | M2.3 audit remediation — runtime acceptance            | PASS (gated) | acceptance/sessions/ (FLEXCELL_STAGE) + ~/.ros/flexcell/referee.jsonl |
 | E-007 | Scenario runner batch (S1×2 + S2 + S5), episode replay | PASS         | ~/.ros/flexcell/episodes/batch_20260928_051219.jsonl                  |
+| E-008 | Metrics report over real store + S7 adaptation probe   | PASS         | ~/.ros/flexcell/episodes/batch_20260928_124615.jsonl                  |
 | M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)             | NOT RUN      | — (RFC #15; harness #7/#8/#9)                                         |
 
 ## Entries
@@ -121,6 +122,27 @@
   decisions** (8/10/12/5 steps). Batch summary:
   `~/.ros/flexcell/episodes/batch_20260928_051219.jsonl`.
 - **Evidence**: batch summary jsonl + the episode files it references.
+
+### E-008 — Metrics report over the real store + S7 adaptation probe (2026-09-28)
+
+- **Purpose**: close issues #8 (metrics report generator) and #9 (S7 perturbation
+  builder).
+- **#8**: `setup/95_metrics_report.py` regenerates every number from the replay store —
+  per-cell success rate with Wilson 95% CI, decision-latency percentiles (metric 3),
+  safety invalid-per-1000 (metric 6), and replay integrity per episode (planted-
+  proposal records classified as gate evidence, excluded from the integrity
+  denominator). Verified on the full store (21 episodes incl. dev iterations, kept in
+  a separate `dev/*` bucket so they can never pollute a cell) and on the E-007 batch:
+  both REPORT: PASS. Primitives in `contracts/metrics.py` (6 unit tests).
+- **#9**: `setup/96_s7_perturb.py` — seeded off-canonical box placement inside the
+  reachable band (geometry priors: ground plane, x∈[0.16,0.28], |y|≤0.24, ≥0.12 m
+  separation, off zone centres), applied via the gz set_pose service; the runner
+  attaches the schedule to the batch row. S7:2 batch → SCENARIO RUNNER PASS: both
+  off-canonical demos SUCCEEDED (the deterministic baseline adapts to perturbed
+  placement — the expected S7 outcome per ratified ⑥) with 0 diverged replay steps.
+  Batch summary: `~/.ros/flexcell/episodes/batch_20260928_124615.jsonl`.
+- **Evidence**: episode store + both batch summaries; report text in the issue
+  comments.
 
 ## Evidence locations
 

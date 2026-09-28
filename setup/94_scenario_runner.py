@@ -33,6 +33,7 @@ import sys
 import time
 
 from flexcell_skills.contracts.episode import replay_episode
+from flexcell_skills.contracts.metrics import wilson
 from flexcell_skills.decision_policy import FSMPolicy
 
 ROS_LOG = os.path.expanduser('~/.ros/flexcell')
@@ -47,18 +48,9 @@ SCENARIOS = {
            'pose': [0.42, 0.0, 0.0175], 'inject': None, 'expect': 'FAILED'},
     'S5': {'kind': 'demo', 'scenario': 'exhaust_demo_v1',
            'inject': 'exhaust_demo_v1:always', 'expect': 'FAILED'},
+    'S7': {'kind': 'demo', 'scenario': 's7_perturb_v1', 'inject': None,
+           'perturb': True, 'expect': 'SUCCEEDED'},
 }
-
-
-def wilson(successes, n, z=1.96):
-    """Wilson 95% CI for a binomial proportion (metric #1, §4.3)."""
-    if n == 0:
-        return (0.0, 1.0)
-    p = successes / float(n)
-    denom = 1.0 + z * z / n
-    center = (p + z * z / (2 * n)) / denom
-    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / denom
-    return (max(0.0, center - half), min(1.0, center + half))
 
 
 def newest_episode():
@@ -73,11 +65,23 @@ def arm_inject(client, payload):
                         '--inject', payload], capture_output=True, timeout=60)
 
 
-def run_episode(client, spec, ws, log):
-    """One episode: reset, inject, run, clear.  Returns (ok_rc, output)."""
+def run_episode(client, spec, ws, seed=None):
+    """One episode: reset, perturb (S7), inject, run, clear.
+    Returns (rc, output, extra) where extra carries the S7 schedule."""
     admin_env = dict(os.environ, FLEXCELL_WS=ws)
     subprocess.run(['python3', 'setup/flexcell_admin.py', 'reset'],
                    capture_output=True, timeout=300, env=admin_env)
+    extra = {}
+    if spec.get('perturb') and seed is not None:
+        p = subprocess.run(['python3', 'setup/96_s7_perturb.py',
+                            '--seed', str(seed), '--apply'],
+                           capture_output=True, text=True, timeout=60,
+                           env=admin_env)
+        try:
+            extra['perturb'] = json.loads(
+                p.stdout.strip().splitlines()[-1])
+        except (ValueError, IndexError):
+            extra['perturb'] = None
     arm_inject(client, spec.get('inject'))
     cmd = ['python3', client, '--action', spec['kind']]
     if spec['kind'] == 'demo':
@@ -87,7 +91,7 @@ def run_episode(client, spec, ws, log):
                 '--pose'] + [str(v) for v in spec['pose']]
     proc = subprocess.run(cmd, capture_output=True, text=True, timeout=220)
     arm_inject(client, '')   # always clear
-    return proc.returncode, (proc.stdout or '') + (proc.stderr or '')
+    return proc.returncode, (proc.stdout or '') + (proc.stderr or ''), extra
 
 
 def main():
@@ -122,7 +126,8 @@ def main():
         spec = SCENARIOS[sid]
         for i in range(count):
             print('  %s run %d/%d' % (sid, i + 1, count))
-            rc, out = run_episode(client, spec, args.ws, log=False)
+            rc, out, extra = run_episode(client, spec, args.ws,
+                                         seed=1000 + len(rows))
             outcome = ('SUCCEEDED' if '"outcome": "OUTCOME_SUCCEEDED"' in out
                        else 'CANCELED' if 'OUTCOME_CANCELED' in out
                        else 'FAILED')
@@ -141,6 +146,7 @@ def main():
                 'scenario': sid, 'run': i + 1, 'rc': rc, 'outcome': outcome,
                 'expected': spec['expect'], 'episode': ep_path,
                 'replay_ok': replay_ok, 'replay_steps': replay_n,
+                'perturb': extra.get('perturb'),
                 'ts': time.time(),
             }
             rows.append(row)
