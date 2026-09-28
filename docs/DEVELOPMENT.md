@@ -47,7 +47,10 @@ Checklist (ratified order — check off as issues close):
 - [x] S7 perturbation scenario builder — #9
       (`setup/96_s7_perturb.py` seeded off-canonical placement + runner
       integration; S7:2 batch green; 2026-09-28)
-- [ ] JevPolicy + pluggable JevBackend (TypeSafeBackend | LocalReproductionBackend) — #10
+- [x] JevPolicy + pluggable JevBackend (TypeSafeBackend | LocalReproductionBackend) — #10
+      (`jev_policy.py` Choice-over-menu + typed policy_failure → FSM fallback;
+      `jev_backends.py` import-guarded vendor SDK + transport-injected local
+      endpoint; executor `decision_policy=jev`; 2026-09-28)
 - [ ] LLMPolicy — #11 (**DEFERRED ③** — do not start before the four items above exist)
 - [ ] HybridRouter + threshold sweep τ∈{0.5,0.7,0.9} + calibration report — #12
 - [x] ADR set from the ratified Week-2 preparation — #2 (ADR-001 simulation

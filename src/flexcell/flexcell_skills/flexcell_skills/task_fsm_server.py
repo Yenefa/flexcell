@@ -135,6 +135,7 @@ class TaskFsmServer(Node):
         self.declare_parameter('episode_dir', '~/.ros/flexcell/episodes')
         self.declare_parameter('task_state_topic', '/flexcell/task_state')
         self.declare_parameter('decision_policy', 'fsm')
+        self.declare_parameter('jev_backend', 'local')
         self.declare_parameter('decision_log_file', 'decisions.jsonl')
         # test hook (issue #6 AC): "ACTION[:target]" - the FIRST decision the
         # executor receives is replaced by this planted out-of-contract
@@ -158,11 +159,25 @@ class TaskFsmServer(Node):
                                       self.get_logger())
 
         policy_name = gp2('decision_policy').value
-        if policy_name != 'fsm':
+        if policy_name == 'fsm':
+            self._policy = FSMPolicy()
+        elif policy_name == 'jev':
+            # issue #10 (ratified ④): backend-agnostic fast policy with typed
+            # policy_failure -> FSM fallback (degradation, not deadlock)
+            from flexcell_skills.jev_backends import make_backend
+            from flexcell_skills.jev_policy import JevPolicy
+            backend = make_backend(str(gp2('jev_backend').value))
+            ok, detail = backend.health()
+            if not ok:
+                self.get_logger().warn(
+                    'jev backend %r unhealthy (%s) - every decision will '
+                    'degrade to the FSM fallback' % (
+                        gp2('jev_backend').value, detail))
+            self._policy = JevPolicy(backend, fallback=FSMPolicy())
+        else:
             raise ValueError(
-                'unknown decision_policy %r (only "fsm" is implemented; '
-                'jev/llm/hybrid follow the ratified order)' % policy_name)
-        self._policy = FSMPolicy()
+                'unknown decision_policy %r ("fsm"|"jev" implemented; '
+                'llm/hybrid follow the ratified order)' % policy_name)
         self._decision_log = JsonlLog(self, gp2('log_dir').value,
                                       gp2('decision_log_file').value)
 
