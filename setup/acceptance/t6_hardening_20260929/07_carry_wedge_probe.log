@@ -1,0 +1,23 @@
+=== [1] box pose twice, 1.5s apart (static vs moving) ===
+  t0 target_box_a   ['0.2782', '0.0028', '0.0159'] 
+  t0 target_box_b   ['0.2000', '-0.1800', '0.0175'] 
+  t1 target_box_a   ['0.2782', '0.0028', '0.0159'] 
+  t1 target_box_b   ['0.2000', '-0.1800', '0.0175'] 
+  t2 target_box_a   ['0.2782', '0.0028', '0.0190'] 
+  t2 target_box_b   ['0.2000', '-0.1800', '0.0175'] 
+
+=== [2] carry_state topic value ===
+  no carry_state message received
+
+=== [3] carry_server log: last ENGAGED/RELEASED ===
+[carry_server-6] [INFO] [1790688670.199336263] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1790688675.757492213] [carry_server]: carry ENGAGED object=target_box_a offset=[-0.005 -0.004 -0.160]
+[carry_server-6] [INFO] [1790688684.378370522] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1790688690.711359667] [carry_server]: carry ENGAGED object=target_box_b offset=[0.007 0.001 -0.163]
+[carry_server-6] [INFO] [1790688696.752152485] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1790688770.271491925] [carry_server]: carry ENGAGED object=target_box_a offset=[-0.008 0.000 -0.163]
+
+=== [4] is the planning scene still holding box A as ATTACHED? ===
+  world objects:      []
+  attached objects:   []
+=== PROBE DONE ===

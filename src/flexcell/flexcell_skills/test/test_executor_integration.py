@@ -30,6 +30,7 @@ from flexcell_interfaces.msg import (
     CarryState, RobotStateSummary, WorldObject, WorldState, ZoneState)
 
 from flexcell_skills.contracts.episode import EpisodeStore
+from flexcell_skills.contracts.injection import InjectionLifecycle
 from flexcell_skills.common import JsonlLog
 from flexcell_skills.decision_policy import FSMPolicy
 from flexcell_skills.task_fsm_server import TaskFsmServer
@@ -273,9 +274,11 @@ class TestPickEngageFailure(unittest.TestCase):
         node._profiles = ['demo_slow']
         node._default_profile = 'demo_slow'
         node._deadline = 30000
-        node._inject_scenario = ''
-        node._inject_mode = ''
-        node._inject_counts = {}
+        # T6: the injection is a four-state lifecycle object now, not three
+        # loose attributes (a bare fixture without it made _injection_check
+        # raise and the typed GRASP_FAILED degrade to ERR_INTERNAL).
+        node._inject = InjectionLifecycle()
+        node._publish_inject_status = lambda: None
         node._base = 'world'
         node._ee = 'end_effector_link'
         node._size = [0.035, 0.035, 0.035]

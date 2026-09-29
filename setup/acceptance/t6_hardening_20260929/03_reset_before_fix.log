@@ -1,0 +1,47 @@
+=== [0] syntax check + sync the admin fix (CLI uses the STAGING copy) ===
+  host: compiles
+/mnt/c/Users/安帅潮/AppData/Local/Temp/opencode/fc_verify_reset.sh: line 17: /home/ros/agentic_workcell_ws/setup/flexcell_admin.py: Permission denied
+[Errno 13] Permission denied: '/home/ros/agentic_workcell_ws/setup/__pycache__/flexcell_admin.cpython-312.pyc.128078919907376'  staging bytes: 17930  cr=0
+
+=== [1] reset from the CURRENT wedged state (box A stranded at 0.278) ===
+  ok=False
+    carry_disengaged         True
+    scene_had_objects        False
+    scene_cleared            True
+    arm_home                 True
+    respawn target_box_a     True
+    respawn target_box_b     True
+    reobserved               True
+    canonical target_box_a   DRIFT [0.2773671602687223, 0.002019196071542804, 0.017175232632013954]
+    canonical target_box_b   OK ['0.2000', '-0.1800', '0.0175']
+
+=== [2] reproduce: clean reset -> abort-while-carrying -> reset ===
+  ok=False
+    carry_disengaged         True
+    scene_had_objects        False
+  "outcome": "OUTCOME_FAILED",
+  "error_code": "ERR_SKILL_FAILED",
+  --- reset after the abort (this is the case that used to drift) ---
+  ok=False
+    carry_disengaged         True
+    scene_had_objects        True
+    scene_cleared            False
+    arm_home                 True
+    respawn target_box_a     True
+    respawn target_box_b     True
+    reobserved               True
+    canonical target_box_a   DRIFT [0.28063513667704165, -0.0027005848924373317, 0.01734922526710969]
+    canonical target_box_b   OK ['0.2000', '-0.1800', '0.0175']
+
+=== [3] and once more, to prove it is repeatable ===
+  ok=False
+    carry_disengaged         True
+    scene_had_objects        True
+    scene_cleared            False
+    arm_home                 True
+    respawn target_box_a     True
+    respawn target_box_b     True
+    reobserved               True
+    canonical target_box_a   DRIFT [0.28067005525398653, 0.004590332375777893, 0.015482818744153672]
+    canonical target_box_b   OK ['0.2000', '-0.1800', '0.0175']
+=== T6-RESET VERIFY DONE ===

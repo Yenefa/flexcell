@@ -56,33 +56,97 @@ _GZ_STREAM = {
     'thread': None,
     'world': None,
     'last_start': 0.0,    # restart backoff bookkeeping (thread-death self-heal)
+    'node': None,         # current gz transport node (unsubscribed on rebuild)
+    'cb_errors': 0,       # Pose_V callbacks that raised (see _on_pose_v)
+    'cb_error': '',       # last callback error, for reporting
 }
+
+
+def _register_gz_msgs():
+    """Register the gz message classes ONCE, at import time.
+
+    gz's python bindings register message classes as an import side effect:
+    `gz/msgs10/__init__.py` aliases ``sys.modules['gz.msgs']`` to ``gz.msgs10``
+    so the generated pb2 modules can import their nested types.  If the nested
+    class is missing from the descriptor pool, parsing a ``Pose_V`` still
+    succeeds but touching ``msg.pose`` raises
+
+        TypeError: No message class registered for 'gz.msgs.Pose'
+
+    and gz-transport's python shim then prints a **full traceback per message**
+    (to a stream that, inside the admin process, is fd 1) - the ~900-1000 line
+    "flood" that `lib_gate.sh`'s `gate_flood` used to fail on.  Doing the
+    import here (main thread, once, at module import) instead of inside the
+    stream thread makes the registration deterministic rather than racy.
+    """
+    try:
+        from gz.msgs10 import pose_v_pb2, pose_pb2, header_pb2  # noqa: F401
+        return True
+    except Exception:  # noqa: BLE001 - registration is best-effort
+        return False
+
+
+_GZ_MSGS_REGISTERED = _register_gz_msgs()
+
+
+def _on_pose_v(msg, got_first=None):
+    """Fold one ``Pose_V`` into the stream. **Never raises.**
+
+    Returning quietly is the whole point: an exception escaping into
+    gz-transport's `cb_deserialize` is what produced the traceback flood, and
+    a stream that keeps failing never updates ``last_rx``, so the caller's
+    staleness check rebuilds the subscription (self-heal) without any noise.
+    Returns 1 when the message was absorbed, 0 when it was counted as an error.
+    """
+    now = time.monotonic()
+    try:
+        with _GZ_STREAM['lock']:
+            for ent in msg.pose:
+                _GZ_STREAM['poses'][ent.name] = (
+                    [ent.position.x, ent.position.y, ent.position.z],
+                    [ent.orientation.x, ent.orientation.y,
+                     ent.orientation.z, ent.orientation.w],
+                    now)
+            _GZ_STREAM['last_rx'] = now
+    except Exception as exc:  # noqa: BLE001 - counted, never propagated
+        with _GZ_STREAM['lock']:
+            _GZ_STREAM['cb_errors'] += 1
+            _GZ_STREAM['cb_error'] = '%s: %s' % (type(exc).__name__, exc)
+        return 0
+    if got_first is not None:
+        got_first.set()
+    return 1
+
+
+def gz_stream_health():
+    """(registered, cb_errors, last_error) - for health/reset reporting."""
+    with _GZ_STREAM['lock']:
+        return (_GZ_MSGS_REGISTERED, _GZ_STREAM['cb_errors'],
+                _GZ_STREAM['cb_error'])
 
 
 def _gz_stream_loop(world):
     import gz.transport13 as gz_transport
-    # importing the nested-class modules registers them in protobuf BEFORE any
-    # callback deserializes a Pose_V - without this the callback thread dies
-    # with "No message class registered for 'gz.msgs.Pose'" (and can segfault)
-    from gz.msgs10 import pose_v_pb2, pose_pb2, header_pb2  # noqa: F401
+    from gz.msgs10 import pose_v_pb2  # noqa: F401  (already registered above)
+    topic = '/world/%s/dynamic_pose/info' % world
     while True:
+        # do not leak the previous node's subscription on every rebuild
+        with _GZ_STREAM['lock']:
+            old = _GZ_STREAM.get('node')
+        if old is not None:
+            try:
+                old.unsubscribe(topic)
+            except Exception:  # noqa: BLE001 - best effort cleanup
+                pass
         node = gz_transport.Node()
+        with _GZ_STREAM['lock']:
+            _GZ_STREAM['node'] = node
         got_first = threading.Event()
 
-        def cb(msg):
-            now = time.monotonic()
-            with _GZ_STREAM['lock']:
-                for ent in msg.pose:
-                    _GZ_STREAM['poses'][ent.name] = (
-                        [ent.position.x, ent.position.y, ent.position.z],
-                        [ent.orientation.x, ent.orientation.y,
-                         ent.orientation.z, ent.orientation.w],
-                        now)
-                _GZ_STREAM['last_rx'] = now
-            got_first.set()
+        def cb(msg, _ev=got_first):
+            _on_pose_v(msg, _ev)
 
-        node.subscribe(type(pose_v_pb2.Pose_V()),
-                       '/world/%s/dynamic_pose/info' % world, cb)
+        node.subscribe(type(pose_v_pb2.Pose_V()), topic, cb)
         got_first.wait(6.0)
         while True:
             time.sleep(1.0)

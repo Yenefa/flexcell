@@ -31,6 +31,7 @@ from rclpy.time import Time
 
 from flexcell_interfaces.action import PickObject
 
+from flexcell_skills.contracts.injection import InjectionLifecycle
 from flexcell_skills.contracts.skill_result import derive_status
 from flexcell_skills.common import (
     GripperClient, JsonlLog, MoveToPoseClient, PlanningSceneOps,
@@ -90,14 +91,20 @@ class PickServer(Node):
         self._carry_stop = self.create_publisher(
             EmptyMsg, gp('carry_stop_topic').value, 10)
 
-        # ---- deterministic failure injection (Week-1.5) ----
-        # payload "<scenario_id>:<once|always>" or "" to disable; attempts are
-        # counted per (scenario, object) so a retry (attempt 2) passes "once".
-        self._inject_scenario = ''
-        self._inject_mode = ''
-        self._inject_counts = {}
+        # ---- deterministic failure injection (Week-1.5; lifecycle T6) ----
+        # payload "<scenario_id>:<once|always>[#request_id]" arms, "" clears.
+        # The four-state lifecycle (requested/armed/applied/cleared) lives in
+        # the pure contract module so it is unit-testable; this node only
+        # publishes a snapshot on every transition so a requester can SEAL the
+        # step instead of firing and hoping (2026-09-29: a request that was
+        # never delivered silently ran a cell under the wrong condition).
+        self._inject = InjectionLifecycle()
+        self.declare_parameter('inject_status_topic', '/flexcell/inject_status')
         self.create_subscription(
             StringMsg, gp('inject_topic').value, self._on_inject, 10)
+        self._inject_status = self.create_publisher(
+            StringMsg, gp('inject_status_topic').value, self._status_qos())
+        self._publish_inject_status()
         self._follow_min = float(gp('box_follow_min_m').value)
         self._size = list(gp('object_size').value)
         self._base = gp('base_frame').value
@@ -148,38 +155,51 @@ class PickServer(Node):
             return None, 0, err
         return res, int(res.error_code), res.detail
 
+    def _status_qos(self):
+        """Latched (TRANSIENT_LOCAL) status QoS.
+
+        The requester is a short-lived process that connects long after this
+        node started, so the current state has to be latched - a VOLATILE
+        publisher is QoS-INCOMPATIBLE with a TRANSIENT_LOCAL subscriber and the
+        seal would then never see the transition (measured 2026-09-29: every
+        arm/clear reported "state not observed", surfacing as HARNESS_ERROR).
+        """
+        from rclpy.qos import (QoSDurabilityPolicy, QoSProfile,
+                               QoSReliabilityPolicy)
+        qos = QoSProfile(depth=5)
+        qos.reliability = QoSReliabilityPolicy.RELIABLE
+        qos.durability = QoSDurabilityPolicy.TRANSIENT_LOCAL
+        return qos
+
+    def _publish_inject_status(self):
+        """Publish the current injection state (latched for late joiners)."""
+        try:
+            self._inject_status.publish(
+                StringMsg(data=json.dumps(self._inject.snapshot(),
+                                          sort_keys=True)))
+        except Exception as exc:  # noqa: BLE001 - status is observability
+            self.get_logger().error('inject status publish failed: %s' % exc)
+
     def _on_inject(self, msg):
-        payload = (msg.data or '').strip()
-        if not payload:
-            self._inject_scenario = ''
-            self._inject_mode = ''
-            self._inject_counts = {}
+        state = self._inject.on_request(msg.data)
+        snap = self._inject.snapshot()
+        if snap['error']:
+            self.get_logger().error('injection request refused: %s'
+                                    % snap['error'])
+        elif state == 'armed':
+            self.get_logger().info(
+                'failure injection ARMED scenario=%s mode=%s request_id=%s'
+                % (snap['scenario'], snap['mode'], snap['request_id'] or '-'))
+        elif state == 'cleared':
             self.get_logger().info('failure injection DISABLED')
-            return
-        if ':' in payload:
-            scenario, mode = payload.split(':', 1)
-        else:
-            scenario, mode = payload, 'once'
-        if mode not in ('once', 'always'):
-            self.get_logger().error('bad inject mode %r (payload=%r)' % (mode, payload))
-            return
-        self._inject_scenario = scenario
-        self._inject_mode = mode
-        self._inject_counts = {}
-        self.get_logger().info(
-            'failure injection ARMED scenario=%s mode=%s' % (scenario, mode))
+        self._publish_inject_status()
 
     def _injection_check(self, object_name):
         """Return a detail string when this attempt must fail deterministically."""
-        if not self._inject_scenario:
-            return None
-        key = '%s|%s' % (self._inject_scenario, object_name)
-        attempt = self._inject_counts.get(key, 0) + 1
-        self._inject_counts[key] = attempt
-        if self._inject_mode == 'once' and attempt > 1:
-            return None
-        return ('injected failure (scenario=%s mode=%s attempt=%d)'
-                % (self._inject_scenario, self._inject_mode, attempt))
+        detail = self._inject.on_pick_attempt(object_name)
+        if detail:
+            self._publish_inject_status()
+        return detail
 
     def _release_everything(self, name):
         self._carry_stop.publish(EmptyMsg())

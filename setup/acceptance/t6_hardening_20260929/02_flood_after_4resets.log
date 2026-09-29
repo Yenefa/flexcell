@@ -1,0 +1,45 @@
+=== [1] restart the stack so the servers load the new common.py ===
+TERM -> move_to_pose (group 990)
+STOP OK: 0 relevant nodes, 0 duplicate actions, 0 orphans
+START OK
+
+=== [2] the same 4-reset baseline (was 954/895/896/899) ===
+run 1: rc=0 flood_out=0 flood_err=0 tracebacks=0 json_ok=1 canon_a=1 out_bytes=623
+run 2: rc=0 flood_out=0 flood_err=0 tracebacks=0 json_ok=1 canon_a=1 out_bytes=623
+run 3: rc=0 flood_out=0 flood_err=0 tracebacks=0 json_ok=1 canon_a=1 out_bytes=623
+run 4: rc=0 flood_out=0 flood_err=0 tracebacks=0 json_ok=1 canon_a=1 out_bytes=623
+
+=== [3] is the stdout now parseable JSON? ===
+  run 1: VALID JSON  ok=True scene_cleared=None
+  run 2: VALID JSON  ok=True scene_cleared=None
+  run 3: VALID JSON  ok=True scene_cleared=None
+  run 4: VALID JSON  ok=True scene_cleared=None
+
+=== [4] health + one happy demo (no regression) ===
+  "ok": true,
+    "task_state": "IDLE",
+  "hard_fail": [],
+  "outcome": "OUTCOME_SUCCEEDED",
+  "object_a_at_zone": true,
+  "object_b_at_zone": true,
+  "zone_a_error_m": 0.0018875982636118967,
+  "zone_b_error_m": 0.011191981842347239,
+
+=== [5] what was the 'stderr output' in colcon test? ===
+/home/ros/agentic_workcell_ws/log/test_2026-09-29_21-28-53/logger_all.log
+/home/ros/agentic_workcell_ws/log/test_2026-09-29_21-28-53/events.log
+/home/ros/agentic_workcell_ws/log/test_2026-09-29_21-28-53/flexcell_skills/command.log
+--- /home/ros/agentic_workcell_ws/log/test_2026-09-28_23-02-49/flexcell_skills/stderr.log ---
+--- /home/ros/agentic_workcell_ws/log/test_2026-09-29_21-28-53/flexcell_skills/stderr.log ---
+=============================== warnings summary ===============================
+<frozen importlib._bootstrap>:488
+  Warning: Type google.protobuf.pyext._message.ScalarMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+<frozen importlib._bootstrap>:488
+  Warning: Type google.protobuf.pyext._message.MessageMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+../../../../../../usr/lib/python3/dist-packages/google/protobuf/internal/well_known_types.py:91
+  Warning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=== AFTER-FIX DONE ===

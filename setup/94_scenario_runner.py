@@ -59,22 +59,36 @@ def newest_episode():
     return files[-1] if files else None
 
 
-def arm_inject(client, payload):
-    """Arm, or explicitly CLEAR, the failure injection.
+def arm_inject(client, payload, expect=None):
+    """Arm, or explicitly CLEAR, the failure injection - and SEAL the step.
 
-    `None` means "leave the injection alone" (scenarios S1/S4/S7); any string
-    is published, and the EMPTY string is the clear signal the pick server
-    understands.  The previous `if payload:` guard made '' a no-op, so the
-    runner's post-episode "always clear" never reached the client and an armed
-    `once`/`always` injection stayed live for every later episode of the batch
-    (measured 2026-09-29: with S5 before S7, all 10 S7 episodes were pre-failed
-    by the leftover `exhaust_demo_v1:always` injection -> S7 0/10).  Cells
-    ordered after an injecting scenario were therefore invalid.
+    `None` means "leave the injection alone" (scenarios S1/S4/S7).  Any other
+    string is published; the EMPTY string is the clear signal.  The previous
+    `if payload:` guard made '' a no-op, so the post-episode clear never
+    reached the client and an armed injection stayed live for every later
+    episode (measured 2026-09-29: with S5 before S7, all 10 S7 episodes were
+    pre-failed by the leftover `exhaust_demo_v1:always` injection).
+
+    The client now waits for the matching lifecycle state and exits non-zero if
+    it is not observed, so a request that never lands cannot silently run a
+    cell under the wrong condition (measured: 1 S5 episode of 20 SUCCEEDED
+    because its `always` injection never armed).  Returns (ok, detail).
     """
     if payload is None:
-        return
-    subprocess.run(['python3', client, '--action', 'inject',
-                    '--inject', payload], capture_output=True, timeout=60)
+        return True, 'skipped'
+    request_id = 'r%d' % (int(time.time() * 1000) % 100000000)
+    want = expect or ('armed' if payload else 'cleared')
+    cmd = ['python3', client, '--action', 'inject', '--inject', payload,
+           '--inject-request-id', request_id,
+           '--expect-inject-state', want]
+    try:
+        proc = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
+    except subprocess.TimeoutExpired:
+        return False, 'timeout arming %r' % (payload,)
+    if proc.returncode != 0:
+        tail = ((proc.stdout or '') + (proc.stderr or '')).strip().splitlines()
+        return False, tail[-1] if tail else 'rc=%d' % proc.returncode
+    return True, '%s sealed' % want
 
 
 def run_episode(client, spec, ws, seed=None):
@@ -94,7 +108,14 @@ def run_episode(client, spec, ws, seed=None):
                 p.stdout.strip().splitlines()[-1])
         except (ValueError, IndexError):
             extra['perturb'] = None
-    arm_inject(client, spec.get('inject'))
+    arm_ok, arm_detail = arm_inject(client, spec.get('inject'))
+    extra['inject_arm'] = arm_detail
+    if not arm_ok:
+        # fail-closed: a cell whose injection was not armed would run under the
+        # wrong condition, so this episode is a HARNESS error, never a policy
+        # outcome.  Leave nothing armed for the next episode.
+        arm_inject(client, '')
+        return 90, 'HARNESS_ERROR: injection not armed (%s)' % arm_detail, extra
     cmd = ['python3', client, '--action', spec['kind']]
     if spec['kind'] == 'demo':
         cmd += ['--scenario', spec['scenario']]
@@ -102,7 +123,10 @@ def run_episode(client, spec, ws, seed=None):
         cmd += ['--object', spec['object'],
                 '--pose'] + [str(v) for v in spec['pose']]
     proc = subprocess.run(cmd, capture_output=True, text=True, timeout=220)
-    arm_inject(client, '')   # always clear
+    clear_ok, clear_detail = arm_inject(client, '')   # always clear, sealed
+    extra['inject_clear'] = clear_detail
+    if not clear_ok:
+        extra['harness_error'] = 'injection not cleared: %s' % clear_detail
     return proc.returncode, (proc.stdout or '') + (proc.stderr or ''), extra
 
 
@@ -140,7 +164,11 @@ def main():
             print('  %s run %d/%d' % (sid, i + 1, count))
             rc, out, extra = run_episode(client, spec, args.ws,
                                          seed=1000 + len(rows))
-            outcome = ('SUCCEEDED' if '"outcome": "OUTCOME_SUCCEEDED"' in out
+            harness_error = extra.get('harness_error')
+            if rc == 90:
+                harness_error = extra.get('inject_arm')
+            outcome = ('HARNESS_ERROR' if rc == 90 else
+                       'SUCCEEDED' if '"outcome": "OUTCOME_SUCCEEDED"' in out
                        else 'CANCELED' if 'OUTCOME_CANCELED' in out
                        else 'FAILED')
             ep_path = newest_episode()
@@ -159,11 +187,15 @@ def main():
                 'expected': spec['expect'], 'episode': ep_path,
                 'replay_ok': replay_ok, 'replay_steps': replay_n,
                 'perturb': extra.get('perturb'),
+                'inject_arm': extra.get('inject_arm'),
+                'inject_clear': extra.get('inject_clear'),
+                'harness_error': harness_error,
                 'ts': time.time(),
             }
             rows.append(row)
-            print('    outcome=%s expected=%s replay=%s (%d steps)'
-                  % (outcome, spec['expect'], replay_ok, replay_n))
+            print('    outcome=%s expected=%s replay=%s (%d steps) arm=%s clear=%s'
+                  % (outcome, spec['expect'], replay_ok, replay_n,
+                     extra.get('inject_arm'), extra.get('inject_clear')))
 
     summary_path = os.path.join(EPISODE_DIR, '%s.jsonl' % batch_id)
     os.makedirs(EPISODE_DIR, exist_ok=True)
@@ -175,14 +207,21 @@ def main():
     bad = 0
     for sid in dict(plan):
         sel = [r for r in rows if r['scenario'] == sid]
-        succ = sum(1 for r in sel if r['outcome'] == 'SUCCEEDED')
-        lo, hi = wilson(succ, len(sel))
+        # a HARNESS_ERROR episode is not a policy outcome: it is excluded from
+        # the success denominator, but it still fails the batch loudly.
+        graded = [r for r in sel if r['outcome'] != 'HARNESS_ERROR']
+        harness = len(sel) - len(graded)
+        succ = sum(1 for r in graded if r['outcome'] == 'SUCCEEDED')
+        lo, hi = wilson(succ, len(graded))
         expect_ok = SCENARIOS[sid]['expect'] == 'SUCCEEDED'
-        print('  %s: %d/%d SUCCEEDED, CI95=[%.2f, %.2f], replay_ok=%s'
-              % (sid, succ, len(sel), lo, hi,
-                 all(r['replay_ok'] for r in sel)))
+        print('  %s: %d/%d SUCCEEDED, CI95=[%.2f, %.2f], replay_ok=%s%s'
+              % (sid, succ, len(graded), lo, hi,
+                 all(r['replay_ok'] for r in graded),
+                 (', %d HARNESS_ERROR excluded' % harness) if harness else ''))
         for r in sel:
-            if r['outcome'] != r['expected'] or r['replay_ok'] is not True:
+            if (r['outcome'] == 'HARNESS_ERROR'
+                    or r['outcome'] != r['expected']
+                    or r['replay_ok'] is not True):
                 bad += 1
     print('batch summary: %s' % summary_path)
     print('SCENARIO RUNNER: %s' % ('PASS' if bad == 0 else 'FAIL (%d)' % bad))

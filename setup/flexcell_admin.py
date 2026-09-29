@@ -110,6 +110,28 @@ class Admin(Node):
     def _on_task(self, msg):
         self._task_state = msg.data
 
+    def _canonical_present(self):
+        """True if any CANONICAL object is still in the planning scene.
+
+        The authoritative check for "did the scene really get cleared" - the
+        ApplyPlanningScene response flag is not, because a REMOVE diff naming an
+        already-absent id makes move_group answer success=false.
+        """
+        cli = self.create_client(GetPlanningScene, '/get_planning_scene',
+                                 callback_group=self._cbg)
+        if not cli.wait_for_service(timeout_sec=4.0):
+            return False
+        fut = cli.call_async(GetPlanningScene.Request())
+        end = time.monotonic() + 10.0
+        while not fut.done() and time.monotonic() < end:
+            self.spin(0.1)
+        if not fut.done():
+            return False
+        sc = fut.result().scene
+        ids = {c.id for c in sc.world.collision_objects}
+        ids |= {a.object.id for a in sc.robot_state.attached_collision_objects}
+        return bool(ids & set(CANONICAL))
+
     def _on_carry(self, msg):
         self._carry_state = msg
 
@@ -184,7 +206,15 @@ class Admin(Node):
         return 0 if ok else 1
 
     # ------------------------------------------------------------- reset
-    def wait_task_idle(self, timeout_s=5.0):
+    def wait_task_idle(self, timeout_s=15.0):
+        """Wait for the latched task_state to read IDLE.
+
+        The window was 5 s, but a fresh process needs DDS discovery before the
+        TRANSIENT_LOCAL sample arrives: measured 1.54 s here, and under the
+        full stack load it can exceed 5 s - which surfaced as a spurious
+        "task_fsm is BUSY" on an idle workcell.  Wait longer, and let the
+        caller tell "never received" from "genuinely busy".
+        """
         end = time.monotonic() + timeout_s
         while time.monotonic() < end:
             self.spin(0.2)
@@ -197,28 +227,51 @@ class Admin(Node):
 
         # 0) task must be idle
         report['task_idle'] = self.wait_task_idle()
+        report['task_state_seen'] = self._task_state
+        report['task_state_publishers'] = self.count_publishers(
+            '/flexcell/task_state')
         if not report['task_idle']:
-            print(json.dumps({'ok': False, 'report': report,
-                              'error': 'task_fsm is BUSY - wait or stop it'}))
+            if self._task_state is None:
+                why = ('task_state never received (no latched sample from '
+                       '/flexcell/task_state; discovery or publisher down) - '
+                       'NOT evidence of a busy task')
+            else:
+                why = 'task_fsm reports state %r' % (self._task_state,)
+            print(json.dumps({'ok': False, 'report': report, 'error': why}))
             return 1
 
-        # 1) disengage carry (backend state), verify via latched CarryState
-        engaged = bool(self._carry_state.engaged) if self._carry_state else False
-        if engaged:
-            # wait for the stop topic to have a matched subscriber before
-            # publishing (short-lived process race)
-            end = time.monotonic() + 5.0
-            while self.count_subscribers('/flexcell/carry_stop') == 0 \
-                    and time.monotonic() < end:
-                time.sleep(0.1)
-            self._carry_stop.publish(EmptyMsg())
-            end = time.monotonic() + 3.0
-            while time.monotonic() < end:
+        # 1) force-disengage the carry servo.
+        #
+        # The old code published the stop only `if engaged`, and `engaged` came
+        # from the latched CarryState - a topic that goes SILENT when the state
+        # never changes.  A wedged servo (logged ENGAGED, publishing nothing)
+        # therefore read as "not engaged": the stop was never sent, the reset
+        # reported carry_disengaged: true, and every later set_pose was
+        # overwritten at 10 Hz by the still-pinning servo.  Measured
+        # 2026-09-29: target_box_a stranded at EE+offset [0.2782, 0.0028,
+        # 0.0222]; set_pose -> True three times, the box never moved.  Send the
+        # stop unconditionally and confirm it.
+        report['carry_stop_sent'] = False
+        end = time.monotonic() + 5.0
+        while self.count_subscribers('/flexcell/carry_stop') == 0 \
+                and time.monotonic() < end:
+            self.spin(0.1)
+        if self.count_subscribers('/flexcell/carry_stop') > 0:
+            for _ in range(3):
+                self._carry_stop.publish(EmptyMsg())
                 self.spin(0.2)
-                if self._carry_state and not self._carry_state.engaged:
-                    break
-            engaged = bool(self._carry_state.engaged) if self._carry_state else None
-        report['carry_disengaged'] = engaged is False
+            report['carry_stop_sent'] = True
+        end = time.monotonic() + 3.0
+        while time.monotonic() < end:
+            self.spin(0.2)
+            if self._carry_state and not self._carry_state.engaged:
+                break
+        report['carry_state_known'] = self._carry_state is not None
+        report['carry_engaged'] = (bool(self._carry_state.engaged)
+                                   if self._carry_state else None)
+        # NOTE: carry_disengaged is settled AFTER the pose verification below,
+        # from behavioural proof (the boxes hold their commanded pose) instead
+        # of from a topic that may never speak.
 
         # 2) clear the planning scene belief (detach + remove tracked objects)
         # only if something is actually there - REMOVE of a nonexistent id
@@ -258,8 +311,17 @@ class Admin(Node):
             end = time.monotonic() + 10.0
             while not fut.done() and time.monotonic() < end:
                 rclpy.spin_once(self, timeout_sec=0.1)
-            scene_cleared = bool(fut.done() and fut.result().success)
-        report['scene_cleared'] = scene_cleared
+            apply_ok = bool(fut.done() and fut.result().success)
+            # Trust the SCENE, not the response flag: re-query and decide on
+            # absence.  A REMOVE diff naming an already-absent id makes
+            # move_group answer success=false, which used to surface as
+            # `scene_cleared: false` while the scene was in fact clean.
+            # Measured 2026-09-29: the scene was empty on re-query right after
+            # a reported scene_cleared: false.
+            report['scene_apply_ok'] = apply_ok
+            report['scene_cleared'] = not self._canonical_present()
+        else:
+            report['scene_cleared'] = not present
 
         # 3) arm to joint home via the Day-1 joint tool (lifecycle, not a skill)
         proc = subprocess.run(
@@ -297,21 +359,40 @@ class Admin(Node):
             report['reobserved'] = False
 
         # 6) verify canonical positions: re-assert via set_pose (reliable
-        # service path), then sample - stream first, CLI parse as fallback
+        # service path), then sample - stream first, CLI parse as fallback.
+        # If a box refuses its commanded pose, a carry servo is very likely
+        # still pinning it: re-send the stop and try once more, because
+        # "set_pose returned True but the box did not move" is precisely the
+        # wedge the unconditional stop in step 1 removes.
         for name, want in CANONICAL.items():
             got = None
-            for _ in range(2):
+            for attempt in range(2):
                 gz_set_pose(name, want)
                 time.sleep(0.8)
                 got = gz_pose(name)
                 if got is None:
                     got = gz_pose_cli(name)
-                if got is not None:
+                if got is not None and all(abs(g - w) < 0.005
+                                           for g, w in zip(got, want)):
                     break
+                if attempt == 0:
+                    for _ in range(3):
+                        self._carry_stop.publish(EmptyMsg())
+                        self.spin(0.2)
+                    time.sleep(0.4)
             ok = got is not None and all(abs(g - w) < 0.005
                                          for g, w in zip(got, want))
             report['canonical %s' % name] = ('OK %s' % ['%.4f' % v for v in got]
                                              if ok else 'DRIFT %s' % got)
+
+        # carry_disengaged, decided on BEHAVIOUR: a servo that is still
+        # pinning cannot let a box hold a commanded pose, so boxes-on-canonical
+        # is the proof.  The latched CarryState is corroboration only.
+        boxes_canonical = all('OK' in report['canonical %s' % n]
+                              for n in CANONICAL)
+        state_says_off = (self._carry_state is not None
+                          and not self._carry_state.engaged)
+        report['carry_disengaged'] = bool(boxes_canonical or state_says_off)
 
         ok = (report['task_idle'] and report['carry_disengaged']
               and report['scene_cleared'] and report['arm_home']

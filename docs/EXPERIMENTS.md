@@ -7,18 +7,19 @@
 
 ## Index
 
-| ID    | Experiment                                                              | Outcome      | Evidence                                                              |
-| ----- | ----------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------- |
-| E-001 | Day-1 environment verification                                          | PASS         | acceptance/day1 (delivery host) + [DAY1_REPORT.md](../DAY1_REPORT.md) |
-| E-002 | Day-2 MoveToPose acceptance                                             | PASS 10/10   | acceptance/day2 + [DAY2_MOVETOPOSE.md](DAY2_MOVETOPOSE.md)            |
-| E-003 | Week-1 deterministic skills battery                                     | PASS         | acceptance/week1                                                      |
-| E-004 | Week-1.5 demo hardening — delivery acceptance (att3)                    | PASS         | acceptance/week15/delivery_20260926/                                  |
-| E-005 | Week-1.5 cold-start re-verification                                     | PASS         | acceptance/week15/cs_20260926/                                        |
-| E-006 | M2.3 audit remediation — runtime acceptance                             | PASS (gated) | acceptance/sessions/ (FLEXCELL_STAGE) + ~/.ros/flexcell/referee.jsonl |
-| E-007 | Scenario runner batch (S1×2 + S2 + S5), episode replay                  | PASS         | ~/.ros/flexcell/episodes/batch_20260928_051219.jsonl                  |
-| E-008 | Metrics report over real store + S7 adaptation probe                    | PASS         | ~/.ros/flexcell/episodes/batch_20260928_124615.jsonl                  |
-| E-009 | New-machine (RTX 4060 laptop) bring-up + first official benchmark batch | see entry    | setup/acceptance/m3_seed_batch_20260929*/                             |
-| M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN      | — (RFC #15; harness #7/#8/#9)                                         |
+| ID    | Experiment                                                              | Outcome                  | Evidence                                                              |
+| ----- | ----------------------------------------------------------------------- | ------------------------ | --------------------------------------------------------------------- |
+| E-001 | Day-1 environment verification                                          | PASS                     | acceptance/day1 (delivery host) + [DAY1_REPORT.md](../DAY1_REPORT.md) |
+| E-002 | Day-2 MoveToPose acceptance                                             | PASS 10/10               | acceptance/day2 + [DAY2_MOVETOPOSE.md](DAY2_MOVETOPOSE.md)            |
+| E-003 | Week-1 deterministic skills battery                                     | PASS                     | acceptance/week1                                                      |
+| E-004 | Week-1.5 demo hardening — delivery acceptance (att3)                    | PASS                     | acceptance/week15/delivery_20260926/                                  |
+| E-005 | Week-1.5 cold-start re-verification                                     | PASS                     | acceptance/week15/cs_20260926/                                        |
+| E-006 | M2.3 audit remediation — runtime acceptance                             | PASS (gated)             | acceptance/sessions/ (FLEXCELL_STAGE) + ~/.ros/flexcell/referee.jsonl |
+| E-007 | Scenario runner batch (S1×2 + S2 + S5), episode replay                  | PASS                     | ~/.ros/flexcell/episodes/batch_20260928_051219.jsonl                  |
+| E-008 | Metrics report over real store + S7 adaptation probe                    | PASS                     | ~/.ros/flexcell/episodes/batch_20260928_124615.jsonl                  |
+| E-009 | New-machine (RTX 4060 laptop) bring-up + first official benchmark batch | SUPERSEDED (not citable) | setup/acceptance/m3_seed_batch_20260929*/                             |
+| E-010 | T6 hardening: gate_flood + injection lifecycle + reset determinism      | PASS                     | this entry (measurements inline)                                      |
+| M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN                  | — (RFC #15; harness #7/#8/#9)                                         |
 
 ## Entries
 
@@ -265,6 +266,97 @@ VERIFY_B:OK` with `error_code 0` — i.e. **the `always` injection was never
 reset` does not restore the canonical world after an abort-while-carrying
   (`scene_cleared: false`, `target_box_a: DRIFT [0.282, 0.001, 0.028]`), which is
   why the batch was gated on a verified-canonical world before starting.
+
+### E-010 — T6 hardening: gate_flood, injection lifecycle, reset determinism (2026-09-29)
+
+- **Purpose**: chief ruling 2026-09-29 — _"otherwise stop citing benchmark
+  numbers"_. Three P0 items had to be fixed and measured before any cell number
+  could be quoted: the never-green `gate_flood`, the unverified injection
+  lifecycle, and the non-restoring reset. E-009 is demoted to **not citable**
+  because all three measurement-path defects were live during it.
+- **Offline baseline**: `colcon test` **130 → 153 tests, 0 failures**
+  (+7 `test_gz_stream.py`, +16 `test_injection.py`).
+
+#### ① gate_flood — the `gz.msgs.Pose` traceback flood
+
+- **What it was**: `for ent in msg.pose` inside the gz Pose_V callback raised
+  `TypeError: No message class registered for 'gz.msgs.Pose'`, and
+  gz-transport's python shim prints a **full traceback per message**. Measured
+  4-reset baseline: **954 / 895 / 896 / 899** lines on _stdout_ (fd 2 was
+  /dev/null — the shim's `sys.stderr` is a wrapper on fd 1 in this process), and
+  3 of 4 runs also **segfaulted at exit** (rc=139).
+- **Root cause work**: only `gz.msgs10` + `gz.transport13` exist in this
+  environment, so the "version pairing" theory was wrong; the pb2 registration
+  import (`common.py:67`) was already present and, tested in isolation, made no
+  difference (4 import combinations, and transport-before-msgs ordering, all
+  clean). It reproduces only after the first `set_pose` round-trips, i.e. in the
+  reset process. **The precise trigger was not isolated** — reported as such
+  rather than guessed at.
+- **Fix**: the callback can no longer raise. `_on_pose_v` folds a message and
+  **counts** any failure (`cb_errors` / `cb_error`, exposed via
+  `gz_stream_health()`), a failing stream never updates `last_rx` so the
+  existing staleness self-heal rebuilds it, and the previous gz node is
+  unsubscribed on rebuild instead of leaking. Registration moved to module
+  import (main thread, once) so it is deterministic.
+- **Result — same 4-reset baseline: flood 954/895/896/899 → 0/0/0/0, exit
+  139×3 → 0×4, stdout 407–433 kB → 623 B and now parseable JSON.** A bonus
+  effect: the admin's "JSON" output was never valid JSON before, because the
+  tracebacks shared the stream.
+
+#### ② Injection lifecycle — requested / armed / applied / cleared
+
+- **What it was**: fire-and-forget on a topic. A request that never landed was
+  invisible (1 S5 episode of 20 SUCCEEDED with `error_code 0` and an all-OK
+  `fsm_trace`, because its `always` injection never armed), and a request that
+  _did_ land was never cleared (E-009 S7 0/10).
+- **Fix**: new pure contract `contracts/injection.py` (`InjectionLifecycle`,
+  `parse_request`) — four states, per-`(scenario, object)` attempt counting with
+  the frozen `once` semantics, a bad payload stays `requested` with a recorded
+  `error` instead of being ignored, and a clear resets the counters. The pick
+  server publishes a latched snapshot on every transition;
+  `w1_client.py --expect-inject-state … --inject-request-id …` **seals** the
+  step and exits 3 if the transition is not observed; the runner now checks that
+  exit code, records `inject_arm`/`inject_clear`/`harness_error` per row, and
+  turns an unarmable request into a `HARNESS_ERROR` episode that is excluded
+  from the success denominator but fails the batch.
+- **Result (live)**: arm → `state=armed` rc 0; clear → `state=cleared,
+live=false` rc 0; **negative** `bogus:sometimes` → seal fires, **rc 3**;
+  `S5:3` → 3× FAILED as expected with `arm=armed sealed clear=cleared sealed`,
+  **0 HARNESS_ERROR**, RUNNER PASS; `S1:2` immediately after → 2/2 SUCCEEDED,
+  RUNNER PASS (the cross-cell leakage of E-009 S7 is closed).
+- One bug was caught _by the seal itself_ during acceptance: the status
+  publisher was VOLATILE while requesters subscribe TRANSIENT_LOCAL →
+  "incompatible QoS … DURABILITY", so no transition was ever observable. Fixed
+  by latching the publisher.
+
+#### ③ Reset determinism — `scene_cleared: false` / `DRIFT`
+
+- **What it was**: the stop was published only `if engaged`, and `engaged` came
+  from the latched `CarryState` — a topic that goes **silent** when the state
+  never changes. A wedged carry servo (logged `ENGAGED`, publishing nothing)
+  therefore read as "not engaged": the stop was never sent, the reset reported
+  `carry_disengaged: true`, and every `set_pose` was overwritten at 10 Hz.
+  Measured: `target_box_a` stranded at **[0.2782, 0.0028, 0.0222]** = EE +
+  logged offset, with `set_pose` returning `True` three times and the box never
+  moving.
+- **Fix**: publish the carry stop **unconditionally** and confirm it; decide
+  `carry_disengaged` on **behaviour** (a pinning servo cannot let a box hold a
+  commanded pose) with the latched state as corroboration only; retry the stop
+  and the pose once when a box refuses its commanded pose; decide
+  `scene_cleared` by **re-querying the scene** instead of trusting the
+  `ApplyPlanningScene` response flag (a REMOVE naming an already-absent id makes
+  move_group answer `success=false`); and widen the `task_idle` wait from 5 s to
+  15 s while distinguishing "never received" (DDS discovery; measured 1.54 s) from
+  a genuinely busy task.
+- **Result**: the stranded box was restored to canonical `[0.2200, 0.0000,
+0.0175]`, and **3× abort-while-carrying → reset plus 3 plain resets all
+  `ok=true`** with both boxes canonical, `scene_cleared: true`, carry disengaged
+  (previously `ok=false` + DRIFT every time).
+
+- **Not done here**: the underlying reason a PLACE failure leaves the box grasped
+  is _correct_ behaviour (the box is still in the gripper); the reset releasing
+  it is the fix. Making the executor release on abort is a separate change and is
+  left open. S3/S4 (P1) and the n≥20 re-run are the next steps.
 
 ## Evidence locations
 

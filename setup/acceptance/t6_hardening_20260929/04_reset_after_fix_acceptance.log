@@ -1,0 +1,18 @@
+=== cycle 1 ===
+ pre-reset:  ok=True  task_idle=True  stop_sent=True  scene_cleared=True  carry_off=True  boxA=OK    boxB=OK
+  (abort-while-carrying task issued)
+ post-reset:  ok=True  task_idle=True  stop_sent=True  scene_cleared=True  carry_off=True  boxA=OK    boxB=OK
+=== cycle 2 ===
+ pre-reset:  ok=True  task_idle=True  stop_sent=True  scene_cleared=True  carry_off=True  boxA=OK    boxB=OK
+  (abort-while-carrying task issued)
+ post-reset:  ok=True  task_idle=True  stop_sent=True  scene_cleared=True  carry_off=True  boxA=OK    boxB=OK
+=== cycle 3 ===
+ pre-reset:  ok=True  task_idle=True  stop_sent=True  scene_cleared=True  carry_off=True  boxA=OK    boxB=OK
+  (abort-while-carrying task issued)
+ post-reset:  ok=True  task_idle=True  stop_sent=True  scene_cleared=True  carry_off=True  boxA=OK    boxB=OK
+
+=== plain resets, 3x (idempotence) ===
+ run 1:  ok=True  task_idle=True  stop_sent=True  scene_cleared=True  carry_off=True  boxA=OK    boxB=OK
+ run 2:  ok=True  task_idle=True  stop_sent=True  scene_cleared=True  carry_off=True  boxA=OK    boxB=OK
+ run 3:  ok=True  task_idle=True  stop_sent=True  scene_cleared=True  carry_off=True  boxA=OK    boxB=OK
+=== ACCEPTANCE DONE ===

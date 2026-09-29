@@ -49,6 +49,13 @@ def main():
     ap.add_argument('--skip-verify', action='store_true')
     ap.add_argument('--scenario', default='week1_demo_v1')
     ap.add_argument('--inject', default='')
+    ap.add_argument('--inject-request-id', default='',
+                    help='correlate the injection lifecycle transition')
+    ap.add_argument('--expect-inject-state', default='',
+                    help='seal the step: wait for this lifecycle state '
+                         '(armed|cleared|applied|requested|idle) and exit '
+                         'non-zero if it is not observed')
+    ap.add_argument('--inject-timeout', type=float, default=8.0)
     ap.add_argument('--timeout', type=float, default=150.0)
     args = ap.parse_args()
 
@@ -58,6 +65,18 @@ def main():
 
     # failure injection is a topic, not an action
     if args.action == 'inject':
+        # Subscribe FIRST so the transition cannot be missed, then publish with
+        # a request id and wait for the matching lifecycle state.  The old
+        # fire-and-forget form let a lost request pass unnoticed, which is how a
+        # benchmark episode ran under the wrong condition (2026-09-29).
+        from rclpy.qos import (QoSDurabilityPolicy, QoSProfile,
+                               QoSReliabilityPolicy)
+        seen = []
+        sub_qos = QoSProfile(depth=5)
+        sub_qos.reliability = QoSReliabilityPolicy.RELIABLE
+        sub_qos.durability = QoSDurabilityPolicy.TRANSIENT_LOCAL
+        n.create_subscription(StringMsg, '/flexcell/inject_status',
+                              lambda m: seen.append(m.data), sub_qos)
         pub = n.create_publisher(StringMsg, '/flexcell/inject', 10)
         import time as _t
         deadline = _t.time() + 5.0
@@ -65,12 +84,42 @@ def main():
             _t.sleep(0.1)
         if pub.get_subscription_count() == 0:
             print('INJECT WARNING: no subscriber matched; payload may be lost')
+        payload = args.inject
+        if args.inject_request_id:
+            # a clear carries its id as a bare "#id" (nothing to suffix)
+            payload = ('#%s' % args.inject_request_id if not payload
+                       else '%s#%s' % (payload, args.inject_request_id))
         for _ in range(5):
-            pub.publish(StringMsg(data=args.inject))
+            pub.publish(StringMsg(data=payload))
             _t.sleep(0.2)
-        print('INJECT set to %r' % args.inject)
+        want = args.expect_inject_state
+        if not want:
+            want = 'armed' if payload else 'cleared'
+        end = _t.time() + args.inject_timeout
+        got = None
+        while _t.time() < end:
+            rclpy.spin_once(n, timeout_sec=0.1)
+            for raw in list(seen):
+                try:
+                    snap = json.loads(raw)
+                except ValueError:
+                    continue
+                if (snap.get('state') == want
+                        and (not args.inject_request_id
+                             or snap.get('request_id') == args.inject_request_id)):
+                    got = snap
+                    break
+            if got is not None:
+                break
+        print('INJECT payload=%r expect=%s observed=%s'
+              % (payload, want, json.dumps(got, sort_keys=True) if got else None))
         n.destroy_node()
         rclpy.shutdown()
+        if got is None:
+            print('INJECT FAILED: state %r not observed within %.1fs'
+                  % (want, args.inject_timeout))
+            return 3
+        return 0
         return 0
 
     cls, act = SPEC[args.action]
