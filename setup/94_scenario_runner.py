@@ -60,9 +60,21 @@ def newest_episode():
 
 
 def arm_inject(client, payload):
-    if payload:
-        subprocess.run(['python3', client, '--action', 'inject',
-                        '--inject', payload], capture_output=True, timeout=60)
+    """Arm, or explicitly CLEAR, the failure injection.
+
+    `None` means "leave the injection alone" (scenarios S1/S4/S7); any string
+    is published, and the EMPTY string is the clear signal the pick server
+    understands.  The previous `if payload:` guard made '' a no-op, so the
+    runner's post-episode "always clear" never reached the client and an armed
+    `once`/`always` injection stayed live for every later episode of the batch
+    (measured 2026-09-29: with S5 before S7, all 10 S7 episodes were pre-failed
+    by the leftover `exhaust_demo_v1:always` injection -> S7 0/10).  Cells
+    ordered after an injecting scenario were therefore invalid.
+    """
+    if payload is None:
+        return
+    subprocess.run(['python3', client, '--action', 'inject',
+                    '--inject', payload], capture_output=True, timeout=60)
 
 
 def run_episode(client, spec, ws, seed=None):

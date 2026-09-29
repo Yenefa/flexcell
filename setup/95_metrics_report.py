@@ -40,6 +40,10 @@ CELL_OF_SCENARIO = {
     'week1_demo_v1': 'S1',
     'recovery_demo_v1': 'S2',
     'exhaust_demo_v1': 'S5',
+    # S7 off-canonical placement is a primary-track cell (ratified decision 6),
+    # not a dev iteration: it carries the adaptation probe.  Without this the
+    # S7 cell silently degrades into a dev/ bucket (2026-09-28).
+    's7_perturb_v1': 'S7',
 }
 
 POLICY = FSMPolicy()

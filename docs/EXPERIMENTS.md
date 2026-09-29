@@ -7,17 +7,18 @@
 
 ## Index
 
-| ID    | Experiment                                             | Outcome      | Evidence                                                              |
-| ----- | ------------------------------------------------------ | ------------ | --------------------------------------------------------------------- |
-| E-001 | Day-1 environment verification                         | PASS         | acceptance/day1 (delivery host) + [DAY1_REPORT.md](../DAY1_REPORT.md) |
-| E-002 | Day-2 MoveToPose acceptance                            | PASS 10/10   | acceptance/day2 + [DAY2_MOVETOPOSE.md](DAY2_MOVETOPOSE.md)            |
-| E-003 | Week-1 deterministic skills battery                    | PASS         | acceptance/week1                                                      |
-| E-004 | Week-1.5 demo hardening — delivery acceptance (att3)   | PASS         | acceptance/week15/delivery_20260926/                                  |
-| E-005 | Week-1.5 cold-start re-verification                    | PASS         | acceptance/week15/cs_20260926/                                        |
-| E-006 | M2.3 audit remediation — runtime acceptance            | PASS (gated) | acceptance/sessions/ (FLEXCELL_STAGE) + ~/.ros/flexcell/referee.jsonl |
-| E-007 | Scenario runner batch (S1×2 + S2 + S5), episode replay | PASS         | ~/.ros/flexcell/episodes/batch_20260928_051219.jsonl                  |
-| E-008 | Metrics report over real store + S7 adaptation probe   | PASS         | ~/.ros/flexcell/episodes/batch_20260928_124615.jsonl                  |
-| M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)             | NOT RUN      | — (RFC #15; harness #7/#8/#9)                                         |
+| ID    | Experiment                                                              | Outcome      | Evidence                                                              |
+| ----- | ----------------------------------------------------------------------- | ------------ | --------------------------------------------------------------------- |
+| E-001 | Day-1 environment verification                                          | PASS         | acceptance/day1 (delivery host) + [DAY1_REPORT.md](../DAY1_REPORT.md) |
+| E-002 | Day-2 MoveToPose acceptance                                             | PASS 10/10   | acceptance/day2 + [DAY2_MOVETOPOSE.md](DAY2_MOVETOPOSE.md)            |
+| E-003 | Week-1 deterministic skills battery                                     | PASS         | acceptance/week1                                                      |
+| E-004 | Week-1.5 demo hardening — delivery acceptance (att3)                    | PASS         | acceptance/week15/delivery_20260926/                                  |
+| E-005 | Week-1.5 cold-start re-verification                                     | PASS         | acceptance/week15/cs_20260926/                                        |
+| E-006 | M2.3 audit remediation — runtime acceptance                             | PASS (gated) | acceptance/sessions/ (FLEXCELL_STAGE) + ~/.ros/flexcell/referee.jsonl |
+| E-007 | Scenario runner batch (S1×2 + S2 + S5), episode replay                  | PASS         | ~/.ros/flexcell/episodes/batch_20260928_051219.jsonl                  |
+| E-008 | Metrics report over real store + S7 adaptation probe                    | PASS         | ~/.ros/flexcell/episodes/batch_20260928_124615.jsonl                  |
+| E-009 | New-machine (RTX 4060 laptop) bring-up + first official benchmark batch | see entry    | setup/acceptance/m3_seed_batch_20260929*/                             |
+| M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN      | — (RFC #15; harness #7/#8/#9)                                         |
 
 ## Entries
 
@@ -143,6 +144,127 @@
   Batch summary: `~/.ros/flexcell/episodes/batch_20260928_124615.jsonl`.
 - **Evidence**: episode store + both batch summaries; report text in the issue
   comments.
+
+### E-009 — New-machine bring-up + first official benchmark batch (2026-09-29)
+
+- **Purpose**: bring the RTX 4060 laptop to a verified workcell per
+  [REPRODUCE.md](../REPRODUCE.md) and produce the **first M3-seed benchmark
+  numbers** on a real store (S1/S2/S5/S7 × 20/20/20/10, policy = FSMPolicy,
+  `decision_policy=fsm` verified from the live startup banner).
+- **Machine**: i5-13500H / 16 threads / 16 GB, WSL2 Ubuntu-24.04, `.wslconfig`
+  memory=10GB + swap=16GB (WSL saw 7 GB before, 9 GB after). **No hardware GL in
+  WSL** — the Windows NVIDIA driver is not installed (WMI shows only Intel UHD,
+  `nvidia-smi` → `Failed to initialize NVML`), so WSLg falls back to llvmpipe.
+  All runtime verification was therefore **headless** (two machine-local patches,
+  neither a repo change: `' -s'` added to the upstream gz launch args in the
+  gitignored `src/`, and `start_rviz:=false` in the `/tmp/flexcell_cli` copy).
+  Proof per run: `pgrep -af '[g]z sim'` shows the server only, `rviz2` count 0.
+- **Build/test baseline reproduced**: `colcon build` (4 workers) upstream exit 0
+  - flexcell exit 0; `colcon test` → **130 tests, 0 errors, 0 failures, 0
+    skipped**. `rosdep update` failed 12/12 (WSL egress flakes to
+    `raw.githubusercontent.com`, plus an `EE certificate key too weak` intercept)
+    → **dependency closure NOT_VERIFIED** (same caveat as the delivery host,
+    workspace WSL-001); the closure is evidenced by build + tests + runtime.
+- **Three real defects found and fixed** (all in-repo, all blocking):
+  1. `setup/flexcell_admin.py` used `os.environ` without ever importing `os`
+     (missing since `d3c2d04`) → every `health`/`reset` died with `NameError`,
+     so the CLI's skill-fleet readiness gate could **never** pass and
+     `flexcell start` always failed. The working copy only existed in the
+     delivery host's F: staging, which is now unreachable. After the one-line
+     fix: strict health **17 checks `ok: true`, `hard_fail: []`**.
+  2. `95_metrics_report.py` had no `s7_perturb_v1 → S7` mapping, so the S7 cell
+     silently degraded into a `dev/*` bucket. Mapping added; the report now emits
+     a real `## Cell S7`.
+  3. `94_scenario_runner.py::arm_inject` guarded on `if payload:`, which made the
+     **empty** payload a no-op — so the runner's post-episode "always clear" never
+     reached the client and an armed `once`/`always` injection stayed live for
+     every later episode of the batch. Measured effect: with S5 before S7, all 10
+     S7 episodes were pre-failed by the leftover `exhaust_demo_v1:always`
+     injection (0.52 s episodes, `err=23`, no motion). Now `if payload is None:
+return`, and the pick server log shows the clear landing
+     (`failure injection DISABLED`). This is why the delivery-host batches never
+     caught it: E-007 put S5 last, E-008 ran S7 alone.
+- **First batch (superseded, kept as defect evidence)** —
+  `setup/acceptance/m3_seed_batch_20260929/`: S1 16/20 = 0.80
+  CI95 [0.58, 0.92] · S2 13/20 = 0.65 [0.43, 0.82] · S5 0/20 SUCCEEDED
+  (= 20/20 correctly FAILED, typed) · **S7 0/10 = 0.00 [0.00, 0.28] — invalid,
+  pre-failed by defect 3**. `REPORT: PASS (70 episodes, 0 replay-dirty)` — note
+  the reporter's verdict is _replay integrity_, not outcome correctness; the
+  runner's own verdict was `FAIL (21)`.
+- **Clean batch** — `setup/acceptance/m3_seed_batch_20260929_clean/`, run as four
+  independently resumable per-cell segments (the WSL VM restarted twice mid-batch
+  and killed the detached runner, so the batch was re-planned into
+  S1/S2/S5/S7 segments whose row files merge into one `batch_merged.jsonl`;
+  partial attempts sit in the store but in no row file, so they cannot enter the
+  report). Every number below is regenerated by `95_metrics_report.py` from the
+  replay store over `batch_merged.jsonl` (70 rows); the report is committed
+  verbatim as `95_metrics_report.md`.
+
+  | Cell | Scenario                        | success (metric 1)                                                       | Wilson 95% CI       | replay integrity |
+  | ---- | ------------------------------- | ------------------------------------------------------------------------ | ------------------- | ---------------- |
+  | S1   | canonical happy demo            | 18/20 = **0.90**                                                         | [0.70, 0.97]        | 20/20 clean      |
+  | S2   | injected failure, first attempt | 8/20 = **0.40**                                                          | [0.22, 0.61]        | 20/20 clean      |
+  | S5   | retry exhaustion                | 1/20 SUCCEEDED → 19/20 correctly FAILED (typed `ERR_RECOVERY_EXHAUSTED`) | [0.01, 0.24]        | 20/20 clean      |
+  | S7   | off-canonical placement         | 6/10 = **0.60**                                                          | [0.31, 0.83] ⚠ n<20 | 10/10 clean      |
+
+  `REPORT: PASS (70 episodes, 0 replay-dirty)`, 0 `dev/*` buckets (S7 is a real
+  cell again). Row-level: 70 rows, 19 outcome mismatches, **0 replay-dirty**.
+  Runner verdict per segment: `S1 FAIL (2)`, and S2/S5/S7 likewise non-zero
+  because the deterministic baseline missed the expected outcome — that is the
+  measurement, not a harness fault.
+
+- **S7 recovered from 0/10 to 6/10 once defect 3 was fixed** — direct evidence
+  that the first batch's S7 collapse was the leftover injection, not the
+  perturbation: the deterministic baseline does adapt to off-canonical placement
+  (the expected S7 outcome per ratified ⑥), it just has to survive the same
+  intermittent servo failure as S1.
+- **S2 is the weak cell and the reason is physical**: all 12 S2 failures are
+  `BUDGET_EXHAUSTED` from the grasp failure (8 succeeded with
+  `demo done: A->zone_1 (0.0000m), B->zone_2 (0.0000m)`), i.e. S2 pays the servo
+  failure twice over — it needs two successful picks _and_ a recovery leg. S1
+  (0.90) vs S2 (0.40) is the honest per-pick reliability gap on this machine.
+- **One S5 episode succeeded when it should have exhausted** (run 20,
+  `dabdd93d`): its `fsm_trace` is
+  `PICK_A(attempt=1):OK, PLACE_A:OK, VERIFY_A:OK, PICK_B:OK, PLACE_B:OK,
+VERIFY_B:OK` with `error_code 0` — i.e. **the `always` injection was never
+  armed for that episode**, not a policy error. The arming rides a transient
+  topic publisher (`w1_client` publishes 5× over ~1 s then exits) and the client
+  _does_ print `INJECT WARNING: no subscriber matched; payload may be lost`, but
+  `arm_inject` uses `capture_output=True` and never checks it, so a lost arm is
+  silent. Consequence for the numbers: S5's failure path is n=19, and injection
+  arming is currently **unverified by construction** — worth a follow-up (assert
+  on the client's warning, or make arming an action/服务 call instead of a topic).
+- **Environment caveat that applies to every number above**: no hardware GL in
+  WSL (llvmpipe), so all runs are headless; load ~10-12 on 16 threads; the carry
+  servo intermittently fails to lift (`box_rise_m ≈ -0.001..-0.004`,
+  `inj=None`), which is the declared teleport-servo compromise, not new
+  degradation. The delivery host's frozen Week-1.5 baseline was produced under
+  different conditions (GPU-accelerated, 12 cores) — the success rates here are
+  **not** directly comparable to it, and the CI widths (±19 pp at n=20) dominate
+  the run-to-run variance.
+- **Dominant failure mode of the machine (not a code defect)**: the carry servo
+  intermittently fails to lift the box — `box_rise_m ≈ -0.001..-0.004` →
+  `ERR_GRASP_FAILED` → (with budget 1) `ERR_RECOVERY_EXHAUSTED`. Confirmed
+  _physical_, not injected, from `pick.jsonl` (`inj=None`). This is the declared
+  teleport-servo compromise ("magnetic ≠ contact grasping") showing up as a
+  measurable success-rate ceiling, and it is the honest headline number for S1/S2
+  on this machine. Idle CPU profile (6 s `/proc` deltas, not a `top` snapshot):
+  each of the 6 skill servers ~70-92 % (each holds a persistent Python subscriber
+  to the high-rate gz `dynamic_pose/info` topic), gz sim 103 %, move_group 25 %
+  → 7.15 of 16 cores busy.
+- **NOT_RUN / explicitly out of this session's scope**: S3 (absent from the
+  runner entirely), S4 (`RunPickPlace` records no episode and is off the policy
+  seam — see `docs/ISSUE_DRAFTS_20260929.md` A), the Day-2 battery
+  (`setup/32_day2_acceptance.sh`), the independent referee run
+  (`setup/92_referee.py`), any Jev/LLM arm, and the M2.3 flood gate (see B).
+- **Open integrity findings** (not fixed here, evidence in
+  `docs/ISSUE_DRAFTS_20260929.md` B/C): the `gate_flood` zero-traceback gate has
+  **never** been green — the committed delivery-host reset artifacts carry the
+  same ~1000-count `gz.msgs.Pose` flood (1016 / 1030 / 964 / 963), so the M2.3
+  "pb2 registration fix in place" claim is unsupported; and `flexcell_admin.py
+reset` does not restore the canonical world after an abort-while-carrying
+  (`scene_cleared: false`, `target_box_a: DRIFT [0.282, 0.001, 0.028]`), which is
+  why the batch was gated on a verified-canonical world before starting.
 
 ## Evidence locations
 

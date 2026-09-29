@@ -1,0 +1,26 @@
+scenario runner: {'S7': 10}
+  S7 run 1/10
+    outcome=FAILED expected=SUCCEEDED replay=True (9 steps)
+  S7 run 2/10
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S7 run 3/10
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (10 steps)
+  S7 run 4/10
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (10 steps)
+  S7 run 5/10
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps)
+  S7 run 6/10
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps)
+  S7 run 7/10
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps)
+  S7 run 8/10
+    outcome=FAILED expected=SUCCEEDED replay=True (9 steps)
+  S7 run 9/10
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps)
+  S7 run 10/10
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+
+=== per-scenario results (metric #1, Wilson 95%% CI) ===
+  S7: 6/10 SUCCEEDED, CI95=[0.31, 0.83], replay_ok=True
+batch summary: /home/ros/.ros/flexcell/episodes/batch_20260929_141821.jsonl
+SCENARIO RUNNER: FAIL (4)

@@ -1,0 +1,149 @@
+scenario runner: {'S1': 20, 'S2': 20, 'S5': 20, 'S7': 10}
+  S1 run 1/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (10 steps)
+  S1 run 2/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps)
+  S1 run 3/20
+    outcome=FAILED expected=SUCCEEDED replay=True (9 steps)
+  S1 run 4/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps)
+  S1 run 5/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps)
+  S1 run 6/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps)
+  S1 run 7/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (10 steps)
+  S1 run 8/20
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S1 run 9/20
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S1 run 10/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (10 steps)
+  S1 run 11/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (10 steps)
+  S1 run 12/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps)
+  S1 run 13/20
+    outcome=FAILED expected=SUCCEEDED replay=True (9 steps)
+  S1 run 14/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps)
+  S1 run 15/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps)
+  S1 run 16/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps)
+  S1 run 17/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (10 steps)
+  S1 run 18/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps)
+  S1 run 19/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (10 steps)
+  S1 run 20/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps)
+  S2 run 1/20
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S2 run 2/20
+    outcome=FAILED expected=SUCCEEDED replay=True (11 steps)
+  S2 run 3/20
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S2 run 4/20
+    outcome=FAILED expected=SUCCEEDED replay=True (11 steps)
+  S2 run 5/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S2 run 6/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S2 run 7/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S2 run 8/20
+    outcome=FAILED expected=SUCCEEDED replay=True (11 steps)
+  S2 run 9/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S2 run 10/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S2 run 11/20
+    outcome=FAILED expected=SUCCEEDED replay=True (11 steps)
+  S2 run 12/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S2 run 13/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S2 run 14/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S2 run 15/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S2 run 16/20
+    outcome=FAILED expected=SUCCEEDED replay=True (11 steps)
+  S2 run 17/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S2 run 18/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S2 run 19/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S2 run 20/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S5 run 1/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S5 run 2/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S5 run 3/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S5 run 4/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S5 run 5/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S5 run 6/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S5 run 7/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S5 run 8/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S5 run 9/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S5 run 10/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S5 run 11/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S5 run 12/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S5 run 13/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S5 run 14/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S5 run 15/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S5 run 16/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S5 run 17/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S5 run 18/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S5 run 19/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S5 run 20/20
+    outcome=FAILED expected=FAILED replay=True (5 steps)
+  S7 run 1/10
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S7 run 2/10
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S7 run 3/10
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S7 run 4/10
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S7 run 5/10
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S7 run 6/10
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S7 run 7/10
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S7 run 8/10
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S7 run 9/10
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S7 run 10/10
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+
+=== per-scenario results (metric #1, Wilson 95%% CI) ===
+  S1: 16/20 SUCCEEDED, CI95=[0.58, 0.92], replay_ok=True
+  S2: 13/20 SUCCEEDED, CI95=[0.43, 0.82], replay_ok=True
+  S5: 0/20 SUCCEEDED, CI95=[0.00, 0.16], replay_ok=True
+  S7: 0/10 SUCCEEDED, CI95=[0.00, 0.28], replay_ok=True
+batch summary: /home/ros/.ros/flexcell/episodes/batch_20260929_001501.jsonl
+SCENARIO RUNNER: FAIL (21)

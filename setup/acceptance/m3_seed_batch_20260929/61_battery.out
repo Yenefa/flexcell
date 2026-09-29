@@ -1,0 +1,158 @@
+GATE session: /mnt/f/flexcell-stage/setup/acceptance/sessions/week15_battery_070aed6_20260929_000504
+  "ok": true,
+    "carry_disengaged": true,
+    "scene_cleared": true,
+    "arm_home": true,
+    "canonical target_box_a": "OK ['0.2200', '0.0000', '0.0175']",
+    "canonical target_box_b": "OK ['0.2000', '-0.1800', '0.0175']"
+GATE FAIL flood-clean 61_E0_reset_before.out: 910 unregistered-gz-class tracebacks
+=== 61_A_happy | 2026-09-29T00:05:38+08:00 | scenario=week1_demo_v1 ===
+SENDING action=demo object=target_box pose=[0.12, -0.15, 0.0175]
+RESULT {
+  "action": "demo",
+  "outcome": "OUTCOME_SUCCEEDED",
+  "outcome_val": 0,
+  "error_code": "ERR_NONE",
+  "detail": "demo done: A->zone_1 (0.0000m), B->zone_2 (0.0000m)",
+  "wall_seconds": 28.462,
+  "fsm_trace": [
+    "PICK_A(attempt=1):OK",
+    "PLACE_A:OK",
+    "VERIFY_A(attempt=1):OK",
+    "PICK_B(attempt=1):OK",
+    "PLACE_B:OK",
+    "VERIFY_B(attempt=1):OK"
+  ],
+  "object_a_at_zone": true,
+  "object_b_at_zone": true,
+  "zone_a_error_m": 0.01030435258422517,
+  "zone_b_error_m": 0.008949209606647503,
+  "run_id": "week1_demo_v1-fcbf01ae",
+  "scenario_id": "week1_demo_v1"
+}
+RC=0
+GATE PASS happy_outcome
+GATE PASS happy_zone_a
+GATE PASS happy_zone_b
+  "outcome": "OUTCOME_SUCCEEDED",
+  "object_a_at_zone": true,
+  "object_b_at_zone": true,
+  "zone_a_error_m": 0.01030435258422517,
+  "zone_b_error_m": 0.008949209606647503,
+  "run_id": "week1_demo_v1-fcbf01ae",
+  "ok": true,
+    "carry_disengaged": true,
+    "scene_cleared": true,
+    "arm_home": true,
+    "canonical target_box_a": "OK ['0.2200', '0.0000', '0.0175']",
+    "canonical target_box_b": "OK ['0.2000', '-0.1800', '0.0175']"
+GATE FAIL flood-clean 61_E1_reset_after_success.out: 953 unregistered-gz-class tracebacks
+INJECT set to 'recovery_demo_v1:once'
+=== 61_B_recovery | 2026-09-29T00:06:46+08:00 | scenario=recovery_demo_v1 ===
+SENDING action=demo object=target_box pose=[0.12, -0.15, 0.0175]
+RESULT {
+  "action": "demo",
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_RECOVERY_EXHAUSTED",
+  "detail": "policy abort (BUDGET_EXHAUSTED): pick attempt 2 failed (error 23) (trace=PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED,RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1)),PICK_A(attempt=1):OK,PLACE_A:OK,VERIFY_A(attempt=1):OK,PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED,RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1)),PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED)",
+  "wall_seconds": 22.828,
+  "fsm_trace": [
+    "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+    "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+    "PICK_A(attempt=1):OK",
+    "PLACE_A:OK",
+    "VERIFY_A(attempt=1):OK",
+    "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED",
+    "RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1))",
+    "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED"
+  ],
+  "object_a_at_zone": true,
+  "object_b_at_zone": false,
+  "zone_a_error_m": 0.01295807780040908,
+  "zone_b_error_m": NaN,
+  "run_id": "recovery_demo_v1-efece60d",
+  "scenario_id": "recovery_demo_v1"
+}
+RC=1
+GATE FAIL recovery_outcome: /"outcome": "OUTCOME_SUCCEEDED"/ not matched in /mnt/f/flexcell-stage/setup/acceptance/sessions/week15_battery_070aed6_20260929_000504/61_B_recovery.out
+GATE PASS recovery_trace
+  "outcome": "OUTCOME_FAILED",
+  "error_code": "ERR_RECOVERY_EXHAUSTED",
+  "detail": "policy abort (BUDGET_EXHAUSTED): pick attempt 2 failed (error 23) (trace=PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED,RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1)),PICK_A(attempt=1):OK,PLACE_A:OK,VERIFY_A(attempt=1):OK,PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED,RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1)),PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED)",
+  "fsm_trace": [
+    "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+    "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED",
+    "RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1))",
+    "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED"
+  "run_id": "recovery_demo_v1-efece60d",
+  "ok": true,
+    "carry_disengaged": true,
+    "scene_cleared": true,
+    "arm_home": true,
+    "canonical target_box_a": "OK ['0.2200', '0.0000', '0.0175']",
+    "canonical target_box_b": "OK ['0.2000', '-0.1800', '0.0175']"
+GATE FAIL flood-clean 61_E2_reset_before_exhaust.out: 906 unregistered-gz-class tracebacks
+INJECT set to 'exhaust_demo_v1:always'
+=== 61_C_exhausted | 2026-09-29T00:07:45+08:00 | scenario=exhaust_demo_v1 ===
+SENDING action=demo object=target_box pose=[0.12, -0.15, 0.0175]
+RESULT {
+  "action": "demo",
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_RECOVERY_EXHAUSTED",
+  "detail": "policy abort (BUDGET_EXHAUSTED): pick attempt 2 failed (error 23) (trace=PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED,RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1)),PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED)",
+  "wall_seconds": 0.375,
+  "fsm_trace": [
+    "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+    "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+    "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED"
+  ],
+  "object_a_at_zone": false,
+  "object_b_at_zone": false,
+  "zone_a_error_m": NaN,
+  "zone_b_error_m": NaN,
+  "run_id": "exhaust_demo_v1-70662b9a",
+  "scenario_id": "exhaust_demo_v1"
+}
+RC=1
+GATE PASS exhaust_outcome
+GATE PASS exhaust_typed
+  "outcome": "OUTCOME_FAILED",
+  "error_code": "ERR_RECOVERY_EXHAUSTED",
+  "detail": "policy abort (BUDGET_EXHAUSTED): pick attempt 2 failed (error 23) (trace=PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED,RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1)),PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED)",
+  "fsm_trace": [
+    "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+  "ok": true,
+    "carry_disengaged": true,
+    "scene_cleared": true,
+    "arm_home": true,
+    "canonical target_box_a": "OK ['0.2200', '0.0000', '0.0175']",
+    "canonical target_box_b": "OK ['0.2000', '-0.1800', '0.0175']"
+GATE FAIL flood-clean 61_E3_reset_after_failure.out: 899 unregistered-gz-class tracebacks
+INJECT set to ''
+=== 61_D_invalid | 2026-09-29T00:08:22+08:00 | EXPECT: typed failure (IK unreachable) ===
+SENDING action=task object=target_box_a pose=[0.42, 0.0, 0.0175]
+RESULT {
+  "action": "task",
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_SKILL_FAILED",
+  "detail": "PLACE failed: ERR_MOTION_FAILED (hover motion failed: IK pre-check failed: NO_IK_SOLUTION for link end_effector_link)",
+  "wall_seconds": 10.532,
+  "fsm_trace": [
+    "OBSERVE",
+    "PICK",
+    "PLACE"
+  ],
+  "object_at_place": false,
+  "final_position_error_m": 0.0,
+  "skip_verify": false
+}
+RC=1
+GATE PASS invalid_failed
+GATE PASS invalid_typed
+  "outcome": "OUTCOME_FAILED",
+  "error_code": "ERR_SKILL_FAILED",
+  "detail": "PLACE failed: ERR_MOTION_FAILED (hover motion failed: IK pre-check failed: NO_IK_SOLUTION for link end_effector_link)",
+GATE: 5 FAILURE(S) (/mnt/f/flexcell-stage/setup/acceptance/sessions/week15_battery_070aed6_20260929_000504)

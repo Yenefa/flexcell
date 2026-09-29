@@ -13,9 +13,15 @@
 - The staging area is `/mnt/f/flexcell-stage` (drive `F:`). Hardcoded in
   ~50 files (`WORLD=`, `ADMIN=`, all acceptance evidence dirs). On the new
   machine, EITHER assign a partition/drive letter `F:` and copy the staging
-  dirs there (phase 3), OR bind-mount any folder onto `/mnt/f`:
-  `sudo mkdir -p /mnt/f && sudo mount --bind /mnt/c/flexcell-stage /mnt/f`
+  dirs there (phase 3), OR bind-mount a folder onto `/mnt/f`:
+  `sudo mkdir -p /mnt/f && sudo mount --bind /mnt/c/flexcell-mnt /mnt/f`
   (add to /etc/fstab to survive reboots).
+  **Mount the PARENT, not the stage dir itself.** `/mnt/f` must be the
+  directory that _contains_ a child named `flexcell-stage`, because the CLI
+  hardcodes `/mnt/f/flexcell-stage/...`. Verified 2026-09-29: binding
+  `/mnt/c/flexcell-stage` directly onto `/mnt/f` resolves to
+  `/mnt/f/worlds/...` and every hardcoded path 404s. Working layout:
+  `/mnt/c/flexcell-mnt/flexcell-stage/{setup,worlds}` -> `/mnt/f/flexcell-stage/...`.
 - Behavior-freeze baseline: `setup/acceptance/week15/delivery_20260926/66_run_record_happy.jsonl`
   — fsm_trace compared byte-exact. Never edit baselines.
 
@@ -61,7 +67,7 @@ Windows side first, or fetch it from WSL directly):
    source /opt/ros/jazzy/setup.bash && source install/setup.bash
    ```
 5. Offline test ladder (no GUI needed) — or just `colcon test
---packages-select flexcell_skills`, which runs all six suites since the
+--packages-select flexcell_skills`, which runs every suite since the
    M2.3 audit remediation (wired in via `tests_require`):
    ```
    python3 src/flexcell/flexcell_skills/test/test_canonical_state.py     # 13
@@ -70,8 +76,21 @@ Windows side first, or fetch it from WSL directly):
    python3 src/flexcell/flexcell_skills/test/test_contracts.py           # 17
    python3 src/flexcell/flexcell_skills/test/test_recovery.py            # 15
    python3 src/flexcell/flexcell_skills/test/test_runtime_guards.py      # 13
+   python3 src/flexcell/flexcell_skills/test/test_episode.py
+   python3 src/flexcell/flexcell_skills/test/test_safety_gate.py
+   python3 src/flexcell/flexcell_skills/test/test_jev_policy.py
+   python3 src/flexcell/flexcell_skills/test/test_metrics.py
+   python3 src/flexcell/flexcell_skills/test/test_executor_integration.py
    python3 setup/82_undefined_attr_check.py src/flexcell                 # static
    ```
+   Measured on the 2026-09-29 bring-up (i5-13500H, 16 threads, 10 GB WSL):
+   `colcon test` → **130 tests, 0 errors, 0 failures, 0 skipped** (~12 s);
+   `colcon build` at 4 workers → upstream exit 0 + flexcell exit 0. The static
+   scan has one known false positive (`jev_backends.py -> self.name`): `name`
+   is a _class_ attribute and the scanner only collects `self.X = ...` stores,
+   so it cannot see it — `make_backend('local').name` returns
+   `'local-reproduction'` at runtime. Fix the scanner (per-class attribute
+   scope); do not "fix" the backends.
 
 ## 3. Staging area (F: convention)
 
@@ -83,11 +102,34 @@ cp -r /home/ros/agentic_workcell_ws/setup  /mnt/f/flexcell-stage/setup
 sudo chown -R ros:ros /mnt/f/flexcell-stage
 ```
 
-`setup/flexcell` (the lifecycle CLI) exports `GALLIUM_DRIVER=d3d12` on
-purpose: WSLg's XWayland is not DRI3-capable, so without it Mesa falls back
-to llvmpipe (rviz2 ~6fps at ~160% CPU - and that CPU burn is what starved
-the carry servo in the att1/att2 incidents). With it, glxinfo reports the
-real GPU (D3D12 - RTX 4060 / RX 6800).
+`setup/flexcell` (the lifecycle CLI) does **not** export any GL driver variable —
+an earlier version exported `GALLIUM_DRIVER=d3d12`, which is AMD-specific and is
+no longer in the tree. Consequence: on a machine with no working hardware GL
+inside WSL (e.g. the NVIDIA driver not installed on the Windows host, so Mesa
+falls back to llvmpipe), the stack still starts but burns ~180% CPU in the
+Gazebo GUI's software renderer — the documented cause of the att1/att2
+carry-servo starvation. Unattended verification MUST therefore launch headless:
+
+1. Gazebo: the upstream bringup passes `gz_args = [world, '.sdf', ' -v 1', ' -r']`,
+   which starts `gz sim gui` as well as the server. Add `' -s'` in
+   `src/open_manipulator/open_manipulator_bringup/launch/open_manipulator_x_gazebo.launch.py`
+   (upstream clone, gitignored — machine-local, not a FlexCell change).
+2. RViz: `open_manipulator_x_moveit.launch.py` defaults `start_rviz:=true` and
+   `setup/flexcell` does not override it, so rviz2 also starts. Install the CLI
+   the way the batteries do
+   (`tr -d '\r' < <staging>/setup/flexcell > /tmp/flexcell_cli`) and add
+   `start_rviz:=false` to its `open_manipulator_x_moveit.launch.py` line.
+
+Proof after starting: `pgrep -af '[g]z sim'` shows the server only, `pgrep -af '[r]viz2'`
+is empty, and the 17-check strict health is `ok: true`.
+
+`rosdep` is **not** required for the happy path, and its index is unreliable from
+this network: `rosdep update` failed 12/12 attempts on 2026-09-29 (WSL NAT flakes
+toward `raw.githubusercontent.com` — `Errno 101`, TLS handshake timeouts, plus one
+`EE certificate key too weak` intercept), so `rosdep install` refuses to run and
+the dependency closure is **NOT_VERIFIED** — the same caveat as the delivery host
+(workspace WSL-001). The closure is instead evidenced empirically: the
+`colcon build` resolves, `colcon test` is green, and the runtime ladder passes.
 
 ## 4. Verification ladder (in order; stop at the first red)
 
@@ -98,8 +140,10 @@ a versioned `sessions/<suite>_<sha>_<ts>/` dir (never overwritten; set
 artifacts are gated on the `gz.msgs.Pose` traceback flood. Machine paths can
 be overridden with `FLEXCELL_WS` / `FLEXCELL_STAGE`.
 
-1. `bash /tmp/flexcell_cli start` → `START OK` + `flexcell health` = 12 OK
-   (~40 s on the 13500H).
+1. `bash /tmp/flexcell_cli start` → `START OK` + strict `flexcell health` with
+   **17 checks** `ok: true` and `hard_fail: []` (measured 29 s on the 13500H).
+   The `READY: ... (Ns)` lines count _retries_, not seconds — a `(0s)` line
+   means "succeeded on the first attempt", not "instant".
 2. `flexcell reset` → `"ok": true`.
 3. Happy demo under the independent referee (recomputes box_rise /
    zone_error from the raw gz stream and cross-checks the servers' jsonl):

@@ -1,0 +1,46 @@
+scenario runner: {'S2': 20}
+  S2 run 1/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S2 run 2/20
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S2 run 3/20
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S2 run 4/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S2 run 5/20
+    outcome=FAILED expected=SUCCEEDED replay=True (11 steps)
+  S2 run 6/20
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S2 run 7/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S2 run 8/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S2 run 9/20
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S2 run 10/20
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S2 run 11/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S2 run 12/20
+    outcome=FAILED expected=SUCCEEDED replay=True (11 steps)
+  S2 run 13/20
+    outcome=FAILED expected=SUCCEEDED replay=True (11 steps)
+  S2 run 14/20
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S2 run 15/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S2 run 16/20
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S2 run 17/20
+    outcome=FAILED expected=SUCCEEDED replay=True (5 steps)
+  S2 run 18/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+  S2 run 19/20
+    outcome=FAILED expected=SUCCEEDED replay=True (11 steps)
+  S2 run 20/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (12 steps)
+
+=== per-scenario results (metric #1, Wilson 95%% CI) ===
+  S2: 8/20 SUCCEEDED, CI95=[0.22, 0.61], replay_ok=True
+batch summary: /home/ros/.ros/flexcell/episodes/batch_20260929_111043.jsonl
+SCENARIO RUNNER: FAIL (12)
