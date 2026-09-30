@@ -167,7 +167,54 @@ timeout cancel regression` (hard-gated; case10 needs the arm OFF the
 - `workspace/aedl` (separate private repo; its docstring patch sits in that
   project root awaiting a privileged session).
 
-## 6. Known first-run hazards (all in 踩坑日记, dates 2026-09-26/27/28)
+## 5b. WSL networking: mirrored mode is REQUIRED here (2026-09-30)
+
+`.wslconfig` sets `networkingMode=mirrored` + `dnsTunneling=true`. This is not a
+preference: under the default NAT the campus network sees WSL as a
+NAT/proxy-shaped client and the account risks being flagged. Mirrored mode makes
+WSL share the host network stack, so its traffic is indistinguishable from
+native host traffic. It also fixed WSL egress to github.com (1/5 -> 4/5 HTTPS
+here, and it varies).
+
+**Mirrored mode has a cost that must be paid for explicitly.** It exposes every
+host adapter inside WSL. On this laptop that means two NICs:
+
+```
+eth1  100.77.115.74/32   VPN / tunnel adapter
+eth2  10.92.6.94/24      the real uplink
+```
+
+With both present, FastDDS forms no participant mesh: `ros2 node list` returns
+nothing, the `ros_gz_bridge` never delivers `/clock` or `/joint_states`, and
+because everything runs on sim time the `ros_gz_control` activation handshake
+stalls, so `flexcell start` dies with `START FAILED: controllers not active`.
+
+The fix is one environment variable, exported for every process in the session:
+
+```bash
+export ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST   # single-machine workcell
+```
+
+That is the Jazzy replacement for the deprecated `ROS_LOCALHOST_ONLY`. Verified
+under mirrored mode: `START OK`, 3 controllers active, 20 nodes, `health
+ok=true`, `reset ok=true` with both boxes canonical.
+
+Two traps that cost real time here, both fixed by `/tmp/flexcell_env.sh`:
+
+- **`ROS_LOCALHOST_ONLY=1` is not equivalent.** It hangs the start instead of
+  failing it, and Jazzy prints a deprecation warning pointing at the variable
+  above.
+- **The `ros2` CLI blocks when the daemon socket is absent.** `ros2 daemon start`
+  reports success and then the daemon shows up late, so a `ros2 node list`
+  issued too early hits its full timeout with no output. The flexcell CLI's
+  readiness probes go through `ros2`, so the daemon must be up before
+  `flexcell start` or every probe reads "not ready".
+
+Cleanup gotcha: a half-stopped stack leaves `ros2 launch ...` (PID X) and
+`robot_state_publisher` alive. Pattern kills that omit those two leave the
+"pre-existing stack" check refusing every subsequent start - kill by PID.
+
+## 6. Known first-run hazards (all in 踩坑日记, dates 2026-09-26/27/28/30)
 
 - /joint_states must have exactly 1 publisher (joint_state_broadcaster).
 - `flexcell reset` may exit RC=139 while reporting `"ok": true` - judge by
