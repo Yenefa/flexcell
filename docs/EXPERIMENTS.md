@@ -358,6 +358,48 @@ live=false` rc 0; **negative** `bogus:sometimes` → seal fires, **rc 3**;
   it is the fix. Making the executor release on abort is a separate change and is
   left open. S3/S4 (P1) and the n≥20 re-run are the next steps.
 
+### E-011 — First M3-baseline candidate batch, n=20 per cell (2026-09-30)
+
+The n≥20 re-run that E-010 called the next step. Four cells, 80 episodes, run in
+resumable per-cell segments because the WSL VM had restarted mid-batch twice
+(`/tmp` is tmpfs; the driver therefore banks each cell as its own row file and
+merges at the end). Head commit `d03d06c`.
+
+| cell | success      | Wilson 95%   | E-009 for comparison   |
+| ---- | ------------ | ------------ | ---------------------- |
+| S1   | 15/20 = 0.75 | [0.53, 0.89] | 0.90 (n=20)            |
+| S2   | 11/20 = 0.55 | [0.34, 0.74] | 0.40 (n=20)            |
+| S5   | 0/20 = 0.00  | [0.00, 0.16] | 0/20, correctly FAILED |
+| S7   | 16/20 = 0.80 | [0.58, 0.92] | 0.60 (n=10)            |
+
+`REPORT: PASS (80 episodes, 0 replay-dirty)`; 20/20 episodes clean in every cell
+(0 diverged steps, 0 safety-rejection exclusions); **0 harness errors** across
+all 80 episodes, which is the T6 injection-lifecycle change doing its job on real
+data rather than only in the unit tests.
+
+- **What moved and why it is believable**: S2 and S7 are the two cells that
+  E-010 identified as capped by harness defects — S2 by the carry-servo lift
+  failure that stranded the box and made `reset` report `ok=false`, S7 by
+  leftover injection that the `if payload:` guard had turned into a no-op. Both
+  rose after the fixes (+0.15 and, at n=10→20, +0.20). S1 fell 0.90→0.75 and S7
+  is now measured at n=20 instead of n=10, so neither comparison is
+  like-for-like; with 20 episodes the Wilson interval is ±0.18 wide, which is wide
+  enough that S1's move is **not** evidence of a regression.
+- **S5 stays 0/20 by design**: that cell expects exhaustion to fail. A non-zero
+  rate there would be the bug.
+- **NOT_RUN — decision latency (metric 3)**: p50/p95/p99/max all report `0.0 ms`
+  across 177-207 evaluated decisions per cell. A maximum of exactly zero across
+  hundreds of decisions is not a measurement, it is an unpopulated field. The
+  numbers are carried in the report because the generator emits them
+  unconditionally, but **nothing here supports any latency claim**, and none is
+  made. Instrumenting it is open work.
+- **Open**: this is a _candidate_ baseline. Freezing it as the M3 baseline is a
+  human decision; nothing here is tagged or released.
+
+Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
+`batch_merged.jsonl`, `95_metrics_report.md`, `gate_reset.json`,
+`baseline_rerun.log`). Copied off the execution host and md5-verified.
+
 ## Evidence locations
 
 - Delivery host: `F:\flexcell-stage\setup\acceptance\{day1,day2,week1,week15}\`
