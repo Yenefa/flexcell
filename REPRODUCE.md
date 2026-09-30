@@ -214,6 +214,35 @@ Cleanup gotcha: a half-stopped stack leaves `ros2 launch ...` (PID X) and
 `robot_state_publisher` alive. Pattern kills that omit those two leave the
 "pre-existing stack" check refusing every subsequent start - kill by PID.
 
+### Running purely inside WSL (what a handover agent needs)
+
+Nothing in the runtime has to live outside WSL. The repo already contains
+everything the stack needs - `setup/flexcell`, `setup/flexcell_admin.py` and
+`worlds/flexcell_world.sdf` are all tracked - so the `F:` staging drive and the
+`/tmp` scratch copies are optional, not dependencies.
+
+```bash
+~/flexcell-up.sh        # bring the stack up, then verify
+~/flexcell-down.sh      # stop it
+~/flexcell-install.sh   # regenerate the CLI + env (idempotent)
+```
+
+`~/flexcell-up.sh` sources `~/.flexcell/env.sh` (the discovery-range variable
+above), starts the `ros2` daemon, starts the stack only if it is not already
+up, and then reports node count, active controllers and a health check. It
+refuses to silently restart a healthy stack, so it is safe to re-run.
+
+Two things it will not do for you, by design:
+
+- **`src/` is gitignored**, so the upstream launch file that carries the
+  headless `gz -s` flag is a local edit. `~/flexcell-install.sh` re-applies it
+  idempotently and takes a timestamped backup, but if you re-clone `src/` from
+  upstream, expect to run the installer again.
+- **Process ownership lives in `/tmp/flexcell_lifecycle`** (pid files and logs).
+  That is tmpfs on purpose: it is per-boot runtime state, and the CLI recreates
+  it on every start. A reboot loses the logs of the previous session, nothing
+  else.
+
 ## 6. Known first-run hazards (all in 踩坑日记, dates 2026-09-26/27/28/30)
 
 - /joint_states must have exactly 1 publisher (joint_state_broadcaster).
