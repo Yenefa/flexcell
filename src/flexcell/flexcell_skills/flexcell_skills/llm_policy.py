@@ -127,9 +127,12 @@ class LLMPolicy(DecisionPolicy):
         t0 = time.perf_counter_ns()
         try:
             reply = self._transport(self._endpoint, payload, self._timeout_s)
-        except Exception:
+        except Exception as exc:
             self.stats['backend_errors'] += 1
-            return self._degrade(world, goal, constraints, history, 'backend_error')
+            d = self._degrade(world, goal, constraints, history, 'backend_error')
+            trace = dict(d.policy_trace, error_type=type(exc).__name__,
+                         http_status=getattr(exc, 'code', None))
+            return replace(d, policy_trace=trace)
         try:
             choice = reply['choices'][0]
             content = choice.get('text') or choice.get('message', {}).get('content')

@@ -127,7 +127,16 @@ def episode_rows(episodes, model_replay=None):
                             or not result['same_frozen_model']
                             or [r['seq'] for r in replayed] != [r['seq'] for r in steps]):
                         raise ValueError('model replay identity or step sequence mismatch')
-                    diverged = sum(not r['ok'] for r in replayed)
+                    checks = []
+                    for row, step in zip(replayed, steps):
+                        if row['recorded'] != step['policy_output']:
+                            raise ValueError('model replay source decision mismatch')
+                        got = row['replayed']
+                        usable = (step['policy_input']['world_state_canonical'] is None or
+                                  not (got.get('policy_trace') or {}).get('fallback', True))
+                        checks.append(usable and all(got.get(k)==step['policy_output'].get(k)
+                                                     for k in ('action', 'target', 'reason_code')))
+                    diverged = sum(not ok for ok in checks)
                     replayed_n = len(replayed)
                     replay_status = 'PASS' if replayed_n and not diverged else 'FAIL'
         except Exception as exc:  # noqa: BLE001 - report, don't die
@@ -139,6 +148,7 @@ def episode_rows(episodes, model_replay=None):
         row = {
             'path': os.path.basename(path),
             'scenario': scenario,
+            'record_kind': rec.get('record_kind'),
             'outcome': str(final.get('outcome')),
             'steps': len(steps),
             'latency_ms': lat,
@@ -180,6 +190,15 @@ def report(episodes, min_cell, model_replay=None):
         total_replay_not_run += replay_not_run
         safety_records = sum(1 for r in rows if r['is_safety_record'])
         total_replay_bad += replay_bad
+        if all(r['record_kind'] == 'MODEL_INPUT_FIXTURE' for r in rows):
+            lines.extend(['## ' + cell, '',
+                          'Frozen model input fixtures; robot execution, physical success, and safety rates: NOT_RUN.', '',
+                          '| metric | value |', '| --- | --- |',
+                          '| model replay | %d/%d episodes clean; %d diverged or unavailable steps |' % (
+                              sum(r['replay_ok'] for r in rows), n,
+                              sum(r['replay_diverged_steps'] for r in rows)),
+                          '| unavailable replay | %d episodes |' % replay_not_run, ''])
+            continue
         width_note = ''
         target = max(min_cell, 100) if cell.split(' @ ')[0].split('/')[0] in ('S2', 'S7') else min_cell
         if n < target:

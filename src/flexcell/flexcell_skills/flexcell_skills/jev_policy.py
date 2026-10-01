@@ -137,7 +137,7 @@ class JevPolicy:
     any failure.  Same decide() contract as every other DecisionPolicy."""
 
     name = 'jev'
-    version = '1.1'
+    version = '1.2'
 
     def __init__(self, backend, fallback=None, timeout_s=2.0):
         self._backend = backend
@@ -148,6 +148,12 @@ class JevPolicy:
             'invocations': 0, 'fallbacks': 0, 'parse_errors': 0,
             'backend_errors': 0, 'no_world': 0, 'tokens': 0,
         }
+
+    def route_eligible(self, threshold):
+        """Can any supported calibration bin clear this routing threshold?"""
+        data = self._calibration.data
+        return bool(data and any(b['n'] >= 5 and b['wilson_lower'] >= threshold
+                                 for b in data['bins']))
 
     def _state_bytes(self, world):
         """The EXACT canonical envelope bytes (fair-bytes rule, §4.4)."""
@@ -212,7 +218,15 @@ class JevPolicy:
         except PolicyStateError:
             pass
         reported = probability
-        probability, calibrated, calibration = self._calibration.estimate(reported)
+        data = self._calibration.data
+        identity_matches = bool(data and raw.get('model') == data['model'] and
+                                raw.get('model_sha256') == data['model_sha256'])
+        if identity_matches:
+            probability, calibrated, calibration = self._calibration.estimate(reported)
+        else:
+            calibrated = False
+            calibration = ('unverified_response_model_identity' if data
+                           else self._calibration.error)
         return Decision(
             action=action, target=target,
             confidence=probability,

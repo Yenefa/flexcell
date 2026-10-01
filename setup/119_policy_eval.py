@@ -6,6 +6,7 @@ model replay requires a matching frozen backend identity in the source episode.
 """
 import argparse
 import hashlib
+import inspect
 import json
 import os
 from pathlib import Path
@@ -81,7 +82,7 @@ def configure(arm, profile):
 def frozen(profile, policy):
     files = ('llm_policy.py', 'decision_policy.py', 'canonical_state.py',
              'contracts/episode.py')
-    pkg = REPO/'src/flexcell/flexcell_skills/flexcell_skills'
+    pkg = Path(inspect.getfile(type(policy))).resolve().parent
     data = dict(profile, policy=policy.name, policy_version=policy.version,
                 source_hashing='UTF8 with LF line endings',
                 source_sha256={name: hashlib.sha256((pkg/name).read_text().encode()).hexdigest() for name in files},

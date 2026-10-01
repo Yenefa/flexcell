@@ -456,8 +456,9 @@ def _native_main():
     try:
         node.spin(1.0)
         if args.command == 'health':
-            return node.health(strict=not args.no_strict)
-        rc = node.reset()
+            rc = node.health(strict=not args.no_strict)
+        else:
+            rc = node.reset()
     finally:
         try:
             stop_gz_pose_stream()
@@ -466,6 +467,8 @@ def _native_main():
         node.destroy_node()
         if rclpy.ok():
             rclpy.shutdown()
+    if args.command == 'health' and cleanup_error:
+        raise RuntimeError('health worker cleanup failed: ' + cleanup_error)
     if args.command == 'reset':
         payload = getattr(node, '_reset_payload', {'ok': False, 'error': 'reset incomplete'})
         if cleanup_error:

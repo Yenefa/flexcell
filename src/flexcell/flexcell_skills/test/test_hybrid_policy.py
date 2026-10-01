@@ -69,6 +69,16 @@ class TestHybrid(unittest.TestCase):
         self.assertEqual(d.action, 'OBSERVE')
         self.assertEqual(fast.calls + slow.calls, 0)
 
+    def test_impossible_calibrated_threshold_skips_fast_inference(self):
+        fast = Policy('jev', Decision('PICK', 'a', 1.))
+        fast.route_eligible = lambda threshold: False
+        slow = Policy('llm', Decision('OBSERVE', 'a'))
+        decision = HybridRouter(fast, slow).decide(self.world, self.goal, self.constraints, ())
+        self.assertEqual(fast.calls, 0)
+        self.assertEqual(slow.calls, 1)
+        self.assertEqual(decision.policy_trace['source'], 'llm')
+        self.assertTrue(decision.policy_trace['proposals'][0]['skipped'])
+
     def test_s3_injection_targets_only_b_first_attempt(self):
         injection = InjectionLifecycle()
         injection.on_request('s3@b:once#r1')

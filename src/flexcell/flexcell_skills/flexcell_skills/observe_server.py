@@ -152,6 +152,7 @@ class ObserveServer(Node):
                 self._log.write({'event': 'carry_snapshot', 'request_mono_ns': before,
                                  'reply_mono_ns': time.monotonic_ns(),
                                  'revision': result.revision, 'session': result.session,
+                                 'query_detail': getattr(result, 'detail', ''),
                                  'engaged': state.engaged, 'object_id': state.object_id,
                                  'cached_engaged': self._carry.engaged if self._carry else None,
                                  'cached_object': self._carry.object_id if self._carry else None})

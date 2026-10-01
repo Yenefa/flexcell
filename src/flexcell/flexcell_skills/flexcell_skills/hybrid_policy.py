@@ -19,7 +19,7 @@ from flexcell_skills.llm_policy import LLMPolicy  # compatibility re-export
 
 class HybridRouter(DecisionPolicy):
     name = 'hybrid'
-    version = '1.0'
+    version = '1.1'
 
     def __init__(self, fast, slow, threshold=0.7, fallback=None, require_calibration=True):
         self._threshold = float(threshold)
@@ -29,7 +29,8 @@ class HybridRouter(DecisionPolicy):
         self._require_calibration = require_calibration
         self._fallback = fallback or FSMPolicy()
         self.stats = dict(invocations=0, fast_selected=0, escalations=0,
-                          slow_selected=0, fallbacks=0, rejected_proposals=0)
+                          slow_selected=0, fallbacks=0, rejected_proposals=0,
+                          fast_bypassed=0)
 
     def decide(self, world, goal, constraints, history):
         self.stats['invocations'] += 1
@@ -61,7 +62,16 @@ class HybridRouter(DecisionPolicy):
                                            'failure': type(exc).__name__})
                 return None
 
-        fast = propose(self._fast)
+        eligibility = getattr(self._fast, 'route_eligible', None)
+        bypass = bool(self._require_calibration and eligibility and
+                      not eligibility(self._threshold))
+        if bypass:
+            self.stats['fast_bypassed'] += 1
+            trace['proposals'].append({'policy': self._fast.name, 'skipped': True,
+                                      'reason': 'calibration_unavailable_or_threshold_unattainable'})
+            fast = None
+        else:
+            fast = propose(self._fast)
         calibrated = bool(fast and (fast.policy_trace or {}).get('confidence_calibrated'))
         trace['fast_calibration_required'] = self._require_calibration
         trace['fast_confidence_calibrated'] = calibrated
@@ -70,7 +80,8 @@ class HybridRouter(DecisionPolicy):
             self.stats['fast_selected'] += 1
             return replace(fast, policy_trace=dict(trace, source=self._fast.name,
                                                    fallback=False, escalated=False))
-        trace['escalation_reason'] = ('uncalibrated_fast_confidence'
+        trace['escalation_reason'] = ('calibration_unavailable_or_threshold_unattainable' if bypass
+                                      else 'uncalibrated_fast_confidence'
                                       if fast and not calibrated and self._require_calibration
                                       else 'fast_unavailable_or_below_threshold')
         self.stats['escalations'] += 1

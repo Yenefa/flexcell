@@ -1,6 +1,7 @@
 """Owned, isolated Gazebo subscriber. No native callbacks in the ROS process."""
 import argparse
 import json
+import os
 import signal
 import threading
 import time
@@ -41,10 +42,14 @@ def main():
     signal.signal(signal.SIGTERM, lambda *_: stop.set())
     signal.signal(signal.SIGINT, lambda *_: stop.set())
     topic = '/world/%s/dynamic_pose/info' % args.world
-    if not node.subscribe_raw(topic, receive, Pose_V.DESCRIPTOR.full_name,
-                              transport.SubscribeOptions()):
+    options = transport.SubscribeOptions()
+    options.msgs_per_sec = 20  # bound native-to-Python traffic before decoding
+    if not node.subscribe_raw(topic, receive, Pose_V.DESCRIPTOR.full_name, options):
         raise RuntimeError('Gazebo raw subscription refused')
-    stop.wait()
+    owner = os.getppid()
+    while not stop.wait(.2):
+        if os.getppid() != owner:  # parent death, including SIGKILL/SIGSEGV
+            stop.set()
     node.unsubscribe(topic)
 
 

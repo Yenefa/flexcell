@@ -133,10 +133,15 @@ class CarryServer(Node):
         response.success = False
         if self._backend == 'velocity_servo':
             try:
-                transport_ok, reply = self._gz_node.request(
-                    self._guard + 'status', self._Empty(), self._Empty, self._String, 1000)
+                # Status is read-only. Retry transport discovery/reply loss,
+                # keeping the total native wait below the ROS client's 2 s.
+                for attempt in range(3):
+                    transport_ok, reply = self._gz_node.request(
+                        self._guard + 'status', self._Empty(), self._Empty, self._String, 400)
+                    if transport_ok:
+                        break
                 if not transport_ok:
-                    raise RuntimeError('native carry status timed out')
+                    raise RuntimeError('native carry status timed out after 3 attempts')
                 native = json.loads(reply.data)
                 if (bool(native['engaged']) != (self._offset is not None)
                         or native['session'] != self._session
@@ -149,7 +154,8 @@ class CarryServer(Node):
         response.revision = self._state_revision
         response.session = self._session
         response.success = True
-        response.detail = 'current carry backend state confirmed'
+        response.detail = ('current carry backend state confirmed; native attempts=%d' % (attempt+1)
+                           if self._backend == 'velocity_servo' else 'current carry backend state confirmed')
         return response
 
     # ------------------------------------------------------------ commands

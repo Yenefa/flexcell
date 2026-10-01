@@ -168,7 +168,8 @@ class LocalReproductionBackend(JevBackend):
             probability=float(parsed.get('confidence', 0.0)),
             raw={'backend': self.name,
                  'model': self._model,
-                 'model_sha256': os.environ.get('FLEXCELL_JEV_MODEL_SHA256'),
+                 'model_sha256': (None if self._injected else
+                                  os.environ.get('FLEXCELL_JEV_MODEL_SHA256')),
                  'tokens': int(rep.get('usage', {}).get('total_tokens', 0) or 0)})
 
 
