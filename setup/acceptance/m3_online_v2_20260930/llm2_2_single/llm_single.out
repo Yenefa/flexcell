@@ -1,0 +1,19 @@
+[37;1m2026-09-30 23:19:58.807 [31;1m[[37;1mRTPS_TRANSPORT_SHM[31;1m Error] [37mFailed init_port fastrtps_port7007: open_and_lock_file failed[34;1m -> Function [36mopen_port_internal[m
+SENDING action=task object=target_box_a pose=[0.12, -0.15, 0.0175]
+RESULT {
+  "action": "task",
+  "outcome": "OUTCOME_SUCCEEDED",
+  "outcome_val": 0,
+  "error_code": "ERR_NONE",
+  "detail": "task done: all assignments verified",
+  "evidence_id": "pick_place_v1-ccf71f4d",
+  "wall_seconds": 27.606,
+  "fsm_trace": [
+    "PICK_A(attempt=1):OK",
+    "PLACE_A:OK",
+    "VERIFY_A(attempt=1):OK"
+  ],
+  "object_at_place": true,
+  "final_position_error_m": 0.004524215932755266,
+  "skip_verify": false
+}

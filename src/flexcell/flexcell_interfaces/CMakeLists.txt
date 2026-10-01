@@ -7,6 +7,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 
 rosidl_generate_interfaces(${PROJECT_NAME}
+  "srv/EngageCarry.srv"
   "msg/Assignment.msg"
   "msg/TaskConstraints.msg"
   "msg/HistoryEntry.msg"

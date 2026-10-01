@@ -1,0 +1,462 @@
+{
+  "experiment": "E-011",
+  "protocol_id": "flexcell-benchmark-v1",
+  "status": "ARCHIVED_NOT_COMPARABLE_WITH_V2",
+  "source_commit": "f5095cb9cf7f8ad48177ade5a04e4cad328d90aa",
+  "erratum_date": "2026-09-30",
+  "erratum": "Metric 3 truncated integer-ms timing is NOT_RUN; raw episodes unchanged.",
+  "files": [
+    {
+      "path": "reports/m3_baseline_t6_20260929_original.md",
+      "source": "HEAD:setup/acceptance/m3_baseline_t6_20260929/95_metrics_report.md",
+      "sha256": "513bf703e0574d933534deda95d885817b7b72d2c9189cd1bd41ddc98bfd1899"
+    },
+    {
+      "path": "reports/m3_baseline_t6_20260929_corrected.md",
+      "source": "setup/acceptance/m3_baseline_t6_20260929/95_metrics_report.md",
+      "sha256": "b842a4b269d585ce637581fa2a112831fdada998ed42b5a78f1e6f175341129f"
+    },
+    {
+      "path": "reports/m3_seed_batch_20260929_original.md",
+      "source": "HEAD:setup/acceptance/m3_seed_batch_20260929/95_metrics_report.md",
+      "sha256": "e59033585573c0383437d758a003a63516c541d423b943c20ce4f338aa3e5525"
+    },
+    {
+      "path": "reports/m3_seed_batch_20260929_corrected.md",
+      "source": "setup/acceptance/m3_seed_batch_20260929/95_metrics_report.md",
+      "sha256": "622865958f46dbe5372187ff996facc63e057b58b2790ded4e63fc6b68f5f6f6"
+    },
+    {
+      "path": "reports/m3_seed_batch_20260929_clean_original.md",
+      "source": "HEAD:setup/acceptance/m3_seed_batch_20260929_clean/95_metrics_report.md",
+      "sha256": "2a471e7c45a3ccfffde9cac2da874943d99a9b6ced13126a02592ba179525ac9"
+    },
+    {
+      "path": "reports/m3_seed_batch_20260929_clean_corrected.md",
+      "source": "setup/acceptance/m3_seed_batch_20260929_clean/95_metrics_report.md",
+      "sha256": "8ab8b74bd1350f3bd396b3b5af0bc7cc6917bbfee13f83c9650875453914b4c5"
+    },
+    {
+      "path": "batches/seg_S1_20.jsonl",
+      "source": "setup\\acceptance\\m3_baseline_t6_20260929\\seg_S1_20.jsonl",
+      "sha256": "4eade1b62d60ef54458c262f1fcdb84add52ab20cc35a32f7b88b0c0225d3c64"
+    },
+    {
+      "path": "batches/seg_S2_20.jsonl",
+      "source": "setup\\acceptance\\m3_baseline_t6_20260929\\seg_S2_20.jsonl",
+      "sha256": "9a016dd7360e7b1df4cead3847dbeb3b70bed146ca4ebb13f5557cc788f06a52"
+    },
+    {
+      "path": "batches/seg_S5_20.jsonl",
+      "source": "setup\\acceptance\\m3_baseline_t6_20260929\\seg_S5_20.jsonl",
+      "sha256": "cc73982d56477b90d4fd165d88bf0e63cc0cce0acdf396ca63c125edff47f760"
+    },
+    {
+      "path": "batches/seg_S7_20.jsonl",
+      "source": "setup\\acceptance\\m3_baseline_t6_20260929\\seg_S7_20.jsonl",
+      "sha256": "3f2b925d3ed60f3dc6f62f979adcc5ed9ba59d3454de0123357c5f7ec49258e7"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-06ce0554.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-06ce0554.json",
+      "sha256": "ff5f86df3203ab65f1cb9ebd157a3d0ed89615dfd974c2c306f8c96e644cdced"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-0c8d6728.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-0c8d6728.json",
+      "sha256": "2711faa44be9d4f3a8357cab3af9606a2b50782b364b4b2c949015cf90ce6d97"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-288595b6.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-288595b6.json",
+      "sha256": "b7b14204cdf5db84a015bea3f3c7ea04d969d78c21b32d28d0d9a193147910b3"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-2daac080.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-2daac080.json",
+      "sha256": "c3c3feb0df78eae4a7c58fb7ecd2ca9c46fe1c4a98ef724918d0e4f1f3572878"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-3966e88d.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-3966e88d.json",
+      "sha256": "0fe1eabc9d4da61a284ccbf6d659e6a844dd2d6e9616198300dad286a50bddd8"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-465c5621.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-465c5621.json",
+      "sha256": "420323d133b2ac1a76213c5123c7b571a8faa485fc33c2dea0fa49a099dad37e"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-48f5549d.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-48f5549d.json",
+      "sha256": "ff8082f08aa2af4923c90529b10d85abc79670c6bdb5887740f8ebe53e9796d4"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-4cadb4de.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-4cadb4de.json",
+      "sha256": "5d4fbf8246ab56340dbffd90de6396ccbf90d17e1221f123c5a1db86a85c97ad"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-53527902.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-53527902.json",
+      "sha256": "e701145a7945c78c6a8d717cbf6a5556dab6801e67a136f2795540dd323e797f"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-591181f4.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-591181f4.json",
+      "sha256": "12f73d7eb4e6296be59f62803a2d1f3b956ee53f2303f8d10dbdd8b44bc78fb7"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-616bc92e.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-616bc92e.json",
+      "sha256": "3df90f6e303fb10eef9d9d3f07a7c8b0e34c19ae30f76a11d33143c97f34b34a"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-628658ae.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-628658ae.json",
+      "sha256": "60000de185c563d6afc60907b6dda2ffd7e39a3a17a1fd17c44546dcd7508bfa"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-72e73945.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-72e73945.json",
+      "sha256": "d318dd0e80d8a06a1bd5b11858a9906b578105d56655773385258531c9f8ba7e"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-783c49cd.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-783c49cd.json",
+      "sha256": "f57551ff8e162c88eaa1086e002a8359ee6576d68add2f20e8b4b608276e0ea8"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-80bfa47d.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-80bfa47d.json",
+      "sha256": "ddab7e7773ba85800f74fd2d9183ce337d2c9da4100e82e631f04214a147785b"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-9ebc574f.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-9ebc574f.json",
+      "sha256": "49d7cfe456bad8c4d314c2a6c5699d96ee58497c8810850c282ff6f2c71e5828"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-a1a354b8.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-a1a354b8.json",
+      "sha256": "224ff2662031662f2c9e5dbf538913ccbe774312dbf7ed8540019d0219875903"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-a45da978.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-a45da978.json",
+      "sha256": "fe4ec98ac7958c420d9119b20fcf429debafcb62ca51c9a14cf42f13b7ea8e7e"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-d59a668c.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-d59a668c.json",
+      "sha256": "b420c7d00c337bb0e0b4e5027b4b3dd349ab19fdeb725943cc8e06f8535e63f1"
+    },
+    {
+      "path": "episodes/exhaust_demo_v1_exhaust_demo_v1-db14736f.json",
+      "source": "/home/ros/.ros/flexcell/episodes/exhaust_demo_v1_exhaust_demo_v1-db14736f.json",
+      "sha256": "6c13f415ab661aed169e85cbf2d7d66316ae4bc5b504d4face9c8756a697993a"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-0c8afe81.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-0c8afe81.json",
+      "sha256": "46efbe96297fcb4ad6dd7a6d425e37b04424ca927d1dccf7d53c236b288917c4"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-1bbaca97.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-1bbaca97.json",
+      "sha256": "76b9eda500819a4ccbb5bfd53c3f12e24f6e182a35d317b2f119b40dd146b086"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-1c2d69c6.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-1c2d69c6.json",
+      "sha256": "326bbe1d2a308529cc3c8dc3a5987765cd1189c21705f2a40feb28340e4c3134"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-1d125219.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-1d125219.json",
+      "sha256": "97410ce877b41173bad1ea1b892314e73e0413af14663412bb0ec808a96ced70"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-1e03591a.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-1e03591a.json",
+      "sha256": "78ef285c296b01752ab60b7ec17b6f9768777391e026e078086dc8317ca0a1ff"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-2c6aede0.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-2c6aede0.json",
+      "sha256": "9bc079d873d8b5323ed3be9aa871ed81aca7bb57036b38df02031dbcd1fa42ca"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-2c89d2de.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-2c89d2de.json",
+      "sha256": "14069eb81ffcf648a78290dadef4f857f3f2a2d1889be94daa4f9edcc3bc3763"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-3e6fcf2e.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-3e6fcf2e.json",
+      "sha256": "41f1f0a4aa35fd9e4e43cc3e52b605c6f37e5ed8e3b50ec89d95f0e318320551"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-3f00bf48.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-3f00bf48.json",
+      "sha256": "62fbc861a83440cc86590d49d0761c2157e6e2990bbb8dac26f61cb556ac0d42"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-436ddfe7.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-436ddfe7.json",
+      "sha256": "43062bf8a8e31e9a469e8f093d06016ac19044114286c418c175d7c02d065394"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-46e1dbda.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-46e1dbda.json",
+      "sha256": "9aa764c6da9448d1404fb5008138f3b87c1a3f8a429e880a1229da07d0d75f73"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-6bedde81.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-6bedde81.json",
+      "sha256": "4b465dad7dd22996c37d5e195615fa5ddad8bff97499365339047d8b901460fe"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-731fb850.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-731fb850.json",
+      "sha256": "f4b02db497f1c2cc663da641ce40980154d94e75f0305ea3d7454c80ba17232c"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-9a3399fc.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-9a3399fc.json",
+      "sha256": "4357e69fbfefd4dc67e295d33a3b679eb2ea12bdd4db0c978fc45f6ae8cdebde"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-c83471f5.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-c83471f5.json",
+      "sha256": "c551cea6b77668ca048b2afe9fe1a3711ae098907c33137f8a13b5d651cf9159"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-d5729796.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-d5729796.json",
+      "sha256": "df778d15a84679c85ca1350f2f107d417fe30a2452da3a478ac34ed7d7ee85e4"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-d5745365.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-d5745365.json",
+      "sha256": "55930da50361a0c2efba7683d5371a07b9cfde47b2e52d27b4abe062eb2a01b5"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-e1a322f4.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-e1a322f4.json",
+      "sha256": "00e4569fd16d6c055147cf061c98b688e29e9450fa6d217eb5f785d6db4f8252"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-f0ca4771.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-f0ca4771.json",
+      "sha256": "06d1918e4f3dc9135c7ea994cf58949785bcdca4955672b6419f4fd64974f458"
+    },
+    {
+      "path": "episodes/recovery_demo_v1_recovery_demo_v1-f2eb0e65.json",
+      "source": "/home/ros/.ros/flexcell/episodes/recovery_demo_v1_recovery_demo_v1-f2eb0e65.json",
+      "sha256": "3025451d9ef08001708a3b3d9b6d802b38b88ffb7c97394e7256736669e41e1b"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-1af30991.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-1af30991.json",
+      "sha256": "2dd5fff4f16975be6d82dccf573627e2c79bf94579224c67596b1fb0ccd5f257"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-230fc800.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-230fc800.json",
+      "sha256": "fc94ff39a10f8e1e3f7d57fa6efd5cd9641e108518d1df3894aa28075a1c98b5"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-254a2763.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-254a2763.json",
+      "sha256": "2d0ea1e6dfc6d36b9fb24b518831cd1fc67ba734a965811841f4c34e1feeb7f0"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-320d3b5b.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-320d3b5b.json",
+      "sha256": "ab2eb09e39baf3c7c6d730f7093858849e04dc18575bb61a029958ab95da6aba"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-3b335e88.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-3b335e88.json",
+      "sha256": "4e36f5e46dc89bd2f397ae1945abeb098864d7a7817b2d3d3ba230b48c0c6fd8"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-4bd2670f.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-4bd2670f.json",
+      "sha256": "cb4a9920d6f8e69a3cf699881003c1eed45379147ec6c2dc80a1142074cc675a"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-544bab22.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-544bab22.json",
+      "sha256": "55e8d8ab71c89483c4e296a1ff39b23617a49b35aba35eadf5482475e964855e"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-55dcedad.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-55dcedad.json",
+      "sha256": "6a35b3e40d19f7d1f3521c1f50dd53429d795fcbb38e3014754c320ebc11732d"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-6166efc5.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-6166efc5.json",
+      "sha256": "a97bc7b1ca970a761090dd25f011e28cb4297299d54b0291923be5f403e309ed"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-6fe9afad.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-6fe9afad.json",
+      "sha256": "87b86e55dbe0f4ea78cd795c8dca7a8a452723bd7c9f3b582b4260ff8c443e2c"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-7aab5f31.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-7aab5f31.json",
+      "sha256": "ed8f46ce3cba01f961eb62873cdc35c6281b452a8ce14fa59279d1cb679bac88"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-7c41fca6.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-7c41fca6.json",
+      "sha256": "afbc390501f20b900022fa434b51f601397e5884b9a40b6690afc93456d18994"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-977be00d.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-977be00d.json",
+      "sha256": "b84fd087a4a948687af861d3f387972913b16f78219018d8ad46ba7353ad1187"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-98937e8b.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-98937e8b.json",
+      "sha256": "aa05d8d9f3e1aa1c0f909eb26907a8465ac9b955cd0cd7e1ec5d7e53d860d174"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-a437f169.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-a437f169.json",
+      "sha256": "73c12858fa3d5273b1b72ce86bb19df681cbedb9eec1924a0a3dd3c2ecbca075"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-c9b21c16.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-c9b21c16.json",
+      "sha256": "0d58fceaeb616d3f176d4798b5e5cad8d0df4a11b55a31a303510b72747d591f"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-e977152a.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-e977152a.json",
+      "sha256": "cea60be84866e051dfd52e00d2f153e81fb9b5136b3e9b9d3a6f8889f917cc1d"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-ec241ed8.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-ec241ed8.json",
+      "sha256": "b91b5e7b579744dfda0c7c0278b2583e938bf44fa0620d6358923bf1062d8bd9"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-ee198ae9.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-ee198ae9.json",
+      "sha256": "35bb1059b3398df227a4b3c1c7883e0771d8cc4c0c309a381a2ecb89c7cc36a2"
+    },
+    {
+      "path": "episodes/s7_perturb_v1_s7_perturb_v1-fc6f4074.json",
+      "source": "/home/ros/.ros/flexcell/episodes/s7_perturb_v1_s7_perturb_v1-fc6f4074.json",
+      "sha256": "e6763c134440eb5ab8ffa77f20a0f8611b72cb23ee1c44843522d4be6d1fdf2d"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-0293e5ac.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-0293e5ac.json",
+      "sha256": "8441a2d12dd5e8ae4ad3819e8f277e339f0820e3d99f8beed97029545b032bea"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-0fd2715e.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-0fd2715e.json",
+      "sha256": "3a75f4fe10dc0c8aa214e57d7598accde69748df000e83c578c5991fcecc5b4b"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-23b87f50.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-23b87f50.json",
+      "sha256": "6c7d353fa500e1faec118b1c346152eca186eb5b23246ab287165161a0bb3460"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-2c01c1d5.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-2c01c1d5.json",
+      "sha256": "05cdcff8e8eb4a6835018bfe04f26c6a4f5c2a038ad5e2afffbdac1db4c160f1"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-34f4c4e9.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-34f4c4e9.json",
+      "sha256": "264e25c242546a16700da4cccdcc37651e3cf749d7eeae59308b3aeed8e28cde"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-4256a33d.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-4256a33d.json",
+      "sha256": "47264b048278edf8fc06dbab82db572f78f0aed0d4e3da32e931f409d983cd88"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-46eaeb56.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-46eaeb56.json",
+      "sha256": "5d7884c6d623c8ae5938599bf8529c8df944d87672bdb61388d6776bbbc759f7"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-56e172ac.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-56e172ac.json",
+      "sha256": "3c0703e59d91266390d2d88e7bc5513f11c77a151cbaa0cf123add932a26cdf7"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-68d42283.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-68d42283.json",
+      "sha256": "4ac8aea6884b09c5a587c358de88e4ae8d354573ccde30e13958a9c4fb1ca0dd"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-6a591c83.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-6a591c83.json",
+      "sha256": "5cc1b6a585cdf2685aaa8b24b1d53eb4c4cd8f53f6c8c6872291a0ff0e3ae582"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-7cad0416.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-7cad0416.json",
+      "sha256": "8e21644bc600947bb65e3d311cc487f99a6a071867bed476f505792bb5d3cef4"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-802a1982.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-802a1982.json",
+      "sha256": "9cebf540a791c83da6f58b4523cff3931b3dc8b0d3576a8caae74f0d048af678"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-9ea16588.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-9ea16588.json",
+      "sha256": "a2dfec5aac256d58f7fd45d1af3e8a44e30a88920602c98e0d847f16ede9d4f2"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-b51a5bc4.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-b51a5bc4.json",
+      "sha256": "edf6d35418439add9290d29d1ca4a06dab078618735bdd8e6133edf4f792bbbe"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-b98fd5ec.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-b98fd5ec.json",
+      "sha256": "e0f204bdb177557588f225e2be10e4930a1fc9f3580fcbd832f09fffef9dbf4e"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-bf7fde54.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-bf7fde54.json",
+      "sha256": "22b1655a3e46c7cc2cf9be4487361cc71af80044fbaeb98d0d6342994a375160"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-c5a8b6f4.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-c5a8b6f4.json",
+      "sha256": "1d08a9bb4b2bc2a02c344335a7650370ba2211f07f2e9a52f4f15b68a1c87a65"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-e7bb0353.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-e7bb0353.json",
+      "sha256": "d9553934f8d58a8af97ebfac513d7874f265888ae06f9b3dcbec122210cc1c0d"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-f1570a38.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-f1570a38.json",
+      "sha256": "37f5913ebea6852fb5ac5367e980fa50fef0ee9d33e54c3a0233ddd42adac767"
+    },
+    {
+      "path": "episodes/week1_demo_v1_week1_demo_v1-fd15b464.json",
+      "source": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-fd15b464.json",
+      "sha256": "b76fa7400e44c973439cd802a43e70ec97f7e2509de697a5bb3d5a2a4bf6f9fb"
+    }
+  ],
+  "missing": [],
+  "episode_count": 80
+}

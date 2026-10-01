@@ -12,10 +12,10 @@ import argparse
 import json
 import sys
 import time
+import uuid
 
 import rclpy
 from rclpy.node import Node
-from rclpy.parameter import Parameter
 
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import String as StringMsg
@@ -61,7 +61,11 @@ def main():
 
     rclpy.init()
     n = Node('w1_client')
-    n.set_parameters([Parameter('use_sim_time', value=True)])
+    # This CLI uses monotonic deadlines and zero-stamped goals. A simulation
+    # clock subscription is unnecessary and can swamp its action waitable.
+    from rclpy.executors import SingleThreadedExecutor
+    executor = SingleThreadedExecutor()
+    executor.add_node(n)
 
     # failure injection is a topic, not an action
     if args.action == 'inject':
@@ -79,8 +83,8 @@ def main():
                               lambda m: seen.append(m.data), sub_qos)
         pub = n.create_publisher(StringMsg, '/flexcell/inject', 10)
         import time as _t
-        deadline = _t.time() + 5.0
-        while pub.get_subscription_count() == 0 and _t.time() < deadline:
+        deadline = _t.monotonic() + 5.0
+        while pub.get_subscription_count() == 0 and _t.monotonic() < deadline:
             _t.sleep(0.1)
         if pub.get_subscription_count() == 0:
             print('INJECT WARNING: no subscriber matched; payload may be lost')
@@ -95,10 +99,10 @@ def main():
         want = args.expect_inject_state
         if not want:
             want = 'armed' if payload else 'cleared'
-        end = _t.time() + args.inject_timeout
+        end = _t.monotonic() + args.inject_timeout
         got = None
-        while _t.time() < end:
-            rclpy.spin_once(n, timeout_sec=0.1)
+        while _t.monotonic() < end:
+            executor.spin_once(timeout_sec=0.1)
             for raw in list(seen):
                 try:
                     snap = json.loads(raw)
@@ -119,7 +123,6 @@ def main():
             print('INJECT FAILED: state %r not observed within %.1fs'
                   % (want, args.inject_timeout))
             return 3
-        return 0
         return 0
 
     cls, act = SPEC[args.action]
@@ -163,28 +166,48 @@ def main():
     print('SENDING action=%s object=%s pose=%s' % (args.action, args.object, args.pose),
           flush=True)
     t0 = time.monotonic()
-    send = cli.send_goal_async(g)
+    from unique_identifier_msgs.msg import UUID
+    goal_uuid = UUID(uuid=list(uuid.uuid4().bytes))
+    print('GOAL_UUID ' + bytes(goal_uuid.uuid).hex(), flush=True)
+    send = cli.send_goal_async(g, goal_uuid=goal_uuid)
     while not send.done():
-        rclpy.spin_once(n, timeout_sec=0.05)
+        executor.spin_once(timeout_sec=0.05)
+        if time.monotonic() - t0 > min(30.0, args.timeout):
+            print('CLIENT_GOAL_SEND_TIMEOUT: acceptance unknown; stop batch and inspect task state', flush=True)
+            n.destroy_node()
+            rclpy.shutdown()
+            return 4
     gh = send.result()
     if gh is None or not gh.accepted:
         print(json.dumps({'client_error': 'goal rejected'}))
         return 3
-    rf = gh.get_result_async()
-    while not rf.done():
-        rclpy.spin_once(n, timeout_sec=0.05)
+    pending_results = [gh.get_result_async()]
+    next_result_read = time.monotonic() + 5.0
+    while not any(f.done() for f in pending_results):
+        executor.spin_once(timeout_sec=0.05)
+        if time.monotonic() >= next_result_read:
+            # GetResult is idempotent and refers to this exact accepted goal.
+            # Retry a lost read; never resend the robot's action goal.
+            pending_results.append(gh.get_result_async())
+            next_result_read = time.monotonic() + 5.0
         if time.monotonic() - t0 > args.timeout:
             print('CLIENT_TIMEOUT')
             gh.cancel_goal_async()
             return 4
 
-    r = rf.result().result
+    result_reply = next(f.result() for f in pending_results if f.done())
+    if result_reply.status == 0:
+        print('CLIENT_RESULT_UNKNOWN: server no longer retains this goal', flush=True)
+        return 4
+    r = result_reply.result
     out = {
         'action': args.action,
+        'goal_uuid': bytes(goal_uuid.uuid).hex(),
         'outcome': name_of(cls.Result, 'OUTCOME_', r.outcome),
         'outcome_val': int(r.outcome),
         'error_code': name_of(cls.Result, 'ERR_', getattr(r, 'error_code', 0)),
         'detail': r.detail,
+        'evidence_id': getattr(r, 'evidence_id', ''),
         'wall_seconds': round(time.monotonic() - t0, 3),
     }
     if args.action == 'observe':

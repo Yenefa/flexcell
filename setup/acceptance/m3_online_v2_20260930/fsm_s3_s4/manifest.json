@@ -1,0 +1,42 @@
+{
+  "stage": "ONLINE_SMOKE_NOT_STATISTICAL_BASELINE",
+  "source_batch": "/home/ros/.ros/flexcell/episodes/batch_20260930_224530.jsonl",
+  "cells": {
+    "S3": {
+      "attempted": 2,
+      "harness_errors": 1,
+      "task_succeeded": 1,
+      "expectation_matched": 1,
+      "scenario_exercised": 1,
+      "episodes": 1,
+      "actual_decision_sources": {
+        "fsm": 10
+      },
+      "final_error_codes": {
+        "0": 1
+      }
+    },
+    "S4": {
+      "attempted": 1,
+      "harness_errors": 0,
+      "task_succeeded": 0,
+      "expectation_matched": 1,
+      "scenario_exercised": 1,
+      "episodes": 1,
+      "actual_decision_sources": {
+        "fsm": 4
+      },
+      "final_error_codes": {
+        "50": 1
+      }
+    }
+  },
+  "files_sha256": {
+    "batch_original.jsonl": "5ea8cb8619f9cc8f698c6e634a3cb29a5b1ce845fd22c081be847088a07220c5",
+    "batch_portable.jsonl": "ee6e489f11ee6939d94f6b1199f20b097082143b3554bd10fe2d7a2c3a04123e",
+    "deployment.json": "12835b991c643b84a087e7d1c1394a5c4974e2ed59cc7f225105590452d1410d",
+    "episodes/pick_place_v1_pick_place_v1-16d5aa87.json": "59adcf3b4c3f8bb88ccc627fed47c707b44cc97dcba1dd20d5b0bf75eb182b14",
+    "episodes/recovery_b_demo_v1_recovery_b_demo_v1-69d7d17f.json": "7f6067168b16e5f672afaee5623c5aa76afe626a3f3e34050b89090072c0051f",
+    "runner.log": "48eafd98b224b84019acf087ecf22e3ec2ca09c435977f751ce87e57ce17283f"
+  }
+}

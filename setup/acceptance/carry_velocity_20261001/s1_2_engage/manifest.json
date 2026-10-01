@@ -1,0 +1,30 @@
+{
+  "stage": "ONLINE_SMOKE_NOT_STATISTICAL_BASELINE",
+  "source_batch": "/home/ros/.ros/flexcell/episodes/batch_20261001_230025.jsonl",
+  "cells": {
+    "S1": {
+      "attempted": 2,
+      "harness_errors": 0,
+      "task_succeeded": 1,
+      "expectation_matched": 1,
+      "scenario_exercised": 2,
+      "episodes": 2,
+      "actual_decision_sources": {
+        "fsm": 2,
+        "llm": 12
+      },
+      "final_error_codes": {
+        "51": 1,
+        "0": 1
+      }
+    }
+  },
+  "files_sha256": {
+    "batch_original.jsonl": "8af3e007fa0e499c1cafc6830a2995fd84063a2af4e83cb0d9bbea25a3eee901",
+    "batch_portable.jsonl": "bea658d5eb99a2744c9462afa1e7180e9ed085c1219c1b42b0787f316e464daf",
+    "deployment.json": "a007a8b09fdc85e5d7e11a6046eaceecb5018f75d05d452e4801621fcc89c085",
+    "episodes/week1_demo_v1_week1_demo_v1-23b53a6a.json": "093a997d759ae80f9f2e7594faef394b1df516ce45a93d297a53c053fb3ce98f",
+    "episodes/week1_demo_v1_week1_demo_v1-4ba6e24f.json": "0267ec8badceafed631117b8294259f56d125995d14c3e66a240d17fbf403b26",
+    "runner.log": "73a2615cb54d7656e2038a287f0915af2c53ccb7db94b5dee71b7db8bdc71510"
+  }
+}

@@ -1,0 +1,17 @@
+SENDING action=task object=target_box_a pose=[0.12, -0.15, 0.0175]
+RESULT {
+  "action": "task",
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_SKILL_FAILED",
+  "detail": "policy abort (NON_RECOVERABLE): PLACE failed with non-recoverable error 24 while carrying, and retrying PLACE while carrying is not allowed. (trace=PICK_A(attempt=1):OK,PLACE_A:FAIL)",
+  "evidence_id": "pick_place_v1-a1ee6801",
+  "wall_seconds": 16.615,
+  "fsm_trace": [
+    "PICK_A(attempt=1):OK",
+    "PLACE_A:FAIL"
+  ],
+  "object_at_place": false,
+  "final_position_error_m": NaN,
+  "skip_verify": false
+}

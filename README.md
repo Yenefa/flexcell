@@ -70,6 +70,32 @@ After coding — update the Issue, record evidence in EXPERIMENTS.md, link the c
 
 ## Status
 
+2026-10-01 carry implementation update (E-015): the mainline now uses a bounded
+Gazebo pose/velocity constraint, confirms engage before lifting, and checks
+PLACE's release dependency before admitting deployment. The final single-object
+closed loop passed with 2.86 mm error. Earlier S1 smoke batches were 4/5 and 1/2
+under different fingerprints; both failures and limitations remain recorded.
+This is a new magnetic carry implementation, not an accepted statistical baseline.
+See [implementation and online evidence](docs/CARRY_VELOCITY_20261001.md).
+
+2026-10-01 mechanism investigation: reproduced a Fast DDS discovery failure
+caused by incomplete fragmented localhost UDP delivery; a 1400-byte transport
+limit passed two repetitions. Isolated Gazebo controls support preserved
+velocity under pose-only servo as a cause of lift loss. The current fleet and
+physics baseline remain unchanged. See [causal evidence and limits](docs/MECHANISM_20261001.md).
+
+2026-10-01 mainline update: both task actions share the policy executor and
+episode recorder. The fleet now uses the official `deepseek-flash` endpoint,
+with a persistent RMB 5 request budget. One single-object task completed with
+8.95 mm measured placement error; a separate S1 smoke batch completed all five
+tasks with three successes and two failures. Placement waits for carry-release
+acknowledgment, and accepted action results can be read again without resending
+the physical goal. S3 recovered a B-only injected failure, and S4 recorded its
+expected PLACE failure through the single-object policy seam (one run each).
+Protocol v1 E-011 is archived; v2 batches stay separate and
+the large batch remains frozen. MTC is pending. See
+[current implementation, evidence and limits](docs/DEEPSEEK_20261001.md).
+
 Current: **Week-1.5 accepted; M2 Runtime Decision Foundation is the active milestone** —
 see [docs/ROADMAP.md](docs/ROADMAP.md). The table below is the Day-1 verification record.
 

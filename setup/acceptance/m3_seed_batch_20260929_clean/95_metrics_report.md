@@ -7,7 +7,7 @@ generated from the replay store; every number regenerates - no hand-written PASS
 | metric | value |
 | --- | --- |
 | success rate (metric 1) | 18/20 = 0.90, Wilson95 [0.70, 0.97]
-| decision latency (metric 3) | {'n': 176, 'p50_ms': 0.0, 'p95_ms': 0.0, 'p99_ms': 0.0, 'max_ms': 0.0}
+| decision latency (metric 3) | NOT_RUN (legacy integer-ms truncation; recorded decisions n=176; unusable for latency claims) |
 | invalid decisions (metric 6) | {'evaluated': 176, 'rejected': 0, 'invalid_per_1000': 0.0}
 | replay integrity | 20/20 episodes clean (0 diverged steps total; 0 safety-rejection records excluded)
 
@@ -37,7 +37,7 @@ generated from the replay store; every number regenerates - no hand-written PASS
 | metric | value |
 | --- | --- |
 | success rate (metric 1) | 8/20 = 0.40, Wilson95 [0.22, 0.61]
-| decision latency (metric 3) | {'n': 180, 'p50_ms': 0.0, 'p95_ms': 0.0, 'p99_ms': 0.0, 'max_ms': 0.0}
+| decision latency (metric 3) | NOT_RUN (legacy integer-ms truncation; recorded decisions n=180; unusable for latency claims) |
 | invalid decisions (metric 6) | {'evaluated': 180, 'rejected': 0, 'invalid_per_1000': 0.0}
 | replay integrity | 20/20 episodes clean (0 diverged steps total; 0 safety-rejection records excluded)
 
@@ -67,7 +67,7 @@ generated from the replay store; every number regenerates - no hand-written PASS
 | metric | value |
 | --- | --- |
 | success rate (metric 1) | 1/20 = 0.05, Wilson95 [0.01, 0.24]
-| decision latency (metric 3) | {'n': 103, 'p50_ms': 0.0, 'p95_ms': 0.0, 'p99_ms': 0.0, 'max_ms': 0.0}
+| decision latency (metric 3) | NOT_RUN (legacy integer-ms truncation; recorded decisions n=103; unusable for latency claims) |
 | invalid decisions (metric 6) | {'evaluated': 103, 'rejected': 0, 'invalid_per_1000': 0.0}
 | replay integrity | 20/20 episodes clean (0 diverged steps total; 0 safety-rejection records excluded)
 
@@ -97,7 +97,7 @@ generated from the replay store; every number regenerates - no hand-written PASS
 | metric | value |
 | --- | --- |
 | success rate (metric 1) | 6/10 = 0.60, Wilson95 [0.31, 0.83] ⚠ n<20 (CI wide; prefer n≥20)
-| decision latency (metric 3) | {'n': 80, 'p50_ms': 0.0, 'p95_ms': 0.0, 'p99_ms': 0.0, 'max_ms': 0.0}
+| decision latency (metric 3) | NOT_RUN (legacy integer-ms truncation; recorded decisions n=80; unusable for latency claims) |
 | invalid decisions (metric 6) | {'evaluated': 80, 'rejected': 0, 'invalid_per_1000': 0.0}
 | replay integrity | 10/10 episodes clean (0 diverged steps total; 0 safety-rejection records excluded)
 

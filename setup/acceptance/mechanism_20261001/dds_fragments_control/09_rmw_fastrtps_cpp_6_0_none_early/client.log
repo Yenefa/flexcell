@@ -1,0 +1,24 @@
+Timeout (0:00:10)!
+Thread 0x0000793768b086c0 (most recent call first):
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 781 in _wait_for_ready_callbacks
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 877 in wait_for_ready_callbacks
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 991 in _spin_once_impl
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 359 in spin
+  File "/usr/lib/python3.12/threading.py", line 1010 in run
+  File "/usr/lib/python3.12/threading.py", line 1073 in _bootstrap_inner
+  File "/usr/lib/python3.12/threading.py", line 1030 in _bootstrap
+
+Thread 0x0000793780756740 (most recent call first):
+  File "/mnt/c/dev/flexcell/setup/112_dds_probe.py", line 172 in role
+  File "/mnt/c/dev/flexcell/setup/112_dds_probe.py", line 326 in main
+  File "/mnt/c/dev/flexcell/setup/112_dds_probe.py", line 388 in <module>
+Traceback (most recent call last):
+  File "/mnt/c/dev/flexcell/setup/112_dds_probe.py", line 388, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/mnt/c/dev/flexcell/setup/112_dds_probe.py", line 326, in main
+    if args.role: return role(args)
+                         ^^^^^^^^^^
+  File "/mnt/c/dev/flexcell/setup/112_dds_probe.py", line 176, in role
+    raise RuntimeError('initial discovery failed; time control recorded')
+RuntimeError: initial discovery failed; time control recorded

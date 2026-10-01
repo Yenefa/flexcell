@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "/mnt/c/dev/flexcell/setup/112_dds_probe.py", line 236, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/mnt/c/dev/flexcell/setup/112_dds_probe.py", line 198, in main
+    if args.role: return role(args)
+                         ^^^^^^^^^^
+  File "/mnt/c/dev/flexcell/setup/112_dds_probe.py", line 129, in role
+    ex.spin()
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 359, in spin
+    self._spin_once_impl()
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 991, in _spin_once_impl
+    handler, entity, node = self.wait_for_ready_callbacks(
+                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 877, in wait_for_ready_callbacks
+    return next(self._cb_iter)
+           ^^^^^^^^^^^^^^^^^^^
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 757, in _wait_for_ready_callbacks
+    wait_set = _rclpy.WaitSet(
+               ^^^^^^^^^^^^^^^
+rclpy._rclpy_pybind11.RCLError: failed to initialize wait set: the given context is not valid, either rcl_init() was not called or rcl_shutdown() was called., at ./src/rcl/wait.c:130
+The following exception was never retrieved: cannot use Destroyable because destruction was requested

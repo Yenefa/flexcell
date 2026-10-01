@@ -1,0 +1,15 @@
+<sdf version="1.9"><model name="probe_box_03">
+      <pose>4 0 0.1175 0 0 0</pose>
+      <link name="link">
+        <inertial>
+          <mass>0.05</mass>
+          <inertia><ixx>1.0e-05</ixx><iyy>1.0e-05</iyy><izz>1.0e-05</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+        </inertial>
+        <visual name="vis">
+          <geometry><box><size>0.035 0.035 0.035</size></box></geometry>
+          <material><ambient>0.200000 0.350000 0.900000 1</ambient><diffuse>0.200000 0.350000 0.900000 1</diffuse></material>
+        </visual>
+      <gravity>true</gravity></link>
+    <plugin filename="gz-sim-velocity-control-system" name="gz::sim::systems::VelocityControl"><initial_linear>0 0 0</initial_linear><initial_angular>0 0 0</initial_angular></plugin></model>
+
+    </sdf>

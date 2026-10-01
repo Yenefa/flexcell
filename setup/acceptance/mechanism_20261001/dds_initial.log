@@ -1,0 +1,38 @@
+00_rmw_cyclonedds_cpp_1_0_none_early client_rc=0
+{'trials': 30, 'first_missed': 0, 'final_missed': 0, 'scene_unavailable': 0}
+01_rmw_cyclonedds_cpp_1_200_none_early client_rc=0
+{'trials': 30, 'first_missed': 0, 'final_missed': 0, 'scene_unavailable': 0}
+02_rmw_cyclonedds_cpp_6_0_none_early client_rc=0
+{'trials': 30, 'first_missed': 0, 'final_missed': 0, 'scene_unavailable': 0}
+03_rmw_cyclonedds_cpp_6_200_none_early client_rc=0
+{'trials': 30, 'first_missed': 0, 'final_missed': 0, 'scene_unavailable': 0}
+04_rmw_cyclonedds_cpp_6_200_none_late client_rc=0
+{'trials': 30, 'first_missed': 0, 'final_missed': 0, 'scene_unavailable': 0}
+05_rmw_cyclonedds_cpp_6_200_first_early client_rc=0
+{'trials': 4, 'first_missed': 4, 'final_missed': 0, 'scene_unavailable': 0}
+06_rmw_cyclonedds_cpp_6_200_all_early client_rc=0
+{'trials': 1, 'first_missed': 1, 'final_missed': 1, 'scene_unavailable': 0}
+07_rmw_fastrtps_cpp_1_0_none_early client_rc=0
+{'trials': 30, 'first_missed': 0, 'final_missed': 0, 'scene_unavailable': 0}
+08_rmw_fastrtps_cpp_1_200_none_early client_rc=1
+Traceback (most recent call last):
+  File "/mnt/c/dev/flexcell/setup/112_dds_probe.py", line 236, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/mnt/c/dev/flexcell/setup/112_dds_probe.py", line 221, in main
+    client = subprocess.run(cmd + ['--role', 'client'], env=env,
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2141, in _communicate
+    self.wait(timeout=self._remaining_time(endtime))
+  File "/usr/lib/python3.12/subprocess.py", line 1264, in wait
+    return self._wait(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2045, in _wait
+    raise TimeoutExpired(self.args, timeout)
+subprocess.TimeoutExpired: Command '['/usr/bin/python3', '/mnt/c/dev/flexcell/setup/112_dds_probe.py', '--out', 'setup/acceptance/mechanism_20261001/dds_initial/09_rmw_fastrtps_cpp_6_0_none_early', '--threads', '6', '--clock-hz', '0', '--fault', 'none', '--trials', '30', '--result-timing', 'early', '--role', 'client']' timed out after 69.99998728600076 seconds

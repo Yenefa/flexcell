@@ -1,0 +1,14 @@
+scenario runner: {'S3': 5, 'S4': 5}
+  S3 run 1/5
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (10 steps) arm=armed sealed clear=cleared sealed
+  S4 run 1/5
+    outcome=FAILED expected=FAILED replay=True (4 steps) arm=skipped clear=cleared sealed
+  S3 run 2/5
+    outcome=HARNESS_ERROR expected=SUCCEEDED replay=None (0 steps) arm=armed sealed clear=cleared sealed
+    stopping batch: task client timed out (cancel/cleanup required)
+
+=== per-scenario results (metric #1, Wilson 95%% CI) ===
+  S3: 1/1 SUCCEEDED, CI95=[0.21, 1.00], replay_ok=True, 1 HARNESS_ERROR excluded
+  S4: 0/1 SUCCEEDED, CI95=[0.00, 0.79], replay_ok=True
+batch summary: /home/ros/.ros/flexcell/episodes/batch_20260930_224530.jsonl
+SCENARIO RUNNER: FAIL (3)

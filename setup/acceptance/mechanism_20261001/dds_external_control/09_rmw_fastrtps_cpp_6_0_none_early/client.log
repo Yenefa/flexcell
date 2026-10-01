@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/mnt/c/dev/flexcell/setup/112_dds_probe.py", line 380, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/mnt/c/dev/flexcell/setup/112_dds_probe.py", line 324, in main
+    if args.role: return role(args)
+                         ^^^^^^^^^^
+  File "/mnt/c/dev/flexcell/setup/112_dds_probe.py", line 215, in role
+    raise RuntimeError('initial discovery failed; external-participant control recorded')
+RuntimeError: initial discovery failed; external-participant control recorded

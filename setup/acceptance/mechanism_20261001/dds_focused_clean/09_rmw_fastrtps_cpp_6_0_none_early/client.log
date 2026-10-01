@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/mnt/c/dev/flexcell/setup/112_dds_probe.py", line 273, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/mnt/c/dev/flexcell/setup/112_dds_probe.py", line 218, in main
+    if args.role: return role(args)
+                         ^^^^^^^^^^
+  File "/mnt/c/dev/flexcell/setup/112_dds_probe.py", line 152, in role
+    raise RuntimeError('isolated probe server not discovered')
+RuntimeError: isolated probe server not discovered

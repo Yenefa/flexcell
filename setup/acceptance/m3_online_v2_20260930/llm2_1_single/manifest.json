@@ -1,0 +1,20 @@
+{
+  "stage": "SINGLE_API_SMOKE_OUTSIDE_BENCHMARK_CELLS",
+  "outcome": "OUTCOME_FAILED",
+  "error_code": "ERR_RECOVERY_EXHAUSTED",
+  "policy": {
+    "name": "llm",
+    "version": "2.1"
+  },
+  "runtime_fingerprint": "140abf93bb36b6d803ae3961cba43573fb2b803e013a4b04d6621aad21ba8240",
+  "actual_decision_sources": {
+    "fsm": 2,
+    "llm": 3
+  },
+  "files_sha256": {
+    "deployment.json": "1087894a7581d36c8430e4f2fc058d458e594c91578dadd0f21abadc0499df04",
+    "episode.json": "76250c2fd28e4292f94d22cc799f04a41ed8fffce3c82160fefcfd10712b6a4a",
+    "llm_single.out": "dff96cc89846afb2db50214e42a5b483e5fd84d2c1c9a8a0a538a109609cb1df",
+    "llm_single_reset.json": "e6e7122bd07b752b9e00bbc029f16e241482248060c89542c699009492418552"
+  }
+}

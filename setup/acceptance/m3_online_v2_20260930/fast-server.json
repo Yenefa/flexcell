@@ -1,0 +1,36 @@
+﻿{
+    "started":  "2026-09-30T22:31:33.9599355+08:00",
+    "arguments":  [
+                      "-m",
+                      "\"C:\\Users\\安帅潮\\AppData\\Local\\Flexcell\\inference\\qwen2.5-1.5b-instruct-q4_k_m.gguf\"",
+                      "-ngl",
+                      "99",
+                      "-c",
+                      "8192",
+                      "-np",
+                      "1",
+                      "-t",
+                      "4",
+                      "--host",
+                      "127.0.0.1",
+                      "--port",
+                      "18081",
+                      "--alias",
+                      "flexcell-fast"
+                  ],
+    "pid":  16396,
+    "arm":  "fast",
+    "asset":  {
+                  "model":  "Qwen/Qwen2.5-1.5B-Instruct-GGUF",
+                  "revision":  "91cad51170dc346986eccefdc2dd33a9da36ead9",
+                  "file":  "qwen2.5-1.5b-instruct-q4_k_m.gguf",
+                  "url":  "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/91cad51170dc346986eccefdc2dd33a9da36ead9/qwen2.5-1.5b-instruct-q4_k_m.gguf",
+                  "sha256":  "6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e"
+              },
+    "runtime":  {
+                    "version":  "llama.cpp-b11284-win-vulkan-x64",
+                    "file":  "llama-b11284-bin-win-vulkan-x64.zip",
+                    "url":  "https://github.com/ggml-org/llama.cpp/releases/download/b11284/llama-b11284-bin-win-vulkan-x64.zip",
+                    "sha256":  "69c70371c2c9fe3e80859cdbb48596aed3e4265627e470a90d5a9f66dd6779d5"
+                }
+}

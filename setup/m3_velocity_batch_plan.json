@@ -1,0 +1,62 @@
+{
+  "protocol_version": 2,
+  "status": "FROZEN_NEW_PHYSICS_SMOKE_INCOMPLETE",
+  "physics": "velocity_servo_v1; pose plus zero velocity per physics step; magnetic, not contact grasp",
+  "seed": 20260930,
+  "order": "round_robin",
+  "samples_per_cell": {
+    "S1": 50,
+    "S2": 100,
+    "S3": 50,
+    "S4": 50,
+    "S5": 50,
+    "S7": 100
+  },
+  "arms": [
+    "fsm",
+    "llm",
+    "jev",
+    "hybrid"
+  ],
+  "runs_per_arm_configuration": 400,
+  "total_runs_if_all_arms_and_three_hybrid_thresholds_are_enabled": 2400,
+  "hybrid_threshold_sweep": [
+    0.5,
+    0.7,
+    0.9
+  ],
+  "runner": "python3 setup/94_scenario_runner.py --stage baseline --policy <arm> --smoke-summary <passing-summary.jsonl> --seed 20260930 --batch S1:50 S2:100 S3:50 S4:50 S5:50 S7:100",
+  "dry_run": "python3 setup/94_scenario_runner.py --dry-run --seed 20260930 --batch S1:50 S2:100 S3:50 S4:50 S5:50 S7:100",
+  "entry_requirements": [
+    "five passing smoke runs per requested cell, same policy/protocol/runtime fingerprint; baseline flag required",
+    "reset exits 0 with ok:true (signals/timeouts are harness errors)",
+    "each result matches a fresh episode by evidence_id",
+    "decision latency is measured with perf_counter_ns",
+    "model arms have configured endpoints and report actual routing provenance",
+    "S2 injection targets A only; S3 injection targets B only"
+  ],
+  "interpretation": "Targets reduce uncertainty; n=50/100 alone does not guarantee power for a chosen effect size. S4/S5 expect typed failure, so expectation-match rate differs from task success rate. S6 remains a lifecycle/cold-start test.",
+  "runtime_fingerprint": "005eadb8dca9d3e691761297c5ca58f264b0fd88b88429593cfdf23a33434491",
+  "active_arm": "llm",
+  "model": {
+    "endpoint": "https://api.deepseek.com/chat/completions",
+    "model": "deepseek-flash",
+    "backend": "deepseek-official",
+    "response_format": "json_object",
+    "thinking": "disabled",
+    "max_tokens": 512,
+    "budget_limit_cny": 5,
+    "credential_configured": true
+  },
+  "dds_profile_sha256": "721583029ba9aef212c3c3c83c196efda2cd4c3fc40666efcc9aea8be973ee33",
+  "world_sha256": "4e5417120d7161ba3bd3c7313c3e3e699ab74efb04df4a7baf3f6af5fbdb88d2",
+  "plugin_sha256": "62b572670119abf058139ee1878a5d2c95e7dc2b7c3e6887ead97cecc8b6e8db",
+  "not_started": true,
+  "archived_protocol_v1": "E-011: archive only; not comparable",
+  "cohort_rule": "Never pool the initial, engage and final readiness deployment fingerprints, or the old teleport baseline.",
+  "smoke_evidence": "setup/acceptance/carry_velocity_20261001",
+  "remaining_before_large_batch": [
+    "Five passing runs in each requested cell under one identical deployed fingerprint",
+    "Resolve or explicitly bound task policy rejection and service discovery failures; model replay remains NOT_RUN"
+  ]
+}

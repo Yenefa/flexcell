@@ -39,10 +39,10 @@ def latency_summary(values_ms):
         return None
     return {
         'n': len(values_ms),
-        'p50_ms': round(percentile(values_ms, 50), 3),
-        'p95_ms': round(percentile(values_ms, 95), 3),
-        'p99_ms': round(percentile(values_ms, 99), 3),
-        'max_ms': round(max(values_ms), 3),
+        'p50_ms': round(percentile(values_ms, 50), 6),
+        'p95_ms': round(percentile(values_ms, 95), 6),
+        'p99_ms': round(percentile(values_ms, 99), 6),
+        'max_ms': round(max(values_ms), 6),
     }
 
 

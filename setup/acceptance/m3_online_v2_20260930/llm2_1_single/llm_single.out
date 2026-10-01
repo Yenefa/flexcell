@@ -1,0 +1,18 @@
+SENDING action=task object=target_box_a pose=[0.12, -0.15, 0.0175]
+RESULT {
+  "action": "task",
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_RECOVERY_EXHAUSTED",
+  "detail": "executor pick budget exhausted",
+  "evidence_id": "pick_place_v1-74e428fb",
+  "wall_seconds": 27.135,
+  "fsm_trace": [
+    "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+    "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+    "PICK_A(attempt=2):OK"
+  ],
+  "object_at_place": false,
+  "final_position_error_m": NaN,
+  "skip_verify": false
+}

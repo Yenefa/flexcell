@@ -1,0 +1,20 @@
+{
+  "stage": "SINGLE_API_SMOKE_OUTSIDE_BENCHMARK_CELLS",
+  "outcome": "OUTCOME_FAILED",
+  "error_code": "ERR_SKILL_FAILED",
+  "policy": {
+    "name": "llm",
+    "version": "2.3"
+  },
+  "runtime_fingerprint": "3fac87e0d3d5d4d1685a5f68cf63a04778071bd4a2563a66ec7a68edb3caf64c",
+  "actual_decision_sources": {
+    "fsm": 1,
+    "llm": 3
+  },
+  "files_sha256": {
+    "deployment.json": "4c36fb62a504f6ea349bbe17850164da8889a8d1325ae2a913c06ae772aa2991",
+    "episode.json": "718639c43fa14582f17e3be9632eeca63405eda84ec524454e8a345458e05646",
+    "llm_single.out": "18fd444cf9b0c55d430d5a8ab0f7c50f516ae5cb1a5490f28175e0228413fc5a",
+    "llm_single_reset.json": "3f81bbeedf85529d7a2e032b5cd814ed955fb1879d24cf31daccb8f767bcc11e"
+  }
+}

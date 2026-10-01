@@ -25,11 +25,11 @@ from types import SimpleNamespace
 from geometry_msgs.msg import Point, Pose
 from std_msgs.msg import Header as StdHeader
 
-from flexcell_interfaces.action import PickObject, RunDemo
+from flexcell_interfaces.action import PickObject, RunDemo, RunPickPlace
 from flexcell_interfaces.msg import (
     CarryState, RobotStateSummary, WorldObject, WorldState, ZoneState)
 
-from flexcell_skills.contracts.episode import EpisodeStore
+from flexcell_skills.contracts.episode import EpisodeStore, replay_episode
 from flexcell_skills.contracts.injection import InjectionLifecycle
 from flexcell_skills.common import JsonlLog
 from flexcell_skills.decision_policy import FSMPolicy
@@ -153,12 +153,14 @@ def _make_fsm(tmpdir, demo_call):
                    'zone_2': (0.25, 0.05, 0.0175)}
     node._budget = 1
     node._demo_tol = 0.06
+    node._tol = 0.06
     node._seq = 0
     node._admission = threading.Lock()
     node.get_logger = lambda: _Logger()
     node.get_parameter = lambda name: SimpleNamespace(value='')
     node._publish_task_state = lambda state: None
     node._demo_log = JsonlLog(_StubNode(), tmpdir, 'demo_runs_it.jsonl')
+    node._log = JsonlLog(_StubNode(), tmpdir, 'task_runs_it.jsonl')
     node._decision_log = JsonlLog(_StubNode(), tmpdir, 'decisions_it.jsonl')
     node._episodes = EpisodeStore(tmpdir, _Logger())
     node._cli_observe = node._cli_pick = None
@@ -216,6 +218,75 @@ class TestDemoAbortPath(unittest.TestCase):
         self.assertEqual(res.outcome, RunDemo.Result.OUTCOME_FAILED)
         self.assertEqual(res.error_code, RunDemo.Result.ERR_RESOURCE_BUSY)
         node._admission.release()
+
+
+class TestSingleTaskPolicySeam(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.mkdtemp(prefix='fx_single_it_')
+        self.addCleanup(shutil.rmtree, self.tmp, True)
+
+    def drive(self, place_fails=False, skip_verify=False, recover_pick=False):
+        calls = []
+        pick = [(_skill_result(), None)]
+        if recover_pick:
+            pick.insert(0, (_skill_result(outcome=1, error_code=23), None))
+        script = {
+            'OBSERVE': [(_skill_result(world_state=_world_state()), None)],
+            'PICK': pick,
+            'PLACE': [(SimpleNamespace(outcome=1 if place_fails else 0,
+                                       error_code=10 if place_fails else 0,
+                                       detail='place', evidence_id='place',
+                                       released=not place_fails,
+                                       object_pose_after=_pose(0.12, -0.15)), None)],
+            'VERIFY': [(SimpleNamespace(outcome=0, error_code=0, detail='verified',
+                                        evidence_id='verify', has_measured_pose=True,
+                                        position_error_m=0.002), None)],
+        }
+        node = _make_fsm(self.tmp, _make_demo_call(script, calls))
+        goal = RunPickPlace.Goal()
+        goal.object_name = 'target_box_a'
+        goal.place_pose.pose = _pose(0.12, -0.15)
+        goal.motion_profile_id = 'demo_slow'
+        goal.skip_verify = skip_verify
+        gh = _GoalHandle(goal)
+        result = node._execute(gh)
+        import glob
+        with open(glob.glob(self.tmp + '/pick_place_v1_*.json')[0]) as fh:
+            episode = json.load(fh)
+        return result, episode, calls
+
+    def test_task_success_records_real_verifier_result_and_replays(self):
+        result, episode, _ = self.drive()
+        self.assertEqual(result.outcome, 0)
+        self.assertTrue(result.object_at_place)
+        self.assertEqual(episode['final_state']['final_position_error_m'], 0.002)
+        self.assertEqual(len(episode['steps']), 4)
+        self.assertTrue(all(r['ok'] for r in replay_episode(episode, FSMPolicy())))
+        for step in episode['steps']:
+            self.assertEqual(step['decide_latency_clock'], 'perf_counter_ns')
+            self.assertGreater(step['decide_latency_ms'], 0)
+
+    def test_s4_place_failure_is_a_policy_abort_with_replay(self):
+        result, episode, calls = self.drive(place_fails=True)
+        self.assertEqual(result.outcome, 1)
+        self.assertEqual(episode['steps'][-1]['policy_output']['action'], 'ABORT')
+        self.assertFalse(any(c.startswith('VERIFY') for c in calls))
+        self.assertTrue(all(r['ok'] for r in replay_episode(episode, FSMPolicy())))
+
+    def test_pick_recovery_uses_policy_and_counts_attempt_two(self):
+        result, episode, calls = self.drive(recover_pick=True)
+        self.assertEqual(result.outcome, 0)
+        self.assertIn('PICK_A(attempt=2)', calls)
+        self.assertEqual(len(episode['steps']), 6)
+        self.assertTrue(all(r['ok'] for r in replay_episode(episode, FSMPolicy())))
+
+    def test_skip_verify_does_not_invent_a_measurement(self):
+        result, episode, calls = self.drive(skip_verify=True)
+        self.assertEqual(result.outcome, 0)
+        self.assertTrue(result.object_at_place)
+        self.assertIsNone(episode['final_state']['final_position_error_m'])
+        self.assertEqual(len(episode['steps']), 3)
+        self.assertFalse(any(c.startswith('VERIFY') for c in calls))
 
 
 class TestCallSkillTimeout(unittest.TestCase):

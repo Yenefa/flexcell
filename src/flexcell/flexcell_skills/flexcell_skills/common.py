@@ -15,6 +15,8 @@ import threading
 import time
 import uuid
 
+from flexcell_skills.contracts.action_result import AcceptedGoalResult
+
 from rclpy.action import ActionClient
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.duration import Duration
@@ -59,6 +61,7 @@ _GZ_STREAM = {
     'node': None,         # current gz transport node (unsubscribed on rebuild)
     'cb_errors': 0,       # Pose_V callbacks that raised (see _on_pose_v)
     'cb_error': '',       # last callback error, for reporting
+    'stop': threading.Event(),
 }
 
 
@@ -129,7 +132,7 @@ def _gz_stream_loop(world):
     import gz.transport13 as gz_transport
     from gz.msgs10 import pose_v_pb2  # noqa: F401  (already registered above)
     topic = '/world/%s/dynamic_pose/info' % world
-    while True:
+    while not _GZ_STREAM['stop'].is_set():
         # do not leak the previous node's subscription on every rebuild
         with _GZ_STREAM['lock']:
             old = _GZ_STREAM.get('node')
@@ -147,13 +150,33 @@ def _gz_stream_loop(world):
             _on_pose_v(msg, _ev)
 
         node.subscribe(type(pose_v_pb2.Pose_V()), topic, cb)
-        got_first.wait(6.0)
-        while True:
-            time.sleep(1.0)
+        end = time.monotonic() + 6.0
+        while not got_first.is_set() and time.monotonic() < end:
+            if _GZ_STREAM['stop'].wait(0.1):
+                break
+        while not _GZ_STREAM['stop'].wait(1.0):
             with _GZ_STREAM['lock']:
                 stale = time.monotonic() - _GZ_STREAM['last_rx'] > 10.0
             if stale:
                 break   # rebuild the subscription with a fresh node
+    with _GZ_STREAM['lock']:
+        node = _GZ_STREAM['node']
+        _GZ_STREAM['node'] = None
+    if node is not None:
+        node.unsubscribe(topic)
+
+
+def stop_gz_pose_stream(timeout_s=10.0):
+    """Quiesce native callbacks before Python/protobuf interpreter teardown."""
+    _GZ_STREAM['stop'].set()
+    with _GZ_STREAM['lock']:
+        thread = _GZ_STREAM['thread']
+    if thread is not None:
+        thread.join(timeout_s)
+        if thread.is_alive():
+            raise RuntimeError('Gazebo pose subscriber did not stop')
+    with _GZ_STREAM['lock']:
+        _GZ_STREAM['thread'] = None
 
 
 def _ensure_gz_pose_stream(world='empty'):
@@ -169,6 +192,7 @@ def _ensure_gz_pose_stream(world='empty'):
         # - the process silently lost its ground-truth source while
         # _GZ_STREAM['thread'] still looked occupied
         _GZ_STREAM['last_start'] = now
+        _GZ_STREAM['stop'].clear()
         t = threading.Thread(target=_gz_stream_loop, args=(world,), daemon=True)
         _GZ_STREAM['thread'] = t
         _GZ_STREAM['world'] = world
@@ -348,7 +372,7 @@ class MoveToPoseClient:
         gh = send.result()
         if gh is None or not gh.accepted:
             return None, 'move_to_pose goal rejected'
-        rf = gh.get_result_async()
+        rf = AcceptedGoalResult(gh)
         t0 = time.monotonic()
         while not rf.done():
             if cancel_check is not None and cancel_check():
@@ -387,7 +411,7 @@ class GripperClient:
         gh = send.result()
         if gh is None or not gh.accepted:
             return None, 'gripper goal rejected'
-        rf = gh.get_result_async()
+        rf = AcceptedGoalResult(gh)
         if wait_future(rf, timeout_s) != 'done':
             return None, 'gripper result timeout'
         return rf.result().result, None
@@ -398,6 +422,7 @@ class PlanningSceneOps:
 
     def __init__(self, node, service='/apply_planning_scene',
                  get_service='/get_planning_scene'):
+        self._get_service = get_service
         self._apply = node.create_client(ApplyPlanningScene, service,
                                          callback_group=ReentrantCallbackGroup())
         self._get = node.create_client(GetPlanningScene, get_service,
@@ -469,7 +494,15 @@ class PlanningSceneOps:
 
     def is_attached(self, name):
         if not self._get.wait_for_service(timeout_sec=5.0):
-            return False, 'get_planning_scene unavailable'
+            # A long-lived Fast DDS client can miss the service while a fresh
+            # participant sees it (observed online 2026-10-01). Refresh this
+            # client once; attachment still comes only from the actual scene.
+            self._node.get_logger().warn('planning-scene query discovery unavailable; refreshing client once')
+            self._node.destroy_client(self._get)
+            self._get = self._node.create_client(GetPlanningScene, self._get_service,
+                                                 callback_group=ReentrantCallbackGroup())
+            if not self._get.wait_for_service(timeout_sec=5.0):
+                return False, 'get_planning_scene unavailable after client refresh'
         req = GetPlanningScene.Request()
         fut = self._get.call_async(req)
         if wait_future(fut, 10.0) != 'done':

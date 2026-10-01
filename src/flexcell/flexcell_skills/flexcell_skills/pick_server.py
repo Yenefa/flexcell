@@ -5,15 +5,15 @@ observe -> approach (hover, descend) -> close gripper + attach -> lift, with
 measured checks at every step. Composition over Day-2 MoveToPose: this server
 never plans motions itself.
 
-Grasp mode (declared, not silent): the gz DetachableJoint system on link5
-provides a deterministic magnetic anchor - on attach the box is jointed to the
-gripper with the relative pose it had at that moment. Contact-pinch grasping
-is future hardening. Success is still measured: the box must physically rise
-with the arm, otherwise GRASP_FAILED.
+Grasp mode: simulation-only magnetic carry at the measured gripper offset.
+The teleport baseline pins pose periodically; velocity_servo constrains pose
+and velocity each physics step and confirms engage before lifting. Success
+still requires an observed physical rise, otherwise GRASP_FAILED.
 """
 
 import threading
 import time
+import uuid
 
 import rclpy
 from rclpy.action import ActionServer, CancelResponse, GoalResponse
@@ -30,13 +30,14 @@ from rclpy.duration import Duration
 from rclpy.time import Time
 
 from flexcell_interfaces.action import PickObject
+from flexcell_interfaces.srv import EngageCarry
 
 from flexcell_skills.contracts.injection import InjectionLifecycle
 from flexcell_skills.contracts.skill_result import derive_status
 from flexcell_skills.common import (
     GripperClient, JsonlLog, MoveToPoseClient, PlanningSceneOps,
     crash_detail, dist3, interruptible_sleep, new_evidence, pose_msg,
-    sample_gz_pose)
+    sample_gz_pose, wait_future)
 
 R = PickObject.Result
 F = PickObject.Feedback
@@ -65,6 +66,8 @@ class PickServer(Node):
         self.declare_parameter('attach_radius_m', 0.20)
         self.declare_parameter('carry_start_topic', '/flexcell/carry_start')
         self.declare_parameter('carry_stop_topic', '/flexcell/carry_stop')
+        self.declare_parameter('carry_backend', 'teleport')
+        self.declare_parameter('carry_engage_service', '/flexcell/carry_engage')
         self.declare_parameter('inject_topic', '/flexcell/inject')
         self.declare_parameter('box_follow_min_m', 0.03)
         self.declare_parameter('object_size', [0.035, 0.035, 0.035])
@@ -90,6 +93,10 @@ class PickServer(Node):
             StringMsg, gp('carry_start_topic').value, 10)
         self._carry_stop = self.create_publisher(
             EmptyMsg, gp('carry_stop_topic').value, 10)
+        self._carry_backend = gp('carry_backend').value
+        self._carry_engage = self.create_client(
+            EngageCarry, gp('carry_engage_service').value,
+            callback_group=ReentrantCallbackGroup())
 
         # ---- deterministic failure injection (Week-1.5; lifecycle T6) ----
         # payload "<scenario_id>:<once|always>[#request_id]" arms, "" clears.
@@ -205,6 +212,24 @@ class PickServer(Node):
         self._carry_stop.publish(EmptyMsg())
         self._gripper.command(self._gripper_open)
         self._scene.remove(name)
+
+    def _engage_carry(self, object_id, offset):
+        if not self._carry_engage.wait_for_service(timeout_sec=2.0):
+            return False, 'carry engage service unavailable'
+        request = EngageCarry.Request()
+        request.request_id = uuid.uuid4().hex
+        request.object_id = object_id
+        request.reference_frame = self._base
+        request.offset = offset
+        # A lost service response may be retried with the same ownership token.
+        # The server returns the existing session instead of engaging twice.
+        for _ in range(2):
+            future = self._carry_engage.call_async(request)
+            if wait_future(future, 2.0) == 'done':
+                result = future.result()
+                return bool(result.success and result.session == request.request_id), result.message
+            self._carry_engage.remove_pending_request(future)
+        return False, 'carry engage acknowledgement timed out; lift was not started'
 
     def _execute(self, goal_handle):
         t0 = time.monotonic()
@@ -339,12 +364,17 @@ class PickServer(Node):
 
             # engage the carry servo at the MEASURED gripper-to-object offset
             offset = [box_pos[i] - ee_pos[i] for i in range(3)]
-            self._carry_start.publish(StringMsg(data=json.dumps({
-                'object': goal.object_name,
-                'offset': offset,
-                'frame': self._base,
-            })))
             rec['carry_offset'] = offset
+            if self._carry_backend == 'velocity_servo':
+                confirmed, message = self._engage_carry(goal.object_name, offset)
+                rec['carry_engage_confirmed'] = confirmed
+                if not confirmed:
+                    self._release_everything(goal.object_name)
+                    return finish(R.OUTCOME_FAILED, R.ERR_GRASP_FAILED, message)
+            else:
+                self._carry_start.publish(StringMsg(data=json.dumps({
+                    'object': goal.object_name, 'offset': offset, 'frame': self._base,
+                })))
             if interruptible_sleep(0.5, cancel_requested):
                 # cancel while the carry servo pins the object: leave the
                 # servo engaged (the box hangs from the EE) - releasing here

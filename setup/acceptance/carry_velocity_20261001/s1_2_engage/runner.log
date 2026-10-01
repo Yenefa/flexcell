@@ -1,0 +1,10 @@
+scenario runner: {'S1': 2}
+  S1 run 1/2
+    outcome=FAILED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 2/2
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+
+=== per-scenario results (metric #1, Wilson 95%% CI) ===
+  S1: 1/2 SUCCEEDED, CI95=[0.09, 0.91], replay_ok=False
+batch summary: /home/ros/.ros/flexcell/episodes/batch_20261001_230025.jsonl
+SCENARIO RUNNER: FAIL (1)

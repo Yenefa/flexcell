@@ -1,0 +1,276 @@
+{
+  "stage": "ENDPOINT_WARMUP_NOT_BEHAVIOR_ACCEPTANCE",
+  "input_episode_sha256": "99f31c8ddcfe824cafde28ba2ab10c5a0a01fb5ff0e9d994826941218ac8483d",
+  "input": {
+    "constraints": {
+      "allowed_actions": [
+        "ABORT",
+        "OBSERVE",
+        "PICK",
+        "PLACE",
+        "VERIFY",
+        "WAIT"
+      ],
+      "max_world_age_s": 0.0,
+      "motion_profile_id": "demo_slow",
+      "recovery_budget": 1,
+      "verify_tolerance_m": 0.06
+    },
+    "goal": {
+      "assignments": [
+        [
+          "target_box_a",
+          "zone_1"
+        ],
+        [
+          "target_box_b",
+          "zone_2"
+        ]
+      ],
+      "goal_id": "week1_demo_v1-64f83245",
+      "scenario_id": "week1_demo_v1"
+    },
+    "history": [
+      {
+        "action": "OBSERVE",
+        "attempt": 1,
+        "error_code": 0,
+        "evidence_id": "auto-2-e9d55f2a-46e5f362",
+        "outcome": 0,
+        "target": "target_box_a",
+        "world_revision": 2
+      }
+    ],
+    "world_state_canonical": "{\"WorldStateSchemaVersion\":2,\"task_context\":{\"available_actions\":[],\"constraints\":{\"allowed_actions\":[],\"max_world_age_s\":0.0,\"motion_profile_id\":\"\",\"recovery_budget\":0,\"verify_tolerance_m\":0.0},\"deadline_remaining_s\":0.0,\"fault_injection_active\":false,\"goal_id\":\"\",\"history\":[],\"last_action\":\"\",\"last_action_world_revision\":0,\"last_error_code\":0,\"last_outcome\":0,\"plan_completed\":[],\"plan_remaining\":[],\"recovery_budget_remaining\":0,\"retry_counts\":[],\"scenario_id\":\"\",\"task_state\":\"\"},\"world_state\":{\"carry\":{\"engaged\":false,\"object_id\":\"\",\"offset\":[0.0,0.0,0.0],\"reference_frame\":\"world\"},\"header\":{\"frame_id\":\"world\",\"stamp\":{\"nanosec\":910000000,\"sec\":140}},\"objects\":[{\"available\":true,\"klass\":\"box\",\"name\":\"target_box_a\",\"pose\":{\"orientation\":{\"w\":1.0,\"x\":-0.0,\"y\":0.0,\"z\":-0.0},\"position\":{\"x\":0.22,\"y\":0.0,\"z\":0.017499998}},\"pose_age_s\":0.018075286,\"size\":[0.035,0.035,0.035]},{\"available\":true,\"klass\":\"box\",\"name\":\"target_box_b\",\"pose\":{\"orientation\":{\"w\":1.0,\"x\":0.0,\"y\":-0.0,\"z\":0.0},\"position\":{\"x\":0.2,\"y\":-0.18,\"z\":0.017499998}},\"pose_age_s\":0.018196007,\"size\":[0.035,0.035,0.035]}],\"revision\":2,\"robot\":{\"ee_frame\":\"end_effector_link\",\"ee_pose\":{\"orientation\":{\"w\":0.999996142,\"x\":2.24e-06,\"y\":-0.000846696,\"z\":0.002645443},\"position\":{\"x\":0.285953776,\"y\":0.001449474,\"z\":0.187585414}},\"gripper_joint_name\":\"gripper_left_joint\",\"gripper_position\":-4.3e-08,\"has_gripper_state\":true,\"joint_names\":[\"joint1\",\"joint2\",\"joint3\",\"joint4\"],\"positions\":[0.005290894,-0.000329164,0.001424705,-0.002788939]},\"schema_version\":\"2.0\",\"source\":\"SIMULATION_GROUND_TRUTH\",\"zones\":[{\"center\":{\"x\":0.12,\"y\":-0.15,\"z\":0.0175},\"id\":\"zone_1\",\"occupancy\":0,\"occupied_by\":\"\",\"radius\":0.06},{\"center\":{\"x\":0.25,\"y\":0.05,\"z\":0.0175},\"id\":\"zone_2\",\"occupancy\":1,\"occupied_by\":\"target_box_a\",\"radius\":0.06}]}}",
+    "world_state_schema_version": 2
+  },
+  "calls": [
+    {
+      "endpoint": "http://127.0.0.1:18081/v1/chat/completions",
+      "payload": {
+        "model": "flexcell-fast",
+        "max_tokens": 32,
+        "temperature": 0.0,
+        "messages": [
+          {
+            "role": "user",
+            "content": "You are the task-level decision policy of a robotic workcell.\nHistory outcomes: 0=SUCCEEDED, 1=FAILED, 255=no result. Error 0 is success. For each assigned object use OBSERVE -> PICK -> PLACE -> VERIFY. After a successful OBSERVE choose PICK, not another OBSERVE. After a successful PICK choose PLACE; after successful PLACE choose VERIFY. After successful VERIFY start the next unfinished object with OBSERVE. A failed PICK with error 22,23,30 permits OBSERVE then PICK within budget. After failed PLACE choose ABORT. When retry budget is spent choose ABORT. Use history to track progress; an old source pose does not undo a successful action.\nWORLD STATE (canonical, verbatim):\n{\"WorldStateSchemaVersion\":2,\"task_context\":{\"available_actions\":[],\"constraints\":{\"allowed_actions\":[],\"max_world_age_s\":0.0,\"motion_profile_id\":\"\",\"recovery_budget\":0,\"verify_tolerance_m\":0.0},\"deadline_remaining_s\":0.0,\"fault_injection_active\":false,\"goal_id\":\"\",\"history\":[],\"last_action\":\"\",\"last_action_world_revision\":0,\"last_error_code\":0,\"last_outcome\":0,\"plan_completed\":[],\"plan_remaining\":[],\"recovery_budget_remaining\":0,\"retry_counts\":[],\"scenario_id\":\"\",\"task_state\":\"\"},\"world_state\":{\"carry\":{\"engaged\":false,\"object_id\":\"\",\"offset\":[0.0,0.0,0.0],\"reference_frame\":\"world\"},\"header\":{\"frame_id\":\"world\",\"stamp\":{\"nanosec\":910000000,\"sec\":140}},\"objects\":[{\"available\":true,\"klass\":\"box\",\"name\":\"target_box_a\",\"pose\":{\"orientation\":{\"w\":1.0,\"x\":-0.0,\"y\":0.0,\"z\":-0.0},\"position\":{\"x\":0.22,\"y\":0.0,\"z\":0.017499998}},\"pose_age_s\":0.018075286,\"size\":[0.035,0.035,0.035]},{\"available\":true,\"klass\":\"box\",\"name\":\"target_box_b\",\"pose\":{\"orientation\":{\"w\":1.0,\"x\":0.0,\"y\":-0.0,\"z\":0.0},\"position\":{\"x\":0.2,\"y\":-0.18,\"z\":0.017499998}},\"pose_age_s\":0.018196007,\"size\":[0.035,0.035,0.035]}],\"revision\":2,\"robot\":{\"ee_frame\":\"end_effector_link\",\"ee_pose\":{\"orientation\":{\"w\":0.999996142,\"x\":2.24e-06,\"y\":-0.000846696,\"z\":0.002645443},\"position\":{\"x\":0.285953776,\"y\":0.001449474,\"z\":0.187585414}},\"gripper_joint_name\":\"gripper_left_joint\",\"gripper_position\":-4.3e-08,\"has_gripper_state\":true,\"joint_names\":[\"joint1\",\"joint2\",\"joint3\",\"joint4\"],\"positions\":[0.005290894,-0.000329164,0.001424705,-0.002788939]},\"schema_version\":\"2.0\",\"source\":\"SIMULATION_GROUND_TRUTH\",\"zones\":[{\"center\":{\"x\":0.12,\"y\":-0.15,\"z\":0.0175},\"id\":\"zone_1\",\"occupancy\":0,\"occupied_by\":\"\",\"radius\":0.06},{\"center\":{\"x\":0.25,\"y\":0.05,\"z\":0.0175},\"id\":\"zone_2\",\"occupancy\":1,\"occupied_by\":\"target_box_a\",\"radius\":0.06}]}}\n\nTASK CONTEXT: last result: OBSERVE/target_box_a outcome=0 error=0; attempts={\"OBSERVE:target_box_a\": 1}; goal=[[\"target_box_a\", \"zone_1\"], [\"target_box_b\", \"zone_2\"]]; budget=1; history=[{\"action\": \"OBSERVE\", \"attempt\": 1, \"error_code\": 0, \"outcome\": 0, \"target\": \"target_box_a\"}]\nChoose exactly ONE next action from this menu:\n1. ABORT \u2014 abort the task (typed failure)\n2. OBSERVE \u2014 gather fresh world state (leg start or after a failure)\n3. PICK \u2014 pick target_box_a (attempt 1)\n4. PLACE \u2014 place the carried object into its assigned zone\n5. VERIFY \u2014 verify the placed object at its zone\n6. WAIT \u2014 no-op wait\nRespond with a single JSON object: {\"choice\": \"<one of: ABORT, OBSERVE, PICK, PLACE, VERIFY, WAIT>\", \"confidence\": <0..1>}"
+          }
+        ],
+        "response_format": {
+          "type": "json_object"
+        },
+        "seed": 20260930
+      },
+      "timeout_s": 60.0,
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "{\n  \"choice\": \"PICK\",\n  \"confidence\": 1\n}"
+            }
+          }
+        ],
+        "created": 1790779727,
+        "model": "flexcell-fast",
+        "system_fingerprint": "b11284-25747b08e",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 22,
+          "prompt_tokens": 1127,
+          "total_tokens": 1149,
+          "prompt_tokens_details": {
+            "cached_tokens": 37
+          }
+        },
+        "id": "chatcmpl-wL9JpFJn2R3c9IMFeyIgFXXx2aQxUmJs",
+        "timings": {
+          "cache_n": 37,
+          "prompt_n": 1090,
+          "prompt_ms": 794.619,
+          "prompt_per_token_ms": 0.729008256880734,
+          "prompt_per_second": 1371.7265758810197,
+          "predicted_n": 22,
+          "predicted_ms": 342.396,
+          "predicted_per_token_ms": 16.30457142857143,
+          "predicted_per_second": 61.33249220201171
+        }
+      },
+      "latency_ms": 1430.339609
+    },
+    {
+      "endpoint": "http://127.0.0.1:18082/v1/chat/completions",
+      "payload": {
+        "model": "flexcell-slow",
+        "temperature": 0.0,
+        "max_tokens": 160,
+        "seed": 20260930,
+        "messages": [
+          {
+            "role": "user",
+            "content": "Decide one next action to complete this robotic task. Reason from the typed history and current world. Outcomes: 0=SUCCEEDED, 1=FAILED, 255=no result; error 0 means success. For each assigned object use OBSERVE -> PICK -> PLACE -> VERIFY. After successful OBSERVE choose PICK, without repeating OBSERVE. After successful PICK choose PLACE. After successful PLACE choose VERIFY. After successful VERIFY start the next unfinished object with OBSERVE. Use allowed_actions in constraints; target is an object, not a zone. Verify after place. A failed pick with errors 22/23/30 may be reobserved and retried within the recovery budget. A failed PLACE is not retried while carrying. Abort when recovery is exhausted. Track completed objects individually. Do not infer that failed motion succeeded. Return only a JSON decision with action, target, confidence, reason_code, explanation. Target is an assigned object id, or empty for WAIT/ABORT. Allowed reason_code values: PLAN_NEXT,RECOVERABLE_RETRY,VERIFY_MISMATCH_RETRY,BUDGET_EXHAUSTED,VERIFY_BUDGET_EXHAUSTED,NON_RECOVERABLE,OBSERVE_FAILED.\nTASK (typed):\n{\"constraints\": {\"allowed_actions\": [\"ABORT\", \"OBSERVE\", \"PICK\", \"PLACE\", \"VERIFY\", \"WAIT\"], \"max_world_age_s\": 0.0, \"motion_profile_id\": \"demo_slow\", \"recovery_budget\": 1, \"verify_tolerance_m\": 0.06}, \"goal\": {\"assignments\": [[\"target_box_a\", \"zone_1\"], [\"target_box_b\", \"zone_2\"]], \"goal_id\": \"week1_demo_v1-64f83245\", \"scenario_id\": \"week1_demo_v1\"}, \"history\": [{\"action\": \"OBSERVE\", \"attempt\": 1, \"error_code\": 0, \"evidence_id\": \"auto-2-e9d55f2a-46e5f362\", \"outcome\": 0, \"target\": \"target_box_a\", \"world_revision\": 2}]}\nWORLD (canonical, verbatim):\n{\"WorldStateSchemaVersion\":2,\"task_context\":{\"available_actions\":[],\"constraints\":{\"allowed_actions\":[],\"max_world_age_s\":0.0,\"motion_profile_id\":\"\",\"recovery_budget\":0,\"verify_tolerance_m\":0.0},\"deadline_remaining_s\":0.0,\"fault_injection_active\":false,\"goal_id\":\"\",\"history\":[],\"last_action\":\"\",\"last_action_world_revision\":0,\"last_error_code\":0,\"last_outcome\":0,\"plan_completed\":[],\"plan_remaining\":[],\"recovery_budget_remaining\":0,\"retry_counts\":[],\"scenario_id\":\"\",\"task_state\":\"\"},\"world_state\":{\"carry\":{\"engaged\":false,\"object_id\":\"\",\"offset\":[0.0,0.0,0.0],\"reference_frame\":\"world\"},\"header\":{\"frame_id\":\"world\",\"stamp\":{\"nanosec\":910000000,\"sec\":140}},\"objects\":[{\"available\":true,\"klass\":\"box\",\"name\":\"target_box_a\",\"pose\":{\"orientation\":{\"w\":1.0,\"x\":-0.0,\"y\":0.0,\"z\":-0.0},\"position\":{\"x\":0.22,\"y\":0.0,\"z\":0.017499998}},\"pose_age_s\":0.018075286,\"size\":[0.035,0.035,0.035]},{\"available\":true,\"klass\":\"box\",\"name\":\"target_box_b\",\"pose\":{\"orientation\":{\"w\":1.0,\"x\":0.0,\"y\":-0.0,\"z\":0.0},\"position\":{\"x\":0.2,\"y\":-0.18,\"z\":0.017499998}},\"pose_age_s\":0.018196007,\"size\":[0.035,0.035,0.035]}],\"revision\":2,\"robot\":{\"ee_frame\":\"end_effector_link\",\"ee_pose\":{\"orientation\":{\"w\":0.999996142,\"x\":2.24e-06,\"y\":-0.000846696,\"z\":0.002645443},\"position\":{\"x\":0.285953776,\"y\":0.001449474,\"z\":0.187585414}},\"gripper_joint_name\":\"gripper_left_joint\",\"gripper_position\":-4.3e-08,\"has_gripper_state\":true,\"joint_names\":[\"joint1\",\"joint2\",\"joint3\",\"joint4\"],\"positions\":[0.005290894,-0.000329164,0.001424705,-0.002788939]},\"schema_version\":\"2.0\",\"source\":\"SIMULATION_GROUND_TRUTH\",\"zones\":[{\"center\":{\"x\":0.12,\"y\":-0.15,\"z\":0.0175},\"id\":\"zone_1\",\"occupancy\":0,\"occupied_by\":\"\",\"radius\":0.06},{\"center\":{\"x\":0.25,\"y\":0.05,\"z\":0.0175},\"id\":\"zone_2\",\"occupancy\":1,\"occupied_by\":\"target_box_a\",\"radius\":0.06}]}}"
+          }
+        ],
+        "response_format": {
+          "type": "json_schema",
+          "json_schema": {
+            "name": "task_decision",
+            "strict": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string",
+                  "enum": [
+                    "ABORT",
+                    "OBSERVE",
+                    "PICK",
+                    "PLACE",
+                    "VERIFY",
+                    "WAIT"
+                  ]
+                },
+                "target": {
+                  "type": "string",
+                  "enum": [
+                    "",
+                    "target_box_a",
+                    "target_box_b"
+                  ]
+                },
+                "confidence": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1
+                },
+                "reason_code": {
+                  "type": "string",
+                  "enum": [
+                    "PLAN_NEXT",
+                    "RECOVERABLE_RETRY",
+                    "VERIFY_MISMATCH_RETRY",
+                    "BUDGET_EXHAUSTED",
+                    "VERIFY_BUDGET_EXHAUSTED",
+                    "NON_RECOVERABLE",
+                    "OBSERVE_FAILED"
+                  ]
+                },
+                "explanation": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "action",
+                "target",
+                "confidence",
+                "reason_code",
+                "explanation"
+              ],
+              "additionalProperties": false
+            }
+          }
+        }
+      },
+      "timeout_s": 60.0,
+      "response": {
+        "choices": [
+          {
+            "finish_reason": "stop",
+            "index": 0,
+            "message": {
+              "role": "assistant",
+              "content": "{\n  \"action\": \"PICK\",\n  \"target\": \"target_box_a\",\n  \"confidence\": 1.0,\n  \"reason_code\": \"PLAN_NEXT\",\n  \"explanation\": \"The object has been successfully observed. Next action is to pick up the object.\"\n}"
+            }
+          }
+        ],
+        "created": 1790779729,
+        "model": "flexcell-slow",
+        "system_fingerprint": "b11284-25747b08e",
+        "object": "chat.completion",
+        "usage": {
+          "completion_tokens": 64,
+          "prompt_tokens": 1212,
+          "total_tokens": 1276,
+          "prompt_tokens_details": {
+            "cached_tokens": 44
+          }
+        },
+        "id": "chatcmpl-l9AcAbAxG73W8Kxo2SiJ8w0T6x6tlP9h",
+        "timings": {
+          "cache_n": 44,
+          "prompt_n": 1168,
+          "prompt_ms": 860.055,
+          "prompt_per_token_ms": 0.7363484589041095,
+          "prompt_per_second": 1358.052682677271,
+          "predicted_n": 64,
+          "predicted_ms": 1530.992,
+          "predicted_per_token_ms": 24.301460317460318,
+          "predicted_per_second": 41.14979046265428
+        }
+      },
+      "latency_ms": 2655.848439
+    }
+  ],
+  "results": [
+    {
+      "policy": "jev",
+      "version": "1.1",
+      "decision": {
+        "action": "PICK",
+        "target": "target_box_a",
+        "confidence": 1.0,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=local-reproduction prob=1.000 raw={\"backend\": \"local-reproduction\", \"model\": \"flexcell-fast\", \"tokens\": 1149}",
+        "evidence_ref": null,
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "local-reproduction",
+          "model": "flexcell-fast",
+          "tokens": 1149
+        }
+      },
+      "stats": {
+        "invocations": 1,
+        "fallbacks": 0,
+        "parse_errors": 0,
+        "backend_errors": 0,
+        "no_world": 0,
+        "tokens": 1149
+      }
+    },
+    {
+      "policy": "llm",
+      "version": "2.1",
+      "decision": {
+        "action": "PICK",
+        "target": "target_box_a",
+        "confidence": 1.0,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "The object has been successfully observed. Next action is to pick up the object.",
+        "evidence_ref": null,
+        "policy_trace": {
+          "source": "llm",
+          "fallback": false,
+          "backend": "local-task-reasoner",
+          "model": "flexcell-slow",
+          "tokens": 1276,
+          "prompt_tokens": 1212,
+          "completion_tokens": 64,
+          "backend_latency_ms": 2655.895554
+        }
+      },
+      "stats": {
+        "invocations": 1,
+        "fallbacks": 0,
+        "tokens": 1276,
+        "backend_errors": 0,
+        "parse_errors": 0,
+        "no_world": 0
+      }
+    }
+  ]
+}

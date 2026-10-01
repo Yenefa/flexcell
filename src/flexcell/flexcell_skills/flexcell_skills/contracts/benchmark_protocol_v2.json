@@ -1,0 +1,22 @@
+{
+  "protocol_id": "flexcell-benchmark-v2",
+  "protocol_version": 2,
+  "status": "FROZEN_DEFINITION_PENDING_ONLINE_SMOKE",
+  "physics": "teleport-servo",
+  "schema": {"world_state": 2, "episode": 1},
+  "recovery_budget": 1,
+  "order": "round_robin",
+  "reset": "process exits 0, JSON ok:true; any signal/timeout stops the batch",
+  "latency": "perf_counter_ns immediately around policy.decide; float milliseconds",
+  "scenarios": {
+    "S1": {"kind": "demo", "scenario": "week1_demo_v1", "inject": null, "expect": "SUCCEEDED"},
+    "S2": {"kind": "demo", "scenario": "recovery_demo_v1", "inject": "recovery_demo_v1@target_box_a:once", "injected_object": "target_box_a", "expect": "SUCCEEDED"},
+    "S3": {"kind": "demo", "scenario": "recovery_b_demo_v1", "inject": "recovery_b_demo_v1@target_box_b:once", "injected_object": "target_box_b", "expect": "SUCCEEDED"},
+    "S4": {"kind": "task", "object": "target_box_a", "pose": [0.42, 0.0, 0.0175], "inject": null, "expect": "FAILED", "required_failed_action": "PLACE"},
+    "S5": {"kind": "demo", "scenario": "exhaust_demo_v1", "inject": "exhaust_demo_v1@target_box_a:always", "injected_object": "target_box_a", "expect": "FAILED", "required_task_error": 51},
+    "S7": {"kind": "demo", "scenario": "s7_perturb_v1", "inject": null, "perturb": true, "expect": "SUCCEEDED"}
+  },
+  "historical_data": "E-011 is archived protocol v1; never pool or append v2 cells to that baseline",
+  "smoke": {"max_runs_per_cell": 5, "purpose": "online execution and protocol semantics; not statistical comparison"},
+  "model_claims": "model_source must occur in actual policy_trace; FSM fallback alone is not model execution"
+}

@@ -111,4 +111,6 @@ task_fsm_server:
     demo_log_file: demo_runs.jsonl
     task_state_topic: /flexcell/task_state
     decision_policy: fsm
+    jev_backend: local
+    hybrid_threshold: 0.7
     decision_log_file: decisions.jsonl

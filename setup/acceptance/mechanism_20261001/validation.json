@@ -1,0 +1,44 @@
+{
+  "budget_pytest": {
+    "command": "source setup/104_mainline_env.sh && PYTHONPATH=$PWD/src/flexcell/flexcell_skills python3 -m pytest -q src/flexcell/flexcell_skills/test/test_inference_budget.py",
+    "result": "3 passed; tool exit0, final max65536 implementation"
+  },
+  "source_ast": {
+    "files": 9,
+    "result": "PASS"
+  },
+  "diff_check": {
+    "exit_code": 0,
+    "result": "PASS; existing CRLF normalization warnings retained"
+  },
+  "ros_natural_completed_goals": 352,
+  "first_reply_missed": 0,
+  "injected_first_getresult_drop": {
+    "goals": 8,
+    "recovered": 8,
+    "executions": 8
+  },
+  "injected_all_getresult_drop": {
+    "valid_goals": 1,
+    "unrecovered": 1,
+    "other_config_not_reached": 1
+  },
+  "discovery_safe_profile": {
+    "repetitions": 2,
+    "goals": 16,
+    "scene_replies": 16,
+    "first_result_replies": 16
+  },
+  "servo": {
+    "position_controls_complete": 12,
+    "zero_velocity_controls_complete": 4,
+    "partial_zero_velocity_attempt_retained": true
+  },
+  "not_run": [
+    "full robot pipeline",
+    "fleet redeploy",
+    "400 or n>=50 batch",
+    "full unit suite",
+    "rosdep"
+  ]
+}

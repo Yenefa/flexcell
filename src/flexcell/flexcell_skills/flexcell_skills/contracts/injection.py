@@ -87,6 +87,7 @@ class InjectionLifecycle:
     def reset_to_idle(self):
         self.state = IDLE
         self.scenario = ''
+        self.target_object = ''
         self.mode = ''
         self.request_id = ''
         self.applied_count = 0
@@ -103,6 +104,7 @@ class InjectionLifecycle:
             # and record why. Never silently ignore it.
             self.state = REQUESTED
             self.scenario = ''
+            self.target_object = ''
             self.mode = ''
             self.error = str(exc)
             return self.state
@@ -112,12 +114,13 @@ class InjectionLifecycle:
             # clear
             self.state = CLEARED
             self.scenario = ''
+            self.target_object = ''
             self.mode = ''
             self.applied_count = 0
             self._attempts = {}
             return self.state
         self.state = REQUESTED
-        self.scenario = scenario
+        self.scenario, _, self.target_object = scenario.partition('@')
         self.mode = mode
         self.applied_count = 0
         self._attempts = {}
@@ -133,6 +136,8 @@ class InjectionLifecycle:
         attempt of this object only", exactly as the frozen Week-1.5 semantics.
         """
         if self.state not in LIVE_STATES or not self.scenario:
+            return None
+        if self.target_object and object_name != self.target_object:
             return None
         key = '%s|%s' % (self.scenario, object_name)
         attempt = self._attempts.get(key, 0) + 1
@@ -150,6 +155,7 @@ class InjectionLifecycle:
         return {
             'state': self.state,
             'scenario': self.scenario,
+            'target_object': self.target_object,
             'mode': self.mode,
             'request_id': self.request_id,
             'applied_count': self.applied_count,

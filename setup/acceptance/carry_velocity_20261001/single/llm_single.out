@@ -1,0 +1,20 @@
+SENDING action=task object=target_box_a pose=[0.12, -0.15, 0.0175]
+GOAL_UUID 5bece51bb8f44efaa487204f45618446
+RESULT {
+  "action": "task",
+  "goal_uuid": "5bece51bb8f44efaa487204f45618446",
+  "outcome": "OUTCOME_SUCCEEDED",
+  "outcome_val": 0,
+  "error_code": "ERR_NONE",
+  "detail": "task done: all assignments verified",
+  "evidence_id": "pick_place_v1-81a490d7",
+  "wall_seconds": 18.459,
+  "fsm_trace": [
+    "PICK_A(attempt=1):OK",
+    "PLACE_A:OK",
+    "VERIFY_A(attempt=1):OK"
+  ],
+  "object_at_place": true,
+  "final_position_error_m": 0.012701558311510229,
+  "skip_verify": false
+}

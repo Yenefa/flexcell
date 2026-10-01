@@ -1,0 +1,12 @@
+........                                                                 [100%]
+=============================== warnings summary ===============================
+<frozen importlib._bootstrap>:488
+  Warning: Type google.protobuf.pyext._message.ScalarMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+<frozen importlib._bootstrap>:488
+  Warning: Type google.protobuf.pyext._message.MessageMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+../../../../usr/lib/python3/dist-packages/google/protobuf/internal/well_known_types.py:91
+  Warning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html

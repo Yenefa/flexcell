@@ -46,3 +46,17 @@ manipulation backend**.
 - The swap is expected to be exercised by the **Real Robot Backend** phase
   ([ROADMAP.md](../ROADMAP.md)); the same replaceability rule then applies to the whole
   Robot Backend layer.
+
+## 2026-10-01 implementation extension: leased velocity carry
+
+The active mainline now selects `velocity_servo_v1`, retaining magnetic carry.
+A world plugin constrains pose and velocity each physics step under a 500 ms
+heartbeat lease, with session ownership and confirmed removal on release.
+PICK waits for typed engage acknowledgement before lifting. The original
+pose-only teleport backend remains available for archived conditions.
+
+The skill action contracts and measured-rise / independent-verification rules
+are retained. Statistical results are sensitive to the physics implementation:
+old teleport and new velocity cohorts must use distinct deployment fingerprints
+and must not be pooled. This extension does not introduce contact-grasp realism.
+See [E-015 implementation and evidence](../CARRY_VELOCITY_20261001.md).

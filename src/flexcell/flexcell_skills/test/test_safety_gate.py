@@ -108,6 +108,13 @@ class TestSafetyGate(unittest.TestCase):
         self.assertFalse(ok)
         self.assertEqual(reason, 'already_carried')
 
+    def test_pick_already_carried_same_object_rejected(self):
+        ok, reason = validate(_dec('PICK', 'target_box_a'), _goal(),
+                              _world(engaged=True, carried='target_box_a'),
+                              _constraints())
+        self.assertFalse(ok)
+        self.assertEqual(reason, 'already_carried')
+
     def test_place_requires_the_carried_object(self):
         ok, reason = validate(_dec('PLACE', 'target_box_a'), _goal(),
                               _world(), _constraints())

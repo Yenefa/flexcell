@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Local WSL runtime uses UDP discovery/data to avoid stale SHM port locks.
+     Interfaces remain the Fast DDS defaults; no loopback restriction. -->
+<profiles xmlns="http://www.eprosima.com/XMLSchemas/fastRTPS_Profiles">
+  <transport_descriptors>
+    <transport_descriptor>
+      <transport_id>flexcell_udp</transport_id>
+      <type>UDPv4</type>
+    </transport_descriptor>
+  </transport_descriptors>
+  <participant profile_name="flexcell_udp_participant" is_default_profile="true">
+    <rtps>
+      <useBuiltinTransports>false</useBuiltinTransports>
+      <userTransports><transport_id>flexcell_udp</transport_id></userTransports>
+    </rtps>
+  </participant>
+</profiles>

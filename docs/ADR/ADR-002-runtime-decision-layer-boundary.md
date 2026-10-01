@@ -1,5 +1,13 @@
 # ADR-002: Runtime Decision Layer Boundary
 
+> Implementation update (2026-09-30): both `RunDemo` and `RunPickPlace` now
+> use the shared policy executor, safety gate and episode recorder. The
+> single-object route is no longer a retained off-seam exception. Jev, LLM
+> and Hybrid have executed actual local model decisions. The slow policy is an
+> independent task-reasoning implementation, with a distinct model; real LLM
+> single-object pick/place/verify completed online. Smoke failures and fallback
+> provenance are retained. See [mainline implementation](../MAINLINE_20260930.md).
+
 - **Status**: Accepted (2026-09-27; M2.1 architecture freeze, chief-directed)
 - **Context**: Week-2 preparation ratified (`docs/WEEK2_PREPARATION.md @ 4fccfb8`); RFC #14
   (decision layer architecture) and RFC #16 (WorldState v2 freeze) open

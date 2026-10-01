@@ -1,0 +1,383 @@
+{
+  "method": "Fit each uninterrupted falling arc z=a+v*t-4.9*t^2 using simulator timestamps; fit v against age across position resets. Inferred velocity, not a direct Gazebo velocity topic.",
+  "cases": [
+    {
+      "name": "probe_box_08",
+      "segments": [
+        {
+          "sim_start_s": 23.735,
+          "velocity_at_start_m_s": -0.06993396226413601,
+          "rmse_m": 6.231387379983389e-05,
+          "samples": 4
+        },
+        {
+          "sim_start_s": 23.82,
+          "velocity_at_start_m_s": -0.9065000000000354,
+          "rmse_m": 1.4071590969300972e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 23.92,
+          "velocity_at_start_m_s": -1.8865000000000551,
+          "rmse_m": 1.3940097969120306e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 24.02,
+          "velocity_at_start_m_s": -2.866499999999945,
+          "rmse_m": 3.5511642870900826e-15,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 24.12,
+          "velocity_at_start_m_s": -3.8465000000000966,
+          "rmse_m": 1.638593019550265e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 24.22,
+          "velocity_at_start_m_s": -4.826499999999829,
+          "rmse_m": 4.4375930011081e-15,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 24.32,
+          "velocity_at_start_m_s": -5.517400000000145,
+          "rmse_m": 0.008176982817641395,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 24.42,
+          "velocity_at_start_m_s": -6.44840000000017,
+          "rmse_m": 0.009562912108767044,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 24.52,
+          "velocity_at_start_m_s": -7.379399999999915,
+          "rmse_m": 0.010948841399888562,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 24.62,
+          "velocity_at_start_m_s": -8.310400000000202,
+          "rmse_m": 0.012334770691018267,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 24.72,
+          "velocity_at_start_m_s": -9.24139999999968,
+          "rmse_m": 0.013720699982143677,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 24.82,
+          "velocity_at_start_m_s": -10.324999999999951,
+          "rmse_m": 0.015046562915012305,
+          "samples": 6
+        },
+        {
+          "sim_start_s": 24.94,
+          "velocity_at_start_m_s": -11.882500000000254,
+          "rmse_m": 1.572849965370316e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 25.04,
+          "velocity_at_start_m_s": -12.862499999999539,
+          "rmse_m": 1.1681220140236688e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 25.14,
+          "velocity_at_start_m_s": -13.84250000000027,
+          "rmse_m": 1.773969991045154e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 25.24,
+          "velocity_at_start_m_s": -14.822499999999726,
+          "rmse_m": 1.5014551731841132e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 25.34,
+          "velocity_at_start_m_s": -15.80249999999971,
+          "rmse_m": 1.6524273259675203e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 25.44,
+          "velocity_at_start_m_s": -16.7825000000003,
+          "rmse_m": 2.0865197433255567e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 25.54,
+          "velocity_at_start_m_s": -17.762499999999324,
+          "rmse_m": 1.5965363203051985e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 25.64,
+          "velocity_at_start_m_s": -18.74250000000032,
+          "rmse_m": 1.139331726283876e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 25.74,
+          "velocity_at_start_m_s": -19.722499999999595,
+          "rmse_m": 1.9898391062690074e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 25.84,
+          "velocity_at_start_m_s": -20.702499999999596,
+          "rmse_m": 2.151221488565488e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 25.94,
+          "velocity_at_start_m_s": -21.682500000000356,
+          "rmse_m": 2.309424535204629e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 26.04,
+          "velocity_at_start_m_s": -22.662499999999117,
+          "rmse_m": 2.0164354144446296e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 26.14,
+          "velocity_at_start_m_s": -23.64250000000036,
+          "rmse_m": 5.296499040269368e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 26.24,
+          "velocity_at_start_m_s": -24.62249999999948,
+          "rmse_m": 2.4807900306554055e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 26.34,
+          "velocity_at_start_m_s": -25.602499999999477,
+          "rmse_m": 2.637952170054239e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 26.44,
+          "velocity_at_start_m_s": -25.254600000000394,
+          "rmse_m": 0.03755868378950447,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 26.54,
+          "velocity_at_start_m_s": -26.18559999999898,
+          "rmse_m": 0.03894461308061648,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 26.64,
+          "velocity_at_start_m_s": -28.542294088050973,
+          "rmse_m": 0.006655463131047728,
+          "samples": 455
+        }
+      ],
+      "velocity_slope_vs_sim_age_m_s2": -9.705425989866242,
+      "velocity_min_m_s": -28.542294088050973,
+      "velocity_max_m_s": -0.06993396226413601,
+      "largest_ballistic_fit_rmse_m": 0.03894461308061648
+    },
+    {
+      "name": "probe_box_09",
+      "segments": [
+        {
+          "sim_start_s": 26.745,
+          "velocity_at_start_m_s": -0.0699339622641755,
+          "rmse_m": 6.231387379976888e-05,
+          "samples": 4
+        },
+        {
+          "sim_start_s": 26.83,
+          "velocity_at_start_m_s": -0.9064999999999686,
+          "rmse_m": 1.0263712480109909e-15,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 26.93,
+          "velocity_at_start_m_s": -1.8864999999999612,
+          "rmse_m": 2.5694032897727285e-15,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 27.03,
+          "velocity_at_start_m_s": -2.866500000000074,
+          "rmse_m": 1.4268667395592192e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 27.13,
+          "velocity_at_start_m_s": -3.846499999999852,
+          "rmse_m": 3.5936209301754025e-15,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 27.23,
+          "velocity_at_start_m_s": -4.826500000000124,
+          "rmse_m": 1.6667795129466247e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 27.33,
+          "velocity_at_start_m_s": -5.806499999999912,
+          "rmse_m": 5.969282441427776e-15,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 27.43,
+          "velocity_at_start_m_s": -6.786499999999916,
+          "rmse_m": 7.483420625286243e-15,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 27.53,
+          "velocity_at_start_m_s": -7.766500000000203,
+          "rmse_m": 2.392988787970557e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 27.63,
+          "velocity_at_start_m_s": -8.746499999999713,
+          "rmse_m": 7.842635874173058e-15,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 27.73,
+          "velocity_at_start_m_s": -9.726500000000225,
+          "rmse_m": 1.2825696525919158e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 27.83,
+          "velocity_at_start_m_s": -10.706499999999826,
+          "rmse_m": 1.0873053236023828e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 27.93,
+          "velocity_at_start_m_s": -11.68649999999981,
+          "rmse_m": 1.24545317329043e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 28.03,
+          "velocity_at_start_m_s": -12.666500000000255,
+          "rmse_m": 1.4594788516769548e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 28.13,
+          "velocity_at_start_m_s": -13.646499999999502,
+          "rmse_m": 1.2101997525388048e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 28.23,
+          "velocity_at_start_m_s": -14.626500000000279,
+          "rmse_m": 1.3150988898405085e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 28.33,
+          "velocity_at_start_m_s": -15.606499999999702,
+          "rmse_m": 1.579619529536518e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 28.43,
+          "velocity_at_start_m_s": -16.586499999999695,
+          "rmse_m": 1.7344618877090558e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 28.53,
+          "velocity_at_start_m_s": -17.566500000000314,
+          "rmse_m": 1.2959208739370123e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 28.63,
+          "velocity_at_start_m_s": -18.54649999999929,
+          "rmse_m": 1.6373366701529955e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 28.73,
+          "velocity_at_start_m_s": -19.52650000000034,
+          "rmse_m": 1.2161883888976234e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 28.83,
+          "velocity_at_start_m_s": -20.506499999999587,
+          "rmse_m": 2.0663574010865515e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 28.93,
+          "velocity_at_start_m_s": -21.486499999999573,
+          "rmse_m": 2.223714638087331e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 29.03,
+          "velocity_at_start_m_s": -22.466500000000366,
+          "rmse_m": 2.5438405243138006e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 29.13,
+          "velocity_at_start_m_s": -23.446499999999084,
+          "rmse_m": 2.0607082208528197e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 29.23,
+          "velocity_at_start_m_s": -24.42650000000039,
+          "rmse_m": 7.28445068812722e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 29.33,
+          "velocity_at_start_m_s": -25.40649999999947,
+          "rmse_m": 2.5546048447531707e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 29.43,
+          "velocity_at_start_m_s": -26.386499999999458,
+          "rmse_m": 2.7277210455496944e-14,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 29.53,
+          "velocity_at_start_m_s": -27.36650000000042,
+          "rmse_m": 2.482534153247273e-16,
+          "samples": 5
+        },
+        {
+          "sim_start_s": 29.63,
+          "velocity_at_start_m_s": -28.34649999999994,
+          "rmse_m": 5.845189317420336e-13,
+          "samples": 305
+        }
+      ],
+      "velocity_slope_vs_sim_age_m_s2": -9.800228205761254,
+      "velocity_min_m_s": -28.34649999999994,
+      "velocity_max_m_s": -0.0699339622641755,
+      "largest_ballistic_fit_rmse_m": 6.231387379976888e-05
+    }
+  ]
+}

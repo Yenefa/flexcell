@@ -82,7 +82,7 @@ def validate(decision, goal, world_dict, constraints):
         obj = objects.get(decision.target)
         if obj is None or not obj.get('available'):
             return False, 'target_not_available'
-        if carry.get('engaged') and carry.get('object_id') != decision.target:
+        if carry.get('engaged'):
             return False, 'already_carried'
 
     # 6) PLACE: the target object must be the carried one

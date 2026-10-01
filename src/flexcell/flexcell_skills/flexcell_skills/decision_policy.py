@@ -66,7 +66,7 @@ class EvidenceRef:
     policy_version: str
     world_revision: int = 0
     observe_evidence_id: str = ''
-    decide_latency_ms: int = 0
+    decide_latency_ms: float | None = None
 
 
 @dataclass(frozen=True)
@@ -77,6 +77,7 @@ class Decision:
     reason_code: str = RC_PLAN_NEXT
     explanation: str = ''          # write-only: logged, never parsed (ADR-002)
     evidence_ref: EvidenceRef | None = None
+    policy_trace: dict | None = None  # typed routing provenance; never dispatched
 
 
 @dataclass(frozen=True)

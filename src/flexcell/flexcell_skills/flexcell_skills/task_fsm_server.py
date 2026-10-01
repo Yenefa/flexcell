@@ -13,8 +13,9 @@ exactly the frozen Week-1.5 semantics, so behavior is trace-equivalent (B5).
 Every decision is logged to `decisions.jsonl` with evidence references
 (world revision + observe evidence id + decide latency).
 
-No LLM, no Jev - FSMPolicy is the deterministic baseline the upstream roadmap
-requires. One task at a time (single-arm mutual exclusion). Cancellation is
+FSMPolicy remains the default reference arm. Jev, LLM and Hybrid policies
+use the same executor for both task actions. One task at a time (single-arm
+mutual exclusion). Cancellation is
 honoured between states; a canceled mid-task leaves the robot in the state the
 skills left it in and reports honestly.
 """
@@ -36,13 +37,17 @@ from std_msgs.msg import String as StringMsg
 
 from flexcell_interfaces.action import (
     Observe, PickObject, PlaceObject, RunDemo, RunPickPlace, VerifyObject)
+from flexcell_interfaces.msg import ZoneState
 
 from flexcell_skills.common import JsonlLog, crash_detail, new_evidence
 from flexcell_skills.skill_contract import (
     check_pick, check_place, check_verify)
 from flexcell_skills.canonical_state import serialize_envelope
 from flexcell_skills.contracts.error_codes import task_abort_error_code
+from flexcell_skills.contracts.action_result import AcceptedGoalResult
+
 from flexcell_skills.contracts.episode import EpisodeRecorder, EpisodeStore
+from flexcell_skills.contracts.benchmark_protocol import load_protocol
 from flexcell_skills.contracts.safety_gate import (
     metrics as safety_metrics, sanitize as sanitize_decision, validate)
 from flexcell_skills.contracts.recovery import (
@@ -136,6 +141,7 @@ class TaskFsmServer(Node):
         self.declare_parameter('task_state_topic', '/flexcell/task_state')
         self.declare_parameter('decision_policy', 'fsm')
         self.declare_parameter('jev_backend', 'local')
+        self.declare_parameter('hybrid_threshold', 0.7)
         self.declare_parameter('decision_log_file', 'decisions.jsonl')
         # test hook (issue #6 AC): "ACTION[:target]" - the FIRST decision the
         # executor receives is replaced by this planted out-of-contract
@@ -157,27 +163,36 @@ class TaskFsmServer(Node):
                                   gp2('demo_log_file').value)
         self._episodes = EpisodeStore(gp2('episode_dir').value,
                                       self.get_logger())
+        protocol, digest = load_protocol()
+        self._benchmark_protocol = {'id': protocol['protocol_id'],
+                                    'version': protocol['protocol_version'],
+                                    'sha256': digest}
 
         policy_name = gp2('decision_policy').value
         if policy_name == 'fsm':
             self._policy = FSMPolicy()
-        elif policy_name == 'jev':
+        elif policy_name in ('jev', 'llm', 'hybrid'):
             # issue #10 (ratified ④): backend-agnostic fast policy with typed
             # policy_failure -> FSM fallback (degradation, not deadlock)
             from flexcell_skills.jev_backends import make_backend
             from flexcell_skills.jev_policy import JevPolicy
+            from flexcell_skills.hybrid_policy import HybridRouter, LLMPolicy
             backend = make_backend(str(gp2('jev_backend').value))
             ok, detail = backend.health()
             if not ok:
                 self.get_logger().warn(
-                    'jev backend %r unhealthy (%s) - every decision will '
-                    'degrade to the FSM fallback' % (
+                    'jev backend %r unavailable (%s) - fast path will '
+                    'fall back or escalate according to the selected policy' % (
                         gp2('jev_backend').value, detail))
-            self._policy = JevPolicy(backend, fallback=FSMPolicy())
+            fast = JevPolicy(backend, fallback=FSMPolicy())
+            slow = LLMPolicy(fallback=FSMPolicy())
+            self._policy = (fast if policy_name == 'jev' else
+                            slow if policy_name == 'llm' else
+                            HybridRouter(fast, slow,
+                                         threshold=gp2('hybrid_threshold').value))
         else:
             raise ValueError(
-                'unknown decision_policy %r ("fsm"|"jev" implemented; '
-                'llm/hybrid follow the ratified order)' % policy_name)
+                'unknown decision_policy %r (fsm|jev|llm|hybrid)' % policy_name)
         self._decision_log = JsonlLog(self, gp2('log_dir').value,
                                       gp2('decision_log_file').value)
 
@@ -223,7 +238,7 @@ class TaskFsmServer(Node):
         gh = send.result()
         if gh is None or not gh.accepted:
             return None, '%s goal rejected' % state
-        rf = gh.get_result_async()
+        rf = AcceptedGoalResult(gh)
         while not rf.done():
             if goal_handle is not None and goal_handle.is_cancel_requested:
                 # outer cancel: stop the skill's motion and surface its
@@ -255,166 +270,8 @@ class TaskFsmServer(Node):
         return result, None
 
     def _execute(self, goal_handle):
-        t0 = time.monotonic()
-        goal = goal_handle.request
-        self._seq += 1
-        rid, evidence = new_evidence(goal.object_name, self._seq)
-        res = R()
-        trace = []
-        rec = {
-            'request_id': rid, 'evidence_id': evidence,
-            'object_name': goal.object_name,
-            'place': [goal.place_pose.pose.position.x,
-                      goal.place_pose.pose.position.y,
-                      goal.place_pose.pose.position.z],
-        }
-
-        def finish(outcome, error, detail):
-            res.outcome = outcome
-            res.error_code = error
-            res.detail = detail
-            res.fsm_trace = trace
-            res.evidence_id = evidence
-            rec.update(outcome=str(outcome), error_code=int(error), detail=detail,
-                       trace=list(trace),
-                       elapsed_ms=int((time.monotonic() - t0) * 1000))
-            self._log.write(rec)
-            if outcome == R.OUTCOME_SUCCEEDED:
-                goal_handle.succeed()
-            elif outcome == R.OUTCOME_CANCELED:
-                goal_handle.canceled()
-            else:
-                goal_handle.abort()
-            return res
-
-        # ---------- admission ----------
-        if not self._admission.acquire(blocking=False):
-            return finish(R.OUTCOME_FAILED, R.ERR_RESOURCE_BUSY,
-                          'another task is active')
-        try:
-            if not goal.object_name:
-                return finish(R.OUTCOME_FAILED, R.ERR_OBJECT_UNKNOWN,
-                              'object_name is empty')
-            pp = goal.place_pose.pose.position
-            deadline_s = self._skill_wait
-
-            # ---------- OBSERVE ----------
-            if goal_handle.is_cancel_requested:
-                return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
-                              'canceled before OBSERVE')
-            g = Observe.Goal()
-            g.refresh = True
-            result, err = self._call_skill(self._cli_observe, g, 'OBSERVE', trace, rec, 30.0, goal_handle=goal_handle, t0=t0)
-            if err:
-                return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
-                              'OBSERVE failed: %s' % err)
-            if goal_handle.is_cancel_requested:
-                return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
-                              'canceled during OBSERVE (trace=%s)' % ','.join(trace))
-            if int(result.outcome) != Observe.Result.OUTCOME_SUCCEEDED:
-                return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
-                              'OBSERVE failed: %s' % result.detail)
-            res.detail = result.detail
-
-            # ---------- PICK ----------
-            if goal_handle.is_cancel_requested:
-                return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
-                              'canceled before PICK (trace=%s)' % ','.join(trace))
-            g = PickObject.Goal()
-            g.object_name = goal.object_name
-            g.motion_profile_id = goal.motion_profile_id
-            result, err = self._call_skill(self._cli_pick, g, 'PICK', trace, rec, deadline_s, goal_handle=goal_handle, t0=t0)
-            if err:
-                return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
-                              'PICK failed: %s' % err)
-            if goal_handle.is_cancel_requested:
-                return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
-                              'canceled during PICK (trace=%s)' % ','.join(trace))
-            if int(result.outcome) != PickObject.Result.OUTCOME_SUCCEEDED:
-                return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
-                              'PICK failed: %s (%s)' % (err_name(
-                                  PickObject.Result, 'ERR_', int(result.error_code)),
-                                  result.detail))
-            violation = check_pick(result)
-            if violation is not None:
-                return finish(R.OUTCOME_FAILED, R.ERR_SKILL_CONTRACT_VIOLATION,
-                              'post-condition violation on PICK: %s' % violation)
-
-            # ---------- PLACE ----------
-            if goal_handle.is_cancel_requested:
-                return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
-                              'canceled before PLACE (box is attached; robot left '
-                              'holding the object - trace=%s)' % ','.join(trace))
-            g = PlaceObject.Goal()
-            g.object_name = goal.object_name
-            g.place_pose = PoseStamped()
-            g.place_pose.header.frame_id = 'world'
-            g.place_pose.pose.position = pp
-            g.place_pose.pose.orientation.w = 1.0
-            g.motion_profile_id = goal.motion_profile_id
-            result, err = self._call_skill(self._cli_place, g, 'PLACE', trace, rec, deadline_s, goal_handle=goal_handle, t0=t0)
-            if err:
-                return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
-                              'PLACE failed: %s' % err)
-            if goal_handle.is_cancel_requested:
-                return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
-                              'canceled during PLACE (box still carried; '
-                              'trace=%s)' % ','.join(trace))
-            if int(result.outcome) != PlaceObject.Result.OUTCOME_SUCCEEDED:
-                return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
-                              'PLACE failed: %s (%s)' % (err_name(
-                                  PlaceObject.Result, 'ERR_', int(result.error_code)),
-                                  result.detail))
-            violation = check_place(
-                result, place_position=[pp.x, pp.y, pp.z],
-                tolerance_m=self._tol)
-            if violation is not None:
-                return finish(R.OUTCOME_FAILED, R.ERR_SKILL_CONTRACT_VIOLATION,
-                              'post-condition violation on PLACE: %s' % violation)
-
-            # ---------- VERIFY ----------
-            res.object_at_place = False
-            if goal.skip_verify:
-                trace.append('VERIFY(skipped)')
-                res.object_at_place = True   # PLACE already verified internally
-                return finish(R.OUTCOME_SUCCEEDED, R.ERR_NONE,
-                              'task done (VERIFY skipped; PLACE drop check passed)')
-
-            if goal_handle.is_cancel_requested:
-                return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
-                              'canceled before VERIFY (trace=%s)' % ','.join(trace))
-            g = VerifyObject.Goal()
-            g.object_name = goal.object_name
-            g.expected_pose = goal.place_pose.pose
-            g.position_tolerance_m = self._tol
-            result, err = self._call_skill(self._cli_verify, g, 'VERIFY', trace, rec, 30.0, goal_handle=goal_handle, t0=t0)
-            if err:
-                return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
-                              'VERIFY failed: %s' % err)
-            if goal_handle.is_cancel_requested:
-                return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
-                              'canceled during VERIFY (trace=%s)' % ','.join(trace))
-            if int(result.outcome) == VerifyObject.Result.OUTCOME_VERIFIED:
-                violation = check_verify(result)
-                if violation is not None:
-                    return finish(R.OUTCOME_FAILED, R.ERR_SKILL_CONTRACT_VIOLATION,
-                                  'post-condition violation on VERIFY: %s' % violation)
-                res.object_at_place = True
-                res.final_position_error_m = result.position_error_m
-                return finish(R.OUTCOME_SUCCEEDED, R.ERR_NONE,
-                              'task done: object verified at place (err=%.4f)'
-                              % result.position_error_m)
-            res.final_position_error_m = result.position_error_m
-            return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
-                          'VERIFY mismatch: %s' % result.detail)
-
-        except Exception as exc:  # crash guard (issue #20): rclpy's
-            # fallback for a raising execute callback is a default Result
-            # with outcome=0 = OUTCOME_SUCCEEDED - never let that happen
-            return finish(R.OUTCOME_FAILED, R.ERR_SKILL_FAILED,
-                          crash_detail(exc))
-        finally:
-            self._admission.release()
+        """Single-object tasks use the same policy/skill seam as RunDemo."""
+        return self._execute_plan(goal_handle, single=True)
 
     # =================================================================
     # Week-1.5 demo task, policy-driven (issue #4 / ADR-002):
@@ -429,7 +286,9 @@ class TaskFsmServer(Node):
     def _demo_call(self, cli, goal, label, goal_handle, t0, deadline_s):
         """Run one skill for the demo; returns (result, None) or (None, err_detail)."""
         if goal_handle is not None:
-            fb = RunDemo.Feedback()
+            fb_type = (RunPickPlace.Feedback if isinstance(
+                goal_handle.request, RunPickPlace.Goal) else RunDemo.Feedback)
+            fb = fb_type()
             fb.state = label
             fb.elapsed_ms = int((time.monotonic() - t0) * 1000)
             goal_handle.publish_feedback(fb)
@@ -444,7 +303,7 @@ class TaskFsmServer(Node):
         gh = send.result()
         if gh is None or not gh.accepted:
             return None, '%s goal rejected' % label
-        rf = gh.get_result_async()
+        rf = AcceptedGoalResult(gh)
         t_r = time.monotonic()
         while not rf.done():
             if goal_handle is not None and goal_handle.is_cancel_requested:
@@ -464,15 +323,25 @@ class TaskFsmServer(Node):
         return rf.result().result, None
 
     def _execute_demo(self, goal_handle):
+        return self._execute_plan(goal_handle, single=False)
+
+    def _execute_plan(self, goal_handle, single=False):
         t0 = time.monotonic()
         goal = goal_handle.request
         self._seq += 1
-        scenario = goal.scenario_id or 'week1_demo_v1'
+        scenario = ('pick_place_v1' if single else
+                    goal.scenario_id or 'week1_demo_v1')
+        result_type = RunPickPlace.Result if single else RunDemo.Result
+        owns_arm = False
+        zones = dict(self._zones)
+        if single:
+            pp = goal.place_pose.pose.position
+            zones['task_place'] = (pp.x, pp.y, pp.z)
         run_id = '%s-%s' % (scenario, uuid.uuid4().hex[:8])
         _, evidence = new_evidence(scenario, self._seq)
         trace = []
         steps = []
-        res = RunDemo.Result()
+        res = result_type()
         verify_results = {}
         # episode recorder (issue #7 / §4.4): the exact policy input at every
         # decide() call, persisted for offline policy-input replay
@@ -490,78 +359,88 @@ class TaskFsmServer(Node):
         planted_used = False
 
         def finish(outcome, error, detail):
-            res.outcome = outcome
-            res.error_code = error
-            res.scenario_id = scenario
-            res.run_id = run_id
-            res.detail = detail
-            res.fsm_trace = trace
-            res.duration_s = time.monotonic() - t0
-            res.evidence_id = evidence
-            self._episodes.write(episode.to_dict(final_state={
+            res.outcome, res.error_code = outcome, error
+            res.detail, res.fsm_trace, res.evidence_id = detail, trace, evidence
+            duration_s = time.monotonic() - t0
+            final = {
                 'outcome': str(outcome), 'error_code': int(error),
                 'detail': detail, 'fsm_trace': list(trace),
-                'object_a_at_zone': res.object_a_at_zone,
-                'object_b_at_zone': res.object_b_at_zone,
-                'zone_a_error_m': res.zone_a_error_m,
-                'zone_b_error_m': res.zone_b_error_m,
-                'duration_s': res.duration_s,
+                'duration_s': duration_s, 'evidence_id': evidence,
                 'safety': safety_metrics(safety_evaluated, safety_rejected),
-            }))
-            res.outcome = outcome
-            res.error_code = error
-            res.scenario_id = scenario
-            res.run_id = run_id
-            res.detail = detail
-            res.fsm_trace = trace
-            res.duration_s = time.monotonic() - t0
-            res.evidence_id = evidence
-            for tag in ('a', 'b'):
-                vr = verify_results.get(tag)
-                v_ok = vr is not None and int(vr.outcome) == VerifyObject.Result.OUTCOME_VERIFIED
-                setattr(res, 'object_%s_at_zone' % tag, bool(v_ok))
-                setattr(res, 'zone_%s_error_m' % tag,
-                        float(vr.position_error_m) if vr is not None and vr.has_measured_pose
-                        else float('nan'))
-            self._demo_log.write({
-                'scenario_id': scenario, 'run_id': run_id,
-                'evidence_id': evidence,
-                'outcome': str(outcome), 'error_code': int(error),
-                'detail': detail, 'duration_s': res.duration_s,
-                'steps': steps, 'fsm_trace': list(trace),
-                'object_a_at_zone': res.object_a_at_zone,
-                'object_b_at_zone': res.object_b_at_zone,
-                'zone_a_error_m': res.zone_a_error_m,
-                'zone_b_error_m': res.zone_b_error_m,
-            })
-            self._publish_task_state('IDLE')
-            if outcome == RunDemo.Result.OUTCOME_SUCCEEDED:
+            }
+            ros_goal = getattr(goal_handle, 'goal_id', None)
+            if ros_goal is not None:
+                final['goal_uuid'] = bytes(ros_goal.uuid).hex()
+            if single:
+                vr = verify_results.get('a')
+                res.object_at_place = bool(
+                    (vr is not None and int(vr.outcome) == 0) or
+                    (goal.skip_verify and outcome == result_type.OUTCOME_SUCCEEDED))
+                res.final_position_error_m = (
+                    float(vr.position_error_m)
+                    if vr is not None and vr.has_measured_pose else float('nan'))
+                final.update(object_at_place=res.object_at_place,
+                             final_position_error_m=res.final_position_error_m)
+            else:
+                res.scenario_id, res.run_id = scenario, run_id
+                res.duration_s = duration_s
+                for tag in ('a', 'b'):
+                    vr = verify_results.get(tag)
+                    v_ok = vr is not None and int(vr.outcome) == 0
+                    setattr(res, 'object_%s_at_zone' % tag, bool(v_ok))
+                    setattr(res, 'zone_%s_error_m' % tag,
+                            float(vr.position_error_m)
+                            if vr is not None and vr.has_measured_pose
+                            else float('nan'))
+                    final['object_%s_at_zone' % tag] = bool(v_ok)
+                    final['zone_%s_error_m' % tag] = getattr(
+                        res, 'zone_%s_error_m' % tag)
+            episode.drop_pending()
+            self._episodes.write(episode.to_dict(
+                final_state=final, protocol=getattr(self, '_benchmark_protocol', None)))
+            log_record = dict(final, scenario_id=scenario, run_id=run_id,
+                              steps=steps)
+            if single:
+                log_record.update(object_name=goal.object_name,
+                                  place=list(zones['task_place']))
+                self._log.write(log_record)
+            else:
+                self._demo_log.write(log_record)
+            if owns_arm:
+                self._publish_task_state('IDLE')
+            if outcome == result_type.OUTCOME_SUCCEEDED:
                 goal_handle.succeed()
-            elif outcome == RunDemo.Result.OUTCOME_CANCELED:
+            elif outcome == result_type.OUTCOME_CANCELED:
                 goal_handle.canceled()
             else:
                 goal_handle.abort()
             return res
 
         if not self._admission.acquire(blocking=False):
-            return finish(RunDemo.Result.OUTCOME_FAILED,
-                          RunDemo.Result.ERR_RESOURCE_BUSY,
+            return finish(result_type.OUTCOME_FAILED,
+                          result_type.ERR_RESOURCE_BUSY,
                           'another demo task is active')
+        owns_arm = True
         self._publish_task_state('BUSY')
         try:
+            if single and not goal.object_name:
+                return finish(result_type.OUTCOME_FAILED, result_type.ERR_OBJECT_UNKNOWN,
+                              'object_name is empty')
             # ---- decision inputs (ADR-002: executor assembles, policy decides) ----
             goal_obj = TaskGoal(
                 goal_id=run_id,
                 scenario_id=scenario,
-                assignments=((self._obj_a, 'zone_1'), (self._obj_b, 'zone_2')),
+                assignments=(((goal.object_name, 'task_place'),) if single else
+                             ((self._obj_a, 'zone_1'), (self._obj_b, 'zone_2'))),
             )
             constraints = Constraints(
                 allowed_actions=frozenset((
                     ACTION_OBSERVE, ACTION_PICK, ACTION_PLACE, ACTION_VERIFY,
                     'WAIT', ACTION_ABORT)),
                 recovery_budget=self._budget,
-                verify_tolerance_m=self._demo_tol,
-                motion_profile_id='demo_slow',
+                verify_tolerance_m=(self._tol if single else self._demo_tol),
+                motion_profile_id=(goal.motion_profile_id or 'demo_slow'
+                                   if single else 'demo_slow'),
                 max_world_age_s=0.0,
             )
             zone_of = dict(goal_obj.assignments)
@@ -576,41 +455,47 @@ class TaskFsmServer(Node):
             last_fail_label = ''
 
             def tag_of(object_id):
-                return 'A' if object_id == self._obj_a else 'B'
+                return 'A' if single or object_id == self._obj_a else 'B'
 
             while True:
                 # cancellation is honoured at decision boundaries (the original
                 # demo loop never checked it - safety delta, documented in #4)
                 if goal_handle.is_cancel_requested:
-                    return finish(RunDemo.Result.OUTCOME_CANCELED,
-                                  RunDemo.Result.ERR_CANCELED,
+                    return finish(result_type.OUTCOME_CANCELED,
+                                  result_type.ERR_CANCELED,
                                   'canceled (trace=%s)' % ','.join(trace))
                 # completion is structural (all assignments verified), not a decision
-                verified_legs = sum(
-                    1 for d in history
-                    if d.action == ACTION_VERIFY and d.outcome == 0)
-                if verified_legs >= len(goal_obj.assignments):
-                    return finish(RunDemo.Result.OUTCOME_SUCCEEDED,
-                                  RunDemo.Result.ERR_NONE,
-                                  'demo done: A->zone_1 (%.4fm), B->zone_2 (%.4fm)'
-                                  % (res.zone_a_error_m, res.zone_b_error_m))
+                verified_targets = {d.target for d in history
+                                    if d.action == ACTION_VERIFY and d.outcome == 0}
+                if single and goal.skip_verify:
+                    verified_targets = {d.target for d in history
+                                        if d.action == ACTION_PLACE and d.outcome == 0}
+                if {obj for obj, _ in goal_obj.assignments} <= verified_targets:
+                    if single and goal.skip_verify:
+                        trace.append('VERIFY(skipped)')
+                    return finish(result_type.OUTCOME_SUCCEEDED,
+                                  result_type.ERR_NONE,
+                                  'task done: all assignments verified')
 
+                if decision_seq >= 64:
+                    return finish(result_type.OUTCOME_FAILED, result_type.ERR_SKILL_FAILED,
+                                  'executor decision limit reached (64)')
                 # ---- ask the policy WHAT next ----
                 # issue #7: persist the EXACT policy input before decide()
                 world_canonical = (serialize_envelope(world)
                                    if world is not None else None)
                 episode.begin_step(world_canonical, goal_obj, constraints,
                                    history)
-                t_dec = time.monotonic()
+                t_dec = time.perf_counter_ns()
                 decision = self._policy.decide(world, goal_obj, constraints,
                                                tuple(history))
-                d_ms = int((time.monotonic() - t_dec) * 1000)
+                d_ms = (time.perf_counter_ns() - t_dec) / 1_000_000.0
                 if planted is not None and not planted_used:
                     # issue #6 AC test hook: the executor receives the planted
                     # out-of-contract proposal instead of the policy's output
                     decision = planted
                     planted_used = True
-                episode.record_decision(decision, d_ms)
+                episode.record_decision(decision, d_ms, clock='perf_counter_ns')
 
                 # ---- safety gate (issue #6): deterministic, BEFORE dispatch.
                 # Consumes the policy-facing view (canonical envelope), never
@@ -647,14 +532,15 @@ class TaskFsmServer(Node):
                         'world_revision': last_world_revision,
                         'observe_evidence_id': last_observe_evidence,
                         'decide_latency_ms': d_ms,
+                        'policy_trace': decision.policy_trace,
                         'dispatched': False,
                         'safety_rejection': gate_reason,
                     })
                     episode.record_executor_result(
                         detail='safety rejection: %s' % gate_reason,
                         post_condition='SAFETY_REJECTED')
-                    return finish(RunDemo.Result.OUTCOME_FAILED,
-                                  RunDemo.Result.ERR_SAFETY_REJECTED,
+                    return finish(result_type.OUTCOME_FAILED,
+                                  result_type.ERR_SAFETY_REJECTED,
                                   'safety gate rejected %s on %r: %s'
                                   % (decision.action, decision.target,
                                      gate_reason))
@@ -664,7 +550,6 @@ class TaskFsmServer(Node):
                 # skill goal (issue #6 §2.6)
                 assert dispatch_view == {'action': decision.action,
                                          'target': decision.target}
-                d_ms = int((time.monotonic() - t_dec) * 1000)
                 recovery_audit = None
                 if (history and decision.reason_code in (
                         RC_RECOVERABLE_RETRY, RC_VERIFY_MISMATCH_RETRY,
@@ -701,6 +586,7 @@ class TaskFsmServer(Node):
                     'world_revision': last_world_revision,
                     'observe_evidence_id': last_observe_evidence,
                     'decide_latency_ms': d_ms,
+                    'policy_trace': decision.policy_trace,
                     'dispatched': True,
                     'safety_rejection': None,
                 })
@@ -747,8 +633,8 @@ class TaskFsmServer(Node):
                                   'ok': o_ok, 'error': err or '', 'attempt': attempt})
                     if err or o_outcome != Observe.Result.OUTCOME_SUCCEEDED:
                         if goal_handle.is_cancel_requested:
-                            return finish(RunDemo.Result.OUTCOME_CANCELED,
-                                          RunDemo.Result.ERR_CANCELED,
+                            return finish(result_type.OUTCOME_CANCELED,
+                                          result_type.ERR_CANCELED,
                                           'canceled during %s (trace=%s)'
                                           % (label, ','.join(trace)))
                         history.append(HistoryRecord(
@@ -757,6 +643,11 @@ class TaskFsmServer(Node):
                             world_revision=last_world_revision, evidence_id=''))
                         continue
                     world = r.world_state
+                    if single:
+                        zone = ZoneState()
+                        zone.id = 'task_place'
+                        zone.center.x, zone.center.y, zone.center.z = zones['task_place']
+                        world.zones = [z for z in world.zones if z.id != 'task_place'] + [zone]
                     last_world_revision = int(r.world_state.revision)
                     # Observe.action carries no evidence_id field - defensive
                     # getattr keeps the decision log honest if it is added later
@@ -770,6 +661,13 @@ class TaskFsmServer(Node):
 
                 # ---------------- PICK (bounded recovery via policy) ----------------
                 if decision.action == ACTION_PICK:
+                    attempt = 1 + sum(h.action == ACTION_PICK and
+                                      h.target == decision.target for h in history)
+                    if attempt > 1 + constraints.recovery_budget:
+                        episode.record_executor_result(detail='executor pick budget exhausted')
+                        return finish(result_type.OUTCOME_FAILED,
+                                      result_type.ERR_RECOVERY_EXHAUSTED,
+                                      'executor pick budget exhausted')
                     label = 'PICK_%s(attempt=%d)' % (tag, attempt)
                     pg = PickObject.Goal()
                     pg.object_name = decision.target
@@ -795,12 +693,12 @@ class TaskFsmServer(Node):
                         if violation is not None:
                             steps.append({'state': label, 'skill': 'pick',
                                           'ok': False, 'error': violation,
-                                          'error_code': RunDemo.Result.ERR_SKILL_CONTRACT_VIOLATION,
+                                          'error_code': result_type.ERR_SKILL_CONTRACT_VIOLATION,
                                           'attempt': attempt,
                                           'evidence_id': getattr(r, 'evidence_id', '')})
                             trace.append('%s:FAIL:ERR_SKILL_CONTRACT_VIOLATION' % label)
-                            return finish(RunDemo.Result.OUTCOME_FAILED,
-                                          RunDemo.Result.ERR_SKILL_CONTRACT_VIOLATION,
+                            return finish(result_type.OUTCOME_FAILED,
+                                          result_type.ERR_SKILL_CONTRACT_VIOLATION,
                                           'post-condition violation on %s: %s'
                                           % (label, violation))
                         history.append(HistoryRecord(
@@ -818,8 +716,8 @@ class TaskFsmServer(Node):
                     else:
                         last_fail_label = label
                         if goal_handle.is_cancel_requested:
-                            return finish(RunDemo.Result.OUTCOME_CANCELED,
-                                          RunDemo.Result.ERR_CANCELED,
+                            return finish(result_type.OUTCOME_CANCELED,
+                                          result_type.ERR_CANCELED,
                                           'canceled during %s (trace=%s)'
                                           % (label, ','.join(trace)))
                         history.append(HistoryRecord(
@@ -833,7 +731,7 @@ class TaskFsmServer(Node):
                 # ---------------- PLACE (failure aborts: carried box) ----------------
                 if decision.action == ACTION_PLACE:
                     label = 'PLACE_%s' % tag
-                    zx, zy, zz = self._zones[zone_of[decision.target]]
+                    zx, zy, zz = zones[zone_of[decision.target]]
                     zone_pose = PoseStamped()
                     zone_pose.header.frame_id = 'world'
                     zone_pose.pose.position.x = zx
@@ -860,15 +758,15 @@ class TaskFsmServer(Node):
                     if place_ok:
                         violation = check_place(
                             r, place_position=[zx, zy, zz],
-                            tolerance_m=self._demo_tol)
+                            tolerance_m=constraints.verify_tolerance_m)
                         if violation is not None:
                             steps.append({'state': label, 'skill': 'place',
                                           'ok': False, 'error': violation,
-                                          'error_code': RunDemo.Result.ERR_SKILL_CONTRACT_VIOLATION,
+                                          'error_code': result_type.ERR_SKILL_CONTRACT_VIOLATION,
                                           'evidence_id': getattr(r, 'evidence_id', '') if r else ''})
                             trace.append('%s:FAIL:ERR_SKILL_CONTRACT_VIOLATION' % label)
-                            return finish(RunDemo.Result.OUTCOME_FAILED,
-                                          RunDemo.Result.ERR_SKILL_CONTRACT_VIOLATION,
+                            return finish(result_type.OUTCOME_FAILED,
+                                          result_type.ERR_SKILL_CONTRACT_VIOLATION,
                                           'post-condition violation on %s: %s'
                                           % (label, violation))
                         history.append(HistoryRecord(
@@ -881,10 +779,14 @@ class TaskFsmServer(Node):
                         if world is not None:
                             world.carry.engaged = False
                             world.carry.object_id = ''
+                            for obj in world.objects:
+                                if obj.name == decision.target:
+                                    obj.pose = r.object_pose_after
+                                    obj.pose_age_s = 0.0
                     else:
                         if goal_handle.is_cancel_requested:
-                            return finish(RunDemo.Result.OUTCOME_CANCELED,
-                                          RunDemo.Result.ERR_CANCELED,
+                            return finish(result_type.OUTCOME_CANCELED,
+                                          result_type.ERR_CANCELED,
                                           'canceled during PLACE_%s (box state '
                                           'unchanged by the failed place; '
                                           'trace=%s)' % (tag, ','.join(trace)))
@@ -899,8 +801,15 @@ class TaskFsmServer(Node):
 
                 # ---------------- VERIFY (bounded re-verification via policy) ----------------
                 if decision.action == ACTION_VERIFY:
+                    vattempt = 1 + sum(h.action == ACTION_VERIFY and
+                                       h.target == decision.target for h in history)
+                    if vattempt > 1 + constraints.recovery_budget:
+                        episode.record_executor_result(detail='executor verify budget exhausted')
+                        return finish(result_type.OUTCOME_FAILED,
+                                      result_type.ERR_RECOVERY_EXHAUSTED,
+                                      'executor verify budget exhausted')
                     label = 'VERIFY_%s(attempt=%d)' % (tag, vattempt)
-                    zx, zy, zz = self._zones[zone_of[decision.target]]
+                    zx, zy, zz = zones[zone_of[decision.target]]
                     zone_pose = PoseStamped()
                     zone_pose.header.frame_id = 'world'
                     zone_pose.pose.position.x = zx
@@ -910,7 +819,7 @@ class TaskFsmServer(Node):
                     vg = VerifyObject.Goal()
                     vg.object_name = decision.target
                     vg.expected_pose = zone_pose.pose
-                    vg.position_tolerance_m = self._demo_tol
+                    vg.position_tolerance_m = constraints.verify_tolerance_m
                     r, err = self._demo_call(self._cli_verify, vg, label,
                                              goal_handle, t0, 30.0)
                     v_ok = (err is None and r is not None and
@@ -929,8 +838,8 @@ class TaskFsmServer(Node):
                                           'attempt': vattempt,
                                           'evidence_id': getattr(r, 'evidence_id', '')})
                             trace.append('%s:FAIL:ERR_SKILL_CONTRACT_VIOLATION' % label)
-                            return finish(RunDemo.Result.OUTCOME_FAILED,
-                                          RunDemo.Result.ERR_SKILL_CONTRACT_VIOLATION,
+                            return finish(result_type.OUTCOME_FAILED,
+                                          result_type.ERR_SKILL_CONTRACT_VIOLATION,
                                           'post-condition violation on %s: %s'
                                           % (label, violation))
                     verify_results[tag.lower()] = r
@@ -951,8 +860,8 @@ class TaskFsmServer(Node):
                     else:
                         last_fail_label = label
                         if goal_handle.is_cancel_requested:
-                            return finish(RunDemo.Result.OUTCOME_CANCELED,
-                                          RunDemo.Result.ERR_CANCELED,
+                            return finish(result_type.OUTCOME_CANCELED,
+                                          result_type.ERR_CANCELED,
                                           'canceled during %s (trace=%s)'
                                           % (label, ','.join(trace)))
                         history.append(HistoryRecord(
@@ -972,7 +881,7 @@ class TaskFsmServer(Node):
                 # assignments this branch replaces were its residue).
                 if decision.action == ACTION_ABORT:
                     episode.record_executor_result()
-                    return finish(RunDemo.Result.OUTCOME_FAILED,
+                    return finish(result_type.OUTCOME_FAILED,
                                   task_abort_error_code(decision.reason_code),
                                   'policy abort (%s): %s (trace=%s)'
                                   % (decision.reason_code, decision.explanation,
@@ -987,14 +896,14 @@ class TaskFsmServer(Node):
 
         except PolicyStateError as exc:
             self.get_logger().error('policy state error: %s' % exc)
-            return finish(RunDemo.Result.OUTCOME_FAILED,
-                          RunDemo.Result.ERR_SKILL_FAILED,
+            return finish(result_type.OUTCOME_FAILED,
+                          result_type.ERR_SKILL_FAILED,
                           'policy state error: %s' % exc)
         except Exception as exc:  # crash guard (issue #20): rclpy's fallback
             # for a raising execute callback is a default Result with
             # outcome=0 = OUTCOME_SUCCEEDED - never let that happen
-            return finish(RunDemo.Result.OUTCOME_FAILED,
-                          RunDemo.Result.ERR_SKILL_FAILED, crash_detail(exc))
+            return finish(result_type.OUTCOME_FAILED,
+                          result_type.ERR_SKILL_FAILED, crash_detail(exc))
         finally:
             self._admission.release()
             self._publish_task_state('IDLE')

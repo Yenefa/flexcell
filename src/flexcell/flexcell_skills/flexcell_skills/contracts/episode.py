@@ -69,13 +69,16 @@ def history_to_dicts(history):
 
 
 def decision_to_dict(d):
-    return {
+    out = {
         "action": d.action,
         "target": d.target,
         "confidence": round(float(d.confidence), 9),
         "reason_code": d.reason_code,
         "explanation": d.explanation,
     }
+    if d.policy_trace is not None:
+        out['policy_trace'] = d.policy_trace
+    return out
 
 
 def env_snapshot():
@@ -136,11 +139,15 @@ class EpisodeRecorder:
             "executor_result": None,
         }
 
-    def record_decision(self, decision, decide_latency_ms):
+    def record_decision(self, decision, decide_latency_ms, clock=None):
         if self._pending is None:
             raise RuntimeError("record_decision before begin_step")
         self._pending["policy_output"] = decision_to_dict(decision)
-        self._pending["decide_latency_ms"] = int(decide_latency_ms)
+        latency = float(decide_latency_ms)
+        if not math.isfinite(latency) or latency < 0:
+            raise ValueError("decision latency must be finite and nonnegative")
+        self._pending["decide_latency_ms"] = latency
+        self._pending["decide_latency_clock"] = clock
 
     def record_executor_result(self, outcome=None, error_code=None, detail="",
                                evidence_id="", post_condition=None):
@@ -162,7 +169,7 @@ class EpisodeRecorder:
         """A step that never produced a result (canceled mid-flight)."""
         self._pending = None
 
-    def to_dict(self, final_state=None, injection_schedule=None):
+    def to_dict(self, final_state=None, injection_schedule=None, protocol=None):
         # idempotent: the episode is frozen on the first finalize so the
         # stored bytes (and the end timestamp) are stable
         if self._frozen is not None:
@@ -173,6 +180,8 @@ class EpisodeRecorder:
             "seed": self._seed,
             "run_id": self._run_id,
             "policy": self._policy,
+            "benchmark_protocol": protocol,
+            "runtime_fingerprint": os.environ.get('FLEXCELL_RUNTIME_FINGERPRINT'),
             "injection_schedule": injection_schedule or [],
             "initial_world_state": (
                 self._steps[0]["policy_input"]["world_state_canonical"]

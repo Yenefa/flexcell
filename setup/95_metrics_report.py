@@ -8,20 +8,20 @@ no hand-written PASS lines anywhere.  Per scenario cell it reports:
   - decision latency p50/p95/p99/max over decide() (metric 3)
   - safety-gate invalid-decisions-per-1000 with the evaluated/rejected base
     (metric 6)
-  - replay integrity: FSMPolicy re-run on every recorded policy input must
-    reproduce every recorded decision (0 diverged = the store is trustworthy)
+  - replay integrity: FSM records are replayed with FSMPolicy; model replay
+    is NOT_RUN until a pinned model backend is supplied
 
 Usage (ROS env sourced):
   python3 setup/95_metrics_report.py [--store DIR] [--batch FILE.jsonl]
-      [--out report.md] [--min-cell 20]
+      [--out report.md] [--min-cell 50]
 
 --batch restricts the report to one scenario-runner batch summary (the
 audit-compliant way to keep benchmark numbers from mixing with dev-iteration
 runs).  Without it, ALL episodes in the store are reported, grouped by
 scenario id, with dev scenarios labelled as such.
 
-Exit 0 = report PASS: every episode parsed, every replay clean, no cell
-below --min-cell episodes (a width warning, not a hard gate - §4.3).
+Exit 0 = report PASS for replay integrity only; model replay is INCOMPLETE.
+Sample targets are width warnings, not statistical-power guarantees.
 """
 import argparse
 import glob
@@ -39,6 +39,7 @@ from flexcell_skills.decision_policy import FSMPolicy
 CELL_OF_SCENARIO = {
     'week1_demo_v1': 'S1',
     'recovery_demo_v1': 'S2',
+    'recovery_b_demo_v1': 'S3',
     'exhaust_demo_v1': 'S5',
     # S7 off-canonical placement is a primary-track cell (ratified decision 6),
     # not a dev iteration: it carries the adaptation probe.  Without this the
@@ -49,25 +50,45 @@ CELL_OF_SCENARIO = {
 POLICY = FSMPolicy()
 
 
+def cell_of(record):
+    scenario = record.get('scenario_id', 'unknown')
+    base = record.get('benchmark_cell') or CELL_OF_SCENARIO.get(scenario, 'dev/' + scenario)
+    name = record.get('policy', {}).get('name', 'unknown')
+    arm = base if name == 'fsm' else base + '/' + name
+    protocol = record.get('benchmark_protocol') or {}
+    # Unmarked historical records are v1. Even two v2 definitions with different
+    # digests must remain separate; never pool merely because the cell matches.
+    label = ('%s:%s' % (protocol.get('id', 'unknown'), protocol.get('sha256', 'unknown'))
+             if protocol else 'protocol-v1-legacy')
+    profile = record.get('runtime_fingerprint') or 'unfingerprinted'
+    return arm + ' @ ' + label + ' / runtime=' + profile
+
+
 def load_episodes(store, batch):
     """Return [(path, record)] - filtered to one batch when given."""
     if batch:
         paths = []
+        batch_rows = {}
         with open(batch) as fh:
             for line in fh:
                 line = line.strip()
                 if not line:
                     continue
-                p = json.loads(line).get('episode')
+                row = json.loads(line)
+                p = row.get('episode')
                 if p:
                     paths.append(p)
+                    batch_rows[p] = row
     else:
         paths = sorted(glob.glob(os.path.join(store, '*.json')))
     out = []
     for p in paths:
         try:
             with open(p) as fh:
-                out.append((p, json.load(fh)))
+                rec = json.load(fh)
+                if batch:
+                    rec['benchmark_cell'] = batch_rows[p]['scenario']
+                out.append((p, rec))
         except (OSError, ValueError) as exc:
             print('WARN: unreadable episode %s: %s' % (p, exc), file=sys.stderr)
     return out
@@ -79,15 +100,21 @@ def episode_rows(episodes):
     problems = []
     for path, rec in episodes:
         scenario = rec.get('scenario_id', 'unknown')
-        cell = CELL_OF_SCENARIO.get(scenario, 'dev/' + scenario)
+        cell = cell_of(rec)
         final = rec.get('final_state', {})
         steps = rec.get('steps', [])
         lat = [float(s['decide_latency_ms']) for s in steps
-               if s.get('decide_latency_ms') is not None]
+               if s.get('decide_latency_ms') is not None
+               and s.get('decide_latency_clock') == 'perf_counter_ns']
+        replay_status = 'NOT_RUN'
         try:
-            replayed = replay_episode(rec, POLICY)
-            diverged = sum(1 for r in replayed if not r['ok'])
-            replayed_n = len(replayed)
+            if rec.get('policy', {}).get('name') == 'fsm':
+                replayed = replay_episode(rec, POLICY)
+                diverged = sum(1 for r in replayed if not r['ok'])
+                replayed_n = len(replayed)
+                replay_status = 'PASS' if replayed_n > 0 and diverged == 0 else 'FAIL'
+            else:
+                diverged, replayed_n = 0, 0
         except Exception as exc:  # noqa: BLE001 - report, don't die
             diverged, replayed_n = -1, 0
             problems.append('%s: replay error %r' % (os.path.basename(path), exc))
@@ -100,6 +127,7 @@ def episode_rows(episodes):
             'outcome': str(final.get('outcome')),
             'steps': len(steps),
             'latency_ms': lat,
+            'latency_unmeasured': len(steps) - len(lat),
             'safety': final.get('safety'),
             # a planted-proposal episode (safety_rejected>=1) records the
             # PLANTED decision, not a policy output - replay divergence is
@@ -107,8 +135,10 @@ def episode_rows(episodes):
             # not policy traces, and stay out of the integrity denominator
             'is_safety_record': isinstance(final.get('safety'), dict)
             and int(final['safety'].get('rejected', 0)) > 0,
-            'replay_ok': diverged == 0,
+            'replay_ok': replay_status == 'PASS',
+            'replay_status': replay_status,
             'replayed_n': replayed_n,
+            'replay_diverged_steps': max(diverged, 0),
         }
         cells.setdefault(cell, []).append(row)
     return cells, problems
@@ -120,6 +150,7 @@ def report(episodes, min_cell):
              'generated from the replay store; every number regenerates - '
              'no hand-written PASS lines.', '']
     total_replay_bad = 0
+    total_replay_not_run = 0
     for cell in sorted(cells):
         rows = cells[cell]
         n = len(rows)
@@ -129,12 +160,15 @@ def report(episodes, min_cell):
         safety = aggregate_safety([r['safety'] for r in rows
                                    if isinstance(r.get('safety'), dict)])
         replay_bad = sum(1 for r in rows
-                         if not r['replay_ok'] and not r['is_safety_record'])
+                         if r['replay_status'] == 'FAIL' and not r['is_safety_record'])
+        replay_not_run = sum(r['replay_status'] == 'NOT_RUN' for r in rows)
+        total_replay_not_run += replay_not_run
         safety_records = sum(1 for r in rows if r['is_safety_record'])
         total_replay_bad += replay_bad
         width_note = ''
-        if n < min_cell:
-            width_note = ' ⚠ n<%d (CI wide; prefer n≥%d)' % (min_cell, min_cell)
+        target = max(min_cell, 100) if cell.split(' @ ')[0].split('/')[0] in ('S2', 'S7') else min_cell
+        if n < target:
+            width_note = ' ⚠ n<%d (CI wide; prefer n≥%d)' % (target, target)
         lines.append('## Cell %s (n=%d)' % (cell, n))
         lines.append('')
         lines.append('| metric | value |')
@@ -142,17 +176,35 @@ def report(episodes, min_cell):
         lines.append('| success rate (metric 1) | %d/%d = %.2f, Wilson95 [%.2f, %.2f]%s'
                      % (succ, n, succ / n if n else 0.0, lo, hi, width_note))
         lines.append('| decision latency (metric 3) | %s'
-                     % (lat if lat else 'no decisions recorded'))
+                     % ((str(lat) + ('; %d NOT_RUN legacy/unmeasured decisions' %
+                                    sum(r['latency_unmeasured'] for r in rows)
+                                    if any(r['latency_unmeasured'] for r in rows) else ''))
+                        if lat else 'NOT_RUN (legacy millisecond-truncated or absent timing)'))
         lines.append('| invalid decisions (metric 6) | %s'
                      % safety)
-        lines.append('| replay integrity | %d/%d episodes clean (%d diverged steps total; %d safety-rejection records excluded)'
-                     % (n - replay_bad - safety_records, n,
-                        sum(1 for r in rows if not r['replay_ok']),
+        replay_eligible = [r for r in rows if not r['is_safety_record']
+                           and r['replay_status'] != 'NOT_RUN']
+        lines.append('| replay integrity | %d/%d replayed episodes clean (%d diverged steps total; %d safety-rejection records excluded)'
+                     % (sum(r['replay_ok'] for r in replay_eligible), len(replay_eligible),
+                        sum(r['replay_diverged_steps'] for r in replay_eligible),
                         safety_records))
+        if replay_not_run:
+            lines.append('| model replay | NOT_RUN (%d episodes; pinned backend required) |' % replay_not_run)
+        sources = {}
+        for _, rec in episodes:
+            if cell_of(rec) != cell:
+                continue
+            for step in rec.get('steps', []):
+                trace = (step.get('policy_output') or {}).get('policy_trace') or {}
+                source = trace.get('source') or rec.get('policy', {}).get('name', 'unknown')
+                sources[source] = sources.get(source, 0) + 1
+        lines.append('| actual decision sources | %s |' % sources)
         lines.append('')
         for r in rows:
             if r['is_safety_record']:
                 flag = ' **SAFETY-REJECTION RECORD**'
+            elif r['replay_status'] == 'NOT_RUN':
+                flag = ' **REPLAY NOT_RUN**'
             elif r['replay_ok']:
                 flag = ''
             else:
@@ -166,6 +218,8 @@ def report(episodes, min_cell):
         lines.extend('- ' + p for p in problems)
         lines.append('')
     verdict = 'PASS' if total_replay_bad == 0 and not problems else 'FAIL'
+    if verdict == 'PASS' and total_replay_not_run:
+        verdict = 'INCOMPLETE'
     lines.append('REPORT: %s (%d episodes, %d replay-dirty)'
                  % (verdict, len(episodes), total_replay_bad))
     return '\n'.join(lines), verdict
@@ -178,7 +232,7 @@ def main():
     ap.add_argument('--batch', default=None,
                     help='restrict to one scenario-runner batch summary')
     ap.add_argument('--out', default=None, help='write markdown here')
-    ap.add_argument('--min-cell', type=int, default=20,
+    ap.add_argument('--min-cell', type=int, default=50,
                     help='preferred per-cell n (width warning below it)')
     args = ap.parse_args()
 

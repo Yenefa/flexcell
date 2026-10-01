@@ -46,3 +46,6 @@
 *.vcd binary
 *.bag binary
 *.db3 binary
+
+# Frozen evidence manifests hash exact bytes, including original line endings.
+setup/acceptance/** -text

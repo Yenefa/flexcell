@@ -27,13 +27,14 @@ w.r.t. the robot (offline testable by construction, ADR-002).
 """
 
 import json
+import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field, replace
 
 from flexcell_skills.canonical_state import serialize_envelope
 from flexcell_skills.decision_policy import (
-    ACTION_OBSERVE, ACTION_PICK, ACTION_PLACE, ACTION_VERIFY, Decision,
-    FSMPolicy)
+    ACTION_ABORT, ACTION_OBSERVE, ACTION_PICK, ACTION_PLACE, ACTION_VERIFY, Decision,
+    FSMPolicy, PolicyStateError)
 
 POLICY_FAILURE = 'policy_failure'
 
@@ -95,10 +96,16 @@ def _choice_options(constraints, goal, history):
            json.dumps({'%s:%s' % k: v for k, v in sorted(attempts.items())},
                        sort_keys=True))
     ) if history else 'task start (no history)'
+    ctx += '; goal=%s; budget=%d; history=%s' % (
+        json.dumps(list(goal.assignments)), constraints.recovery_budget,
+        json.dumps([{'action': h.action, 'target': h.target,
+                     'outcome': h.outcome, 'error_code': h.error_code,
+                     'attempt': h.attempt} for h in history], sort_keys=True))
+    pending = _pending_target(goal, history)
     by_kind = {
         'OBSERVE': 'gather fresh world state (leg start or after a failure)',
         'PICK': 'pick %s (attempt %d)' % (
-            goal.assignments[0][0], attempts.get(('PICK', goal.assignments[0][0]), 0) + 1),
+            pending, attempts.get(('PICK', pending), 0) + 1),
         'PLACE': 'place the carried object into its assigned zone',
         'VERIFY': 'verify the placed object at its zone',
         'WAIT': 'no-op wait',
@@ -129,7 +136,7 @@ class JevPolicy:
     any failure.  Same decide() contract as every other DecisionPolicy."""
 
     name = 'jev'
-    version = '1.0'
+    version = '1.1'
 
     def __init__(self, backend, fallback=None, timeout_s=2.0):
         self._backend = backend
@@ -173,6 +180,14 @@ class JevPolicy:
             return self._fallback_decision(world, goal, constraints, history,
                                            'backend error', repr(exc))
 
+        try:
+            probability = float(resp.probability)
+            if not math.isfinite(probability) or not 0.0 <= probability <= 1.0:
+                raise ValueError('confidence outside [0,1]')
+        except (TypeError, ValueError) as exc:
+            self.stats['parse_errors'] += 1
+            return self._fallback_decision(world, goal, constraints, history,
+                                           'invalid confidence', str(exc))
         raw = resp.raw if isinstance(resp.raw, dict) else {}
         self.stats['tokens'] += int(raw.get('tokens', 0) or 0)
         choice = str(resp.choice or '').strip()
@@ -187,10 +202,21 @@ class JevPolicy:
         target = (_pending_target(goal, history)
                   if action in (ACTION_OBSERVE, ACTION_PICK, ACTION_PLACE,
                                 ACTION_VERIFY) else '')
+        reason_code = 'PLAN_NEXT'
+        try:
+            reference = self._fallback.decide(world, goal, constraints, history)
+            if reference.action == action:
+                reason_code = reference.reason_code
+        except PolicyStateError:
+            pass
         return Decision(
             action=action, target=target,
-            confidence=max(0.0, min(1.0, float(resp.probability))),
-            reason_code='PLAN_NEXT',
+            confidence=probability,
+            reason_code=reason_code,
+            policy_trace={'source': self.name, 'fallback': False,
+                          'backend': self._backend.name,
+                          'model': raw.get('model'),
+                          'tokens': int(raw.get('tokens', 0) or 0)},
             explanation='jev backend=%s prob=%.3f raw=%s'
                         % (self._backend.name, float(resp.probability),
                            json.dumps(raw, sort_keys=True)[:200]))
@@ -201,6 +227,12 @@ class JevPolicy:
         the typed policy_failure rides in the explanation (write-only, logged
         - never parsed)."""
         self.stats['fallbacks'] += 1
-        d = self._fallback.decide(world, goal, constraints, history)
+        try:
+            d = self._fallback.decide(world, goal, constraints, history)
+        except PolicyStateError:
+            d = Decision(ACTION_ABORT, '', reason_code='POLICY_FAILURE',
+                         explanation='history outside FSM fallback grammar')
         return replace(
-            d, explanation='jev %s (%s): %s' % (POLICY_FAILURE, reason, detail))
+            d, explanation='%s %s (%s): %s' % (self.name, POLICY_FAILURE, reason, detail),
+            policy_trace={'source': 'fsm', 'fallback': True,
+                          'requested_policy': self.name, 'failure': reason})

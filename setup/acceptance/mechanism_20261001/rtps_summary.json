@@ -1,0 +1,120 @@
+{
+  "pcap_linktype": 276,
+  "rtps_packets": 1216,
+  "before_after_boundary_wall_ns": 1790851514174513592,
+  "guids": [
+    {
+      "prefix": "010f072bdd3abbd600000000",
+      "packets": 660,
+      "first_wall_ns": 1790851504924855000,
+      "srcports": [
+        35540,
+        36410,
+        37057,
+        37452
+      ],
+      "writer_counts": {
+        "other": 1762,
+        "000100c2": 50,
+        "000004c2": 102,
+        "000003c2": 118,
+        "00001c03": 8,
+        "00001403": 4,
+        "00001a03": 12,
+        "00001803": 4
+      },
+      "keywords": {
+        "ros_discovery_info": 44,
+        "dds_probe_server": 82,
+        "feedback": 4,
+        "status": 4
+      },
+      "packets_before_fresh": 200,
+      "packets_after_fresh": 460,
+      "destination_ports_before": {
+        "47150": 36,
+        "47162": 92,
+        "47163": 72
+      },
+      "destination_ports_after": {
+        "47164": 182,
+        "47165": 54,
+        "47162": 168,
+        "47163": 52,
+        "47150": 4
+      }
+    },
+    {
+      "prefix": "010f072bfc3a6a3d00000000",
+      "packets": 316,
+      "first_wall_ns": 1790851506396542000,
+      "srcports": [
+        33863,
+        34443,
+        36357,
+        36894
+      ],
+      "writer_counts": {
+        "other": 892,
+        "000100c2": 56,
+        "000003c2": 68,
+        "000004c2": 76,
+        "00001c03": 2
+      },
+      "keywords": {
+        "ros_discovery_info": 4,
+        "dds_probe_client": 28,
+        "feedback": 4,
+        "status": 4
+      },
+      "packets_before_fresh": 152,
+      "packets_after_fresh": 164,
+      "destination_ports_before": {
+        "47150": 32,
+        "47160": 120
+      },
+      "destination_ports_after": {
+        "47164": 2,
+        "47160": 98,
+        "47161": 60,
+        "47150": 4
+      }
+    },
+    {
+      "prefix": "010f072bfc3a6a3d01000000",
+      "packets": 240,
+      "first_wall_ns": 1790851514311014000,
+      "srcports": [
+        34594,
+        34639,
+        37188,
+        37361
+      ],
+      "writer_counts": {
+        "other": 668,
+        "000100c2": 48,
+        "000004c2": 56,
+        "000003c2": 56,
+        "00001c03": 4,
+        "00001403": 2,
+        "00001803": 2
+      },
+      "keywords": {
+        "ros_discovery_info": 4,
+        "dds_probe_fresh": 28,
+        "feedback": 2,
+        "status": 2
+      },
+      "packets_before_fresh": 0,
+      "packets_after_fresh": 240,
+      "destination_ports_before": {},
+      "destination_ports_after": {
+        "47150": 24,
+        "47160": 152,
+        "47162": 12,
+        "47161": 52
+      }
+    }
+  ],
+  "caveat": "Boundary is failed_discovery_graph wall time; wall clock jumped during probe, so microsecond ordering is not inferred."
+}

@@ -16,7 +16,7 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 
-from std_msgs.msg import Empty as EmptyMsg
+from std_srvs.srv import Trigger
 
 from flexcell_interfaces.action import PlaceObject
 
@@ -24,7 +24,7 @@ from flexcell_skills.contracts.skill_result import derive_status
 from flexcell_skills.common import (
     GripperClient, JsonlLog, MoveToPoseClient, PlanningSceneOps,
     crash_detail, dist3, interruptible_sleep, new_evidence, pose_msg,
-    sample_gz_pose)
+    sample_gz_pose, wait_future)
 
 R = PlaceObject.Result
 F = PlaceObject.Feedback
@@ -53,6 +53,7 @@ class PlaceServer(Node):
         self.declare_parameter('settle_time_s', 1.0)
         self.declare_parameter('retreat_m', 0.10)
         self.declare_parameter('carry_stop_topic', '/flexcell/carry_stop')
+        self.declare_parameter('carry_release_service', '/flexcell/carry_release')
         self.declare_parameter('object_size', [0.035, 0.035, 0.035])
         self.declare_parameter('default_deadline_ms', 30000)
         self.declare_parameter('motion_profile_names', ['demo_veryslow', 'demo_slow', 'demo_default'])
@@ -71,8 +72,10 @@ class PlaceServer(Node):
         self._tol = float(gp('place_tolerance_m').value)
         self._settle = float(gp('settle_time_s').value)
         self._retreat = float(gp('retreat_m').value)
-        self._carry_stop = self.create_publisher(
-            EmptyMsg, gp('carry_stop_topic').value, 10)
+        self._carry_release = self.create_client(
+            Trigger, gp('carry_release_service').value,
+            callback_group=ReentrantCallbackGroup())
+        self.create_service(Trigger, '/flexcell/place_ready', self._on_ready)
         self._size = list(gp('object_size').value)
         self._deadline = int(gp('default_deadline_ms').value)
         self._profiles = list(gp('motion_profile_names').value)
@@ -106,6 +109,14 @@ class PlaceServer(Node):
         if err is not None:
             return None, 0, err
         return res, int(res.error_code), res.detail
+
+    def _on_ready(self, _request, response):
+        # Readiness is checked from THIS participant, using the client's graph.
+        # An external node discovering the task action is not sufficient.
+        response.success = self._carry_release.wait_for_service(timeout_sec=2.0)
+        response.message = ('PLACE release dependency ready' if response.success
+                            else 'PLACE cannot discover carry release service')
+        return response
 
     def _execute(self, goal_handle):
         t0 = time.monotonic()
@@ -206,7 +217,18 @@ class PlaceServer(Node):
                               'canceled before RELEASING (box still carried)')
             self._feedback(goal_handle, 'RELEASING', t0)
             # release: stop the carry servo first, then free the planning scene
-            self._carry_stop.publish(EmptyMsg())
+            if not self._carry_release.wait_for_service(timeout_sec=5.0):
+                return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
+                              'carry release service unavailable; object remains attached')
+            release_future = self._carry_release.call_async(Trigger.Request())
+            if wait_future(release_future, 5.0) != 'done':
+                return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
+                              'carry release acknowledgement timed out')
+            release = release_future.result()
+            if not release.success:
+                return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
+                              'carry release failed: %s' % release.message)
+            rec['carry_release_confirmed'] = True
             sok, serr = self._scene.detach_to_world(
                 goal.object_name, place_pos, self._size)
             if not sok:

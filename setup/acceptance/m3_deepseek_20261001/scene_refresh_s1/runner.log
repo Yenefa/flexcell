@@ -1,0 +1,30 @@
+scenario runner: {'S1': 5}
+  S1 run 1/5
+    outcome=HARNESS_ERROR expected=SUCCEEDED replay=None (0 steps) arm=None clear=None
+    stopping batch: reset failed rc=1: Traceback (most recent call last):
+  File "/mnt/c/dev/flexcell/setup/flexcell_admin.py", line 437, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/mnt/c/dev/flexcell/setup/flexcell_admin.py", line 418, in main
+    rc = node.reset()
+         ^^^^^^^^^^^^
+  File "/mnt/c/dev/flexcell/setup/flexcell_admin.py", line 327, in reset
+    proc = subprocess.run(
+           ^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 550, in run
+    stdout, stderr = process.communicate(input, timeout=timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 1209, in communicate
+    stdout, stderr = self._communicate(input, endtime, timeout)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib/python3.12/subprocess.py", line 2116, in _communicate
+    self._check_timeout(endtime, orig_timeout, stdout, stderr)
+  File "/usr/lib/python3.12/subprocess.py", line 1253, in _check_timeout
+    raise TimeoutExpired(
+subprocess.TimeoutExpired: Command '['python3', '/home/ros/agentic_workcell_ws/plan_execute.py', '0.0', '0.0', '0.0', '0.0']' timed out after 90 seconds
+
+
+=== per-scenario results (metric #1, Wilson 95%% CI) ===
+  S1: 0/0 SUCCEEDED, CI95=[0.00, 1.00], replay_ok=True, 1 HARNESS_ERROR excluded
+batch summary: /home/ros/.ros/flexcell/episodes/batch_20261001_011809.jsonl
+SCENARIO RUNNER: FAIL (2)

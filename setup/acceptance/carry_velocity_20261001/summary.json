@@ -1,0 +1,168 @@
+{
+  "stage": "MAINLINE_IMPLEMENTATION_DEPLOYED_SMOKE_INCOMPLETE",
+  "protocol_version": 2,
+  "physics_backend": "velocity_servo_v1",
+  "not_a_statistical_baseline": true,
+  "active_runtime_fingerprint": "005eadb8dca9d3e691761297c5ca58f264b0fd88b88429593cfdf23a33434491",
+  "lifecycle": {
+    "stage": "LIFECYCLE_SMOKE_NOT_BENCHMARK",
+    "partition": "carry-lifecycle-e9f40d8f154d4c038a2fe5a17683d897",
+    "passed": true,
+    "held_min_z_m": 0.19975500000000002,
+    "released_z_m": 0.009449629195337825,
+    "lease_expired_z_m": 0.009324691402369066
+  },
+  "cohorts": {
+    "s1_5_initial": {
+      "runtime_fingerprint": "4381dad6aa575478551630ee51c90bfacf83675614375fba30d402ad71420690",
+      "cells": {
+        "S1": {
+          "attempted": 5,
+          "harness_errors": 0,
+          "task_succeeded": 4,
+          "expectation_matched": 4,
+          "scenario_exercised": 5,
+          "episodes": 5,
+          "actual_decision_sources": {
+            "fsm": 6,
+            "llm": 35
+          },
+          "final_error_codes": {
+            "0": 4,
+            "53": 1
+          }
+        }
+      },
+      "runner_rc": 1,
+      "model_replay": "NOT_RUN"
+    },
+    "s1_2_engage": {
+      "runtime_fingerprint": "aa073fa2bb43640ac77866ce9224df34183173f56742820d6594a6946f6ba91f",
+      "cells": {
+        "S1": {
+          "attempted": 2,
+          "harness_errors": 0,
+          "task_succeeded": 1,
+          "expectation_matched": 1,
+          "scenario_exercised": 2,
+          "episodes": 2,
+          "actual_decision_sources": {
+            "fsm": 2,
+            "llm": 12
+          },
+          "final_error_codes": {
+            "51": 1,
+            "0": 1
+          }
+        }
+      },
+      "runner_rc": 1,
+      "model_replay": "NOT_RUN"
+    },
+    "single_snapshot": {
+      "runtime_fingerprint": "8dd87d757ca88226491e5af32fea5c561430ded5921d673160004f4da0f0aac0",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall_seconds": 18.459,
+      "error_m": 0.012701558311510229,
+      "actual_decision_sources": {
+        "fsm": 1,
+        "llm": 3
+      },
+      "model_replay": "NOT_RUN"
+    },
+    "single_final_snapshot": {
+      "runtime_fingerprint": "005eadb8dca9d3e691761297c5ca58f264b0fd88b88429593cfdf23a33434491",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall_seconds": 19.012,
+      "error_m": 0.0028573007555182483,
+      "actual_decision_sources": {
+        "fsm": 1,
+        "llm": 3
+      },
+      "model_replay": "NOT_RUN"
+    }
+  },
+  "budget": {
+    "request_records": 152,
+    "limit_cny": 5,
+    "committed_upper_bound_cny": 0.987406,
+    "unknown_reservations": 1
+  },
+  "final_reset": {
+    "rc": 0,
+    "body": {
+      "ok": true,
+      "report": {
+        "task_idle": true,
+        "task_state_seen": "IDLE",
+        "task_state_publishers": 1,
+        "carry_stop_sent": true,
+        "carry_state_known": true,
+        "carry_engaged": false,
+        "scene_had_objects": true,
+        "scene_apply_ok": false,
+        "scene_cleared": true,
+        "arm_home": true,
+        "arm_home_detail": "waiting for /move_action and /execute_trajectory ... BEFORE /joint_states: {'joint1': -0.9809, 'joint2': -0.4591, 'joint3': 0.1936, 'joint4': -0.3679} PLAN error_code = 1 planning_time = 0.0141 PLANNE",
+        "respawn target_box_a": true,
+        "respawn target_box_b": true,
+        "reobserved": true,
+        "canonical target_box_a": "OK ['0.2200', '0.0000', '0.0175']",
+        "canonical target_box_b": "OK ['0.2000', '-0.1800', '0.0175']",
+        "carry_disengaged": true
+      }
+    }
+  },
+  "final_health": {
+    "rc": 0,
+    "body": {
+      "ok": true,
+      "checks": {
+        "action /move_to_pose": "OK",
+        "action /observe": "OK",
+        "action /pick_object": "OK",
+        "action /place_object": "OK",
+        "action /verify_object": "OK",
+        "action /run_demo": "OK",
+        "action /run_pick_place": "OK",
+        "service /controller_manager/list_controllers": "OK",
+        "controller arm_controller": "OK",
+        "controller gripper_controller": "OK",
+        "controller joint_state_broadcaster": "OK",
+        "service /get_planning_scene": "OK",
+        "gz world models": "OK",
+        "object target_box_a pose": "OK ['0.220', '0.000', '0.017']",
+        "object target_box_b pose": "OK ['0.200', '-0.180', '0.017']",
+        "service /flexcell/carry_engage": "OK",
+        "carry_state publishers": "OK (1)",
+        "task_state": "IDLE",
+        "carry_engaged": false
+      },
+      "hard_fail": [],
+      "busy": false
+    }
+  },
+  "native_status_rc": 0,
+  "checks": {
+    "carry_pytest_passed": 8,
+    "native_interface_skills_builds": "PASS",
+    "deployed_source_validation": {
+      "deployed_source_hashes_match": true,
+      "installed_native_plugin_hash_match": true,
+      "source_zip_files": 102,
+      "runtime_fingerprint": "005eadb8dca9d3e691761297c5ca58f264b0fd88b88429593cfdf23a33434491"
+    },
+    "static_checks": "PASS"
+  },
+  "not_run_or_open": [
+    "Final-fingerprint dual-object batch",
+    "Large n>=50 batch",
+    "Model replay",
+    "Full test suite",
+    "rosdep closure",
+    "Historical Cyclone GetResult-loss root cause",
+    "gate_flood trigger source",
+    "Historical reset139 root cause",
+    "MTC"
+  ]
+}

@@ -91,11 +91,14 @@ class LocalReproductionBackend(JevBackend):
 
     def __init__(self, transport=None, model=None,
                  endpoint_env='FLEXCELL_JEV_ENDPOINT',
-                 model_env='FLEXCELL_JEV_MODEL'):
+                 model_env='FLEXCELL_JEV_MODEL', timeout_s=2.0, max_tokens=32):
         self._injected = transport is not None
         self._endpoint = os.environ.get(endpoint_env, '')
         self._model = model or os.environ.get(model_env, 'local-jev')
         self._transport = transport or self._http_transport
+        self._endpoint_env = endpoint_env
+        self._timeout_s = float(timeout_s)
+        self._max_tokens = int(max_tokens)
 
     @staticmethod
     def _http_transport(url, payload, timeout_s):
@@ -107,9 +110,9 @@ class LocalReproductionBackend(JevBackend):
 
     def health(self):
         if not self._endpoint:
-            return False, ('FLEXCELL_JEV_ENDPOINT not set - local '
-                           'reproduction server unavailable')
-        return True, self._endpoint
+            return False, ('%s not set - local server unavailable'
+                           % self._endpoint_env)
+        return True, 'endpoint configured (reachability checked on decision)'
 
     def _render(self, state, question):
         """Fixed prompt template: canonical JSON embedded verbatim + the
@@ -120,6 +123,14 @@ class LocalReproductionBackend(JevBackend):
         actions = ', '.join(o.action for o in question.options)
         return (
             'You are the task-level decision policy of a robotic workcell.\n'
+            'History outcomes: 0=SUCCEEDED, 1=FAILED, 255=no result. Error 0 is success. '
+            'For each assigned object use OBSERVE -> PICK -> PLACE -> VERIFY. '
+            'After a successful OBSERVE choose PICK, not another OBSERVE. '
+            'After a successful PICK choose PLACE; after successful PLACE choose VERIFY. '
+            'After successful VERIFY start the next unfinished object with OBSERVE. '
+            'A failed PICK with error 22,23,30 permits OBSERVE then PICK within budget. '
+            'After failed PLACE choose ABORT. When retry budget is spent choose ABORT. '
+            'Use history to track progress; an old source pose does not undo a successful action.\n'
             'WORLD STATE (canonical, verbatim):\n%s\n\n'
             'TASK CONTEXT: %s\n'
             'Choose exactly ONE next action from this menu:\n%s\n'
@@ -135,16 +146,22 @@ class LocalReproductionBackend(JevBackend):
         payload = {
             'model': self._model,
             'prompt': self._render(state, question),
-            'max_tokens': 32,
+            'max_tokens': self._max_tokens,
             'temperature': 0.0,
         }
-        rep = self._transport(self._endpoint, payload, 10.0)
-        text = (rep.get('choices') or [{}])[0].get('text', '')
+        if self._endpoint.endswith('/chat/completions'):
+            payload['messages'] = [{'role': 'user', 'content': payload.pop('prompt')}]
+            payload['response_format'] = {'type': 'json_object'}
+        payload['seed'] = 20260930
+        rep = self._transport(self._endpoint, payload, self._timeout_s)
+        choice = (rep.get('choices') or [{}])[0]
+        text = choice.get('text') or choice.get('message', {}).get('content', '')
         parsed = json.loads(text)
         return JevResponse(
             choice=str(parsed.get('choice', '')),
             probability=float(parsed.get('confidence', 0.0)),
             raw={'backend': self.name,
+                 'model': self._model,
                  'tokens': int(rep.get('usage', {}).get('total_tokens', 0) or 0)})
 
 

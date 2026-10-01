@@ -1,0 +1,15 @@
+scenario runner: {'S1': 5}
+  S1 run 1/5
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 2/5
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 3/5
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 4/5
+    outcome=FAILED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+    stopping batch: missing or ambiguous episode for this result
+
+=== per-scenario results (metric #1, Wilson 95%% CI) ===
+  S1: 3/3 SUCCEEDED, CI95=[0.44, 1.00], replay_ok=False, 1 HARNESS_ERROR excluded
+batch summary: /home/ros/.ros/flexcell/episodes/batch_20261001_122254.jsonl
+SCENARIO RUNNER: FAIL (2)

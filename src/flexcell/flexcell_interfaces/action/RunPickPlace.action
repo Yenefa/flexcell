@@ -1,4 +1,4 @@
-# Deterministic pick-and-place task, driven by a strict FSM (no LLM).
+# Single-object task through the DecisionPolicy seam (FSM is the default).
 string object_name
 geometry_msgs/PoseStamped place_pose
 string motion_profile_id
@@ -11,7 +11,9 @@ uint8 outcome
 uint16 ERR_NONE=0
 uint16 ERR_OBJECT_UNKNOWN=21
 uint16 ERR_SKILL_FAILED=50
+uint16 ERR_RECOVERY_EXHAUSTED=51
 uint16 ERR_SKILL_CONTRACT_VIOLATION=52
+uint16 ERR_SAFETY_REJECTED=53
 uint16 ERR_RESOURCE_BUSY=41
 uint16 ERR_CANCELED=32
 uint16 error_code

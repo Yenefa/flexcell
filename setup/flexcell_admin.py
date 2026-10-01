@@ -30,7 +30,7 @@ from std_msgs.msg import String as StringMsg
 from flexcell_interfaces.action import Observe
 from flexcell_interfaces.msg import CarryState
 
-from flexcell_skills.common import sample_gz_pose
+from flexcell_skills.common import sample_gz_pose, stop_gz_pose_stream
 
 ACTIONS = {
     '/move_to_pose': None,          # type-agnostic presence check below
@@ -158,13 +158,29 @@ class Admin(Node):
             checks['action %s' % name] = 'OK' if ok else 'MISSING'
             cli.destroy()
 
-        # controllers active (real controller_manager query)
-        out = subprocess.run(['ros2', 'control', 'list_controllers'],
-                             capture_output=True, text=True, timeout=20).stdout
+        # Query the service directly. CLI daemon startup can hang even when
+        # the manager and physical controllers are healthy.
+        from controller_manager_msgs.srv import ListControllers
+        manager = self.create_client(ListControllers, '/controller_manager/list_controllers',
+                                     callback_group=self._cbg)
+        states = {}
+        try:
+            available = manager.wait_for_service(timeout_sec=4.0)
+            replied = False
+            if available:
+                future = manager.call_async(ListControllers.Request())
+                end = time.monotonic() + 5.0
+                while not future.done() and time.monotonic() < end:
+                    self.spin(0.1)
+                if future.done() and future.exception() is None:
+                    states = {c.name: c.state for c in future.result().controller}
+                    replied = True
+            checks['service /controller_manager/list_controllers'] = (
+                'OK' if replied else 'UNAVAILABLE (discovery or reply timeout)')
+        finally:
+            self.destroy_client(manager)
         for c in CONTROLLERS:
-            checks['controller %s' % c] = ('OK' if
-                                           re.search(r'^%s\s+.*active' % c, out,
-                                                     re.M) else 'NOT_ACTIVE')
+            checks['controller %s' % c] = ('OK' if states.get(c) == 'active' else 'NOT_ACTIVE')
 
         # planning service reachable
         cli = self.create_client(GetPlanningScene, '/get_planning_scene',
@@ -185,6 +201,16 @@ class Admin(Node):
             got = gz_pose(name)
             checks['object %s pose' % name] = (
                 'OK %s' % ['%.3f' % v for v in got] if got else 'UNAVAILABLE')
+
+        if os.environ.get('FLEXCELL_CARRY_BACKEND') == 'velocity_servo':
+            from flexcell_interfaces.srv import EngageCarry
+            engage = self.create_client(EngageCarry, '/flexcell/carry_engage',
+                                        callback_group=self._cbg)
+            try:
+                checks['service /flexcell/carry_engage'] = (
+                    'OK' if engage.wait_for_service(timeout_sec=4.0) else 'UNAVAILABLE')
+            finally:
+                self.destroy_client(engage)
 
         # carry backend single instance (graph-level publisher count)
         n_pub = self.count_publishers('/flexcell/carry_state')
@@ -237,7 +263,7 @@ class Admin(Node):
                        'NOT evidence of a busy task')
             else:
                 why = 'task_fsm reports state %r' % (self._task_state,)
-            print(json.dumps({'ok': False, 'report': report, 'error': why}))
+            self._reset_payload = {'ok': False, 'report': report, 'error': why}
             return 1
 
         # 1) force-disengage the carry servo.
@@ -398,7 +424,7 @@ class Admin(Node):
               and report['scene_cleared'] and report['arm_home']
               and all(report['respawn %s' % n] for n in CANONICAL)
               and all('OK' in report['canonical %s' % n] for n in CANONICAL))
-        print(json.dumps({'ok': ok, 'report': report}, indent=2))
+        self._reset_payload = {'ok': ok, 'report': report}
         return 0 if ok else 1
 
 
@@ -409,15 +435,28 @@ def main():
     args = ap.parse_args()
     rclpy.init()
     node = Admin()
+    rc = 1
+    cleanup_error = None
     try:
         node.spin(1.0)
         if args.command == 'health':
             return node.health(strict=not args.no_strict)
-        return node.reset()
+        rc = node.reset()
     finally:
+        try:
+            stop_gz_pose_stream()
+        except Exception as exc:
+            cleanup_error = str(exc)
         node.destroy_node()
         if rclpy.ok():
             rclpy.shutdown()
+    if args.command == 'reset':
+        payload = getattr(node, '_reset_payload', {'ok': False, 'error': 'reset incomplete'})
+        if cleanup_error:
+            payload.update(ok=False, cleanup_error=cleanup_error)
+            rc = 1
+        print(json.dumps(payload, indent=2))
+    return rc
 
 
 if __name__ == '__main__':

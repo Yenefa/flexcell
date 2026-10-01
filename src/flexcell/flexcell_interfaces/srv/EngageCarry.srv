@@ -1,0 +1,9 @@
+# Request identity makes a repeated request safe after a lost response.
+string request_id
+string object_id
+string reference_frame
+float64[3] offset
+---
+bool success
+string message
+string session

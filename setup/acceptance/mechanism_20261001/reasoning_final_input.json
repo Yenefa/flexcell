@@ -1,0 +1,22 @@
+{
+  "task": "Review causal conclusions and remaining limits; no new experiments may be invented.",
+  "DDS": {
+    "runtime": "WSL ROS Jazzy rclpy7.1.12, FastDDS2.14.6, rmw_fastrtps8.4.4; current robot fleet Cyclone2.2.4",
+    "trigger": "Independent server and client, action RunPickPlace plus GetPlanningScene, no physical action, six executor workers, no clock, server2s head start, domain159, UDP-only default maxMessageSize.",
+    "observed": "Initial action discovery fails8s; plus4s wait fails; same-participant newActionClient also fails. New participant in SAME PROCESS or SEPARATE PROCESS heals old original action and scene, actual scene query and result reply then work.",
+    "network": "ip route get127.0.0.1 => via169.254.73.152 devloopback0 table127. loMTU65536 but loopback0MTU1500. Fullfragment capture onany showed27 fragmented probeUDP datagrams. All outgoing offsets complete;24 showed incoming offset0 ONLY,3 showed no incoming fragments. UDP lengths3772..approx10308. Packets are paired bysrc,dst,IPid; capturekernel drops0. Initialport-onlypcap omitted noninitial fragments and must NOT infer unsent SEDPseqs fromit.",
+    "reliability": "Oldclient keepsACKNACK requestingSEDPpublicationseq1..16; no endpointready. IPReasmReqds+24, ReasmOKs+0 overprobe (globalcounter corroboration only).",
+    "intervention": "Only transportmaxMessageSize1400 changes. Same condition initialdiscovery works,8/8 scenequeries and firstresultrepliespass, no GetResult retries. Reverting default UDP limit with fullcapture again fails8+4s. Second1400 repetition running; do not count untilartifactcomplete.",
+    "boundedsearch": "336 completed natural accepted virtualgoals acrossCyclone150/FastDDS186 =>zero first/finalGetResultmiss, excludes startupfailures/processhangs and deliberatefaultcases; no proof of historicalCyclone replyloss root. Injecting firstserver GetResultdrop:8/8 recover sameUUID, no secondexecution. Inject allresponse drops:2cases cannotrecover.",
+    "question": "Is the evidence sufficient for this reproduced discovery failure to be attributed to fragmented localhost UDP path, with MTU-safe packet batching as workaround? State exactly what it does and does not prove for historical action reply failures and GetResult sufficient conditions."
+  },
+  "servo": {
+    "setup": "SeparateGazebopartition, actualboxB .035m .05kg model and sameworldphysicsdt.005 gravity-9.8. No robot/TF/offset, pinfixed z.1175, threshold.0475. Samples simtime50Hz.",
+    "controls": "Gravityon+collision,10Hzpositionreset:20..28% samplesbelowthreshold. Gravityoff+collision:all4rate/schedulecontrols zexact.1175, nonebelow, eventransporttimeout. Gravityon+nocollision:positionpinningstillfallsup to3m.",
+    "inference": "Fit uninterruptednocollision10Hzfixeddeadline arcs z=a+v*t-4.9*t\u00b2 using simulator time:30arcs, dv/dage=-9.8002282, maximumfitRMSE.000062314m. Velocityinferredfromposes, notdirecttelemetry.",
+    "falsifier": "KeepgravityON andcollisionON/OFF, same10Hzpinning; VelocityControl zeroes linear/angular velocity EVERYphysicsstep. All4completed3scontrols0samplesbelowthreshold, even200ms gaps. z_min.107945..11358.",
+    "source": "InstalledGazebo8.15 release-tag PhysicsWorldPoseCmdblock callsSetWorldPose no velocityreset, consistentwithpreservedmomentum.",
+    "limits": "Not originalrobotfullgrasp trace. PermanentVelocityControlwouldbreakreleasedfall; needboundedengagedstate thenrestoredfreephysics. Ratealone50Hzdidnoteliminatedips. Do NOT equatethiswithnewphysicsbaseline or fixproductionbyloweringthreshold.",
+    "question": "Rankmechanismclaims/falsifiers and recommend whether acceptirreduciblenoisefloor, mandatecontactphysics, or firstdevelopboundedvelocity-aware magneticcarry."
+  }
+}

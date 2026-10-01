@@ -1,0 +1,11 @@
+scenario runner: {'S1': 5}
+  S1 run 1/5
+    outcome=FAILED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 2/5
+    outcome=FAILED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=INJECT FAILED: state 'cleared' not observed within 8.0s
+    stopping batch: injection not cleared: INJECT FAILED: state 'cleared' not observed within 8.0s
+
+=== per-scenario results (metric #1, Wilson 95%% CI) ===
+  S1: 0/1 SUCCEEDED, CI95=[0.00, 0.79], replay_ok=False, 1 HARNESS_ERROR excluded
+batch summary: /home/ros/.ros/flexcell/episodes/batch_20260930_232125.jsonl
+SCENARIO RUNNER: FAIL (3)

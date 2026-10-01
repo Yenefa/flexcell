@@ -1,5 +1,13 @@
 # ADR-003: Orchestration Substrate — FSM as Reference Control Arm, MTC as Treatment Arm
 
+> Evidence correction (2026-09-30): the checkmarks below record the original
+> entry-gate claim, not a fully verified M3 comparison. S3/S4 and precise
+> decision timing were missing from the historical batches; their code paths
+> have now executed online. Distinct model endpoints are deployed and a real
+> LLM single-object task completed; calibration and MTC remain pending.
+> Servo is retained by user instruction; contact-grasp quality is outside
+> current claims. See [mainline implementation](../MAINLINE_20260930.md).
+
 - **Status**: Accepted (2026-09-28; chief review — **ratified with three amendments**,
   folded into the Decision below: ① FSM defined as reference/control arm, not assumed
   optimal; ② MTC repositioned from "skill backend" to "alternative orchestration

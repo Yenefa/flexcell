@@ -1,5 +1,31 @@
 # EXPERIMENTS — log
 
+> 2026-10-01 主线接入（E-015）：速度约束 magnetic carry、engage 确认和
+> PLACE 内部依赖门禁已上线；最终单物体闭环 2.86 mm。不同指纹的首批
+> S1×5=4/5、确认后 S1×2=1/2，均未解锁统计基线。
+> [实现、全部失败和最终部署](CARRY_VELOCITY_20261001.md)。
+
+> 2026-10-01 机制调查（E-014）：Fast DDS localhost IP 分片接收失效可复现；
+> 1400 字节 transport 对照两轮 16/16 成功。Servo 位置传送保留速度的机制
+> 获得重力/碰撞/更新率/速度控制对照支持。当前是机理证据，不是新基线。
+> [调查报告、重现范围和证伪实验](MECHANISM_20261001.md)。
+
+> 2026-10-01 主线更新（E-013）：官方 DeepSeek 真实决策与 5 元持久预算已
+> 上线，单物体闭环成功；独立 S1:5 完整执行，结果 3/5 成功。
+> 运行指纹区分客户端、释放确认和内部结果读取补丁，失败与未关联记录均保留。
+> 最新 S3 的 B-only 注入恢复成功，S4 按预期实际进入 PLACE 失败并入库（各 n=1）。
+> 当前结论是在线接入和控制闭环，统计比较与模型重放仍未完成。
+> [实现、证据及交接](DEEPSEEK_20261001.md)。
+
+> 2026-09-30 主线更新（E-012）：单物体 policy 闭环与 Jev/LLM/Hybrid 运行
+> 接入已实现，真实快/慢模型已运行，LLM 单物体闭环在线完成。E-011 按
+> protocol v1 冻结存档，v2 小批另存。旧批次 metric 3 因整数毫秒截断重分类
+> NOT_RUN，三个派生报告已更正，原始记录保留。E-010 的 flood-clean 证明
+> 症状被抑制，不证明触发根因已定位。
+> S3 已在线执行仅 B 的首次失败恢复，S4 已在线进入 PLACE 失败并入库；
+> 早期小批存在模型推进和 ROS 应答失败，完整 benchmark 与大样本仍未运行。
+> [实现、运行入口和剩余主线](MAINLINE_20260930.md)。
+
 > One entry per experiment: purpose / scenario / configuration / result / evidence
 > location. **Chat history is not experiment memory** — if a result is not recorded here
 > (or linked from here), it did not happen. Benchmark (M3) numbers must regenerate from
@@ -19,6 +45,10 @@
 | E-008 | Metrics report over real store + S7 adaptation probe                    | PASS                     | ~/.ros/flexcell/episodes/batch_20260928_124615.jsonl                  |
 | E-009 | New-machine (RTX 4060 laptop) bring-up + first official benchmark batch | SUPERSEDED (not citable) | setup/acceptance/m3_seed_batch_20260929*/                             |
 | E-010 | T6 hardening: gate_flood + injection lifecycle + reset determinism      | PASS                     | this entry (measurements inline)                                      |
+| E-012 | Shared task policy seam + distinct models + protocol v2 online smoke   | ONLINE PARTIAL; BASELINE FROZEN | [MAINLINE_20260930.md](MAINLINE_20260930.md)                      |
+| E-013 | Official DeepSeek policy + persistent RMB 5 budget + action handoff    | ONLINE PARTIAL; S1 3/5; BASELINE FROZEN | [DEEPSEEK_20261001.md](DEEPSEEK_20261001.md)                    |
+| E-014 | DDS fragment-path diagnosis + servo velocity controls                 | MECHANISM PROBES; NOT BENCHMARK | [MECHANISM_20261001.md](MECHANISM_20261001.md) |
+| E-015 | Leased velocity carry + engage receipt + PLACE dependency readiness | DEPLOYED; FINAL SINGLE PASS; SMOKE INCOMPLETE | [CARRY_VELOCITY_20261001.md](CARRY_VELOCITY_20261001.md) |
 | M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN                  | — (RFC #15; harness #7/#8/#9)                                         |
 
 ## Entries
@@ -360,6 +390,14 @@ live=false` rc 0; **negative** `bogus:sometimes` → seal fires, **rc 3**;
 
 ### E-011 — First M3-baseline candidate batch, n=20 per cell (2026-09-30)
 
+**Current disposition (2026-09-30): archived as protocol v1, not an active v2
+baseline.** The frozen bundle contains the corrected derived metrics reports
+(legacy integer timing reclassified NOT_RUN), original reports from Git HEAD,
+and unchanged raw episodes. Protocol v2 changes object-scoped injection;
+v1 and v2 results must not be pooled or treated as appended baseline cells.
+See [the freeze record](MAINLINE_20260930.md). The following is the original
+experiment narrative, including its then-open work.
+
 The n≥20 re-run that E-010 called the next step. Four cells, 80 episodes, run in
 resumable per-cell segments because the WSL VM had restarted mid-batch twice
 (`/tmp` is tmpfs; the driver therefore banks each cell as its own row file and
@@ -399,6 +437,76 @@ data rather than only in the unit tests.
 Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
 `batch_merged.jsonl`, `95_metrics_report.md`, `gate_reset.json`,
 `baseline_rerun.log`). Copied off the execution host and md5-verified.
+
+### E-013 — Official DeepSeek and bounded online control (2026-10-01)
+
+- **Purpose**: make the remote slow policy exercise actual Gazebo skills through
+  both task APIs; keep the user's RMB 5 allowance across processes and restarts.
+- **Configuration**: protocol v2; teleport-servo; official `deepseek-flash`,
+  JSON object, thinking disabled, output cap 512, production timeout 30 s;
+  persistent overlay and Cyclone DDS. Different runtime fingerprints remain
+  separate. The previous OpenCode gateway attempt returned HTTP 402 and is
+  not counted as a model decision.
+- **Change**: persistent client executor and same-goal GetResult retries;
+  acknowledged carry release before PLACE detach/open; the same result-read
+  recovery at task/skill/motion boundaries. No repeated physical SendGoal.
+- **Result**: one accepted single-object success (8.95 mm). An independent
+  S1:5 batch completed all five tasks: 3 succeeded, 2 failed (servo grasp and
+  skill reply/motion discovery failures). After the internal result-read fix,
+  S3:1 succeeded with B-only injected recovery, and S4:1 produced the expected
+  actual PLACE/NO_IK_SOLUTION failure. S4's model abort reason was imprecise;
+  expected task failure does not validate every model rationale.
+- **Cost**: 95 authorized official requests, conservative upper bound RMB
+  0.330258 / 5; all settled from usage. Final reset exited 0 with `ok:true`,
+  carry disengaged, scene cleared and arm home.
+- **Limits**: online smoke, not statistical comparison; S3/S4 each n=1;
+  model replay NOT_RUN, so metrics reports INCOMPLETE. MTC, Jev/APUS and
+  calibrated Hybrid remain open; large sample plan stays frozen. Offline
+  executor checks validate contracts/control flow, not grasp reliability.
+- **Evidence**: [implementation and handoff](DEEPSEEK_20261001.md),
+  [full artifact manifest](../setup/acceptance/m3_deepseek_20261001/manifest.json).
+
+### E-014 — DDS fragment path and servo momentum (2026-10-01)
+
+- **Scope**: isolated real ROS/RMW two-process probes and Gazebo box controls;
+  no new robot baseline, fleet switch or large benchmark batch.
+- **DDS**: localhost routes through MTU 1500 loopback0. Full capture shows
+  complete outgoing fragmented UDP and missing incoming noninitial fragments.
+  Default transport fails discovery; changing only maxMessageSize to 1400
+  passes 8 + 8 queries/goals, with no fragments in the captured repetition.
+  Historical Cyclone result loss remains unreproduced within 352 completed
+  virtual goals. First GetResult response-drop injection recovers 8/8 with one
+  execution per goal; one valid all-response-drop case times out. Another
+  all configuration never reaches injection and is excluded from that claim.
+- **Servo**: 12 gravity/collision/cadence controls plus four completed
+  zero-velocity interventions support pose-only reset preserving momentum.
+  Gravity stays enabled during the intervention. A permanent velocity plugin
+  is not a release-capable production fix.
+- **Inference**: three official thinking/max reviews, one truncated final
+  answer retained; cumulative 98 requests, RMB 0.761626 upper bound against
+  the same RMB 5 ledger. Model hypotheses are separate from measured evidence.
+- **Evidence**: [report](MECHANISM_20261001.md),
+  [manifest](../setup/acceptance/mechanism_20261001/manifest.json).
+
+### E-015 — Bounded velocity carry deployed to the robot stack (2026-10-01)
+
+- **Change**: native Gazebo pose/velocity command constraints with a 500 ms lease,
+  session ownership and release after a physics step. Typed engage receipt blocks
+  lift until acknowledged; PLACE exposes its own release discovery readiness.
+- **Online evidence**: lifecycle PASS; initial single 12.70 mm; first S1×5 4/5,
+  with a lost/unobserved topic start, a policy gate rejection and a lift planning
+  failure retained. After engage receipt, S1×2 1/2: first PLACE cannot discover
+  release, second complete. After readiness gating, final single 19.012 s /
+  2.86 mm. These stages use different runtime fingerprints and are not pooled.
+- **Validation**: native/interface/skills builds; eight carry contract tests;
+  final reset RC=0 / ok=true, health 19 checks / IDLE, native carry off.
+- **Limits**: magnetic simulation, final-fingerprint dual-object batch pending;
+  model replay NOT_RUN; no statistical baseline or large batch. Historical DDS
+  result-loss, reset139, rosdep and MTC gaps retain their prior status.
+- **Budget**: same persistent RMB 5 ledger, 152 request records, RMB 0.987406
+  conservative upper bound including one historical unknown reservation.
+- **Evidence**: [report](CARRY_VELOCITY_20261001.md),
+  [manifest](../setup/acceptance/carry_velocity_20261001/manifest.json).
 
 ## Evidence locations
 

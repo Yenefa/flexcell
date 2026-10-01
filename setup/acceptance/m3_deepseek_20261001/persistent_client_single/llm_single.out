@@ -1,0 +1,19 @@
+SENDING action=task object=target_box_a pose=[0.12, -0.15, 0.0175]
+RESULT {
+  "action": "task",
+  "outcome": "OUTCOME_SUCCEEDED",
+  "outcome_val": 0,
+  "error_code": "ERR_NONE",
+  "detail": "task done: all assignments verified",
+  "evidence_id": "pick_place_v1-66d58de1",
+  "wall_seconds": 28.598,
+  "fsm_trace": [
+    "PICK_A(attempt=1):OK",
+    "PLACE_A:OK",
+    "VERIFY_A(attempt=1):FAIL",
+    "VERIFY_A(attempt=2):OK"
+  ],
+  "object_at_place": true,
+  "final_position_error_m": 0.008953429625893473,
+  "skip_verify": false
+}
