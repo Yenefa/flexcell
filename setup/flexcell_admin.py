@@ -212,6 +212,22 @@ class Admin(Node):
             finally:
                 self.destroy_client(engage)
 
+        from flexcell_interfaces.srv import QueryCarry
+        snapshot = self.create_client(QueryCarry, '/flexcell/carry_snapshot', callback_group=self._cbg)
+        try:
+            carry_response = None
+            if snapshot.wait_for_service(timeout_sec=3):
+                future = snapshot.call_async(QueryCarry.Request())
+                deadline = time.monotonic()+3
+                while not future.done() and time.monotonic() < deadline:
+                    self.spin(.1)
+                if future.done() and future.exception() is None:
+                    carry_response = future.result()
+            checks['service /flexcell/carry_snapshot'] = ('OK' if carry_response and carry_response.success
+                                                        else 'UNAVAILABLE (current backend state unconfirmed)')
+        finally:
+            self.destroy_client(snapshot)
+
         # carry backend single instance (graph-level publisher count)
         n_pub = self.count_publishers('/flexcell/carry_state')
         checks['carry_state publishers'] = ('OK (1)' if n_pub == 1
@@ -219,8 +235,8 @@ class Admin(Node):
 
         self.spin(1.5)
         checks['task_state'] = self._task_state or 'UNAVAILABLE'
-        checks['carry_engaged'] = bool(self._carry_state.engaged) if \
-            self._carry_state else None
+        checks['carry_engaged'] = bool(carry_response.state.engaged) if \
+            carry_response and carry_response.success else None
 
         fail_words = ('MISSING', 'NOT_ACTIVE', 'DUPLICATE', 'UNAVAILABLE')
         hard_fail = [k for k, v in checks.items()
@@ -428,7 +444,7 @@ class Admin(Node):
         return 0 if ok else 1
 
 
-def main():
+def _native_main():
     ap = argparse.ArgumentParser()
     ap.add_argument('command', choices=['health', 'reset'])
     ap.add_argument('--no-strict', action='store_true')
@@ -457,6 +473,38 @@ def main():
             rc = 1
         print(json.dumps(payload, indent=2))
     return rc
+
+
+def main():
+    # The parent validates the *process exit*, after native library finalizers.
+    # Never forward a child's ok:true if it then dies with SIGSEGV (RC=139).
+    if '--native-admin-worker' in sys.argv:
+        sys.argv.remove('--native-admin-worker')
+        return _native_main()
+    child = subprocess.Popen([sys.executable, __file__, '--native-admin-worker',
+                              *sys.argv[1:]], stdout=subprocess.PIPE,
+                             stderr=subprocess.PIPE, text=True)
+    import signal
+    def terminate(signum, _frame):
+        child.send_signal(signum)
+        raise SystemExit(128 + signum)
+    signal.signal(signal.SIGTERM, terminate)
+    signal.signal(signal.SIGINT, terminate)
+    try:
+        stdout, stderr = child.communicate(timeout=300)
+    except subprocess.TimeoutExpired:
+        child.kill()
+        stdout, stderr = child.communicate()
+        print(json.dumps({'ok': False, 'error': 'admin worker timed out'}))
+        return 1
+    if child.returncode != 0:
+        print(json.dumps({'ok': False, 'worker_rc': child.returncode,
+                          'error': 'admin worker failed; success output rejected',
+                          'worker_output': stdout[-4000:], 'worker_stderr': stderr[-1500:]}))
+        return 1
+    sys.stdout.write(stdout)
+    sys.stderr.write(stderr)
+    return 0
 
 
 if __name__ == '__main__':

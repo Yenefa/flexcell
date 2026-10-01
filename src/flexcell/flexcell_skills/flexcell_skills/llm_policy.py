@@ -9,6 +9,7 @@ import math
 import os
 import time
 import urllib.request
+from urllib.parse import urlparse
 from dataclasses import replace
 from pathlib import Path
 
@@ -62,7 +63,11 @@ class LLMPolicy(DecisionPolicy):
         budget_path = os.environ.get('FLEXCELL_LLM_BUDGET_FILE')
         budget = InferenceBudget(budget_path) if budget_path else None
         call_id = budget.reserve(url, payload) if budget else None
-        with urllib.request.urlopen(req, timeout=timeout) as reply:
+        opener = (urllib.request.build_opener(urllib.request.ProxyHandler({}))
+                  if urlparse(url).hostname in ('localhost', '127.0.0.1', '::1')
+                  else None)
+        open_request = opener.open if opener else urllib.request.urlopen
+        with open_request(req, timeout=timeout) as reply:
             response = json.load(reply)
         if budget:
             response['_flexcell_cost'] = budget.settle(call_id, response)

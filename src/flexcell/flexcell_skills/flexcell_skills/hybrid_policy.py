@@ -21,11 +21,12 @@ class HybridRouter(DecisionPolicy):
     name = 'hybrid'
     version = '1.0'
 
-    def __init__(self, fast, slow, threshold=0.7, fallback=None):
+    def __init__(self, fast, slow, threshold=0.7, fallback=None, require_calibration=True):
         self._threshold = float(threshold)
         if not math.isfinite(self._threshold) or not 0 <= self._threshold <= 1:
             raise ValueError('hybrid threshold must be finite and in [0,1]')
         self._fast, self._slow = fast, slow
+        self._require_calibration = require_calibration
         self._fallback = fallback or FSMPolicy()
         self.stats = dict(invocations=0, fast_selected=0, escalations=0,
                           slow_selected=0, fallbacks=0, rejected_proposals=0)
@@ -61,10 +62,17 @@ class HybridRouter(DecisionPolicy):
                 return None
 
         fast = propose(self._fast)
-        if fast is not None and fast.confidence >= self._threshold:
+        calibrated = bool(fast and (fast.policy_trace or {}).get('confidence_calibrated'))
+        trace['fast_calibration_required'] = self._require_calibration
+        trace['fast_confidence_calibrated'] = calibrated
+        if (fast is not None and fast.confidence >= self._threshold
+                and (calibrated or not self._require_calibration)):
             self.stats['fast_selected'] += 1
             return replace(fast, policy_trace=dict(trace, source=self._fast.name,
                                                    fallback=False, escalated=False))
+        trace['escalation_reason'] = ('uncalibrated_fast_confidence'
+                                      if fast and not calibrated and self._require_calibration
+                                      else 'fast_unavailable_or_below_threshold')
         self.stats['escalations'] += 1
         slow = propose(self._slow)
         if slow is not None:

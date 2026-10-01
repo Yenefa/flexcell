@@ -35,7 +35,7 @@ from std_srvs.srv import Trigger
 from tf2_ros import Buffer, TransformListener
 
 from flexcell_interfaces.msg import CarryState
-from flexcell_interfaces.srv import EngageCarry
+from flexcell_interfaces.srv import EngageCarry, QueryCarry
 
 from flexcell_skills.common import JsonlLog
 
@@ -55,6 +55,7 @@ class CarryServer(Node):
         self.declare_parameter('state_topic', '/flexcell/carry_state')
         self.declare_parameter('release_service', '/flexcell/carry_release')
         self.declare_parameter('engage_service', '/flexcell/carry_engage')
+        self.declare_parameter('query_service', '/flexcell/carry_snapshot')
         self.declare_parameter('log_dir', '~/.ros/flexcell')
         self.declare_parameter('log_file', 'carry.jsonl')
 
@@ -69,11 +70,12 @@ class CarryServer(Node):
         self._log = JsonlLog(self, gp('log_dir').value, gp('log_file').value)
 
         import gz.transport13 as gz_transport
-        from gz.msgs10 import boolean_pb2, pose_pb2, stringmsg_pb2
+        from gz.msgs10 import boolean_pb2, pose_pb2, stringmsg_pb2, empty_pb2
         self._gz_node = gz_transport.Node()
         self._Pose = pose_pb2.Pose
         self._Boolean = boolean_pb2.Boolean
         self._String = stringmsg_pb2.StringMsg
+        self._Empty = empty_pb2.Empty
         self._service = '/world/%s/set_pose' % self._world
         self._guard = '/world/%s/flexcell/carry/' % self._world
         if self._backend == 'velocity_servo': self._service = self._guard + 'pin'
@@ -84,6 +86,7 @@ class CarryServer(Node):
         self._thread = None
         self._session = ''
         self._retired_sessions = set()
+        self._state_revision = 0
 
         self._tf_buffer = Buffer()
         self._tf_listener = TransformListener(self._tf_buffer, self, spin_thread=False)
@@ -100,6 +103,7 @@ class CarryServer(Node):
             EmptyMsg, gp('stop_topic').value, self._on_stop, 10)
         self.create_service(Trigger, gp('release_service').value, self._on_release)
         self.create_service(EngageCarry, gp('engage_service').value, self._on_engage)
+        self.create_service(QueryCarry, gp('query_service').value, self._on_query)
         self.create_timer(0.2, self._check_worker)
 
         self._publish_state()
@@ -109,6 +113,10 @@ class CarryServer(Node):
 
     # ------------------------------------------------------------ state topic
     def _publish_state(self):
+        self._state_revision = getattr(self, '_state_revision', 0) + 1
+        self._state_pub.publish(self._state())
+
+    def _state(self):
         msg = CarryState()
         msg.header.stamp = self.get_clock().now().to_msg()
         msg.header.frame_id = self._base
@@ -119,7 +127,30 @@ class CarryServer(Node):
             msg.offset = [float(v) for v in self._offset]
         else:
             msg.offset = [0.0, 0.0, 0.0]
-        self._state_pub.publish(msg)
+        return msg
+
+    def _on_query(self, _request, response):
+        response.success = False
+        if self._backend == 'velocity_servo':
+            try:
+                transport_ok, reply = self._gz_node.request(
+                    self._guard + 'status', self._Empty(), self._Empty, self._String, 1000)
+                if not transport_ok:
+                    raise RuntimeError('native carry status timed out')
+                native = json.loads(reply.data)
+                if (bool(native['engaged']) != (self._offset is not None)
+                        or native['session'] != self._session
+                        or native['object'] != self._object_id):
+                    raise RuntimeError('native carry ownership differs from ROS state')
+            except Exception as exc:
+                response.detail = str(exc)
+                return response
+        response.state = self._state()  # new message, never an alias of cached topic data
+        response.revision = self._state_revision
+        response.session = self._session
+        response.success = True
+        response.detail = 'current carry backend state confirmed'
+        return response
 
     # ------------------------------------------------------------ commands
     def _on_start(self, msg):

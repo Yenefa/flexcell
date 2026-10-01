@@ -7,6 +7,7 @@ from rclpy.action import ActionClient
 from rclpy.node import Node
 from rcl_interfaces.srv import GetParameters
 from std_srvs.srv import Trigger
+from flexcell_interfaces.srv import QueryCarry
 from flexcell_interfaces.action import RunDemo, RunPickPlace
 
 
@@ -43,6 +44,13 @@ def main():
             ready.remove_pending_request(pending)
         if not release_ready:
             raise RuntimeError('PLACE cannot discover carry release; fleet is not ready')
+        snapshot = node.create_client(QueryCarry, '/flexcell/carry_snapshot')
+        if not snapshot.wait_for_service(timeout_sec=5):
+            raise RuntimeError('carry authority service unavailable')
+        pending = snapshot.call_async(QueryCarry.Request())
+        rclpy.spin_until_future_complete(node, pending, timeout_sec=3)
+        if not pending.done() or not pending.result().success:
+            raise RuntimeError('current carry backend state unconfirmed')
         print('READY: task actions and policy=' + args.policy, flush=True)
     finally:
         node.destroy_node()

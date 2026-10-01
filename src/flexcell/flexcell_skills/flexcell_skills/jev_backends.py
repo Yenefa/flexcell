@@ -28,6 +28,7 @@ import json
 import os
 import urllib.error
 import urllib.request
+from urllib.parse import urlparse
 
 from flexcell_skills.jev_policy import JevBackend, JevResponse
 
@@ -91,13 +92,14 @@ class LocalReproductionBackend(JevBackend):
 
     def __init__(self, transport=None, model=None,
                  endpoint_env='FLEXCELL_JEV_ENDPOINT',
-                 model_env='FLEXCELL_JEV_MODEL', timeout_s=2.0, max_tokens=32):
+                 model_env='FLEXCELL_JEV_MODEL', timeout_s=None, max_tokens=96):
         self._injected = transport is not None
         self._endpoint = os.environ.get(endpoint_env, '')
         self._model = model or os.environ.get(model_env, 'local-jev')
         self._transport = transport or self._http_transport
         self._endpoint_env = endpoint_env
-        self._timeout_s = float(timeout_s)
+        self._timeout_s = float(timeout_s if timeout_s is not None else
+                                os.environ.get('FLEXCELL_JEV_TIMEOUT_S', '2'))
         self._max_tokens = int(max_tokens)
 
     @staticmethod
@@ -105,7 +107,11 @@ class LocalReproductionBackend(JevBackend):
         req = urllib.request.Request(
             url, data=json.dumps(payload).encode(),
             headers={'Content-Type': 'application/json'})
-        with urllib.request.urlopen(req, timeout=timeout_s) as resp:
+        opener = (urllib.request.build_opener(urllib.request.ProxyHandler({}))
+                  if urlparse(url).hostname in ('localhost', '127.0.0.1', '::1')
+                  else None)
+        open_request = opener.open if opener else urllib.request.urlopen
+        with open_request(req, timeout=timeout_s) as resp:
             return json.loads(resp.read().decode())
 
     def health(self):
@@ -162,6 +168,7 @@ class LocalReproductionBackend(JevBackend):
             probability=float(parsed.get('confidence', 0.0)),
             raw={'backend': self.name,
                  'model': self._model,
+                 'model_sha256': os.environ.get('FLEXCELL_JEV_MODEL_SHA256'),
                  'tokens': int(rep.get('usage', {}).get('total_tokens', 0) or 0)})
 
 

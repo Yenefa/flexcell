@@ -11,6 +11,8 @@ import math
 import os
 import re
 import subprocess
+import sys
+import tempfile
 import threading
 import time
 import uuid
@@ -89,7 +91,8 @@ def _register_gz_msgs():
         return False
 
 
-_GZ_MSGS_REGISTERED = _register_gz_msgs()
+# Message classes are registered only in the isolated worker.
+_GZ_MSGS_REGISTERED = False
 
 
 def _on_pose_v(msg, got_first=None):
@@ -129,60 +132,90 @@ def gz_stream_health():
 
 
 def _gz_stream_loop(world):
-    import gz.transport13 as gz_transport
-    from gz.msgs10 import pose_v_pb2  # noqa: F401  (already registered above)
-    topic = '/world/%s/dynamic_pose/info' % world
+    # Gazebo owns native callback threads. Isolate their Python/protobuf lifetime
+    # from ROS/admin interpreter shutdown and throttle before parsing Pose_V.
+    env = dict(os.environ, PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION='python')
     while not _GZ_STREAM['stop'].is_set():
-        # do not leak the previous node's subscription on every rebuild
+        error_log = tempfile.TemporaryFile(mode='w+t')
+        proc = subprocess.Popen([sys.executable, '-m', 'flexcell_skills.pose_stream_worker',
+                                 '--world', world], stdout=subprocess.PIPE,
+                                stderr=error_log, text=True, env=env)
         with _GZ_STREAM['lock']:
-            old = _GZ_STREAM.get('node')
-        if old is not None:
+            _GZ_STREAM['worker'] = proc
+            _GZ_STREAM['last_start'] = time.monotonic()
+            _GZ_STREAM['poses'] = {}
+            _GZ_STREAM['last_rx'] = 0.
+        try:
+            for line in proc.stdout:
+                packet = json.loads(line)
+                with _GZ_STREAM['lock']:
+                    _GZ_STREAM['cb_errors'] += 1 if 'error' in packet else 0
+                    if 'error' not in packet:
+                        globals()['_GZ_MSGS_REGISTERED'] = True
+                    if 'error' in packet:
+                        _GZ_STREAM['cb_error'] = packet['error']
+                    else:
+                        _GZ_STREAM['poses'].update(packet['poses'])
+                        _GZ_STREAM['last_rx'] = packet['mono']
+                if _GZ_STREAM['stop'].is_set():
+                    break
+        finally:
+            if proc.poll() is None:
+                proc.terminate()
             try:
-                old.unsubscribe(topic)
-            except Exception:  # noqa: BLE001 - best effort cleanup
-                pass
-        node = gz_transport.Node()
-        with _GZ_STREAM['lock']:
-            _GZ_STREAM['node'] = node
-        got_first = threading.Event()
-
-        def cb(msg, _ev=got_first):
-            _on_pose_v(msg, _ev)
-
-        node.subscribe(type(pose_v_pb2.Pose_V()), topic, cb)
-        end = time.monotonic() + 6.0
-        while not got_first.is_set() and time.monotonic() < end:
-            if _GZ_STREAM['stop'].wait(0.1):
-                break
-        while not _GZ_STREAM['stop'].wait(1.0):
+                proc.wait(timeout=3.)
+            except subprocess.TimeoutExpired:
+                proc.kill(); proc.wait()
+            proc.stdout.close()
+            error_log.seek(0)
+            stderr_tail = error_log.read()[-1500:]
+            error_log.close()
             with _GZ_STREAM['lock']:
-                stale = time.monotonic() - _GZ_STREAM['last_rx'] > 10.0
-            if stale:
-                break   # rebuild the subscription with a fresh node
-    with _GZ_STREAM['lock']:
-        node = _GZ_STREAM['node']
-        _GZ_STREAM['node'] = None
-    if node is not None:
-        node.unsubscribe(topic)
+                _GZ_STREAM['worker_rc'] = proc.returncode
+                if proc.returncode not in (0, -15):
+                    _GZ_STREAM['cb_errors'] += 1
+                    _GZ_STREAM['cb_error'] = 'worker rc=%s: %s' % (proc.returncode, stderr_tail)
+                _GZ_STREAM['worker'] = None
+        if _GZ_STREAM['stop'].wait(.5):
+            break
 
 
 def stop_gz_pose_stream(timeout_s=10.0):
     """Quiesce native callbacks before Python/protobuf interpreter teardown."""
     _GZ_STREAM['stop'].set()
     with _GZ_STREAM['lock']:
+        worker = _GZ_STREAM.get('worker')
         thread = _GZ_STREAM['thread']
+    if worker is not None and worker.poll() is None:
+        worker.terminate()
     if thread is not None:
         thread.join(timeout_s)
         if thread.is_alive():
             raise RuntimeError('Gazebo pose subscriber did not stop')
     with _GZ_STREAM['lock']:
         _GZ_STREAM['thread'] = None
+        worker_rc = _GZ_STREAM.get('worker_rc', 0)
+    if worker_rc not in (0, -15):
+        raise RuntimeError('Gazebo pose worker exit code %s' % worker_rc)
+
+
+def now_rx_stale():
+    return time.monotonic()-max(_GZ_STREAM['last_rx'], _GZ_STREAM['last_start']) > 10.
 
 
 def _ensure_gz_pose_stream(world='empty'):
     with _GZ_STREAM['lock']:
+        old_world = _GZ_STREAM['world']
+        old_thread = _GZ_STREAM['thread']
+    if old_thread is not None and old_thread.is_alive() and old_world != world:
+        stop_gz_pose_stream()
+    with _GZ_STREAM['lock']:
         t = _GZ_STREAM['thread']
         if t is not None and t.is_alive() and _GZ_STREAM['world'] == world:
+            if now_rx_stale():
+                worker = _GZ_STREAM.get('worker')
+                if worker is not None and worker.poll() is None:
+                    worker.terminate()
             return
         now = time.monotonic()
         if (t is not None and not t.is_alive()

@@ -13,6 +13,7 @@ epsilon. Deterministic; no LLM anywhere.
 """
 
 import time
+import copy
 
 import rclpy
 from rclpy.action import ActionServer, CancelResponse, GoalResponse
@@ -29,15 +30,20 @@ from std_msgs.msg import Header
 from tf2_ros import Buffer, TransformListener
 
 from flexcell_interfaces.action import Observe
+from flexcell_interfaces.srv import QueryCarry
 from flexcell_interfaces.msg import (
     CarryState, RobotStateSummary, TaskContext, WorldObject, WorldState, ZoneState)
 
 from flexcell_skills.common import (
     JsonlLog, crash_detail, dist3, new_evidence, pose_msg,
-    sample_gz_pose_age)
+    sample_gz_pose_age, wait_future)
 from flexcell_skills.contracts.skill_result import derive_status
 
 R = Observe.Result
+
+class CarrySnapshotUnavailable(RuntimeError):
+    pass
+
 
 ARM_JOINTS = ['joint1', 'joint2', 'joint3', 'joint4']
 
@@ -54,6 +60,7 @@ class ObserveServer(Node):
         self.declare_parameter('joint_states_topic', '/joint_states')
         self.declare_parameter('world_state_topic', '/flexcell/world_state')
         self.declare_parameter('carry_state_topic', '/flexcell/carry_state')
+        self.declare_parameter('carry_query_service', '/flexcell/carry_snapshot')
         self.declare_parameter('zones', ['zone_1', 'zone_2'])
         self.declare_parameter('source', 'SIMULATION_GROUND_TRUTH')
         self.declare_parameter('log_dir', '~/.ros/flexcell')
@@ -95,6 +102,8 @@ class ObserveServer(Node):
         self._seq = 0
 
         self._cbg = ReentrantCallbackGroup()
+        self._carry_query = self.create_client(
+            QueryCarry, gp('carry_query_service').value, callback_group=self._cbg)
         self._tf_buffer = Buffer()
         self._tf_listener = TransformListener(self._tf_buffer, self, spin_thread=False)
         self.create_subscription(
@@ -126,7 +135,29 @@ class ObserveServer(Node):
         self._js = msg
 
     def _on_carry(self, msg):
-        self._carry = msg
+        self._carry = copy.deepcopy(msg)
+        self._carry_rx_mono = time.monotonic()
+
+    def _current_carry(self):
+        if not self._carry_query.wait_for_service(timeout_sec=2.0):
+            raise CarrySnapshotUnavailable('carry snapshot service unavailable')
+        for _ in range(2):
+            before = time.monotonic_ns()
+            future = self._carry_query.call_async(QueryCarry.Request())
+            if wait_future(future, 2.0) == 'done':
+                result = future.result()
+                if not result.success:
+                    raise CarrySnapshotUnavailable(result.detail)
+                state = copy.deepcopy(result.state)
+                self._log.write({'event': 'carry_snapshot', 'request_mono_ns': before,
+                                 'reply_mono_ns': time.monotonic_ns(),
+                                 'revision': result.revision, 'session': result.session,
+                                 'engaged': state.engaged, 'object_id': state.object_id,
+                                 'cached_engaged': self._carry.engaged if self._carry else None,
+                                 'cached_object': self._carry.object_id if self._carry else None})
+                return state
+            self._carry_query.remove_pending_request(future)
+        raise CarrySnapshotUnavailable('carry snapshot response timed out')
 
     # ------------------------------------------------------------ snapshot
     def _snapshot(self):
@@ -188,16 +219,11 @@ class ObserveServer(Node):
         except Exception as exc:  # noqa: BLE001
             notes.append('ee: lookup failed (%s)' % exc)
 
-        # carry backend state (backend belief, NOT physical evidence)
-        carry = CarryState()
-        carry.header.stamp = self.get_clock().now().to_msg()
-        carry.header.frame_id = self._base
-        carry.engaged = False
-        carry.offset = [0.0, 0.0, 0.0]
-        if self._carry is not None:
-            carry = self._carry
-            if carry.engaged:
-                notes.append('carry: backend engaged on %s' % carry.object_id)
+        # A transition-only topic can remain cached indefinitely. Query the
+        # backend for this snapshot; missing confirmation is an observation error.
+        carry = self._current_carry()
+        if carry.engaged:
+            notes.append('carry: confirmed backend engaged on %s' % carry.object_id)
 
         # zones: occupancy derived from ground truth (never faked)
         zones = []
@@ -284,6 +310,8 @@ class ObserveServer(Node):
             self._pub.publish(ws)
             return finish(R.OUTCOME_SUCCEEDED, R.ERR_NONE,
                           '; '.join(ws.notes), world_state=ws)
+        except CarrySnapshotUnavailable as exc:
+            return finish(R.OUTCOME_FAILED, R.ERR_WORLD_STATE_UNAVAILABLE, str(exc))
         except Exception as exc:  # crash guard (issue #20): a raising execute
             # callback must become a typed FAILURE - rclpy's fallback default
             # Result has outcome=0, which reads as OUTCOME_SUCCEEDED

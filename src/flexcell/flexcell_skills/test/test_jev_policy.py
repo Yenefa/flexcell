@@ -211,7 +211,7 @@ class TestBackends(unittest.TestCase):
             return {'choices': [{'text': '{"choice": "PICK", '
                                            '"confidence": 0.91}'}],
                     'usage': {'total_tokens': 11}}
-        backend = LocalReproductionBackend(transport=transport)
+        backend = LocalReproductionBackend(transport=transport, endpoint_env='TEST_UNUSED_JEV_ENDPOINT')
         policy = JevPolicy(backend)
         d = policy.decide(_world_state(), _goal(), _constraints(), [])
         self.assertEqual(d.action, ACTION_PICK)

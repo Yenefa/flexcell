@@ -30,10 +30,15 @@ class TestHybrid(unittest.TestCase):
         return router.decide(self.world, self.goal, self.constraints, ()), router, f, s
 
     def test_high_confidence_fast_path(self):
-        d, r, f, s = self.route(Decision('PICK', 'a', 0.9), Decision('WAIT', ''))
+        d, r, f, s = self.route(Decision('PICK', 'a', 0.9, policy_trace={'confidence_calibrated': True}), Decision('WAIT', ''))
         self.assertEqual(d.action, 'PICK')
         self.assertEqual(d.policy_trace['source'], 'jev')
         self.assertEqual(s.calls, 0)
+
+    def test_uncalibrated_fast_confidence_escalates(self):
+        d, _, _, s = self.route(Decision('PICK', 'a', 1.), Decision('OBSERVE', 'a'))
+        self.assertEqual(s.calls, 1)
+        self.assertEqual(d.policy_trace['escalation_reason'], 'uncalibrated_fast_confidence')
 
     def test_low_confidence_escalates(self):
         d, r, f, s = self.route(Decision('PICK', 'a', 0.5), Decision('OBSERVE', 'a'))

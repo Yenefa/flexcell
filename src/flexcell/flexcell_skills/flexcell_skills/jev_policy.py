@@ -31,6 +31,7 @@ import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field, replace
 
+from flexcell_skills.confidence_calibration import ConfidenceCalibration
 from flexcell_skills.canonical_state import serialize_envelope
 from flexcell_skills.decision_policy import (
     ACTION_ABORT, ACTION_OBSERVE, ACTION_PICK, ACTION_PLACE, ACTION_VERIFY, Decision,
@@ -142,6 +143,7 @@ class JevPolicy:
         self._backend = backend
         self._fallback = fallback if fallback is not None else FSMPolicy()
         self._timeout_s = float(timeout_s)
+        self._calibration = ConfidenceCalibration()
         self.stats = {
             'invocations': 0, 'fallbacks': 0, 'parse_errors': 0,
             'backend_errors': 0, 'no_world': 0, 'tokens': 0,
@@ -209,6 +211,8 @@ class JevPolicy:
                 reason_code = reference.reason_code
         except PolicyStateError:
             pass
+        reported = probability
+        probability, calibrated, calibration = self._calibration.estimate(reported)
         return Decision(
             action=action, target=target,
             confidence=probability,
@@ -216,6 +220,11 @@ class JevPolicy:
             policy_trace={'source': self.name, 'fallback': False,
                           'backend': self._backend.name,
                           'model': raw.get('model'),
+                          'model_sha256': raw.get('model_sha256'),
+                          'reported_confidence': reported,
+                          'confidence_calibrated': calibrated,
+                          'calibration': calibration,
+                          'confidence_label': 'FSM_ACTION_AGREEMENT',
                           'tokens': int(raw.get('tokens', 0) or 0)},
             explanation='jev backend=%s prob=%.3f raw=%s'
                         % (self._backend.name, float(resp.probability),

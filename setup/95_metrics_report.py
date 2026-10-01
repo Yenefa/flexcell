@@ -25,6 +25,7 @@ Sample targets are width warnings, not statistical-power guarantees.
 """
 import argparse
 import glob
+import hashlib
 import json
 import os
 import sys
@@ -61,6 +62,8 @@ def cell_of(record):
     label = ('%s:%s' % (protocol.get('id', 'unknown'), protocol.get('sha256', 'unknown'))
              if protocol else 'protocol-v1-legacy')
     profile = record.get('runtime_fingerprint') or 'unfingerprinted'
+    if record.get('record_kind') == 'MODEL_INPUT_FIXTURE':
+        arm = 'dev/MODEL_INPUT_FIXTURE/' + arm
     return arm + ' @ ' + label + ' / runtime=' + profile
 
 
@@ -94,7 +97,7 @@ def load_episodes(store, batch):
     return out
 
 
-def episode_rows(episodes):
+def episode_rows(episodes, model_replay=None):
     """Group episodes into cells + compute per-episode facts."""
     cells = {}
     problems = []
@@ -115,6 +118,18 @@ def episode_rows(episodes):
                 replay_status = 'PASS' if replayed_n > 0 and diverged == 0 else 'FAIL'
             else:
                 diverged, replayed_n = 0, 0
+                digest = hashlib.sha256(open(path, 'rb').read()).hexdigest()
+                result = (model_replay or {}).get(digest)
+                if result is not None:
+                    replayed = result['steps']
+                    identity = rec.get('model_freeze', {}).get('identity')
+                    if (not identity or identity != result['freeze_identity']
+                            or not result['same_frozen_model']
+                            or [r['seq'] for r in replayed] != [r['seq'] for r in steps]):
+                        raise ValueError('model replay identity or step sequence mismatch')
+                    diverged = sum(not r['ok'] for r in replayed)
+                    replayed_n = len(replayed)
+                    replay_status = 'PASS' if replayed_n and not diverged else 'FAIL'
         except Exception as exc:  # noqa: BLE001 - report, don't die
             diverged, replayed_n = -1, 0
             problems.append('%s: replay error %r' % (os.path.basename(path), exc))
@@ -144,8 +159,8 @@ def episode_rows(episodes):
     return cells, problems
 
 
-def report(episodes, min_cell):
-    cells, problems = episode_rows(episodes)
+def report(episodes, min_cell, model_replay=None):
+    cells, problems = episode_rows(episodes, model_replay)
     lines = ['# FlexCell benchmark metrics report', '',
              'generated from the replay store; every number regenerates - '
              'no hand-written PASS lines.', '']
@@ -234,13 +249,24 @@ def main():
     ap.add_argument('--out', default=None, help='write markdown here')
     ap.add_argument('--min-cell', type=int, default=50,
                     help='preferred per-cell n (width warning below it)')
+    ap.add_argument('--model-replay-results', help='119_policy_eval same frozen model replay JSON')
     args = ap.parse_args()
 
     episodes = load_episodes(args.store, args.batch)
     if not episodes:
         print('REPORT: FAIL (no episodes found in %s)' % args.store)
         return 2
-    text, verdict = report(episodes, args.min_cell)
+    model_replay = {}
+    if args.model_replay_results:
+        data = json.load(open(args.model_replay_results))
+        if data.get('mode') != 'SAME_FROZEN_MODEL_REPLAY':
+            raise ValueError('counterfactual evaluation cannot satisfy model replay integrity')
+        freeze = dict(data['freeze'])
+        identity = freeze.pop('identity')
+        if hashlib.sha256(json.dumps(freeze, sort_keys=True).encode()).hexdigest() != identity:
+            raise ValueError('invalid frozen backend digest')
+        model_replay = {r['episode_sha256']: dict(r, freeze_identity=identity) for r in data['episodes']}
+    text, verdict = report(episodes, args.min_cell, model_replay)
     print(text)
     if args.out:
         with open(args.out, 'w') as fh:

@@ -23,6 +23,8 @@ fi
 # authenticated transport from a separate mode-600 file, never exported here.
 _flexcell_model_env=${FLEXCELL_MODEL_ENV:-$HOME/.config/flexcell/mainline_model.sh}
 if [ -f "$_flexcell_model_env" ]; then source "$_flexcell_model_env"; fi
+_flexcell_jev_env=${FLEXCELL_JEV_ENV:-$HOME/.config/flexcell/mainline_jev.sh}
+if [ -f "$_flexcell_jev_env" ]; then source "$_flexcell_jev_env"; fi
 export FLEXCELL_JEV_ENDPOINT=${FLEXCELL_JEV_ENDPOINT:-http://127.0.0.1:18081/v1/chat/completions}
 export FLEXCELL_JEV_MODEL=${FLEXCELL_JEV_MODEL:-flexcell-fast}
 export FLEXCELL_LLM_ENDPOINT=${FLEXCELL_LLM_ENDPOINT:-http://127.0.0.1:18082/v1/chat/completions}
@@ -35,4 +37,4 @@ source /opt/ros/jazzy/setup.bash
 source "$FLEXCELL_WS/install/setup.bash"
 source "$FLEXCELL_INSTALL/setup.bash"
 $_flexcell_had_nounset && set -u
-unset _flexcell_repo _flexcell_had_nounset _flexcell_model_env _flexcell_physics_env
+unset _flexcell_jev_env _flexcell_repo _flexcell_had_nounset _flexcell_model_env _flexcell_physics_env

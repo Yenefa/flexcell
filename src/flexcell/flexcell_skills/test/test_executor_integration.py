@@ -364,6 +364,7 @@ class TestPickEngageFailure(unittest.TestCase):
             SimpleNamespace(outcome=0, error_code=0, detail='ok'), None))
         node._gripper = SimpleNamespace(command=lambda *a, **k: (
             SimpleNamespace(stalled=False), None))
+        node._carry_backend = 'teleport'
         node._carry_start = SimpleNamespace(publish=lambda m: None)
         stopped = []
         node._carry_stop = SimpleNamespace(publish=lambda m: stopped.append(m))
