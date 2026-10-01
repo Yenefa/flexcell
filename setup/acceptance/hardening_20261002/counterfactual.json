@@ -1,0 +1,2096 @@
+{
+  "schema_version": 1,
+  "freeze": {
+    "endpoint": "http://127.0.0.1:18082/v1/chat/completions",
+    "model": "flexcell-slow",
+    "model_sha256": "626b4a6678b86442240e33df819e00132d3ba7dddfe1cdc4fbb18e0a9615c62d",
+    "runtime": {
+      "version": "llama.cpp-b11284-linux-cpu",
+      "sha256": "f53f2534e7ac8df1ef056117d215f1581feb6c426310d6423efac9adcdd5c2c8",
+      "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11284/llama-b11284-bin-ubuntu-x64.tar.gz"
+    },
+    "executable_sha256": "66f497c890946a4685a3effc09c7a257bef9220ccfb45d5b7aa9542f51fce114",
+    "server_arguments": [
+      "/home/ros/.local/share/flexcell/inference/linux/llama-b11284/llama-server",
+      "-m",
+      "/home/ros/.local/share/flexcell/inference/linux/qwen2.5-3b-instruct-q4_k_m.gguf",
+      "-ngl",
+      "0",
+      "-c",
+      "8192",
+      "-np",
+      "1",
+      "-t",
+      "4",
+      "--host",
+      "127.0.0.1",
+      "--port",
+      "18082",
+      "--alias",
+      "flexcell-slow"
+    ],
+    "policy": "llm",
+    "policy_version": "2.3",
+    "source_hashing": "UTF8 with LF line endings",
+    "source_sha256": {
+      "llm_policy.py": "ff506605d332725641ebe7ac3a9356dd7cc0024d120f03afc1523d082811a85d",
+      "decision_policy.py": "805b532d0bdde387229f68486929873d4246c74048073883e5e0baf040875bc3",
+      "canonical_state.py": "8e3c9f0f32ac0202d9eb34a36cf8fa460ce5c735800c942c90b5bace7894b655",
+      "contracts/episode.py": "0821a2552e4950088a9711735c93db05fb0385264d307c79b88f8bb0aa93d938"
+    },
+    "decoding": {
+      "temperature": 0.0,
+      "seed": 20260930,
+      "max_tokens": 160,
+      "response_format": "json_schema"
+    },
+    "identity": "0f9bb6bb02e3a3a7b2aa59bfbb9d61a70968dfdade27704e45f13e835e92bf26"
+  },
+  "comparison_fields": [
+    "action",
+    "target",
+    "reason_code"
+  ],
+  "mode": "COUNTERFACTUAL_MODEL_EVALUATION",
+  "episodes": [
+    {
+      "episode_file": "setup/acceptance/carry_velocity_20261001/s1_5_initial/episodes/week1_demo_v1_week1_demo_v1-12c28a3a.json",
+      "episode_sha256": "29ba30d7e82abd8cc6b6ad7467145d1d5b95c1bc6cf5fdbf333be4cc0dc7bf3b",
+      "run_id": "week1_demo_v1-12c28a3a",
+      "same_frozen_model": false,
+      "replay_status": "COUNTERFACTUAL",
+      "steps": [
+        {
+          "seq": 1,
+          "ok": true,
+          "model_called": false,
+          "model_success": false,
+          "latency_ms": 0.05107100150780752,
+          "recorded": {
+            "action": "OBSERVE",
+            "confidence": 1.0,
+            "explanation": "plan order: leg start",
+            "policy_trace": {
+              "failure": "bootstrap",
+              "fallback": true,
+              "requested_policy": "llm",
+              "source": "fsm"
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "OBSERVE",
+            "target": "target_box_a",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "plan order: leg start",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "bootstrap"
+            }
+          }
+        },
+        {
+          "seq": 2,
+          "ok": true,
+          "model_called": true,
+          "model_success": true,
+          "latency_ms": 10267.210353000337,
+          "recorded": {
+            "action": "PICK",
+            "confidence": 0.95,
+            "explanation": "OBSERVE of target_box_a succeeded, so proceed to PICK it.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 639.590682,
+              "completion_tokens": 47,
+              "cost": {
+                "call_id": "d8b26792fe334361af11963bf5e620e6",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003028
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1326,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1373
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "PICK",
+            "target": "target_box_a",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "Next action is to pick up the target_box_a as it was successfully observed and is now ready for the next step.",
+            "policy_trace": {
+              "source": "llm",
+              "fallback": false,
+              "backend": "frozen-local-counterfactual",
+              "model": "flexcell-slow",
+              "tokens": 1405,
+              "response_model": "flexcell-slow",
+              "response_format": "json_schema",
+              "thinking": "backend-default",
+              "finish_reason": "stop",
+              "cost": null,
+              "prompt_tokens": 1333,
+              "completion_tokens": 72,
+              "backend_latency_ms": 10266.96397
+            }
+          }
+        },
+        {
+          "seq": 3,
+          "ok": false,
+          "model_called": true,
+          "model_success": true,
+          "latency_ms": 10282.714492001105,
+          "recorded": {
+            "action": "PLACE",
+            "confidence": 0.95,
+            "explanation": "Pick succeeded and carry is engaged, so place target_box_a into zone_1.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 753.083348,
+              "completion_tokens": 56,
+              "cost": {
+                "call_id": "ebbda216e40441eab001519fccb04bd6",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003202
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1377,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1433
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "PLACE",
+            "target": "target_box_a",
+            "confidence": 1.0,
+            "reason_code": "RECOVERABLE_RETRY",
+            "explanation": "Previous PICK attempt was successful but failed to place, retrying to ensure object is placed correctly.",
+            "policy_trace": {
+              "source": "llm",
+              "fallback": false,
+              "backend": "frozen-local-counterfactual",
+              "model": "flexcell-slow",
+              "tokens": 1457,
+              "response_model": "flexcell-slow",
+              "response_format": "json_schema",
+              "thinking": "backend-default",
+              "finish_reason": "stop",
+              "cost": null,
+              "prompt_tokens": 1389,
+              "completion_tokens": 68,
+              "backend_latency_ms": 10282.494216
+            }
+          }
+        },
+        {
+          "seq": 4,
+          "ok": false,
+          "model_called": true,
+          "model_success": true,
+          "latency_ms": 8610.162117000073,
+          "recorded": {
+            "action": "VERIFY",
+            "confidence": 0.95,
+            "explanation": "PLACE succeeded for target_box_a, so verify the placement before moving to target_box_b.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 682.073665,
+              "completion_tokens": 58,
+              "cost": {
+                "call_id": "c460cfa6e0324c9ab7c27b0b4cdc8957",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003332
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1434,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1492
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "OBSERVE",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "Next action is to observe the second target box.",
+            "policy_trace": {
+              "source": "llm",
+              "fallback": false,
+              "backend": "frozen-local-counterfactual",
+              "model": "flexcell-slow",
+              "tokens": 1505,
+              "response_model": "flexcell-slow",
+              "response_format": "json_schema",
+              "thinking": "backend-default",
+              "finish_reason": "stop",
+              "cost": null,
+              "prompt_tokens": 1446,
+              "completion_tokens": 59,
+              "backend_latency_ms": 8609.94814
+            }
+          }
+        },
+        {
+          "seq": 5,
+          "ok": true,
+          "model_called": true,
+          "model_success": true,
+          "latency_ms": 10784.132839999074,
+          "recorded": {
+            "action": "OBSERVE",
+            "confidence": 0.95,
+            "explanation": "target_box_a verified successfully, so begin the next unfinished object target_box_b with OBSERVE.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 736.355818,
+              "completion_tokens": 62,
+              "cost": {
+                "call_id": "954287c35d0e4bd6976df4243c177f44",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003506
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1505,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1567
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "OBSERVE",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "Next object to observe and complete the task.",
+            "policy_trace": {
+              "source": "llm",
+              "fallback": false,
+              "backend": "frozen-local-counterfactual",
+              "model": "flexcell-slow",
+              "tokens": 1577,
+              "response_model": "flexcell-slow",
+              "response_format": "json_schema",
+              "thinking": "backend-default",
+              "finish_reason": "stop",
+              "cost": null,
+              "prompt_tokens": 1519,
+              "completion_tokens": 58,
+              "backend_latency_ms": 10783.909485
+            }
+          }
+        },
+        {
+          "seq": 6,
+          "ok": false,
+          "model_called": true,
+          "model_success": false,
+          "latency_ms": 55565.70189800004,
+          "recorded": {
+            "action": "PICK",
+            "confidence": 0.95,
+            "explanation": "OBSERVE of target_box_b succeeded, so proceed to PICK it.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 789.521947,
+              "completion_tokens": 56,
+              "cost": {
+                "call_id": "4ad4113e5506435693e52355d063b4c3",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003612
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1582,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1638
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "PICK",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "pick attempt 1",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "parse_error"
+            }
+          }
+        },
+        {
+          "seq": 7,
+          "ok": false,
+          "model_called": true,
+          "model_success": false,
+          "latency_ms": 53761.12662800006,
+          "recorded": {
+            "action": "OBSERVE",
+            "confidence": 0.9,
+            "explanation": "Pick failed with recoverable error 23, so re-observe target_box_b before retrying within the recovery budget.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 804.007112,
+              "completion_tokens": 67,
+              "cost": {
+                "call_id": "340e7ac4ecbe42b2a52659a8390c7efc",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003802
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1633,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1700
+            },
+            "reason_code": "RECOVERABLE_RETRY",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "OBSERVE",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "RECOVERABLE_RETRY",
+            "explanation": "recoverable pick failure, budget 0/1",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "parse_error"
+            }
+          }
+        },
+        {
+          "seq": 8,
+          "ok": true,
+          "model_called": true,
+          "model_success": true,
+          "latency_ms": 48716.421508001076,
+          "recorded": {
+            "action": "PICK",
+            "confidence": 0.9,
+            "explanation": "Latest OBSERVE of target_box_b succeeded after a recoverable pick failure (error 23), so retry PICK within the recovery budget.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 878.530918,
+              "completion_tokens": 63,
+              "cost": {
+                "call_id": "f53c24cd64ca40a4ad131e3f5ff6085c",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003916
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1706,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1769
+            },
+            "reason_code": "RECOVERABLE_RETRY",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "PICK",
+            "target": "target_box_b",
+            "confidence": 0.95,
+            "reason_code": "RECOVERABLE_RETRY",
+            "explanation": "Previous PICK attempt failed with error 23, retrying within recovery budget.",
+            "policy_trace": {
+              "source": "llm",
+              "fallback": false,
+              "backend": "frozen-local-counterfactual",
+              "model": "flexcell-slow",
+              "tokens": 1808,
+              "response_model": "flexcell-slow",
+              "response_format": "json_schema",
+              "thinking": "backend-default",
+              "finish_reason": "stop",
+              "cost": null,
+              "prompt_tokens": 1741,
+              "completion_tokens": 67,
+              "backend_latency_ms": 48716.197462
+            }
+          }
+        },
+        {
+          "seq": 9,
+          "ok": false,
+          "model_called": true,
+          "model_success": false,
+          "latency_ms": 37336.45489999981,
+          "recorded": {
+            "action": "PLACE",
+            "confidence": 0.95,
+            "explanation": "Pick succeeded for target_box_b, so proceed to place it in zone_2.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 1026.616255,
+              "completion_tokens": 56,
+              "cost": {
+                "call_id": "2df60079d85b4dfb96e57807a5f657d4",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003962
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1757,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1813
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "PLACE",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "plan order: place",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "parse_error"
+            }
+          }
+        },
+        {
+          "seq": 10,
+          "ok": false,
+          "model_called": true,
+          "model_success": false,
+          "latency_ms": 37183.93788799949,
+          "recorded": {
+            "action": "VERIFY",
+            "confidence": 0.95,
+            "explanation": "PLACE for target_box_b succeeded, so verify the placement next.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 776.409738,
+              "completion_tokens": 53,
+              "cost": {
+                "call_id": "9f0d4447d4904959a817a30f10fa064e",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.004044
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1810,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1863
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "VERIFY",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "verify attempt 1",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "parse_error"
+            }
+          }
+        }
+      ],
+      "agreement_steps": 4,
+      "total_steps": 10,
+      "model_successes": 5
+    },
+    {
+      "episode_file": "setup/acceptance/carry_velocity_20261001/s1_5_initial/episodes/week1_demo_v1_week1_demo_v1-340a7e29.json",
+      "episode_sha256": "1d3fe597ed3a2e6e78c129fe6f43cdbfb57b6209a085354c4a82c8a3985a437c",
+      "run_id": "week1_demo_v1-340a7e29",
+      "same_frozen_model": false,
+      "replay_status": "COUNTERFACTUAL",
+      "steps": [
+        {
+          "seq": 1,
+          "ok": true,
+          "model_called": false,
+          "model_success": false,
+          "latency_ms": 0.02901900006690994,
+          "recorded": {
+            "action": "OBSERVE",
+            "confidence": 1.0,
+            "explanation": "plan order: leg start",
+            "policy_trace": {
+              "failure": "bootstrap",
+              "fallback": true,
+              "requested_policy": "llm",
+              "source": "fsm"
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "OBSERVE",
+            "target": "target_box_a",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "plan order: leg start",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "bootstrap"
+            }
+          }
+        },
+        {
+          "seq": 2,
+          "ok": true,
+          "model_called": true,
+          "model_success": true,
+          "latency_ms": 26905.888018998667,
+          "recorded": {
+            "action": "PICK",
+            "confidence": 0.95,
+            "explanation": "OBSERVE of target_box_a succeeded, so proceed to PICK it.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 770.072848,
+              "completion_tokens": 56,
+              "cost": {
+                "call_id": "719e1517d266436d800aa8128e6acea5",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003094
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1323,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1379
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "PICK",
+            "target": "target_box_a",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "First action is to pick up target_box_a as it is the next uncompleted object.",
+            "policy_trace": {
+              "source": "llm",
+              "fallback": false,
+              "backend": "frozen-local-counterfactual",
+              "model": "flexcell-slow",
+              "tokens": 1390,
+              "response_model": "flexcell-slow",
+              "response_format": "json_schema",
+              "thinking": "backend-default",
+              "finish_reason": "stop",
+              "cost": null,
+              "prompt_tokens": 1324,
+              "completion_tokens": 66,
+              "backend_latency_ms": 26905.736631
+            }
+          }
+        },
+        {
+          "seq": 3,
+          "ok": false,
+          "model_called": true,
+          "model_success": true,
+          "latency_ms": 30826.4368070013,
+          "recorded": {
+            "action": "PLACE",
+            "confidence": 0.95,
+            "explanation": "Pick succeeded and carry is engaged, so place target_box_a next.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 1314.76577,
+              "completion_tokens": 53,
+              "cost": {
+                "call_id": "7b3a34a146e84c12bc68784865dad0cb",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003188
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1382,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1435
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "PLACE",
+            "target": "target_box_a",
+            "confidence": 1.0,
+            "reason_code": "RECOVERABLE_RETRY",
+            "explanation": "Previous PICK was successful but failed to place, retrying to ensure object is placed correctly.",
+            "policy_trace": {
+              "source": "llm",
+              "fallback": false,
+              "backend": "frozen-local-counterfactual",
+              "model": "flexcell-slow",
+              "tokens": 1446,
+              "response_model": "flexcell-slow",
+              "response_format": "json_schema",
+              "thinking": "backend-default",
+              "finish_reason": "stop",
+              "cost": null,
+              "prompt_tokens": 1379,
+              "completion_tokens": 67,
+              "backend_latency_ms": 30826.229302
+            }
+          }
+        },
+        {
+          "seq": 4,
+          "ok": false,
+          "model_called": true,
+          "model_success": false,
+          "latency_ms": 28649.05570600058,
+          "recorded": {
+            "action": "VERIFY",
+            "confidence": 0.95,
+            "explanation": "PLACE succeeded for target_box_a, so verify the placement before moving to target_box_b.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 750.30255,
+              "completion_tokens": 58,
+              "cost": {
+                "call_id": "ce66f880a3de4b109ba0e73876c410f4",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.00334
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1438,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1496
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "VERIFY",
+            "target": "target_box_a",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "verify attempt 1",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "parse_error"
+            }
+          }
+        },
+        {
+          "seq": 5,
+          "ok": true,
+          "model_called": true,
+          "model_success": true,
+          "latency_ms": 27263.840551999238,
+          "recorded": {
+            "action": "OBSERVE",
+            "confidence": 0.95,
+            "explanation": "target_box_a verified successfully; begin next assigned object target_box_b with OBSERVE.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 1145.679544,
+              "completion_tokens": 60,
+              "cost": {
+                "call_id": "2c2acbe2ae014d3aaf64574c114a7a35",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003488
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1504,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1564
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "OBSERVE",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "Next object to observe and process.",
+            "policy_trace": {
+              "source": "llm",
+              "fallback": false,
+              "backend": "frozen-local-counterfactual",
+              "model": "flexcell-slow",
+              "tokens": 1565,
+              "response_model": "flexcell-slow",
+              "response_format": "json_schema",
+              "thinking": "backend-default",
+              "finish_reason": "stop",
+              "cost": null,
+              "prompt_tokens": 1509,
+              "completion_tokens": 56,
+              "backend_latency_ms": 27263.678745
+            }
+          }
+        },
+        {
+          "seq": 6,
+          "ok": false,
+          "model_called": true,
+          "model_success": true,
+          "latency_ms": 36056.33737300013,
+          "recorded": {
+            "action": "PICK",
+            "confidence": 0.95,
+            "explanation": "OBSERVE of target_box_b succeeded, so proceed to PICK it.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 1209.702674,
+              "completion_tokens": 56,
+              "cost": {
+                "call_id": "2c1701f3d0ad4dd9958fb76cc5434fef",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003594
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1573,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1629
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "PICK",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "RECOVERABLE_RETRY",
+            "explanation": "Previous PICK attempt failed, but the object is still in the zone and can be retried.",
+            "policy_trace": {
+              "source": "llm",
+              "fallback": false,
+              "backend": "frozen-local-counterfactual",
+              "model": "flexcell-slow",
+              "tokens": 1675,
+              "response_model": "flexcell-slow",
+              "response_format": "json_schema",
+              "thinking": "backend-default",
+              "finish_reason": "stop",
+              "cost": null,
+              "prompt_tokens": 1606,
+              "completion_tokens": 69,
+              "backend_latency_ms": 36056.196326
+            }
+          }
+        },
+        {
+          "seq": 7,
+          "ok": false,
+          "model_called": true,
+          "model_success": true,
+          "latency_ms": 42138.7963369998,
+          "recorded": {
+            "action": "PLACE",
+            "confidence": 0.95,
+            "explanation": "Pick of target_box_b succeeded and carry is engaged, so proceed to place it in zone_2.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 850.473944,
+              "completion_tokens": 60,
+              "cost": {
+                "call_id": "01f19ca4924c4b72ad61998b3be31319",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.00373
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1625,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1685
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "OBSERVE",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "Next action is to observe the second assigned object.",
+            "policy_trace": {
+              "source": "llm",
+              "fallback": false,
+              "backend": "frozen-local-counterfactual",
+              "model": "flexcell-slow",
+              "tokens": 1718,
+              "response_model": "flexcell-slow",
+              "response_format": "json_schema",
+              "thinking": "backend-default",
+              "finish_reason": "stop",
+              "cost": null,
+              "prompt_tokens": 1659,
+              "completion_tokens": 59,
+              "backend_latency_ms": 42138.489289
+            }
+          }
+        },
+        {
+          "seq": 8,
+          "ok": false,
+          "model_called": true,
+          "model_success": true,
+          "latency_ms": 58269.76495800045,
+          "recorded": {
+            "action": "VERIFY",
+            "confidence": 0.95,
+            "explanation": "PLACE for target_box_b succeeded, so verify the placement next.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 963.11146,
+              "completion_tokens": 53,
+              "cost": {
+                "call_id": "ba313c9430134e8d95ba1bf37e922de9",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003786
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1681,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1734
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "OBSERVE",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "Next object to observe and pick is target_box_b.",
+            "policy_trace": {
+              "source": "llm",
+              "fallback": false,
+              "backend": "frozen-local-counterfactual",
+              "model": "flexcell-slow",
+              "tokens": 1778,
+              "response_model": "flexcell-slow",
+              "response_format": "json_schema",
+              "thinking": "backend-default",
+              "finish_reason": "stop",
+              "cost": null,
+              "prompt_tokens": 1718,
+              "completion_tokens": 60,
+              "backend_latency_ms": 58269.50098
+            }
+          }
+        }
+      ],
+      "agreement_steps": 3,
+      "total_steps": 8,
+      "model_successes": 6
+    },
+    {
+      "episode_file": "setup/acceptance/carry_velocity_20261001/s1_5_initial/episodes/week1_demo_v1_week1_demo_v1-34eb26bb.json",
+      "episode_sha256": "8290a55694e6adaa93d85ee2047d6eeedeb4a640f1751edc42e00030303b2ee9",
+      "run_id": "week1_demo_v1-34eb26bb",
+      "same_frozen_model": false,
+      "replay_status": "COUNTERFACTUAL",
+      "steps": [
+        {
+          "seq": 1,
+          "ok": true,
+          "model_called": false,
+          "model_success": false,
+          "latency_ms": 0.03883899989887141,
+          "recorded": {
+            "action": "OBSERVE",
+            "confidence": 1.0,
+            "explanation": "plan order: leg start",
+            "policy_trace": {
+              "failure": "bootstrap",
+              "fallback": true,
+              "requested_policy": "llm",
+              "source": "fsm"
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "OBSERVE",
+            "target": "target_box_a",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "plan order: leg start",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "bootstrap"
+            }
+          }
+        },
+        {
+          "seq": 2,
+          "ok": true,
+          "model_called": true,
+          "model_success": true,
+          "latency_ms": 43521.27882000059,
+          "recorded": {
+            "action": "PICK",
+            "confidence": 0.95,
+            "explanation": "OBSERVE of target_box_a succeeded, so proceed to PICK it.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 1050.880425,
+              "completion_tokens": 56,
+              "cost": {
+                "call_id": "d0b84e62b6e34d70b11dd792d13688fa",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.0031
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1326,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1382
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "PICK",
+            "target": "target_box_a",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "Next action is to pick up the target_box_a as it was successfully observed and verified.",
+            "policy_trace": {
+              "source": "llm",
+              "fallback": false,
+              "backend": "frozen-local-counterfactual",
+              "model": "flexcell-slow",
+              "tokens": 1390,
+              "response_model": "flexcell-slow",
+              "response_format": "json_schema",
+              "thinking": "backend-default",
+              "finish_reason": "stop",
+              "cost": null,
+              "prompt_tokens": 1324,
+              "completion_tokens": 66,
+              "backend_latency_ms": 43521.091269
+            }
+          }
+        },
+        {
+          "seq": 3,
+          "ok": false,
+          "model_called": true,
+          "model_success": false,
+          "latency_ms": 60089.285475,
+          "recorded": {
+            "action": "PLACE",
+            "confidence": 0.95,
+            "explanation": "Pick succeeded and carry is engaged, so place target_box_a into zone_1.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 852.56333,
+              "completion_tokens": 56,
+              "cost": {
+                "call_id": "53fbe207cb414a319fb4f8bbb5850880",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003206
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1379,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1435
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "PLACE",
+            "target": "target_box_a",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "plan order: place",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "backend_error"
+            }
+          }
+        },
+        {
+          "seq": 4,
+          "ok": false,
+          "model_called": true,
+          "model_success": false,
+          "latency_ms": 42992.69784600074,
+          "recorded": {
+            "action": "VERIFY",
+            "confidence": 0.95,
+            "explanation": "PLACE succeeded for target_box_a, so verify the placement before moving to target_box_b.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 1034.618139,
+              "completion_tokens": 49,
+              "cost": {
+                "call_id": "33b40ab2a8de4641bc4915834f05ed91",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003264
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1436,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1485
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "VERIFY",
+            "target": "target_box_a",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "verify attempt 1",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "parse_error"
+            }
+          }
+        },
+        {
+          "seq": 5,
+          "ok": true,
+          "model_called": true,
+          "model_success": true,
+          "latency_ms": 35282.712825001,
+          "recorded": {
+            "action": "OBSERVE",
+            "confidence": 0.95,
+            "explanation": "target_box_a verified successfully; begin next assigned object target_box_b with OBSERVE.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 1055.139566,
+              "completion_tokens": 60,
+              "cost": {
+                "call_id": "fe5e7bc7be2e421b83b275fb0608e239",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003492
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1506,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1566
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "OBSERVE",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "Next object to observe and process.",
+            "policy_trace": {
+              "source": "llm",
+              "fallback": false,
+              "backend": "frozen-local-counterfactual",
+              "model": "flexcell-slow",
+              "tokens": 1571,
+              "response_model": "flexcell-slow",
+              "response_format": "json_schema",
+              "thinking": "backend-default",
+              "finish_reason": "stop",
+              "cost": null,
+              "prompt_tokens": 1515,
+              "completion_tokens": 56,
+              "backend_latency_ms": 35282.514917
+            }
+          }
+        },
+        {
+          "seq": 6,
+          "ok": false,
+          "model_called": true,
+          "model_success": true,
+          "latency_ms": 48137.71943699976,
+          "recorded": {
+            "action": "PLACE",
+            "confidence": 0.9,
+            "explanation": "OBSERVE of target_box_b succeeded, so proceed to PLACE it into zone_2.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 956.536832,
+              "completion_tokens": 51,
+              "cost": {
+                "call_id": "79d00a0b26e045cd80092cc91f29187a",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003594
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1593,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1644
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "PICK",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "RECOVERABLE_RETRY",
+            "explanation": "Previous PICK attempt failed, but recovery budget is available.",
+            "policy_trace": {
+              "source": "llm",
+              "fallback": false,
+              "backend": "frozen-local-counterfactual",
+              "model": "flexcell-slow",
+              "tokens": 1695,
+              "response_model": "flexcell-slow",
+              "response_format": "json_schema",
+              "thinking": "backend-default",
+              "finish_reason": "stop",
+              "cost": null,
+              "prompt_tokens": 1634,
+              "completion_tokens": 61,
+              "backend_latency_ms": 48137.349409
+            }
+          }
+        }
+      ],
+      "agreement_steps": 3,
+      "total_steps": 6,
+      "model_successes": 3
+    },
+    {
+      "episode_file": "setup/acceptance/carry_velocity_20261001/s1_5_initial/episodes/week1_demo_v1_week1_demo_v1-6d4a5b3d.json",
+      "episode_sha256": "82bb0a97459f6e014eaad0db9e45082a8850b80bcb3333a3452dd554eca6c705",
+      "run_id": "week1_demo_v1-6d4a5b3d",
+      "same_frozen_model": false,
+      "replay_status": "COUNTERFACTUAL",
+      "steps": [
+        {
+          "seq": 1,
+          "ok": true,
+          "model_called": false,
+          "model_success": false,
+          "latency_ms": 0.0421029999415623,
+          "recorded": {
+            "action": "OBSERVE",
+            "confidence": 1.0,
+            "explanation": "plan order: leg start",
+            "policy_trace": {
+              "failure": "bootstrap",
+              "fallback": true,
+              "requested_policy": "llm",
+              "source": "fsm"
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "OBSERVE",
+            "target": "target_box_a",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "plan order: leg start",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "bootstrap"
+            }
+          }
+        },
+        {
+          "seq": 2,
+          "ok": true,
+          "model_called": true,
+          "model_success": true,
+          "latency_ms": 51987.57996899985,
+          "recorded": {
+            "action": "PICK",
+            "confidence": 0.95,
+            "explanation": "OBSERVE of target_box_a succeeded, so proceed to PICK it.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 789.238355,
+              "completion_tokens": 56,
+              "cost": {
+                "call_id": "ff29640a5e4f4669a005877821c2d1a1",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003104
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1328,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1384
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "PICK",
+            "target": "target_box_a",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "Next action is to pick up the target_box_a as it was successfully observed and verified.",
+            "policy_trace": {
+              "source": "llm",
+              "fallback": false,
+              "backend": "frozen-local-counterfactual",
+              "model": "flexcell-slow",
+              "tokens": 1403,
+              "response_model": "flexcell-slow",
+              "response_format": "json_schema",
+              "thinking": "backend-default",
+              "finish_reason": "stop",
+              "cost": null,
+              "prompt_tokens": 1337,
+              "completion_tokens": 66,
+              "backend_latency_ms": 51987.291633
+            }
+          }
+        },
+        {
+          "seq": 3,
+          "ok": false,
+          "model_called": true,
+          "model_success": true,
+          "latency_ms": 44137.48525899973,
+          "recorded": {
+            "action": "PLACE",
+            "confidence": 0.95,
+            "explanation": "Pick succeeded and carry is engaged, so place target_box_a into zone_1.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 906.103453,
+              "completion_tokens": 56,
+              "cost": {
+                "call_id": "d048330b083043fb944c1cc7778f6a78",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003214
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1383,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1439
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "OBSERVE",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "Next object to observe and pick is target_box_b.",
+            "policy_trace": {
+              "source": "llm",
+              "fallback": false,
+              "backend": "frozen-local-counterfactual",
+              "model": "flexcell-slow",
+              "tokens": 1446,
+              "response_model": "flexcell-slow",
+              "response_format": "json_schema",
+              "thinking": "backend-default",
+              "finish_reason": "stop",
+              "cost": null,
+              "prompt_tokens": 1388,
+              "completion_tokens": 58,
+              "backend_latency_ms": 44137.024053
+            }
+          }
+        },
+        {
+          "seq": 4,
+          "ok": false,
+          "model_called": true,
+          "model_success": false,
+          "latency_ms": 47246.70706299912,
+          "recorded": {
+            "action": "VERIFY",
+            "confidence": 0.95,
+            "explanation": "PLACE for target_box_a succeeded, so verify the placement before moving to target_box_b.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 696.294236,
+              "completion_tokens": 49,
+              "cost": {
+                "call_id": "618b18bebcfa4eb494fb344db1fe393f",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.00328
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1444,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1493
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "VERIFY",
+            "target": "target_box_a",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "verify attempt 1",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "parse_error"
+            }
+          }
+        },
+        {
+          "seq": 5,
+          "ok": true,
+          "model_called": true,
+          "model_success": true,
+          "latency_ms": 48194.6814439998,
+          "recorded": {
+            "action": "OBSERVE",
+            "confidence": 0.95,
+            "explanation": "target_box_a verified successfully, so begin the next unfinished object target_box_b with OBSERVE.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 1060.386083,
+              "completion_tokens": 53,
+              "cost": {
+                "call_id": "dd962f2966ec473a9e34b9dfcf6d3aff",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003452
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1514,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1567
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "OBSERVE",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "Next object to observe and process is target_box_b.",
+            "policy_trace": {
+              "source": "llm",
+              "fallback": false,
+              "backend": "frozen-local-counterfactual",
+              "model": "flexcell-slow",
+              "tokens": 1586,
+              "response_model": "flexcell-slow",
+              "response_format": "json_schema",
+              "thinking": "backend-default",
+              "finish_reason": "stop",
+              "cost": null,
+              "prompt_tokens": 1526,
+              "completion_tokens": 60,
+              "backend_latency_ms": 48194.41311
+            }
+          }
+        },
+        {
+          "seq": 6,
+          "ok": false,
+          "model_called": true,
+          "model_success": false,
+          "latency_ms": 50584.96233900041,
+          "recorded": {
+            "action": "PICK",
+            "confidence": 0.95,
+            "explanation": "OBSERVE of target_box_b succeeded, so proceed to PICK it.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 1009.035119,
+              "completion_tokens": 56,
+              "cost": {
+                "call_id": "55bb1884fb824ce5b06dca62653ba863",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003622
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1587,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1643
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "PICK",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "pick attempt 1",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "parse_error"
+            }
+          }
+        },
+        {
+          "seq": 7,
+          "ok": false,
+          "model_called": true,
+          "model_success": false,
+          "latency_ms": 46190.17225099924,
+          "recorded": {
+            "action": "OBSERVE",
+            "confidence": 0.9,
+            "explanation": "Pick failed with recoverable error 30; reobserve target_box_b before retrying within recovery budget.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 1115.631842,
+              "completion_tokens": 65,
+              "cost": {
+                "call_id": "4f6fe1b7a3964a648f8e8c3b10a0fab5",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003784
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1632,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1697
+            },
+            "reason_code": "RECOVERABLE_RETRY",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "OBSERVE",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "RECOVERABLE_RETRY",
+            "explanation": "recoverable pick failure, budget 0/1",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "parse_error"
+            }
+          }
+        },
+        {
+          "seq": 8,
+          "ok": false,
+          "model_called": true,
+          "model_success": false,
+          "latency_ms": 38419.0845789999,
+          "recorded": {
+            "action": "PLACE",
+            "confidence": 0.95,
+            "explanation": "OBSERVE succeeded and carry is engaged with target_box_b, so proceed to PLACE into zone_2.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 1056.643573,
+              "completion_tokens": 63,
+              "cost": {
+                "call_id": "5daf64b785984c18949f8d1eeeb7ede2",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003942
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1719,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1782
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "PICK",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "pick attempt 2",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "parse_error"
+            }
+          }
+        },
+        {
+          "seq": 9,
+          "ok": false,
+          "model_called": true,
+          "model_success": false,
+          "latency_ms": 39772.126005000246,
+          "recorded": {
+            "action": "VERIFY",
+            "confidence": 0.95,
+            "explanation": "PLACE for target_box_b succeeded, so verify it before finishing the task.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 1042.430736,
+              "completion_tokens": 46,
+              "cost": {
+                "call_id": "360067e6b72b4a17b47282f5fc7f0ed4",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.0039
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1766,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1812
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "ABORT",
+            "target": "",
+            "confidence": 1.0,
+            "reason_code": "POLICY_FAILURE",
+            "explanation": "history outside FSM fallback grammar",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "parse_error"
+            }
+          }
+        }
+      ],
+      "agreement_steps": 3,
+      "total_steps": 9,
+      "model_successes": 3
+    },
+    {
+      "episode_file": "setup/acceptance/carry_velocity_20261001/s1_5_initial/episodes/week1_demo_v1_week1_demo_v1-d4bfeef7.json",
+      "episode_sha256": "8e404dcf48d9d17893a364232c2ef7b346e492c4a2a44b46fcc4f1ef2d1efdfe",
+      "run_id": "week1_demo_v1-d4bfeef7",
+      "same_frozen_model": false,
+      "replay_status": "COUNTERFACTUAL",
+      "steps": [
+        {
+          "seq": 1,
+          "ok": true,
+          "model_called": false,
+          "model_success": false,
+          "latency_ms": 0.34792999940691516,
+          "recorded": {
+            "action": "OBSERVE",
+            "confidence": 1.0,
+            "explanation": "plan order: leg start",
+            "policy_trace": {
+              "failure": "bootstrap",
+              "fallback": true,
+              "requested_policy": "llm",
+              "source": "fsm"
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "OBSERVE",
+            "target": "target_box_a",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "plan order: leg start",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "bootstrap"
+            }
+          }
+        },
+        {
+          "seq": 2,
+          "ok": true,
+          "model_called": true,
+          "model_success": true,
+          "latency_ms": 51095.840046000376,
+          "recorded": {
+            "action": "PICK",
+            "confidence": 1.0,
+            "explanation": "pick attempt 1",
+            "policy_trace": {
+              "failure": "backend_error",
+              "fallback": true,
+              "requested_policy": "llm",
+              "source": "fsm"
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "PICK",
+            "target": "target_box_a",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "Next action is to pick up the target_box_a as it was successfully observed in the previous step.",
+            "policy_trace": {
+              "source": "llm",
+              "fallback": false,
+              "backend": "frozen-local-counterfactual",
+              "model": "flexcell-slow",
+              "tokens": 1399,
+              "response_model": "flexcell-slow",
+              "response_format": "json_schema",
+              "thinking": "backend-default",
+              "finish_reason": "stop",
+              "cost": null,
+              "prompt_tokens": 1331,
+              "completion_tokens": 68,
+              "backend_latency_ms": 51095.416857
+            }
+          }
+        },
+        {
+          "seq": 3,
+          "ok": false,
+          "model_called": true,
+          "model_success": true,
+          "latency_ms": 28672.796806000406,
+          "recorded": {
+            "action": "PLACE",
+            "confidence": 0.95,
+            "explanation": "Pick succeeded and carry is engaged, so place target_box_a into zone_1.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 945.228741,
+              "completion_tokens": 56,
+              "cost": {
+                "call_id": "9758d2c9391249d09c612a309666e469",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.00319
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1371,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1427
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "PICK",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "RECOVERABLE_RETRY",
+            "explanation": "Previous PICK attempt failed, but target is still engaged and the object is in the same zone.",
+            "policy_trace": {
+              "source": "llm",
+              "fallback": false,
+              "backend": "frozen-local-counterfactual",
+              "model": "flexcell-slow",
+              "tokens": 1453,
+              "response_model": "flexcell-slow",
+              "response_format": "json_schema",
+              "thinking": "backend-default",
+              "finish_reason": "stop",
+              "cost": null,
+              "prompt_tokens": 1384,
+              "completion_tokens": 69,
+              "backend_latency_ms": 28672.599913
+            }
+          }
+        },
+        {
+          "seq": 4,
+          "ok": false,
+          "model_called": true,
+          "model_success": false,
+          "latency_ms": 60116.41500800033,
+          "recorded": {
+            "action": "VERIFY",
+            "confidence": 0.95,
+            "explanation": "Place succeeded for target_box_a, so verify the placement before moving to target_box_b.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 1180.871212,
+              "completion_tokens": 48,
+              "cost": {
+                "call_id": "85bc5929061749a39d3f05a7e29bfb6a",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003236
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1426,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1474
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_a"
+          },
+          "replayed": {
+            "action": "VERIFY",
+            "target": "target_box_a",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "verify attempt 1",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "backend_error"
+            }
+          }
+        },
+        {
+          "seq": 5,
+          "ok": false,
+          "model_called": true,
+          "model_success": false,
+          "latency_ms": 60193.0926820005,
+          "recorded": {
+            "action": "OBSERVE",
+            "confidence": 0.95,
+            "explanation": "target_box_a verified successfully, so begin the next unfinished object target_box_b with OBSERVE.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 1131.014246,
+              "completion_tokens": 62,
+              "cost": {
+                "call_id": "0f336ac870ee421188386936244fad1a",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003488
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1496,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1558
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "OBSERVE",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "plan order: leg start",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "backend_error"
+            }
+          }
+        },
+        {
+          "seq": 6,
+          "ok": false,
+          "model_called": true,
+          "model_success": false,
+          "latency_ms": 60176.59400199955,
+          "recorded": {
+            "action": "PICK",
+            "confidence": 0.95,
+            "explanation": "OBSERVE of target_box_b succeeded, so proceed to PICK it.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 1285.218644,
+              "completion_tokens": 56,
+              "cost": {
+                "call_id": "4fc12d4aca0e4e1b9a9816f46b199361",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.003582
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1567,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1623
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "PICK",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "pick attempt 1",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "backend_error"
+            }
+          }
+        },
+        {
+          "seq": 7,
+          "ok": false,
+          "model_called": true,
+          "model_success": false,
+          "latency_ms": 60199.48066500001,
+          "recorded": {
+            "action": "PLACE",
+            "confidence": 0.95,
+            "explanation": "Pick of target_box_b succeeded and carry is engaged, so proceed to place it in zone_2.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 1105.751691,
+              "completion_tokens": 60,
+              "cost": {
+                "call_id": "1b64ab898310485392b28e2ec14c6a21",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.00372
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1620,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1680
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "PLACE",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "plan order: place",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "backend_error"
+            }
+          }
+        },
+        {
+          "seq": 8,
+          "ok": false,
+          "model_called": true,
+          "model_success": false,
+          "latency_ms": 60183.352891999675,
+          "recorded": {
+            "action": "VERIFY",
+            "confidence": 0.95,
+            "explanation": "PLACE for target_box_b succeeded, so verify the placement next.",
+            "policy_trace": {
+              "backend": "deepseek-official",
+              "backend_latency_ms": 1238.314374,
+              "completion_tokens": 53,
+              "cost": {
+                "call_id": "1d1a3b7fac0f41b38f6d9bb20eaf63f5",
+                "status": "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING",
+                "upper_bound_cny": 0.00378
+              },
+              "fallback": false,
+              "finish_reason": "stop",
+              "model": "deepseek-flash",
+              "prompt_tokens": 1678,
+              "response_format": "json_object",
+              "response_model": "deepseek-flash",
+              "source": "llm",
+              "thinking": "disabled",
+              "tokens": 1731
+            },
+            "reason_code": "PLAN_NEXT",
+            "target": "target_box_b"
+          },
+          "replayed": {
+            "action": "VERIFY",
+            "target": "target_box_b",
+            "confidence": 1.0,
+            "reason_code": "PLAN_NEXT",
+            "explanation": "verify attempt 1",
+            "policy_trace": {
+              "source": "fsm",
+              "fallback": true,
+              "requested_policy": "llm",
+              "failure": "backend_error"
+            }
+          }
+        }
+      ],
+      "agreement_steps": 2,
+      "total_steps": 8,
+      "model_successes": 2
+    }
+  ]
+}

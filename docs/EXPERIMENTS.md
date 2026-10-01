@@ -1,5 +1,11 @@
 # EXPERIMENTS — log
 
+> 2026-10-02 主线修复（E-016）：仓内启动路径、typed 控制器就绪探测和
+> carry 权威快照已落地；冷启动 FSM 双物体 S1 成功，真实旧 A carry 注入
+> 探针通过。Jev 已有真实校准，快路径不具备 0.7 路由资格；离线冻结模型
+> 重放实际 FAIL，Hybrid 在线 smoke 未通过。最终部署 FSM/IDLE。
+> [实现、失败证据及剩余门槛](HARDENING_20261002.md)。
+
 > 2026-10-01 主线接入（E-015）：速度约束 magnetic carry、engage 确认和
 > PLACE 内部依赖门禁已上线；最终单物体闭环 2.86 mm。不同指纹的首批
 > S1×5=4/5、确认后 S1×2=1/2，均未解锁统计基线。
@@ -49,6 +55,7 @@
 | E-013 | Official DeepSeek policy + persistent RMB 5 budget + action handoff    | ONLINE PARTIAL; S1 3/5; BASELINE FROZEN | [DEEPSEEK_20261001.md](DEEPSEEK_20261001.md)                    |
 | E-014 | DDS fragment-path diagnosis + servo velocity controls                 | MECHANISM PROBES; NOT BENCHMARK | [MECHANISM_20261001.md](MECHANISM_20261001.md) |
 | E-015 | Leased velocity carry + engage receipt + PLACE dependency readiness | DEPLOYED; FINAL SINGLE PASS; SMOKE INCOMPLETE | [CARRY_VELOCITY_20261001.md](CARRY_VELOCITY_20261001.md) |
+| E-016 | Lifecycle paths + authoritative carry + local calibration/replay | FSM CONTROL PASS; HYBRID/REPLAY FAIL; NOT BENCHMARK | [HARDENING_20261002.md](HARDENING_20261002.md) |
 | M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN                  | — (RFC #15; harness #7/#8/#9)                                         |
 
 ## Entries
@@ -507,6 +514,30 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
   conservative upper bound including one historical unknown reservation.
 - **Evidence**: [report](CARRY_VELOCITY_20261001.md),
   [manifest](../setup/acceptance/carry_velocity_20261001/manifest.json).
+
+### E-016 — Mainline carry authority and model evaluation (2026-10-02)
+
+- **Change**: workspace lifecycle paths, typed controller readiness, authoritative
+  carry query checked against native ownership; bounded status reply retries,
+  isolated pose worker, and admin success contingent on child exit.
+- **Online**: cold FSM S1 double-object passed (A 2.11 mm / B 14.81 mm, 8 replay
+  decisions). Four Hybrid attempts retain failures/timeouts and distinct
+  fingerprints. Final FSM deployment reset, strict health and stale-A injection
+  probe pass; no final-fingerprint S1 batch claim.
+- **Models**: real local Jev calibration 4/30 FSM agreement, heldout 1/5; calibrated
+  lower bound 0.0531 disallows the 0.7 fast route. Local counterfactual 5 episodes /
+  41 steps has 15 semantic agreements; one same-frozen-model fixture replay fails
+  with 6 divergent/unavailable steps. No fixture claims robot execution or
+  historical DeepSeek same-model replay.
+- **Validation**: 193 skills tests pass; 5 targeted carry tests pass including two
+  new reply-loss cases; build passes; actual crashing admin child is rejected.
+  Historical evidence 454 manifest items retain exact Git/worktree bytes.
+- **Budget/limits**: same RMB 5 ledger, 163 records / RMB 1.168980 conservative upper
+  bound, including 6 unknown reservations. Minimal official completion requests
+  time out through proxy and direct. Historical reset/flood roots remain UNKNOWN;
+  large batch NOT_STARTED, rosdep NOT_VERIFIED, MTC pending. Local commits, no push.
+- **Evidence**: [report](HARDENING_20261002.md),
+  [manifest](../setup/acceptance/hardening_20261002/manifest.json).
 
 ## Evidence locations
 

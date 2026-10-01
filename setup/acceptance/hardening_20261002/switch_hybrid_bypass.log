@@ -1,0 +1,8 @@
+STOPPED fleet group=33657
+STARTED fleet pid=36125 log=/home/ros/.local/share/flexcell/mainline/runtime/20261002_032316/fleet.log
+Traceback (most recent call last):
+  File "/mnt/c/dev/flexcell/setup/108_wait_policy.py", line 61, in <module>
+    main()
+  File "/mnt/c/dev/flexcell/setup/108_wait_policy.py", line 53, in main
+    raise RuntimeError('current carry backend state unconfirmed')
+RuntimeError: current carry backend state unconfirmed

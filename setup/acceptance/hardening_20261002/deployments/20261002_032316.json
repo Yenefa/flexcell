@@ -1,0 +1,160 @@
+{
+  "policy": "hybrid",
+  "threshold": 0.7,
+  "protocol_sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+  "interface_sources_sha256": {
+    "src/flexcell/flexcell_interfaces/CMakeLists.txt": "61ed4eccfb51a853652fbee68a9b6b0194e8dbd99bad9e069a1c2bb42fab0054",
+    "src/flexcell/flexcell_interfaces/package.xml": "890652c95eec1ad6f7309e7d0348856e2e98476f544d4769462b40adc52756f4",
+    "src/flexcell/flexcell_interfaces/action/MoveToPose.action": "e240dad9326435e0ef6d524a0c05c5e500f3411b6c8f3239c6ff88254e7ffbf5",
+    "src/flexcell/flexcell_interfaces/action/Observe.action": "7ebb485193debba8fedbfd1d06e99049a77756049d40c4badbccbde60ea80ae6",
+    "src/flexcell/flexcell_interfaces/action/PickObject.action": "83c1956225d2d83d230a12a02e1c6578020df48ba608486acc42afc216f92e8a",
+    "src/flexcell/flexcell_interfaces/action/PlaceObject.action": "1fbef7be2b0c65a5556ba5c0fdf63ddec631a90e0667154ca23c4ad71c6b313a",
+    "src/flexcell/flexcell_interfaces/action/RunDemo.action": "89f59b3fc7af42bef5568ad43c8ba441783353bea909a0cd901da3db73aac1b9",
+    "src/flexcell/flexcell_interfaces/action/RunPickPlace.action": "5e0e7a419540d66eb6c8cdda04ed38cc24d1c10449d5a5c36ed388a4a1764126",
+    "src/flexcell/flexcell_interfaces/action/VerifyObject.action": "0881672df539feb9fafb3e869c0db4b9775e48ee942e3d5aeb482fb573e27b3d",
+    "src/flexcell/flexcell_interfaces/msg/Assignment.msg": "434f5ade7a879157ab57b3b71c17e409d2ee2d75064006fd4bd1f241dfd76f6a",
+    "src/flexcell/flexcell_interfaces/msg/CarryState.msg": "7f97e5067cb88851caf4203d91b97ad252dccd10380a0af798e13d337d9b6dab",
+    "src/flexcell/flexcell_interfaces/msg/HistoryEntry.msg": "a8d3843da671dcb5c4c696094afb466239f34fff02d915bfe9bb4593221fea5a",
+    "src/flexcell/flexcell_interfaces/msg/RobotStateSummary.msg": "e0aa94711c8a542d1c7a49aedbe9ddf5f41ec96440544e0559ad6d7ced66f16a",
+    "src/flexcell/flexcell_interfaces/msg/TaskConstraints.msg": "e71af89133cd4e5546c68c13e89a0161b81b1d2182eff2e967affdddbf4d5905",
+    "src/flexcell/flexcell_interfaces/msg/TaskContext.msg": "1a27d4d5063d2da2d4bb2cfd1a5e41c2b7acfdeb9ee834034847efd00ab331fc",
+    "src/flexcell/flexcell_interfaces/msg/WorldObject.msg": "2cef6aae25356229abed3c05360296c5a80445f18532dcb5327f395333e87cb8",
+    "src/flexcell/flexcell_interfaces/msg/WorldState.msg": "27c04764826a6ef69346ceb7115a88c5622889048c9d719508a45d9a43c32207",
+    "src/flexcell/flexcell_interfaces/msg/ZoneState.msg": "ff5cbc173d74b69a77ddbbe113a10c93a95093c05b7c8e3bdf536b6ef41422de",
+    "src/flexcell/flexcell_interfaces/srv/EngageCarry.srv": "595b2dab7cdfd721f4cace50662d415385548c925f876ef137b089587b2c9f2a",
+    "src/flexcell/flexcell_interfaces/srv/QueryCarry.srv": "4bc70d47ba6c0b92c905b83f430b7a17c72ec14d924f827b00d166ac84a51135"
+  },
+  "installed_source_sha256": {
+    "place_server.py": "8698e1ad755544fb406342938140e39b547e34b54a6e7237235e9c55bc10f020",
+    "jev_policy.py": "1517b17ee4f9dc1adce5142d99362c37381b0026986783cb3ee62296ebed85de",
+    "hybrid_policy.py": "6be5ca28d03f7ce8f2b69f4e82f568178ecbe990e9c121345e871456a4bdc272",
+    "carry_server.py": "298fde2126bf4c8ef29181f543e1cd8b7bac44f0d69b905fb378da6ec4524484",
+    "canonical_state.py": "8e3c9f0f32ac0202d9eb34a36cf8fa460ce5c735800c942c90b5bace7894b655",
+    "decision_policy.py": "805b532d0bdde387229f68486929873d4246c74048073883e5e0baf040875bc3",
+    "__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pose_stream_worker.py": "beca69f11fde071416991310b36ab0538d3200b1b461b54e892d697b35d8090b",
+    "observe_server.py": "5ce86e3051470b61730422eda89130bd5dd7a7219d85601528f1b4fd3b81b430",
+    "skill_contract.py": "14fd903e6680d50f02a854f71de8bf7ea76329334b186375d8fb2d4032fe5eb6",
+    "llm_policy.py": "ff506605d332725641ebe7ac3a9356dd7cc0024d120f03afc1523d082811a85d",
+    "confidence_calibration.py": "499b1c8d060f93e68c0b8db2ea05ad81c7c21a61055b4ecbdd9cf5cb55625fde",
+    "inference_budget.py": "addb4fc44c5336e039dc8d3a14c75043028b228d18f9fabe3e81d3ecefeb6f30",
+    "task_fsm_server.py": "66a01c09c2167d612a86c607d81add287d7619681adf121fc15491b66e9a2f07",
+    "common.py": "31aab57cd1f790f127c6a513dedf3d43f3b7db626d14ec9a71cca814db2868e6",
+    "verify_server.py": "5ba413c948a72e79b399bf5ab5a8bef544769aef35b73369c87e5da0c3380581",
+    "pick_server.py": "8db5d4e3cb468d58a0c816382ac0ed486f593ba68d51faa5d83b65a48c911cd2",
+    "move_to_pose_server.py": "b041b7b8105c0089c997a87cc2f63e1ddde7682b5bbcea4b718a22a9bc86b2be",
+    "jev_backends.py": "5a029f5ea947987d7d06d4ca65e93454c64efd03204d502704bf834b0e05272a",
+    "contracts/recovery.py": "9da093f08d5a3a1a68e8fad232a21ce94f186310ed6760920c344857a00e2ac0",
+    "contracts/injection.py": "0846cf172cd196311d84e21307dfa655842262103a497e61f442fc496f34c369",
+    "contracts/benchmark_protocol.py": "80850e36663e7427d1cccbc0304d442e338fbc3a2fa84a965a40c20c03f57977",
+    "contracts/episode.py": "0821a2552e4950088a9711735c93db05fb0385264d307c79b88f8bb0aa93d938",
+    "contracts/trajectory.py": "0e573ec40181c5e379611b559abf753cf4b3e2a879313764564c7bc00d4a9e79",
+    "contracts/__init__.py": "b4529fdefce9fd91518814bb684cb28f17aa1d5edf3c84ce0904480e19c6bd3a",
+    "contracts/action_result.py": "8c70c1de6f5fd0329db0ec23bf9c39878ada56f541899315db710ddffac4edf5",
+    "contracts/error_codes.py": "c7b5aff2295bc5ce3436d24fbfe3ab1f41190c88826c28747cf7339f5b23ccf1",
+    "contracts/skill_result.py": "473bd79ffd4317799d8ad2619095b9128d01162d9efd971d39a69a99fdc10572",
+    "contracts/safety_gate.py": "d3f056b3c8d089604cea472952bd4b3984417ba638e1b8e5c111196010a4e057",
+    "contracts/metrics.py": "feaa7ccbf36b10af0affb2c11cde820136aec1e49ecd5d405662df5038fb06ed"
+  },
+  "simulation_backend": {
+    "carry": "velocity_servo",
+    "native_sources": {
+      "src/flexcell/flexcell_gazebo/CMakeLists.txt": "963c4f1e6cdc5480ef8a201477e0d24f5005ad9ed0ec1fcaeb1bafa94c5d0e24",
+      "src/flexcell/flexcell_gazebo/package.xml": "cc4dbbc86ff674f3cc5218018e22068c566cbada495f9fc45d821c1c45c1bde1",
+      "src/flexcell/flexcell_gazebo/hooks/plugin_path.dsv": "777d044a3a3d3751f77abe96cc461d03fbbb59e8b80c6921338cda4f74dcfbf3",
+      "src/flexcell/flexcell_gazebo/src/CarryDynamics.cc": "2b2a4ec0c60edd74982636e0923021d906409dc175849956474f154b43710783"
+    },
+    "plugin_sha256": "62b572670119abf058139ee1878a5d2c95e7dc2b7c3e6887ead97cecc8b6e8db"
+  },
+  "params_sha256": "e96a07042178ac25b38fad4b8555d40b2e4c8b48ef1ffe9975d20a58b76c77e7",
+  "harness_sha256": {
+    "setup/94_scenario_runner.py": "fe5965a44b5d32becbe15546ef9d85c763b5568441bfc40191ec78a9a5a93f99",
+    "setup/flexcell_admin.py": "cabe3591527f8fa899f81e8adb02427b3e286df07c577d5db4061762b3e7362c",
+    "setup/108_wait_policy.py": "eebc37282c6d816dc3e49dc1ddf38343b5d8ba8b5a8c144f845b0242d6810894",
+    "src/flexcell/flexcell_skills/test/w1_client.py": "86ad4b2ae9bbaf20ceda3f9b0e05051f99701ea58331bc0d2a782acbec58b370"
+  },
+  "source_sha256": {
+    "src/flexcell/flexcell_skills/flexcell_skills/canonical_state.py": "8e3c9f0f32ac0202d9eb34a36cf8fa460ce5c735800c942c90b5bace7894b655",
+    "src/flexcell/flexcell_skills/flexcell_skills/carry_server.py": "298fde2126bf4c8ef29181f543e1cd8b7bac44f0d69b905fb378da6ec4524484",
+    "src/flexcell/flexcell_skills/flexcell_skills/common.py": "31aab57cd1f790f127c6a513dedf3d43f3b7db626d14ec9a71cca814db2868e6",
+    "src/flexcell/flexcell_skills/flexcell_skills/confidence_calibration.py": "499b1c8d060f93e68c0b8db2ea05ad81c7c21a61055b4ecbdd9cf5cb55625fde",
+    "src/flexcell/flexcell_skills/flexcell_skills/decision_policy.py": "805b532d0bdde387229f68486929873d4246c74048073883e5e0baf040875bc3",
+    "src/flexcell/flexcell_skills/flexcell_skills/hybrid_policy.py": "6be5ca28d03f7ce8f2b69f4e82f568178ecbe990e9c121345e871456a4bdc272",
+    "src/flexcell/flexcell_skills/flexcell_skills/inference_budget.py": "addb4fc44c5336e039dc8d3a14c75043028b228d18f9fabe3e81d3ecefeb6f30",
+    "src/flexcell/flexcell_skills/flexcell_skills/jev_backends.py": "5a029f5ea947987d7d06d4ca65e93454c64efd03204d502704bf834b0e05272a",
+    "src/flexcell/flexcell_skills/flexcell_skills/jev_policy.py": "1517b17ee4f9dc1adce5142d99362c37381b0026986783cb3ee62296ebed85de",
+    "src/flexcell/flexcell_skills/flexcell_skills/llm_policy.py": "ff506605d332725641ebe7ac3a9356dd7cc0024d120f03afc1523d082811a85d",
+    "src/flexcell/flexcell_skills/flexcell_skills/move_to_pose_server.py": "b041b7b8105c0089c997a87cc2f63e1ddde7682b5bbcea4b718a22a9bc86b2be",
+    "src/flexcell/flexcell_skills/flexcell_skills/observe_server.py": "5ce86e3051470b61730422eda89130bd5dd7a7219d85601528f1b4fd3b81b430",
+    "src/flexcell/flexcell_skills/flexcell_skills/pick_server.py": "8db5d4e3cb468d58a0c816382ac0ed486f593ba68d51faa5d83b65a48c911cd2",
+    "src/flexcell/flexcell_skills/flexcell_skills/place_server.py": "8698e1ad755544fb406342938140e39b547e34b54a6e7237235e9c55bc10f020",
+    "src/flexcell/flexcell_skills/flexcell_skills/pose_stream_worker.py": "beca69f11fde071416991310b36ab0538d3200b1b461b54e892d697b35d8090b",
+    "src/flexcell/flexcell_skills/flexcell_skills/skill_contract.py": "14fd903e6680d50f02a854f71de8bf7ea76329334b186375d8fb2d4032fe5eb6",
+    "src/flexcell/flexcell_skills/flexcell_skills/task_fsm_server.py": "66a01c09c2167d612a86c607d81add287d7619681adf121fc15491b66e9a2f07",
+    "src/flexcell/flexcell_skills/flexcell_skills/verify_server.py": "5ba413c948a72e79b399bf5ab5a8bef544769aef35b73369c87e5da0c3380581",
+    "src/flexcell/flexcell_skills/flexcell_skills/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/action_result.py": "8c70c1de6f5fd0329db0ec23bf9c39878ada56f541899315db710ddffac4edf5",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/benchmark_protocol.py": "80850e36663e7427d1cccbc0304d442e338fbc3a2fa84a965a40c20c03f57977",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/episode.py": "0821a2552e4950088a9711735c93db05fb0385264d307c79b88f8bb0aa93d938",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/error_codes.py": "c7b5aff2295bc5ce3436d24fbfe3ab1f41190c88826c28747cf7339f5b23ccf1",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/injection.py": "0846cf172cd196311d84e21307dfa655842262103a497e61f442fc496f34c369",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/metrics.py": "feaa7ccbf36b10af0affb2c11cde820136aec1e49ecd5d405662df5038fb06ed",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/recovery.py": "9da093f08d5a3a1a68e8fad232a21ce94f186310ed6760920c344857a00e2ac0",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/safety_gate.py": "d3f056b3c8d089604cea472952bd4b3984417ba638e1b8e5c111196010a4e057",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/skill_result.py": "473bd79ffd4317799d8ad2619095b9128d01162d9efd971d39a69a99fdc10572",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/trajectory.py": "0e573ec40181c5e379611b559abf753cf4b3e2a879313764564c7bc00d4a9e79",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/__init__.py": "b4529fdefce9fd91518814bb684cb28f17aa1d5edf3c84ce0904480e19c6bd3a"
+  },
+  "models": {
+    "runtime": {
+      "version": "llama.cpp-b11284-win-vulkan-x64",
+      "file": "llama-b11284-bin-win-vulkan-x64.zip",
+      "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11284/llama-b11284-bin-win-vulkan-x64.zip",
+      "sha256": "69c70371c2c9fe3e80859cdbb48596aed3e4265627e470a90d5a9f66dd6779d5"
+    },
+    "fast": {
+      "model": "Qwen/Qwen2.5-1.5B-Instruct-GGUF",
+      "revision": "91cad51170dc346986eccefdc2dd33a9da36ead9",
+      "file": "qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/91cad51170dc346986eccefdc2dd33a9da36ead9/qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "sha256": "6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e"
+    },
+    "slow": {
+      "model": "Qwen/Qwen2.5-3B-Instruct-GGUF",
+      "revision": "7dabda4d13d513e3e842b20f0d435c732f172cbe",
+      "file": "qwen2.5-3b-instruct-q4_k_m.gguf",
+      "url": "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/7dabda4d13d513e3e842b20f0d435c732f172cbe/qwen2.5-3b-instruct-q4_k_m.gguf",
+      "sha256": "626b4a6678b86442240e33df819e00132d3ba7dddfe1cdc4fbb18e0a9615c62d"
+    }
+  },
+  "active_backends": {
+    "fast": {
+      "endpoint": "http://127.0.0.1:18081/v1/chat/completions",
+      "model": "flexcell-fast",
+      "model_sha256": "6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e",
+      "calibration_sha256": "7059e9c852360a2205e5231bd3daa8358898e9806c6ab8e76381d3e58940e094"
+    },
+    "slow": {
+      "endpoint": "https://api.deepseek.com/chat/completions",
+      "model": "deepseek-flash",
+      "backend": "deepseek-official",
+      "response_format": "json_object",
+      "thinking": "disabled",
+      "max_tokens": 512,
+      "budget_limit_cny": 5,
+      "credential_configured": true
+    }
+  },
+  "policy_timeouts_s": {
+    "fast": 45.0,
+    "slow": 30.0
+  },
+  "server_context_tokens": 8192,
+  "ros_domain_id": 45,
+  "rmw_implementation": "rmw_cyclonedds_cpp",
+  "world_sha256": "951e15d282eec23142ad0d1c76c06fa4c8bfef7378fe9cdc95717fc8497ce7d7",
+  "dds_profile_sha256": "721583029ba9aef212c3c3c83c196efda2cd4c3fc40666efcc9aea8be973ee33",
+  "runtime_fingerprint": "6d69f9a1c744dc10ac0be8831e8abbd0f3cf631f8e8eeef6e6fffead053c8314",
+  "install": "/home/ros/.local/share/flexcell/mainline/install",
+  "head": "73a09a8c905ce4ea1dc6806593e059bc86d23537"
+}

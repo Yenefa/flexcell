@@ -70,6 +70,17 @@ After coding — update the Issue, record evidence in EXPERIMENTS.md, link the c
 
 ## Status
 
+2026-10-02 mainline hardening (E-016): lifecycle paths and typed controller
+readiness are fixed; Observe now reads confirmed carry authority instead of a
+stale topic cache. Cold FSM dual-object S1 passed, and a real stale-A injection
+confirmed that the stale cache was not used. Local Jev calibration and frozen
+model offline replay
+now have measured results; the fast route is ineligible and model replay failed.
+Hybrid online smoke still failed, including official API timeouts. The final
+fleet is FSM/IDLE, with reset and strict health passing; historical reset/flood
+roots remain open. Local commits only, no push. See
+[implementation, results and remaining blockers](docs/HARDENING_20261002.md).
+
 2026-10-01 carry implementation update (E-015): the mainline now uses a bounded
 Gazebo pose/velocity constraint, confirms engage before lifting, and checks
 PLACE's release dependency before admitting deployment. The final single-object

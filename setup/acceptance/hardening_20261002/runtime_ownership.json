@@ -1,0 +1,22 @@
+[
+  {
+    "component": "fleet",
+    "pid": 12961,
+    "command": "/usr/bin/python3 /opt/ros/jazzy/bin/ros2 launch flexcell_skills week1.launch.py params_file:=/tmp/flexcell-velocity-params.yaml ",
+    "environment": {
+      "ROS_DOMAIN_ID": "45",
+      "CYCLONEDDS_URI": "/mnt/c/dev/flexcell/setup/cyclone_mtu_safe.xml",
+      "RMW_IMPLEMENTATION": "rmw_cyclonedds_cpp"
+    }
+  },
+  {
+    "component": "move_to_pose",
+    "pid": 12971,
+    "command": "/usr/bin/python3 /opt/ros/jazzy/bin/ros2 launch flexcell_skills move_to_pose.launch.py ",
+    "environment": {
+      "ROS_DOMAIN_ID": "45",
+      "CYCLONEDDS_URI": "/mnt/c/dev/flexcell/setup/cyclone_mtu_safe.xml",
+      "RMW_IMPLEMENTATION": "rmw_cyclonedds_cpp"
+    }
+  }
+]
