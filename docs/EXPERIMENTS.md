@@ -39,24 +39,26 @@
 
 ## Index
 
-| ID    | Experiment                                                              | Outcome                  | Evidence                                                              |
-| ----- | ----------------------------------------------------------------------- | ------------------------ | --------------------------------------------------------------------- |
-| E-001 | Day-1 environment verification                                          | PASS                     | acceptance/day1 (delivery host) + [DAY1_REPORT.md](../DAY1_REPORT.md) |
-| E-002 | Day-2 MoveToPose acceptance                                             | PASS 10/10               | acceptance/day2 + [DAY2_MOVETOPOSE.md](DAY2_MOVETOPOSE.md)            |
-| E-003 | Week-1 deterministic skills battery                                     | PASS                     | acceptance/week1                                                      |
-| E-004 | Week-1.5 demo hardening — delivery acceptance (att3)                    | PASS                     | acceptance/week15/delivery_20260926/                                  |
-| E-005 | Week-1.5 cold-start re-verification                                     | PASS                     | acceptance/week15/cs_20260926/                                        |
-| E-006 | M2.3 audit remediation — runtime acceptance                             | PASS (gated)             | acceptance/sessions/ (FLEXCELL_STAGE) + ~/.ros/flexcell/referee.jsonl |
-| E-007 | Scenario runner batch (S1×2 + S2 + S5), episode replay                  | PASS                     | ~/.ros/flexcell/episodes/batch_20260928_051219.jsonl                  |
-| E-008 | Metrics report over real store + S7 adaptation probe                    | PASS                     | ~/.ros/flexcell/episodes/batch_20260928_124615.jsonl                  |
-| E-009 | New-machine (RTX 4060 laptop) bring-up + first official benchmark batch | SUPERSEDED (not citable) | setup/acceptance/m3_seed_batch_20260929*/                             |
-| E-010 | T6 hardening: gate_flood + injection lifecycle + reset determinism      | PASS                     | this entry (measurements inline)                                      |
-| E-012 | Shared task policy seam + distinct models + protocol v2 online smoke   | ONLINE PARTIAL; BASELINE FROZEN | [MAINLINE_20260930.md](MAINLINE_20260930.md)                      |
-| E-013 | Official DeepSeek policy + persistent RMB 5 budget + action handoff    | ONLINE PARTIAL; S1 3/5; BASELINE FROZEN | [DEEPSEEK_20261001.md](DEEPSEEK_20261001.md)                    |
-| E-014 | DDS fragment-path diagnosis + servo velocity controls                 | MECHANISM PROBES; NOT BENCHMARK | [MECHANISM_20261001.md](MECHANISM_20261001.md) |
-| E-015 | Leased velocity carry + engage receipt + PLACE dependency readiness | DEPLOYED; FINAL SINGLE PASS; SMOKE INCOMPLETE | [CARRY_VELOCITY_20261001.md](CARRY_VELOCITY_20261001.md) |
-| E-016 | Lifecycle paths + authoritative carry + local calibration/replay | FSM CONTROL PASS; HYBRID/REPLAY FAIL; NOT BENCHMARK | [HARDENING_20261002.md](HARDENING_20261002.md) |
-| M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN                  | — (RFC #15; harness #7/#8/#9)                                         |
+| ID    | Experiment                                                              | Outcome                                                                      | Evidence                                                              |
+| ----- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| E-001 | Day-1 environment verification                                          | PASS                                                                         | acceptance/day1 (delivery host) + [DAY1_REPORT.md](../DAY1_REPORT.md) |
+| E-002 | Day-2 MoveToPose acceptance                                             | PASS 10/10                                                                   | acceptance/day2 + [DAY2_MOVETOPOSE.md](DAY2_MOVETOPOSE.md)            |
+| E-003 | Week-1 deterministic skills battery                                     | PASS                                                                         | acceptance/week1                                                      |
+| E-004 | Week-1.5 demo hardening — delivery acceptance (att3)                    | PASS                                                                         | acceptance/week15/delivery_20260926/                                  |
+| E-005 | Week-1.5 cold-start re-verification                                     | PASS                                                                         | acceptance/week15/cs_20260926/                                        |
+| E-006 | M2.3 audit remediation — runtime acceptance                             | PASS (gated)                                                                 | acceptance/sessions/ (FLEXCELL_STAGE) + ~/.ros/flexcell/referee.jsonl |
+| E-007 | Scenario runner batch (S1×2 + S2 + S5), episode replay                  | PASS                                                                         | ~/.ros/flexcell/episodes/batch_20260928_051219.jsonl                  |
+| E-008 | Metrics report over real store + S7 adaptation probe                    | PASS                                                                         | ~/.ros/flexcell/episodes/batch_20260928_124615.jsonl                  |
+| E-009 | New-machine (RTX 4060 laptop) bring-up + first official benchmark batch | SUPERSEDED (not citable)                                                     | setup/acceptance/m3_seed_batch_20260929*/                             |
+| E-010 | T6 hardening: gate_flood + injection lifecycle + reset determinism      | PASS                                                                         | this entry (measurements inline)                                      |
+| E-012 | Shared task policy seam + distinct models + protocol v2 online smoke    | ONLINE PARTIAL; BASELINE FROZEN                                              | [MAINLINE_20260930.md](MAINLINE_20260930.md)                          |
+| E-013 | Official DeepSeek policy + persistent RMB 5 budget + action handoff     | ONLINE PARTIAL; S1 3/5; BASELINE FROZEN                                      | [DEEPSEEK_20261001.md](DEEPSEEK_20261001.md)                          |
+| E-014 | DDS fragment-path diagnosis + servo velocity controls                   | MECHANISM PROBES; NOT BENCHMARK                                              | [MECHANISM_20261001.md](MECHANISM_20261001.md)                        |
+| E-015 | Leased velocity carry + engage receipt + PLACE dependency readiness     | DEPLOYED; FINAL SINGLE PASS; SMOKE INCOMPLETE                                | [CARRY_VELOCITY_20261001.md](CARRY_VELOCITY_20261001.md)              |
+| E-016 | Lifecycle paths + authoritative carry + local calibration/replay        | FSM CONTROL PASS; HYBRID/REPLAY FAIL; NOT BENCHMARK                          | [HARDENING_20261002.md](HARDENING_20261002.md)                        |
+| E-017 | Desktop revival; hybrid online n=5 at one fingerprint                   | 5/5 SUCCEEDED; E-016 hybrid hang modes absent on the NAT host; NOT BENCHMARK | staging `hybrid_n5_desktop_20261004/`                                 |
+| E-018 | Clef-flash fast arm — offline calibration on the desktop                | GPU: 17/30, TOP BIN 8/8 (LB 0.676), 1.9 s, 35/35 SUCCESS; τ=0.5 ELIGIBLE     | desktop `jev_calibration_clef_gpu.json`; code pending feat branch     |
+| M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN                                                                      | — (RFC #15; harness #7/#8/#9)                                         |
 
 ## Entries
 
@@ -538,6 +540,81 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
   large batch NOT_STARTED, rosdep NOT_VERIFIED, MTC pending. Local commits, no push.
 - **Evidence**: [report](HARDENING_20261002.md),
   [manifest](../setup/acceptance/hardening_20261002/manifest.json).
+
+### E-017 — Desktop revival: hybrid online n=5 at one fingerprint (2026-10-04)
+
+- **Setup**: the original delivery desktop (RX 6800 / Ryzen 5 5600 / 32 GB) was revived
+  to `main` `424ad43` following ONBOARDING, with one deliberate deviation: **NAT, not
+  mirrored** networking — under mirrored mode both gz transport and the DDS mesh broke
+  on this host (see issue #25). `rmw_cyclonedds_cpp` was installed (the 9/30 mainline
+  requirement). Sha-pinned local models were provisioned via `118` (Qwen2.5-1.5B/3B
+  Q4_K_M + llama.cpp b11284; fast:18081 / slow:18082), and calibration was reproduced
+  on-machine from the recorded inputs: reported confidence sits at 0.9–1.0 while
+  FSM-action agreement stays far below any sweep τ, so the router **bypasses the fast
+  route by design** (`calibration_unavailable_or_threshold_unattainable`).
+- **Result**: `102 cold hybrid` DEPLOYED — fingerprint `20261004_194901`, protocol v2,
+  slow arm = official deepseek-flash. Single-object episodes **n=5/5 SUCCEEDED**
+  (errors 10.2 / 1.3 / 6.3 / 10.2 / 1.4 mm; wall 16.3–30.1 s); strict health 19/19
+  `hard_fail=[]` afterwards. **None of the four E-016 hybrid hang modes reproduced**
+  (planning service unavailable / client 150 s timeout / carry query timeout / official
+  request timeout) on the same code and the same API with a different network stack
+  (NAT vs the laptop's mirrored mode). Environment attribution is supported, not proven.
+- **Validation**: client evidence + deployment fingerprint archived as
+  `setup/acceptance/hybrid_n5_desktop_20261004/{deployment.json,ep1..ep5}` (staging
+  copy); replay-store rows under `~/.ros/flexcell/episodes/`. This is the E-016 next
+  gate ("hybrid same-fingerprint n=5") executed, **not** a statistical baseline: one
+  task shape (S1-style), fast path absent, n=5.
+- **Budget/limits**: desktop ledger ¥5 limit; ¥0.066 committed upper bound total
+  (1 wiring probe outside the ledger + 3 LLM-arm decisions + the n=5 decisions).
+  τ sweep deferred: with the current fast arm every τ ∈ {0.5, 0.7, 0.9} bypasses fast,
+  so a sweep would degenerate to LLM-only. The #12 critical path is fast-arm
+  qualification: the 160-token output cap truncates/derails parsing, and
+  FSM-action agreement is 4/30.
+- **Evidence**: staging `hybrid_n5_desktop_20261004/`; ledger on the desktop machine.
+
+### E-018 — Clef-flash as the fast arm: offline calibration on the desktop (2026-10-05)
+
+- **Setup**: Cloudflare's open decision model `clef-flash` (9B, Apache-2.0, base
+  Qwen3.5-9B) served by **Ollama 0.35.1 Linux inside WSL**. The Windows 0.35.1 build
+  fails every `/v1/systemone` request with `Clef: non-finite logit` on CUDA, ROCm,
+  Vulkan AND CPU (upstream issue ollama#18769; the Linux build works — the issue
+  reporter measured 0.1-0.3 s on GPU). Model blobs were reused from the Windows pull
+  (no re-download). New `ClefBackend` (typed `/v1/systemone`:
+  `questions={type: choice, instructions, criteria}`; response `answers.<id>.
+{choice, probabilities}`) + `make_backend('clef')` + `119 --backend clef`; the
+  routing signal is the chosen option's own probability — the API's `confidence`
+  field is probability-mass CONCENTRATION, not accuracy. Full test suite green.
+- **Result**: calibration over the same 35 recorded inputs:
+  **12/20 calibration agreement (Qwen1.5B baseline: 4/30, Wilson lower 0.053)** and
+  the bins are MONOTONE — [0,0.5): 1/8 (LB 0.02), [0.5,0.8): 3/4 (LB 0.30),
+  **[0.8,1.0): 8/8 (Wilson lower 0.676)**; heldout 2/5. Reported confidence is a
+  usable routing signal for the first time: low-confidence picks fail, the top bin
+  is clean. `output_tokens: 0` on every call — the no-generation no-parse claim is
+  real, so E-016's truncation/parse failure mode is structurally absent.
+- **Limits (CPU interlude, superseded the same day)**: the first calibration ran
+  CPU-only in WSL (ROCm-WSL not wired): median 109 s/decision, 10/35 rows timed out
+  at the 120 s cap — unusable live. Root-caused to the Ollama runner, not the
+  weights: upstream llama.cpp b11389 `llama-server` with `ggml-org/Clef-Flash-GGUF`
+  returns finite, calibrated probabilities on the same machine (see ollama#18769
+  comments), so the GPU path bypasses Ollama entirely.
+- **Result (GPU, final)**: upstream `llama-server` b11389 (Vulkan build) on the
+  RX 6800, `Clef-Flash-Q4_K_M.gguf`, `-ngl 99 -ub 32768 -c 16384`, bound
+  `0.0.0.0:11435` (WSL reaches it via the NAT gateway — no firewall change). Full
+  recalibration over the same 35 inputs: **model_success 35/35 (zero timeouts, zero
+  parse failures)**, **calibration agreement 17/30 (Qwen baseline 4/30)**, bins
+  monotone — [0,0.5): 0/11 (LB 0.000), [0.5,0.8): 9/11 (LB 0.523),
+  **[0.8,1.0): 8/8 (LB 0.676)**; heldout 2/5. **Latency median 1.9 s, max 6.8 s**
+  (~56× vs the CPU run). The arm is LIVE-QUALIFIED: the top bin clears τ=0.5, so
+  high-confidence decisions route locally for free; τ=0.7 misses by 0.024 (more
+  calibration samples may close it), τ=0.9 escalates everything.
+- **Next**: (1) swap `mainline_jev.sh` to the GPU endpoint + rerun the hybrid arm
+  with the now-eligible fast path, (2) enlarge the calibration set (top-bin n=8),
+  (3) the ratified τ ∈ {0.5, 0.7, 0.9} sweep (#12 critical path) is now
+  non-degenerate: τ=0.5 exercises the free local route, τ=0.7/0.9 measure pure-LLM.
+- **Evidence**: desktop `~/.config/flexcell/jev_calibration_clef.json` (CPU) and
+  `jev_calibration_clef_gpu.json` (GPU, identity digest
+  `3243a51d…ab85b66`); ClefBackend + harness changes in the working tree pending a
+  feat-branch commit.
 
 ## Evidence locations
 

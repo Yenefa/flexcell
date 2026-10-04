@@ -1,9 +1,11 @@
-# GitHub issue drafts — POSTING BLOCKED
+# GitHub issue drafts — POSTED
 
-> **Status: NOT POSTED.** The `gh` CLI token on this machine is invalid
-> (`gh auth status`: "The token in ...\hosts.yml is invalid"). Re-authenticate
-> with `gh auth refresh -h github.com` and post these, or hand them to the
-> chief. Nothing here has been filed as an issue; do not assume otherwise.
+> **Status: POSTED 2026-10-03.** Issue A → [#22](https://github.com/Yenefa/flexcell/issues/22),
+> Issue B → [#23](https://github.com/Yenefa/flexcell/issues/23),
+> Issue C → [#24](https://github.com/Yenefa/flexcell/issues/24) — posted by the
+> desktop-revival session (the original 9/29 posting failure was an invalid
+> `gh` token on the laptop; the desktop's `gh` is authenticated). Bodies kept
+> below verbatim for provenance.
 
 Prepared 2026-09-29 during the new-machine (RTX 4060 laptop) bring-up +
 first official benchmark batch, at `main` = `070aed6`.
