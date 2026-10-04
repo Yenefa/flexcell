@@ -607,14 +607,39 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
   (~56× vs the CPU run). The arm is LIVE-QUALIFIED: the top bin clears τ=0.5, so
   high-confidence decisions route locally for free; τ=0.7 misses by 0.024 (more
   calibration samples may close it), τ=0.9 escalates everything.
-- **Next**: (1) swap `mainline_jev.sh` to the GPU endpoint + rerun the hybrid arm
-  with the now-eligible fast path, (2) enlarge the calibration set (top-bin n=8),
-  (3) the ratified τ ∈ {0.5, 0.7, 0.9} sweep (#12 critical path) is now
-  non-degenerate: τ=0.5 exercises the free local route, τ=0.7/0.9 measure pure-LLM.
-- **Evidence**: desktop `~/.config/flexcell/jev_calibration_clef.json` (CPU) and
-  `jev_calibration_clef_gpu.json` (GPU, identity digest
-  `3243a51d…ab85b66`); ClefBackend + harness changes in the working tree pending a
-  feat-branch commit.
+- **τ sweep, first pass (2026-10-05, single-object task, n=5 per τ)**: with
+  `mainline_jev.sh` on the GPU endpoint and `jev_backend: clef`:
+  **τ=0.5 → 5/5 SUCCEEDED, decisions jev 11 / llm 6 / fsm 5 (bootstrap) — 55% of
+  decisions on the free local arm, escalation rate 30%; τ=0.7 → 5/5, jev 0
+  (full bypass, LB 0.676 < 0.7), escalation 100%; τ=0.9 → 3/5 (2 failed on the
+  known reset-flakiness family before decisions, not τ-caused), escalation 100%.**
+  Same success rate at τ=0.5 with ~55% of decisions free — the sweep is
+  non-degenerate and the escalation/success-per-τ AC of #12 is now measurable at
+  scale. (First sweep attempt was invalid: a branch checkout had reverted the WSL
+  working tree to pre-Clef code, sending fast calls to a dead endpoint — all
+  "backend error"; re-run on the correct tree. Lesson recorded.)
+- **Prompt v2 + Q8_0 (2026-10-05 evening)**: two upgrades, both validated against
+  the leakage concern by a FRESH-INPUT blind set (S7 off-canonical perturbed demos
+  recorded on the FSM arm, never used for tuning — note `96_s7_perturb.py` had a
+  missing `import math` blocking standalone runs; fixed):
+  ① prompt v2 folds the frozen FSM cycle semantics into the ClefBackend
+  instructions and enriches per-option criteria (backend-scoped; the shared
+  _choice_options contract text untouched);
+  ② Q8_0 weights replace Q4_K_M on the same Vulkan server.
+  In-sample 35: agreement 26/30, top bin 23/23 (LB 0.857). **Fresh S7 blind:
+  18/20 (90%), top bin 18/18 (LB 0.824)** — generalization holds; the prompt
+  encodes the task spec, not the test answers.
+- **τ=0.7 live crossover**: with the Q8+v2 profile, the hybrid arm at the strict
+  τ=0.7 threshold now routes **jev 16 / llm 1 / fsm 5 (bootstrap) over 5
+  episodes, 5/5 SUCCEEDED — escalation rate 5.9%** (was 100% with Q4+v1 this
+  morning). The local GPU arm carries 94% of model decisions for free; DeepSeek
+  is a rare safety net. Sweep ledger total ¥0.234/¥5.
+- **Next**: (1) scale the sweep to the S-cell runner for n≥50 per-τ statistics
+  (#12 AC), (2) S7 differentiation track at τ=0.7 (hybrid vs FSM where the
+  deterministic baseline is weakest), (3) land the feat branch docs.
+- **Evidence**: desktop `~/.config/flexcell/jev_calibration_clef{,_gpu,_v2,_fresh,_q8,_q8_fresh}.json`
+  (Q8 digest `8754b06f…b05593d9`); ClefBackend + harness changes on the
+  `feat/clef-fast-arm` branch (pushed).
 
 ## Evidence locations
 

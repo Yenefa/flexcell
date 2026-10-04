@@ -41,11 +41,12 @@ class TestClefBackend(unittest.TestCase):
         self.assertEqual(seen['payload']['state'], STATE)
         question = seen['payload']['questions']['next_action']
         self.assertEqual(question['type'], 'choice')
+        self.assertIn('OBSERVE -> PICK -> PLACE -> VERIFY', question['instructions'])
         self.assertIn('Context:', question['instructions'])
-        self.assertEqual(question['criteria'],
-                         {'OBSERVE': 'world stale or object unknown',
-                          'PICK': 'object observed and not carried',
-                          'ABORT': 'budget spent or unrecoverable'})
+        self.assertTrue(question['criteria']['OBSERVE']
+                        .startswith('world stale or object unknown'))
+        self.assertIn('refresh the world snapshot', question['criteria']['OBSERVE'])
+        self.assertIn('retry budget spent', question['criteria']['ABORT'])
         self.assertEqual(resp.choice, 'PICK')
         # routing signal = chosen option's probability, not the mass
         # concentration reported in `confidence`

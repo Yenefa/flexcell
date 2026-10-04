@@ -195,6 +195,36 @@ class ClefBackend(JevBackend):
 
     name = 'clef'
 
+    # Prompt v2: fold the frozen FSM cycle semantics into the instructions and
+    # enrich each option's criteria with the rule that disambiguates it (the
+    # generative baseline's failures were mostly eager actions: PICK instead of
+    # a fresh OBSERVE, skipping VERIFY).  Backend-scoped: the shared
+    # _choice_options contract text stays untouched.
+    _INSTRUCTIONS_TEMPLATE = (
+        'You are the task-level decision policy of a robotic workcell. History '
+        'outcomes: 0=SUCCEEDED, 1=FAILED, 255=no result. The per-object action '
+        'cycle is strictly OBSERVE -> PICK -> PLACE -> VERIFY; after VERIFY '
+        'succeeds, start the next unfinished object with OBSERVE. After a '
+        'successful OBSERVE choose PICK, not another OBSERVE. After a '
+        'successful PICK choose PLACE; after a successful PLACE choose VERIFY. '
+        'A failed PICK with error 22, 23 or 30 permits OBSERVE then PICK '
+        'within the retry budget; after a failed PLACE or a spent budget '
+        'choose ABORT. An old source pose does not undo a successful action. '
+        'Context: %s'
+    )
+    _CRITERIA_ENRICHMENT = {
+        'OBSERVE': 'refresh the world snapshot; also the correct next step '
+                   'when the previous PICK failed with error 22, 23 or 30',
+        'PICK': 'the object is observed in the world snapshot and the gripper '
+                'is empty; not a retry of a just-failed grasp before a fresh '
+                'OBSERVE',
+        'PLACE': 'the gripper is carrying an object right now',
+        'VERIFY': 'the object was just placed; confirms the placement, do not '
+                  'skip it',
+        'ABORT': 'retry budget spent, PLACE failed, or the task is '
+                 'unrecoverable',
+    }
+
     def __init__(self, transport=None, model=None,
                  endpoint_env='FLEXCELL_JEV_ENDPOINT',
                  model_env='FLEXCELL_JEV_MODEL', timeout_s=None):
@@ -232,9 +262,15 @@ class ClefBackend(JevBackend):
         questions = {
             'next_action': {
                 'type': 'choice',
-                'instructions': '%s Context: %s' % (question.prompt,
-                                                    question.context),
-                'criteria': {o.action: o.criteria for o in question.options},
+                'instructions': '%s %s' % (self._INSTRUCTIONS_TEMPLATE
+                                           % question.context,
+                                           question.prompt),
+                'criteria': {
+                    o.action: '%s — %s' % (o.criteria,
+                                           self._CRITERIA_ENRICHMENT[o.action])
+                    if o.action in self._CRITERIA_ENRICHMENT else o.criteria
+                    for o in question.options
+                },
             },
         }
         payload = {'model': self._model, 'state': state, 'questions': questions}

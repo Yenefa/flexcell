@@ -18,6 +18,7 @@ Usage:  python3 setup/96_s7_perturb.py --seed 7 [--amp 0.06]
 """
 import argparse
 import json
+import math
 import random
 import sys
 
