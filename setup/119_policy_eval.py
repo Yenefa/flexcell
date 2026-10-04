@@ -19,7 +19,8 @@ from flexcell_skills.contracts.episode import (
     _goal_from_dict, _constraints_from_dict, _history_from_dicts, decision_to_dict)
 from flexcell_skills.contracts.metrics import wilson
 from flexcell_skills.decision_policy import FSMPolicy, PolicyStateError
-from flexcell_skills.jev_backends import LocalReproductionBackend
+from flexcell_skills.jev_backends import (
+    ClefBackend, LocalReproductionBackend, make_backend)
 from flexcell_skills.jev_policy import JevPolicy
 from flexcell_skills.llm_policy import LLMPolicy
 from flexcell_skills.confidence_calibration import prompt_digest
@@ -140,11 +141,23 @@ def evaluate(paths, out, repeatability=False):
     return 1 if any(r['replay_status']=='FAIL' for r in summary['episodes']) else 0
 
 
-def calibrate(paths, out):
-    profile = local_profile('fast')
-    configure('fast', profile)
+def calibrate(paths, out, backend='local'):
+    if backend == 'clef':
+        # Clef fast arm: identity comes from the ollama-side profile envs;
+        # the ollama model digest stands in for model_sha256 so the
+        # calibration gate can bind later router runs to these weights.
+        endpoint = os.environ.get('FLEXCELL_JEV_ENDPOINT')
+        model = os.environ.get('FLEXCELL_JEV_MODEL', 'clef-flash')
+        model_sha256 = os.environ.get('FLEXCELL_JEV_MODEL_SHA256')
+        if not endpoint or not model_sha256:
+            raise SystemExit('clef calibration needs FLEXCELL_JEV_ENDPOINT '
+                             'and FLEXCELL_JEV_MODEL_SHA256 (ollama digest)')
+        profile = dict(endpoint=endpoint, model=model, model_sha256=model_sha256)
+    else:
+        profile = local_profile('fast')
+        configure('fast', profile)
     os.environ.pop('FLEXCELL_JEV_CALIBRATION', None)
-    policy, reference = JevPolicy(LocalReproductionBackend()), FSMPolicy()
+    policy, reference = JevPolicy(make_backend(backend)), FSMPolicy()
     rows, excluded = [], []
     # Split by episode before any model calls; correlated steps never cross sets.
     for index, path in enumerate(paths):
@@ -192,6 +205,9 @@ def calibrate(paths, out):
 def main():
     ap=argparse.ArgumentParser(description=__doc__)
     ap.add_argument('mode', choices=('replay', 'calibrate'))
+    ap.add_argument('--backend', choices=('local', 'clef'), default='local',
+                    help='fast-arm backend to calibrate (default: local '
+                         'llama.cpp reproduction; clef = Ollama /v1/systemone)')
     ap.add_argument('--episodes', type=Path, required=True)
     ap.add_argument('--out', type=Path, required=True)
     ap.add_argument('--make-repeatability-fixtures', action='store_true')
@@ -200,7 +216,8 @@ def main():
     if not paths:
         raise ValueError('no episode records')
     args.out.parent.mkdir(parents=True, exist_ok=True)
-    return calibrate(paths, args.out) if args.mode=='calibrate' else evaluate(paths, args.out, args.make_repeatability_fixtures)
+    return (calibrate(paths, args.out, args.backend) if args.mode=='calibrate'
+            else evaluate(paths, args.out, args.make_repeatability_fixtures))
 
 
 if __name__=='__main__':

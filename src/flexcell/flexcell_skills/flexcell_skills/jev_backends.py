@@ -173,10 +173,98 @@ class LocalReproductionBackend(JevBackend):
                  'tokens': int(rep.get('usage', {}).get('total_tokens', 0) or 0)})
 
 
+class ClefBackend(JevBackend):
+    """Cloudflare Clef decision model behind a typed /v1/systemone endpoint
+    (e.g. Ollama serving the open Apache-2.0 Clef weights, or the hosted
+    Workers AI shape).  Clef scores every option of every question in a
+    single forward pass and returns probabilities - there is no free-form
+    generation to truncate and no JSON to parse, so the failure modes that
+    disqualify the generative local reproduction (E-016: 160-token output
+    cap, FSM-grammar disagreement) are structurally absent here.
+
+    Same Jev / SystemOne question shape as `TypeSafeBackend.classify`:
+    questions = {name: {prompt, context, options: {action: criteria}}}.
+
+    `transport` is injected for offline tests; the default transport POSTs
+    {model, state, questions} to the FAST-ARM profile envs (FLEXCELL_JEV_*):
+    one profile slot, two swappable implementations, so the calibration-gate
+    identity (model + model_sha256, validated by ConfidenceCalibration) stays
+    coherent across backends.  The state is forwarded as the exact canonical
+    envelope bytes (fair-bytes principle; Clef accepts string or JSON state).
+    """
+
+    name = 'clef'
+
+    def __init__(self, transport=None, model=None,
+                 endpoint_env='FLEXCELL_JEV_ENDPOINT',
+                 model_env='FLEXCELL_JEV_MODEL', timeout_s=None):
+        self._injected = transport is not None
+        self._endpoint = os.environ.get(endpoint_env, '')
+        self._model = model or os.environ.get(model_env, 'clef-flash')
+        self._transport = transport or self._http_transport
+        self._endpoint_env = endpoint_env
+        self._timeout_s = float(timeout_s if timeout_s is not None else
+                                os.environ.get('FLEXCELL_JEV_TIMEOUT_S', '2'))
+
+    @staticmethod
+    def _http_transport(url, payload, timeout_s):
+        req = urllib.request.Request(
+            url, data=json.dumps(payload).encode(),
+            headers={'Content-Type': 'application/json'})
+        opener = (urllib.request.build_opener(urllib.request.ProxyHandler({}))
+                  if urlparse(url).hostname in ('localhost', '127.0.0.1', '::1')
+                  else None)
+        open_request = opener.open if opener else urllib.request.urlopen
+        with open_request(req, timeout=timeout_s) as resp:
+            return json.loads(resp.read().decode())
+
+    def health(self):
+        if not self._endpoint:
+            return False, ('%s not set - clef endpoint unavailable'
+                           % self._endpoint_env)
+        return True, 'endpoint configured (reachability checked on decision)'
+
+    def classify(self, state, question):
+        if not self._injected and not self._endpoint:
+            raise RuntimeError(
+                'clef endpoint not configured (%s) - typed policy_failure '
+                'upstream' % self._endpoint_env)
+        questions = {
+            'next_action': {
+                'type': 'choice',
+                'instructions': '%s Context: %s' % (question.prompt,
+                                                    question.context),
+                'criteria': {o.action: o.criteria for o in question.options},
+            },
+        }
+        payload = {'model': self._model, 'state': state, 'questions': questions}
+        rep = self._transport(self._endpoint, payload, self._timeout_s)
+        # Response: {"answers": {"next_action": {choice, probabilities,
+        # confidence}}, "usage": {...}}.  confidence is the CONCENTRATION of
+        # the probability mass, not accuracy, so the routing signal is the
+        # chosen option's own probability; confidence is kept as telemetry.
+        answer = (rep.get('answers') or {}).get('next_action') or {}
+        probabilities = answer.get('probabilities') or {}
+        choice = str(answer.get('choice', '') or '')
+        probability = float(probabilities.get(choice,
+                                              answer.get('confidence', 0.0))
+                            or 0.0)
+        return JevResponse(
+            choice=choice, probability=probability,
+            raw={'backend': self.name, 'model': self._model,
+                 'model_sha256': (None if self._injected else
+                                  os.environ.get('FLEXCELL_JEV_MODEL_SHA256')),
+                 'probabilities': probabilities,
+                 'concentration': answer.get('confidence'),
+                 'output_tokens': (rep.get('usage') or {}).get('output_tokens')})
+
+
 def make_backend(spec):
     """Backend factory for the executor wiring (decision_policy=jev)."""
     if spec == 'typesafe':
         return TypeSafeBackend()
     if spec == 'local':
         return LocalReproductionBackend()
-    raise ValueError('unknown jev backend %r (typesafe|local)' % (spec,))
+    if spec == 'clef':
+        return ClefBackend()
+    raise ValueError('unknown jev backend %r (typesafe|local|clef)' % (spec,))
