@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "ok": true,
+  "episode_file": "/home/ros/.ros/flexcell/episodes/pick_place_v1_pick_place_v1-a0d14046.json",
+  "episode_sha256": "99a3849d67ebb1e20de79c3e458d12184a8d604d87317d79856c9bd5065891da",
+  "run_id": "pick_place_v1-a0d14046",
+  "runtime": "/home/ros/.local/share/flexcell/mainline/runtime/20261006_003632",
+  "runtime_fingerprint": "0bc2bb56e6bb9128fbd43da410ab3870ad7a3b439cec01f8ba95fbc872b9ddf4",
+  "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+  "prompt_sha256": "b37e71cd0b9b0ff81cfa3638111da8375251be2fadeabc01468ce46b5f4e85b8",
+  "route_eligible_085": true,
+  "threshold": 0.85,
+  "deploy_rc": 0,
+  "smoke_command_rc": 0,
+  "reset_ok": true,
+  "final_state": {
+    "detail": "task done: all assignments verified",
+    "duration_s": 30.340220166,
+    "error_code": 0,
+    "evidence_id": "pick_place_v1-aa284e41",
+    "final_position_error_m": 0.001183484,
+    "fsm_trace": [
+      "PICK_A(attempt=1):OK",
+      "PLACE_A:OK",
+      "VERIFY_A(attempt=1):OK"
+    ],
+    "goal_uuid": "6f36e768589e46f9b09917b9c0ebbbf6",
+    "object_at_place": true,
+    "outcome": "0",
+    "safety": {
+      "evaluated": 4,
+      "invalid_per_1000": 0.0,
+      "rejected": 0
+    }
+  },
+  "routing_audit": {
+    "ok": true,
+    "errors": [],
+    "bootstrap": 1,
+    "model_decisions": 3,
+    "fast_selected": 3,
+    "slow_selected": 0,
+    "fsm_fallbacks": 0,
+    "fast_calls": 3,
+    "fast_tokens": 4123
+  },
+  "flat_decisions": [
+    {
+      "seq": 1,
+      "action": "OBSERVE",
+      "source": "fsm",
+      "fallback": true,
+      "fast_tokens": 0,
+      "confidence": 1.0
+    },
+    {
+      "seq": 2,
+      "action": "PICK",
+      "source": "jev",
+      "fallback": false,
+      "fast_tokens": 1327,
+      "confidence": 0.8568788745827374
+    },
+    {
+      "seq": 3,
+      "action": "PLACE",
+      "source": "jev",
+      "fallback": false,
+      "fast_tokens": 1375,
+      "confidence": 0.8568788745827374
+    },
+    {
+      "seq": 4,
+      "action": "VERIFY",
+      "source": "jev",
+      "fallback": false,
+      "fast_tokens": 1421,
+      "confidence": 0.8568788745827374
+    }
+  ],
+  "source_files_verified": 36,
+  "decision_latency": {
+    "status": "MEASURED",
+    "clock": "perf_counter_ns",
+    "bootstrap_excluded": true,
+    "n": 3,
+    "p50_ms": 1773.520879,
+    "p95_ms": 1847.600272,
+    "p99_ms": 1854.185107,
+    "max_ms": 1855.831316
+  },
+  "scope": "Single-object live routing smoke; no physical-success-rate estimate"
+}

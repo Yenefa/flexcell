@@ -1,0 +1,270 @@
+{
+  "schema_version": 1,
+  "stage": "smoke",
+  "scenario": "S1",
+  "planned_n": 5,
+  "batch": "/home/ros/.ros/flexcell/episodes/batch_20261006_004107.jsonl",
+  "batch_command_rc": 0,
+  "runtime_fingerprint": "0bc2bb56e6bb9128fbd43da410ab3870ad7a3b439cec01f8ba95fbc872b9ddf4",
+  "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+  "routing_ok": true,
+  "physical_ok": true,
+  "counts": {
+    "episodes": 5,
+    "physical_successes": 5,
+    "physical_failures": 0,
+    "harness_errors": 0,
+    "routing_errors": 0,
+    "bootstrap": 5,
+    "fast_calls": 36,
+    "fast_tokens": 52052,
+    "fast_selected": 30,
+    "slow_selected": 6,
+    "fsm_fallbacks": 0
+  },
+  "runs": [
+    {
+      "run": 1,
+      "rc": 0,
+      "outcome": "SUCCEEDED",
+      "harness_error": null,
+      "episode": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-dd46554b.json",
+      "routing_audit": {
+        "ok": true,
+        "errors": [],
+        "bootstrap": 1,
+        "model_decisions": 7,
+        "fast_selected": 6,
+        "slow_selected": 1,
+        "fsm_fallbacks": 0,
+        "fast_calls": 7,
+        "fast_tokens": 10103
+      },
+      "final_state": {
+        "detail": "task done: all assignments verified",
+        "duration_s": 50.36014293,
+        "error_code": 0,
+        "evidence_id": "week1_demo_v1-de2aac55",
+        "fsm_trace": [
+          "PICK_A(attempt=1):OK",
+          "PLACE_A:OK",
+          "VERIFY_A(attempt=1):OK",
+          "PICK_B(attempt=1):OK",
+          "PLACE_B:OK",
+          "VERIFY_B(attempt=1):OK"
+        ],
+        "goal_uuid": "a629983392f74933ab3f1ce1b4888c07",
+        "object_a_at_zone": true,
+        "object_b_at_zone": true,
+        "outcome": "0",
+        "safety": {
+          "evaluated": 8,
+          "invalid_per_1000": 0.0,
+          "rejected": 0
+        },
+        "zone_a_error_m": 0.005619217,
+        "zone_b_error_m": 0.006224875
+      }
+    },
+    {
+      "run": 2,
+      "rc": 0,
+      "outcome": "SUCCEEDED",
+      "harness_error": null,
+      "episode": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-210895bd.json",
+      "routing_audit": {
+        "ok": true,
+        "errors": [],
+        "bootstrap": 1,
+        "model_decisions": 7,
+        "fast_selected": 6,
+        "slow_selected": 1,
+        "fsm_fallbacks": 0,
+        "fast_calls": 7,
+        "fast_tokens": 10095
+      },
+      "final_state": {
+        "detail": "task done: all assignments verified",
+        "duration_s": 58.529910429,
+        "error_code": 0,
+        "evidence_id": "week1_demo_v1-4165dc19",
+        "fsm_trace": [
+          "PICK_A(attempt=1):OK",
+          "PLACE_A:OK",
+          "VERIFY_A(attempt=1):OK",
+          "PICK_B(attempt=1):OK",
+          "PLACE_B:OK",
+          "VERIFY_B(attempt=1):OK"
+        ],
+        "goal_uuid": "60acfa95d8334ce7890c8533cca07671",
+        "object_a_at_zone": true,
+        "object_b_at_zone": true,
+        "outcome": "0",
+        "safety": {
+          "evaluated": 8,
+          "invalid_per_1000": 0.0,
+          "rejected": 0
+        },
+        "zone_a_error_m": 0.006044966,
+        "zone_b_error_m": 0.005989398
+      }
+    },
+    {
+      "run": 3,
+      "rc": 0,
+      "outcome": "SUCCEEDED",
+      "harness_error": null,
+      "episode": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-c367cf71.json",
+      "routing_audit": {
+        "ok": true,
+        "errors": [],
+        "bootstrap": 1,
+        "model_decisions": 7,
+        "fast_selected": 6,
+        "slow_selected": 1,
+        "fsm_fallbacks": 0,
+        "fast_calls": 7,
+        "fast_tokens": 10069
+      },
+      "final_state": {
+        "detail": "task done: all assignments verified",
+        "duration_s": 53.872381561,
+        "error_code": 0,
+        "evidence_id": "week1_demo_v1-cc57da18",
+        "fsm_trace": [
+          "PICK_A(attempt=1):OK",
+          "PLACE_A:OK",
+          "VERIFY_A(attempt=1):OK",
+          "PICK_B(attempt=1):OK",
+          "PLACE_B:OK",
+          "VERIFY_B(attempt=1):OK"
+        ],
+        "goal_uuid": "0296b42d02334739b3865597a8431675",
+        "object_a_at_zone": true,
+        "object_b_at_zone": true,
+        "outcome": "0",
+        "safety": {
+          "evaluated": 8,
+          "invalid_per_1000": 0.0,
+          "rejected": 0
+        },
+        "zone_a_error_m": 0.006966467,
+        "zone_b_error_m": 0.003524557
+      }
+    },
+    {
+      "run": 4,
+      "rc": 0,
+      "outcome": "SUCCEEDED",
+      "harness_error": null,
+      "episode": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-e7ad0742.json",
+      "routing_audit": {
+        "ok": true,
+        "errors": [],
+        "bootstrap": 1,
+        "model_decisions": 8,
+        "fast_selected": 6,
+        "slow_selected": 2,
+        "fsm_fallbacks": 0,
+        "fast_calls": 8,
+        "fast_tokens": 11682
+      },
+      "final_state": {
+        "detail": "task done: all assignments verified",
+        "duration_s": 75.829402228,
+        "error_code": 0,
+        "evidence_id": "week1_demo_v1-557f8291",
+        "fsm_trace": [
+          "PICK_A(attempt=1):OK",
+          "PLACE_A:OK",
+          "VERIFY_A(attempt=1):OK",
+          "RECOVERY:REOBSERVE+RETRY(after )",
+          "PICK_B(attempt=1):OK",
+          "PLACE_B:OK",
+          "VERIFY_B(attempt=1):OK"
+        ],
+        "goal_uuid": "f0e2cb275cc24eeeb5341411a6f7043d",
+        "object_a_at_zone": true,
+        "object_b_at_zone": true,
+        "outcome": "0",
+        "safety": {
+          "evaluated": 9,
+          "invalid_per_1000": 0.0,
+          "rejected": 0
+        },
+        "zone_a_error_m": 0.011556538,
+        "zone_b_error_m": 0.003842505
+      }
+    },
+    {
+      "run": 5,
+      "rc": 0,
+      "outcome": "SUCCEEDED",
+      "harness_error": null,
+      "episode": "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-7253d5a1.json",
+      "routing_audit": {
+        "ok": true,
+        "errors": [],
+        "bootstrap": 1,
+        "model_decisions": 7,
+        "fast_selected": 6,
+        "slow_selected": 1,
+        "fsm_fallbacks": 0,
+        "fast_calls": 7,
+        "fast_tokens": 10103
+      },
+      "final_state": {
+        "detail": "task done: all assignments verified",
+        "duration_s": 52.024741429,
+        "error_code": 0,
+        "evidence_id": "week1_demo_v1-3a30fcee",
+        "fsm_trace": [
+          "PICK_A(attempt=1):OK",
+          "PLACE_A:OK",
+          "VERIFY_A(attempt=1):OK",
+          "PICK_B(attempt=1):OK",
+          "PLACE_B:OK",
+          "VERIFY_B(attempt=1):OK"
+        ],
+        "goal_uuid": "3a018d6638dc4a7cbc63231f1207cff7",
+        "object_a_at_zone": true,
+        "object_b_at_zone": true,
+        "outcome": "0",
+        "safety": {
+          "evaluated": 8,
+          "invalid_per_1000": 0.0,
+          "rejected": 0
+        },
+        "zone_a_error_m": 0.008007522,
+        "zone_b_error_m": 0.00525309
+      }
+    }
+  ],
+  "decision_latency": {
+    "status": "MEASURED",
+    "clock": "perf_counter_ns",
+    "bootstrap_excluded": true,
+    "n": 36,
+    "p50_ms": 2879.619821,
+    "p95_ms": 3739.231421,
+    "p99_ms": 4206.173404,
+    "max_ms": 4309.213939
+  },
+  "decision_latency_by_selected_source": {
+    "jev": {
+      "n": 30,
+      "p50_ms": 2832.892439,
+      "p95_ms": 3431.036687,
+      "p99_ms": 4087.322917,
+      "max_ms": 4309.213939
+    },
+    "llm": {
+      "n": 6,
+      "p50_ms": 3533.366484,
+      "p95_ms": 3922.952081,
+      "p99_ms": 3996.440344,
+      "max_ms": 4014.81241
+    }
+  },
+  "limitations": "Five episodes; historical calibration and current physical results are separate; no n>=50 collection"
+}
