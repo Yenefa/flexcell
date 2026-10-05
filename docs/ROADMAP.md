@@ -50,6 +50,13 @@ Replay → Jev → LLM**. Work is tracked in sub-milestones (implementation) plu
 
 ## Future
 
+The current M3 claim is a cost hypothesis with independent task outcomes and a
+zero-API-cost FSM control, not an established smarter policy. The Q8 pilot uses
+the two supported-bin regimes tau=0.03/0.85; the historical 0.5/0.7/0.9 grid does
+not distinguish the current calibrated bins. Narrower bins and policy superiority
+are unqualified. S7 placement perturbation alone is not a differentiation oracle.
+The truncated pilots leave n>=50 frozen. See [Q8 pilot](Q8_PILOT_20261005.md).
+
 - **M3 Hybrid Agent Benchmark** — cells A-D on S1-S7 (S7 perturbation track kept in
   primary, ⑥); pass/fail gates in #15. Gate rule: FSM ≥ every other cell on task success
   before any policy enters the critical path.

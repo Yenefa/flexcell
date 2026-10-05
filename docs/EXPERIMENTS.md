@@ -1,5 +1,11 @@
 # EXPERIMENTS — log
 
+> 2026-10-05 Q8 路由先导（E-019）：实际校准加载与逐决策证据门禁通过，215 tests passed；
+> τ=0.85 smoke 5/5，计划 n=20 的先导实际 14/17 + 1 reset HARNESS_ERROR 后停批；
+> τ=0.03 smoke 实际 3/3 + 1 reset HARNESS_ERROR 后停批，先导未解锁。
+> 两组均保留原始失败，n≥50 冻结；独立回归修复 EXPECT 行误放行后实测通过。
+> [假设、逐回合统计、失败与证据](Q8_PILOT_20261005.md)。
+
 > 2026-10-02 主线修复（E-016）：仓内启动路径、typed 控制器就绪探测和
 > carry 权威快照已落地；冷启动 FSM 双物体 S1 成功，真实旧 A carry 注入
 > 探针通过。Jev 已有真实校准，快路径不具备 0.7 路由资格；离线冻结模型
@@ -58,6 +64,7 @@
 | E-016 | Lifecycle paths + authoritative carry + local calibration/replay        | FSM CONTROL PASS; HYBRID/REPLAY FAIL; NOT BENCHMARK                          | [HARDENING_20261002.md](HARDENING_20261002.md)                        |
 | E-017 | Desktop revival; hybrid online n=5 at one fingerprint                   | 5/5 SUCCEEDED; E-016 hybrid hang modes absent on the NAT host; NOT BENCHMARK | staging `hybrid_n5_desktop_20261004/`                                 |
 | E-018 | Clef-flash fast arm — offline calibration on the desktop                | GPU: 17/30, TOP BIN 8/8 (LB 0.676), 1.9 s, 35/35 SUCCESS; τ=0.5 ELIGIBLE     | desktop `jev_calibration_clef_gpu.json`; code pending feat branch     |
+| E-019 | Q8 per-decision provenance + two-regime pilot                           | 215 TESTS PASS; HIGH 14/17 + RESET ERROR; LOW SMOKE TRUNCATED; n>=50 FROZEN  | [Q8_PILOT_20261005.md](Q8_PILOT_20261005.md)                          |
 | M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN                                                                      | — (RFC #15; harness #7/#8/#9)                                         |
 
 ## Entries

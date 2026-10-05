@@ -26,6 +26,7 @@ No vendor secret, key, or endpoint is ever committed (workspace rule).
 
 import json
 import os
+import socket
 import urllib.error
 import urllib.request
 from urllib.parse import urlparse
@@ -252,7 +253,19 @@ class ClefBackend(JevBackend):
         if not self._endpoint:
             return False, ('%s not set - clef endpoint unavailable'
                            % self._endpoint_env)
-        return True, 'endpoint configured (reachability checked on decision)'
+        if self._injected:
+            return True, 'injected transport (network not probed)'
+        try:
+            endpoint = urlparse(self._endpoint)
+            if endpoint.scheme not in ('http', 'https') or not endpoint.hostname:
+                raise ValueError('invalid HTTP endpoint')
+            port = endpoint.port or (443 if endpoint.scheme == 'https' else 80)
+            with socket.create_connection((endpoint.hostname, port),
+                                          timeout=min(self._timeout_s, 2.0)):
+                pass
+        except (OSError, ValueError) as exc:
+            return False, 'TCP endpoint unavailable: %s' % type(exc).__name__
+        return True, 'TCP reachable (typed inference checked on decision)'
 
     def classify(self, state, question):
         if not self._injected and not self._endpoint:
@@ -285,6 +298,10 @@ class ClefBackend(JevBackend):
         probability = float(probabilities.get(choice,
                                               answer.get('confidence', 0.0))
                             or 0.0)
+        usage = rep.get('usage') or {}
+        input_tokens = int(usage.get('input_tokens', usage.get('prompt_tokens', 0)) or 0)
+        output_tokens = int(usage.get('output_tokens', usage.get('completion_tokens', 0)) or 0)
+        tokens = int(usage.get('total_tokens', input_tokens + output_tokens) or 0)
         return JevResponse(
             choice=choice, probability=probability,
             raw={'backend': self.name, 'model': self._model,
@@ -292,7 +309,8 @@ class ClefBackend(JevBackend):
                                   os.environ.get('FLEXCELL_JEV_MODEL_SHA256')),
                  'probabilities': probabilities,
                  'concentration': answer.get('confidence'),
-                 'output_tokens': (rep.get('usage') or {}).get('output_tokens')})
+                 'input_tokens': input_tokens, 'output_tokens': output_tokens,
+                 'tokens': tokens})
 
 
 def make_backend(spec):

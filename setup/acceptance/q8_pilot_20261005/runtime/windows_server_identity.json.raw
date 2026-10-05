@@ -1,0 +1,67 @@
+{
+  "captured_utc": "2026-10-05T06:42:47.2449396Z",
+  "readiness": {
+    "status": "ok"
+  },
+  "models": {
+    "models": [
+      {
+        "name": "Clef-Flash-Q8_0.gguf",
+        "model": "Clef-Flash-Q8_0.gguf",
+        "modified_at": "",
+        "size": "",
+        "digest": "",
+        "type": "model",
+        "description": "",
+        "tags": [
+          ""
+        ],
+        "capabilities": [
+          "completion"
+        ],
+        "parameters": "",
+        "details": {
+          "parent_model": "",
+          "format": "gguf",
+          "family": "",
+          "families": [
+            ""
+          ],
+          "parameter_size": "",
+          "quantization_level": ""
+        }
+      }
+    ],
+    "object": "list",
+    "data": [
+      {
+        "id": "Clef-Flash-Q8_0.gguf",
+        "aliases": [
+          "Clef-Flash-Q8_0.gguf"
+        ],
+        "tags": [],
+        "object": "model",
+        "created": 1791182535,
+        "owned_by": "llamacpp",
+        "meta": {
+          "vocab_type": 2,
+          "n_vocab": 248320,
+          "n_ctx": 16384,
+          "n_ctx_train": 262144,
+          "n_embd": 4096,
+          "n_params": 9075566084,
+          "size": 9646280720,
+          "ftype": "Q8_0"
+        }
+      }
+    ]
+  },
+  "pid": 26544,
+  "executable": "C:\\Users\\fuker\\AppData\\Local\\Temp\\flexcell_models\\llama-b11389-vulkan\\llama-server.exe",
+  "command_line": "C:\\Users\\fuker\\AppData\\Local\\Temp\\flexcell_models\\llama-b11389-vulkan\\llama-server.exe -m Clef-Flash-Q8_0.gguf --host 0.0.0.0 --port 11435 -ngl 99 -ub 32768 -c 16384",
+  "weight_file": "C:\\Users\\fuker\\AppData\\Local\\Temp\\flexcell_models\\Clef-Flash-Q8_0.gguf",
+  "weight_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+  "binding": "Process command line, local GGUF file hash, and served filename agree; provider does not expose a weight SHA.",
+  "sleep_ac_seconds": 0,
+  "sleep_dc_seconds": 0
+}

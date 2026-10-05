@@ -1,0 +1,48 @@
+FFF.                                                                     [100%]
+=================================== FAILURES ===================================
+_ test_regression_requires_observed_motion_and_zero_process_exit[False-6-False] _
+../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_acceptance_gate.py:38: in test_regression_requires_observed_motion_and_zero_process_exit
+    assert (result.returncode == 0) is passes, result.stdout + result.stderr
+E   AssertionError: GATE session: /tmp/pytest-of-ros/pytest-2/test_regression_requires_obser0/evidence/setup/acceptance/sessions/day2_battery_unknown_20261005_145010
+E     === case10 day1_regression plan_execute.py 0.0 -0.9 0.9 0.5 | 2026-10-05T14:50:10+08:00 | EXPECT: PLAN/EXECUTE error_code=1 MOTION_DETECTED=True (arm OFF the all-zero home) ===
+E     PLAN error_code = 1
+E     EXECUTE error_code = 1
+E     MOTION_DETECTED = False
+E     RC=6
+E     GATE PASS regression_motion
+E     GATE: ALL PASS (/tmp/pytest-of-ros/pytest-2/test_regression_requires_obser0/evidence/setup/acceptance/sessions/day2_battery_unknown_20261005_145010)
+E     
+E   assert (0 == 0) is False
+E    +  where 0 = CompletedProcess(args=['bash', '/tmp/pytest-of-ros/pytest-2/test_regression_requires_obser0/setup/32_day2_acceptance.s...test_regression_requires_obser0/evidence/setup/acceptance/sessions/day2_battery_unknown_20261005_145010)\n', stderr='').returncode
+_ test_regression_requires_observed_motion_and_zero_process_exit[True-6-False] _
+../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_acceptance_gate.py:38: in test_regression_requires_observed_motion_and_zero_process_exit
+    assert (result.returncode == 0) is passes, result.stdout + result.stderr
+E   AssertionError: GATE session: /tmp/pytest-of-ros/pytest-2/test_regression_requires_obser1/evidence/setup/acceptance/sessions/day2_battery_unknown_20261005_145011
+E     === case10 day1_regression plan_execute.py 0.0 -0.9 0.9 0.5 | 2026-10-05T14:50:11+08:00 | EXPECT: PLAN/EXECUTE error_code=1 MOTION_DETECTED=True (arm OFF the all-zero home) ===
+E     PLAN error_code = 1
+E     EXECUTE error_code = 1
+E     MOTION_DETECTED = True
+E     RC=6
+E     GATE PASS regression_motion
+E     GATE: ALL PASS (/tmp/pytest-of-ros/pytest-2/test_regression_requires_obser1/evidence/setup/acceptance/sessions/day2_battery_unknown_20261005_145011)
+E     
+E   assert (0 == 0) is False
+E    +  where 0 = CompletedProcess(args=['bash', '/tmp/pytest-of-ros/pytest-2/test_regression_requires_obser1/setup/32_day2_acceptance.s...test_regression_requires_obser1/evidence/setup/acceptance/sessions/day2_battery_unknown_20261005_145011)\n', stderr='').returncode
+___ test_regression_requires_observed_motion_and_zero_process_exit[-0-False] ___
+../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_acceptance_gate.py:38: in test_regression_requires_observed_motion_and_zero_process_exit
+    assert (result.returncode == 0) is passes, result.stdout + result.stderr
+E   AssertionError: GATE session: /tmp/pytest-of-ros/pytest-2/test_regression_requires_obser2/evidence/setup/acceptance/sessions/day2_battery_unknown_20261005_145011
+E     === case10 day1_regression plan_execute.py 0.0 -0.9 0.9 0.5 | 2026-10-05T14:50:11+08:00 | EXPECT: PLAN/EXECUTE error_code=1 MOTION_DETECTED=True (arm OFF the all-zero home) ===
+E     PLAN error_code = 1
+E     EXECUTE error_code = 1
+E     RC=0
+E     GATE PASS regression_motion
+E     GATE: ALL PASS (/tmp/pytest-of-ros/pytest-2/test_regression_requires_obser2/evidence/setup/acceptance/sessions/day2_battery_unknown_20261005_145011)
+E     
+E   assert (0 == 0) is False
+E    +  where 0 = CompletedProcess(args=['bash', '/tmp/pytest-of-ros/pytest-2/test_regression_requires_obser2/setup/32_day2_acceptance.s...test_regression_requires_obser2/evidence/setup/acceptance/sessions/day2_battery_unknown_20261005_145011)\n', stderr='').returncode
+=========================== short test summary info ============================
+FAILED ../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_acceptance_gate.py::test_regression_requires_observed_motion_and_zero_process_exit[False-6-False]
+FAILED ../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_acceptance_gate.py::test_regression_requires_observed_motion_and_zero_process_exit[True-6-False]
+FAILED ../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_acceptance_gate.py::test_regression_requires_observed_motion_and_zero_process_exit[-0-False]
+3 failed, 1 passed in 2.14s

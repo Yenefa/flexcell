@@ -36,6 +36,7 @@ import time
 from flexcell_skills.contracts.benchmark_protocol import load_protocol, check_scenario_execution
 from flexcell_skills.contracts.episode import replay_episode
 from flexcell_skills.contracts.metrics import wilson
+from flexcell_skills.contracts.routing_audit import audit_routing_episode
 from flexcell_skills.decision_policy import FSMPolicy
 
 ROS_LOG = os.path.expanduser('~/.ros/flexcell')
@@ -150,11 +151,21 @@ def main():
     ap.add_argument('--seed', type=int, default=20260930)
     ap.add_argument('--stage', choices=('smoke', 'baseline'), default='smoke')
     ap.add_argument('--smoke-summary', help='passing same-protocol smoke required for baseline')
+    ap.add_argument('--deployment', help='frozen hybrid deployment JSON; enforce per-decision provenance')
     ap.add_argument('--policy', choices=('fsm', 'jev', 'llm', 'hybrid'), default='fsm',
                     help='expected policy of the running fleet (model replay is reported NOT_RUN)')
     ap.add_argument('--ws', default=os.environ.get('FLEXCELL_WS',
                                                    '/home/ros/agentic_workcell_ws'))
     args = ap.parse_args()
+
+    deployment = None
+    if args.deployment:
+        if args.policy != 'hybrid':
+            ap.error('--deployment routing audit requires --policy hybrid')
+        with open(args.deployment, encoding='utf-8') as stream:
+            deployment = json.load(stream)
+        if deployment.get('policy') != args.policy:
+            ap.error('deployment policy mismatch')
 
     if args.list:
         for k, v in SCENARIOS.items():
@@ -174,6 +185,8 @@ def main():
         plan += [(sid, n)]
     if not plan:
         ap.error('batch must contain at least one cell')
+    if not args.dry_run and args.policy == 'hybrid' and deployment is None:
+        ap.error('hybrid execution requires --deployment for routing provenance')
     baseline_profile = None
     if not args.dry_run and args.stage == 'smoke' and any(n > 5 for _, n in plan):
         ap.error('smoke is capped at n=5 per cell; baseline requires a passing smoke summary')
@@ -187,11 +200,14 @@ def main():
         if len(profiles) != 1:
             ap.error('baseline requires smoke from one fingerprinted runtime')
         baseline_profile = profiles.pop()
+        if deployment and deployment.get('runtime_fingerprint') != baseline_profile:
+            ap.error('deployment differs from the qualifying smoke runtime')
         for sid, _ in plan:
             valid = [r for r in smoke if r.get('scenario') == sid and
                      r.get('protocol_sha256') == PROTOCOL_SHA256 and
                      r.get('runtime_fingerprint') == baseline_profile and
                      r.get('policy') == args.policy and r.get('stage') == 'smoke' and
+                     (not deployment or (r.get('routing_audit') or {}).get('ok') is True) and
                      r.get('scenario_exercised') and not r.get('harness_error') and
                      r.get('outcome') == r.get('expected') and
                      (r.get('replay_ok') is True if args.policy == 'fsm'
@@ -209,6 +225,7 @@ def main():
 
     policy = FSMPolicy()
     rows = []
+    batch_fingerprint = None
     batch_id = 'batch_%s' % time.strftime('%Y%m%d_%H%M%S')
     summary_path = os.path.join(EPISODE_DIR, '%s.jsonl' % batch_id)
     os.makedirs(EPISODE_DIR, exist_ok=True)
@@ -248,6 +265,7 @@ def main():
         replay_status = 'NOT_RUN'
         scenario_exercised, scenario_detail = False, 'no episode'
         model_decisions = 0
+        routing_audit = None
         if ep_path:
             try:
                 with open(ep_path) as fh:
@@ -257,6 +275,14 @@ def main():
                     harness_error = 'executor protocol does not match runner'
                 if baseline_profile and record.get('runtime_fingerprint') != baseline_profile:
                     harness_error = 'runtime changed since the qualifying smoke'
+                if batch_fingerprint is None:
+                    batch_fingerprint = record.get('runtime_fingerprint')
+                if not batch_fingerprint or record.get('runtime_fingerprint') != batch_fingerprint:
+                    harness_error = 'missing or mixed runtime fingerprints within batch'
+                if deployment:
+                    routing_audit = audit_routing_episode(record, deployment)
+                    if not routing_audit['ok']:
+                        harness_error = 'routing provenance failed: ' + '; '.join(routing_audit['errors'])
                 scenario_exercised, scenario_detail = check_scenario_execution(spec, record)
                 model_decisions = sum(((step.get('policy_output') or {}).get('policy_trace') or {}).get('source') in ('jev', 'llm') for step in record.get('steps', []))
                 recorded_policy = record.get('policy', {}).get('name')
@@ -287,6 +313,7 @@ def main():
             'stage': args.stage, 'scenario_exercised': scenario_exercised,
             'runtime_fingerprint': record.get('runtime_fingerprint') if ep_path else None,
             'scenario_detail': scenario_detail, 'model_decisions': model_decisions,
+            'routing_audit': routing_audit,
             'reset_rc': extra.get('reset_rc'), 'reset_output': extra.get('reset_output'),
             'client_output': out,
         }

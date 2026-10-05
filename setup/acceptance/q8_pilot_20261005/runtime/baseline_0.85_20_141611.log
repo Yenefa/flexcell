@@ -1,0 +1,44 @@
+scenario runner: {'S1': 20}
+  S1 run 1/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 2/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 3/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 4/20
+    outcome=FAILED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 5/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 6/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 7/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 8/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 9/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 10/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 11/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 12/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 13/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 14/20
+    outcome=FAILED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 15/20
+    outcome=FAILED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 16/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 17/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 18/20
+    outcome=HARNESS_ERROR expected=SUCCEEDED replay=None (0 steps) arm=None clear=None
+    stopping batch: reset failed rc=1: {"ok": false, "worker_rc": 1, "error": "admin worker failed; success output rejected", "worker_output": "{\n  \"ok\": false,\n  \"report\": {\n    \"task_idle\": true,\n    \"task_state_seen\": \"IDLE\",\n    \"task_state_publishers\": 1,\n    \"carry_stop_sent\": true,\n    \"carry_state_known\": true,\n    \"carry_engaged\": false,\n    \"scene_had_objects\": true,\n    \"scene_apply_ok\": true,\n    \"scene_cleared\": true,\n    \"arm_home\": true,\n    \"arm_home_detail\": \"waiting for /move_action and /execute_trajectory ... BEFORE /joint_states: {'joint1': 0.2291, 'joint2': -0.0385, 'joint3': -0.1415, 'joint4': -0.4939} PLAN error_code = 1 planning_time = 0.0034 PLANNE\",\n    \"respawn target_box_a\": true,\n    \"respawn target_box_b\": true,\n    \"reobserved\": true,\n    \"canonical target_box_a\": \"OK ['0.2200', '0.0000', '0.0175']\",\n    \"canonical target_box_b\": \"OK ['0.2000', '-0.1800', '0.0175']\",\n    \"carry_disengaged\": true\n  },\n  \"cleanup_error\": \"Gazebo pose worker exit code -6\"\n}\n", "worker_stderr": ""}
+
+
+=== per-scenario results (metric #1, Wilson 95%% CI) ===
+  S1: 14/17 SUCCEEDED, CI95=[0.59, 0.94], replay_ok=False, 1 HARNESS_ERROR excluded
+batch summary: /home/ros/.ros/flexcell/episodes/batch_20261005_141611.jsonl
+SCENARIO RUNNER: FAIL (5)

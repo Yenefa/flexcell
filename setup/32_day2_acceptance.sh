@@ -105,13 +105,21 @@ case_cancel() {
 }
 
 case_regression() {
+  local process_rc
   { echo "=== case10 day1_regression plan_execute.py 0.0 -0.9 0.9 0.5 | $(date -Is) | EXPECT: PLAN/EXECUTE error_code=1 MOTION_DETECTED=True (arm OFF the all-zero home) ==="
     timeout 120 python3 "$P" 0.0 -0.9 0.9 0.5
-    echo "RC=$?"
   } 2>&1 | tee "$E/10_day1_regression.out"
+  process_rc=${PIPESTATUS[0]}
+  echo "RC=$process_rc" | tee -a "$E/10_day1_regression.out"
+  if [ "$process_rc" -eq 0 ]; then
+    echo 'GATE PASS regression_exit'
+  else
+    echo "GATE FAIL regression_exit: process rc=$process_rc"
+    GATE_FAILS=$((GATE_FAILS + 1))
+  fi
   # audit P1-5: MOTION_DETECTED=False used to print and still exit 0 - the
-  # grep existed but nothing consumed it.  Now the battery goes red.
-  gate_check regression_motion "$E/10_day1_regression.out" 'MOTION_DETECTED=True'
+  # old unanchored grep matched the EXPECT header, not the measured verdict.
+  gate_check regression_motion "$E/10_day1_regression.out" '^MOTION_DETECTED[[:space:]]*=[[:space:]]*True[[:space:]]*$'
 }
 
 if [ $# -eq 0 ]; then

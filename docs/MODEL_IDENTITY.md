@@ -5,7 +5,7 @@
 | 项       | 值                                                                                |
 | -------- | --------------------------------------------------------------------------------- |
 | 服务     | DeepSeek 官方 API，`https://api.deepseek.com/chat/completions`                    |
-| 模型名   | **`deepseek-v4.1-flash`**（官方具名模型，指向确定权重）                           |
+| 请求模型 | **`deepseek-flash`**（当前配置及本轮响应中的字符串；权重版本 UNKNOWN）            |
 | 角色     | 慢路径 / 任务级推理（ADR-002 接缝）                                               |
 | 思考模式 | thinking disabled                                                                 |
 | 输出模式 | `json_object`，上限 512 output tokens                                             |
@@ -15,24 +15,25 @@
 
 ### 名称记录说明
 
-仓库既有记录（`docs/DEEPSEEK_20261001.md` 等）写作 `deepseek-flash`。那是**客户端配置与账本中的请求串**，
-官方实际模型名为 `deepseek-v4.1-flash`。两者指向同一模型；引用服务端返回的 model ID 时以
-`deepseek-v4.1-flash` 为准。
+2026-10-05 Q8 先导的真实慢路径记录中，`model` 与 `response_model` 均为
+`deepseek-flash`。此前本页把它解释为 `deepseek-v4.1-flash` 并声称绑定确定权重，
+缺少服务商权重版本或摘要证据，现撤回。实际权重版本与跨时间权重稳定性为 **UNKNOWN**；
+固定请求串不能替代服务端权重身份。
 
 ### 已验证事实
 
-- 95 次官方请求的 `requested model` 与响应 `response model` **全部一致**，无模型漂移。
-- 该名称是具名版本，不是 `latest` 别名，因此跨时间可复现：后续批次仍在使用同一组权重。
-- 计价按官方人民币价格，输入未命中缓存高峰 2 元/百万 tokens、输出 8 元/百万 tokens。
+- 本轮慢路径记录的请求模型与响应模型字符串一致；这不证明权重未漂移。
+- 账本固定按输入 2 元/百万 tokens、输出 8 元/百万 tokens 记费用上界。
+  这是仓库当前计价常量，不是本轮联网核实的官方现价。
   账本始终用这组较高价格、不扣缓存优惠，因此展示值是**费用上界**。
-  95 次结算合计 **0.330258 元 / 5 元**（实测 prompt 143221 / completion 5477 tokens）。
+  历史 2026-10-01 的 95 次结算合计 **0.330258 元 / 5 元**
+  （实测 prompt 143221 / completion 5477 tokens），不代表本机当前账本总额。
 
 ### 已知边界
 
-- 权重固定**不等于**同输入同输出：采样、批处理浮点非确定性、服务端路由都可能造成偏差。
-  "跨时间用同一模型"已成立；"同一输入产生同一决策"尚未验证。
-- `model replay` 目前 0/5 NOT_RUN，原因是**尚未实现用冻结输入离线重放模型的环节**，
-  不是因为模型会漂移。episode 中已存 `canonical_world`（策略输入的精确字节）。
+- 固定请求串、固定权重、同输入同输出是三个不同结论；后二者当前均未验证。
+- 本轮在线先导的 `model replay` 为 **NOT_RUN**。仓库 `119_policy_eval.py`
+  已有本地冻结模型的离线工具；它不构成官方服务权重身份或本轮在线重放的证据。
 - 早期实验曾使用本地小模型（Qwen2.5-1.5B / Qwen2.5-3B），那批结果与线上官方模型
   **不是同一模型**，不可合并比较。相关记录保留在
   `setup/acceptance/m3_deepseek_20261001/endpoint_attempt.json`。
@@ -44,15 +45,20 @@
 
 **当前部署（桌面机，2026-10-05）**——绑定字段以此为准，变更须同步本表与校准文件：
 
-| 项        | 值                                                                                  |
-| --------- | ----------------------------------------------------------------------------------- |
-| 后端      | `clef`（`ClefBackend`，typed `/v1/systemone`）                                       |
-| 端点      | `http://172.17.144.1:11435/v1/systemone`（llama.cpp b11389 Vulkan，Windows 侧 GPU）  |
-| 模型名    | `clef-flash-q8_0`（ggml-org/Clef-Flash-GGUF Q8_0）                                   |
-| 权重 sha256 | `8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9`                 |
-| 校准文件  | `~/.config/flexcell/jev_calibration_clef_q8.json`（含自身 sha，路由门逐字段校验）    |
+| 项              | 值                                                                                                              |
+| --------------- | --------------------------------------------------------------------------------------------------------------- |
+| 后端            | `clef`（`ClefBackend`，typed `/v1/systemone`）                                                                  |
+| 端点            | `http://172.17.144.1:11435/v1/systemone`（llama.cpp b11389 Vulkan，Windows 侧 GPU）                             |
+| 模型名          | `clef-flash-q8_0`（ggml-org/Clef-Flash-GGUF Q8_0）                                                              |
+| 权重 sha256     | `8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9`                                              |
+| 校准文件        | `~/.config/flexcell/jev_calibration_clef_q8_20261005.json`（运行时计算文件 sha，逐决策核对）                    |
 | prompt 摘要算法 | 哈希 `jev_backends.py` 全源文件字节（2026-10-05 起；旧算法为 ast.dump，跨 Python 版本不稳定且不覆盖 Clef 模板） |
-| 校准标签  | `FSM_ACTION_AGREEMENT`（**不是物理成功率**；scope 限 S1 录制输入路由）                |
+| 校准标签        | `FSM_ACTION_AGREEMENT`（**不是物理成功率**；scope 限 S1 录制输入路由）                                          |
+
+2026-10-05 新一轮真实加载：后端字节摘要 `b37e71cd…5f4e85b8`，校准文件摘要
+`0af588a8…8ec3fa7`。原始字节与完整摘要见 [Q8 先导记录](Q8_PILOT_20261005.md)。
+服务端 `/v1/models` 实测 `n_ctx=16384`；`102` 旧部署文件的通用
+`server_context_tokens=8192` 是静态默认值，不能当成 Clef 服务实测上下文。
 
 Ollama Windows 构建对 Clef 全后端 500（ollama#18769），故走上游 llama-server。
 Qwen 旧快臂（4/30，LB 0.053）仅存于 `118_local_models.py` 流程；`118 start fast`

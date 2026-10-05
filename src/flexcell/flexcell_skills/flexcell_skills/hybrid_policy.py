@@ -34,7 +34,8 @@ class HybridRouter(DecisionPolicy):
 
     def decide(self, world, goal, constraints, history):
         self.stats['invocations'] += 1
-        trace = {'threshold': self._threshold, 'proposals': []}
+        trace = {'threshold': self._threshold, 'proposals': [],
+                 'calibration_sha256': getattr(self._fast, 'calibration_sha256', None)}
         if world is None:
             return self._fallback_decision(world, goal, constraints, history,
                                            trace, 'bootstrap')

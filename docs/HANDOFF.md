@@ -1,5 +1,14 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-10-05 Q8 先导（E-019）：Q8 文件 SHA、TCP/HTTP、真实 typed 请求与新校准加载已核验；
+> hybrid 强制 deployment manifest，逐决策核对校准/权重/来源/真实 tokens，非 bootstrap FSM 回退拒收。
+> 215 tests passed；修复 Day-2 回归从 EXPECT 行误匹配 PASS 的门禁，满足 off-home 条件的独立回归通过。
+> τ=0.85 smoke 5/5；先导计划 n=20，实际 17 回合 14 成功/3 抓取失败，第 18 次 reset pose worker -6 停批。
+> τ=0.03 smoke 实际 3/3，第 4 次同类 reset -6 停批，n=20 未解锁；失败完整保留，n≥50 冻结。
+> 最终 hybrid/τ=0.85，指纹 `b66edd87…b299`，strict health 19 项、IDLE、carry=false；carry 后端为 teleport。
+> 原生订阅退出根因与抓取失败底层原因 UNKNOWN；单次健康检查不能证明长批稳定。
+> [完整结果、假设边界、失败及复现入口](Q8_PILOT_20261005.md)。以下为历史记录。
+
 > 2026-10-03 原交付主机（RX 6800 台式 / Ryzen 5600 / 32GB）复活至本 HEAD `424ad43`，成为第二台全绿验证机：
 > WSL 全新 clone（Windows code-clone 对象库，LF 干净）+ 上游按证据同版本拷贝，colcon build 11 包 51.4s + colcon test **195/0/0**；
 > 补装 `rmw_cyclonedds_cpp`（9/30 起主线硬要求）；`.wslconfig` 本机 = 16GB/16GB/**NAT**——mirrored 模式在本机实测同时破坏

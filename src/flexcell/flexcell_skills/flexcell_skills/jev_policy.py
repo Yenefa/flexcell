@@ -155,6 +155,10 @@ class JevPolicy:
         return bool(data and any(b['n'] >= 5 and b['wilson_lower'] >= threshold
                                  for b in data['bins']))
 
+    @property
+    def calibration_sha256(self):
+        return self._calibration.sha256 if self._calibration.data else None
+
     def _state_bytes(self, world):
         """The EXACT canonical envelope bytes (fair-bytes rule, §4.4)."""
         if world is None:
@@ -238,6 +242,7 @@ class JevPolicy:
                           'reported_confidence': reported,
                           'confidence_calibrated': calibrated,
                           'calibration': calibration,
+                          'calibration_sha256': self.calibration_sha256,
                           'confidence_label': 'FSM_ACTION_AGREEMENT',
                           'tokens': int(raw.get('tokens', 0) or 0)},
             explanation='jev backend=%s prob=%.3f raw=%s'
