@@ -5,6 +5,15 @@ import os
 import signal
 import threading
 import time
+import weakref
+
+
+def _unsubscribe_and_wait(node, topic, released, timeout_s=3.):
+    """Wait for the transport to drop every Python callback reference."""
+    if not node.unsubscribe(topic):
+        raise RuntimeError('Gazebo pose unsubscribe refused')
+    if not released.wait(timeout_s):
+        raise RuntimeError('Gazebo pose callback was not released before shutdown')
 
 
 def main():
@@ -46,11 +55,18 @@ def main():
     options.msgs_per_sec = 20  # bound native-to-Python traffic before decoding
     if not node.subscribe_raw(topic, receive, Pose_V.DESCRIPTOR.full_name, options):
         raise RuntimeError('Gazebo raw subscription refused')
+    # Transport 13.6 may retain an in-flight RawSubscriptionHandler after
+    # unsubscribe returns. Its destructor acquires the GIL to release receive;
+    # doing that during Py_FinalizeEx aborts the native reception thread. Let
+    # transport own the only callback reference, then observe its final release.
+    released = threading.Event()
+    weakref.finalize(receive, released.set)
+    del receive
     owner = os.getppid()
     while not stop.wait(.2):
         if os.getppid() != owner:  # parent death, including SIGKILL/SIGSEGV
             stop.set()
-    node.unsubscribe(topic)
+    _unsubscribe_and_wait(node, topic, released)
 
 
 if __name__ == '__main__':

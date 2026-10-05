@@ -1,0 +1,36 @@
+FFFF                                                                     [100%]
+=================================== FAILURES ===================================
+______________ test_main_waits_for_last_native_callback_reference ______________
+../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_pose_worker_shutdown.py:50: in test_main_waits_for_last_native_callback_reference
+    assert released.is_set(), 'interpreter teardown would race the native callback destructor'
+E   AssertionError: interpreter teardown would race the native callback destructor
+E   assert False
+E    +  where False = <bound method Event.is_set of <threading.Event at 0x712cec1b96a0: unset>>()
+E    +    where <bound method Event.is_set of <threading.Event at 0x712cec1b96a0: unset>> = <threading.Event at 0x712cec1b96a0: unset>.is_set
+___________________ test_unsubscribe_failure_is_not_success ____________________
+../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_pose_worker_shutdown.py:58: in test_unsubscribe_failure_is_not_success
+    pose_stream_worker._unsubscribe_and_wait(
+E   AttributeError: module 'flexcell_skills.pose_stream_worker' has no attribute '_unsubscribe_and_wait'
+_________________ test_callback_release_timeout_is_not_success _________________
+../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_pose_worker_shutdown.py:64: in test_callback_release_timeout_is_not_success
+    pose_stream_worker._unsubscribe_and_wait(
+E   AttributeError: module 'flexcell_skills.pose_stream_worker' has no attribute '_unsubscribe_and_wait'
+______________________ test_abort_keeps_native_diagnostic ______________________
+../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_pose_worker_shutdown.py:76: in test_abort_keeps_native_diagnostic
+    common.stop_gz_pose_stream()
+/home/ros/agentic_workcell_ws/build/flexcell_skills/flexcell_skills/common.py:199: in stop_gz_pose_stream
+    raise RuntimeError('Gazebo pose worker exit code %s' % worker_rc)
+E   RuntimeError: Gazebo pose worker exit code -6
+
+During handling of the above exception, another exception occurred:
+../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_pose_worker_shutdown.py:75: in test_abort_keeps_native_diagnostic
+    with pytest.raises(RuntimeError, match='terminate called without an active exception'):
+E   AssertionError: Regex pattern did not match.
+E    Regex: 'terminate called without an active exception'
+E    Input: 'Gazebo pose worker exit code -6'
+=========================== short test summary info ============================
+FAILED ../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_pose_worker_shutdown.py::test_main_waits_for_last_native_callback_reference
+FAILED ../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_pose_worker_shutdown.py::test_unsubscribe_failure_is_not_success
+FAILED ../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_pose_worker_shutdown.py::test_callback_release_timeout_is_not_success
+FAILED ../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_pose_worker_shutdown.py::test_abort_keeps_native_diagnostic
+4 failed in 1.16s

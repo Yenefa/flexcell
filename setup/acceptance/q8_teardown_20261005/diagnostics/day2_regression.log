@@ -1,0 +1,59 @@
+GATE session: /mnt/f/flexcell-stage/setup/acceptance/sessions/day2_battery_9c6a154_20261005_154032
+=== case1 happy_a target=(0.20,0.05,0.20) q=(0,0,0,1) profile=demo_slow | 2026-10-05T15:40:32+08:00 | EXPECT: outcome=SUCCEEDED pos_err<0.02 execution_started=true ===
+SENDING request_id=case1_happy_a frame=world pose=['0.2000', '0.0500', '0.2000', '0.0000', '0.0000', '0.0000', '1.0000'] profile=demo_slow deadline=20000
+FEEDBACK VALIDATING elapsed_ms=1
+FEEDBACK PLANNING   elapsed_ms=2
+FEEDBACK EXECUTING  elapsed_ms=52
+FEEDBACK CHECKING   elapsed_ms=1625
+RESULT {
+  "outcome": "OUTCOME_SUCCEEDED",
+  "outcome_val": 0,
+  "error_code": "ERR_NONE",
+  "error_code_val": 0,
+  "moveit_error_code": 0,
+  "has_reached_pose": true,
+  "position_error_m": 0.006089353720661634,
+  "orientation_error_rad": 0.2784012730321481,
+  "orientation_enforced": false,
+  "execution_started": true,
+  "world_revision_before": 0,
+  "world_revision_after": 0,
+  "evidence_id": "case1_happy_a-2d97d918",
+  "detail": "planning + execution + measured pose within tolerance",
+  "phases": [
+    "VALIDATING",
+    "PLANNING",
+    "EXECUTING",
+    "CHECKING"
+  ],
+  "wall_seconds": 1.642,
+  "reached_pose": {
+    "frame_id": "world",
+    "position": [
+      0.2037379918259431,
+      0.0547983940240593,
+      0.20028820241912645
+    ]
+  }
+}
+RC=0
+GATE PASS happy_a_outcome
+GATE PASS happy_a_started
+GATE PASS happy_a_pos_err (position_error_m=0.006089353720661634 < 0.02)
+=== case10 day1_regression plan_execute.py 0.0 -0.9 0.9 0.5 | 2026-10-05T15:40:35+08:00 | EXPECT: PLAN/EXECUTE error_code=1 MOTION_DETECTED=True (arm OFF the all-zero home) ===
+waiting for /move_action and /execute_trajectory ...
+BEFORE /joint_states: {'joint1': 0.282, 'joint2': -0.579, 'joint3': 0.4175, 'joint4': 0.1579}
+PLAN error_code = 1  planning_time = 0.0137
+PLANNED joints: ['joint1', 'joint2', 'joint3', 'joint4']
+PLANNED waypoints: 10
+PLANNED final positions: [0.0042, -0.9034, 0.8943, 0.5071]
+PLANNED duration: 0.873 s
+EXECUTE error_code = 1
+AFTER  /joint_states: {'joint1': 0.0042, 'joint2': -0.9034, 'joint3': 0.8943, 'joint4': 0.5071}
+DELTA  /joint_states: {'joint1': -0.2778, 'joint2': -0.3244, 'joint3': 0.4768, 'joint4': 0.3492}
+MOTION_DETECTED = True
+RC = 0
+RC=0
+GATE PASS regression_exit
+GATE PASS regression_motion
+GATE: ALL PASS (/mnt/f/flexcell-stage/setup/acceptance/sessions/day2_battery_9c6a154_20261005_154032)

@@ -195,8 +195,10 @@ def stop_gz_pose_stream(timeout_s=10.0):
     with _GZ_STREAM['lock']:
         _GZ_STREAM['thread'] = None
         worker_rc = _GZ_STREAM.get('worker_rc', 0)
+        worker_error = _GZ_STREAM['cb_error']
     if worker_rc not in (0, -15):
-        raise RuntimeError('Gazebo pose worker exit code %s' % worker_rc)
+        raise RuntimeError('Gazebo pose worker exit code %s: %s'
+                           % (worker_rc, worker_error))
 
 
 def now_rx_stale():

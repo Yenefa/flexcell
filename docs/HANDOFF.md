@@ -1,5 +1,13 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-10-05 pose worker 退出修复（E-020）：未插桩复现并抓到 core，确认
+> `Py_FinalizeEx` 与 `RawSubscriptionHandler` 析构获取 GIL 竞态。
+> 增加回调引用实际释放屏障，保留 -6 拒收与超时失败；219 tests passed、
+> 真实订阅启停 100/100、连续 reset 20/20、happy_a + 四关节运动回归通过。
+> prompt digest/校准 SHA 未变；模型先导须用修复后的新指纹重新资格验证。
+> 原始截断批次完整保留，抓取失败根因仍 UNKNOWN，n≥50 继续冻结。
+> [修复、反例测试与运行证据](Q8_TEARDOWN_20261005.md)。下条为修复前历史。
+
 > 2026-10-05 Q8 先导（E-019）：Q8 文件 SHA、TCP/HTTP、真实 typed 请求与新校准加载已核验；
 > hybrid 强制 deployment manifest，逐决策核对校准/权重/来源/真实 tokens，非 bootstrap FSM 回退拒收。
 > 215 tests passed；修复 Day-2 回归从 EXPECT 行误匹配 PASS 的门禁，满足 off-home 条件的独立回归通过。
