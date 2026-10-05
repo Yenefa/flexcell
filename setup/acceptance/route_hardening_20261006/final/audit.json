@@ -1,0 +1,235 @@
+{
+  "schema_version": 1,
+  "routing_ok": true,
+  "physical_successes": 3,
+  "episodes": 5,
+  "runtime_fingerprint": "2d1ba0597c807f24a70ac203abb0aff335339cc56668d13cc4871f51f1f7c689",
+  "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+  "fast_selected": 22,
+  "slow_selected": 5,
+  "fast_calls": 27,
+  "fast_tokens": 38410,
+  "harness_errors": [],
+  "goal_requests": 30,
+  "goal_responses": 30,
+  "sendgoal_timeouts": 0,
+  "observer_goals_correlated": 8,
+  "failures_retained": true,
+  "resampled_episodes": 0,
+  "offline_gpu_overlap": false,
+  "outcomes": [
+    {
+      "run_id": "week1_demo_v1-1650751e",
+      "outcome": "SUCCEEDED",
+      "command_rc": 0,
+      "final_state": {
+        "detail": "task done: all assignments verified",
+        "duration_s": 45.825898186,
+        "error_code": 0,
+        "evidence_id": "week1_demo_v1-3ca38b5e",
+        "fsm_trace": [
+          "PICK_A(attempt=1):OK",
+          "PLACE_A:OK",
+          "VERIFY_A(attempt=1):OK",
+          "PICK_B(attempt=1):OK",
+          "PLACE_B:OK",
+          "VERIFY_B(attempt=1):OK"
+        ],
+        "goal_uuid": "4546591941ac4c299694ef7e71f687eb",
+        "object_a_at_zone": true,
+        "object_b_at_zone": true,
+        "outcome": "0",
+        "safety": {
+          "evaluated": 8,
+          "invalid_per_1000": 0.0,
+          "rejected": 0
+        },
+        "zone_a_error_m": 0.001254128,
+        "zone_b_error_m": 0.006130578
+      },
+      "routing_audit": {
+        "bootstrap": 1,
+        "errors": [],
+        "fast_calls": 7,
+        "fast_selected": 6,
+        "fast_tokens": 10083,
+        "fsm_fallbacks": 0,
+        "model_decisions": 7,
+        "ok": true,
+        "slow_selected": 1
+      },
+      "episode_sha256": "dad5eb1a65f4d3646e96ef85cd68634ec8bb1a1d81e25557787d297cc095e65d"
+    },
+    {
+      "run_id": "week1_demo_v1-471252c7",
+      "outcome": "FAILED",
+      "command_rc": 1,
+      "final_state": {
+        "detail": "policy abort (BUDGET_EXHAUSTED): PLACE failed with error 30 and recovery budget is exhausted while still carrying target_box_a. (trace=PICK_A(attempt=1):OK,PLACE_A:FAIL)",
+        "duration_s": 28.831274277,
+        "error_code": 51,
+        "evidence_id": "week1_demo_v1-7f399c45",
+        "fsm_trace": [
+          "PICK_A(attempt=1):OK",
+          "PLACE_A:FAIL"
+        ],
+        "goal_uuid": "52289603ce3e4715a4993a5ec988f4b2",
+        "object_a_at_zone": false,
+        "object_b_at_zone": false,
+        "outcome": "1",
+        "safety": {
+          "evaluated": 4,
+          "invalid_per_1000": 0.0,
+          "rejected": 0
+        },
+        "zone_a_error_m": null,
+        "zone_b_error_m": null
+      },
+      "routing_audit": {
+        "bootstrap": 1,
+        "errors": [],
+        "fast_calls": 3,
+        "fast_selected": 2,
+        "fast_tokens": 4035,
+        "fsm_fallbacks": 0,
+        "model_decisions": 3,
+        "ok": true,
+        "slow_selected": 1
+      },
+      "episode_sha256": "87f57df6b3e418348ab5280069ad157d9de3971534a8b853685ea04521e2bca4"
+    },
+    {
+      "run_id": "week1_demo_v1-45314299",
+      "outcome": "SUCCEEDED",
+      "command_rc": 0,
+      "final_state": {
+        "detail": "task done: all assignments verified",
+        "duration_s": 47.633856452,
+        "error_code": 0,
+        "evidence_id": "week1_demo_v1-623939f7",
+        "fsm_trace": [
+          "PICK_A(attempt=1):OK",
+          "PLACE_A:OK",
+          "VERIFY_A(attempt=1):OK",
+          "PICK_B(attempt=1):OK",
+          "PLACE_B:OK",
+          "VERIFY_B(attempt=1):OK"
+        ],
+        "goal_uuid": "24327117c68744f8a864babbd192db47",
+        "object_a_at_zone": true,
+        "object_b_at_zone": true,
+        "outcome": "0",
+        "safety": {
+          "evaluated": 8,
+          "invalid_per_1000": 0.0,
+          "rejected": 0
+        },
+        "zone_a_error_m": 0.007264153,
+        "zone_b_error_m": 0.005393334
+      },
+      "routing_audit": {
+        "bootstrap": 1,
+        "errors": [],
+        "fast_calls": 7,
+        "fast_selected": 6,
+        "fast_tokens": 10131,
+        "fsm_fallbacks": 0,
+        "model_decisions": 7,
+        "ok": true,
+        "slow_selected": 1
+      },
+      "episode_sha256": "90282f56fdb0ff10376278532cc412306cf1c060e4ecabfc3cba872895e34338"
+    },
+    {
+      "run_id": "week1_demo_v1-dc2980c5",
+      "outcome": "FAILED",
+      "command_rc": 1,
+      "final_state": {
+        "detail": "policy abort (NON_RECOVERABLE): PLACE failed with error 25 while carrying target_box_a, and recovery budget is exhausted, so abort. (trace=PICK_A(attempt=1):OK,PLACE_A:FAIL)",
+        "duration_s": 22.256590321,
+        "error_code": 50,
+        "evidence_id": "week1_demo_v1-f9e94bd4",
+        "fsm_trace": [
+          "PICK_A(attempt=1):OK",
+          "PLACE_A:FAIL"
+        ],
+        "goal_uuid": "a4911d04be8e4ee3946088b2ace9fa35",
+        "object_a_at_zone": false,
+        "object_b_at_zone": false,
+        "outcome": "1",
+        "safety": {
+          "evaluated": 4,
+          "invalid_per_1000": 0.0,
+          "rejected": 0
+        },
+        "zone_a_error_m": null,
+        "zone_b_error_m": null
+      },
+      "routing_audit": {
+        "bootstrap": 1,
+        "errors": [],
+        "fast_calls": 3,
+        "fast_selected": 2,
+        "fast_tokens": 4032,
+        "fsm_fallbacks": 0,
+        "model_decisions": 3,
+        "ok": true,
+        "slow_selected": 1
+      },
+      "episode_sha256": "90a463d99d49a447617ea623258f1da1116fa68adb5fe7f326e48a25d5dd1cee"
+    },
+    {
+      "run_id": "week1_demo_v1-d2f6286b",
+      "outcome": "SUCCEEDED",
+      "command_rc": 0,
+      "final_state": {
+        "detail": "task done: all assignments verified",
+        "duration_s": 47.627809923,
+        "error_code": 0,
+        "evidence_id": "week1_demo_v1-312413de",
+        "fsm_trace": [
+          "PICK_A(attempt=1):OK",
+          "PLACE_A:OK",
+          "VERIFY_A(attempt=1):OK",
+          "PICK_B(attempt=1):OK",
+          "PLACE_B:OK",
+          "VERIFY_B(attempt=1):OK"
+        ],
+        "goal_uuid": "4341f7a712654757937839dfa62a34d8",
+        "object_a_at_zone": true,
+        "object_b_at_zone": true,
+        "outcome": "0",
+        "safety": {
+          "evaluated": 8,
+          "invalid_per_1000": 0.0,
+          "rejected": 0
+        },
+        "zone_a_error_m": 0.008607136,
+        "zone_b_error_m": 0.01642918
+      },
+      "routing_audit": {
+        "bootstrap": 1,
+        "errors": [],
+        "fast_calls": 7,
+        "fast_selected": 6,
+        "fast_tokens": 10129,
+        "fsm_fallbacks": 0,
+        "model_decisions": 7,
+        "ok": true,
+        "slow_selected": 1
+      },
+      "episode_sha256": "01e317e4489173a7d8ce69b399dbcb282306b758f7237f842ed58b882ccc2cfa"
+    }
+  ],
+  "latency": {
+    "status": "MEASURED",
+    "clock": "perf_counter_ns",
+    "n": 27,
+    "p50_ms": 1920.451544,
+    "p95_ms": 2575.620034,
+    "p99_ms": 2650.351945,
+    "max_ms": 2676.382796
+  },
+  "latency_comparison": "NOT_RUN: no causal latency claim across fingerprints or overlapping GPU traffic",
+  "scope": "Same-fingerprint S1 n=5 only; frozen large batches remain NOT_RUN"
+}

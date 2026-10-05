@@ -1,0 +1,63 @@
+{
+  "ok": true,
+  "controlled_acceptance_delay_s": 0.3,
+  "send_deadline_s": 0.06,
+  "timed_out": true,
+  "blocked_until_terminal": true,
+  "physical_dispatches": 0,
+  "ros_goal_requests": 1,
+  "ros_goals_executed": 1,
+  "canceled_original_goal": true,
+  "resolved": true,
+  "goals": [
+    {
+      "goal_uuid": "8ff0a0cd84764ac7a3b654f3550c0469",
+      "started_ns": 10829951097888,
+      "canceled_ns": 10829961238476
+    }
+  ],
+  "events": [
+    {
+      "task_run_id": "controlled_late_acceptance",
+      "goal_uuid": "8ff0a0cd84764ac7a3b654f3550c0469",
+      "label": "PROBE",
+      "mono_ns": 10829647495199,
+      "elapsed_ms": 0.005844,
+      "event": "goal_send_requested",
+      "wall_ts": 1791223888.1978803
+    },
+    {
+      "task_run_id": "controlled_late_acceptance",
+      "goal_uuid": "8ff0a0cd84764ac7a3b654f3550c0469",
+      "label": "PROBE",
+      "mono_ns": 10829709788655,
+      "elapsed_ms": 62.299704,
+      "event": "goal_send_timeout",
+      "acceptance": "UNKNOWN",
+      "wall_ts": 1791223888.260176
+    },
+    {
+      "task_run_id": "controlled_late_acceptance",
+      "goal_uuid": "8ff0a0cd84764ac7a3b654f3550c0469",
+      "label": "PROBE",
+      "mono_ns": 10829955989468,
+      "elapsed_ms": 308.500149,
+      "event": "late_goal_cancel_sent",
+      "wall_ts": 1791223888.5063753
+    },
+    {
+      "task_run_id": "controlled_late_acceptance",
+      "goal_uuid": "8ff0a0cd84764ac7a3b654f3550c0469",
+      "label": "PROBE",
+      "mono_ns": 10829975980424,
+      "elapsed_ms": 328.491128,
+      "event": "late_goal_terminal",
+      "status": 5,
+      "wall_ts": 1791223888.5263665
+    }
+  ],
+  "states": [
+    "IDLE"
+  ],
+  "scope": "Non-motion actual ROS action communication; intentional delayed server acceptance"
+}

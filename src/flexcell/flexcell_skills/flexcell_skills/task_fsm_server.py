@@ -34,6 +34,7 @@ from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
 
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import String as StringMsg
+from unique_identifier_msgs.msg import UUID
 
 from flexcell_interfaces.action import (
     Observe, PickObject, PlaceObject, RunDemo, RunPickPlace, VerifyObject)
@@ -45,6 +46,7 @@ from flexcell_skills.skill_contract import (
 from flexcell_skills.canonical_state import serialize_envelope
 from flexcell_skills.contracts.error_codes import task_abort_error_code
 from flexcell_skills.contracts.action_result import AcceptedGoalResult
+from flexcell_skills.contracts.goal_response import LateGoalCleanup
 
 from flexcell_skills.contracts.episode import EpisodeRecorder, EpisodeStore
 from flexcell_skills.contracts.benchmark_protocol import load_protocol
@@ -60,6 +62,10 @@ from flexcell_skills.decision_policy import (
     RC_VERIFY_BUDGET_EXHAUSTED, RC_VERIFY_MISMATCH_RETRY)
 
 R = RunPickPlace.Result
+
+
+class SkillTransportError(RuntimeError):
+    """An unknown skill result must not become another policy dispatch."""
 
 
 def err_name(cls, prefix, value):
@@ -110,6 +116,12 @@ class TaskFsmServer(Node):
         self._tol = float(gp('default_place_tolerance_m').value)
         self._skill_wait = float(gp('skill_wait_s').value)
         self._log = JsonlLog(self, gp('log_dir').value, gp('log_file').value)
+        self._skill_transport_log = JsonlLog(self, gp('log_dir').value,
+                                             'skill_transport.jsonl')
+        self._pending_skill_sends = {}
+        self._send_guard_lock = threading.Lock()
+        self.create_timer(.1, self._poll_late_skill_goals,
+                          callback_group=ReentrantCallbackGroup())
 
         # one atomic admission gate for BOTH task actions - they drive the
         # same arm (audit P1-3: the old per-action check-then-set flags were
@@ -219,6 +231,121 @@ class TaskFsmServer(Node):
     def _publish_task_state(self, state):
         self._state_pub.publish(StringMsg(data=state))
 
+    def _has_pending_skill_goal(self):
+        return bool(getattr(self, '_pending_skill_sends', {}))
+
+    def _poll_late_skill_goals(self):
+        with self._send_guard_lock:
+            for goal_id, cleanup in list(self._pending_skill_sends.items()):
+                if cleanup.poll():
+                    del self._pending_skill_sends[goal_id]
+            if (not self._pending_skill_sends and getattr(self, '_late_goal_blocked', False)
+                    and self._admission.acquire(blocking=False)):
+                try:
+                    self._late_goal_blocked = False
+                    self._publish_task_state('IDLE')
+                finally:
+                    self._admission.release()
+
+    def _send_skill_goal(self, cli, goal, label, timeout_s=15.0):
+        goal_id = uuid.uuid4()
+        message_id = UUID(uuid=list(goal_id.bytes))
+        run_id = getattr(self, '_active_task_run_id', None)
+        started = time.monotonic_ns()
+
+        def emit(**fields):
+            log = getattr(self, '_skill_transport_log', None)
+            if log is not None:
+                log.write(dict(task_run_id=run_id, goal_uuid=goal_id.hex,
+                               label=label, mono_ns=time.monotonic_ns(),
+                               elapsed_ms=(time.monotonic_ns()-started)/1e6,
+                               **fields))
+
+        def quarantine(future, detail, event):
+            emit(event=event, acceptance='UNKNOWN')
+            cleanup = LateGoalCleanup(future, emit)
+            with self._send_guard_lock:
+                self._pending_skill_sends[goal_id.hex] = cleanup
+                self._late_goal_blocked = True
+            return None, detail
+
+        emit(event='goal_send_requested')
+        try:
+            send = cli.send_goal_async(goal, goal_uuid=message_id)
+        except Exception as exc:
+            return quarantine(None, '%s goal send error: %s' % (label, type(exc).__name__),
+                              'goal_send_error')
+        deadline = time.monotonic() + timeout_s
+        while not send.done():
+            if time.monotonic() >= deadline:
+                return quarantine(send, '%s goal send timeout' % label, 'goal_send_timeout')
+            time.sleep(.02)
+        try:
+            handle = send.result()
+        except Exception as exc:
+            return quarantine(send, '%s goal response error: %s' % (label, type(exc).__name__),
+                              'goal_response_error')
+        if handle is None:
+            return quarantine(send, '%s goal response unknown' % label, 'goal_response_unknown')
+        emit(event='goal_response', accepted=bool(handle and handle.accepted))
+        if handle is None or not handle.accepted:
+            return None, '%s goal rejected' % label
+        return handle, None
+
+    def _guard_canceled_skill(self, handle, result_read, label):
+        goal_id = getattr(handle, 'goal_id', None)
+        goal_uuid = bytes(goal_id.uuid).hex() if goal_id is not None else None
+        run_id = getattr(self, '_active_task_run_id', None)
+
+        def emit(**fields):
+            log = getattr(self, '_skill_transport_log', None)
+            if log is not None:
+                log.write(dict(task_run_id=run_id, goal_uuid=goal_uuid, label=label,
+                               mono_ns=time.monotonic_ns(), **fields))
+
+        emit(event='cancel_stop_unconfirmed')
+        with self._send_guard_lock:
+            cleanup = (LateGoalCleanup.after_cancel(result_read, emit)
+                       if result_read is not None else LateGoalCleanup.for_accepted(handle, emit))
+            self._pending_skill_sends[goal_uuid or id(handle)] = cleanup
+            self._late_goal_blocked = True
+
+    def _wait_skill_result(self, handle, label, deadline_s, goal_handle=None):
+        reader = None
+        cancel_attempted = False
+        started = time.monotonic()
+        try:
+            reader = AcceptedGoalResult(handle)
+            while not reader.done():
+                if goal_handle is not None and goal_handle.is_cancel_requested:
+                    cancel_attempted = True
+                    handle.cancel_goal_async()
+                    cancel_started = time.monotonic()
+                    while not reader.done() and time.monotonic() - cancel_started < 15.0:
+                        time.sleep(.05)
+                    if not reader.done():
+                        self._guard_canceled_skill(handle, reader, label)
+                        return None, '%s canceled: stop confirmation timeout' % label
+                    break
+                if time.monotonic() - started > deadline_s:
+                    cancel_attempted = True
+                    handle.cancel_goal_async()
+                    self._guard_canceled_skill(handle, reader, label)
+                    return None, '%s result timeout (cancel sent)' % label
+                time.sleep(.05)
+            response = reader.result()
+            if response.status not in (4, 5, 6):
+                raise RuntimeError('skill result is not terminal')
+            return response.result, None
+        except Exception as exc:
+            self._guard_canceled_skill(handle, reader, label)
+            if reader is not None and not cancel_attempted:
+                try:
+                    handle.cancel_goal_async()
+                except Exception:
+                    pass  # Quarantine remains until a terminal result is known.
+            return None, '%s result/stop unconfirmed: %s' % (label, type(exc).__name__)
+
     def _call_skill(self, cli, goal, state, trace, rec, deadline_s, goal_handle=None, t0=None):
         """Call one skill; returns (result, None) or (None, detail)."""
         trace.append(state)
@@ -229,39 +356,12 @@ class TaskFsmServer(Node):
             goal_handle.publish_feedback(fb)
         if not cli.wait_for_server(timeout_sec=10.0):
             return None, '%s skill server unavailable' % state
-        send = cli.send_goal_async(goal)
-        t0 = time.monotonic()
-        while not send.done():
-            if time.monotonic() - t0 > 15.0:
-                return None, '%s goal send timeout' % state
-            time.sleep(0.02)
-        gh = send.result()
-        if gh is None or not gh.accepted:
-            return None, '%s goal rejected' % state
-        rf = AcceptedGoalResult(gh)
-        while not rf.done():
-            if goal_handle is not None and goal_handle.is_cancel_requested:
-                # outer cancel: stop the skill's motion and surface its
-                # CANCELED result (audit P0-3 - skills used to run to
-                # completion while the caller waited)
-                gh.cancel_goal_async()
-                t_c = time.monotonic()
-                while not rf.done() and time.monotonic() - t_c < 15.0:
-                    time.sleep(0.05)
-                if not rf.done():
-                    return None, '%s canceled: stop confirmation timeout' % state
-                result = rf.result().result
-                rec['%s_result' % state.lower()] = {
-                    'outcome': int(result.outcome),
-                    'error_code': int(getattr(result, 'error_code', 0)),
-                    'detail': getattr(result, 'detail', ''),
-                }
-                return result, None
-            if time.monotonic() - t0 > deadline_s:
-                gh.cancel_goal_async()
-                return None, '%s result timeout (cancel sent)' % state
-            time.sleep(0.05)
-        result = rf.result().result
+        gh, error = self._send_skill_goal(cli, goal, state)
+        if error:
+            return None, error
+        result, error = self._wait_skill_result(gh, state, deadline_s, goal_handle)
+        if error:
+            return None, error
         rec['%s_result' % state.lower()] = {
             'outcome': int(result.outcome),
             'error_code': int(getattr(result, 'error_code', 0)),
@@ -294,33 +394,10 @@ class TaskFsmServer(Node):
             goal_handle.publish_feedback(fb)
         if not cli.wait_for_server(timeout_sec=10.0):
             return None, '%s skill server unavailable' % label
-        send = cli.send_goal_async(goal)
-        t_send = time.monotonic()
-        while not send.done():
-            if time.monotonic() - t_send > 15.0:
-                return None, '%s goal send timeout' % label
-            time.sleep(0.02)
-        gh = send.result()
-        if gh is None or not gh.accepted:
-            return None, '%s goal rejected' % label
-        rf = AcceptedGoalResult(gh)
-        t_r = time.monotonic()
-        while not rf.done():
-            if goal_handle is not None and goal_handle.is_cancel_requested:
-                # outer cancel: stop the skill's motion and surface its
-                # CANCELED result (audit P0-3)
-                gh.cancel_goal_async()
-                t_c = time.monotonic()
-                while not rf.done() and time.monotonic() - t_c < 15.0:
-                    time.sleep(0.05)
-                if not rf.done():
-                    return None, '%s canceled: stop confirmation timeout' % label
-                return rf.result().result, None
-            if time.monotonic() - t_r > deadline_s:
-                gh.cancel_goal_async()
-                return None, '%s result timeout (cancel sent)' % label
-            time.sleep(0.05)
-        return rf.result().result, None
+        gh, error = self._send_skill_goal(cli, goal, label)
+        if error:
+            return None, error
+        return self._wait_skill_result(gh, label, deadline_s, goal_handle)
 
     def _execute_demo(self, goal_handle):
         return self._execute_plan(goal_handle, single=False)
@@ -407,7 +484,7 @@ class TaskFsmServer(Node):
             else:
                 self._demo_log.write(log_record)
             if owns_arm:
-                self._publish_task_state('IDLE')
+                self._publish_task_state('BUSY' if self._has_pending_skill_goal() else 'IDLE')
             if outcome == result_type.OUTCOME_SUCCEEDED:
                 goal_handle.succeed()
             elif outcome == result_type.OUTCOME_CANCELED:
@@ -421,8 +498,13 @@ class TaskFsmServer(Node):
                           result_type.ERR_RESOURCE_BUSY,
                           'another demo task is active')
         owns_arm = True
+        self._active_task_run_id = run_id
         self._publish_task_state('BUSY')
         try:
+            if self._has_pending_skill_goal():
+                return finish(result_type.OUTCOME_FAILED,
+                              result_type.ERR_RESOURCE_BUSY,
+                              'skill goal acceptance or stop confirmation is unknown')
             if single and not goal.object_name:
                 return finish(result_type.OUTCOME_FAILED, result_type.ERR_OBJECT_UNKNOWN,
                               'object_name is empty')
@@ -453,6 +535,15 @@ class TaskFsmServer(Node):
             last_world_revision = 0
             last_observe_evidence = ''
             last_fail_label = ''
+
+            def call_skill(cli, request, label, deadline):
+                result, error = self._demo_call(cli, request, label, goal_handle, t0, deadline)
+                if error:
+                    episode.record_executor_result(detail=error)
+                    steps.append(dict(state=label, ok=False, error=error,
+                                      transport_failure=True))
+                    raise SkillTransportError(error)
+                return result, error
 
             def tag_of(object_id):
                 return 'A' if single or object_id == self._obj_a else 'B'
@@ -608,8 +699,7 @@ class TaskFsmServer(Node):
                         label = 'OBSERVE_%s' % tag
                     og = Observe.Goal()
                     og.refresh = True
-                    r, err = self._demo_call(self._cli_observe, og, label,
-                                             goal_handle, t0, 30.0)
+                    r, err = call_skill(self._cli_observe, og, label, 30.0)
                     o_outcome = int(r.outcome) if r is not None else 255
                     o_evidence = getattr(r, 'evidence_id', '') if r else ''
                     episode.record_executor_result(
@@ -672,8 +762,7 @@ class TaskFsmServer(Node):
                     pg = PickObject.Goal()
                     pg.object_name = decision.target
                     pg.motion_profile_id = constraints.motion_profile_id
-                    r, err = self._demo_call(self._cli_pick, pg, label,
-                                             goal_handle, t0, 90.0)
+                    r, err = call_skill(self._cli_pick, pg, label, 90.0)
                     pick_ok = (err is None and r is not None and
                                int(r.outcome) == PickObject.Result.OUTCOME_SUCCEEDED)
                     code = int(r.error_code) if (err is None and r is not None) else -1
@@ -742,8 +831,7 @@ class TaskFsmServer(Node):
                     pg.object_name = decision.target
                     pg.place_pose = zone_pose
                     pg.motion_profile_id = constraints.motion_profile_id
-                    r, err = self._demo_call(self._cli_place, pg, label,
-                                             goal_handle, t0, 90.0)
+                    r, err = call_skill(self._cli_place, pg, label, 90.0)
                     place_ok = (err is None and r is not None and
                                 int(r.outcome) == PlaceObject.Result.OUTCOME_SUCCEEDED)
                     episode.record_executor_result(
@@ -820,8 +908,7 @@ class TaskFsmServer(Node):
                     vg.object_name = decision.target
                     vg.expected_pose = zone_pose.pose
                     vg.position_tolerance_m = constraints.verify_tolerance_m
-                    r, err = self._demo_call(self._cli_verify, vg, label,
-                                             goal_handle, t0, 30.0)
+                    r, err = call_skill(self._cli_verify, vg, label, 30.0)
                     v_ok = (err is None and r is not None and
                             int(r.outcome) == VerifyObject.Result.OUTCOME_VERIFIED)
                     episode.record_executor_result(
@@ -894,6 +981,11 @@ class TaskFsmServer(Node):
                 raise PolicyStateError(
                     'policy returned unsupported action %r' % decision.action)
 
+        except SkillTransportError as exc:
+            canceled = goal_handle.is_cancel_requested
+            return finish(result_type.OUTCOME_CANCELED if canceled else result_type.OUTCOME_FAILED,
+                          result_type.ERR_CANCELED if canceled else result_type.ERR_SKILL_FAILED,
+                          'skill transport failure: %s' % exc)
         except PolicyStateError as exc:
             self.get_logger().error('policy state error: %s' % exc)
             return finish(result_type.OUTCOME_FAILED,
@@ -905,8 +997,8 @@ class TaskFsmServer(Node):
             return finish(result_type.OUTCOME_FAILED,
                           result_type.ERR_SKILL_FAILED, crash_detail(exc))
         finally:
+            self._publish_task_state('BUSY' if self._has_pending_skill_goal() else 'IDLE')
             self._admission.release()
-            self._publish_task_state('IDLE')
 
 
 def main(args=None):

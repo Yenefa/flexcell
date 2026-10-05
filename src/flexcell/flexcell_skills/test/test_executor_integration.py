@@ -32,7 +32,7 @@ from flexcell_interfaces.msg import (
 from flexcell_skills.contracts.episode import EpisodeStore, replay_episode
 from flexcell_skills.contracts.injection import InjectionLifecycle
 from flexcell_skills.common import JsonlLog
-from flexcell_skills.decision_policy import FSMPolicy
+from flexcell_skills.decision_policy import Decision, FSMPolicy
 from flexcell_skills.task_fsm_server import TaskFsmServer
 from flexcell_skills import pick_server as pick_server_module
 from flexcell_skills.pick_server import PickServer
@@ -293,6 +293,8 @@ class TestCallSkillTimeout(unittest.TestCase):
 
     def test_result_timeout_cancels_and_reports(self):
         node = TaskFsmServer.__new__(TaskFsmServer)
+        node._pending_skill_sends = {}
+        node._send_guard_lock = threading.Lock()
 
         class _NeverDone:
             def done(self):
@@ -318,7 +320,7 @@ class TestCallSkillTimeout(unittest.TestCase):
             def wait_for_server(self, timeout_sec=None):
                 return True
 
-            def send_goal_async(self, goal):
+            def send_goal_async(self, goal, goal_uuid=None):
                 f = SimpleNamespace(done=lambda: True,
                                     result=lambda: gh_stub)
                 return f
@@ -328,6 +330,111 @@ class TestCallSkillTimeout(unittest.TestCase):
                                        [], rec, 0.15)
         self.assertIsNone(result)
         self.assertEqual(err, 'VERIFY result timeout (cancel sent)')
+        self.assertTrue(gh_stub.cancelled)
+        self.assertTrue(node._has_pending_skill_goal())
+
+    def test_send_timeout_never_returns_to_a_retrying_policy(self):
+        with tempfile.TemporaryDirectory(prefix='fx_send_timeout_') as tmp:
+            calls = []
+            node = _make_fsm(tmp, _make_demo_call({
+                'OBSERVE': [(None, 'OBSERVE_A goal send timeout')],
+            }, calls))
+
+            class RetryEverything:
+                name, version = 'retrying-test-policy', '1'
+                invocations = 0
+
+                def decide(self, world, goal, constraints, history):
+                    self.invocations += 1
+                    return Decision('OBSERVE', 'target_box_a')
+
+            node._policy = RetryEverything()
+            gh = _GoalHandle(RunDemo.Goal())
+            gh.request.scenario_id = 'it_send_timeout'
+            result = node._execute_demo(gh)
+            self.assertEqual(result.outcome, RunDemo.Result.OUTCOME_FAILED)
+            self.assertEqual(result.error_code, RunDemo.Result.ERR_SKILL_FAILED)
+            self.assertIn('skill transport failure', result.detail)
+            self.assertEqual(node._policy.invocations, 1)
+            self.assertEqual(calls, ['OBSERVE_A'])
+            record = json.loads(next(__import__('pathlib').Path(tmp).glob('it_send_timeout_*.json')).read_text())
+            self.assertEqual(len(record['steps']), 1)
+            self.assertIsNone(record['steps'][0]['executor_result']['outcome'])
+            self.assertIn('goal send timeout', record['steps'][0]['executor_result']['detail'])
+
+    def test_unconfirmed_skill_blocks_a_following_task(self):
+        with tempfile.TemporaryDirectory(prefix='fx_send_busy_') as tmp:
+            calls = []
+            node = _make_fsm(tmp, lambda *args: calls.append(args))
+            node._pending_skill_sends = {'unknown': object()}
+            states = []
+            node._publish_task_state = states.append
+            gh = _GoalHandle(RunDemo.Goal())
+            result = node._execute_demo(gh)
+            self.assertEqual(result.error_code, RunDemo.Result.ERR_RESOURCE_BUSY)
+            self.assertEqual(calls, [])
+            self.assertNotIn('IDLE', states)
+
+    def test_quarantine_is_checked_after_acquiring_task_admission(self):
+        with tempfile.TemporaryDirectory(prefix='fx_send_race_') as tmp:
+            calls = []
+            node = _make_fsm(tmp, lambda *args: calls.append(args))
+            lock = threading.Lock()
+
+            class Admission:
+                def acquire(self, blocking=False):
+                    # The previous owner quarantines its goal before releasing
+                    # admission; checking before this acquire would miss it.
+                    node._pending_skill_sends = {'late': object()}
+                    return lock.acquire(blocking=blocking)
+
+                def release(self):
+                    lock.release()
+
+            node._admission = Admission()
+            result = node._execute_demo(_GoalHandle(RunDemo.Goal()))
+            self.assertEqual(result.error_code, RunDemo.Result.ERR_RESOURCE_BUSY)
+            self.assertEqual(calls, [])
+            self.assertFalse(lock.locked())
+
+    def test_result_read_exception_quarantines_accepted_goal(self):
+        node = TaskFsmServer.__new__(TaskFsmServer)
+        node._pending_skill_sends = {}
+        node._send_guard_lock = threading.Lock()
+        cancels = []
+
+        def fail_read():
+            raise RuntimeError('result transport failed')
+
+        handle = SimpleNamespace(get_result_async=fail_read,
+                                 cancel_goal_async=lambda: cancels.append(True), accepted=True)
+        result, error = node._wait_skill_result(handle, 'PICK', 1)
+        self.assertIsNone(result)
+        self.assertIn('result/stop unconfirmed', error)
+        self.assertTrue(node._has_pending_skill_goal())
+        # Cleanup on the original handle attempts cancellation; no new goal.
+        self.assertFalse(next(iter(node._pending_skill_sends.values())).poll())
+        self.assertEqual(cancels, [True])
+
+    def test_cancel_exception_keeps_blocked_until_terminal_result(self):
+        node = TaskFsmServer.__new__(TaskFsmServer)
+        node._pending_skill_sends = {}
+        node._send_guard_lock = threading.Lock()
+        reply = SimpleNamespace(ready=False, response=None)
+        future = SimpleNamespace(done=lambda: reply.ready, result=lambda: reply.response)
+
+        def fail_cancel():
+            raise RuntimeError('cancel transport failed')
+
+        handle = SimpleNamespace(get_result_async=lambda: future, cancel_goal_async=fail_cancel)
+        result, error = node._wait_skill_result(handle, 'OBSERVE', -1)
+        self.assertIsNone(result)
+        self.assertIn('result/stop unconfirmed', error)
+        cleanup = next(iter(node._pending_skill_sends.values()))
+        self.assertFalse(cleanup.poll())
+        reply.ready = True
+        reply.response = SimpleNamespace(status=5)
+        self.assertTrue(cleanup.poll())
 
 
 class TestPickEngageFailure(unittest.TestCase):

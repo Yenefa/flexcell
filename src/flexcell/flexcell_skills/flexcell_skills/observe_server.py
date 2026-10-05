@@ -274,7 +274,11 @@ class ObserveServer(Node):
         self._seq += 1
         rid, evidence = new_evidence('', self._seq)
         res = R()
-        rec = {'request_id': rid, 'evidence_id': evidence}
+        goal_id = getattr(goal_handle, 'goal_id', None)
+        goal_uuid = bytes(goal_id.uuid).hex() if goal_id is not None else None
+        rec = {'request_id': rid, 'evidence_id': evidence, 'goal_uuid': goal_uuid}
+        self._log.write({'event': 'goal_execute_started', 'goal_uuid': goal_uuid,
+                         'mono_ns': time.monotonic_ns()})
 
         def finish(outcome, error, detail, world_state=None):
             # single finalization point (SkillResult v2: status derives here)

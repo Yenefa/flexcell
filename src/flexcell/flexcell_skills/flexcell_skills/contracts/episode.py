@@ -152,7 +152,8 @@ class EpisodeRecorder:
     def record_executor_result(self, outcome=None, error_code=None, detail="",
                                evidence_id="", post_condition=None):
         """Executor/verifier result following the decision.  outcome/error_code
-        None = no skill dispatch happened for this decision (WAIT/ABORT)."""
+        None = no confirmed skill result (WAIT/ABORT or a transport failure).
+        Missing outcome is not proof that an unacknowledged goal never ran."""
         if self._pending is None:
             raise RuntimeError("record_executor_result before begin_step")
         self._pending["executor_result"] = {

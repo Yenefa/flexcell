@@ -1,0 +1,101 @@
+[INFO] [launch]: All log files can be found below /home/ros/.ros/log/2026-10-06-02-11-56-063190-Yenefa-44969
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [observe_server-1]: process started with pid [45015]
+[INFO] [pick_server-2]: process started with pid [45016]
+[INFO] [place_server-3]: process started with pid [45017]
+[INFO] [verify_server-4]: process started with pid [45018]
+[INFO] [task_fsm_server-5]: process started with pid [45019]
+[INFO] [carry_server-6]: process started with pid [45020]
+[verify_server-4] [INFO] [1791223916.819690223] [verify_server]: Verify server up | default_tolerance=0.050m
+[place_server-3] [INFO] [1791223917.240406218] [place_server]: Place server up | hover=0.10m carry_offset=0.16m tol=0.060m
+[observe_server-1] [INFO] [1791223917.298536791] [observe_server]: Observe server v2 up | tracked=['target_box_a', 'target_box_b'] zones=['zone_1', 'zone_2'] eps=0.0020m source=SIMULATION_GROUND_TRUTH
+[pick_server-2] [INFO] [1791223917.399128982] [pick_server]: Pick server up | hover=0.22m grasp_dz=0.16m raise=0.10m attach_r=0.20m
+[carry_server-6] [INFO] [1791223917.586676093] [carry_server]: Carry servo up | backend=velocity_servo service=/world/empty/flexcell/carry/pin period=0.10s state=/flexcell/carry_state
+[task_fsm_server-5] [INFO] [1791223918.942339627] [task_fsm_server]: Task FSM v3 up | demo: target_box_a->zone_1, target_box_b->zone_2 | recovery budget=1 | policy=hybrid v1.1
+[carry_server-6] [INFO] [1791223975.827388695] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791223980.711984502] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791223980.916815000] [carry_server]: carry RELEASED
+[pick_server-2] [INFO] [1791223996.345519142] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791223996.545959755] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791223996.745828771] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791223996.946293097] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791223997.148138073] [pick_server]: failure injection DISABLED
+[carry_server-6] [INFO] [1791224020.954004801] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791224020.964176354] [carry_server]: carry ENGAGED object=target_box_a offset=[-0.007 -0.002 -0.160]
+[carry_server-6] [INFO] [1791224013.205963811] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791224026.208812745] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791224026.224092850] [carry_server]: carry ENGAGED object=target_box_b offset=[-0.003 0.003 -0.156]
+[carry_server-6] [INFO] [1791224037.136911194] [carry_server]: carry RELEASED
+[pick_server-2] [INFO] [1791224044.714934682] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224044.914984714] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224045.115206594] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224045.315668347] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224045.515874372] [pick_server]: failure injection DISABLED
+[carry_server-6] [INFO] [1791224047.705572509] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791224047.911529000] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791224065.964061024] [carry_server]: carry RELEASED
+[pick_server-2] [INFO] [1791224075.498487401] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224075.688118615] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224075.888388374] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224076.088485651] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224076.288785903] [pick_server]: failure injection DISABLED
+[carry_server-6] [INFO] [1791224082.033116667] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791224082.043173309] [carry_server]: carry ENGAGED object=target_box_a offset=[-0.001 0.001 -0.167]
+[pick_server-2] [INFO] [1791224107.212242313] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224107.412167717] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224107.612239977] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224107.812338943] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224108.012675212] [pick_server]: failure injection DISABLED
+[carry_server-6] [INFO] [1791224114.934952217] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791224115.140910606] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791224115.350190545] [carry_server]: carry RELEASED
+[pick_server-2] [INFO] [1791224128.492707585] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224128.692520422] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224128.892757298] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224129.092985797] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224129.293492802] [pick_server]: failure injection DISABLED
+[carry_server-6] [INFO] [1791224134.679507912] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791224134.688810304] [carry_server]: carry ENGAGED object=target_box_a offset=[-0.001 0.005 -0.157]
+[carry_server-6] [INFO] [1791224166.204642315] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791224161.815170847] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791224161.825132853] [carry_server]: carry ENGAGED object=target_box_b offset=[0.005 -0.000 -0.167]
+[carry_server-6] [INFO] [1791224172.738699897] [carry_server]: carry RELEASED
+[pick_server-2] [INFO] [1791224178.605781816] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224178.805783129] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224179.006100182] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224179.206912774] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224179.407157849] [pick_server]: failure injection DISABLED
+[carry_server-6] [INFO] [1791224181.582867264] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791224181.787519055] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791224181.992569892] [carry_server]: carry RELEASED
+[pick_server-2] [INFO] [1791224193.705083250] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224193.905036647] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224194.105306445] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224194.305298616] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224194.505524041] [pick_server]: failure injection DISABLED
+[carry_server-6] [INFO] [1791224199.768854647] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791224199.778435216] [carry_server]: carry ENGAGED object=target_box_a offset=[0.001 -0.003 -0.162]
+[pick_server-2] [INFO] [1791224218.737625426] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224218.937555306] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224219.138325227] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224219.338058259] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224219.538701216] [pick_server]: failure injection DISABLED
+[carry_server-6] [INFO] [1791224221.713359542] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791224221.918290553] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791224222.123699220] [carry_server]: carry RELEASED
+[pick_server-2] [INFO] [1791224233.773514548] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224233.973346157] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224234.173653003] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224234.373771651] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224234.574535462] [pick_server]: failure injection DISABLED
+[carry_server-6] [INFO] [1791224239.812007264] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791224239.823358742] [carry_server]: carry ENGAGED object=target_box_a offset=[-0.001 -0.004 -0.168]
+[carry_server-6] [INFO] [1791224271.289826846] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791224266.880092880] [carry_server]: carry RELEASED
+[carry_server-6] [INFO] [1791224266.889220817] [carry_server]: carry ENGAGED object=target_box_b offset=[0.008 -0.004 -0.164]
+[carry_server-6] [INFO] [1791224277.940631500] [carry_server]: carry RELEASED
+[pick_server-2] [INFO] [1791224283.837904626] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224284.037274209] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224284.237433592] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224284.437988355] [pick_server]: failure injection DISABLED
+[pick_server-2] [INFO] [1791224284.640341543] [pick_server]: failure injection DISABLED

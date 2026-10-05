@@ -1,0 +1,72 @@
+{
+  "status": "NOT_PROMOTED",
+  "prompt_sha256": "8a41b798cc38b9799afb04e870bfc545ce2e95af1e720c0b5f18eb524527a9fe",
+  "reason": "Correct OBSERVE actions remain in under-supported middle bin; no evidence of fewer slow selections at unchanged threshold 0.85",
+  "bins": [
+    {
+      "lower": 0.0,
+      "upper": 0.5,
+      "n": 0,
+      "agreements": 0,
+      "wilson_lower": 0.0,
+      "wilson_upper": 1.0
+    },
+    {
+      "lower": 0.5,
+      "upper": 0.8,
+      "n": 3,
+      "agreements": 3,
+      "wilson_lower": 0.43849391955098227,
+      "wilson_upper": 1.0
+    },
+    {
+      "lower": 0.8,
+      "upper": 1.0,
+      "n": 13,
+      "agreements": 13,
+      "wilson_lower": 0.7718981569447083,
+      "wilson_upper": 1.0
+    }
+  ],
+  "model_successes": 21,
+  "agreements": 21,
+  "rows": 21,
+  "heldout": {
+    "n": 5,
+    "model_successes": 5,
+    "agreements": 5
+  },
+  "observe_rows": [
+    {
+      "episode_sha256": "29ba30d7e82abd8cc6b6ad7467145d1d5b95c1bc6cf5fdbf333be4cc0dc7bf3b",
+      "seq": 5,
+      "action": "OBSERVE",
+      "partition": "calibration",
+      "probability": 0.5980458878580873
+    },
+    {
+      "episode_sha256": "29ba30d7e82abd8cc6b6ad7467145d1d5b95c1bc6cf5fdbf333be4cc0dc7bf3b",
+      "seq": 7,
+      "action": "OBSERVE",
+      "partition": "calibration",
+      "probability": 0.6238544091503112
+    },
+    {
+      "episode_sha256": "1d3fe597ed3a2e6e78c129fe6f43cdbfb57b6209a085354c4a82c8a3985a437c",
+      "seq": 5,
+      "action": "OBSERVE",
+      "partition": "calibration",
+      "probability": 0.613375622504043
+    },
+    {
+      "episode_sha256": "8290a55694e6adaa93d85ee2047d6eeedeb4a640f1751edc42e00030303b2ee9",
+      "seq": 5,
+      "action": "OBSERVE",
+      "partition": "heldout",
+      "probability": 0.6017426255952353
+    }
+  ],
+  "extension": "NOT_RUN: pilot did not establish routing benefit",
+  "heldout_is_not_blind_after_multiple_candidate_evaluations": true,
+  "active_calibration_unchanged": true
+}
