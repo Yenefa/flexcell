@@ -1,0 +1,51 @@
+FFFFFFF                                                                  [100%]
+=================================== FAILURES ===================================
+_______________ test_stalled_transport_retries_in_fresh_process ________________
+../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_admin_pose_rpc.py:44: in test_stalled_transport_retries_in_fresh_process
+    assert ok is True and len(calls) == 2
+E   assert (True is True and 0 == 2)
+E    +  where 0 = len([])
+_________________________ test_retry_budget_is_bounded _________________________
+../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_admin_pose_rpc.py:53: in test_retry_budget_is_bounded
+    assert ok is False and len(calls) == 3 and len(details['attempts']) == 3
+E   assert (True is False)
+____________ test_rejection_or_invalid_exit_is_not_retried[result0] ____________
+../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_admin_pose_rpc.py:66: in test_rejection_or_invalid_exit_is_not_retried
+    assert ok is False and len(calls) == 1
+E   assert (True is False)
+____________ test_rejection_or_invalid_exit_is_not_retried[result1] ____________
+../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_admin_pose_rpc.py:66: in test_rejection_or_invalid_exit_is_not_retried
+    assert ok is False and len(calls) == 1
+E   assert (True is False)
+____________ test_rejection_or_invalid_exit_is_not_retried[result2] ____________
+../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_admin_pose_rpc.py:66: in test_rejection_or_invalid_exit_is_not_retried
+    assert ok is False and len(calls) == 1
+E   assert (True is False)
+____________ test_rejection_or_invalid_exit_is_not_retried[result3] ____________
+../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_admin_pose_rpc.py:66: in test_rejection_or_invalid_exit_is_not_retried
+    assert ok is False and len(calls) == 1
+E   assert (True is False)
+____________ test_rejection_or_invalid_exit_is_not_retried[result4] ____________
+../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_admin_pose_rpc.py:66: in test_rejection_or_invalid_exit_is_not_retried
+    assert ok is False and len(calls) == 1
+E   assert (True is False)
+=============================== warnings summary ===============================
+test/test_admin_pose_rpc.py::test_stalled_transport_retries_in_fresh_process
+  Warning: Type google.protobuf.pyext._message.ScalarMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+test/test_admin_pose_rpc.py::test_stalled_transport_retries_in_fresh_process
+  Warning: Type google.protobuf.pyext._message.MessageMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+test/test_admin_pose_rpc.py::test_stalled_transport_retries_in_fresh_process
+  Warning: datetime.datetime.utcfromtimestamp() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.fromtimestamp(timestamp, datetime.UTC).
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED ../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_admin_pose_rpc.py::test_stalled_transport_retries_in_fresh_process
+FAILED ../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_admin_pose_rpc.py::test_retry_budget_is_bounded
+FAILED ../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_admin_pose_rpc.py::test_rejection_or_invalid_exit_is_not_retried[result0]
+FAILED ../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_admin_pose_rpc.py::test_rejection_or_invalid_exit_is_not_retried[result1]
+FAILED ../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_admin_pose_rpc.py::test_rejection_or_invalid_exit_is_not_retried[result2]
+FAILED ../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_admin_pose_rpc.py::test_rejection_or_invalid_exit_is_not_retried[result3]
+FAILED ../../../../Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills/test/test_admin_pose_rpc.py::test_rejection_or_invalid_exit_is_not_retried[result4]
+7 failed, 3 warnings in 1.39s

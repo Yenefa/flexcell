@@ -74,15 +74,39 @@ def gz_pose_cli(name):
 
 
 def gz_set_pose(name, xyz):
-    from gz.msgs10 import boolean_pb2, pose_pb2
-    import gz.transport13 as gz_transport
-    node = gz_transport.Node()
-    req = pose_pb2.Pose()
-    req.name = name
-    req.position.x, req.position.y, req.position.z = xyz
-    req.orientation.w = 1.0
-    return node.request('/world/empty/set_pose', req, pose_pb2.Pose,
-                        boolean_pb2.Boolean, 1000)
+    # NodeShared is a process singleton. A stalled cold RPC stayed stalled even
+    # with a new Node and a 15s wait; a fresh process succeeded in 0.20s. Retry
+    # only this idempotent pose command on a clean native transport instance.
+    attempts = []
+    for attempt in range(1, 4):
+        detail = dict(attempt=attempt)
+        attempts.append(detail)
+        try:
+            proc = subprocess.run(
+                [sys.executable, '-m', 'flexcell_skills.pose_request_worker',
+                 name, *(str(value) for value in xyz)],
+                capture_output=True, text=True, timeout=5,
+                env=dict(os.environ, PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION='python'))
+        except subprocess.TimeoutExpired:
+            detail['error'] = 'pose request worker timed out'
+            return False, dict(attempts=attempts)
+        detail.update(worker_rc=proc.returncode, stderr=proc.stderr[-1500:])
+        if proc.returncode != 0:
+            detail['error'] = 'pose request worker exit rejected'
+            return False, dict(attempts=attempts)
+        try:
+            payload = json.loads(proc.stdout)
+        except ValueError:
+            payload = None
+        if (not isinstance(payload, dict)
+                or type(payload.get('transport_ok')) is not bool
+                or type(payload.get('response_data')) is not bool):
+            detail['error'] = 'invalid pose request worker response'
+            return False, dict(attempts=attempts)
+        detail.update(payload)
+        if payload['transport_ok']:
+            return payload['response_data'], dict(attempts=attempts)
+    return False, dict(attempts=attempts)
 
 
 class Admin(Node):
@@ -376,8 +400,9 @@ class Admin(Node):
 
         # 4) objects back to canonical spawns (ground truth, deterministic)
         for name, xyz in CANONICAL.items():
-            ok, _ = gz_set_pose(name, xyz)
+            ok, detail = gz_set_pose(name, xyz)
             report['respawn %s' % name] = bool(ok)
+            report['respawn_details %s' % name] = detail
         time.sleep(1.0)
 
         # 5) re-observe so WorldState revision/poses reflect the reset world
@@ -408,8 +433,10 @@ class Admin(Node):
         # wedge the unconditional stop in step 1 removes.
         for name, want in CANONICAL.items():
             got = None
+            report['canonical_rpc %s' % name] = []
             for attempt in range(2):
-                gz_set_pose(name, want)
+                pose_ok, detail = gz_set_pose(name, want)
+                report['canonical_rpc %s' % name].append(dict(ok=pose_ok, **detail))
                 time.sleep(0.8)
                 got = gz_pose(name)
                 if got is None:

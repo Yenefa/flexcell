@@ -1,5 +1,13 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-10-05 reset RPC 隔离恢复：callback 修复后的首个 smoke 保留为
+> HARNESS_ERROR（respawn=false、无 -6）。进程对照发现新 Node + 15 秒仍卡住，
+> 同时新进程 0.20 秒成功；底层传输卡住原因 UNKNOWN。
+> 幂等 set_pose 改为短进程、最多三次有记录的传输重试；服务 data=false、
+> 崩溃、超时和无效返回立即失败。226 tests passed，第二轮真实 reset 20/20，
+> 80 个位姿命令/81 次请求（1 次恢复）均有真实确认。模型先导需按新指纹资格验证。
+> [两类故障、修复范围及证据](Q8_TEARDOWN_20261005.md)。下条为 callback-only 阶段。
+
 > 2026-10-05 pose worker 退出修复（E-020）：未插桩复现并抓到 core，确认
 > `Py_FinalizeEx` 与 `RawSubscriptionHandler` 析构获取 GIL 竞态。
 > 增加回调引用实际释放屏障，保留 -6 拒收与超时失败；219 tests passed、

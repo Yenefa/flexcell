@@ -1,0 +1,75 @@
+{
+  "ok": true,
+  "report": {
+    "task_idle": true,
+    "task_state_seen": "IDLE",
+    "task_state_publishers": 1,
+    "carry_stop_sent": true,
+    "carry_state_known": true,
+    "carry_engaged": false,
+    "scene_had_objects": false,
+    "scene_cleared": true,
+    "arm_home": true,
+    "arm_home_detail": "waiting for /move_action and /execute_trajectory ... BEFORE /joint_states: {'joint1': -0.0035, 'joint2': -0.0039, 'joint3': 0.0071, 'joint4': -0.0098} PLAN error_code = 1 planning_time = 0.0025 PLANNE",
+    "respawn target_box_a": true,
+    "respawn_details target_box_a": {
+      "attempts": [
+        {
+          "attempt": 1,
+          "worker_rc": 0,
+          "stderr": "",
+          "transport_ok": true,
+          "response_data": true,
+          "elapsed_s": 0.20128885899976012
+        }
+      ]
+    },
+    "respawn target_box_b": true,
+    "respawn_details target_box_b": {
+      "attempts": [
+        {
+          "attempt": 1,
+          "worker_rc": 0,
+          "stderr": "",
+          "transport_ok": true,
+          "response_data": true,
+          "elapsed_s": 0.20196643200051767
+        }
+      ]
+    },
+    "reobserved": true,
+    "canonical_rpc target_box_a": [
+      {
+        "ok": true,
+        "attempts": [
+          {
+            "attempt": 1,
+            "worker_rc": 0,
+            "stderr": "",
+            "transport_ok": true,
+            "response_data": true,
+            "elapsed_s": 0.20205567999983032
+          }
+        ]
+      }
+    ],
+    "canonical target_box_a": "OK ['0.2200', '0.0000', '0.0175']",
+    "canonical_rpc target_box_b": [
+      {
+        "ok": true,
+        "attempts": [
+          {
+            "attempt": 1,
+            "worker_rc": 0,
+            "stderr": "",
+            "transport_ok": true,
+            "response_data": true,
+            "elapsed_s": 0.2013776890007648
+          }
+        ]
+      }
+    ],
+    "canonical target_box_b": "OK ['0.2000', '-0.1800', '0.0175']",
+    "carry_disengaged": true
+  }
+}

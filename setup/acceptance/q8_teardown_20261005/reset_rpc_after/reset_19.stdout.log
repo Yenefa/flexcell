@@ -1,0 +1,75 @@
+{
+  "ok": true,
+  "report": {
+    "task_idle": true,
+    "task_state_seen": "IDLE",
+    "task_state_publishers": 1,
+    "carry_stop_sent": true,
+    "carry_state_known": true,
+    "carry_engaged": false,
+    "scene_had_objects": false,
+    "scene_cleared": true,
+    "arm_home": true,
+    "arm_home_detail": "waiting for /move_action and /execute_trajectory ... BEFORE /joint_states: {'joint1': 0.0036, 'joint2': -0.0061, 'joint3': -0.003, 'joint4': -0.0035} PLAN error_code = 1 planning_time = 0.0126 PLANNED",
+    "respawn target_box_a": true,
+    "respawn_details target_box_a": {
+      "attempts": [
+        {
+          "attempt": 1,
+          "worker_rc": 0,
+          "stderr": "",
+          "transport_ok": true,
+          "response_data": true,
+          "elapsed_s": 0.20126667099975748
+        }
+      ]
+    },
+    "respawn target_box_b": true,
+    "respawn_details target_box_b": {
+      "attempts": [
+        {
+          "attempt": 1,
+          "worker_rc": 0,
+          "stderr": "",
+          "transport_ok": true,
+          "response_data": true,
+          "elapsed_s": 0.201284504000796
+        }
+      ]
+    },
+    "reobserved": true,
+    "canonical_rpc target_box_a": [
+      {
+        "ok": true,
+        "attempts": [
+          {
+            "attempt": 1,
+            "worker_rc": 0,
+            "stderr": "",
+            "transport_ok": true,
+            "response_data": true,
+            "elapsed_s": 0.20156568999937008
+          }
+        ]
+      }
+    ],
+    "canonical target_box_a": "OK ['0.2200', '0.0000', '0.0175']",
+    "canonical_rpc target_box_b": [
+      {
+        "ok": true,
+        "attempts": [
+          {
+            "attempt": 1,
+            "worker_rc": 0,
+            "stderr": "",
+            "transport_ok": true,
+            "response_data": true,
+            "elapsed_s": 0.20129045600060635
+          }
+        ]
+      }
+    ],
+    "canonical target_box_b": "OK ['0.2000', '-0.1800', '0.0175']",
+    "carry_disengaged": true
+  }
+}
