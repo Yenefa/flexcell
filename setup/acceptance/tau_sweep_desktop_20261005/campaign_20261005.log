@@ -1,0 +1,340 @@
+[18:42:51] == PHASE A: unit suite ==
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+[18:42:54] == PHASE A2: orphan sweep ==
+[18:43:10] orphans clean
+== PHASE B: hybrid tau=0.85 ==
+[18:43:10] == DEPLOY hybrid 0.85 ==
+STARTED gazebo pid=717 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184311/gazebo.log
+STARTED moveit pid=842 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184311/moveit.log
+STARTED move_to_pose pid=843 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184311/move_to_pose.log
+STARTED fleet pid=849 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184311/fleet.log
+READY: task actions and policy=hybrid
+DEPLOYED policy=hybrid protocol=v2 logs=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184311
+[18:43:20] == RUN hybrid smoke S1:5 ==
+setup/94_scenario_runner.py: line 27: Scenario runner for the M2 benchmark cells (issue #7 remainder / §4.2).
+
+Orchestrates episodes end-to-end WITHOUT hand-orchestration:
+  per episode: admin reset -> arm /flexcell/inject (if any) -> run the demo
+  (or task) via w1_client -> clear injection -> locate the episode record ->
+  offline FSM policy-input replay -> summary row. Model replay is NOT_RUN
+  until a pinned backend is supplied; model batches report RECORDED, not PASS.
+
+Scenario suite (S6 cold-start needs the lifecycle CLI - new-machine flow;
+S7 perturbation is separate issue #9):
+
+  S1  canonical happy demo            inject: none            expect SUCCEEDED
+  S2  injected failure first attempt  inject: <scenario>:once expect SUCCEEDED
+  S3  injected PICK_B first attempt   inject: <scenario>@B:once expect SUCCEEDED
+  S4  unreachable place target        inject: none            expect FAILED (typed)
+  S5  retry exhaustion                inject: <scenario>:always expect FAILED (typed)
+
+Usage (ROS env sourced, stack running):
+  python3 setup/94_scenario_runner.py --batch S1:2 S2:1 S5:1
+  python3 setup/94_scenario_runner.py --list
+
+Writes a batch summary to ~/.ros/flexcell/episodes/batch_<ts>.jsonl (one row
+per episode: outcome, expected, replay_ok, safety metrics) and prints the
+per-scenario success table with Wilson 95% CIs.  Exit 0 iff every episode
+replayed cleanly AND every outcome matched its expectation.
+: No such file or directory
+setup/94_scenario_runner.py: line 28: import: command not found
+setup/94_scenario_runner.py: line 29: import: command not found
+setup/94_scenario_runner.py: line 30: import: command not found
+setup/94_scenario_runner.py: line 31: import: command not found
+setup/94_scenario_runner.py: line 32: import: command not found
+setup/94_scenario_runner.py: line 33: import: command not found
+setup/94_scenario_runner.py: line 34: import: command not found
+setup/94_scenario_runner.py: line 36: from: command not found
+setup/94_scenario_runner.py: line 37: from: command not found
+setup/94_scenario_runner.py: line 38: from: command not found
+setup/94_scenario_runner.py: line 39: from: command not found
+setup/94_scenario_runner.py: line 40: from: command not found
+setup/94_scenario_runner.py: line 42: syntax error near unexpected token `('
+setup/94_scenario_runner.py: line 42: `ROS_LOG = os.path.expanduser('~/.ros/flexcell')'
+RUN_RC=2 SUMMARY=
+== PHASE C: fsm control ==
+[18:43:20] == DEPLOY fsm  ==
+STOPPED fleet group=849
+STOPPED move_to_pose group=843
+STOPPED moveit group=842
+STOPPED gazebo group=717
+STARTED gazebo pid=1193 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184321/gazebo.log
+STARTED moveit pid=1318 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184321/moveit.log
+STARTED move_to_pose pid=1319 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184321/move_to_pose.log
+STARTED fleet pid=1323 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184321/fleet.log
+READY: task actions and policy=fsm
+DEPLOYED policy=fsm protocol=v2 logs=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184321
+[18:43:34] == RUN fsm smoke S1:5 ==
+setup/94_scenario_runner.py: line 27: Scenario runner for the M2 benchmark cells (issue #7 remainder / §4.2).
+
+Orchestrates episodes end-to-end WITHOUT hand-orchestration:
+  per episode: admin reset -> arm /flexcell/inject (if any) -> run the demo
+  (or task) via w1_client -> clear injection -> locate the episode record ->
+  offline FSM policy-input replay -> summary row. Model replay is NOT_RUN
+  until a pinned backend is supplied; model batches report RECORDED, not PASS.
+
+Scenario suite (S6 cold-start needs the lifecycle CLI - new-machine flow;
+S7 perturbation is separate issue #9):
+
+  S1  canonical happy demo            inject: none            expect SUCCEEDED
+  S2  injected failure first attempt  inject: <scenario>:once expect SUCCEEDED
+  S3  injected PICK_B first attempt   inject: <scenario>@B:once expect SUCCEEDED
+  S4  unreachable place target        inject: none            expect FAILED (typed)
+  S5  retry exhaustion                inject: <scenario>:always expect FAILED (typed)
+
+Usage (ROS env sourced, stack running):
+  python3 setup/94_scenario_runner.py --batch S1:2 S2:1 S5:1
+  python3 setup/94_scenario_runner.py --list
+
+Writes a batch summary to ~/.ros/flexcell/episodes/batch_<ts>.jsonl (one row
+per episode: outcome, expected, replay_ok, safety metrics) and prints the
+per-scenario success table with Wilson 95% CIs.  Exit 0 iff every episode
+replayed cleanly AND every outcome matched its expectation.
+: No such file or directory
+setup/94_scenario_runner.py: line 28: import: command not found
+setup/94_scenario_runner.py: line 29: import: command not found
+setup/94_scenario_runner.py: line 30: import: command not found
+setup/94_scenario_runner.py: line 31: import: command not found
+setup/94_scenario_runner.py: line 32: import: command not found
+setup/94_scenario_runner.py: line 33: import: command not found
+setup/94_scenario_runner.py: line 34: import: command not found
+setup/94_scenario_runner.py: line 36: from: command not found
+setup/94_scenario_runner.py: line 37: from: command not found
+setup/94_scenario_runner.py: line 38: from: command not found
+setup/94_scenario_runner.py: line 39: from: command not found
+setup/94_scenario_runner.py: line 40: from: command not found
+setup/94_scenario_runner.py: line 42: syntax error near unexpected token `('
+setup/94_scenario_runner.py: line 42: `ROS_LOG = os.path.expanduser('~/.ros/flexcell')'
+RUN_RC=2 SUMMARY=
+[18:43:34] == ARCHIVE ==
+[18:43:34] == CAMPAIGN SUMMARY ==
+hybrid_smoke=FAIL (baseline locked)
+fsm_smoke=FAIL (baseline locked)
+CAMPAIGN_DONE
+[18:45:21] == PHASE A: unit suite ==
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+[18:45:24] == PHASE A2: orphan sweep ==
+[18:45:47] orphans clean
+== PHASE B: hybrid tau=0.85 ==
+[18:45:47] == DEPLOY hybrid 0.85 ==
+STARTED gazebo pid=1882 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184548/gazebo.log
+STARTED moveit pid=2007 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184548/moveit.log
+STARTED move_to_pose pid=2008 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184548/move_to_pose.log
+STARTED fleet pid=2012 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184548/fleet.log
+READY: task actions and policy=hybrid
+DEPLOYED policy=hybrid protocol=v2 logs=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184548
+[18:45:56] DEPLOY FAILED for hybrid 0.85
+== PHASE C: fsm control ==
+[18:45:56] == DEPLOY fsm  ==
+STOPPED fleet group=2012
+STOPPED move_to_pose group=2008
+STOPPED moveit group=2007
+STOPPED gazebo group=1882
+STARTED gazebo pid=2325 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184556/gazebo.log
+STARTED moveit pid=2450 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184556/moveit.log
+STARTED move_to_pose pid=2451 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184556/move_to_pose.log
+STARTED fleet pid=2455 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184556/fleet.log
+READY: task actions and policy=fsm
+DEPLOYED policy=fsm protocol=v2 logs=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184556
+[18:46:10] DEPLOY FAILED for fsm 
+[18:46:10] == ARCHIVE ==
+[18:46:10] == CAMPAIGN SUMMARY ==
+hybrid deploy failed
+fsm deploy failed
+CAMPAIGN_DONE
+[18:47:49] == PHASE A: unit suite ==
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+[18:47:52] == PHASE A2: orphan sweep ==
+[18:48:14] orphans clean
+== PHASE B: hybrid tau=0.85 ==
+[18:48:14] == DEPLOY hybrid 0.85 ==
+STARTED gazebo pid=2992 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184814/gazebo.log
+STARTED moveit pid=3117 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184814/moveit.log
+STARTED move_to_pose pid=3118 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184814/move_to_pose.log
+STARTED fleet pid=3122 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184814/fleet.log
+READY: task actions and policy=hybrid
+DEPLOYED policy=hybrid protocol=v2 logs=/home/ros/.local/share/flexcell/mainline/runtime/20261005_184814
+[18:48:22] == RUN hybrid smoke S1:5 ==
+scenario runner: {'S1': 5}
+  S1 run 1/5
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 2/5
+    outcome=FAILED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 3/5
+    outcome=FAILED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 4/5
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 5/5
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+
+=== per-scenario results (metric #1, Wilson 95%% CI) ===
+  S1: 3/5 SUCCEEDED, CI95=[0.23, 0.88], replay_ok=False
+batch summary: /home/ros/.ros/flexcell/episodes/batch_20261005_184822.jsonl
+SCENARIO RUNNER: FAIL (2)
+RUN_RC=1 SUMMARY=/home/ros/.ros/flexcell/episodes/batch_20261005_184822.jsonl
+== PHASE C: fsm control ==
+[18:54:24] == DEPLOY fsm  ==
+STOPPED fleet group=3122
+STOPPED move_to_pose group=3118
+STOPPED moveit group=3117
+STOPPED gazebo group=2992
+STARTED gazebo pid=4906 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_185424/gazebo.log
+STARTED moveit pid=5031 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_185424/moveit.log
+STARTED move_to_pose pid=5032 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_185424/move_to_pose.log
+STARTED fleet pid=5036 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_185424/fleet.log
+READY: task actions and policy=fsm
+DEPLOYED policy=fsm protocol=v2 logs=/home/ros/.local/share/flexcell/mainline/runtime/20261005_185424
+[18:54:38] == RUN fsm smoke S1:5 ==
+scenario runner: {'S1': 5}
+  S1 run 1/5
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 2/5
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 3/5
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 4/5
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 5/5
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+
+=== per-scenario results (metric #1, Wilson 95%% CI) ===
+  S1: 5/5 SUCCEEDED, CI95=[0.57, 1.00], replay_ok=True
+batch summary: /home/ros/.ros/flexcell/episodes/batch_20261005_185438.jsonl
+SCENARIO RUNNER: PASS
+RUN_RC=0 SUMMARY=/home/ros/.ros/flexcell/episodes/batch_20261005_185438.jsonl
+[18:58:33] fsm smoke passed: /home/ros/.ros/flexcell/episodes/batch_20261005_185438.jsonl
+[18:58:33] == RUN fsm baseline S1:20 ==
+scenario runner: {'S1': 20}
+  S1 run 1/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 2/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 3/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 4/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 5/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 6/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 7/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 8/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 9/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 10/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 11/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 12/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 13/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 14/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 15/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 16/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 17/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 18/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (10 steps) arm=skipped clear=cleared sealed
+  S1 run 19/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=True (8 steps) arm=skipped clear=cleared sealed
+  S1 run 20/20
+    outcome=FAILED expected=SUCCEEDED replay=True (9 steps) arm=skipped clear=cleared sealed
+
+=== per-scenario results (metric #1, Wilson 95%% CI) ===
+  S1: 19/20 SUCCEEDED, CI95=[0.76, 0.99], replay_ok=True
+batch summary: /home/ros/.ros/flexcell/episodes/batch_20261005_185833.jsonl
+SCENARIO RUNNER: FAIL (1)
+RUN_RC=1 SUMMARY=/home/ros/.ros/flexcell/episodes/batch_20261005_185833.jsonl
+[19:14:32] == ARCHIVE ==
+[19:14:32] == CAMPAIGN SUMMARY ==
+hybrid_smoke=FAIL (baseline locked)
+fsm_baseline=FAIL
+CAMPAIGN_DONE
+[19:16:41] == PHASE B2: hybrid tau=0.85 smoke attempt 2 ==
+STOPPED fleet group=5036
+STOPPED move_to_pose group=5032
+STOPPED moveit group=5031
+STOPPED gazebo group=4906
+STARTED gazebo pid=11750 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_191641/gazebo.log
+STARTED moveit pid=11875 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_191641/moveit.log
+STARTED move_to_pose pid=11876 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_191641/move_to_pose.log
+STARTED fleet pid=11880 log=/home/ros/.local/share/flexcell/mainline/runtime/20261005_191641/fleet.log
+READY: task actions and policy=hybrid
+DEPLOYED policy=hybrid protocol=v2 logs=/home/ros/.local/share/flexcell/mainline/runtime/20261005_191641
+[19:16:56] deployment=/home/ros/.local/share/flexcell/mainline/runtime/20261005_191641/deployment.json
+scenario runner: {'S1': 5}
+  S1 run 1/5
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 2/5
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 3/5
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 4/5
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 5/5
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+
+=== per-scenario results (metric #1, Wilson 95%% CI) ===
+  S1: 5/5 SUCCEEDED, CI95=[0.57, 1.00], replay_ok=False
+batch summary: /home/ros/.ros/flexcell/episodes/batch_20261005_191656.jsonl
+SCENARIO RUNNER: RECORDED (model replay NOT_RUN)
+[19:22:53] attempt2_rc=0 summary=/home/ros/.ros/flexcell/episodes/batch_20261005_191656.jsonl
+[19:22:53] pooled valid smoke rows (both attempts, same fingerprint): 8
+[19:22:53] == RUN hybrid baseline S1:20 (pooled smoke qualification) ==
+scenario runner: {'S1': 20}
+  S1 run 1/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 2/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 3/20
+    outcome=FAILED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 4/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 5/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 6/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 7/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 8/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 9/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 10/20
+    outcome=FAILED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 11/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 12/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 13/20
+    outcome=FAILED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 14/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 15/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 16/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 17/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 18/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 19/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 20/20
+    outcome=SUCCEEDED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+
+=== per-scenario results (metric #1, Wilson 95%% CI) ===
+  S1: 17/20 SUCCEEDED, CI95=[0.64, 0.95], replay_ok=False
+batch summary: /home/ros/.ros/flexcell/episodes/batch_20261005_192253.jsonl
+SCENARIO RUNNER: FAIL (3)
+hybrid_baseline_rc=1
+B2_DONE

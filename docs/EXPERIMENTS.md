@@ -74,6 +74,7 @@
 | E-018 | Clef-flash fast arm — offline calibration on the desktop                | GPU: 17/30, TOP BIN 8/8 (LB 0.676), 1.9 s, 35/35 SUCCESS; τ=0.5 ELIGIBLE                     | desktop `jev_calibration_clef_gpu.json`; code pending feat branch     |
 | E-019 | Q8 per-decision provenance + two-regime pilot                           | 215 TESTS PASS; HIGH 14/17 + RESET ERROR; LOW SMOKE TRUNCATED; n>=50 FROZEN                  | [Q8_PILOT_20261005.md](Q8_PILOT_20261005.md)                          |
 | E-020 | Pose callback finalization barrier + bounded fresh-process reset RPC    | 226 TESTS PASS; LIFECYCLE 100/100; RESET 20/20 EACH; LOW 18/20; HIGH SMOKE 4/5; n>=50 FROZEN | [Q8_TEARDOWN_20261005.md](Q8_TEARDOWN_20261005.md)                    |
+| E-021 | Three-arm S1 comparison, same machine, same night, unattended           | FSM 19/20 · hybrid τ=0.03 18/20 · hybrid τ=0.85 17/20; CIs OVERLAP; grasp-physics noise ~15% cross-arm | `setup/acceptance/tau_sweep_desktop_20261005/`                        |
 | M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN                                                                                      | — (RFC #15; harness #7/#8/#9)                                         |
 
 ## Entries
@@ -674,6 +675,46 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
 - **Evidence**: desktop `~/.config/flexcell/jev_calibration_clef{,_gpu,_v2,_fresh,_q8,_q8_fresh}.json`
   (Q8 digest `8754b06f…b05593d9`); ClefBackend + harness changes on the
   `feat/clef-fast-arm` branch (pushed).
+
+### E-021 — Three-arm S1 comparison on one machine in one night (2026-10-05, unattended)
+
+- **Setup**: desktop as the only fully-qualified executor (shutdown race repaired,
+  per-decision routing gates live, 7-day unattended hardening: updates disabled at
+  three layers, sleep structurally impossible on this firmware, Storage Sense off —
+  service snapshot + rollback script on `F:\flexcell-models\`). Three arms, S1
+  single-object, n=20 each, sequential deployments (one fingerprint per arm; no
+  pooling across arms). τ=0.85 unlock used the runner's fingerprint-scoped smoke
+  rule: attempt 1 (3/5, two grasp-physics failures) + attempt 2 (5/5, all routing
+  audits green) = **8 pooled valid rows**, BOTH batch files archived and disclosed.
+- **Result**:
+  | arm | S1 n=20 | Wilson 95% CI | paid slow fraction | cost ceiling |
+  | --- | ------- | ------------- | ------------------ | ------------ |
+  | FSM control | 19/20 (0.95) | [0.76, 0.99] | 0% | ¥0 |
+  | hybrid τ=0.03 | 18/20 (0.90) | [0.69, 0.98] | ~0% | ~¥0.02 |
+  | hybrid τ=0.85 | 17/20 (0.85) | [0.64, 0.95] | ~20% | ~¥0.3 |
+  All CIs overlap: **no significant success-rate difference at n=20**. Every model
+  decision passed the routing provenance audit (139 decisions in the τ=0.85
+  baseline, zero violations). Night total ¥0.576 / ¥5 upper bound.
+- **The dominant confounder**: 6 of tonight's 7 non-success episodes (FSM run20,
+  hybrid τ=0.85 runs 3/10/13, hybrid smoke ×2) are the SAME grasp-physics family —
+  `PICK_B`/`PICK_A` fails twice with ERR_GRASP_FAILED (23) → recovery exhausted
+  (51); cross-arm, ~15% episode incidence, root cause UNKNOWN. It caps every
+  arm's success rate equally and swamps arm-to-arm success comparison below n≈50.
+  Runner "FAIL (N)" labels here mean the strict expected-outcome gate, not
+  harness faults.
+- **Reading (cost hypothesis)**: hybrid at τ=0.03 delivers 0.90 at near-zero paid
+  cost vs FSM 0.95 at zero cost — FSM remains the free control; the hybrid's
+  saving is measured against a PURE-LLM arm (≈3-5× the slow-arm spend), not
+  against FSM. τ=0.85's ~20% slow fraction ≈ 80% paid-call reduction. These are
+  n=20 descriptive results with correlated steps and sequential arms (no
+  time-drift interleaving) — NOT a benchmark.
+- **Next**: B-grasp root cause (the single highest-value open item), batch-level
+  fast-arm presence gate for unattended batches, S7 differentiation design,
+  n≥50 freeze maintained.
+- **Evidence**: `setup/acceptance/tau_sweep_desktop_20261005/` (12 batch files
+  incl. both τ=0.85 smoke attempts, pooled summary, two hybrid deployments,
+  campaign log `F:\flexcell-models\campaign_20261005.log`).
+
 
 ## Evidence locations
 
