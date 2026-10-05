@@ -39,10 +39,24 @@
 
 ## 快路径（Jev）
 
-角色：单 token 分类快路径，`decision_policy=jev`。
-模型与端点通过 `FLEXCELL_JEV_ENDPOINT` / `FLEXCELL_JEV_MODEL` 配置。
-**当前未配置，线上决策来源统计中不含 jev。** Hybrid 阈值逻辑依赖该路径的置信度，
-而置信度语义尚未标定。
+角色：typed 分类快路径，`decision_policy=jev` 或 hybrid 的快臂。后端可插拔
+（`jev_backends.py`：`local` = Qwen 生成式 / `clef` = Clef 决策模型）。
+
+**当前部署（桌面机，2026-10-05）**——绑定字段以此为准，变更须同步本表与校准文件：
+
+| 项        | 值                                                                                  |
+| --------- | ----------------------------------------------------------------------------------- |
+| 后端      | `clef`（`ClefBackend`，typed `/v1/systemone`）                                       |
+| 端点      | `http://172.17.144.1:11435/v1/systemone`（llama.cpp b11389 Vulkan，Windows 侧 GPU）  |
+| 模型名    | `clef-flash-q8_0`（ggml-org/Clef-Flash-GGUF Q8_0）                                   |
+| 权重 sha256 | `8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9`                 |
+| 校准文件  | `~/.config/flexcell/jev_calibration_clef_q8.json`（含自身 sha，路由门逐字段校验）    |
+| prompt 摘要算法 | 哈希 `jev_backends.py` 全源文件字节（2026-10-05 起；旧算法为 ast.dump，跨 Python 版本不稳定且不覆盖 Clef 模板） |
+| 校准标签  | `FSM_ACTION_AGREEMENT`（**不是物理成功率**；scope 限 S1 录制输入路由）                |
+
+Ollama Windows 构建对 Clef 全后端 500（ollama#18769），故走上游 llama-server。
+Qwen 旧快臂（4/30，LB 0.053）仅存于 `118_local_models.py` 流程；`118 start fast`
+检测到 mainline_jev.sh 指向其他快臂时只写 `mainline_qwen.sh`，不再静默覆盖。
 
 ## 决策来源记账规则
 

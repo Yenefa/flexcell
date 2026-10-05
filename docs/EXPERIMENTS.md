@@ -618,22 +618,40 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
   scale. (First sweep attempt was invalid: a branch checkout had reverted the WSL
   working tree to pre-Clef code, sending fast calls to a dead endpoint — all
   "backend error"; re-run on the correct tree. Lesson recorded.)
-- **Prompt v2 + Q8_0 (2026-10-05 evening)**: two upgrades, both validated against
-  the leakage concern by a FRESH-INPUT blind set (S7 off-canonical perturbed demos
-  recorded on the FSM arm, never used for tuning — note `96_s7_perturb.py` had a
-  missing `import math` blocking standalone runs; fixed):
+- **Prompt v2 + Q8_0 (2026-10-05 evening)**: two upgrades:
   ① prompt v2 folds the frozen FSM cycle semantics into the ClefBackend
   instructions and enriches per-option criteria (backend-scoped; the shared
   _choice_options contract text untouched);
   ② Q8_0 weights replace Q4_K_M on the same Vulkan server.
-  In-sample 35: agreement 26/30, top bin 23/23 (LB 0.857). **Fresh S7 blind:
-  18/20 (90%), top bin 18/18 (LB 0.824)** — generalization holds; the prompt
-  encodes the task spec, not the test answers.
-- **τ=0.7 live crossover**: with the Q8+v2 profile, the hybrid arm at the strict
-  τ=0.7 threshold now routes **jev 16 / llm 1 / fsm 5 (bootstrap) over 5
-  episodes, 5/5 SUCCEEDED — escalation rate 5.9%** (was 100% with Q4+v1 this
-  morning). The local GPU arm carries 94% of model decisions for free; DeepSeek
-  is a rare safety net. Sweep ledger total ¥0.234/¥5.
+  In-sample 35: agreement 26/30, top bin 23/23 (LB 0.857).
+- **⚠ CORRECTION (2026-10-05, chief counter-audit)**: three claims in this
+  entry were wrong and are retracted/downgraded:
+  1. The "fresh S7 blind set" was **not S7 and not blind** — forensics on the
+     six episode files: `scenario_id=week1_demo_v1` (×3, policy=fsm) and
+     `pick_place_v1` (×3, **policy=hybrid** — recorded on the τ=0.5 sweep arm,
+     not the FSM arm as this journal previously stated); zero perturbation
+     records; the earlier journal wording is a factual error. The 18/20 number
+     is a mixed-policy, same-distribution number, not a generalization result.
+  2. **Statistical basis**: those rows come from 4 episodes (7+7+3+3), not 20
+     independent trials — the episode-level Wilson lower bound is ≈0.510 even
+     at 4/4, not 0.824/0.857. All binned LBs in this entry are step-level and
+     optimistic; per-episode accounting is required before any benchmark claim.
+  3. **The τ=0.7 "crossover" is misattributed**: routing eligibility is decided
+     by the bin's Wilson LOWER BOUND, so with the three fixed bins the arms
+     τ=0.5 and τ=0.7 are the SAME operating point (only the top bin clears
+     either). The jev 0→16 change was caused by the profile swap
+     (Q4+v1 → Q8+v2, bins 0.000/0.523/0.676 → 0.342/0.036/0.857), not by τ.
+     The `threshold=0.7` rows in decisions.jsonl are a MIXTURE of two
+     calibration profiles (34 skipped + 17 routed across the swap) and must
+     not be pooled. A valid τ sweep needs bin LB breakpoints
+     (≈0.036 / 0.857 today) or finer bins — pending a design decision.
+- **τ=0.7 live run (as-measured, no τ attribution)**: Q8+v2 profile, 5 episodes
+  5/5 SUCCEEDED, decisions jev 16 / llm 1 / fsm 5 (bootstrap) — escalation
+  5.9% of model decisions; ledger total after all of the day's runs
+  ¥0.234/¥5. Also observed: 15/41 fast proposals in the earlier τ=0.5 arm ran
+  with the calibration NOT loaded (`calib_sha='-'`, silent) — the runner gate
+  passed regardless; per-decision `source=='jev'` + expected calibration sha
+  assertions are REQUIRED harness work before n≥50.
 - **Next**: (1) scale the sweep to the S-cell runner for n≥50 per-τ statistics
   (#12 AC), (2) S7 differentiation track at τ=0.7 (hybrid vs FSM where the
   deterministic baseline is weakest), (3) land the feat branch docs.

@@ -82,10 +82,23 @@ def main():
                     settings = dict(FLEXCELL_JEV_ENDPOINT=saved['endpoint'], FLEXCELL_JEV_MODEL='flexcell-fast',
                                     FLEXCELL_JEV_MODEL_SHA256=assets['fast']['sha256'], FLEXCELL_JEV_TIMEOUT_S='45',
                                     FLEXCELL_JEV_CALIBRATION=str(config/'jev_calibration_20261002.json'))
+                    body = '# Qwen local classifier; slow backend remains separately configured.\n'+\
+                           ''.join('export %s=%s\n' % (k,shlex.quote(v)) for k,v in settings.items())
                     profile=config/'mainline_jev.sh'
-                    profile.write_text('# Local classifier; slow backend remains separately configured.\n'+
-                                       ''.join('export %s=%s\n' % (k,shlex.quote(v)) for k,v in settings.items()))
-                    profile.chmod(0o600)
+                    # Never silently replace a DIFFERENT deployed fast arm (e.g.
+                    # the clef profile): this script's Qwen-era calibration
+                    # (4/30, LB 0.053) would disarm the router gate and every
+                    # decision would escalate to the paid slow arm - with the
+                    # runner still reporting PASS.
+                    current = profile.read_text(encoding='utf-8') if profile.exists() else ''
+                    if not current.strip() or assets['fast']['sha256'] in current:
+                        profile.write_text(body); profile.chmod(0o600)
+                    else:
+                        side = config/'mainline_qwen.sh'
+                        side.write_text(body); side.chmod(0o600)
+                        print(json.dumps({'warning': 'mainline_jev.sh holds a different fast arm; '
+                                            'the Qwen profile was written to mainline_qwen.sh instead',
+                                          'kept': str(profile)}))
                 break
             except Exception:
                 if args.action != 'start' or time.monotonic() >= deadline: raise

@@ -1,5 +1,4 @@
 """Empirical FSM-agreement routing estimates, never physical success odds."""
-import ast
 import hashlib
 import json
 import math
@@ -8,9 +7,13 @@ from pathlib import Path
 
 
 def prompt_digest():
-    tree = ast.parse(Path(__file__).with_name('jev_backends.py').read_text())
-    method = next(n for n in ast.walk(tree) if isinstance(n, ast.FunctionDef) and n.name == '_render')
-    return hashlib.sha256(ast.dump(method, include_attributes=False).encode()).hexdigest()
+    """Digest over the backend prompt surface: the WHOLE jev_backends source
+    bytes, so every backend's prompt logic is covered (LocalReproduction's
+    _render AND ClefBackend's instructions/criteria templates).  Bytes, not
+    ast.dump(): the AST dump is CPython-version dependent, and read_text()
+    without encoding= breaks on hosts whose default codec is not UTF-8."""
+    return hashlib.sha256(
+        Path(__file__).with_name('jev_backends.py').read_bytes()).hexdigest()
 
 
 class ConfidenceCalibration:
@@ -21,7 +24,7 @@ class ConfidenceCalibration:
         if not path:
             return
         try:
-            data = json.loads(Path(path).read_text())
+            data = json.loads(Path(path).read_text(encoding='utf-8'))
             if (data['schema_version'] != 1 or data['prompt_sha256'] != prompt_digest()
                     or data['model_sha256'] != os.environ.get('FLEXCELL_JEV_MODEL_SHA256')
                     or data['model'] != os.environ.get('FLEXCELL_JEV_MODEL')
