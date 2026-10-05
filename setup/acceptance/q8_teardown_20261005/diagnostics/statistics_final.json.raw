@@ -1,0 +1,898 @@
+{
+  "unit": "episode",
+  "groups": [
+    {
+      "stage": "baseline",
+      "threshold": 0.03,
+      "planned_n": 20,
+      "runtime_fingerprints": [
+        "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a"
+      ],
+      "completed_n": 20,
+      "graded_n": 20,
+      "successes": 18,
+      "harness_errors": 0,
+      "success_ci95": [
+        0.6989617935882066,
+        0.9721341060158468
+      ],
+      "audited_n": 20,
+      "unaudited_n": 0,
+      "all_routing_ok": true,
+      "success_fraction_per_attempt": 0.9,
+      "episode_mean_escalation": 0.030396825396825394,
+      "fast": 131,
+      "slow": 5,
+      "paid_upper_bound_cny": 0.018908,
+      "batch": "/home/ros/.ros/flexcell/episodes/batch_20261005_161922.jsonl",
+      "log": "/home/ros/agentic_workcell_ws/setup/acceptance/q8_teardown_20261005/baseline_0.03_20_161922.log",
+      "episodes": [
+        {
+          "run_id": "week1_demo_v1-b5cbf374",
+          "run": 1,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 0,
+          "model_decisions": 6,
+          "escalation_fraction": 0.0,
+          "duration_s": 41.800549473,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 7,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-bc3265bd",
+          "run": 2,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 0,
+          "model_decisions": 6,
+          "escalation_fraction": 0.0,
+          "duration_s": 41.578856543,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 7,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-b7b5733c",
+          "run": 3,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 0,
+          "model_decisions": 6,
+          "escalation_fraction": 0.0,
+          "duration_s": 42.794266489,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 7,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-10b9e0db",
+          "run": 4,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 8,
+          "slow": 0,
+          "model_decisions": 8,
+          "escalation_fraction": 0.0,
+          "duration_s": 60.103882738,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 9,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-8fa8e637",
+          "run": 5,
+          "outcome": "FAILED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 1,
+          "model_decisions": 7,
+          "escalation_fraction": 0.14285714285714285,
+          "duration_s": 47.254704571,
+          "error_code": 51,
+          "safety": {
+            "evaluated": 8,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.003792,
+          "paid_settled_calls": 1
+        },
+        {
+          "run_id": "week1_demo_v1-962aa803",
+          "run": 6,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 0,
+          "model_decisions": 6,
+          "escalation_fraction": 0.0,
+          "duration_s": 41.591937834,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 7,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-a5713b76",
+          "run": 7,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 0,
+          "model_decisions": 6,
+          "escalation_fraction": 0.0,
+          "duration_s": 40.890820677,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 7,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-5eb5d7f3",
+          "run": 8,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 0,
+          "model_decisions": 6,
+          "escalation_fraction": 0.0,
+          "duration_s": 40.529792733,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 7,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-5ecb035a",
+          "run": 9,
+          "outcome": "FAILED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 1,
+          "model_decisions": 7,
+          "escalation_fraction": 0.14285714285714285,
+          "duration_s": 48.27260608,
+          "error_code": 51,
+          "safety": {
+            "evaluated": 8,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.00384,
+          "paid_settled_calls": 1
+        },
+        {
+          "run_id": "week1_demo_v1-5ddde205",
+          "run": 10,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 0,
+          "model_decisions": 6,
+          "escalation_fraction": 0.0,
+          "duration_s": 41.401160501,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 7,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-d1bff85b",
+          "run": 11,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 0,
+          "model_decisions": 6,
+          "escalation_fraction": 0.0,
+          "duration_s": 41.196379019,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 7,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-0e81c40b",
+          "run": 12,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 8,
+          "slow": 1,
+          "model_decisions": 9,
+          "escalation_fraction": 0.1111111111111111,
+          "duration_s": 65.649150008,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 10,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.003764,
+          "paid_settled_calls": 1
+        },
+        {
+          "run_id": "week1_demo_v1-f01c4b7a",
+          "run": 13,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 0,
+          "model_decisions": 6,
+          "escalation_fraction": 0.0,
+          "duration_s": 40.772270129,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 7,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-20aa1705",
+          "run": 14,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 8,
+          "slow": 1,
+          "model_decisions": 9,
+          "escalation_fraction": 0.1111111111111111,
+          "duration_s": 60.455763357,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 10,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.003754,
+          "paid_settled_calls": 1
+        },
+        {
+          "run_id": "week1_demo_v1-26c4fd7b",
+          "run": 15,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 0,
+          "model_decisions": 6,
+          "escalation_fraction": 0.0,
+          "duration_s": 42.459336715,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 7,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-7eb37906",
+          "run": 16,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 8,
+          "slow": 0,
+          "model_decisions": 8,
+          "escalation_fraction": 0.0,
+          "duration_s": 55.245404861,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 9,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-515cf98c",
+          "run": 17,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 0,
+          "model_decisions": 6,
+          "escalation_fraction": 0.0,
+          "duration_s": 41.062429145,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 7,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-617fbe4f",
+          "run": 18,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 0,
+          "model_decisions": 6,
+          "escalation_fraction": 0.0,
+          "duration_s": 41.384419079,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 7,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-286feea5",
+          "run": 19,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 9,
+          "slow": 1,
+          "model_decisions": 10,
+          "escalation_fraction": 0.1,
+          "duration_s": 72.267239837,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 11,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.003758,
+          "paid_settled_calls": 1
+        },
+        {
+          "run_id": "week1_demo_v1-389c1e5d",
+          "run": 20,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 0,
+          "model_decisions": 6,
+          "escalation_fraction": 0.0,
+          "duration_s": 41.584660975,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 7,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        }
+      ]
+    },
+    {
+      "stage": "smoke",
+      "threshold": 0.03,
+      "planned_n": 5,
+      "runtime_fingerprints": [],
+      "completed_n": 1,
+      "graded_n": 0,
+      "successes": 0,
+      "harness_errors": 1,
+      "success_ci95": [
+        0.0,
+        1.0
+      ],
+      "audited_n": 0,
+      "unaudited_n": 1,
+      "all_routing_ok": false,
+      "success_fraction_per_attempt": 0.0,
+      "episode_mean_escalation": null,
+      "fast": 0,
+      "slow": 0,
+      "paid_upper_bound_cny": 0.0,
+      "batch": "/home/ros/.ros/flexcell/episodes/batch_20261005_154607.jsonl",
+      "log": "/home/ros/agentic_workcell_ws/setup/acceptance/q8_teardown_20261005/smoke_0.03_5_154607.log",
+      "episodes": [
+        {
+          "run_id": null,
+          "run": 1,
+          "outcome": "HARNESS_ERROR",
+          "routing_ok": null,
+          "harness_error": "reset failed rc=1: {\"ok\": false, \"worker_rc\": 1, \"error\": \"admin worker failed; success output rejected\", \"worker_output\": \"{\\n  \\\"ok\\\": false,\\n  \\\"report\\\": {\\n    \\\"task_idle\\\": true,\\n    \\\"task_state_seen\\\": \\\"IDLE\\\",\\n    \\\"task_state_publishers\\\": 1,\\n    \\\"carry_stop_sent\\\": true,\\n    \\\"carry_state_known\\\": true,\\n    \\\"carry_engaged\\\": false,\\n    \\\"scene_had_objects\\\": false,\\n    \\\"scene_cleared\\\": true,\\n    \\\"arm_home\\\": true,\\n    \\\"arm_home_detail\\\": \\\"waiting for /move_action and /execute_trajectory ... BEFORE /joint_states: {'joint1': 0.0042, 'joint2': -0.9034, 'joint3': 0.8943, 'joint4': 0.5071} PLAN error_code = 1 planning_time = 0.0131 PLANNED \\\",\\n    \\\"respawn target_box_a\\\": false,\\n    \\\"respawn target_box_b\\\": false,\\n    \\\"reobserved\\\": true,\\n    \\\"canonical target_box_a\\\": \\\"OK ['0.2200', '0.0000', '0.0175']\\\",\\n    \\\"canonical target_box_b\\\": \\\"OK ['0.2000', '-0.1800', '0.0175']\\\",\\n    \\\"carry_disengaged\\\": true\\n  }\\n}\\n\", \"worker_stderr\": \"\"}\n",
+          "bootstrap": 0,
+          "fast": 0,
+          "slow": 0,
+          "model_decisions": 0,
+          "escalation_fraction": null,
+          "duration_s": null,
+          "error_code": null,
+          "safety": null,
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        }
+      ]
+    },
+    {
+      "stage": "smoke",
+      "threshold": 0.03,
+      "planned_n": 5,
+      "runtime_fingerprints": [
+        "268b31b2899f40408392e95be092e6d6f017c61dfc3572edd27108ef411791eb"
+      ],
+      "completed_n": 5,
+      "graded_n": 5,
+      "successes": 4,
+      "harness_errors": 0,
+      "success_ci95": [
+        0.3755282641185388,
+        0.9637768390302125
+      ],
+      "audited_n": 5,
+      "unaudited_n": 0,
+      "all_routing_ok": true,
+      "success_fraction_per_attempt": 0.8,
+      "episode_mean_escalation": 0.050793650793650794,
+      "fast": 32,
+      "slow": 2,
+      "paid_upper_bound_cny": 0.007604,
+      "batch": "/home/ros/.ros/flexcell/episodes/batch_20261005_160611.jsonl",
+      "log": "/home/ros/agentic_workcell_ws/setup/acceptance/q8_teardown_20261005/smoke_0.03_5_160611.log",
+      "episodes": [
+        {
+          "run_id": "week1_demo_v1-6bf26e82",
+          "run": 1,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 0,
+          "model_decisions": 6,
+          "escalation_fraction": 0.0,
+          "duration_s": 41.802181299,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 7,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-4773f184",
+          "run": 2,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 8,
+          "slow": 1,
+          "model_decisions": 9,
+          "escalation_fraction": 0.1111111111111111,
+          "duration_s": 60.97108806,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 10,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.003732,
+          "paid_settled_calls": 1
+        },
+        {
+          "run_id": "week1_demo_v1-7ba4579a",
+          "run": 3,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 0,
+          "model_decisions": 6,
+          "escalation_fraction": 0.0,
+          "duration_s": 41.163196801,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 7,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-42090e25",
+          "run": 4,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 0,
+          "model_decisions": 6,
+          "escalation_fraction": 0.0,
+          "duration_s": 41.450977748,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 7,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-21b099e1",
+          "run": 5,
+          "outcome": "FAILED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 1,
+          "model_decisions": 7,
+          "escalation_fraction": 0.14285714285714285,
+          "duration_s": 45.833562491,
+          "error_code": 51,
+          "safety": {
+            "evaluated": 8,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.003872,
+          "paid_settled_calls": 1
+        }
+      ]
+    },
+    {
+      "stage": "smoke",
+      "threshold": 0.03,
+      "planned_n": 5,
+      "runtime_fingerprints": [
+        "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a"
+      ],
+      "completed_n": 5,
+      "graded_n": 5,
+      "successes": 5,
+      "harness_errors": 0,
+      "success_ci95": [
+        0.5655085052479191,
+        1.0
+      ],
+      "audited_n": 5,
+      "unaudited_n": 0,
+      "all_routing_ok": true,
+      "success_fraction_per_attempt": 1.0,
+      "episode_mean_escalation": 0.04444444444444444,
+      "fast": 36,
+      "slow": 2,
+      "paid_upper_bound_cny": 0.00747,
+      "batch": "/home/ros/.ros/flexcell/episodes/batch_20261005_161224.jsonl",
+      "log": "/home/ros/agentic_workcell_ws/setup/acceptance/q8_teardown_20261005/smoke_0.03_5_161224.log",
+      "episodes": [
+        {
+          "run_id": "week1_demo_v1-b64db525",
+          "run": 1,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 0,
+          "model_decisions": 6,
+          "escalation_fraction": 0.0,
+          "duration_s": 41.815544413,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 7,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-789f3894",
+          "run": 2,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 8,
+          "slow": 1,
+          "model_decisions": 9,
+          "escalation_fraction": 0.1111111111111111,
+          "duration_s": 60.644832349,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 10,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.003734,
+          "paid_settled_calls": 1
+        },
+        {
+          "run_id": "week1_demo_v1-caff97d8",
+          "run": 3,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 0,
+          "model_decisions": 6,
+          "escalation_fraction": 0.0,
+          "duration_s": 41.141202224,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 7,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-47acdfa8",
+          "run": 4,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 8,
+          "slow": 0,
+          "model_decisions": 8,
+          "escalation_fraction": 0.0,
+          "duration_s": 55.743886139,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 9,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0,
+          "paid_settled_calls": 0
+        },
+        {
+          "run_id": "week1_demo_v1-1cc2f735",
+          "run": 5,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 8,
+          "slow": 1,
+          "model_decisions": 9,
+          "escalation_fraction": 0.1111111111111111,
+          "duration_s": 61.891473631,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 10,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.003736,
+          "paid_settled_calls": 1
+        }
+      ]
+    },
+    {
+      "stage": "smoke",
+      "threshold": 0.85,
+      "planned_n": 5,
+      "runtime_fingerprints": [
+        "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b"
+      ],
+      "completed_n": 5,
+      "graded_n": 5,
+      "successes": 4,
+      "harness_errors": 0,
+      "success_ci95": [
+        0.3755282641185388,
+        0.9637768390302125
+      ],
+      "audited_n": 5,
+      "unaudited_n": 0,
+      "all_routing_ok": true,
+      "success_fraction_per_attempt": 0.8,
+      "episode_mean_escalation": 0.22103174603174602,
+      "fast": 31,
+      "slow": 9,
+      "paid_upper_bound_cny": 0.032756,
+      "batch": "/home/ros/.ros/flexcell/episodes/batch_20261005_164336.jsonl",
+      "log": "/home/ros/agentic_workcell_ws/setup/acceptance/q8_teardown_20261005/smoke_0.85_5_164336.log",
+      "episodes": [
+        {
+          "run_id": "week1_demo_v1-7536d26b",
+          "run": 1,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 1,
+          "model_decisions": 7,
+          "escalation_fraction": 0.14285714285714285,
+          "duration_s": 45.339300493,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 8,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.0035,
+          "paid_settled_calls": 1
+        },
+        {
+          "run_id": "week1_demo_v1-66b2bdc8",
+          "run": 2,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 7,
+          "slow": 2,
+          "model_decisions": 9,
+          "escalation_fraction": 0.2222222222222222,
+          "duration_s": 64.025229878,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 10,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.007268,
+          "paid_settled_calls": 2
+        },
+        {
+          "run_id": "week1_demo_v1-6eeb70fc",
+          "run": 3,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 6,
+          "slow": 1,
+          "model_decisions": 7,
+          "escalation_fraction": 0.14285714285714285,
+          "duration_s": 44.949399987,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 8,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.00348,
+          "paid_settled_calls": 1
+        },
+        {
+          "run_id": "week1_demo_v1-e14f9507",
+          "run": 4,
+          "outcome": "SUCCEEDED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 7,
+          "slow": 2,
+          "model_decisions": 9,
+          "escalation_fraction": 0.2222222222222222,
+          "duration_s": 60.356722053,
+          "error_code": 0,
+          "safety": {
+            "evaluated": 10,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.007224,
+          "paid_settled_calls": 2
+        },
+        {
+          "run_id": "week1_demo_v1-d5d67cfb",
+          "run": 5,
+          "outcome": "FAILED",
+          "routing_ok": true,
+          "harness_error": null,
+          "bootstrap": 1,
+          "fast": 5,
+          "slow": 3,
+          "model_decisions": 8,
+          "escalation_fraction": 0.375,
+          "duration_s": 50.671383815,
+          "error_code": 51,
+          "safety": {
+            "evaluated": 9,
+            "invalid_per_1000": 0.0,
+            "rejected": 0
+          },
+          "paid_upper_bound_cny": 0.011284,
+          "paid_settled_calls": 3
+        }
+      ]
+    }
+  ],
+  "model_replay": "NOT_RUN",
+  "superiority_over_FSM": "UNKNOWN",
+  "local_compute_cost": "UNKNOWN"
+}

@@ -1,5 +1,15 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-10-05 两类服务故障修复后的独立资格结果：τ=0.03 smoke 5/5，
+> 同指纹 n=20 完整执行 18/20；τ=0.85 新 smoke 4/5，未解锁 n=20。
+> 新运行 30 个执行回合均无 harness/路由来源错误；3 次 B 抓取失败全部保留，
+> 具体承载/运动根因 UNKNOWN。最终 hybrid/τ=0.85、IDLE、carry=false，
+> strict health 19 项正常，Q8 实际 typed 请求与校准加载复验通过。
+> 同步失误导致的 callback-only 4/5 与此前 reset HARNESS_ERROR 独立留档，
+> 不并入新指纹统计。226 tests passed，100/100 启停及两轮各 20/20 reset 对照。
+> 高阈值 smoke 失败禁止挑成功子集重跑解锁；n≥50、完整 M3 与 #22 关闭继续冻结。
+> [根因、修复、每组口径、失败及复现](Q8_TEARDOWN_20261005.md)。下条为先导之前状态。
+
 > 2026-10-05 reset RPC 隔离恢复：callback 修复后的首个 smoke 保留为
 > HARNESS_ERROR（respawn=false、无 -6）。进程对照发现新 Node + 15 秒仍卡住，
 > 同时新进程 0.20 秒成功；底层传输卡住原因 UNKNOWN。

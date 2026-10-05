@@ -1,5 +1,13 @@
 # EXPERIMENTS — log
 
+> 2026-10-05 Gazebo 退出与 reset RPC 修复（E-020）：core 确认 callback 析构/GIL
+> 与 Python finalization 竞态；引用释放屏障后启停 100/100、reset 20/20。
+> 另一个 RPC 进程卡住经新进程对照定位，隔离恢复后 reset 再次 20/20
+> （80 命令/81 请求、1 次恢复均留记录），全量 226 tests passed。
+> 新指纹 τ=0.03 smoke 5/5、先导 18/20；τ=0.85 smoke 4/5，n=20 阻断。
+> 新执行 30 回合无 harness/来源错误，3 次 B 抓取失败保留；n≥50 冻结。
+> [故障范围、对照与新指纹资格结果](Q8_TEARDOWN_20261005.md)。下条为修复前历史。
+
 > 2026-10-05 Q8 路由先导（E-019）：实际校准加载与逐决策证据门禁通过，215 tests passed；
 > τ=0.85 smoke 5/5，计划 n=20 的先导实际 14/17 + 1 reset HARNESS_ERROR 后停批；
 > τ=0.03 smoke 实际 3/3 + 1 reset HARNESS_ERROR 后停批，先导未解锁。
@@ -45,27 +53,28 @@
 
 ## Index
 
-| ID    | Experiment                                                              | Outcome                                                                      | Evidence                                                              |
-| ----- | ----------------------------------------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| E-001 | Day-1 environment verification                                          | PASS                                                                         | acceptance/day1 (delivery host) + [DAY1_REPORT.md](../DAY1_REPORT.md) |
-| E-002 | Day-2 MoveToPose acceptance                                             | PASS 10/10                                                                   | acceptance/day2 + [DAY2_MOVETOPOSE.md](DAY2_MOVETOPOSE.md)            |
-| E-003 | Week-1 deterministic skills battery                                     | PASS                                                                         | acceptance/week1                                                      |
-| E-004 | Week-1.5 demo hardening — delivery acceptance (att3)                    | PASS                                                                         | acceptance/week15/delivery_20260926/                                  |
-| E-005 | Week-1.5 cold-start re-verification                                     | PASS                                                                         | acceptance/week15/cs_20260926/                                        |
-| E-006 | M2.3 audit remediation — runtime acceptance                             | PASS (gated)                                                                 | acceptance/sessions/ (FLEXCELL_STAGE) + ~/.ros/flexcell/referee.jsonl |
-| E-007 | Scenario runner batch (S1×2 + S2 + S5), episode replay                  | PASS                                                                         | ~/.ros/flexcell/episodes/batch_20260928_051219.jsonl                  |
-| E-008 | Metrics report over real store + S7 adaptation probe                    | PASS                                                                         | ~/.ros/flexcell/episodes/batch_20260928_124615.jsonl                  |
-| E-009 | New-machine (RTX 4060 laptop) bring-up + first official benchmark batch | SUPERSEDED (not citable)                                                     | setup/acceptance/m3_seed_batch_20260929*/                             |
-| E-010 | T6 hardening: gate_flood + injection lifecycle + reset determinism      | PASS                                                                         | this entry (measurements inline)                                      |
-| E-012 | Shared task policy seam + distinct models + protocol v2 online smoke    | ONLINE PARTIAL; BASELINE FROZEN                                              | [MAINLINE_20260930.md](MAINLINE_20260930.md)                          |
-| E-013 | Official DeepSeek policy + persistent RMB 5 budget + action handoff     | ONLINE PARTIAL; S1 3/5; BASELINE FROZEN                                      | [DEEPSEEK_20261001.md](DEEPSEEK_20261001.md)                          |
-| E-014 | DDS fragment-path diagnosis + servo velocity controls                   | MECHANISM PROBES; NOT BENCHMARK                                              | [MECHANISM_20261001.md](MECHANISM_20261001.md)                        |
-| E-015 | Leased velocity carry + engage receipt + PLACE dependency readiness     | DEPLOYED; FINAL SINGLE PASS; SMOKE INCOMPLETE                                | [CARRY_VELOCITY_20261001.md](CARRY_VELOCITY_20261001.md)              |
-| E-016 | Lifecycle paths + authoritative carry + local calibration/replay        | FSM CONTROL PASS; HYBRID/REPLAY FAIL; NOT BENCHMARK                          | [HARDENING_20261002.md](HARDENING_20261002.md)                        |
-| E-017 | Desktop revival; hybrid online n=5 at one fingerprint                   | 5/5 SUCCEEDED; E-016 hybrid hang modes absent on the NAT host; NOT BENCHMARK | staging `hybrid_n5_desktop_20261004/`                                 |
-| E-018 | Clef-flash fast arm — offline calibration on the desktop                | GPU: 17/30, TOP BIN 8/8 (LB 0.676), 1.9 s, 35/35 SUCCESS; τ=0.5 ELIGIBLE     | desktop `jev_calibration_clef_gpu.json`; code pending feat branch     |
-| E-019 | Q8 per-decision provenance + two-regime pilot                           | 215 TESTS PASS; HIGH 14/17 + RESET ERROR; LOW SMOKE TRUNCATED; n>=50 FROZEN  | [Q8_PILOT_20261005.md](Q8_PILOT_20261005.md)                          |
-| M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN                                                                      | — (RFC #15; harness #7/#8/#9)                                         |
+| ID    | Experiment                                                              | Outcome                                                                                      | Evidence                                                              |
+| ----- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| E-001 | Day-1 environment verification                                          | PASS                                                                                         | acceptance/day1 (delivery host) + [DAY1_REPORT.md](../DAY1_REPORT.md) |
+| E-002 | Day-2 MoveToPose acceptance                                             | PASS 10/10                                                                                   | acceptance/day2 + [DAY2_MOVETOPOSE.md](DAY2_MOVETOPOSE.md)            |
+| E-003 | Week-1 deterministic skills battery                                     | PASS                                                                                         | acceptance/week1                                                      |
+| E-004 | Week-1.5 demo hardening — delivery acceptance (att3)                    | PASS                                                                                         | acceptance/week15/delivery_20260926/                                  |
+| E-005 | Week-1.5 cold-start re-verification                                     | PASS                                                                                         | acceptance/week15/cs_20260926/                                        |
+| E-006 | M2.3 audit remediation — runtime acceptance                             | PASS (gated)                                                                                 | acceptance/sessions/ (FLEXCELL_STAGE) + ~/.ros/flexcell/referee.jsonl |
+| E-007 | Scenario runner batch (S1×2 + S2 + S5), episode replay                  | PASS                                                                                         | ~/.ros/flexcell/episodes/batch_20260928_051219.jsonl                  |
+| E-008 | Metrics report over real store + S7 adaptation probe                    | PASS                                                                                         | ~/.ros/flexcell/episodes/batch_20260928_124615.jsonl                  |
+| E-009 | New-machine (RTX 4060 laptop) bring-up + first official benchmark batch | SUPERSEDED (not citable)                                                                     | setup/acceptance/m3_seed_batch_20260929*/                             |
+| E-010 | T6 hardening: gate_flood + injection lifecycle + reset determinism      | PASS                                                                                         | this entry (measurements inline)                                      |
+| E-012 | Shared task policy seam + distinct models + protocol v2 online smoke    | ONLINE PARTIAL; BASELINE FROZEN                                                              | [MAINLINE_20260930.md](MAINLINE_20260930.md)                          |
+| E-013 | Official DeepSeek policy + persistent RMB 5 budget + action handoff     | ONLINE PARTIAL; S1 3/5; BASELINE FROZEN                                                      | [DEEPSEEK_20261001.md](DEEPSEEK_20261001.md)                          |
+| E-014 | DDS fragment-path diagnosis + servo velocity controls                   | MECHANISM PROBES; NOT BENCHMARK                                                              | [MECHANISM_20261001.md](MECHANISM_20261001.md)                        |
+| E-015 | Leased velocity carry + engage receipt + PLACE dependency readiness     | DEPLOYED; FINAL SINGLE PASS; SMOKE INCOMPLETE                                                | [CARRY_VELOCITY_20261001.md](CARRY_VELOCITY_20261001.md)              |
+| E-016 | Lifecycle paths + authoritative carry + local calibration/replay        | FSM CONTROL PASS; HYBRID/REPLAY FAIL; NOT BENCHMARK                                          | [HARDENING_20261002.md](HARDENING_20261002.md)                        |
+| E-017 | Desktop revival; hybrid online n=5 at one fingerprint                   | 5/5 SUCCEEDED; E-016 hybrid hang modes absent on the NAT host; NOT BENCHMARK                 | staging `hybrid_n5_desktop_20261004/`                                 |
+| E-018 | Clef-flash fast arm — offline calibration on the desktop                | GPU: 17/30, TOP BIN 8/8 (LB 0.676), 1.9 s, 35/35 SUCCESS; τ=0.5 ELIGIBLE                     | desktop `jev_calibration_clef_gpu.json`; code pending feat branch     |
+| E-019 | Q8 per-decision provenance + two-regime pilot                           | 215 TESTS PASS; HIGH 14/17 + RESET ERROR; LOW SMOKE TRUNCATED; n>=50 FROZEN                  | [Q8_PILOT_20261005.md](Q8_PILOT_20261005.md)                          |
+| E-020 | Pose callback finalization barrier + bounded fresh-process reset RPC    | 226 TESTS PASS; LIFECYCLE 100/100; RESET 20/20 EACH; LOW 18/20; HIGH SMOKE 4/5; n>=50 FROZEN | [Q8_TEARDOWN_20261005.md](Q8_TEARDOWN_20261005.md)                    |
+| M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN                                                                                      | — (RFC #15; harness #7/#8/#9)                                         |
 
 ## Entries
 
