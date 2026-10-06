@@ -10,6 +10,7 @@ Usage:
 """
 import argparse
 import json
+from pathlib import Path
 import sys
 import time
 import uuid
@@ -21,7 +22,7 @@ from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import String as StringMsg
 
 from flexcell_interfaces.action import (
-    Observe, PickObject, PlaceObject, RunDemo, RunPickPlace, VerifyObject)
+    Observe, PickObject, PlaceObject, RunComposite, RunDemo, RunPickPlace, VerifyObject)
 
 SPEC = {
     'observe': (Observe, '/observe'),
@@ -30,6 +31,7 @@ SPEC = {
     'verify': (VerifyObject, '/verify_object'),
     'task': (RunPickPlace, '/run_pick_place'),
     'demo': (RunDemo, '/run_demo'),
+    'composite': (RunComposite, '/run_composite'),
 }
 
 
@@ -48,6 +50,7 @@ def main():
     ap.add_argument('--tol', type=float, default=0.0)
     ap.add_argument('--skip-verify', action='store_true')
     ap.add_argument('--scenario', default='week1_demo_v1')
+    ap.add_argument('--plan', type=Path, help='declared RunComposite JSON plan')
     ap.add_argument('--inject', default='')
     ap.add_argument('--inject-request-id', default='',
                     help='correlate the injection lifecycle transition')
@@ -58,6 +61,12 @@ def main():
     ap.add_argument('--inject-timeout', type=float, default=8.0)
     ap.add_argument('--timeout', type=float, default=150.0)
     args = ap.parse_args()
+    plan = None
+    if args.action == 'composite':
+        from flexcell_skills.contracts.composite import validate_plan
+        if args.plan is None:
+            ap.error('--plan required for composite')
+        plan = validate_plan(json.loads(args.plan.read_text()))
 
     rclpy.init()
     n = Node('w1_client')
@@ -162,6 +171,23 @@ def main():
     elif args.action == 'demo':
         g.scenario_id = args.scenario
         extra['scenario_id'] = args.scenario
+    elif args.action == 'composite':
+        from flexcell_interfaces.msg import CompositeStage, ObjectPosition
+        from geometry_msgs.msg import Point
+        g.scenario_id, g.motion_profile_id = plan['scenario_id'], plan['motion_profile_id']
+        g.position_tolerance_m, g.clearance_m = plan['position_tolerance_m'], plan['clearance_m']
+        for name, xyz in plan['initial_objects'].items():
+            obj = ObjectPosition(); obj.object_name = name
+            obj.position.x, obj.position.y, obj.position.z = map(float, xyz)
+            g.initial_objects.append(obj)
+        for spec in plan['stages']:
+            stage = CompositeStage(); stage.stage_id, stage.object_name = spec['stage_id'], spec['object_name']
+            stage.place_pose.header.frame_id = 'world'; stage.place_pose.pose.orientation.w = 1.
+            p = stage.place_pose.pose.position
+            p.x, p.y, p.z = map(float, spec['destination'])
+            g.stages.append(stage)
+        for xyz in plan['final_empty_positions']:
+            p = Point(); p.x, p.y, p.z = map(float, xyz); g.final_empty_positions.append(p)
 
     print('SENDING action=%s object=%s pose=%s' % (args.action, args.object, args.pose),
           flush=True)
@@ -205,6 +231,7 @@ def main():
         'goal_uuid': bytes(goal_uuid.uuid).hex(),
         'outcome': name_of(cls.Result, 'OUTCOME_', r.outcome),
         'outcome_val': int(r.outcome),
+        'action_status': int(result_reply.status),
         'error_code': name_of(cls.Result, 'ERR_', getattr(r, 'error_code', 0)),
         'detail': r.detail,
         'evidence_id': getattr(r, 'evidence_id', ''),
@@ -247,6 +274,9 @@ def main():
         out['fsm_trace'] = list(r.fsm_trace)
         out['object_at_place'] = bool(r.object_at_place)
         out['final_position_error_m'] = r.final_position_error_m
+    if args.action == 'composite':
+        out.update(run_id=r.run_id, completed_stage_ids=list(r.completed_stage_ids),
+                   component_run_ids=list(r.component_run_ids), component_goal_uuids=list(r.component_goal_uuids))
     out.update(extra)
     print('RESULT ' + json.dumps(out, indent=2), flush=True)
 

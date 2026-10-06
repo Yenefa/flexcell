@@ -10,6 +10,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "srv/EngageCarry.srv"
   "srv/QueryCarry.srv"
   "msg/Assignment.msg"
+  "msg/ObjectPosition.msg"
+  "msg/CompositeStage.msg"
   "msg/TaskConstraints.msg"
   "msg/HistoryEntry.msg"
   "msg/TaskContext.msg"
@@ -25,6 +27,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "action/VerifyObject.action"
   "action/RunPickPlace.action"
   "action/RunDemo.action"
+  "action/RunComposite.action"
   DEPENDENCIES geometry_msgs std_msgs
 )
 

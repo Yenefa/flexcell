@@ -1,0 +1,28 @@
+{
+  "scenario_id": "composite_swap_v1",
+  "initial_objects": {
+    "target_box_a": [0.22, 0.0, 0.0175],
+    "target_box_b": [0.2, -0.18, 0.0175]
+  },
+  "stages": [
+    {
+      "stage_id": "buffer-B",
+      "object_name": "target_box_b",
+      "destination": [0.12, -0.15, 0.0175]
+    },
+    {
+      "stage_id": "relocate-A",
+      "object_name": "target_box_a",
+      "destination": [0.2, -0.18, 0.0175]
+    },
+    {
+      "stage_id": "return-B",
+      "object_name": "target_box_b",
+      "destination": [0.22, 0.0, 0.0175]
+    }
+  ],
+  "final_empty_positions": [[0.12, -0.15, 0.0175]],
+  "position_tolerance_m": 0.06,
+  "clearance_m": 0.05,
+  "motion_profile_id": "demo_slow"
+}

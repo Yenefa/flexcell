@@ -21,6 +21,7 @@ skills left it in and reports honestly.
 """
 
 import json
+import os
 import threading
 import time
 import uuid
@@ -37,7 +38,7 @@ from std_msgs.msg import String as StringMsg
 from unique_identifier_msgs.msg import UUID
 
 from flexcell_interfaces.action import (
-    Observe, PickObject, PlaceObject, RunDemo, RunPickPlace, VerifyObject)
+    Observe, PickObject, PlaceObject, RunComposite, RunDemo, RunPickPlace, VerifyObject)
 from flexcell_interfaces.msg import ZoneState
 
 from flexcell_skills.common import JsonlLog, crash_detail, new_evidence
@@ -48,6 +49,7 @@ from flexcell_skills.contracts.error_codes import task_abort_error_code
 from flexcell_skills.contracts.action_result import AcceptedGoalResult
 from flexcell_skills.contracts.goal_response import LateGoalCleanup
 from flexcell_skills.contracts.backend_health import startup_health
+from flexcell_skills.contracts.composite import Journal, execute as execute_composite
 
 from flexcell_skills.contracts.episode import EpisodeRecorder, EpisodeStore
 from flexcell_skills.contracts.benchmark_protocol import load_protocol
@@ -67,6 +69,35 @@ R = RunPickPlace.Result
 
 class SkillTransportError(RuntimeError):
     """An unknown skill result must not become another policy dispatch."""
+
+
+class ComponentGoal:
+    """Internal native goal sharing the parent's cancellation and arm lease."""
+    def __init__(self, parent, request, goal_uuid, stage_id, started, completed=0):
+        self.parent, self.request = parent, request
+        self.goal_id = UUID(uuid=list(bytes.fromhex(goal_uuid)))
+        self.stage_id, self.started, self.completed = stage_id, started, completed
+        self.terminal_status = None
+
+    @property
+    def is_cancel_requested(self):
+        return self.parent.is_cancel_requested
+
+    def publish_feedback(self, feedback):
+        fb = RunComposite.Feedback()
+        fb.stage_id, fb.state = self.stage_id, feedback.state
+        fb.completed_stages = self.completed
+        fb.elapsed_ms = int((time.monotonic() - self.started) * 1000)
+        self.parent.publish_feedback(fb)
+
+    def succeed(self):
+        self.terminal_status = 'SUCCEEDED'
+
+    def canceled(self):
+        self.terminal_status = 'CANCELED'
+
+    def abort(self):
+        self.terminal_status = 'FAILED'
 
 
 def err_name(cls, prefix, value):
@@ -223,6 +254,14 @@ class TaskFsmServer(Node):
         self._demo_server = ActionServer(
             self, RunDemo, 'run_demo',
             execute_callback=self._execute_demo,
+            goal_callback=lambda req: GoalResponse.ACCEPT,
+            cancel_callback=lambda gh: CancelResponse.ACCEPT,
+            callback_group=ReentrantCallbackGroup())
+
+        self._composite_dir = os.path.join(os.path.expanduser(gp('log_dir').value), 'composites')
+        self._composite_server = ActionServer(
+            self, RunComposite, 'run_composite',
+            execute_callback=self._execute_composite,
             goal_callback=lambda req: GoalResponse.ACCEPT,
             cancel_callback=lambda gh: CancelResponse.ACCEPT,
             callback_group=ReentrantCallbackGroup())
@@ -406,7 +445,109 @@ class TaskFsmServer(Node):
     def _execute_demo(self, goal_handle):
         return self._execute_plan(goal_handle, single=False)
 
-    def _execute_plan(self, goal_handle, single=False):
+    def _execute_composite(self, goal_handle):
+        """Hold the common arm admission gate across the entire outer chain."""
+        started = time.monotonic()
+        res = RunComposite.Result()
+        res.outcome, res.error_code = res.OUTCOME_FAILED, res.ERR_INTERNAL
+        res.run_id = 'composite-' + uuid.uuid4().hex[:16]
+        journal, owns_arm = None, False
+        progress = []
+        try:
+            journal = Journal(self._composite_dir, res.run_id, dict(
+                goal_uuid=bytes(goal_handle.goal_id.uuid).hex(),
+                runtime_fingerprint=os.environ.get('FLEXCELL_RUNTIME_FINGERPRINT'),
+                policy=self._policy.name, policy_version=self._policy.version))
+            res.evidence_id = str(journal.path)
+            if not self._admission.acquire(blocking=False):
+                res.error_code, res.detail = res.ERR_RESOURCE_BUSY, 'another task owns the arm'
+                journal.emit('TERMINAL', outcome=1, error_code=res.error_code, detail=res.detail)
+            else:
+                owns_arm = True
+                self._active_task_run_id = res.run_id
+                self._publish_task_state('BUSY')
+                if self._has_pending_skill_goal():
+                    res.error_code, res.detail = res.ERR_RESOURCE_BUSY, 'skill acceptance or stop confirmation is unknown'
+                    journal.emit('TERMINAL', outcome=1, error_code=res.error_code, detail=res.detail)
+                else:
+                    goal = goal_handle.request
+                    def xyz(p):
+                        return [p.x, p.y, p.z]
+                    names = [p.object_name for p in goal.initial_objects]
+                    if len(names) != len(set(names)):
+                        raise ValueError('duplicate initial objects')
+                    stages = []
+                    for stage in goal.stages:
+                        pose = stage.place_pose
+                        q = pose.pose.orientation
+                        if pose.header.frame_id != 'world' or [q.x, q.y, q.z, q.w] != [0., 0., 0., 1.]:
+                            raise ValueError('stages require world frame and identity orientation')
+                        stages.append(dict(stage_id=stage.stage_id, object_name=stage.object_name,
+                                           destination=xyz(pose.pose.position)))
+                    plan = dict(scenario_id=goal.scenario_id, initial_objects={p.object_name:xyz(p.position) for p in goal.initial_objects},
+                                stages=stages, final_empty_positions=[xyz(p) for p in goal.final_empty_positions],
+                                position_tolerance_m=goal.position_tolerance_m, clearance_m=goal.clearance_m,
+                                motion_profile_id=goal.motion_profile_id)
+                    def emit(event, **data):
+                        journal.emit(event, **data)
+                        if event == 'COMMITTED':
+                            progress.append(data['stage_id'])
+                    def observe(stage_id, boundary):
+                        view = ComponentGoal(goal_handle, RunPickPlace.Goal(), uuid.uuid4().hex, stage_id, started, len(progress))
+                        request = Observe.Goal(); request.refresh = True
+                        reply, error = self._demo_call(self._cli_observe, request, 'OBSERVE_' + boundary.upper(), view, started, self._skill_wait)
+                        if reply is None:
+                            raise SkillTransportError(error)
+                        ws = reply.world_state
+                        return dict(outcome=int(reply.outcome), error_code=int(reply.error_code), evidence_id=reply.evidence_id,
+                                    source=ws.source, revision=int(ws.revision),
+                                    carry=dict(engaged=bool(ws.carry.engaged), object_id=ws.carry.object_id),
+                                    objects=[dict(name=o.name, available=bool(o.available), position=xyz(o.pose.position)) for o in ws.objects])
+                    def native(stage, goal_uuid):
+                        request = RunPickPlace.Goal()
+                        request.object_name, request.motion_profile_id = stage['object_name'], plan['motion_profile_id']
+                        request.place_pose.header.frame_id = 'world'
+                        request.place_pose.pose.orientation.w = 1.
+                        p = request.place_pose.pose.position
+                        p.x, p.y, p.z = map(float, stage['destination'])
+                        request.skip_verify = False
+                        context = dict(parent_run_id=res.run_id, stage_id=stage['stage_id'])
+                        view = ComponentGoal(goal_handle, request, goal_uuid, stage['stage_id'], started, len(progress))
+                        result = self._execute_plan(view, single=True, admission_held=True, component=context)
+                        self._active_task_run_id = res.run_id
+                        return dict(context, goal_uuid=goal_uuid, terminal_status=view.terminal_status,
+                                    outcome=int(result.outcome), error_code=int(result.error_code), detail=result.detail,
+                                    object_at_place=bool(result.object_at_place), final_position_error_m=result.final_position_error_m)
+                    result = execute_composite(plan, observe, native, emit, lambda: goal_handle.is_cancel_requested)
+                    for field in ('outcome', 'error_code', 'detail', 'completed_stage_ids', 'component_run_ids', 'component_goal_uuids'):
+                        setattr(res, field, result[field])
+        except Exception as exc:
+            res.outcome = res.OUTCOME_FAILED
+            res.error_code = res.ERR_INVALID_PLAN if isinstance(exc, ValueError) else res.ERR_INTERNAL
+            res.detail = crash_detail(exc)
+            if journal is not None:
+                try:
+                    journal.emit('TERMINAL', outcome=int(res.outcome), error_code=int(res.error_code), detail=res.detail)
+                except Exception as log_exc:
+                    self.get_logger().error('composite receipt failed: %s' % log_exc)
+        finally:
+            if owns_arm:
+                self._publish_task_state('BUSY' if self._has_pending_skill_goal() else 'IDLE')
+                self._admission.release()
+            if journal is not None:
+                try:
+                    journal.close()
+                except Exception as exc:
+                    res.outcome, res.error_code, res.detail = res.OUTCOME_FAILED, res.ERR_INTERNAL, crash_detail(exc)
+        if res.outcome == res.OUTCOME_SUCCEEDED:
+            goal_handle.succeed()
+        elif res.outcome == res.OUTCOME_CANCELED:
+            goal_handle.canceled()
+        else:
+            goal_handle.abort()
+        return res
+
+    def _execute_plan(self, goal_handle, single=False, admission_held=False, component=None):
         t0 = time.monotonic()
         goal = goal_handle.request
         self._seq += 1
@@ -452,6 +593,9 @@ class TaskFsmServer(Node):
             ros_goal = getattr(goal_handle, 'goal_id', None)
             if ros_goal is not None:
                 final['goal_uuid'] = bytes(ros_goal.uuid).hex()
+            if component is not None:
+                final.update(parent_run_id=component['parent_run_id'], stage_id=component['stage_id'],
+                             execution_kind='IN_PROCESS_COMPONENT', component_execution_id=final.get('goal_uuid'))
             if single:
                 vr = verify_results.get('a')
                 res.object_at_place = bool(
@@ -477,8 +621,10 @@ class TaskFsmServer(Node):
                     final['zone_%s_error_m' % tag] = getattr(
                         res, 'zone_%s_error_m' % tag)
             episode.drop_pending()
-            self._episodes.write(episode.to_dict(
+            episode_path = self._episodes.write(episode.to_dict(
                 final_state=final, protocol=getattr(self, '_benchmark_protocol', None)))
+            if component is not None:
+                component.update(run_id=run_id, final_state=final, episode_path=episode_path)
             log_record = dict(final, scenario_id=scenario, run_id=run_id,
                               steps=steps)
             if single:
@@ -497,11 +643,11 @@ class TaskFsmServer(Node):
                 goal_handle.abort()
             return res
 
-        if not self._admission.acquire(blocking=False):
+        if not admission_held and not self._admission.acquire(blocking=False):
             return finish(result_type.OUTCOME_FAILED,
                           result_type.ERR_RESOURCE_BUSY,
                           'another demo task is active')
-        owns_arm = True
+        owns_arm = not admission_held
         self._active_task_run_id = run_id
         self._publish_task_state('BUSY')
         try:
@@ -1001,8 +1147,9 @@ class TaskFsmServer(Node):
             return finish(result_type.OUTCOME_FAILED,
                           result_type.ERR_SKILL_FAILED, crash_detail(exc))
         finally:
-            self._publish_task_state('BUSY' if self._has_pending_skill_goal() else 'IDLE')
-            self._admission.release()
+            if owns_arm:
+                self._publish_task_state('BUSY' if self._has_pending_skill_goal() else 'IDLE')
+                self._admission.release()
 
 
 def main(args=None):

@@ -1,0 +1,35 @@
+# Explicit, bounded outer plan; policy routing occurs within each native task.
+# 1..8 stages, unique stage IDs, fresh measured conditions at every boundary.
+string scenario_id
+flexcell_interfaces/ObjectPosition[] initial_objects
+flexcell_interfaces/CompositeStage[] stages
+geometry_msgs/Point[] final_empty_positions
+float64 position_tolerance_m     # positive, at most 0.06m
+float64 clearance_m              # object-center distance, 0.05..0.25m
+string motion_profile_id
+---
+uint8 OUTCOME_SUCCEEDED=0
+uint8 OUTCOME_FAILED=1
+uint8 OUTCOME_CANCELED=2
+uint8 outcome
+uint16 ERR_NONE=0
+uint16 ERR_INTERNAL=2
+uint16 ERR_CANCELED=32
+uint16 ERR_RESOURCE_BUSY=41
+uint16 ERR_INVALID_PLAN=60
+uint16 ERR_PRECONDITION_FAILED=61
+uint16 ERR_COMPONENT_FAILED=62
+uint16 ERR_POSTCONDITION_FAILED=63
+uint16 ERR_OBSERVATION_FAILED=64
+uint16 error_code
+string run_id
+string[] completed_stage_ids
+string[] component_run_ids
+string[] component_goal_uuids
+string evidence_id
+string detail
+---
+string stage_id
+string state
+uint32 completed_stages
+uint32 elapsed_ms
