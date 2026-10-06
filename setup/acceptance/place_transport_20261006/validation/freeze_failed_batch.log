@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "episodes": 1,
+  "batch_rows": 2,
+  "planned_episodes": 5,
+  "routing_ok": true,
+  "physical_successes": 0,
+  "runtime_fingerprint": "476c6fa7cfbd3e5bc3e0db0c83669e733a0d348a3a69656bcb3c2774c7805599",
+  "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+  "fast_selected": 2,
+  "slow_selected": 1,
+  "fast_calls": 3,
+  "fast_tokens": 4038,
+  "harness_errors": [
+    "reset failed rc=1:  \\\"worker_rc\\\": 0,\\n          \\\"stderr\\\": \\\"\\\",\\n          \\\"transport_ok\\\": true,\\n          \\\"response_data\\\": true,\\n          \\\"elapsed_s\\\": 0.20107275800182833\\n        }\\n      ]\\n    },\\n    \\\"respawn target_box_b\\\": true,\\n    \\\"respawn_details target_box_b\\\": {\\n      \\\"attempts\\\": [\\n        {\\n          \\\"attempt\\\": 1,\\n          \\\"worker_rc\\\": 0,\\n          \\\"stderr\\\": \\\"\\\",\\n          \\\"transport_ok\\\": true,\\n          \\\"response_data\\\": true,\\n          \\\"elapsed_s\\\": 0.20150996500160545\\n        }\\n      ]\\n    },\\n    \\\"reobserved\\\": true,\\n    \\\"canonical_rpc target_box_a\\\": [\\n      {\\n        \\\"ok\\\": true,\\n        \\\"attempts\\\": [\\n          {\\n            \\\"attempt\\\": 1,\\n            \\\"worker_rc\\\": 0,\\n            \\\"stderr\\\": \\\"\\\",\\n            \\\"transport_ok\\\": true,\\n            \\\"response_data\\\": true,\\n            \\\"elapsed_s\\\": 0.20152027199947042\\n          }\\n        ]\\n      }\\n    ],\\n    \\\"canonical target_box_a\\\": \\\"OK ['0.2200', '0.0000', '0.0175']\\\",\\n    \\\"canonical_rpc target_box_b\\\": [\\n      {\\n        \\\"ok\\\": true,\\n        \\\"attempts\\\": [\\n          {\\n            \\\"attempt\\\": 1,\\n            \\\"worker_rc\\\": 0,\\n            \\\"stderr\\\": \\\"\\\",\\n            \\\"transport_ok\\\": true,\\n            \\\"response_data\\\": true,\\n            \\\"elapsed_s\\\": 0.20180612400145037\\n          }\\n        ]\\n      }\\n    ],\\n    \\\"canonical target_box_b\\\": \\\"OK ['0.2000', '-0.1800', '0.0175']\\\",\\n    \\\"carry_disengaged\\\": true\\n  }\\n}\\n\", \"worker_stderr\": \"\"}\n"
+  ],
+  "task_goal_requests": 3,
+  "task_goal_responses": 3,
+  "task_transport_ok": true,
+  "observer_goals": 1,
+  "observer_correlated": true,
+  "controller_goals": 4,
+  "controller_transport_ok": true,
+  "controller_errors": [],
+  "controller_terminal_statuses": {
+    "4": 4
+  },
+  "controller_quarantines": 0,
+  "places": 1,
+  "place_dependency_checks": 1,
+  "place_check_phases": {
+    "preflight": 1
+  },
+  "place_checks_ready": 1,
+  "negative_dependency_events": 0,
+  "failures_retained": true,
+  "resampled_episodes": 0,
+  "offline_gpu_overlap": false,
+  "outcomes": [
+    {
+      "run": 1,
+      "outcome": "FAILED",
+      "command_rc": 1,
+      "episode": "week1_demo_v1_week1_demo_v1-95823d44.json"
+    },
+    {
+      "run": 2,
+      "outcome": "HARNESS_ERROR",
+      "command_rc": 90,
+      "episode": null
+    }
+  ],
+  "latency": {
+    "status": "MEASURED",
+    "clock": "perf_counter_ns",
+    "n": 3,
+    "p50_ms": 2412.536051,
+    "p95_ms": 3228.056338,
+    "p99_ms": 3300.54703,
+    "max_ms": 3318.669703
+  },
+  "latency_comparison": "NOT_RUN: different fingerprints; no causal latency comparison",
+  "root_cause_of_prior_transport_failures": "UNKNOWN: a passing local profile does not establish prior NIC/RMW cause",
+  "scope": "One same-fingerprint S1 n<=5 simulation batch. No physical hardware acceptance. n>=50 remains frozen."
+}

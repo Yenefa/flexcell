@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- WSL mainline ROS nodes are local; GPU HTTP stays on the tailnet. -->
+<CycloneDDS xmlns="https://cdds.io/config">
+  <Domain id="any">
+    <General>
+      <Interfaces><NetworkInterface name="lo"/></Interfaces>
+      <AllowMulticast>false</AllowMulticast>
+      <MaxMessageSize>1400B</MaxMessageSize>
+      <FragmentSize>1200B</FragmentSize>
+    </General>
+    <Discovery>
+      <ParticipantIndex>auto</ParticipantIndex>
+      <MaxAutoParticipantIndex>99</MaxAutoParticipantIndex>
+      <Peers><Peer Address="127.0.0.1"/></Peers>
+    </Discovery>
+  </Domain>
+</CycloneDDS>

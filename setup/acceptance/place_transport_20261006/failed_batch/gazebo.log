@@ -1,0 +1,184 @@
+[INFO] [launch]: All log files can be found below /home/ros/.ros/log/2026-10-06-12-48-55-064200-Yenefa-95085
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [parameter_bridge-1]: process started with pid [95098]
+[INFO] [gazebo-2]: process started with pid [95099]
+[INFO] [robot_state_publisher-3]: process started with pid [95100]
+[INFO] [create-4]: process started with pid [95101]
+[robot_state_publisher-3] [INFO] [1791262135.599113572] [robot_state_publisher]: Robot initialized
+[create-4] [INFO] [1791262136.079436274] [ros_gz_sim]: Requesting list of world names.
+[parameter_bridge-1] [INFO] [1791262136.174453458] [ros_gz_bridge]: Creating GZ->ROS Bridge: [/clock (gz.msgs.Clock) -> /clock (rosgraph_msgs/msg/Clock)] (Lazy 0)
+[create-4] [INFO] [1791262155.426663753] [ros_gz_sim]: Entity creation successful.
+[gazebo-2] [INFO] [1791262138.388734933] [gz_ros_control]: [gz_ros2_control] Fixed joint ['world_fixed'] (Entity='47') is skipped.
+[gazebo-2] [INFO] [1791262138.391307401] [gz_ros_control]: Loading controller_manager
+[gazebo-2] [INFO] [1791262138.406099196] [controller_manager]: Using ROS clock for triggering controller manager cycles.
+[gazebo-2] [WARN] [1791262138.406186643] [controller_manager]: The resource manager is not yet initialized, will wait for the robot description to initialize it..
+[gazebo-2] [INFO] [1791262138.412363906] [controller_manager]: Subscribing to '/robot_description' topic for robot description.
+[gazebo-2] [WARN] [1791262138.412450019] [gz_ros_control]: Waiting RM to load and initialize hardware...
+[gazebo-2] [WARN] [1791262139.412596959] [controller_manager]: Waiting for data on 'robot_description' topic to finish initialization
+[gazebo-2] [WARN] [1791262140.412565301] [controller_manager]: Waiting for data on 'robot_description' topic to finish initialization
+[gazebo-2] [WARN] [1791262140.412575217] [gz_ros_control]: Waiting RM to load and initialize hardware...
+[gazebo-2] [WARN] [1791262141.412567492] [controller_manager]: Waiting for data on 'robot_description' topic to finish initialization
+[INFO] [create-4]: process has finished cleanly [pid 95101]
+[INFO] [spawner-5]: process started with pid [95188]
+[gazebo-2] [INFO] [1791262160.405789402] [controller_manager]: Received robot description from topic.
+[gazebo-2] [INFO] [1791262160.406140151] [controller_manager]: Enforcing command limits is disabled. Command limits from URDF will be ignored.
+[gazebo-2] [INFO] [1791262160.415362503] [gz_ros_control]: The position_proportional_gain has been set to: 0.1
+[gazebo-2] [INFO] [1791262160.415798677] [gz_ros_control]: Loading joint: joint1
+[gazebo-2] [INFO] [1791262160.415825468] [gz_ros_control]: 	State:
+[gazebo-2] [INFO] [1791262160.415845029] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1791262160.415871920] [gz_ros_control]: 		 velocity
+[gazebo-2] [INFO] [1791262160.415935792] [gz_ros_control]: 		 effort
+[gazebo-2] [INFO] [1791262160.415942799] [gz_ros_control]: 	Command:
+[gazebo-2] [INFO] [1791262160.415945997] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1791262160.415964464] [gz_ros_control]: Loading joint: joint2
+[gazebo-2] [INFO] [1791262160.415967508] [gz_ros_control]: 	State:
+[gazebo-2] [INFO] [1791262160.415970111] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1791262160.415973513] [gz_ros_control]: 		 velocity
+[gazebo-2] [INFO] [1791262160.415977233] [gz_ros_control]: 		 effort
+[gazebo-2] [INFO] [1791262160.415980339] [gz_ros_control]: 	Command:
+[gazebo-2] [INFO] [1791262160.415982965] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1791262160.415991427] [gz_ros_control]: Loading joint: joint3
+[gazebo-2] [INFO] [1791262160.415993769] [gz_ros_control]: 	State:
+[gazebo-2] [INFO] [1791262160.415995866] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1791262160.415997864] [gz_ros_control]: 		 velocity
+[gazebo-2] [INFO] [1791262160.415999658] [gz_ros_control]: 		 effort
+[gazebo-2] [INFO] [1791262160.416002540] [gz_ros_control]: 	Command:
+[gazebo-2] [INFO] [1791262160.416004582] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1791262160.416011010] [gz_ros_control]: Loading joint: joint4
+[gazebo-2] [INFO] [1791262160.416012952] [gz_ros_control]: 	State:
+[gazebo-2] [INFO] [1791262160.416014978] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1791262160.416016724] [gz_ros_control]: 		 velocity
+[gazebo-2] [INFO] [1791262160.416018475] [gz_ros_control]: 		 effort
+[gazebo-2] [INFO] [1791262160.416020249] [gz_ros_control]: 	Command:
+[gazebo-2] [INFO] [1791262160.416022171] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1791262160.416028584] [gz_ros_control]: Loading joint: gripper_left_joint
+[gazebo-2] [INFO] [1791262160.416030951] [gz_ros_control]: 	State:
+[gazebo-2] [INFO] [1791262160.416032800] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1791262160.416034663] [gz_ros_control]: 		 velocity
+[gazebo-2] [INFO] [1791262160.416036552] [gz_ros_control]: 		 effort
+[gazebo-2] [INFO] [1791262160.416038392] [gz_ros_control]: 	Command:
+[gazebo-2] [INFO] [1791262160.416040283] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1791262160.416100811] [gz_ros_control]: Loading joint: gripper_right_joint
+[gazebo-2] [INFO] [1791262160.416147561] [gz_ros_control]: Joint 'gripper_right_joint'is mimicking joint 'gripper_left_joint' with multiplier: 1 and offset: 0
+[gazebo-2] [INFO] [1791262160.416159184] [gz_ros_control]: 	State:
+[gazebo-2] [INFO] [1791262160.416166606] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1791262160.416173500] [gz_ros_control]: 		 velocity
+[gazebo-2] [INFO] [1791262160.416184531] [gz_ros_control]: 		 effort
+[gazebo-2] [INFO] [1791262160.416227213] [gz_ros_control]: 	Command:
+[gazebo-2] [INFO] [1791262160.416910277] [controller_manager]: Initialize hardware 'OpenManipulatorXSystem' 
+[gazebo-2] [WARN] [1791262160.416970465] [controller_manager.hardware_component.system.OpenManipulatorXSystem]: Executor is not available during hardware component initialization for 'OpenManipulatorXSystem'. Skipping node creation!
+[gazebo-2] [INFO] [1791262160.417116236] [controller_manager]: Successful initialization of hardware 'OpenManipulatorXSystem'
+[gazebo-2] [INFO] [1791262160.417872005] [controller_manager]: Activating component 'OpenManipulatorXSystem'.
+[gazebo-2] [INFO] [1791262160.417961879] [resource_manager]: 'configure' hardware 'OpenManipulatorXSystem' 
+[gazebo-2] [INFO] [1791262160.417969296] [gz_ros_control]: System Successfully configured!
+[gazebo-2] [INFO] [1791262160.417977259] [resource_manager]: Successful 'configure' of hardware 'OpenManipulatorXSystem'
+[gazebo-2] [INFO] [1791262160.417985056] [resource_manager]: 'activate' hardware 'OpenManipulatorXSystem' 
+[gazebo-2] [INFO] [1791262160.418060713] [resource_manager]: Successful 'activate' of hardware 'OpenManipulatorXSystem'
+[gazebo-2] [WARN] [1791262160.418145151] [controller_manager]: Component 'OpenManipulatorXSystem' does not have read or write statistics initialized, skipping registration.
+[gazebo-2] [INFO] [1791262160.418155460] [controller_manager]: Resource Manager has been successfully initialized. Starting Controller Manager services...
+[spawner-5] [INFO] [1791262142.114793429] [spawner_joint_state_broadcaster]: waiting for service /controller_manager/list_controllers to become available...
+[gazebo-2] [1;31m[Err] [Physics.cc:1906] [0m[1;31mAttempting to create a mimic constraint for joint [[0m[1;31mgripper_right_joint[0m[1;31m] but the chosen physics engine does not support [0m[1;31mmimic constraints, so no constraint will be [0m[1;31mcreated.[0m[1;31m[0m
+[gazebo-2] [WARN] [1791262142.640334813] [gz_ros_control]:  Desired controller update period (0.01 s) is slower than the gazebo simulation period (0.005 s).
+[gazebo-2] [INFO] [1791262165.506264427] [controller_manager]: Loading controller : 'joint_state_broadcaster' of type 'joint_state_broadcaster/JointStateBroadcaster'
+[gazebo-2] [INFO] [1791262165.506528766] [controller_manager]: Loading controller 'joint_state_broadcaster'
+[gazebo-2] [INFO] [1791262165.521985916] [controller_manager]: Controller 'joint_state_broadcaster' node arguments: --ros-args --params-file /home/ros/agentic_workcell_ws/install/open_manipulator_bringup/share/open_manipulator_bringup/config/open_manipulator_x/hardware_controller_manager.yaml -p use_sim_time:=true --param use_sim_time:=true 
+[spawner-5] [INFO] [1791262165.553758981] [spawner_joint_state_broadcaster]: Loaded joint_state_broadcaster
+[gazebo-2] [INFO] [1791262165.567926186] [controller_manager]: Configuring controller: 'joint_state_broadcaster'
+[gazebo-2] [INFO] [1791262165.569589548] [joint_state_broadcaster]: 'joints' or 'interfaces' parameter is empty. All available state interfaces will be published
+[gazebo-2] [INFO] [1791262165.592869868] [controller_manager]: Activating controllers: [ joint_state_broadcaster ]
+[gazebo-2] [INFO] [1791262165.599246225] [controller_manager]: Successfully switched controllers!
+[spawner-5] [INFO] [1791262165.611046132] [spawner_joint_state_broadcaster]: Configured and activated joint_state_broadcaster
+[robot_state_publisher-3] [WARN] [1791262146.982294686] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[INFO] [spawner-5]: process has finished cleanly [pid 95188]
+[INFO] [spawner-6]: process started with pid [95373]
+[INFO] [spawner-7]: process started with pid [95374]
+[gazebo-2] [INFO] [1791262148.454412460] [controller_manager]: Loading controller : 'gripper_controller' of type 'position_controllers/GripperActionController'
+[gazebo-2] [INFO] [1791262148.454482166] [controller_manager]: Loading controller 'gripper_controller'
+[gazebo-2] [INFO] [1791262148.460127807] [controller_manager]: Controller 'gripper_controller' node arguments: --ros-args --params-file /home/ros/agentic_workcell_ws/install/open_manipulator_bringup/share/open_manipulator_bringup/config/open_manipulator_x/hardware_controller_manager.yaml -p use_sim_time:=true --param use_sim_time:=true 
+[gazebo-2] [WARN] [1791262148.470859735] [gripper_controller]: [Deprecated]: the `position_controllers/GripperActionController` and `effort_controllers::GripperActionController` controllers are replaced by 'parallel_gripper_controllers/GripperActionController' controller
+[spawner-7] [INFO] [1791262148.486855427] [spawner_gripper_controller]: Loaded gripper_controller
+[gazebo-2] [INFO] [1791262148.502219056] [controller_manager]: Configuring controller: 'gripper_controller'
+[gazebo-2] [INFO] [1791262148.502453483] [gripper_controller]: Action status changes will be monitored at 20.000000 Hz.
+[gazebo-2] [INFO] [1791262148.516982973] [controller_manager]: Activating controllers: [ gripper_controller ]
+[gazebo-2] [INFO] [1791262148.531983030] [controller_manager]: Successfully switched controllers!
+[spawner-7] [INFO] [1791262148.540957775] [spawner_gripper_controller]: Configured and activated gripper_controller
+[INFO] [spawner-7]: process has finished cleanly [pid 95374]
+[gazebo-2] [INFO] [1791262149.073999231] [controller_manager]: Loading controller : 'arm_controller' of type 'joint_trajectory_controller/JointTrajectoryController'
+[gazebo-2] [INFO] [1791262149.074109396] [controller_manager]: Loading controller 'arm_controller'
+[gazebo-2] [INFO] [1791262149.090540503] [controller_manager]: Controller 'arm_controller' node arguments: --ros-args --params-file /home/ros/agentic_workcell_ws/install/open_manipulator_bringup/share/open_manipulator_bringup/config/open_manipulator_x/hardware_controller_manager.yaml -p use_sim_time:=true --param use_sim_time:=true 
+[spawner-6] [INFO] [1791262149.178082787] [spawner_arm_controller]: Loaded arm_controller
+[gazebo-2] [INFO] [1791262149.180858797] [controller_manager]: Configuring controller: 'arm_controller'
+[gazebo-2] [INFO] [1791262149.183670419] [arm_controller]: No specific joint names are used for command interfaces. Using 'joints' parameter.
+[gazebo-2] [INFO] [1791262149.184687262] [arm_controller]: Command interfaces are [position] and state interfaces are [position velocity].
+[gazebo-2] [INFO] [1791262149.186643770] [arm_controller]: Using 'splines' interpolation method.
+[gazebo-2] [INFO] [1791262149.197432670] [arm_controller]: Goals with partial set of joints are allowed
+[gazebo-2] [INFO] [1791262149.197540743] [arm_controller]: Action status changes will be monitored at 20.00 Hz.
+[gazebo-2] [INFO] [1791262149.214333365] [arm_controller]: Setting initial scaling factor to 1.000000
+[gazebo-2] [INFO] [1791262149.214469049] [arm_controller]: No scaling interface set. This controller will not read speed scaling from the hardware.
+[gazebo-2] [INFO] [1791262149.240189248] [controller_manager]: Activating controllers: [ arm_controller ]
+[gazebo-2] [INFO] [1791262149.248066142] [controller_manager]: Successfully switched controllers!
+[spawner-6] [INFO] [1791262149.261401237] [spawner_arm_controller]: Configured and activated arm_controller
+[INFO] [spawner-6]: process has finished cleanly [pid 95373]
+[robot_state_publisher-3] [WARN] [1791262151.974235709] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262156.982838538] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262162.041140497] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262167.036303585] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262172.020743189] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262176.986892715] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262181.969194624] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262186.993763664] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262192.025890218] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262197.129710865] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262202.049064596] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262207.166971430] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gazebo-2] [INFO] [1791262210.575517960] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1791262210.575618128] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1791262210.673321534] [arm_controller]: Goal reached, success!
+[robot_state_publisher-3] [WARN] [1791262212.084696488] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262217.132807181] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gazebo-2] NodeShared::RecvSrvRequest() error sending response: Host unreachable
+[robot_state_publisher-3] [WARN] [1791262222.083278413] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262227.079122151] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gazebo-2] [INFO] [1791262229.725128529] [gripper_controller]: Received & accepted new action goal
+[gazebo-2] [INFO] [1791262229.919477634] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1791262229.919526277] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1791262231.238140328] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1791262231.340828226] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1791262231.340877320] [arm_controller]: Accepted new action goal
+[robot_state_publisher-3] [WARN] [1791262232.127725840] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gazebo-2] [INFO] [1791262232.820206280] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1791262232.898320803] [gripper_controller]: Received & accepted new action goal
+[gazebo-2] [INFO] [1791262234.170272865] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1791262234.170335685] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1791262235.083725558] [arm_controller]: Goal reached, success!
+[robot_state_publisher-3] [WARN] [1791262237.154341208] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gazebo-2] [INFO] [1791262239.683992144] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1791262239.684075260] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1791262241.810156668] [arm_controller]: Goal reached, success!
+[robot_state_publisher-3] [WARN] [1791262242.172283307] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262247.237663465] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262252.167691508] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262257.202335611] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262262.147255383] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262267.171367033] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gazebo-2] [INFO] [1791262281.399330296] [controller_manager]: Received robot description from topic.
+[gazebo-2] [WARN] [1791262281.399454577] [controller_manager]: ResourceManager has already loaded a urdf and is initialized. Ignoring attempt to reload a robot description.
+[robot_state_publisher-3] [WARN] [1791262282.252120725] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262287.166328985] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gazebo-2] [INFO] [1791262325.695336678] [controller_manager]: Received robot description from topic.
+[gazebo-2] [WARN] [1791262325.695418367] [controller_manager]: ResourceManager has already loaded a urdf and is initialized. Ignoring attempt to reload a robot description.
+[robot_state_publisher-3] [WARN] [1791262307.214850557] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262312.288607166] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262317.258028694] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[gazebo-2] [INFO] [1791262350.735625359] [controller_manager]: Received robot description from topic.
+[gazebo-2] [WARN] [1791262350.735714687] [controller_manager]: ResourceManager has already loaded a urdf and is initialized. Ignoring attempt to reload a robot description.
+[robot_state_publisher-3] [WARN] [1791262332.265176023] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262337.252415571] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262342.304247056] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262347.295318883] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262352.317024862] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262357.321276932] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262362.321699437] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262367.308349729] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262372.324069800] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!
+[robot_state_publisher-3] [WARN] [1791262377.349701635] [robot_state_publisher]: Moved backwards in time, re-publishing joint transforms!

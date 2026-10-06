@@ -48,10 +48,13 @@ from moveit_msgs.srv import GetMotionPlan, GetPositionIK
 from sensor_msgs.msg import JointState
 from shape_msgs.msg import SolidPrimitive
 from tf2_ros import Buffer, TransformListener
+from unique_identifier_msgs.msg import UUID
 
 from flexcell_interfaces.action import MoveToPose
 from flexcell_skills.common import crash_detail
 from flexcell_skills.contracts.trajectory import trajectory_summary
+from flexcell_skills.contracts.action_result import AcceptedGoalResult
+from flexcell_skills.contracts.goal_response import LateGoalCleanup
 
 R = MoveToPose.Result
 F = MoveToPose.Feedback
@@ -196,6 +199,7 @@ class MoveToPoseServer(Node):
         log_dir = os.path.expanduser(gp('log_dir').value)
         os.makedirs(log_dir, exist_ok=True)
         self._log_path = os.path.join(log_dir, gp('log_file').value)
+        self._controller_log_path = os.path.join(log_dir, 'controller_transport.jsonl')
 
         self._world_gate = bool(gp('world_revision_gate_enabled').value)
 
@@ -203,6 +207,8 @@ class MoveToPoseServer(Node):
         self._js = None
         self._js_wall = 0.0
         self._admission = threading.Lock()
+        self._backend_guard = threading.Lock()
+        self._pending_backend_goals = {}
         self._motion_blocked = False
         self._motion_blocked_reason = ''
         self._seq = 0
@@ -210,6 +216,7 @@ class MoveToPoseServer(Node):
 
         # ---------------- ROS interfaces ----------------
         self._cbg = ReentrantCallbackGroup()
+        self.create_timer(.1, self._poll_backend_goals, callback_group=self._cbg)
 
         self._tf_buffer = Buffer()
         self._tf_listener = TransformListener(self._tf_buffer, self, spin_thread=False)
@@ -428,9 +435,21 @@ class MoveToPoseServer(Node):
             goal_handle.abort()
             return res
         execution_started = False
+        egh, res_fut = None, None
         try:
             # ================= VALIDATING =================
             self._feedback(goal_handle, F.PHASE_VALIDATING, t_start)
+            self._active_motion_ids = (rid, evidence)
+
+            # A quiet arm does not exclude an outstanding late acceptance.
+            if self._pending_backend_goals:
+                res = self._result(R.OUTCOME_STATE_UNKNOWN, R.ERR_STATE_UNKNOWN,
+                                   detail='controller goal acceptance or termination is unknown')
+                res.evidence_id = evidence
+                rec.update(outcome='STATE_UNKNOWN_BLOCKED', error_code=R.ERR_STATE_UNKNOWN)
+                self._log(rec)
+                goal_handle.abort()
+                return res
 
             if self._motion_blocked:
                 if self._reconfirm_state():
@@ -578,10 +597,14 @@ class MoveToPoseServer(Node):
                 err = (R.ERR_CONTROLLER_REJECTED if send_status == 'rejected'
                        else R.ERR_STATE_UNAVAILABLE if send_status == 'unavailable'
                        else R.ERR_EXECUTION_TIMEOUT)
-                res = self._result(R.OUTCOME_FAILED, err, detail=why)
+                unknown = send_status in ('send_timeout', 'send_unknown')
+                if unknown:
+                    err = R.ERR_STATE_UNKNOWN
+                res = self._result(R.OUTCOME_STATE_UNKNOWN if unknown else R.OUTCOME_FAILED,
+                                   err, detail=why)
                 res.execution_started = execution_started
                 res.evidence_id = evidence
-                rec.update(outcome='FAILED', error_code=err,
+                rec.update(outcome='STATE_UNKNOWN' if unknown else 'FAILED', error_code=err,
                            execution_send_status=send_status)
                 self._log(rec)
                 goal_handle.abort()
@@ -597,7 +620,12 @@ class MoveToPoseServer(Node):
                     planned_final_positions=planned_final_positions,
                     traj_joint_names=traj_joint_names)
 
-            ecode = self._backend_result_code(res_fut.result().result)
+            execution_reply = res_fut.result()
+            if execution_reply.status not in (4, 5, 6):
+                raise RuntimeError('controller result is not terminal')
+            self._backend_event(bytes(egh.goal_id.uuid).hex(), event='controller_goal_terminal',
+                                status=execution_reply.status)
+            ecode = self._backend_result_code(execution_reply.result)
             rec['execution_end'] = time.time()
             rec['execution_error_code'] = ecode
             if not self._backend_code_is_success(ecode):
@@ -687,11 +715,15 @@ class MoveToPoseServer(Node):
             # the one server still missing it - rclpy's fallback for a raising
             # execute callback is a default Result whose outcome=0 reads as
             # OUTCOME_SUCCEEDED
-            rec.update(outcome='FAILED', error_code=R.ERR_INTERNAL,
+            if egh is not None:
+                self._quarantine_backend(None, bytes(egh.goal_id.uuid).hex(), handle=egh)
+            outcome = R.OUTCOME_STATE_UNKNOWN if egh is not None else R.OUTCOME_FAILED
+            error = R.ERR_STATE_UNKNOWN if egh is not None else R.ERR_INTERNAL
+            rec.update(outcome='STATE_UNKNOWN' if egh is not None else 'FAILED', error_code=error,
                        detail=crash_detail(exc),
                        elapsed_ms=int((time.monotonic() - t_start) * 1000))
             self._log(rec)
-            res = self._result(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+            res = self._result(outcome, error,
                                detail=crash_detail(exc))
             res.evidence_id = evidence
             goal_handle.abort()
@@ -701,6 +733,43 @@ class MoveToPoseServer(Node):
 
     # ------------------------------------------------------------- stopping
     # ------------------------------------------------------------- execution backends
+    def _poll_backend_goals(self):
+        with self._backend_guard:
+            for goal_id, cleanup in list(self._pending_backend_goals.items()):
+                if cleanup.poll():
+                    del self._pending_backend_goals[goal_id]
+
+    def _backend_event(self, goal_id, **fields):
+        rid, evidence = getattr(self, '_active_motion_ids', (None, None))
+        self._controller_event_log(dict(kind='controller_transport', controller_goal_uuid=goal_id,
+                       request_id=rid, evidence_id=evidence, mono_ns=time.monotonic_ns(), **fields))
+
+    def _controller_event_log(self, row):
+        row['wall_ts'] = time.time()
+        try:
+            with open(self._controller_log_path, 'a') as stream:
+                stream.write(json.dumps(row) + '\n')
+        except OSError as exc:
+            self.get_logger().error('controller event log failed: %s' % exc)
+
+    def _quarantine_backend(self, future, goal_id, handle=None, result_read=None):
+        # Capture the request identity now; cleanup may run during a later task.
+        rid, evidence = getattr(self, '_active_motion_ids', (None, None))
+
+        def emit(**fields):
+            self._controller_event_log(dict(kind='controller_transport', controller_goal_uuid=goal_id,
+                           request_id=rid, evidence_id=evidence,
+                           mono_ns=time.monotonic_ns(), **fields))
+
+        cleanup = (LateGoalCleanup.after_cancel(result_read, emit) if result_read is not None
+                   else LateGoalCleanup.for_accepted(handle, emit) if handle is not None
+                   else LateGoalCleanup(future, emit))
+        with self._backend_guard:
+            self._pending_backend_goals[goal_id] = cleanup
+            self._motion_blocked = True
+            self._motion_blocked_reason = 'controller goal %s is unconfirmed' % goal_id
+        emit(event='controller_goal_quarantined')
+
     def _send_for_execution(self, traj, deadline_t):
         """Hand the planned trajectory to the selected execution backend.
 
@@ -713,28 +782,34 @@ class MoveToPoseServer(Node):
                         'controller action %s unavailable' % self._fjt_action)
             g = FollowJointTrajectory.Goal()
             g.trajectory = traj.joint_trajectory
-            sf = self._fjt_client.send_goal_async(g)
+            client = self._fjt_client
+        else:
+            if not self._exec_client.wait_for_server(timeout_sec=2.0):
+                return ('unavailable', None, None, 'execute action %s unavailable' % self._exec_act)
+            g = ExecuteTrajectory.Goal()
+            g.trajectory = traj
+            client = self._exec_client
+        goal_id = uuid.uuid4()
+        sf, gh = None, None
+        self._backend_event(goal_id.hex, event='controller_goal_send_requested', backend=self._backend)
+        try:
+            sf = client.send_goal_async(g, goal_uuid=UUID(uuid=list(goal_id.bytes)))
             st = self._wait(sf, None, min(deadline_t, time.monotonic() + 5.0))
             if st != 'done':
-                return ('send_timeout', None, None, 'no response from controller action')
+                self._quarantine_backend(sf, goal_id.hex)
+                return ('send_timeout', None, None, 'no response from %s; original goal quarantined'
+                        % self._backend)
             gh = sf.result()
-            if gh is None or not gh.accepted:
-                return ('rejected', None, None, 'controller rejected the trajectory')
-            return ('sent', gh, gh.get_result_async(), '')
-
-        if not self._exec_client.wait_for_server(timeout_sec=2.0):
-            return ('unavailable', None, None,
-                    'execute action %s unavailable' % self._exec_act)
-        g = ExecuteTrajectory.Goal()
-        g.trajectory = traj
-        sf = self._exec_client.send_goal_async(g)
-        st = self._wait(sf, None, min(deadline_t, time.monotonic() + 5.0))
-        if st != 'done':
-            return ('send_timeout', None, None, 'no response from execute action')
-        gh = sf.result()
-        if gh is None or not gh.accepted:
-            return ('rejected', None, None, 'trajectory rejected by the controller manager')
-        return ('sent', gh, gh.get_result_async(), '')
+            if gh is None:
+                raise RuntimeError('controller acceptance unknown')
+            self._backend_event(goal_id.hex, event='controller_goal_response', accepted=gh.accepted)
+            if not gh.accepted:
+                return ('rejected', None, None, 'execution backend rejected the trajectory')
+            return ('sent', gh, AcceptedGoalResult(gh), '')
+        except Exception as exc:
+            self._quarantine_backend(sf, goal_id.hex, handle=gh)
+            return ('send_unknown', None, None, 'execution response unconfirmed: %s'
+                    % type(exc).__name__)
 
     def _backend_result_code(self, result):
         if self._backend == 'controller_action':
@@ -791,13 +866,22 @@ class MoveToPoseServer(Node):
         if result_future is not None:
             self._wait(result_future, None, time.monotonic() + self._stop_result_timeout)
             if result_future.done():
-                terminated = True
                 try:
-                    code = self._backend_result_code(result_future.result().result)
+                    reply = result_future.result()
+                    terminated = reply.status in (4, 5, 6)
+                    if not terminated:
+                        raise RuntimeError('controller termination unknown')
+                    code = self._backend_result_code(reply.result)
+                    self._backend_event(bytes(backend_goal_handle.goal_id.uuid).hex(),
+                                        event='controller_goal_terminal', status=reply.status)
                     rec['execution_termination_error_code'] = code
                 except Exception as exc:  # noqa: BLE001
+                    terminated = False
                     rec['execution_result_error'] = str(exc)
         rec['execution_terminated'] = terminated
+        if backend_goal_handle is not None and not terminated:
+            self._quarantine_backend(None, bytes(backend_goal_handle.goal_id.uuid).hex(),
+                                     result_read=result_future)
 
         # ---- (3) velocities actually reached rest ----
         at_rest = False

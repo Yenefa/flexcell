@@ -1,0 +1,28 @@
+Traceback (most recent call last):
+  File "/home/ros/.codex/worktrees/16d1/flexcell/setup/acceptance/place_transport_20261006/scripts/clock_probe.py", line 67, in <module>
+    main()
+  File "/home/ros/.codex/worktrees/16d1/flexcell/setup/acceptance/place_transport_20261006/scripts/clock_probe.py", line 52, in main
+    rclpy.spin_once(node, timeout_sec=.1)
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/__init__.py", line 226, in spin_once
+    executor.spin_once(timeout_sec=timeout_sec)
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 926, in spin_once
+    self._spin_once_impl(timeout_sec)
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 918, in _spin_once_impl
+    raise handler.exception()
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/task.py", line 286, in _execute_coroutine_step
+    result = coro.send(None)
+             ^^^^^^^^^^^^^^^
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 592, in handler
+    await call_coroutine()
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 480, in _execute
+    await await_or_execute(sub.callback, *msg_tuple)
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/executors.py", line 115, in await_or_execute
+    return callback(*args)
+           ^^^^^^^^^^^^^^^
+  File "/home/ros/.codex/worktrees/16d1/flexcell/setup/acceptance/place_transport_20261006/scripts/clock_probe.py", line 48, in <lambda>
+    node.create_subscription(Clock, '/clock', lambda msg, info: receive('/clock', msg.clock, info), qos_profile_sensor_data)
+                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ros/.codex/worktrees/16d1/flexcell/setup/acceptance/place_transport_20261006/scripts/clock_probe.py", line 32, in receive
+    gid=bytes(info.publisher_gid).hex())
+              ^^^^^^^^^^^^^^^^^^
+AttributeError: 'dict' object has no attribute 'publisher_gid'

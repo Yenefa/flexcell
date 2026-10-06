@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "episodes": 5,
+  "batch_rows": 5,
+  "planned_episodes": 5,
+  "routing_ok": true,
+  "physical_successes": 5,
+  "runtime_fingerprint": "e43bd2f44acc828184ca49d0d326e9661d130cc2f00bac1176e68e5423902cae",
+  "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+  "fast_selected": 30,
+  "slow_selected": 5,
+  "fast_calls": 35,
+  "fast_tokens": 50489,
+  "harness_errors": [],
+  "task_goal_requests": 40,
+  "task_goal_responses": 40,
+  "task_transport_ok": true,
+  "observer_goals": 10,
+  "observer_correlated": true,
+  "controller_goals": 60,
+  "controller_transport_ok": true,
+  "controller_errors": [],
+  "controller_terminal_statuses": {
+    "4": 60
+  },
+  "controller_quarantines": 0,
+  "places": 10,
+  "place_dependency_checks": 20,
+  "place_check_phases": {
+    "preflight": 10,
+    "releasing": 10
+  },
+  "place_checks_ready": 20,
+  "negative_dependency_events": 0,
+  "failures_retained": true,
+  "resampled_episodes": 0,
+  "offline_gpu_overlap": false,
+  "outcomes": [
+    {
+      "run": 1,
+      "outcome": "SUCCEEDED",
+      "command_rc": 0,
+      "episode": "week1_demo_v1_week1_demo_v1-7bee0276.json"
+    },
+    {
+      "run": 2,
+      "outcome": "SUCCEEDED",
+      "command_rc": 0,
+      "episode": "week1_demo_v1_week1_demo_v1-5526bc7f.json"
+    },
+    {
+      "run": 3,
+      "outcome": "SUCCEEDED",
+      "command_rc": 0,
+      "episode": "week1_demo_v1_week1_demo_v1-0fab1968.json"
+    },
+    {
+      "run": 4,
+      "outcome": "SUCCEEDED",
+      "command_rc": 0,
+      "episode": "week1_demo_v1_week1_demo_v1-8c714d59.json"
+    },
+    {
+      "run": 5,
+      "outcome": "SUCCEEDED",
+      "command_rc": 0,
+      "episode": "week1_demo_v1_week1_demo_v1-d19a26ad.json"
+    }
+  ],
+  "latency": {
+    "status": "MEASURED",
+    "clock": "perf_counter_ns",
+    "n": 35,
+    "p50_ms": 2372.749715,
+    "p95_ms": 3119.761836,
+    "p99_ms": 3591.012428,
+    "max_ms": 3594.123288
+  },
+  "latency_comparison": "NOT_RUN: different fingerprints; no causal latency comparison",
+  "root_cause_of_prior_transport_failures": "UNKNOWN: a passing local profile does not establish prior NIC/RMW cause",
+  "scope": "One same-fingerprint S1 n<=5 simulation batch. No physical hardware acceptance. n>=50 remains frozen."
+}

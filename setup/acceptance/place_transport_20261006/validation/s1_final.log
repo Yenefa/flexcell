@@ -1,0 +1,12 @@
+scenario runner: {'S1': 5}
+  S1 run 1/5
+    outcome=FAILED expected=SUCCEEDED replay=None (0 steps) arm=skipped clear=cleared sealed
+  S1 run 2/5
+    outcome=HARNESS_ERROR expected=SUCCEEDED replay=None (0 steps) arm=None clear=None
+    stopping batch: reset failed rc=1:  \"worker_rc\": 0,\n          \"stderr\": \"\",\n          \"transport_ok\": true,\n          \"response_data\": true,\n          \"elapsed_s\": 0.20107275800182833\n        }\n      ]\n    },\n    \"respawn target_box_b\": true,\n    \"respawn_details target_box_b\": {\n      \"attempts\": [\n        {\n          \"attempt\": 1,\n          \"worker_rc\": 0,\n          \"stderr\": \"\",\n          \"transport_ok\": true,\n          \"response_data\": true,\n          \"elapsed_s\": 0.20150996500160545\n        }\n      ]\n    },\n    \"reobserved\": true,\n    \"canonical_rpc target_box_a\": [\n      {\n        \"ok\": true,\n        \"attempts\": [\n          {\n            \"attempt\": 1,\n            \"worker_rc\": 0,\n            \"stderr\": \"\",\n            \"transport_ok\": true,\n            \"response_data\": true,\n            \"elapsed_s\": 0.20152027199947042\n          }\n        ]\n      }\n    ],\n    \"canonical target_box_a\": \"OK ['0.2200', '0.0000', '0.0175']\",\n    \"canonical_rpc target_box_b\": [\n      {\n        \"ok\": true,\n        \"attempts\": [\n          {\n            \"attempt\": 1,\n            \"worker_rc\": 0,\n            \"stderr\": \"\",\n            \"transport_ok\": true,\n            \"response_data\": true,\n            \"elapsed_s\": 0.20180612400145037\n          }\n        ]\n      }\n    ],\n    \"canonical target_box_b\": \"OK ['0.2000', '-0.1800', '0.0175']\",\n    \"carry_disengaged\": true\n  }\n}\n", "worker_stderr": ""}
+
+
+=== per-scenario results (metric #1, Wilson 95%% CI) ===
+  S1: 0/1 SUCCEEDED, CI95=[0.00, 0.79], replay_ok=False, 1 HARNESS_ERROR excluded
+batch summary: /home/ros/.ros/flexcell/episodes/batch_20261006_124958.jsonl
+SCENARIO RUNNER: FAIL (3)

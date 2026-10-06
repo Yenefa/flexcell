@@ -1,0 +1,44 @@
+{
+  "runtime": "/home/ros/.local/share/flexcell/mainline/runtime/20261006_124831",
+  "fingerprint": "476c6fa7cfbd3e5bc3e0db0c83669e733a0d348a3a69656bcb3c2774c7805599",
+  "processes": [
+    {
+      "name": "gazebo",
+      "pid": 95085,
+      "environment": {
+        "ROS_DOMAIN_ID": "45",
+        "RMW_IMPLEMENTATION": "rmw_cyclonedds_cpp",
+        "CYCLONEDDS_URI": "/home/ros/agentic_workcell_ws/setup/cyclone_wsl_local.xml"
+      }
+    },
+    {
+      "name": "moveit",
+      "pid": 95238,
+      "environment": {
+        "ROS_DOMAIN_ID": "45",
+        "RMW_IMPLEMENTATION": "rmw_cyclonedds_cpp",
+        "CYCLONEDDS_URI": "/home/ros/agentic_workcell_ws/setup/cyclone_wsl_local.xml"
+      }
+    },
+    {
+      "name": "move_to_pose",
+      "pid": 95239,
+      "environment": {
+        "ROS_DOMAIN_ID": "45",
+        "RMW_IMPLEMENTATION": "rmw_cyclonedds_cpp",
+        "CYCLONEDDS_URI": "/home/ros/agentic_workcell_ws/setup/cyclone_wsl_local.xml"
+      }
+    },
+    {
+      "name": "fleet",
+      "pid": 95243,
+      "environment": {
+        "ROS_DOMAIN_ID": "45",
+        "RMW_IMPLEMENTATION": "rmw_cyclonedds_cpp",
+        "CYCLONEDDS_URI": "/home/ros/agentic_workcell_ws/setup/cyclone_wsl_local.xml"
+      }
+    }
+  ],
+  "dds_sha256": "76797884e6745ec21ca2d23fd903e23f5cc77f01a60c6fc5ca4f3e59da057b30",
+  "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c"
+}

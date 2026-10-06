@@ -67,7 +67,15 @@ installed_sources={str(p.relative_to(installed_root)):hashlib.sha256(p.read_byte
                    for p in installed_root.rglob('*.py')}
 if carry_backend == 'velocity_servo' and not native_plugin.is_file():
     raise SystemExit('velocity carry plugin is not installed')
+clock_context={}
+cmdline=pathlib.Path('/proc/cmdline')
+if cmdline.is_file() and 'hv_utils.timesync_implicit=' in cmdline.read_text():
+    clock_context['hyperv_timesync_implicit']=[arg.split('=',1)[1] for arg in cmdline.read_text().split()
+                                               if arg.startswith('hv_utils.timesync_implicit=')][-1]
+    clock_context['systemd_timesyncd']=subprocess.run(
+        ['systemctl','is-active','systemd-timesyncd.service'],capture_output=True,text=True,timeout=3).stdout.strip() or 'unknown'
 profile=dict(policy=policy,threshold=float(threshold),protocol_sha256=digest,
+             host_clock_context=clock_context,
              interface_sources_sha256={str(p.relative_to(repo)):hashlib.sha256(p.read_bytes()).hexdigest()
                                        for p in pathlib.Path(repo).glob('src/flexcell/flexcell_interfaces/**/*') if p.is_file()},
              installed_source_sha256=installed_sources,
@@ -75,7 +83,7 @@ profile=dict(policy=policy,threshold=float(threshold),protocol_sha256=digest,
                                  'plugin_sha256':hashlib.sha256(native_plugin.read_bytes()).hexdigest() if carry_backend=='velocity_servo' else None},
              params_sha256=hashlib.sha256((pathlib.Path(repo)/'src/flexcell/flexcell_skills/config/week1.yaml').read_bytes()).hexdigest(),
              harness_sha256={name:hashlib.sha256((pathlib.Path(repo)/name).read_bytes()).hexdigest()
-                             for name in ('setup/94_scenario_runner.py','setup/flexcell_admin.py','setup/108_wait_policy.py',
+                             for name in ('setup/102_mainline_runtime.sh','setup/94_scenario_runner.py','setup/flexcell_admin.py','setup/108_wait_policy.py',
                                           'src/flexcell/flexcell_skills/test/w1_client.py')},
              source_sha256=sources,models=json.load(open(pathlib.Path(repo)/'setup/local_inference_assets.json')),
              active_backends={

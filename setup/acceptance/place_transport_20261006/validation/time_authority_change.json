@@ -1,0 +1,20 @@
+{
+  "before": {
+    "enabled": "enabled",
+    "active": "active"
+  },
+  "after": {
+    "enabled": "disabled",
+    "active": "inactive"
+  },
+  "kernel_cmdline": "initrd=\\initrd.img WSL_ROOT_INIT=1 panic=-1 nr_cpus=16 hv_utils.timesync_implicit=1 console=hvc0 debug pty.legacy_count=0 WSL_ENABLE_CRASH_DUMP=1",
+  "rc": 0,
+  "stdout": "",
+  "stderr": "Removed \"/etc/systemd/system/sysinit.target.wants/systemd-timesyncd.service\".\nRemoved \"/etc/systemd/system/dbus-org.freedesktop.timesync1.service\".\n",
+  "mono_ns": 18731527976402,
+  "rollback": [
+    "sudo systemctl enable --now systemd-timesyncd.service"
+  ],
+  "reason": "Observed competing NTP and Hyper-V implicit time authorities with alternating +-18.6s wall steps; Ubuntu WSL guidance recommends disabling timesyncd on 24.04 when using Hyper-V host time.",
+  "reference": "https://ubuntu.com/wsl/docs/stable/explanation/time-sync/"
+}

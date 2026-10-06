@@ -72,8 +72,9 @@ class PlaceServer(Node):
         self._tol = float(gp('place_tolerance_m').value)
         self._settle = float(gp('settle_time_s').value)
         self._retreat = float(gp('retreat_m').value)
+        self._release_service = gp('carry_release_service').value
         self._carry_release = self.create_client(
-            Trigger, gp('carry_release_service').value,
+            Trigger, self._release_service,
             callback_group=ReentrantCallbackGroup())
         self.create_service(Trigger, '/flexcell/place_ready', self._on_ready)
         self._size = list(gp('object_size').value)
@@ -81,6 +82,7 @@ class PlaceServer(Node):
         self._profiles = list(gp('motion_profile_names').value)
         self._default_profile = gp('default_motion_profile').value
         self._log = JsonlLog(self, gp('log_dir').value, gp('log_file').value)
+        self._dependency_log = JsonlLog(self, gp('log_dir').value, 'place_dependency.jsonl')
 
         self._admission = threading.Lock()
         self._seq = 0
@@ -113,10 +115,31 @@ class PlaceServer(Node):
     def _on_ready(self, _request, response):
         # Readiness is checked from THIS participant, using the client's graph.
         # An external node discovering the task action is not sufficient.
-        response.success = self._carry_release.wait_for_service(timeout_sec=2.0)
+        response.success = self._release_ready(2.0, 'readiness_rpc')
         response.message = ('PLACE release dependency ready' if response.success
                             else 'PLACE cannot discover carry release service')
         return response
+
+    def _release_ready(self, timeout_s, phase, rec=None):
+        started = time.monotonic_ns()
+        ready = self._carry_release.wait_for_service(timeout_sec=timeout_s)
+        check = dict(phase=phase, ready=ready, mono_ns=time.monotonic_ns(),
+                     elapsed_ms=(time.monotonic_ns() - started) / 1e6)
+        if rec is not None:
+            rec.setdefault('release_ready_checks', []).append(check)
+        if not ready:
+            snapshot = dict(event='release_dependency_unavailable', service=self._release_service,
+                            request_id=(rec or {}).get('request_id'),
+                            evidence_id=(rec or {}).get('evidence_id'), **check)
+            try:
+                snapshot['graph_services'] = [(name, types) for name, types in self.get_service_names_and_types()
+                                               if name == self._release_service]
+                snapshot['graph_nodes'] = self.get_node_names_and_namespaces()
+                snapshot['client_ready_after_wait'] = self._carry_release.service_is_ready()
+            except Exception as exc:
+                snapshot['graph_error'] = type(exc).__name__
+            self._dependency_log.write(snapshot)
+        return ready
 
     def _execute(self, goal_handle):
         t0 = time.monotonic()
@@ -181,6 +204,10 @@ class PlaceServer(Node):
 
             place_pos = [pp.x, pp.y, pp.z]
             cancel_requested = lambda: goal_handle.is_cancel_requested  # noqa: E731
+            # Confirm this participant's dependency before moving a carried object.
+            if not self._release_ready(2.0, 'preflight', rec):
+                return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
+                              'carry release service unavailable before approach; object remains attached')
 
             # ---------- APPROACHING ----------
             self._feedback(goal_handle, 'APPROACHING', t0)
@@ -217,7 +244,7 @@ class PlaceServer(Node):
                               'canceled before RELEASING (box still carried)')
             self._feedback(goal_handle, 'RELEASING', t0)
             # release: stop the carry servo first, then free the planning scene
-            if not self._carry_release.wait_for_service(timeout_sec=5.0):
+            if not self._release_ready(5.0, 'releasing', rec):
                 return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
                               'carry release service unavailable; object remains attached')
             release_future = self._carry_release.call_async(Trigger.Request())
