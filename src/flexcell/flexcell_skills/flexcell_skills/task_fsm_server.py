@@ -47,6 +47,7 @@ from flexcell_skills.canonical_state import serialize_envelope
 from flexcell_skills.contracts.error_codes import task_abort_error_code
 from flexcell_skills.contracts.action_result import AcceptedGoalResult
 from flexcell_skills.contracts.goal_response import LateGoalCleanup
+from flexcell_skills.contracts.backend_health import startup_health
 
 from flexcell_skills.contracts.episode import EpisodeRecorder, EpisodeStore
 from flexcell_skills.contracts.benchmark_protocol import load_protocol
@@ -190,12 +191,15 @@ class TaskFsmServer(Node):
             from flexcell_skills.jev_policy import JevPolicy
             from flexcell_skills.hybrid_policy import HybridRouter, LLMPolicy
             backend = make_backend(str(gp2('jev_backend').value))
-            ok, detail = backend.health()
+            ok, detail = startup_health(backend, str(gp2('jev_backend').value))
             if not ok:
                 self.get_logger().warn(
                     'jev backend %r unavailable (%s) - fast path will '
                     'fall back or escalate according to the selected policy' % (
                         gp2('jev_backend').value, detail))
+            else:
+                self.get_logger().info('jev backend %r startup: %s' % (
+                    gp2('jev_backend').value, detail))
             fast = JevPolicy(backend, fallback=FSMPolicy())
             slow = LLMPolicy(fallback=FSMPolicy())
             self._policy = (fast if policy_name == 'jev' else

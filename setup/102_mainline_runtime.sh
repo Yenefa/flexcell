@@ -98,6 +98,8 @@ profile=dict(policy=policy,threshold=float(threshold),protocol_sha256=digest,
                          'budget_limit_cny':5 if os.environ.get('FLEXCELL_LLM_BUDGET_FILE') else None,
                          'credential_configured':bool(os.environ.get('FLEXCELL_LLM_API_KEY_FILE'))}},
              policy_timeouts_s={'fast':float(os.environ.get('FLEXCELL_JEV_TIMEOUT_S','2')),'slow':float(os.environ.get('FLEXCELL_LLM_TIMEOUT_S','5'))},server_context_tokens=8192,
+             startup_health_timeout_s=(min(float(os.environ['FLEXCELL_JEV_HEALTH_TIMEOUT_S']),float(os.environ.get('FLEXCELL_JEV_TIMEOUT_S','2')))
+                                       if os.environ.get('FLEXCELL_JEV_HEALTH_TIMEOUT_S') else None),
              ros_domain_id=int(os.environ['ROS_DOMAIN_ID']),
              rmw_implementation=os.environ['RMW_IMPLEMENTATION'],
              world_sha256=hashlib.sha256(pathlib.Path(os.environ.get('FLEXCELL_WORLD',repo+'/worlds/flexcell_world')+'.sdf').read_bytes()).hexdigest(),

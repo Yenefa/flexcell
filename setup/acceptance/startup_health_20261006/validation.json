@@ -1,0 +1,24 @@
+{
+  "record_kind": "DEPLOYMENT_STARTUP_PROBE_FIX",
+  "network_stability": "NOT_ACCEPTED",
+  "raw_network_diagnostics_retained_at": "/home/ros/fc_sync_logs/school_network_20261006",
+  "redactions": "public endpoint removed from netcheck snapshots; complete multi-peer status stays outside Git",
+  "targeted_tests": 12,
+  "new_skills_pytests_passed": 260,
+  "workspace_test_result": {
+    "tests": 338,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 9,
+    "scope": "aggregate result includes other package results; only flexcell_skills rebuilt/retested here"
+  },
+  "episodes": 0,
+  "inference_calls": 0,
+  "profile_change": "FLEXCELL_JEV_HEALTH_TIMEOUT_S=10; inference timeout 45 unchanged",
+  "prompt_and_calibration_unchanged": true,
+  "raw_diagnostic_sha256": {
+    "netcheck_attempt01.log": "989b8271a9f5d9cc0ff2567c37dbb8b56b6fb8ace1c2233f071fa83d8d22f75c",
+    "netcheck_process_no_proxy_attempt02.log": "9788ff79e2c13a4b64ade6565fb1755f88032c8c4bd369fcae88131efeaf33fd",
+    "status_attempt01.json": "2fb9f7e8fcffc45561babce94b39173a832d0422e2cd1bdf698ff5bcd400316b"
+  }
+}
