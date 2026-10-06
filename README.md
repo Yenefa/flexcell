@@ -72,8 +72,12 @@ After coding — update the Issue, record evidence in EXPERIMENTS.md, link the c
 ## Status
 
 2026-10-06 transfer-cost instrument: the L1 Skill / L2 composition / L3 engineering-cost
-design and an offline append-only ledger are implemented, with 18 targeted tests passing.
-The T1 plan remains a draft; no migration experiment or AC@90 qualification was run.
+design and an offline append-only ledger are implemented, with 30 targeted tests passing.
+The registered T1 simulation pilot completed two target layouts and one source regression
+per arm: FSM 2/2 + 1/1, Hybrid 2/2 + 1/1. No task source adaptation was needed by either arm.
+The original scorer's string-outcome error is retained and corrected in a separate v2 report;
+no episodes were replaced. AC@90 and n≥50 remain frozen. TCP probe timeouts remain unresolved.
+See the [T1 pilot receipt](setup/acceptance/transferbench_t1_20261006/README.md).
 See [design, official-source corrections and usage](docs/TRANSFER_BENCHMARK.md).
 The school's earlier clef routing and controller/time/DDS evidence is preserved in
 [its separate acceptance receipt](setup/acceptance/place_transport_20261006/README.md).

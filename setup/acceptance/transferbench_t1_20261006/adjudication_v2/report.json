@@ -1,0 +1,199 @@
+{
+  "record_kind": "POSTHOC_SCHEMA_CORRECTION",
+  "scorer_version": 2,
+  "original_protocol_id": "flexcell-transferbench-t1-pilot-v1",
+  "correction_manifest": {
+    "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/adjudication_v2/correction_manifest.json",
+    "sha256": "3b5bd173a12f486df8f247a2d781ceda373d5e629821c34b30e186aff08bf46f"
+  },
+  "parent_ledger": {
+    "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/cost.jsonl",
+    "sha256": "bc9cab6c5fab3324b7983d51489fbab261783dae918925a69ce993563f4466b9"
+  },
+  "trial_cells": [
+    {
+      "arm": "fsm",
+      "purpose": "adaptation",
+      "case_id": "T1-layout-01",
+      "runtime_fingerprint": "943071f0d0ef8ca4b48b876107d0bb18e2ccb3d67decfba28a1c87052cb2b2a6",
+      "calibration_sha256": null,
+      "outcomes": {
+        "SUCCEEDED": 2
+      },
+      "retained_attempts": 2,
+      "completed_denominator": 2,
+      "observed_success_rate": 1.0,
+      "routing": {
+        "replay_status": "PASS"
+      },
+      "decision_latency": {
+        "status": "MEASURED_DIAGNOSTIC",
+        "clock": "perf_counter_ns",
+        "n": 14,
+        "p50_ms": 0.014095,
+        "p95_ms": 0.024145699999999996,
+        "percentile_method": "linear interpolation, index=(n-1)*q",
+        "scope": "non-bootstrap complete policy.decide including escalation; not GPU-only latency"
+      },
+      "qualification": "NOT_RUN"
+    },
+    {
+      "arm": "fsm",
+      "purpose": "regression",
+      "case_id": "T1-source-regression",
+      "runtime_fingerprint": "943071f0d0ef8ca4b48b876107d0bb18e2ccb3d67decfba28a1c87052cb2b2a6",
+      "calibration_sha256": null,
+      "outcomes": {
+        "SUCCEEDED": 1
+      },
+      "retained_attempts": 1,
+      "completed_denominator": 1,
+      "observed_success_rate": 1.0,
+      "routing": {
+        "replay_status": "PASS"
+      },
+      "decision_latency": {
+        "status": "MEASURED_DIAGNOSTIC",
+        "clock": "perf_counter_ns",
+        "n": 7,
+        "p50_ms": 0.00913,
+        "p95_ms": 0.03611119999999998,
+        "percentile_method": "linear interpolation, index=(n-1)*q",
+        "scope": "non-bootstrap complete policy.decide including escalation; not GPU-only latency"
+      },
+      "qualification": "NOT_RUN"
+    },
+    {
+      "arm": "hybrid",
+      "purpose": "adaptation",
+      "case_id": "T1-layout-01",
+      "runtime_fingerprint": "e43bd2f44acc828184ca49d0d326e9661d130cc2f00bac1176e68e5423902cae",
+      "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+      "outcomes": {
+        "SUCCEEDED": 2
+      },
+      "retained_attempts": 2,
+      "completed_denominator": 2,
+      "observed_success_rate": 1.0,
+      "routing": {
+        "fast_selected": 12,
+        "slow_selected": 1,
+        "fast_calls": 13,
+        "fast_tokens": 18616,
+        "fsm_fallbacks": 0
+      },
+      "decision_latency": {
+        "status": "MEASURED_DIAGNOSTIC",
+        "clock": "perf_counter_ns",
+        "n": 13,
+        "p50_ms": 2962.162686,
+        "p95_ms": 5646.242253599999,
+        "percentile_method": "linear interpolation, index=(n-1)*q",
+        "scope": "non-bootstrap complete policy.decide including escalation; not GPU-only latency"
+      },
+      "qualification": "NOT_RUN"
+    },
+    {
+      "arm": "hybrid",
+      "purpose": "regression",
+      "case_id": "T1-source-regression",
+      "runtime_fingerprint": "e43bd2f44acc828184ca49d0d326e9661d130cc2f00bac1176e68e5423902cae",
+      "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+      "outcomes": {
+        "SUCCEEDED": 1
+      },
+      "retained_attempts": 1,
+      "completed_denominator": 1,
+      "observed_success_rate": 1.0,
+      "routing": {
+        "fast_selected": 6,
+        "slow_selected": 1,
+        "fast_calls": 7,
+        "fast_tokens": 10090,
+        "fsm_fallbacks": 0
+      },
+      "decision_latency": {
+        "status": "MEASURED_DIAGNOSTIC",
+        "clock": "perf_counter_ns",
+        "n": 7,
+        "p50_ms": 2939.50823,
+        "p95_ms": 4330.9300604,
+        "percentile_method": "linear interpolation, index=(n-1)*q",
+        "scope": "non-bootstrap complete policy.decide including escalation; not GPU-only latency"
+      },
+      "qualification": "NOT_RUN"
+    }
+  ],
+  "original_v1_outcomes": {
+    "FAILED": 6
+  },
+  "cost_basis": "unchanged verified parent ledger; corrected diagnostics are separate, no fabricated ledger chain",
+  "effort_minutes": {
+    "fsm": {
+      "human": null,
+      "coding_agent": 2.5066642300833335,
+      "wait": null
+    },
+    "hybrid": {
+      "human": null,
+      "coding_agent": 3.5070915913666667,
+      "wait": null
+    }
+  },
+  "effort_status": {
+    "fsm": {
+      "human": "NOT_RUN",
+      "coding_agent": "RECORDED",
+      "wait": "NOT_RUN"
+    },
+    "hybrid": {
+      "human": "NOT_RUN",
+      "coding_agent": "RECORDED",
+      "wait": "NOT_RUN"
+    }
+  },
+  "api_usage": [
+    {
+      "arm": "hybrid",
+      "scope": "adaptation",
+      "currency": "CNY",
+      "requests": 14,
+      "known_amount_subtotal": 0,
+      "unknown_amount_requests": 14,
+      "known_input_tokens": 1505,
+      "known_output_tokens": 62,
+      "unknown_token_requests": 13,
+      "amount_status": "INCOMPLETE"
+    },
+    {
+      "arm": "hybrid",
+      "scope": "evaluation",
+      "currency": "CNY",
+      "requests": 8,
+      "known_amount_subtotal": 0,
+      "unknown_amount_requests": 8,
+      "known_input_tokens": 1511,
+      "known_output_tokens": 62,
+      "unknown_token_requests": 7,
+      "amount_status": "INCOMPLETE"
+    }
+  ],
+  "task_specific_source_changes": {
+    "fsm": 0,
+    "hybrid": 0
+  },
+  "shared_initial_configuration": {
+    "layouts": 2,
+    "object_poses": 4,
+    "numeric_components": 12
+  },
+  "common_harness_authoring_cost": "NOT_RUN",
+  "additional_paid_peak_uncached_upper_bound_cny": 0.007024,
+  "actual_paid_invoice": "UNKNOWN",
+  "gpu_energy_and_ownership_cost": "UNKNOWN",
+  "coding_assistant_tokens_and_fees": "NOT_RUN; unavailable to experiment instrument",
+  "AC90": "NOT_RUN",
+  "qualification": "FROZEN",
+  "physical_hardware": "NOT_RUN",
+  "comparison": "fixed-order two-state diagnostic; no engineering-cost or reliability superiority claim"
+}

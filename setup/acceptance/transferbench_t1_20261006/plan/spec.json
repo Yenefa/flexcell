@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "protocol_id": "flexcell-transferbench-t1-pilot-v1",
+  "record_kind": "PROSPECTIVE_PLAN",
+  "migration_axis": "T1",
+  "arms": [
+    "fsm",
+    "hybrid"
+  ],
+  "cases": [
+    "T1-layout-01",
+    "T1-source-regression"
+  ],
+  "baseline_revisions": {
+    "fsm": "d58f4f1d6854c6b74ab6c410dadd796cf991b592",
+    "hybrid": "d58f4f1d6854c6b74ab6c410dadd796cf991b592"
+  },
+  "qualification": {
+    "status": "FROZEN",
+    "target_success_rate": 0.9
+  },
+  "freeze_artifacts": {
+    "task_manifest": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/plan/task_manifest.json",
+    "initial_states": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/plan/initial_states.json",
+    "success_predicate": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/plan/success_predicate.json",
+    "skill_contracts": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/plan/skill_contracts.json",
+    "history_manifest": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/plan/history_manifest.json",
+    "registration_budget": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/plan/registration_budget.json",
+    "baseline_config/fsm": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/plan/baseline_fsm.json",
+    "baseline_config/hybrid": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/plan/baseline_hybrid.json"
+  }
+}

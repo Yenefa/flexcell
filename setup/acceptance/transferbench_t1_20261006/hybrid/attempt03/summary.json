@@ -1,0 +1,63 @@
+{
+  "record_kind": "ACTUAL_SIMULATION_EPISODE",
+  "transfer_protocol_id": "flexcell-transferbench-t1-pilot-v1",
+  "transfer_plan_sha256": "0c690b2b0115cd9d66a4169a988ba21c256bcef92099b120cffb3a1dbdeb04eb",
+  "arm": "hybrid",
+  "attempt": 3,
+  "case_id": "T1-source-regression",
+  "purpose": "regression",
+  "seed": null,
+  "registered_layout": {
+    "target_box_a": [
+      0.22,
+      0.0,
+      0.0175
+    ],
+    "target_box_b": [
+      0.2,
+      -0.18,
+      0.0175
+    ]
+  },
+  "run_id": "week1_demo_v1-9bbacc83",
+  "runtime_fingerprint": "e43bd2f44acc828184ca49d0d326e9661d130cc2f00bac1176e68e5423902cae",
+  "outcome": "FAILED",
+  "reported_client_result": {
+    "action": "demo",
+    "goal_uuid": "69dcd1859159421fa4ed2d8ac5b890b9",
+    "outcome": "OUTCOME_SUCCEEDED",
+    "outcome_val": 0,
+    "error_code": "ERR_NONE",
+    "detail": "task done: all assignments verified",
+    "evidence_id": "week1_demo_v1-0c4b1da7",
+    "wall_seconds": 49.918,
+    "fsm_trace": [
+      "PICK_A(attempt=1):OK",
+      "PLACE_A:OK",
+      "VERIFY_A(attempt=1):OK",
+      "PICK_B(attempt=1):OK",
+      "PLACE_B:OK",
+      "VERIFY_B(attempt=1):OK"
+    ],
+    "object_a_at_zone": true,
+    "object_b_at_zone": true,
+    "zone_a_error_m": 0.0020419850759557778,
+    "zone_b_error_m": 0.0077680142591268495,
+    "run_id": "week1_demo_v1-9bbacc83",
+    "scenario_id": "week1_demo_v1"
+  },
+  "command_rc": 0,
+  "harness_error": null,
+  "audit": {
+    "ok": true,
+    "errors": [],
+    "bootstrap": 1,
+    "model_decisions": 7,
+    "fast_selected": 6,
+    "slow_selected": 1,
+    "fsm_fallbacks": 0,
+    "fast_calls": 7,
+    "fast_tokens": 10090
+  },
+  "qualification": "NOT_RUN"
+}

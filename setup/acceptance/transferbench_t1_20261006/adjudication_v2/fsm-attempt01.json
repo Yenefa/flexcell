@@ -1,0 +1,35 @@
+{
+  "record_kind": "POSTHOC_SCHEMA_CORRECTION",
+  "scorer_version": 2,
+  "original_reported_outcome": "FAILED",
+  "outcome": "SUCCEEDED",
+  "arm": "fsm",
+  "attempt": 1,
+  "run_id": "transfer_t1_layout01_v1-4966203b",
+  "case_id": "T1-layout-01",
+  "purpose": "adaptation",
+  "runtime_fingerprint": "943071f0d0ef8ca4b48b876107d0bb18e2ccb3d67decfba28a1c87052cb2b2a6",
+  "calibration_sha256": null,
+  "return_code": 0,
+  "unchanged_success_definition": "matching run/goal UUID; task/client outcome 0; both measured errors <=0.06m; successful PICK/PLACE/VERIFY per object; reject -6/134",
+  "correction": "canonical episode task outcome text \"0\" represents enum integer 0",
+  "original_evidence": [
+    {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/summary.json",
+      "sha256": "ccf3c0965f591757c6dd971f3262c620fa694136516208c70fcbaa213b58834a"
+    },
+    {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/episode.json",
+      "sha256": "296cac0fa9c8114afb22a2a3792ba1d650a7f579d057b8595944d4b4398b6ed4"
+    },
+    {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/client.json",
+      "sha256": "45d193f225b100a9fce68e2eb8ce7cd72c0864d4c9d583f2f443c7934126e01b"
+    }
+  ],
+  "audit": {
+    "replay_status": "PASS",
+    "replayed_steps": 8
+  },
+  "qualification": "NOT_RUN"
+}

@@ -1,5 +1,15 @@
 # EXPERIMENTS — log
 
+> 2026-10-06 TransferBench T1 pilot (TB-002): pre-registered two new layouts and
+> one S1 source regression per arm, from d58f4f1; FSM 2/2 + 1/1, Hybrid 2/2 + 1/1.
+> Frozen task/Skill sources were reused by both arms. Hybrid selected Clef 18 times
+> and DeepSeek twice; paid peak-uncached upper bound ¥0.007024, invoice UNKNOWN.
+> Human effort and common harness authoring cost NOT_RUN. The v1 scorer misread
+> serialized outcome "0" as failure; all six raw FAILED receipts remain, with a
+> separate post hoc schema-correction report and no resampling. 30 targeted tests
+> passed. Startup/follow-up TCP timeouts retained, cause UNKNOWN; AC@90, physical
+> acceptance and n≥50 remain frozen. [Plan, raw receipts and v2 correction](../setup/acceptance/transferbench_t1_20261006/README.md).
+
 > 2026-10-06 TransferBench instrumentation (TB-001): official methodology review,
 > layered migration-cost design, and an offline cost ledger; 18 targeted unit tests
 > passed. The CLI fixture is SYNTHETIC_TOOL_FIXTURE, with no robot/API invocation.

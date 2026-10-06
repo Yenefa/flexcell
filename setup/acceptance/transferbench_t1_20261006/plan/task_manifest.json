@@ -1,0 +1,46 @@
+{
+  "protocol_id": "flexcell-transferbench-t1-pilot-v1",
+  "migration_axis": "T1",
+  "source_task": "week1_demo_v1",
+  "target_scenario": "transfer_t1_layout01_v1",
+  "source_case": "T1-source-regression",
+  "target_case": "T1-layout-01",
+  "arms": [
+    "fsm",
+    "hybrid"
+  ],
+  "order": "fsm then hybrid; fixed, not counterbalanced",
+  "schedule_per_arm": [
+    "target-seed-2026100601",
+    "target-seed-2026100602",
+    "source-regression"
+  ],
+  "max_target_attempts_per_arm": 2,
+  "max_regression_attempts_per_arm": 1,
+  "max_runs_per_cell": 5,
+  "total_planned_robot_episodes": 6,
+  "additional_paid_stop_threshold_cny": 0.25,
+  "paid_budget": "existing persistent RMB5 absolute cap; no reset; stop threshold checked between episodes, not an invoice",
+  "expected_fingerprints": {
+    "fsm": "943071f0d0ef8ca4b48b876107d0bb18e2ccb3d67decfba28a1c87052cb2b2a6",
+    "hybrid": "e43bd2f44acc828184ca49d0d326e9661d130cc2f00bac1176e68e5423902cae"
+  },
+  "no_failure_replacement": true,
+  "stop_conditions": [
+    "reset/placement failure",
+    "unknown goal/result",
+    "signal including -6/134",
+    "identity mismatch",
+    "missing episode",
+    "routing audit failure",
+    "paid budget ceiling"
+  ],
+  "adaptation": "reuse frozen task/skills and set registered initial parameters; no policy/prompt/calibration tuning",
+  "task_specific_code_change": "0 iff frozen sources still match after pilot",
+  "human_minutes": "NOT_RUN; do not infer zero",
+  "coding_agent_time": "measured orchestration elapsed; common harness authoring not timed",
+  "qualification": "FROZEN; adaptation diagnostics only; AC@90 NOT_RUN",
+  "rate_comparison": "descriptive only, fixed-order two-state pilot cannot establish superiority",
+  "ledger_cli_sha256": "6e1f68e920ccb032daf09eb598243eddc5aea35f7a622c36d30bcf1224942cf9",
+  "pilot_harness_sha256": "83367c1d5aea3cd47dd8385d74d830741fad86daa0ea3d57d318ccb9459566c3"
+}

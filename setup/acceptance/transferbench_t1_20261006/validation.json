@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "record_kind": "BOUNDED_ACTUAL_SIMULATION_PILOT",
+  "baseline_revision": "d58f4f1d6854c6b74ab6c410dadd796cf991b592",
+  "expected_episode_count": 6,
+  "scorer_correction": "POSTHOC_SCHEMA_CORRECTION/v2; no resampling; original FAILED ledger retained",
+  "targeted_tests": {
+    "normal": 30,
+    "isolated_stdlib": 30
+  },
+  "AC90": "NOT_RUN",
+  "qualification": "FROZEN",
+  "large_batch_n_ge_50": "FROZEN",
+  "physical_hardware": "NOT_RUN",
+  "network_stability": "NOT_ACCEPTED",
+  "changed_tool_sha256": {
+    "setup/transferbench/t1_pilot.py": "44c4d8caed64c37fed267acef35af6651fe4f90a23b5d00b7c8d86be82d477f6",
+    "setup/transferbench/adjudicate_t1.py": "07c43c7d2fb07f524f5f4831ebe02fa0c6e11ed8569070c8d28f2df612e5cdc6",
+    "setup/transferbench/test_t1_pilot.py": "7c102e22eb7301a2097a5ea5e9e7e31650e314e8d7ff36b710645e885ab89a01",
+    "setup/transferbench/test_adjudicate_t1.py": "10e237da245660524c52438af7eb75db12106761036b764761888023e454b952"
+  }
+}

@@ -1,8 +1,9 @@
 # FlexCell TransferBench：迁移工程成本设计与 v1 记录器
 
-状态：**设计与离线记录器已实现；迁移实验、AC@90、实体安全验收均为 NOT_RUN。**
+状态：**设计与记录器已实现，T1 参数迁移的六回合仿真试点已完成；AC@90、独立资格评估、实体安全验收均为 NOT_RUN。**
 资料核验日期：2026-10-06。首个目标是前瞻性地记录一次受控迁移需要的工程工作，
-不是把历史运行成功率重新命名为迁移能力。v1 不安装外部仿真栈、不执行机器人任务。
+不是把历史运行成功率重新命名为迁移能力。离线账本本身不执行机器人任务；
+T1 执行器复用本机现有 ROS/Gazebo 部署，不安装外部仿真栈。
 
 ## 官方 benchmark 能借鉴什么
 
@@ -48,9 +49,15 @@ S1 已经运行 Observe→Pick→Place→Verify，原有 S2/S3/S5 已含恢复�
 
 ## 首个试点：T1 留出布局，先登记再适配
 
-`setup/transferbench/pilot_draft_v1.json` 是 **DRAFT_PLAN**，不是已登记实验。
-它锚定本轮前的 `dcff1df` 代码起点，列出 FSM/Hybrid 两臂和一个目标 case；实际
-布局、初态和评估种子尚未选定。不能据这个草案执行或宣称迁移结果。
+`setup/transferbench/pilot_draft_v1.json` 保留为历史 **DRAFT_PLAN**，锚定 `dcff1df`。
+2026-10-06 的实际试点另从 `d58f4f1` 起点注册了 **PROSPECTIVE_PLAN**：
+两个预登记布局，每臂 2 次目标任务、1 次 S1 源任务回测，固定 FSM 后 Hybrid。
+完整注册文件和原始运行在
+[T1 回执](../setup/acceptance/transferbench_t1_20261006/README.md)。
+
+布局只保证未与登记前可用的 345 份 episode 中任一双物体状态在 1mm 内重合，
+不宣称模型预训练未见或广义 OOD。未生成独立资格评估留出集；这些是适配阶段
+诊断状态，不能再作为盲测验收集。
 
 转成 `PROSPECTIVE_PLAN` 前必须封存以下文件，`init` 将原始路径转换为内容 SHA256：
 
@@ -60,6 +67,30 @@ S1 已经运行 Observe→Pick→Place→Verify，原有 S2/S3/S5 已含恢复�
 - `success_predicate`、`skill_contracts`：固定验证器与完整 Skill 实现/契约的内容摘要。
 - `baseline_config/fsm`、`baseline_config/hybrid`：分别冻结配置、prompt、模型/校准身份、
   runtime fingerprint、允许的 coding assistant 与费用预算。
+
+该试点的 FSM、Hybrid 都完成目标 2/2、回测 1/1，按 arm/purpose/fingerprint/
+calibration 分 cell。两臂均复用现有参数化 FSM/Skill，任务源代码与每臂仓内配置
+没有修改；共同新增的输入是 2 个布局、4 个对象位姿、12 个数值分量。
+它检验了“登记→运行→计账→回测”的链路，未证明 Hybrid 比 FSM 少用工程工作。
+
+执行器首版错误地要求 episode 的终态 outcome 为整数，而真实 schema 写成
+字符串 `"0"`，导致六条原始账目误记 FAILED。原账本、summary、日志和执行过的
+源码全部保留；独立的 `adjudicate_t1.py` 仅修正该表示差异，核对同一 run/goal UUID、
+初态、指纹、路由与双方实测后置条件，输出明确标记 **POSTHOC_SCHEMA_CORRECTION**
+的 v2 报告。没有新 episode、替换失败或改写原始 hash chain。
+
+Hybrid 目标 cell 为 Clef 12 次、DeepSeek 1 次，回测为 6/1；20 次 GPU 调用共
+28,706 个实测总 tokens，输入/输出拆分未知。DeepSeek 两次的峰时无缓存预算上界
+合计 ¥0.007024，实际账单和 GPU 成本未知。人工分钟、共同 harness 开发成本和
+coding assistant 的 tokens/费用没有计量；账本只记录两臂运行编排 elapsed
+2.507/3.507 分钟，含切换、reset 和机器人执行，不能解释为人的主动工程时间。
+预算沿用已有 ¥5 绝对上限，新增 ¥0.25 停止阈值仅在回合边界检查，不是账单硬上限。
+[DeepSeek 官方价格表](https://api-docs.deepseek.com/zh-cn/quick_start/pricing/)支持预算
+上界所用峰时费率；缺少缓存命中明细，不能据此填实际费用。
+
+启动日志保留一次 Clef TCP 探测超时，收尾只读探测 4/5 可达；三回合真实推理
+审计通过并不消除网络稳定性问题，超时根因 UNKNOWN。继续扩大采样前应另行处理。
+不改变当前校准、模型、prompt 或部署超时。
 
 公平比较允许 FSM 复用参数化任务模板、配置表和现有 Skill；不能强迫它为每个
 新布局新增状态。两臂都可在预定范围内适配，所有适配和校准投入都计费。人工顺序、

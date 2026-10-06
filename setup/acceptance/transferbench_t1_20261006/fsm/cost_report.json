@@ -1,0 +1,94 @@
+{
+  "schema_version": 1,
+  "record_kind": "PROSPECTIVE_PLAN",
+  "protocol_id": "flexcell-transferbench-t1-pilot-v1",
+  "plan_sha256": "0c690b2b0115cd9d66a4169a988ba21c256bcef92099b120cffb3a1dbdeb04eb",
+  "ledger_tail_sha256": "b5fcd73496233910921f6fca6d22302a7ae2827ca158299c7a63981a306e9b84",
+  "accounting_basis": "CLI timing; other values asserted from pinned evidence, not auto-extracted",
+  "effort_minutes": {
+    "fsm": {
+      "human": null,
+      "coding_agent": 2.5066642300833335,
+      "wait": null
+    },
+    "hybrid": {
+      "human": null,
+      "coding_agent": null,
+      "wait": null
+    }
+  },
+  "effort_status": {
+    "fsm": {
+      "human": "NOT_RUN",
+      "coding_agent": "RECORDED",
+      "wait": "NOT_RUN"
+    },
+    "hybrid": {
+      "human": "NOT_RUN",
+      "coding_agent": "NOT_RUN",
+      "wait": "NOT_RUN"
+    }
+  },
+  "open_effort_sessions": [],
+  "unmeasured_effort_sessions": [],
+  "api_usage": [],
+  "latest_change_snapshot": {},
+  "trial_cells": [
+    {
+      "arm": "fsm",
+      "purpose": "adaptation",
+      "case_id": "T1-layout-01",
+      "runtime_fingerprint": "943071f0d0ef8ca4b48b876107d0bb18e2ccb3d67decfba28a1c87052cb2b2a6",
+      "calibration_sha256": null,
+      "outcomes": {
+        "FAILED": 2
+      },
+      "completed_denominator": 2,
+      "retained_attempts": 2,
+      "observed_success_rate": 0.0,
+      "diagnostic_wilson_95_lower": 0.0,
+      "large_sample_review_required": false
+    },
+    {
+      "arm": "fsm",
+      "purpose": "regression",
+      "case_id": "T1-source-regression",
+      "runtime_fingerprint": "943071f0d0ef8ca4b48b876107d0bb18e2ccb3d67decfba28a1c87052cb2b2a6",
+      "calibration_sha256": null,
+      "outcomes": {
+        "FAILED": 1
+      },
+      "completed_denominator": 1,
+      "retained_attempts": 1,
+      "observed_success_rate": 0.0,
+      "diagnostic_wilson_95_lower": 0.0,
+      "large_sample_review_required": false
+    }
+  ],
+  "attempt_totals": [
+    {
+      "arm": "fsm",
+      "purpose": "adaptation",
+      "retained_attempts": 2,
+      "large_sample_review_required": false
+    },
+    {
+      "arm": "fsm",
+      "purpose": "regression",
+      "retained_attempts": 1,
+      "large_sample_review_required": false
+    }
+  ],
+  "AC@90": {
+    "status": "NOT_RUN",
+    "reason": "v1 qualification is FROZEN"
+  },
+  "decision_latency": {
+    "status": "NOT_RUN",
+    "reason": "use episode perf_counter_ns measurements"
+  },
+  "safety_acceptance": {
+    "status": "NOT_RUN",
+    "reason": "no physical safety evaluation in this tool"
+  }
+}

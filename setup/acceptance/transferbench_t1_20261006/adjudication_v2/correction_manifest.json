@@ -1,0 +1,729 @@
+{
+  "record_kind": "POSTHOC_SCHEMA_CORRECTION",
+  "scorer_version": 2,
+  "reason": "v1 predicate expected int outcome, but EpisodeSchemaVersion 1 writes str(outcome)",
+  "original_protocol_id": "flexcell-transferbench-t1-pilot-v1",
+  "original_plan_sha256": "0c690b2b0115cd9d66a4169a988ba21c256bcef92099b120cffb3a1dbdeb04eb",
+  "parent_ledger": {
+    "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/cost.jsonl",
+    "sha256": "bc9cab6c5fab3324b7983d51489fbab261783dae918925a69ce993563f4466b9"
+  },
+  "original_inputs": {
+    "cost.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/cost.jsonl",
+      "sha256": "bc9cab6c5fab3324b7983d51489fbab261783dae918925a69ce993563f4466b9"
+    },
+    "fsm/attempt01/budget_after.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/budget_after.json",
+      "sha256": "776322534bc576c1a0dda9b3b5207b2471e6da8cd44ea4a47b4e3b19b83388f0"
+    },
+    "fsm/attempt01/budget_before.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/budget_before.json",
+      "sha256": "776322534bc576c1a0dda9b3b5207b2471e6da8cd44ea4a47b4e3b19b83388f0"
+    },
+    "fsm/attempt01/clear-injection.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/clear-injection.json",
+      "sha256": "79636c5a5539ca5e77843010b7a4df06ea9d314142a672c2c70b739f7af8f76b"
+    },
+    "fsm/attempt01/client.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/client.json",
+      "sha256": "45d193f225b100a9fce68e2eb8ce7cd72c0864d4c9d583f2f443c7934126e01b"
+    },
+    "fsm/attempt01/episode.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/episode.json",
+      "sha256": "296cac0fa9c8114afb22a2a3792ba1d650a7f579d057b8595944d4b4398b6ed4"
+    },
+    "fsm/attempt01/offsets.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/offsets.json",
+      "sha256": "f7595bd6690e6775c53665d974fbd2ed9b40f9c791d27ec35618f7b536f45c88"
+    },
+    "fsm/attempt01/pose-target_box_a.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/pose-target_box_a.json",
+      "sha256": "966def39d43b2c520a8af7a8f5b9a6178c3e3f33c2dd1f6de1034c66f05ddc93"
+    },
+    "fsm/attempt01/pose-target_box_b.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/pose-target_box_b.json",
+      "sha256": "d9da19415585b5486fb995aaf18baf2766fc87c2b0443ea12c77a94e57f60acc"
+    },
+    "fsm/attempt01/raw/carry.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/raw/carry.jsonl",
+      "sha256": "43642514d0b039b51a03b801b0e49207c33ddd8d21d5ddd2a5b8a3ac0003e51d"
+    },
+    "fsm/attempt01/raw/controller_transport.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/raw/controller_transport.jsonl",
+      "sha256": "712205b7ce2f503870e6f4a24f44f5aceb62e25c0e17f54295672963bd89486d"
+    },
+    "fsm/attempt01/raw/decisions.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/raw/decisions.jsonl",
+      "sha256": "aa986f1b6fe19a671281886c0b91379031c66ebaad6d8f50046aa18a79b7224b"
+    },
+    "fsm/attempt01/raw/demo_runs.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/raw/demo_runs.jsonl",
+      "sha256": "a5448742ca4cbd8d3c68f039ab98b63a8fbce943363d485ea900c42cbce4bba7"
+    },
+    "fsm/attempt01/raw/move_to_pose.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/raw/move_to_pose.jsonl",
+      "sha256": "0950420b64979ab02a78cc577f5c6d2272ad2c1e4c5316e1a4a15f5938e3172e"
+    },
+    "fsm/attempt01/raw/observe.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/raw/observe.jsonl",
+      "sha256": "59ad32b61cdd2d3cd2fa34e00a44ba791738c17811a6cc00ff4a696a834d3d07"
+    },
+    "fsm/attempt01/raw/pick.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/raw/pick.jsonl",
+      "sha256": "92bfa016f966b721f78725d5f8d3cf7e31ff28e250b99785fec4fba767cface3"
+    },
+    "fsm/attempt01/raw/place.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/raw/place.jsonl",
+      "sha256": "7fdaa6cd42b817fa361cffd11f7c3ca7f150b5321de93e0a5bee333006c2f5c5"
+    },
+    "fsm/attempt01/raw/skill_transport.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/raw/skill_transport.jsonl",
+      "sha256": "1bdf759b4ee4cf863eb2a2264ff4ff9db9f2440b9e6762b20d05daaf96d32d45"
+    },
+    "fsm/attempt01/raw/task_fsm.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/raw/task_fsm.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "fsm/attempt01/raw/verify.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/raw/verify.jsonl",
+      "sha256": "f20dbb79addd7dd58f7691074b252e876f8a749eb3ec6b28b3402659e5c3d018"
+    },
+    "fsm/attempt01/reset.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/reset.json",
+      "sha256": "4e3da4e4f3e81a4523e80c7b087a21fe38e558062051afd1d53e4d8cc7c8c35f"
+    },
+    "fsm/attempt01/summary.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt01/summary.json",
+      "sha256": "ccf3c0965f591757c6dd971f3262c620fa694136516208c70fcbaa213b58834a"
+    },
+    "fsm/attempt02/budget_after.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/budget_after.json",
+      "sha256": "776322534bc576c1a0dda9b3b5207b2471e6da8cd44ea4a47b4e3b19b83388f0"
+    },
+    "fsm/attempt02/budget_before.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/budget_before.json",
+      "sha256": "776322534bc576c1a0dda9b3b5207b2471e6da8cd44ea4a47b4e3b19b83388f0"
+    },
+    "fsm/attempt02/clear-injection.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/clear-injection.json",
+      "sha256": "98122bc11beb9f50400bc3342ceac59c6b6c2c4a340d66b35d19249e4af5f7f0"
+    },
+    "fsm/attempt02/client.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/client.json",
+      "sha256": "646da8287f8d4116b1ab63f01e785486af8b613a07b7e0011a0d39b4c2efbd76"
+    },
+    "fsm/attempt02/episode.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/episode.json",
+      "sha256": "43f16149f7a4eb70bf3e835eadc85a9635ba04ca27d7f478397b1614bb40243c"
+    },
+    "fsm/attempt02/offsets.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/offsets.json",
+      "sha256": "eb0bd070d92e7a434b9e571b7503f90db006bce6cedc73018b0c5ea616e16d09"
+    },
+    "fsm/attempt02/pose-target_box_a.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/pose-target_box_a.json",
+      "sha256": "42ef9d69b05d63d7bb9e12ddbc0c44d32bba963addd4925eabdf0f6dd0c70876"
+    },
+    "fsm/attempt02/pose-target_box_b.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/pose-target_box_b.json",
+      "sha256": "3c8d9b7d70dee116fbbd0648664c446f9736d478fe47175ae2155003ec9313c4"
+    },
+    "fsm/attempt02/raw/carry.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/raw/carry.jsonl",
+      "sha256": "bfee16d390dbfcb4f951c5078ceb887b9daeeb80a867309fa089bec9443d9022"
+    },
+    "fsm/attempt02/raw/controller_transport.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/raw/controller_transport.jsonl",
+      "sha256": "603e8a6da9f957a666ebc69ffc6ca9beaaa3042061ca4fdc2bdf6fe3be57ee7b"
+    },
+    "fsm/attempt02/raw/decisions.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/raw/decisions.jsonl",
+      "sha256": "82b52e99aec7c07adf045cc4b3f376bfad92c59eb5f0baf652dd38bca871d76a"
+    },
+    "fsm/attempt02/raw/demo_runs.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/raw/demo_runs.jsonl",
+      "sha256": "45e07265dfb5ed7ad09329b854c3e60017cc325eb4231f8f9108909bf006358e"
+    },
+    "fsm/attempt02/raw/move_to_pose.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/raw/move_to_pose.jsonl",
+      "sha256": "8a937eac3bc46a8fb14a22b014d671b695d575f34b58fd211b34913676682dd4"
+    },
+    "fsm/attempt02/raw/observe.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/raw/observe.jsonl",
+      "sha256": "1d2a6f51ece602098e047d454372ca8277934501ff8902babec11e53ef81b856"
+    },
+    "fsm/attempt02/raw/pick.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/raw/pick.jsonl",
+      "sha256": "c44329680af4b8efb3c3c8ab0a322ef32d06f6ef768edb6003f99d509c6eaafe"
+    },
+    "fsm/attempt02/raw/place.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/raw/place.jsonl",
+      "sha256": "27a219d04ae6ab8d69920d6185ebada5da495adbc099719ef0ff2ed0bd3b47c6"
+    },
+    "fsm/attempt02/raw/skill_transport.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/raw/skill_transport.jsonl",
+      "sha256": "6b8c57cfc10540843f7e38c994219db8c7562033fbc0536d2391956b65065f98"
+    },
+    "fsm/attempt02/raw/task_fsm.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/raw/task_fsm.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "fsm/attempt02/raw/verify.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/raw/verify.jsonl",
+      "sha256": "ed553d09aa93f61932c251780f55f10f6142bb10556cfdfc0d5b9c3dfc4d103a"
+    },
+    "fsm/attempt02/reset.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/reset.json",
+      "sha256": "710e63c26db53c9d55506005e4d6ee40069f70d2abf46d855561c7ed87087727"
+    },
+    "fsm/attempt02/summary.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt02/summary.json",
+      "sha256": "41dd3a639189973b91fdd5df3e01e665583dd75d22caabaed999dc2f14dcbd5f"
+    },
+    "fsm/attempt03/budget_after.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt03/budget_after.json",
+      "sha256": "776322534bc576c1a0dda9b3b5207b2471e6da8cd44ea4a47b4e3b19b83388f0"
+    },
+    "fsm/attempt03/budget_before.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt03/budget_before.json",
+      "sha256": "776322534bc576c1a0dda9b3b5207b2471e6da8cd44ea4a47b4e3b19b83388f0"
+    },
+    "fsm/attempt03/clear-injection.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt03/clear-injection.json",
+      "sha256": "27dd900187aab6875c1744497f834cbad66f9fd4ac4f021abdda4edf76001882"
+    },
+    "fsm/attempt03/client.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt03/client.json",
+      "sha256": "febf2f056d957a24b5437dcf0a3d86765df48a0342c842e744dd9b536db51d03"
+    },
+    "fsm/attempt03/episode.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt03/episode.json",
+      "sha256": "c20d0510bba2c5584cb929a62ecde4bde72f56a723efd569d8dbf5506d95ac4c"
+    },
+    "fsm/attempt03/offsets.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt03/offsets.json",
+      "sha256": "cb5c2ebf6edaa45c98a5139d16493d9080a32a8df88cfc6982e7160e40c8a203"
+    },
+    "fsm/attempt03/raw/carry.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt03/raw/carry.jsonl",
+      "sha256": "6cf6f5769d8cbf63068a91aa535843d38473b26d5148e2a80020b2a8719d59da"
+    },
+    "fsm/attempt03/raw/controller_transport.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt03/raw/controller_transport.jsonl",
+      "sha256": "e83375f231f71a7c0f32db7a295a9b6c4339471920946f0d1f73d95bba421423"
+    },
+    "fsm/attempt03/raw/decisions.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt03/raw/decisions.jsonl",
+      "sha256": "17c7a1eb00f65cf76109cc599342bf18a228b186830086fe88e4a90cf169c2e8"
+    },
+    "fsm/attempt03/raw/demo_runs.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt03/raw/demo_runs.jsonl",
+      "sha256": "c6fae6045b8dd4f7facca534d54116e6a74f25f444d4c2b73b96a579dab54436"
+    },
+    "fsm/attempt03/raw/move_to_pose.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt03/raw/move_to_pose.jsonl",
+      "sha256": "1a0821aa3049a41daf393966e8b8a67d0b05f595abeea951a745706e574b8c94"
+    },
+    "fsm/attempt03/raw/observe.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt03/raw/observe.jsonl",
+      "sha256": "bf2a3c6bd37695d9d058d956b7a987bd63f9dadd2a05f5f8c2988b75f6118815"
+    },
+    "fsm/attempt03/raw/pick.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt03/raw/pick.jsonl",
+      "sha256": "dff1c0ff78508158f2c0693a2466192dd36117e4ac1486ef72ffc99fd7d4ce91"
+    },
+    "fsm/attempt03/raw/place.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt03/raw/place.jsonl",
+      "sha256": "796795b04f150c9ecae27c6fdd2811d7c51c72ba7dc10cb0c889364c950b395c"
+    },
+    "fsm/attempt03/raw/skill_transport.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt03/raw/skill_transport.jsonl",
+      "sha256": "5fe0174ae81495a97e3ff83e65c1024aff0ce818a844b7cfefdc732a5c7a20ab"
+    },
+    "fsm/attempt03/raw/task_fsm.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt03/raw/task_fsm.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "fsm/attempt03/raw/verify.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt03/raw/verify.jsonl",
+      "sha256": "6e1b0da7564b323a790aaa8907ebf412c9f2fc7a949b102ead95efa0fabdf834"
+    },
+    "fsm/attempt03/reset.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt03/reset.json",
+      "sha256": "6bd22c36f8334771945f2a61512dbd5bdda900309a00230601139425534ca315"
+    },
+    "fsm/attempt03/summary.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/attempt03/summary.json",
+      "sha256": "b0d256ccf4974ac4377f47a402178c85d5e765713d7937da4af3bae3089f68e3"
+    },
+    "fsm/budget_start.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/budget_start.json",
+      "sha256": "776322534bc576c1a0dda9b3b5207b2471e6da8cd44ea4a47b4e3b19b83388f0"
+    },
+    "fsm/cost_report.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/cost_report.json",
+      "sha256": "3ad7eca194e891ce9abf3375cb83454258c96b87d60913f792ce070da07c6c8e"
+    },
+    "fsm/deployment.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/deployment.json",
+      "sha256": "b14817ccdad9189b8bedc32c4622203ff4e5327baa25680efb658bca9de45fb4"
+    },
+    "fsm/fleet.log": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/fleet.log",
+      "sha256": "fa7ad5561586888cc01a0b9180e115b0abafa2ea599f6805b46f78f3f064fed1"
+    },
+    "fsm/status.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/status.json",
+      "sha256": "2b8b8d5df890f44e47ba04a924d1d45d095e14e43094e9f765b3c83e0a196020"
+    },
+    "fsm/switch.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/fsm/switch.json",
+      "sha256": "6741b1ed646b9c427f4168d4a02aaf4cc14d6bdf611b80b83db68f192e3503f4"
+    },
+    "hybrid/attempt01/budget_after.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/budget_after.json",
+      "sha256": "425bd9c92d43f003d5b7fa010a596d6a819a7f1ec0ec8ad31b6993d8c0c20a6b"
+    },
+    "hybrid/attempt01/budget_before.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/budget_before.json",
+      "sha256": "776322534bc576c1a0dda9b3b5207b2471e6da8cd44ea4a47b4e3b19b83388f0"
+    },
+    "hybrid/attempt01/clear-injection.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/clear-injection.json",
+      "sha256": "bd6c1052ce92976886fc139470638d74bc55a59687389383742e6e72facf8e32"
+    },
+    "hybrid/attempt01/client.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/client.json",
+      "sha256": "1d662da1b4647e3ef584fefc558391719c649e5689218202475f315c5cdaefcc"
+    },
+    "hybrid/attempt01/episode.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/episode.json",
+      "sha256": "5d03ce9b779657dd8570f4bca9aba441eb7658bb9cdbb24cc5ebace2628b7309"
+    },
+    "hybrid/attempt01/offsets.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/offsets.json",
+      "sha256": "41a3d88757e587ccb1735616cabc938ae7791b60cd66f78b8fc9f7d054245953"
+    },
+    "hybrid/attempt01/pose-target_box_a.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/pose-target_box_a.json",
+      "sha256": "ef575dd0c1e6fc3fb677999230d466b12ad4a2c965f9181bee93ff967af70900"
+    },
+    "hybrid/attempt01/pose-target_box_b.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/pose-target_box_b.json",
+      "sha256": "8f429f458bdf7c2d92fde151d50169d9068f042697c63b86407045473914e54d"
+    },
+    "hybrid/attempt01/raw/carry.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/raw/carry.jsonl",
+      "sha256": "46c62cc1836fb4553c67ba6df30b8ace563c9afb62c67de8ed6d85884c1b5d5c"
+    },
+    "hybrid/attempt01/raw/controller_transport.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/raw/controller_transport.jsonl",
+      "sha256": "97fa7af30ff1053d2b6ee103f837461aa6fd912d515b429a4295e82b032113fc"
+    },
+    "hybrid/attempt01/raw/decisions.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/raw/decisions.jsonl",
+      "sha256": "910415037b007e7f9281512865eac18f4cd91636a4d3ff7320a65f2c54a74ba7"
+    },
+    "hybrid/attempt01/raw/demo_runs.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/raw/demo_runs.jsonl",
+      "sha256": "e177a9abd9084566d3bddf5e53ac2ae37119ca38687a467109e9a73b635ffe9e"
+    },
+    "hybrid/attempt01/raw/move_to_pose.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/raw/move_to_pose.jsonl",
+      "sha256": "8e1b496a6b48c0cac5aeca4b4fe4d6d8216c3c06d53a8cde120f63f99a87c4d8"
+    },
+    "hybrid/attempt01/raw/observe.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/raw/observe.jsonl",
+      "sha256": "61f30b3c0f091ccc0d8a20c8476766c97d1362be0b5da3020a0238228891fec1"
+    },
+    "hybrid/attempt01/raw/pick.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/raw/pick.jsonl",
+      "sha256": "a91ec608dec37aaff2d4972e848365452ec9f3279674aeed00224e4ffb2fe20a"
+    },
+    "hybrid/attempt01/raw/place.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/raw/place.jsonl",
+      "sha256": "4d83ee81c37783e4ec3c3162eecd7f2046317428c96bab451f2ca9d2747af856"
+    },
+    "hybrid/attempt01/raw/skill_transport.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/raw/skill_transport.jsonl",
+      "sha256": "74265062fba75660165bd5d138e64f9a2740e11df6cb6662061df0d384dca879"
+    },
+    "hybrid/attempt01/raw/task_fsm.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/raw/task_fsm.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "hybrid/attempt01/raw/verify.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/raw/verify.jsonl",
+      "sha256": "7d2d39d12c829fc711c5c71b80f3b58888d9f017b5145c54288d7560179cb33c"
+    },
+    "hybrid/attempt01/reset.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/reset.json",
+      "sha256": "b9dc50c0350199732b1faaabb3a87cec128700a7552f2ab81c2b9c88d31138ca"
+    },
+    "hybrid/attempt01/summary.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/summary.json",
+      "sha256": "534165ae4b712403709fe8babd40d39d201cd7a1d3128ef5817d1d087146016b"
+    },
+    "hybrid/attempt01/usage/fast-transfer_t1_layout01_v1-9fcf3dcc-2-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/usage/fast-transfer_t1_layout01_v1-9fcf3dcc-2-0.json",
+      "sha256": "7dfdab851acf748c749c07bee62ee34a535aca6b880d739b86a029fd72fcc0a6"
+    },
+    "hybrid/attempt01/usage/fast-transfer_t1_layout01_v1-9fcf3dcc-3-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/usage/fast-transfer_t1_layout01_v1-9fcf3dcc-3-0.json",
+      "sha256": "6a870f346f955ebec60dc3cbe3c803e2cfe39fb6ead8ca6905c7ec525839198c"
+    },
+    "hybrid/attempt01/usage/fast-transfer_t1_layout01_v1-9fcf3dcc-4-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/usage/fast-transfer_t1_layout01_v1-9fcf3dcc-4-0.json",
+      "sha256": "c8965ca842e2f945c7d3b22e51f7a98db6110a0abb3ecec4430b323af50f6d66"
+    },
+    "hybrid/attempt01/usage/fast-transfer_t1_layout01_v1-9fcf3dcc-5-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/usage/fast-transfer_t1_layout01_v1-9fcf3dcc-5-0.json",
+      "sha256": "d66a80ef84ad777ab71ba8f92ceac48b96af63336f9a4092852e607bba4495cf"
+    },
+    "hybrid/attempt01/usage/fast-transfer_t1_layout01_v1-9fcf3dcc-6-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/usage/fast-transfer_t1_layout01_v1-9fcf3dcc-6-0.json",
+      "sha256": "6ccfd8e88335fb7c5446a536fd2f81baac5083cdd9dded76c49d191529a1187b"
+    },
+    "hybrid/attempt01/usage/fast-transfer_t1_layout01_v1-9fcf3dcc-7-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/usage/fast-transfer_t1_layout01_v1-9fcf3dcc-7-0.json",
+      "sha256": "4861bb766b83ba3a707e7e778f68df44813166d8fe187d6c0b1e144f98404c32"
+    },
+    "hybrid/attempt01/usage/fast-transfer_t1_layout01_v1-9fcf3dcc-8-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/usage/fast-transfer_t1_layout01_v1-9fcf3dcc-8-0.json",
+      "sha256": "2342b7929ef0387f6ff1d0388cd64c1c924044f71ac0c6cbe158852144cd8569"
+    },
+    "hybrid/attempt01/usage/slow-812ee0456ba2452db0aee5bd04ddb963.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt01/usage/slow-812ee0456ba2452db0aee5bd04ddb963.json",
+      "sha256": "8af1e040e670f1b2f7e24041957ad8e851e1d72b3382a4777477d0631da9e272"
+    },
+    "hybrid/attempt02/budget_after.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/budget_after.json",
+      "sha256": "425bd9c92d43f003d5b7fa010a596d6a819a7f1ec0ec8ad31b6993d8c0c20a6b"
+    },
+    "hybrid/attempt02/budget_before.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/budget_before.json",
+      "sha256": "425bd9c92d43f003d5b7fa010a596d6a819a7f1ec0ec8ad31b6993d8c0c20a6b"
+    },
+    "hybrid/attempt02/clear-injection.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/clear-injection.json",
+      "sha256": "3454ea0f8d46112ff65d4271be172ee110b21572fc3cd60966c687794c16878e"
+    },
+    "hybrid/attempt02/client.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/client.json",
+      "sha256": "710dcbda68b4ae449e60466cab229ec4e93ce86ee31bb456929ef02e67ac811f"
+    },
+    "hybrid/attempt02/episode.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/episode.json",
+      "sha256": "fe89543f6ff569a8ed8069c3d1aecf76604d26bba9b5d585c24ece647bb83fdd"
+    },
+    "hybrid/attempt02/offsets.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/offsets.json",
+      "sha256": "ac95176e90ebc7c81a76d617b9bc8872962cf915fdef6d54a2c245cc53f20130"
+    },
+    "hybrid/attempt02/pose-target_box_a.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/pose-target_box_a.json",
+      "sha256": "e1223b1e0c9e8c1de6dc657e4cd1699cad353ee0bfe1c5d64e5f26184df0d3e6"
+    },
+    "hybrid/attempt02/pose-target_box_b.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/pose-target_box_b.json",
+      "sha256": "840a83d2b859491e7831000d7576d4a12f616043d86cf364f26a2394f8eb5b83"
+    },
+    "hybrid/attempt02/raw/carry.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/raw/carry.jsonl",
+      "sha256": "4a47edc61c6d6f084441b31110a1ba1bd3e82e3133a0158d1eeb1351a79bdfde"
+    },
+    "hybrid/attempt02/raw/controller_transport.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/raw/controller_transport.jsonl",
+      "sha256": "e4f5aa92c725ac83bbedbf2ed1d28c67ba163f7da5b81e5a871e68e6ed307d0f"
+    },
+    "hybrid/attempt02/raw/decisions.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/raw/decisions.jsonl",
+      "sha256": "1005d1dccf2b5df077c6dc547f90fc28f32dac30212b7d21f18c9e7dc19923eb"
+    },
+    "hybrid/attempt02/raw/demo_runs.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/raw/demo_runs.jsonl",
+      "sha256": "92f8ff0271ec19eac0bce375aa9b5179d6d84a3f518dd7cc26e96ab72c592b4c"
+    },
+    "hybrid/attempt02/raw/move_to_pose.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/raw/move_to_pose.jsonl",
+      "sha256": "f9ee272140512be08989fdcb579c9c0be0ad9541df14475663d99897aa9220e1"
+    },
+    "hybrid/attempt02/raw/observe.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/raw/observe.jsonl",
+      "sha256": "6ad0b20e02e2072a85df9a97d0311a247b985cefbb2d318284e2629bec8753c3"
+    },
+    "hybrid/attempt02/raw/pick.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/raw/pick.jsonl",
+      "sha256": "57c44b6ba0db0da2c61abb0f960bede8ea5fb9eed5e5c77e182be530606f0cf5"
+    },
+    "hybrid/attempt02/raw/place.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/raw/place.jsonl",
+      "sha256": "bc1babbb0b27c77da90eae7c423c5f515356cdf3dad754711a6d095954277de1"
+    },
+    "hybrid/attempt02/raw/skill_transport.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/raw/skill_transport.jsonl",
+      "sha256": "2a82ebda74f7d5c9138778c065ddc45900da08471982f59b28eb33a33257774b"
+    },
+    "hybrid/attempt02/raw/task_fsm.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/raw/task_fsm.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "hybrid/attempt02/raw/verify.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/raw/verify.jsonl",
+      "sha256": "f90299021a2aca4ff770f8f7396540dbf04f1cef434d1d54ec85e9fd1e6dc0b3"
+    },
+    "hybrid/attempt02/reset.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/reset.json",
+      "sha256": "c1fa9d8359164c3292bd09e09861e891d59e151ac59e56a35215aab0c227724c"
+    },
+    "hybrid/attempt02/summary.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/summary.json",
+      "sha256": "b82634417cabb93a9fd23bd6caf08c6685bd884469723c4542a3cf2982f7d067"
+    },
+    "hybrid/attempt02/usage/fast-transfer_t1_layout01_v1-0ed69148-2-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/usage/fast-transfer_t1_layout01_v1-0ed69148-2-0.json",
+      "sha256": "4cd3cf9f7d8a842022dc8e6139d6186a1af9fbb07ae7c75de9c3961cca596522"
+    },
+    "hybrid/attempt02/usage/fast-transfer_t1_layout01_v1-0ed69148-3-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/usage/fast-transfer_t1_layout01_v1-0ed69148-3-0.json",
+      "sha256": "a659a2206110f6821ef47aeea4d24d505fac870ceae1abb2fe01fa60aa655784"
+    },
+    "hybrid/attempt02/usage/fast-transfer_t1_layout01_v1-0ed69148-4-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/usage/fast-transfer_t1_layout01_v1-0ed69148-4-0.json",
+      "sha256": "95caa361925d9b7a8f41fda370d0deb74a25582999c540e291a3174a343912ff"
+    },
+    "hybrid/attempt02/usage/fast-transfer_t1_layout01_v1-0ed69148-5-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/usage/fast-transfer_t1_layout01_v1-0ed69148-5-0.json",
+      "sha256": "d3b857808459c186a34fab27f8331b5895e01e0d358a30aaf4354dcf5d6239bc"
+    },
+    "hybrid/attempt02/usage/fast-transfer_t1_layout01_v1-0ed69148-6-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/usage/fast-transfer_t1_layout01_v1-0ed69148-6-0.json",
+      "sha256": "8b75607c8941988b48883a9a4aed20ec15187b30644b74a44d5b3775b9ef53b7"
+    },
+    "hybrid/attempt02/usage/fast-transfer_t1_layout01_v1-0ed69148-7-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt02/usage/fast-transfer_t1_layout01_v1-0ed69148-7-0.json",
+      "sha256": "925f95da27478838c4da709188970ac2cf2bdb7a041103572acbf9c688be3e18"
+    },
+    "hybrid/attempt03/budget_after.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/budget_after.json",
+      "sha256": "83c56ac16011fc677eeba20d7377eb4c8a52860117546e71fe7de5362e05706a"
+    },
+    "hybrid/attempt03/budget_before.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/budget_before.json",
+      "sha256": "425bd9c92d43f003d5b7fa010a596d6a819a7f1ec0ec8ad31b6993d8c0c20a6b"
+    },
+    "hybrid/attempt03/clear-injection.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/clear-injection.json",
+      "sha256": "e242a4304f683e5b1ae134274554b089aad65cacee105e1a538569128cf95cc8"
+    },
+    "hybrid/attempt03/client.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/client.json",
+      "sha256": "b376395fb39faec2fa884a7da5f3bd91ca1082071b55493b8ce504c6ce607899"
+    },
+    "hybrid/attempt03/episode.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/episode.json",
+      "sha256": "6f760bb5c6e0cc7f4106087acbc3e3a89750272892b1017b3ea3de919b7a6ca6"
+    },
+    "hybrid/attempt03/offsets.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/offsets.json",
+      "sha256": "06f63dfc76aed49dd8287f058b4445145e852eb92f3fda39e5c3782971a53c4b"
+    },
+    "hybrid/attempt03/raw/carry.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/raw/carry.jsonl",
+      "sha256": "99372e42f4fa93cf77183d6dd12c22f157f7bcfcecfe6319294d291da0d910bc"
+    },
+    "hybrid/attempt03/raw/controller_transport.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/raw/controller_transport.jsonl",
+      "sha256": "87ce33425f304c76a7931023cd6a4b9ae15a545d89a9567b78f51673aab20b77"
+    },
+    "hybrid/attempt03/raw/decisions.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/raw/decisions.jsonl",
+      "sha256": "4933ba1d783e62a6eded016daf6bc10a89111ef52380e87d0fd211651007d706"
+    },
+    "hybrid/attempt03/raw/demo_runs.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/raw/demo_runs.jsonl",
+      "sha256": "a03f82236059c35968f8add85dcaf950f13f1e8115c64580e0d880782ba8dd8c"
+    },
+    "hybrid/attempt03/raw/move_to_pose.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/raw/move_to_pose.jsonl",
+      "sha256": "3ee797c2046fa3b4540b8a39d0a34b2a8e9b271e10723e515f6cc2cae04f0ef6"
+    },
+    "hybrid/attempt03/raw/observe.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/raw/observe.jsonl",
+      "sha256": "389add4983e927cab4da703d0c71b9c1eb49c977747a51247dafb9323ce7cf5d"
+    },
+    "hybrid/attempt03/raw/pick.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/raw/pick.jsonl",
+      "sha256": "225722312a3fde67a4dc66d456d60b8dafc57e9b68fe6cdbc20c4ae9fa4bc86e"
+    },
+    "hybrid/attempt03/raw/place.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/raw/place.jsonl",
+      "sha256": "88ef9dcdd34ef11e6a0882bef2d787bb905ff62d0f73e17b059684160497e3b4"
+    },
+    "hybrid/attempt03/raw/skill_transport.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/raw/skill_transport.jsonl",
+      "sha256": "678046b823afdeaedfa877a031a57851f540342e6c180b004632576c34350773"
+    },
+    "hybrid/attempt03/raw/task_fsm.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/raw/task_fsm.jsonl",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "hybrid/attempt03/raw/verify.jsonl": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/raw/verify.jsonl",
+      "sha256": "487a816bd89c52cb5fea01e3a7a74cfaf374dd971493e965c74e18bc7d68365e"
+    },
+    "hybrid/attempt03/reset.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/reset.json",
+      "sha256": "218f6afac66e24b18ec971fe2d3fd82fbf0b813a7f0d7176e3a77475f26ed4bd"
+    },
+    "hybrid/attempt03/summary.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/summary.json",
+      "sha256": "f6c4de18dc7e169a3f4a58a8be6ee714c3ab6fa4be491722703445fc735824f8"
+    },
+    "hybrid/attempt03/usage/fast-week1_demo_v1-9bbacc83-2-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/usage/fast-week1_demo_v1-9bbacc83-2-0.json",
+      "sha256": "af993afb8335c574c446323518ab0333da52b355402d55c67ba77b5b2faf887b"
+    },
+    "hybrid/attempt03/usage/fast-week1_demo_v1-9bbacc83-3-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/usage/fast-week1_demo_v1-9bbacc83-3-0.json",
+      "sha256": "7afda884e24569da4a4fdf54e0219ed96be0fd2811d602b3d34d8008b8190640"
+    },
+    "hybrid/attempt03/usage/fast-week1_demo_v1-9bbacc83-4-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/usage/fast-week1_demo_v1-9bbacc83-4-0.json",
+      "sha256": "669243ae549991667a763ca00cf6ec1f1364ad95e09f8007ad8b2edd26829dbd"
+    },
+    "hybrid/attempt03/usage/fast-week1_demo_v1-9bbacc83-5-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/usage/fast-week1_demo_v1-9bbacc83-5-0.json",
+      "sha256": "e12102fd7c86ff398b931c3e3ee24cd4561c96279e0dc5d19f55d3bed20ea70d"
+    },
+    "hybrid/attempt03/usage/fast-week1_demo_v1-9bbacc83-6-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/usage/fast-week1_demo_v1-9bbacc83-6-0.json",
+      "sha256": "bcf57e79bd3f86347d0a6f73de0a5e3f56c3c905a21a031b5cb3db4db805cb86"
+    },
+    "hybrid/attempt03/usage/fast-week1_demo_v1-9bbacc83-7-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/usage/fast-week1_demo_v1-9bbacc83-7-0.json",
+      "sha256": "8a5833d29e656cf8e47d02909947fabd3019b2c979df85fe3f9d4401ace97d24"
+    },
+    "hybrid/attempt03/usage/fast-week1_demo_v1-9bbacc83-8-0.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/usage/fast-week1_demo_v1-9bbacc83-8-0.json",
+      "sha256": "e0e21c0ebb3511077155d3588249cbb8501516be65ececc4fc7bd0361d82c1ff"
+    },
+    "hybrid/attempt03/usage/slow-3e75ccee0e504bf1a86c4663bd12e851.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/attempt03/usage/slow-3e75ccee0e504bf1a86c4663bd12e851.json",
+      "sha256": "8135a1aaf196af4ee2eb6540325d686f5709090ab6050505ef2a498bfe99c90e"
+    },
+    "hybrid/budget_start.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/budget_start.json",
+      "sha256": "776322534bc576c1a0dda9b3b5207b2471e6da8cd44ea4a47b4e3b19b83388f0"
+    },
+    "hybrid/cost_report.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/cost_report.json",
+      "sha256": "fa6c88a356c233cb1f5156ff7b7e9324f84fba9c66ab35d1b523f4138d616b56"
+    },
+    "hybrid/deployment.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/deployment.json",
+      "sha256": "69a5ded83ffe32524fc88cf1fbc4fe2bf4bdb5d4d01bfb985eeb88911107d455"
+    },
+    "hybrid/fleet.log": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/fleet.log",
+      "sha256": "8f653ffb7dedb2755d0b16fa3327aa13ed37c56bf9991ddedf64d489cbfdd24c"
+    },
+    "hybrid/status.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/status.json",
+      "sha256": "d0bedfed63bc1dd58b64686cf6c308fd5914c24d8994fc85534741e5c077140d"
+    },
+    "hybrid/switch.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/hybrid/switch.json",
+      "sha256": "18e8ee928b988f4d2a93c4f2c72a38b394f64cbcbb1d9b259b82093fe33846aa"
+    },
+    "plan/baseline_fsm.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/plan/baseline_fsm.json",
+      "sha256": "c003e3e8867cef2495aa6175093b163d35c4673785487e881f3ed2d708dfcde0"
+    },
+    "plan/baseline_hybrid.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/plan/baseline_hybrid.json",
+      "sha256": "08a44ad470f15b89cad5f716a113b20ace93aa0b5b73d74bf9b1dc7b19dcddb5"
+    },
+    "plan/history_manifest.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/plan/history_manifest.json",
+      "sha256": "cfba2964347c7f8063f8bc33b191109c8b25f440f3a0c03de9e03f6c629b7db2"
+    },
+    "plan/initial_states.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/plan/initial_states.json",
+      "sha256": "a2b2347577ca0b840dc49641fdd06f800f3015c10e153e8ffa59db3a55fe9dde"
+    },
+    "plan/registration_budget.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/plan/registration_budget.json",
+      "sha256": "776322534bc576c1a0dda9b3b5207b2471e6da8cd44ea4a47b4e3b19b83388f0"
+    },
+    "plan/skill_contracts.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/plan/skill_contracts.json",
+      "sha256": "d38d51b61479f14c6d25e05b8782bcfa409379fb14af24e5af25ecfbf25b86de"
+    },
+    "plan/spec.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/plan/spec.json",
+      "sha256": "a93b691a99931d6ca58369f0aa15eb055934d32b5345ca297867572496d7a9ab"
+    },
+    "plan/success_predicate.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/plan/success_predicate.json",
+      "sha256": "21a5b56e30f64d09b3849255d19ed956caba4e15429f744c7831e819f926e62b"
+    },
+    "plan/task_manifest.json": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/plan/task_manifest.json",
+      "sha256": "e968bc326770464f55e45222a4af66150d5b1f1e3ae6ea22b48875239fb5a57a"
+    },
+    "source/125_transfer_cost_executed_v1.py": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/source/125_transfer_cost_executed_v1.py",
+      "sha256": "6e1f68e920ccb032daf09eb598243eddc5aea35f7a622c36d30bcf1224942cf9"
+    },
+    "source/t1_pilot_executed_v1.py": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/source/t1_pilot_executed_v1.py",
+      "sha256": "83367c1d5aea3cd47dd8385d74d830741fad86daa0ea3d57d318ccb9459566c3"
+    },
+    "source/test_t1_pilot_executed_v1.py": {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/source/test_t1_pilot_executed_v1.py",
+      "sha256": "cf42fae021a1ff6fb3951863a29eabe615c3f4a65987043a4bc1fe7229e511d3"
+    }
+  },
+  "executed_source": {
+    "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/source/t1_pilot_executed_v1.py",
+    "sha256": "83367c1d5aea3cd47dd8385d74d830741fad86daa0ea3d57d318ccb9459566c3"
+  },
+  "corrected_harness": {
+    "path": "/home/ros/agentic_workcell_ws/setup/transferbench/t1_pilot.py",
+    "sha256": "44c4d8caed64c37fed267acef35af6651fe4f90a23b5d00b7c8d86be82d477f6"
+  },
+  "adjudicator": {
+    "path": "/home/ros/agentic_workcell_ws/setup/transferbench/adjudicate_t1.py",
+    "sha256": "07c43c7d2fb07f524f5f4831ebe02fa0c6e11ed8569070c8d28f2df612e5cdc6"
+  },
+  "corrected_trial_receipts": [
+    {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/adjudication_v2/fsm-attempt01.json",
+      "sha256": "f85e8d2eeb0d26373a3d69408cf0a8432b7163ed04cd61d47ecd0f87d6b29f5c"
+    },
+    {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/adjudication_v2/fsm-attempt02.json",
+      "sha256": "94b3138ac690084e90e7318c00c1d28232136c34ef5db88a3010353dc6064c01"
+    },
+    {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/adjudication_v2/fsm-attempt03.json",
+      "sha256": "d1876bd5e49d6056830a4111e77f0c0ab84f580fdecb2e76fa7f36d0207eb6b6"
+    },
+    {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/adjudication_v2/hybrid-attempt01.json",
+      "sha256": "a3eed576056ff265133f5b6b90cc025f51f61120f4ccd7c70fc64ac15e0ff0b2"
+    },
+    {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/adjudication_v2/hybrid-attempt02.json",
+      "sha256": "6345a63ba2912e6c292beb07cfee5c592986e6b5eabc3ea015c094a601004952"
+    },
+    {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t1_20261006/adjudication_v2/hybrid-attempt03.json",
+      "sha256": "d4d6caadf59cdfd9e2c80c2c098f761d6b93208336c6c3bec4b49b1d474cedd4"
+    }
+  ],
+  "sampling": "NO_NEW_EPISODES; same six run IDs; no replacement or pooled v1/v2 outcomes",
+  "prospective_registration": "original v1 plan retained; this correction is explicitly post hoc"
+}

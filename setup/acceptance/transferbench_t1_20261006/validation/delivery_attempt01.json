@@ -1,0 +1,211 @@
+{
+  "ok": true,
+  "problems": [],
+  "former_receipts": [
+    {
+      "tree": "/home/ros/agentic_workcell_ws",
+      "receipt": "school_clef_route_20261006",
+      "files": 46,
+      "unchanged": true
+    },
+    {
+      "tree": "/home/ros/agentic_workcell_ws",
+      "receipt": "route_hardening_20261006",
+      "files": 171,
+      "unchanged": true
+    },
+    {
+      "tree": "/home/ros/agentic_workcell_ws",
+      "receipt": "place_transport_20261006",
+      "files": 219,
+      "unchanged": true
+    },
+    {
+      "tree": "/home/ros/agentic_workcell_ws",
+      "receipt": "transferbench_foundation_20261006",
+      "files": 28,
+      "unchanged": true
+    },
+    {
+      "tree": "/home/ros/.codex/worktrees/16d1/flexcell",
+      "receipt": "school_clef_route_20261006",
+      "files": 46,
+      "unchanged": true
+    },
+    {
+      "tree": "/home/ros/.codex/worktrees/16d1/flexcell",
+      "receipt": "route_hardening_20261006",
+      "files": 171,
+      "unchanged": true
+    },
+    {
+      "tree": "/home/ros/.codex/worktrees/16d1/flexcell",
+      "receipt": "place_transport_20261006",
+      "files": 219,
+      "unchanged": true
+    },
+    {
+      "tree": "/home/ros/.codex/worktrees/16d1/flexcell",
+      "receipt": "transferbench_foundation_20261006",
+      "files": 28,
+      "unchanged": true
+    },
+    {
+      "tree": "/mnt/c/dev/flexcell",
+      "receipt": "school_clef_route_20261006",
+      "files": 46,
+      "unchanged": true
+    },
+    {
+      "tree": "/mnt/c/dev/flexcell",
+      "receipt": "route_hardening_20261006",
+      "files": 171,
+      "unchanged": true
+    },
+    {
+      "tree": "/mnt/c/dev/flexcell",
+      "receipt": "place_transport_20261006",
+      "files": 219,
+      "unchanged": true
+    },
+    {
+      "tree": "/mnt/c/dev/flexcell",
+      "receipt": "transferbench_foundation_20261006",
+      "files": 28,
+      "unchanged": true
+    }
+  ],
+  "original_ledger_verified_rows": 33,
+  "original_inputs_unchanged": 169,
+  "actual_run_ids": [
+    "transfer_t1_layout01_v1-4966203b",
+    "transfer_t1_layout01_v1-d632023b",
+    "week1_demo_v1-bcd48a2a",
+    "transfer_t1_layout01_v1-9fcf3dcc",
+    "transfer_t1_layout01_v1-0ed69148",
+    "week1_demo_v1-9bbacc83"
+  ],
+  "no_replacement": true,
+  "corrected_cells": [
+    {
+      "arm": "fsm",
+      "purpose": "adaptation",
+      "case_id": "T1-layout-01",
+      "runtime_fingerprint": "943071f0d0ef8ca4b48b876107d0bb18e2ccb3d67decfba28a1c87052cb2b2a6",
+      "calibration_sha256": null,
+      "outcomes": {
+        "SUCCEEDED": 2
+      },
+      "retained_attempts": 2,
+      "completed_denominator": 2,
+      "observed_success_rate": 1.0,
+      "routing": {
+        "replay_status": "PASS"
+      },
+      "decision_latency": {
+        "status": "MEASURED_DIAGNOSTIC",
+        "clock": "perf_counter_ns",
+        "n": 14,
+        "p50_ms": 0.014095,
+        "p95_ms": 0.024145699999999996,
+        "percentile_method": "linear interpolation, index=(n-1)*q",
+        "scope": "non-bootstrap complete policy.decide including escalation; not GPU-only latency"
+      },
+      "qualification": "NOT_RUN"
+    },
+    {
+      "arm": "fsm",
+      "purpose": "regression",
+      "case_id": "T1-source-regression",
+      "runtime_fingerprint": "943071f0d0ef8ca4b48b876107d0bb18e2ccb3d67decfba28a1c87052cb2b2a6",
+      "calibration_sha256": null,
+      "outcomes": {
+        "SUCCEEDED": 1
+      },
+      "retained_attempts": 1,
+      "completed_denominator": 1,
+      "observed_success_rate": 1.0,
+      "routing": {
+        "replay_status": "PASS"
+      },
+      "decision_latency": {
+        "status": "MEASURED_DIAGNOSTIC",
+        "clock": "perf_counter_ns",
+        "n": 7,
+        "p50_ms": 0.00913,
+        "p95_ms": 0.03611119999999998,
+        "percentile_method": "linear interpolation, index=(n-1)*q",
+        "scope": "non-bootstrap complete policy.decide including escalation; not GPU-only latency"
+      },
+      "qualification": "NOT_RUN"
+    },
+    {
+      "arm": "hybrid",
+      "purpose": "adaptation",
+      "case_id": "T1-layout-01",
+      "runtime_fingerprint": "e43bd2f44acc828184ca49d0d326e9661d130cc2f00bac1176e68e5423902cae",
+      "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+      "outcomes": {
+        "SUCCEEDED": 2
+      },
+      "retained_attempts": 2,
+      "completed_denominator": 2,
+      "observed_success_rate": 1.0,
+      "routing": {
+        "fast_selected": 12,
+        "slow_selected": 1,
+        "fast_calls": 13,
+        "fast_tokens": 18616,
+        "fsm_fallbacks": 0
+      },
+      "decision_latency": {
+        "status": "MEASURED_DIAGNOSTIC",
+        "clock": "perf_counter_ns",
+        "n": 13,
+        "p50_ms": 2962.162686,
+        "p95_ms": 5646.242253599999,
+        "percentile_method": "linear interpolation, index=(n-1)*q",
+        "scope": "non-bootstrap complete policy.decide including escalation; not GPU-only latency"
+      },
+      "qualification": "NOT_RUN"
+    },
+    {
+      "arm": "hybrid",
+      "purpose": "regression",
+      "case_id": "T1-source-regression",
+      "runtime_fingerprint": "e43bd2f44acc828184ca49d0d326e9661d130cc2f00bac1176e68e5423902cae",
+      "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+      "outcomes": {
+        "SUCCEEDED": 1
+      },
+      "retained_attempts": 1,
+      "completed_denominator": 1,
+      "observed_success_rate": 1.0,
+      "routing": {
+        "fast_selected": 6,
+        "slow_selected": 1,
+        "fast_calls": 7,
+        "fast_tokens": 10090,
+        "fsm_fallbacks": 0
+      },
+      "decision_latency": {
+        "status": "MEASURED_DIAGNOSTIC",
+        "clock": "perf_counter_ns",
+        "n": 7,
+        "p50_ms": 2939.50823,
+        "p95_ms": 4330.9300604,
+        "percentile_method": "linear interpolation, index=(n-1)*q",
+        "scope": "non-bootstrap complete policy.decide including escalation; not GPU-only latency"
+      },
+      "qualification": "NOT_RUN"
+    }
+  ],
+  "controller_goal_terminals": 72,
+  "all_controller_terminal_status_4": true,
+  "controller_quarantines": 0,
+  "AC90": "NOT_RUN",
+  "qualification": "FROZEN",
+  "n_ge_50": "FROZEN",
+  "physical_safety_acceptance": "NOT_RUN",
+  "network_stability": "NOT_ACCEPTED; startup timeout and one of five follow-up TCP probes timed out"
+}

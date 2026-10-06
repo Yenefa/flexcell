@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/src/flexcell/flexcell_skills/test/w1_client.py",
+    "--action",
+    "demo",
+    "--scenario",
+    "transfer_t1_layout01_v1"
+  ],
+  "return_code": 0,
+  "stdout": "SENDING action=demo object=target_box pose=[0.12, -0.15, 0.0175]\nGOAL_UUID 2a9509bf745642969928f75ceb331f70\nRESULT {\n  \"action\": \"demo\",\n  \"goal_uuid\": \"2a9509bf745642969928f75ceb331f70\",\n  \"outcome\": \"OUTCOME_SUCCEEDED\",\n  \"outcome_val\": 0,\n  \"error_code\": \"ERR_NONE\",\n  \"detail\": \"task done: all assignments verified\",\n  \"evidence_id\": \"transfer_t1_layout01_v1-35f45e8c\",\n  \"wall_seconds\": 30.224,\n  \"fsm_trace\": [\n    \"PICK_A(attempt=1):OK\",\n    \"PLACE_A:OK\",\n    \"VERIFY_A(attempt=1):OK\",\n    \"PICK_B(attempt=1):OK\",\n    \"PLACE_B:OK\",\n    \"VERIFY_B(attempt=1):OK\"\n  ],\n  \"object_a_at_zone\": true,\n  \"object_b_at_zone\": true,\n  \"zone_a_error_m\": 0.013021968778113088,\n  \"zone_b_error_m\": 0.008953546761728996,\n  \"run_id\": \"transfer_t1_layout01_v1-4966203b\",\n  \"scenario_id\": \"transfer_t1_layout01_v1\"\n}\n",
+  "stderr": "",
+  "elapsed_ms": 30941.888499
+}
