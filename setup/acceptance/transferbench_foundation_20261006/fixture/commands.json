@@ -1,0 +1,205 @@
+[
+  {
+    "command": [
+      "/usr/bin/python3",
+      "/home/ros/agentic_workcell_ws/setup/125_transfer_cost.py",
+      "init",
+      "--spec",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/plan.json",
+      "--ledger",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/cost.jsonl"
+    ],
+    "return_code": 0,
+    "expected_return_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/python3",
+      "/home/ros/agentic_workcell_ws/setup/125_transfer_cost.py",
+      "start",
+      "--arm",
+      "hybrid",
+      "--actor",
+      "coding_agent",
+      "--session",
+      "fixture-cli",
+      "--activity",
+      "offline synthetic receipt exercise",
+      "--ledger",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/cost.jsonl"
+    ],
+    "return_code": 0,
+    "expected_return_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/python3",
+      "/home/ros/agentic_workcell_ws/setup/125_transfer_cost.py",
+      "record",
+      "--event",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/trial-1-event.json",
+      "--ledger",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/cost.jsonl"
+    ],
+    "return_code": 0,
+    "expected_return_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/python3",
+      "/home/ros/agentic_workcell_ws/setup/125_transfer_cost.py",
+      "record",
+      "--event",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/trial-2-event.json",
+      "--ledger",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/cost.jsonl"
+    ],
+    "return_code": 0,
+    "expected_return_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/python3",
+      "/home/ros/agentic_workcell_ws/setup/125_transfer_cost.py",
+      "record",
+      "--event",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/trial-3-event.json",
+      "--ledger",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/cost.jsonl"
+    ],
+    "return_code": 0,
+    "expected_return_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/python3",
+      "/home/ros/agentic_workcell_ws/setup/125_transfer_cost.py",
+      "record",
+      "--event",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/trial-4-event.json",
+      "--ledger",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/cost.jsonl"
+    ],
+    "return_code": 0,
+    "expected_return_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/python3",
+      "/home/ros/agentic_workcell_ws/setup/125_transfer_cost.py",
+      "record",
+      "--event",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/trial-5-event.json",
+      "--ledger",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/cost.jsonl"
+    ],
+    "return_code": 0,
+    "expected_return_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/python3",
+      "/home/ros/agentic_workcell_ws/setup/125_transfer_cost.py",
+      "record",
+      "--event",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/api-1-event.json",
+      "--ledger",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/cost.jsonl"
+    ],
+    "return_code": 0,
+    "expected_return_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/python3",
+      "/home/ros/agentic_workcell_ws/setup/125_transfer_cost.py",
+      "record",
+      "--event",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/api-alias-rejected.json",
+      "--ledger",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/cost.jsonl"
+    ],
+    "return_code": 2,
+    "expected_return_code": 2,
+    "stdout": "",
+    "stderr": "ERROR: API receipt already used; different ID does not create a new request\n"
+  },
+  {
+    "command": [
+      "/usr/bin/python3",
+      "/home/ros/agentic_workcell_ws/setup/125_transfer_cost.py",
+      "record",
+      "--event",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/api-2-event.json",
+      "--ledger",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/cost.jsonl"
+    ],
+    "return_code": 0,
+    "expected_return_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/python3",
+      "/home/ros/agentic_workcell_ws/setup/125_transfer_cost.py",
+      "stop",
+      "--session",
+      "fixture-cli",
+      "--evidence",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/trial-1-raw.json",
+      "--ledger",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/cost.jsonl"
+    ],
+    "return_code": 0,
+    "expected_return_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/python3",
+      "/home/ros/agentic_workcell_ws/setup/125_transfer_cost.py",
+      "report",
+      "--out",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/report.json",
+      "--ledger",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/cost.jsonl"
+    ],
+    "return_code": 0,
+    "expected_return_code": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "command": [
+      "/usr/bin/python3",
+      "/home/ros/agentic_workcell_ws/setup/125_transfer_cost.py",
+      "report",
+      "--out",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/report.json",
+      "--ledger",
+      "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/cost.jsonl"
+    ],
+    "return_code": 2,
+    "expected_return_code": 2,
+    "stdout": "",
+    "stderr": "ERROR: [Errno 17] File exists: '/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_foundation_20261006/fixture/report.json'\n"
+  }
+]

@@ -60,6 +60,7 @@ discussion → Issue/ADR → milestone task → implementation → experiment ev
 - [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) — experiment log with evidence locations
 - [docs/ADR/](docs/ADR/) — architecture decision records (ADR-001: simulation manipulation backend)
 - [docs/WEEK2_PREPARATION.md](docs/WEEK2_PREPARATION.md) — ratified Week-2 design of record
+- [docs/TRANSFER_BENCHMARK.md](docs/TRANSFER_BENCHMARK.md) — transfer engineering-cost design and offline ledger; AC@90 remains NOT_RUN
 - Milestones: **M1** Deterministic Workcell Baseline (done) · **M2** Runtime Decision
   Foundation (current; sub-milestones M2.1/M2.2/M2.3) · **M3** Hybrid Agent Benchmark (future)
 
@@ -69,6 +70,13 @@ After coding — update the Issue, record evidence in EXPERIMENTS.md, link the c
 ---
 
 ## Status
+
+2026-10-06 transfer-cost instrument: the L1 Skill / L2 composition / L3 engineering-cost
+design and an offline append-only ledger are implemented, with 18 targeted tests passing.
+The T1 plan remains a draft; no migration experiment or AC@90 qualification was run.
+See [design, official-source corrections and usage](docs/TRANSFER_BENCHMARK.md).
+The school's earlier clef routing and controller/time/DDS evidence is preserved in
+[its separate acceptance receipt](setup/acceptance/place_transport_20261006/README.md).
 
 2026-10-02 mainline hardening (E-016): lifecycle paths and typed controller
 readiness are fixed; Observe now reads confirmed carry authority instead of a

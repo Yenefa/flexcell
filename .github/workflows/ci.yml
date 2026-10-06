@@ -21,6 +21,9 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
 
+      - name: transfer-cost ledger (stdlib only, no robot)
+        run: python3 -m unittest discover -s setup/transferbench -p 'test_*.py' -v
+
       - name: install test deps
         shell: bash
         run: |

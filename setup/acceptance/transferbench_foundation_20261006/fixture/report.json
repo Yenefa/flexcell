@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "record_kind": "SYNTHETIC_TOOL_FIXTURE",
+  "protocol_id": "flexcell-transferbench-t1-draft-v1",
+  "plan_sha256": "edef8288de130d2f1e666d1fae1bc0fb3fc50bfab7be623668468ff79e6da202",
+  "ledger_tail_sha256": "aed2a4b4a08afdce7d5062aa87aad0aebd82f90f1cdee59c7419c0c5479f532b",
+  "accounting_basis": "CLI timing; other values asserted from pinned evidence, not auto-extracted",
+  "effort_minutes": {
+    "fsm": {
+      "human": null,
+      "coding_agent": null,
+      "wait": null
+    },
+    "hybrid": {
+      "human": null,
+      "coding_agent": 0.01449664685,
+      "wait": null
+    }
+  },
+  "effort_status": {
+    "fsm": {
+      "human": "NOT_RUN",
+      "coding_agent": "NOT_RUN",
+      "wait": "NOT_RUN"
+    },
+    "hybrid": {
+      "human": "NOT_RUN",
+      "coding_agent": "RECORDED",
+      "wait": "NOT_RUN"
+    }
+  },
+  "open_effort_sessions": [],
+  "unmeasured_effort_sessions": [],
+  "api_usage": [
+    {
+      "arm": "hybrid",
+      "scope": "calibration",
+      "currency": "USD",
+      "requests": 2,
+      "known_amount_subtotal": 0.03,
+      "unknown_amount_requests": 1,
+      "known_input_tokens": 100,
+      "known_output_tokens": 40,
+      "unknown_token_requests": 1,
+      "amount_status": "INCOMPLETE"
+    }
+  ],
+  "latest_change_snapshot": {},
+  "trial_cells": [
+    {
+      "arm": "hybrid",
+      "purpose": "adaptation",
+      "case_id": "T1-layout-01",
+      "runtime_fingerprint": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "calibration_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "outcomes": {
+        "SUCCEEDED": 1,
+        "FAILED": 1,
+        "HARNESS_ERROR": 1,
+        "ABORTED_PROCESS": 1
+      },
+      "completed_denominator": 3,
+      "retained_attempts": 4,
+      "observed_success_rate": 0.3333333333333333,
+      "diagnostic_wilson_95_lower": 0.061490315276160515,
+      "large_sample_review_required": false
+    },
+    {
+      "arm": "hybrid",
+      "purpose": "adaptation",
+      "case_id": "T1-layout-01",
+      "runtime_fingerprint": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "calibration_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "outcomes": {
+        "SUCCEEDED": 1
+      },
+      "completed_denominator": 1,
+      "retained_attempts": 1,
+      "observed_success_rate": 1.0,
+      "diagnostic_wilson_95_lower": 0.20654329147389294,
+      "large_sample_review_required": false
+    }
+  ],
+  "attempt_totals": [
+    {
+      "arm": "hybrid",
+      "purpose": "adaptation",
+      "retained_attempts": 5,
+      "large_sample_review_required": false
+    }
+  ],
+  "AC@90": {
+    "status": "NOT_RUN",
+    "reason": "v1 qualification is FROZEN"
+  },
+  "decision_latency": {
+    "status": "NOT_RUN",
+    "reason": "use episode perf_counter_ns measurements"
+  },
+  "safety_acceptance": {
+    "status": "NOT_RUN",
+    "reason": "no physical safety evaluation in this tool"
+  }
+}
