@@ -71,6 +71,15 @@ After coding — update the Issue, record evidence in EXPERIMENTS.md, link the c
 
 ## Status
 
+2026-10-07 mainline composition: `/run_composite` now holds the shared arm lease
+across a declared 1..8-stage chain, preserving native episodes and fresh boundary
+observations. One Hybrid buffer swap and one S1 regression succeeded (4 episodes);
+Clef selected all 9 target decisions. 300 skills tests and 42 instrument/audit tests
+passed. The first audit failure from exact float comparison is retained with an
+explicit serialization correction; no composite was resampled. See
+[API and ownership semantics](docs/COMPOSITE_TASKS.md) and
+[retained pilot receipts](setup/acceptance/composite_api_20261007/README.md).
+
 2026-10-06 registered T3 buffer-swap pilot: FSM and Hybrid each completed one
 three-stage composite and one S1 source regression; 8 native episodes retained.
 Clef selected all 9 target-stage model decisions. The common outer chain is fixed,

@@ -104,6 +104,15 @@ fingerprint、校准身份、protocol 或评估目的分 cell；一次迁移可�
 
 ## 成本与达标规则
 
+T3 随后接入主线有类型的 RunComposite 接口，支持显式 1..8 段计划、全程机械臂锁、
+重复对象、逐段原生 episode 与 fresh Observe。2026-10-07 单臂功能试点完成一次
+Hybrid 组合及一次 S1，共 4 原生 episode；目标 Clef 9 / DeepSeek 0，回测 6 / 1。
+它属于 API/控制流证据，不是追加的双臂迁移成本比较或泛化验收。
+[接口与中断边界](COMPOSITE_TASKS.md)、
+[保留首轮审计失败的主线回执](../setup/acceptance/composite_api_20261007/README.md)。
+审计对齐既有 episode 浮点序列化后只读复核，没有重跑组合；原 driver rc=1 保留。
+组件 UUID 标为进程内执行关联，不充当另一个被 DDS 接受的原生 task goal。
+
 T3 已另行预登记并运行“B→缓冲位，A→B原位，B→A原位”，每臂一次组合和一次
 S1 回测，各 1/1，共 8 份原生 episode。B 被二次访问，并增加最终联合位置/缓冲
 空置谓词，不能由现有两个唯一对象的 assignment 换序表示。两臂共用固定外层

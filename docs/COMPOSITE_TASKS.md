@@ -1,5 +1,11 @@
 # 有类型的组合任务
 
+2026-10-07 主线仿真试点：Hybrid 0.85 完成一次三段交换及一次 S1 回测，共 4 份
+原生 episode，目标段 Clef 9 / DeepSeek 0，回测为 6 / 1。
+[原始回执及审计纠正](../setup/acceptance/composite_api_20261007/README.md)保留首轮
+审计失败：父回执与 episode 的 9 位小数表示被误用全值 equality 比较。修正版只对齐
+既有 EpisodeRecorder 序列化，未放宽原精度误差门槛；没有重跑组合或替换原始回执。
+
 `/run_composite` (`flexcell_interfaces/action/RunComposite`) 接收一个显式、有界的
 搬运链，允许同一对象多次出现。各段复用现有 RunPickPlace 的策略/Skill 执行器；
 FSM、Clef、DeepSeek 仍决定段内动作。外层顺序由调用者提供。

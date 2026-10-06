@@ -1,5 +1,15 @@
 # EXPERIMENTS — log
 
+> 2026-10-07 CORE-001: bounded RunComposite action uses the existing policy/Skill
+> seam and one common arm admission lease throughout all stages. One registered
+> Hybrid swap and one S1 regression completed; 4 native episodes, Clef 9/0 on the
+> target and 6/1 on S1, 30 confirmed controller terminals. 300 skills and 42
+> instrument/audit tests passed. The original driver exited 1 at exact float
+> comparison; its failure and auditor are retained, with a read-only nine-decimal
+> serialization correction and completion of the single already registered S1.
+> No target resampling, prompt/calibration change or large-batch unfreezing.
+> [API receipts and limits](../setup/acceptance/composite_api_20261007/README.md).
+
 > 2026-10-06 TransferBench T3 (TB-003): registered one buffer-assisted B/A/B swap
 > and one S1 regression per arm. FSM and Hybrid each completed 1/1 + 1/1; 8 native
 > episodes, 60 successful controller goal terminals, no quarantine or resampling.

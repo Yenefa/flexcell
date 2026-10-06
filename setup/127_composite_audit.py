@@ -7,6 +7,7 @@ from pathlib import Path
 
 from flexcell_skills.contracts.composite import matches, native_success, positions, vacant, validate_plan
 from flexcell_skills.contracts.routing_audit import audit_routing_episode
+from flexcell_skills.contracts.episode import _sanitize
 
 
 def require(value, detail):
@@ -48,7 +49,9 @@ def audit(receipt, episodes, deployment):
         episode = json.loads(candidates[0].read_text())
         require(episode['runtime_fingerprint'] == first['runtime_fingerprint'] and episode['run_id'] == component['run_id'], 'component identity mismatch')
         final = episode['final_state']
-        require(final == component['final_state'], 'native final state differs from recorded component')
+        # EpisodeRecorder freezes floats to nine decimals. Compare that exact
+        # representation; native_success still checks unrounded finite errors.
+        require(final == _sanitize(component['final_state']), 'native final state differs from recorded component')
         require(final['parent_run_id'] == first['run_id'] and final['stage_id'] == sid
                 and final['execution_kind'] == 'IN_PROCESS_COMPONENT' and final['component_execution_id'] == goal_uuid,
                 'internal execution correlation mismatch')
@@ -69,7 +72,8 @@ def audit(receipt, episodes, deployment):
     actual = positions(final['observation'], expected)
     require(matches(actual, expected, tol) and all(vacant(actual, dest, clearance) for dest in plan['final_empty_positions']), 'joint final predicate failed')
     require(terminal['completed_stage_ids'] == stage_ids and terminal['component_run_ids'] == run_ids and terminal['component_goal_uuids'] == goal_ids, 'terminal progress mismatch')
-    return dict(ok=True, run_id=first['run_id'], runtime_fingerprint=first['runtime_fingerprint'],
+    return dict(ok=True, schema_version=2, serialization='EpisodeRecorder._sanitize (nine decimal places)',
+                run_id=first['run_id'], runtime_fingerprint=first['runtime_fingerprint'],
                 completed_stage_ids=stage_ids, component_run_ids=run_ids, observations=2*len(stage_ids)+1, routing=routing,
                 final_positions=actual, physical_safety='NOT_RUN', qualification='FROZEN',
                 correlation='components run in-process; their UUIDs are internal execution IDs, not accepted DDS action goals')
