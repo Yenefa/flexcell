@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/home/ros/agentic_workcell_ws/setup/acceptance/composite_api_20261007/scripts/pilot.py", line 140, in <module>
+    elif sys.argv[1:]==['run']:run()
+                               ^^^^^
+  File "/home/ros/agentic_workcell_ws/setup/acceptance/composite_api_20261007/scripts/pilot.py", line 122, in run
+    report=audit_module().audit(directory/'parent.jsonl',episodes,deployment);base.write(directory/'audit.json',report)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ros/agentic_workcell_ws/setup/127_composite_audit.py", line 51, in audit
+    require(final == component['final_state'], 'native final state differs from recorded component')
+  File "/home/ros/agentic_workcell_ws/setup/127_composite_audit.py", line 14, in require
+    raise ValueError(detail)
+ValueError: native final state differs from recorded component

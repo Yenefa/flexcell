@@ -1,0 +1,68 @@
+{
+  "ok": true,
+  "schema_version": 2,
+  "serialization": "EpisodeRecorder._sanitize (nine decimal places)",
+  "run_id": "composite-ae09f5b4f0af4856",
+  "runtime_fingerprint": "5dc07d3c0f5ce8b1cadd14549a9d7a238ff33de6871912e19e93c0796398fea9",
+  "completed_stage_ids": [
+    "buffer-B",
+    "relocate-A",
+    "return-B"
+  ],
+  "component_run_ids": [
+    "pick_place_v1-b5fdbecc",
+    "pick_place_v1-ba0f508e",
+    "pick_place_v1-45eb1084"
+  ],
+  "observations": 7,
+  "routing": [
+    {
+      "ok": true,
+      "errors": [],
+      "bootstrap": 1,
+      "model_decisions": 3,
+      "fast_selected": 3,
+      "slow_selected": 0,
+      "fsm_fallbacks": 0,
+      "fast_calls": 3,
+      "fast_tokens": 4137
+    },
+    {
+      "ok": true,
+      "errors": [],
+      "bootstrap": 1,
+      "model_decisions": 3,
+      "fast_selected": 3,
+      "slow_selected": 0,
+      "fsm_fallbacks": 0,
+      "fast_calls": 3,
+      "fast_tokens": 4213
+    },
+    {
+      "ok": true,
+      "errors": [],
+      "bootstrap": 1,
+      "model_decisions": 3,
+      "fast_selected": 3,
+      "slow_selected": 0,
+      "fsm_fallbacks": 0,
+      "fast_calls": 3,
+      "fast_tokens": 4213
+    }
+  ],
+  "final_positions": {
+    "target_box_a": [
+      0.20028234615261895,
+      -0.17752401185400352,
+      0.017498982302326587
+    ],
+    "target_box_b": [
+      0.22205151489936717,
+      0.0012476499496305606,
+      0.017499363417257534
+    ]
+  },
+  "physical_safety": "NOT_RUN",
+  "qualification": "FROZEN",
+  "correlation": "components run in-process; their UUIDs are internal execution IDs, not accepted DDS action goals"
+}

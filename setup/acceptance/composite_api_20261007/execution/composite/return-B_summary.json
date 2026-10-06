@@ -1,0 +1,57 @@
+{
+  "record_kind": "ACTUAL_NATIVE_COMPONENT",
+  "stage_id": "return-B",
+  "parent_run_id": "composite-ae09f5b4f0af4856",
+  "component": {
+    "detail": "task done: all assignments verified",
+    "episode_path": "/home/ros/.ros/flexcell/episodes/pick_place_v1_pick_place_v1-45eb1084.json",
+    "error_code": 0,
+    "final_position_error_m": 0.002401113113615477,
+    "final_state": {
+      "component_execution_id": "1e0446b7530c4bfea4a118b9e9a5af2d",
+      "detail": "task done: all assignments verified",
+      "duration_s": 22.75268190100178,
+      "error_code": 0,
+      "evidence_id": "pick_place_v1-f993fa00",
+      "execution_kind": "IN_PROCESS_COMPONENT",
+      "final_position_error_m": 0.002401113113615477,
+      "fsm_trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK"
+      ],
+      "goal_uuid": "1e0446b7530c4bfea4a118b9e9a5af2d",
+      "object_at_place": true,
+      "outcome": "0",
+      "parent_run_id": "composite-ae09f5b4f0af4856",
+      "safety": {
+        "evaluated": 4,
+        "invalid_per_1000": 0.0,
+        "rejected": 0
+      },
+      "stage_id": "return-B"
+    },
+    "goal_uuid": "1e0446b7530c4bfea4a118b9e9a5af2d",
+    "object_at_place": true,
+    "outcome": 0,
+    "parent_run_id": "composite-ae09f5b4f0af4856",
+    "run_id": "pick_place_v1-45eb1084",
+    "stage_id": "return-B",
+    "terminal_status": "SUCCEEDED"
+  },
+  "audit": {
+    "ok": true,
+    "errors": [],
+    "bootstrap": 1,
+    "model_decisions": 3,
+    "fast_selected": 3,
+    "slow_selected": 0,
+    "fsm_fallbacks": 0,
+    "fast_calls": 3,
+    "fast_tokens": 4213
+  },
+  "raw_episode": {
+    "path": "/home/ros/agentic_workcell_ws/setup/acceptance/composite_api_20261007/execution/composite/episodes/pick_place_v1_pick_place_v1-45eb1084.json",
+    "sha256": "1d629074f9b2c643ed5efaf6d164ed984f917ad7046161db650cc9dd567a3447"
+  }
+}
