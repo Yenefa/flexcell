@@ -1,5 +1,21 @@
 # EXPERIMENTS — log
 
+> 2026-10-06 TransferBench T3 (TB-003): registered one buffer-assisted B/A/B swap
+> and one S1 regression per arm. FSM and Hybrid each completed 1/1 + 1/1; 8 native
+> episodes, 60 successful controller goal terminals, no quarantine or resampling.
+> Clef selected all 9 target decisions; S1 used Clef 6 / DeepSeek 1. A common fixed
+> outer dependency executor was added (352 code lines + 59 registration-time test
+> lines); partial development elapsed is not full human engineering cost. 36
+> instrument tests passed. [Composite/native receipts and cost boundaries](../setup/acceptance/transferbench_t3_20261006/README.md).
+> AC@90, physical safety and n≥50 remain frozen.
+
+> 2026-10-06 school startup health (NET-001): actual DERP(tok) relay; legacy 2s
+> TCP probe failed while explicit 10s probe completed in 2.337s. A deployment-scoped
+> helper and manifest field preserve unchanged prompt/calibration identity; 12
+> targeted tests and 260 skills pytest passes. Mirrored networking and proxy config
+> retained; direct-connect root cause UNKNOWN and network stability NOT_ACCEPTED.
+> [Diagnostics, failure preservation and runtime activation](../setup/acceptance/startup_health_20261006/README.md).
+
 > 2026-10-06 TransferBench T1 pilot (TB-002): pre-registered two new layouts and
 > one S1 source regression per arm, from d58f4f1; FSM 2/2 + 1/1, Hybrid 2/2 + 1/1.
 > Frozen task/Skill sources were reused by both arms. Hybrid selected Clef 18 times

@@ -1,6 +1,8 @@
 """The swap needs a second B task and a fresh joint success predicate."""
 
 import copy
+import json
+from pathlib import Path
 import unittest
 
 import t3_swap_pilot as pilot
@@ -54,6 +56,34 @@ class SwapTests(unittest.TestCase):
         for value in (False,0.0,'00','0.0',None):
             altered=copy.deepcopy(episode);altered['final_state']['outcome']=value
             self.assertFalse(pilot.single_pass(altered,result,0,target))
+
+    def test_real_native_episodes_and_final_joint_observe(self):
+        root=Path(__file__).resolve().parents[1]/'acceptance/transferbench_t3_20261006'
+        count=0
+        for arm in ('fsm','hybrid'):
+            parent=json.loads((root/arm/'composite/summary.json').read_text())
+            self.assertTrue(pilot.composite_pass(parent['components'],parent['final_observe']))
+            for path in (root/arm).glob('**/episode.json'):
+                summary=json.loads((path.parent/'summary.json').read_text())
+                client=json.loads((path.parent/'client.json').read_text())
+                episode=json.loads(path.read_text());result=pilot.base.result_from_output(client['stdout'])
+                self.assertEqual(episode['final_state']['outcome'],'0')
+                if summary['target']:
+                    self.assertTrue(pilot.single_pass(episode,result,client['return_code'],summary['target']))
+                else:
+                    self.assertTrue(pilot.base.success_predicate(episode,result,client['return_code']))
+                count+=1
+        self.assertEqual(count,8)
+
+    def test_report_rechecks_real_receipts_without_modifying_ledger(self):
+        import report_t3_swap
+        root=Path(__file__).resolve().parents[1]/'acceptance/transferbench_t3_20261006'
+        before=(root/'cost.jsonl').read_bytes()
+        result=report_t3_swap.report(root)
+        self.assertEqual(result['native_episode_count'],8)
+        self.assertTrue(all(a['composite_outcome']=='SUCCEEDED' for a in result['arms']))
+        self.assertTrue(all(a['unknown_or_quarantined_transport_events']==0 for a in result['arms']))
+        self.assertEqual((root/'cost.jsonl').read_bytes(),before)
 
 
 if __name__=='__main__':unittest.main()

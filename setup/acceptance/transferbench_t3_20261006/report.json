@@ -1,0 +1,393 @@
+{
+  "record_kind": "ACTUAL_COMPOSITE_TASK_PILOT_REPORT",
+  "protocol_id": "flexcell-transferbench-t3-swap-v1",
+  "model_scope": "native task action routing; outer dependency sequence fixed for both arms",
+  "arms": [
+    {
+      "arm": "fsm",
+      "runtime_fingerprint": "b673f3fda4ca050c3782054c564ac0cad19a34a68af1fb23bed7c7ffba470385",
+      "calibration_sha256": null,
+      "composite_attempts": 1,
+      "composite_outcome": "SUCCEEDED",
+      "composite_id": "t3-swap-fsm-a45424af",
+      "source_regression_outcome": "SUCCEEDED",
+      "stop_reason": null,
+      "native_trials": [
+        {
+          "stage_id": "buffer-B",
+          "run_id": "pick_place_v1-8b0c0a8a",
+          "outcome": "SUCCEEDED"
+        },
+        {
+          "stage_id": "relocate-A",
+          "run_id": "pick_place_v1-54d35a2c",
+          "outcome": "SUCCEEDED"
+        },
+        {
+          "stage_id": "return-B",
+          "run_id": "pick_place_v1-6d8bc995",
+          "outcome": "SUCCEEDED"
+        },
+        {
+          "stage_id": "S1-source-regression",
+          "run_id": "week1_demo_v1-d6699f5a",
+          "outcome": "SUCCEEDED"
+        }
+      ],
+      "native_episode_count": 4,
+      "final_joint_positions": {
+        "target_box_a": [
+          0.209,
+          -0.1761,
+          0.0175
+        ],
+        "target_box_b": [
+          0.2152,
+          0.0071,
+          0.0175
+        ]
+      },
+      "buffer_clear": true,
+      "routing": {
+        "replay": "PASS"
+      },
+      "decision_latency": {
+        "adaptation": {
+          "status": "MEASURED_DIAGNOSTIC",
+          "clock": "perf_counter_ns",
+          "n": 9,
+          "p50_ms": 0.008894,
+          "p95_ms": 0.028558999999999994,
+          "percentile_method": "linear interpolation, index=(n-1)*q",
+          "scope": "non-bootstrap complete policy.decide including escalation; not GPU-only latency"
+        },
+        "regression": {
+          "status": "MEASURED_DIAGNOSTIC",
+          "clock": "perf_counter_ns",
+          "n": 7,
+          "p50_ms": 0.008954,
+          "p95_ms": 0.01856089999999999,
+          "percentile_method": "linear interpolation, index=(n-1)*q",
+          "scope": "non-bootstrap complete policy.decide including escalation; not GPU-only latency"
+        }
+      },
+      "controller_goal_terminals": 30,
+      "controller_terminal_status_counts": {
+        "4": 30
+      },
+      "unknown_or_quarantined_transport_events": 0
+    },
+    {
+      "arm": "hybrid",
+      "runtime_fingerprint": "9250f98b789514e57f3779d6efa326989b576d8e0bea925a6f37dd3f2dbbcf93",
+      "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+      "composite_attempts": 1,
+      "composite_outcome": "SUCCEEDED",
+      "composite_id": "t3-swap-hybrid-0a639573",
+      "source_regression_outcome": "SUCCEEDED",
+      "stop_reason": null,
+      "native_trials": [
+        {
+          "stage_id": "buffer-B",
+          "run_id": "pick_place_v1-ae1ac1ea",
+          "outcome": "SUCCEEDED"
+        },
+        {
+          "stage_id": "relocate-A",
+          "run_id": "pick_place_v1-db2162e9",
+          "outcome": "SUCCEEDED"
+        },
+        {
+          "stage_id": "return-B",
+          "run_id": "pick_place_v1-6774dbdd",
+          "outcome": "SUCCEEDED"
+        },
+        {
+          "stage_id": "S1-source-regression",
+          "run_id": "week1_demo_v1-1a0e12de",
+          "outcome": "SUCCEEDED"
+        }
+      ],
+      "native_episode_count": 4,
+      "final_joint_positions": {
+        "target_box_a": [
+          0.1915,
+          -0.1807,
+          0.0175
+        ],
+        "target_box_b": [
+          0.209,
+          0.0025,
+          0.0175
+        ]
+      },
+      "buffer_clear": true,
+      "routing": {
+        "adaptation": {
+          "fast_selected": 9,
+          "slow_selected": 0,
+          "fast_calls": 9,
+          "fast_tokens": 12561,
+          "fsm_fallbacks": 0
+        },
+        "regression": {
+          "fast_selected": 6,
+          "slow_selected": 1,
+          "fast_calls": 7,
+          "fast_tokens": 10120,
+          "fsm_fallbacks": 0
+        }
+      },
+      "decision_latency": {
+        "adaptation": {
+          "status": "MEASURED_DIAGNOSTIC",
+          "clock": "perf_counter_ns",
+          "n": 9,
+          "p50_ms": 2798.661364,
+          "p95_ms": 3745.7262696,
+          "percentile_method": "linear interpolation, index=(n-1)*q",
+          "scope": "non-bootstrap complete policy.decide including escalation; not GPU-only latency"
+        },
+        "regression": {
+          "status": "MEASURED_DIAGNOSTIC",
+          "clock": "perf_counter_ns",
+          "n": 7,
+          "p50_ms": 2819.210829,
+          "p95_ms": 3480.8532741999998,
+          "percentile_method": "linear interpolation, index=(n-1)*q",
+          "scope": "non-bootstrap complete policy.decide including escalation; not GPU-only latency"
+        }
+      },
+      "controller_goal_terminals": 30,
+      "controller_terminal_status_counts": {
+        "4": 30
+      },
+      "unknown_or_quarantined_transport_events": 0
+    }
+  ],
+  "native_episode_count": 8,
+  "ledger": {
+    "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t3_20261006/cost.jsonl",
+    "sha256": "54be40db29d66fcff3f43bd4f902e28eaf9d9c8448b83fa731f04bef5188ee6b"
+  },
+  "native_trial_cells": [
+    {
+      "arm": "fsm",
+      "purpose": "adaptation",
+      "case_id": "buffer-B",
+      "runtime_fingerprint": "b673f3fda4ca050c3782054c564ac0cad19a34a68af1fb23bed7c7ffba470385",
+      "calibration_sha256": null,
+      "outcomes": {
+        "SUCCEEDED": 1
+      },
+      "completed_denominator": 1,
+      "retained_attempts": 1,
+      "observed_success_rate": 1.0,
+      "diagnostic_wilson_95_lower": 0.20654329147389294,
+      "large_sample_review_required": false
+    },
+    {
+      "arm": "fsm",
+      "purpose": "adaptation",
+      "case_id": "relocate-A",
+      "runtime_fingerprint": "b673f3fda4ca050c3782054c564ac0cad19a34a68af1fb23bed7c7ffba470385",
+      "calibration_sha256": null,
+      "outcomes": {
+        "SUCCEEDED": 1
+      },
+      "completed_denominator": 1,
+      "retained_attempts": 1,
+      "observed_success_rate": 1.0,
+      "diagnostic_wilson_95_lower": 0.20654329147389294,
+      "large_sample_review_required": false
+    },
+    {
+      "arm": "fsm",
+      "purpose": "adaptation",
+      "case_id": "return-B",
+      "runtime_fingerprint": "b673f3fda4ca050c3782054c564ac0cad19a34a68af1fb23bed7c7ffba470385",
+      "calibration_sha256": null,
+      "outcomes": {
+        "SUCCEEDED": 1
+      },
+      "completed_denominator": 1,
+      "retained_attempts": 1,
+      "observed_success_rate": 1.0,
+      "diagnostic_wilson_95_lower": 0.20654329147389294,
+      "large_sample_review_required": false
+    },
+    {
+      "arm": "fsm",
+      "purpose": "regression",
+      "case_id": "S1-source-regression",
+      "runtime_fingerprint": "b673f3fda4ca050c3782054c564ac0cad19a34a68af1fb23bed7c7ffba470385",
+      "calibration_sha256": null,
+      "outcomes": {
+        "SUCCEEDED": 1
+      },
+      "completed_denominator": 1,
+      "retained_attempts": 1,
+      "observed_success_rate": 1.0,
+      "diagnostic_wilson_95_lower": 0.20654329147389294,
+      "large_sample_review_required": false
+    },
+    {
+      "arm": "hybrid",
+      "purpose": "adaptation",
+      "case_id": "buffer-B",
+      "runtime_fingerprint": "9250f98b789514e57f3779d6efa326989b576d8e0bea925a6f37dd3f2dbbcf93",
+      "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+      "outcomes": {
+        "SUCCEEDED": 1
+      },
+      "completed_denominator": 1,
+      "retained_attempts": 1,
+      "observed_success_rate": 1.0,
+      "diagnostic_wilson_95_lower": 0.20654329147389294,
+      "large_sample_review_required": false
+    },
+    {
+      "arm": "hybrid",
+      "purpose": "adaptation",
+      "case_id": "relocate-A",
+      "runtime_fingerprint": "9250f98b789514e57f3779d6efa326989b576d8e0bea925a6f37dd3f2dbbcf93",
+      "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+      "outcomes": {
+        "SUCCEEDED": 1
+      },
+      "completed_denominator": 1,
+      "retained_attempts": 1,
+      "observed_success_rate": 1.0,
+      "diagnostic_wilson_95_lower": 0.20654329147389294,
+      "large_sample_review_required": false
+    },
+    {
+      "arm": "hybrid",
+      "purpose": "adaptation",
+      "case_id": "return-B",
+      "runtime_fingerprint": "9250f98b789514e57f3779d6efa326989b576d8e0bea925a6f37dd3f2dbbcf93",
+      "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+      "outcomes": {
+        "SUCCEEDED": 1
+      },
+      "completed_denominator": 1,
+      "retained_attempts": 1,
+      "observed_success_rate": 1.0,
+      "diagnostic_wilson_95_lower": 0.20654329147389294,
+      "large_sample_review_required": false
+    },
+    {
+      "arm": "hybrid",
+      "purpose": "regression",
+      "case_id": "S1-source-regression",
+      "runtime_fingerprint": "9250f98b789514e57f3779d6efa326989b576d8e0bea925a6f37dd3f2dbbcf93",
+      "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+      "outcomes": {
+        "SUCCEEDED": 1
+      },
+      "completed_denominator": 1,
+      "retained_attempts": 1,
+      "observed_success_rate": 1.0,
+      "diagnostic_wilson_95_lower": 0.20654329147389294,
+      "large_sample_review_required": false
+    }
+  ],
+  "effort_minutes": {
+    "fsm": {
+      "human": null,
+      "coding_agent": 1.99369471865,
+      "wait": null
+    },
+    "hybrid": {
+      "human": null,
+      "coding_agent": 2.8369823690166664,
+      "wait": null
+    }
+  },
+  "effort_status": {
+    "fsm": {
+      "human": "NOT_RUN",
+      "coding_agent": "RECORDED",
+      "wait": "NOT_RUN"
+    },
+    "hybrid": {
+      "human": "NOT_RUN",
+      "coding_agent": "RECORDED",
+      "wait": "NOT_RUN"
+    }
+  },
+  "shared_engineering": {
+    "record_kind": "PROSPECTIVE_PARTIAL_SHARED_DEVELOPMENT_INTERVAL",
+    "baseline_revision": "1bcc7c09fede9d2b5cbb6afec4e375dd72ae0446",
+    "executor_revision": "96c233d552b604c7afeea47e959317d51c15a180",
+    "clock_id": "9a6838ce-bcf6-4ea1-a70e-0daa30dcf9ab",
+    "start_ns": 29564217283419,
+    "end_ns": 30116616472095,
+    "elapsed_minutes": 9.206653165683333,
+    "scope": "shared T3 executor writing/review/unit testing; interval also includes network-receipt delivery overhead; not active work time",
+    "earlier_planning": "NOT_RUN",
+    "network_fix_engineering_time": "NOT_RUN",
+    "human_minutes": "NOT_RUN",
+    "coding_assistant_tokens_and_fees": "NOT_RUN",
+    "allocation": "report once as shared work; do not duplicate across arms or infer zero migration cost",
+    "code_changes": [
+      {
+        "path": "setup/transferbench/t3_swap_pilot.py",
+        "added": 352,
+        "deleted": 0
+      },
+      {
+        "path": "setup/transferbench/test_t3_swap_pilot.py",
+        "added": 59,
+        "deleted": 0
+      }
+    ],
+    "rules_added": null,
+    "states_added": null
+  },
+  "api_usage": [
+    {
+      "arm": "hybrid",
+      "scope": "adaptation",
+      "currency": "CNY",
+      "requests": 9,
+      "known_amount_subtotal": 0,
+      "unknown_amount_requests": 9,
+      "known_input_tokens": 0,
+      "known_output_tokens": 0,
+      "unknown_token_requests": 9,
+      "amount_status": "INCOMPLETE"
+    },
+    {
+      "arm": "hybrid",
+      "scope": "evaluation",
+      "currency": "CNY",
+      "requests": 8,
+      "known_amount_subtotal": 0,
+      "unknown_amount_requests": 8,
+      "known_input_tokens": 1510,
+      "known_output_tokens": 62,
+      "unknown_token_requests": 7,
+      "amount_status": "INCOMPLETE"
+    }
+  ],
+  "additional_paid_peak_uncached_upper_bound_cny": 0.003516,
+  "invoice": "UNKNOWN",
+  "gpu_energy_and_ownership_cost": "UNKNOWN",
+  "comparison": "one composite attempt per arm, fixed order; no cost/reliability superiority claim",
+  "AC90": "NOT_RUN",
+  "qualification": "FROZEN",
+  "n_ge_50": "FROZEN",
+  "physical_safety_acceptance": "NOT_RUN",
+  "network_stability": "NOT_ACCEPTED; DERP relay and earlier TCP failures retained",
+  "receipt_pins": [
+    {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t3_20261006/fsm/composite/summary.json",
+      "sha256": "698ce094a32a2f199992948b76b49ce92a26c01e8888c0acb852faad5f72bc6a"
+    },
+    {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t3_20261006/hybrid/composite/summary.json",
+      "sha256": "865d2ddb7ace89bad7c50559be82b778431dcc0fde58c102f33b23774e2b915c"
+    }
+  ]
+}

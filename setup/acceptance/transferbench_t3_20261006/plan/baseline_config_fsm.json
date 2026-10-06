@@ -1,0 +1,178 @@
+{
+  "policy": "fsm",
+  "threshold": 0.85,
+  "protocol_sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+  "host_clock_context": {
+    "hyperv_timesync_implicit": "1",
+    "systemd_timesyncd": "inactive"
+  },
+  "interface_sources_sha256": {
+    "src/flexcell/flexcell_interfaces/package.xml": "890652c95eec1ad6f7309e7d0348856e2e98476f544d4769462b40adc52756f4",
+    "src/flexcell/flexcell_interfaces/CMakeLists.txt": "61ed4eccfb51a853652fbee68a9b6b0194e8dbd99bad9e069a1c2bb42fab0054",
+    "src/flexcell/flexcell_interfaces/action/MoveToPose.action": "e240dad9326435e0ef6d524a0c05c5e500f3411b6c8f3239c6ff88254e7ffbf5",
+    "src/flexcell/flexcell_interfaces/action/VerifyObject.action": "0881672df539feb9fafb3e869c0db4b9775e48ee942e3d5aeb482fb573e27b3d",
+    "src/flexcell/flexcell_interfaces/action/Observe.action": "7ebb485193debba8fedbfd1d06e99049a77756049d40c4badbccbde60ea80ae6",
+    "src/flexcell/flexcell_interfaces/action/RunPickPlace.action": "5e0e7a419540d66eb6c8cdda04ed38cc24d1c10449d5a5c36ed388a4a1764126",
+    "src/flexcell/flexcell_interfaces/action/PickObject.action": "83c1956225d2d83d230a12a02e1c6578020df48ba608486acc42afc216f92e8a",
+    "src/flexcell/flexcell_interfaces/action/RunDemo.action": "89f59b3fc7af42bef5568ad43c8ba441783353bea909a0cd901da3db73aac1b9",
+    "src/flexcell/flexcell_interfaces/action/PlaceObject.action": "1fbef7be2b0c65a5556ba5c0fdf63ddec631a90e0667154ca23c4ad71c6b313a",
+    "src/flexcell/flexcell_interfaces/srv/QueryCarry.srv": "4bc70d47ba6c0b92c905b83f430b7a17c72ec14d924f827b00d166ac84a51135",
+    "src/flexcell/flexcell_interfaces/srv/EngageCarry.srv": "595b2dab7cdfd721f4cace50662d415385548c925f876ef137b089587b2c9f2a",
+    "src/flexcell/flexcell_interfaces/msg/Assignment.msg": "434f5ade7a879157ab57b3b71c17e409d2ee2d75064006fd4bd1f241dfd76f6a",
+    "src/flexcell/flexcell_interfaces/msg/WorldState.msg": "27c04764826a6ef69346ceb7115a88c5622889048c9d719508a45d9a43c32207",
+    "src/flexcell/flexcell_interfaces/msg/TaskContext.msg": "1a27d4d5063d2da2d4bb2cfd1a5e41c2b7acfdeb9ee834034847efd00ab331fc",
+    "src/flexcell/flexcell_interfaces/msg/TaskConstraints.msg": "e71af89133cd4e5546c68c13e89a0161b81b1d2182eff2e967affdddbf4d5905",
+    "src/flexcell/flexcell_interfaces/msg/RobotStateSummary.msg": "e0aa94711c8a542d1c7a49aedbe9ddf5f41ec96440544e0559ad6d7ced66f16a",
+    "src/flexcell/flexcell_interfaces/msg/ZoneState.msg": "ff5cbc173d74b69a77ddbbe113a10c93a95093c05b7c8e3bdf536b6ef41422de",
+    "src/flexcell/flexcell_interfaces/msg/HistoryEntry.msg": "a8d3843da671dcb5c4c696094afb466239f34fff02d915bfe9bb4593221fea5a",
+    "src/flexcell/flexcell_interfaces/msg/WorldObject.msg": "2cef6aae25356229abed3c05360296c5a80445f18532dcb5327f395333e87cb8",
+    "src/flexcell/flexcell_interfaces/msg/CarryState.msg": "7f97e5067cb88851caf4203d91b97ad252dccd10380a0af798e13d337d9b6dab"
+  },
+  "installed_source_sha256": {
+    "place_server.py": "96e2df61152137ab11a6cf6d7fb332b7fef5f3288ac89ae473ad2fdb3c6b929a",
+    "jev_policy.py": "d2f542472b530e6186a8572df5697a44ec52f36a0a753f87b23962c76e7f8ff7",
+    "hybrid_policy.py": "2da2d17f79c2684b4912f8a4a071696c082b662a6b7c55de14ba8e0033368781",
+    "carry_server.py": "15f9f1b9cbbdd772a6bab1fe644a066e468c0484cf2b7a7e3be72caa834d55db",
+    "canonical_state.py": "8e3c9f0f32ac0202d9eb34a36cf8fa460ce5c735800c942c90b5bace7894b655",
+    "decision_policy.py": "805b532d0bdde387229f68486929873d4246c74048073883e5e0baf040875bc3",
+    "__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "pose_stream_worker.py": "a4550a750447b3c4fb9502a900ccb3383fb2be59554d8cd4bb6eda504073f07d",
+    "observe_server.py": "168ccaa7fafcb1f66696ede1e391c2c8176fd5b47337892cb979037386fe31f9",
+    "skill_contract.py": "14fd903e6680d50f02a854f71de8bf7ea76329334b186375d8fb2d4032fe5eb6",
+    "llm_policy.py": "40e61187ce87c3d57f94588e8703960a8d8cc3bc19ec5b4e6d3597e90046d86b",
+    "confidence_calibration.py": "528dcaaebb4d6c98232f6bd85c7c3506fdd8ccbf83386bfc17c48861b98cbb41",
+    "inference_budget.py": "addb4fc44c5336e039dc8d3a14c75043028b228d18f9fabe3e81d3ecefeb6f30",
+    "pose_request_worker.py": "fd76ad85717d4e6e6816d967a5fdf4d2f5efab2a0a95ea311f0f907a15ce2904",
+    "task_fsm_server.py": "96befb408db7f48659402c0a274f2a68b11d1759dd2376e0d43bdfee386c5456",
+    "common.py": "bd454d744e00d4c45b897c759c65f2ee8390ab5b86d0909a08e4a678b7c7eaee",
+    "verify_server.py": "5ba413c948a72e79b399bf5ab5a8bef544769aef35b73369c87e5da0c3380581",
+    "pick_server.py": "8db5d4e3cb468d58a0c816382ac0ed486f593ba68d51faa5d83b65a48c911cd2",
+    "move_to_pose_server.py": "d4a5f49eb868f5654ae14f2a178f384918b0cde1f47c5a2cc341cd9a7b0ab301",
+    "jev_backends.py": "b37e71cd0b9b0ff81cfa3638111da8375251be2fadeabc01468ce46b5f4e85b8",
+    "contracts/recovery.py": "9da093f08d5a3a1a68e8fad232a21ce94f186310ed6760920c344857a00e2ac0",
+    "contracts/injection.py": "0846cf172cd196311d84e21307dfa655842262103a497e61f442fc496f34c369",
+    "contracts/benchmark_protocol.py": "80850e36663e7427d1cccbc0304d442e338fbc3a2fa84a965a40c20c03f57977",
+    "contracts/episode.py": "a4504f539680233a1fc0d50808e42bd8df5b04ea20e1f17453fe334139f778e8",
+    "contracts/trajectory.py": "0e573ec40181c5e379611b559abf753cf4b3e2a879313764564c7bc00d4a9e79",
+    "contracts/__init__.py": "b4529fdefce9fd91518814bb684cb28f17aa1d5edf3c84ce0904480e19c6bd3a",
+    "contracts/action_result.py": "8c70c1de6f5fd0329db0ec23bf9c39878ada56f541899315db710ddffac4edf5",
+    "contracts/backend_health.py": "c1e728ed39d4065bbc0ab43f365345aa5a534f85c0afb9d40fb7b1e73c04d78c",
+    "contracts/error_codes.py": "c7b5aff2295bc5ce3436d24fbfe3ab1f41190c88826c28747cf7339f5b23ccf1",
+    "contracts/skill_result.py": "473bd79ffd4317799d8ad2619095b9128d01162d9efd971d39a69a99fdc10572",
+    "contracts/safety_gate.py": "d3f056b3c8d089604cea472952bd4b3984417ba638e1b8e5c111196010a4e057",
+    "contracts/goal_response.py": "0e322fc4d4d676f6684b4e96333f4ecc62a379845daa8a06bd24292dbb0d711e",
+    "contracts/metrics.py": "feaa7ccbf36b10af0affb2c11cde820136aec1e49ecd5d405662df5038fb06ed",
+    "contracts/routing_audit.py": "74c2bafce23c01a821af8e3a12a44237af7109774503adbc8be9f91a08d6fc10"
+  },
+  "simulation_backend": {
+    "carry": "velocity_servo",
+    "native_sources": {
+      "src/flexcell/flexcell_gazebo/package.xml": "cc4dbbc86ff674f3cc5218018e22068c566cbada495f9fc45d821c1c45c1bde1",
+      "src/flexcell/flexcell_gazebo/CMakeLists.txt": "963c4f1e6cdc5480ef8a201477e0d24f5005ad9ed0ec1fcaeb1bafa94c5d0e24",
+      "src/flexcell/flexcell_gazebo/src/CarryDynamics.cc": "2b2a4ec0c60edd74982636e0923021d906409dc175849956474f154b43710783",
+      "src/flexcell/flexcell_gazebo/hooks/plugin_path.dsv": "777d044a3a3d3751f77abe96cc461d03fbbb59e8b80c6921338cda4f74dcfbf3"
+    },
+    "plugin_sha256": "62b572670119abf058139ee1878a5d2c95e7dc2b7c3e6887ead97cecc8b6e8db"
+  },
+  "params_sha256": "7107bd766aaa1206069c87f77b4df182ebedf9865e1f0dccf4dbad6c850a4bdd",
+  "harness_sha256": {
+    "setup/102_mainline_runtime.sh": "035466d2514225eb8dd384957793c59555df6266f6552ea3d8fcb5a77c33ab8e",
+    "setup/94_scenario_runner.py": "11934a15af27ce7f3db5322f685ffa0a0c9a209351ba3bdc02092cecae00e0e8",
+    "setup/flexcell_admin.py": "923ecda23fbc99b1ee955017fe6ebf36944876d4c6a573472f6d229eaf0f3177",
+    "setup/108_wait_policy.py": "eebc37282c6d816dc3e49dc1ddf38343b5d8ba8b5a8c144f845b0242d6810894",
+    "src/flexcell/flexcell_skills/test/w1_client.py": "86ad4b2ae9bbaf20ceda3f9b0e05051f99701ea58331bc0d2a782acbec58b370"
+  },
+  "source_sha256": {
+    "src/flexcell/flexcell_skills/flexcell_skills/place_server.py": "96e2df61152137ab11a6cf6d7fb332b7fef5f3288ac89ae473ad2fdb3c6b929a",
+    "src/flexcell/flexcell_skills/flexcell_skills/jev_policy.py": "d2f542472b530e6186a8572df5697a44ec52f36a0a753f87b23962c76e7f8ff7",
+    "src/flexcell/flexcell_skills/flexcell_skills/hybrid_policy.py": "2da2d17f79c2684b4912f8a4a071696c082b662a6b7c55de14ba8e0033368781",
+    "src/flexcell/flexcell_skills/flexcell_skills/carry_server.py": "15f9f1b9cbbdd772a6bab1fe644a066e468c0484cf2b7a7e3be72caa834d55db",
+    "src/flexcell/flexcell_skills/flexcell_skills/canonical_state.py": "8e3c9f0f32ac0202d9eb34a36cf8fa460ce5c735800c942c90b5bace7894b655",
+    "src/flexcell/flexcell_skills/flexcell_skills/decision_policy.py": "805b532d0bdde387229f68486929873d4246c74048073883e5e0baf040875bc3",
+    "src/flexcell/flexcell_skills/flexcell_skills/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "src/flexcell/flexcell_skills/flexcell_skills/pose_stream_worker.py": "a4550a750447b3c4fb9502a900ccb3383fb2be59554d8cd4bb6eda504073f07d",
+    "src/flexcell/flexcell_skills/flexcell_skills/observe_server.py": "168ccaa7fafcb1f66696ede1e391c2c8176fd5b47337892cb979037386fe31f9",
+    "src/flexcell/flexcell_skills/flexcell_skills/skill_contract.py": "14fd903e6680d50f02a854f71de8bf7ea76329334b186375d8fb2d4032fe5eb6",
+    "src/flexcell/flexcell_skills/flexcell_skills/llm_policy.py": "40e61187ce87c3d57f94588e8703960a8d8cc3bc19ec5b4e6d3597e90046d86b",
+    "src/flexcell/flexcell_skills/flexcell_skills/confidence_calibration.py": "528dcaaebb4d6c98232f6bd85c7c3506fdd8ccbf83386bfc17c48861b98cbb41",
+    "src/flexcell/flexcell_skills/flexcell_skills/inference_budget.py": "addb4fc44c5336e039dc8d3a14c75043028b228d18f9fabe3e81d3ecefeb6f30",
+    "src/flexcell/flexcell_skills/flexcell_skills/pose_request_worker.py": "fd76ad85717d4e6e6816d967a5fdf4d2f5efab2a0a95ea311f0f907a15ce2904",
+    "src/flexcell/flexcell_skills/flexcell_skills/task_fsm_server.py": "96befb408db7f48659402c0a274f2a68b11d1759dd2376e0d43bdfee386c5456",
+    "src/flexcell/flexcell_skills/flexcell_skills/common.py": "bd454d744e00d4c45b897c759c65f2ee8390ab5b86d0909a08e4a678b7c7eaee",
+    "src/flexcell/flexcell_skills/flexcell_skills/verify_server.py": "5ba413c948a72e79b399bf5ab5a8bef544769aef35b73369c87e5da0c3380581",
+    "src/flexcell/flexcell_skills/flexcell_skills/pick_server.py": "8db5d4e3cb468d58a0c816382ac0ed486f593ba68d51faa5d83b65a48c911cd2",
+    "src/flexcell/flexcell_skills/flexcell_skills/move_to_pose_server.py": "d4a5f49eb868f5654ae14f2a178f384918b0cde1f47c5a2cc341cd9a7b0ab301",
+    "src/flexcell/flexcell_skills/flexcell_skills/jev_backends.py": "b37e71cd0b9b0ff81cfa3638111da8375251be2fadeabc01468ce46b5f4e85b8",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/recovery.py": "9da093f08d5a3a1a68e8fad232a21ce94f186310ed6760920c344857a00e2ac0",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/injection.py": "0846cf172cd196311d84e21307dfa655842262103a497e61f442fc496f34c369",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/benchmark_protocol.py": "80850e36663e7427d1cccbc0304d442e338fbc3a2fa84a965a40c20c03f57977",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/episode.py": "a4504f539680233a1fc0d50808e42bd8df5b04ea20e1f17453fe334139f778e8",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/trajectory.py": "0e573ec40181c5e379611b559abf753cf4b3e2a879313764564c7bc00d4a9e79",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/__init__.py": "b4529fdefce9fd91518814bb684cb28f17aa1d5edf3c84ce0904480e19c6bd3a",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/action_result.py": "8c70c1de6f5fd0329db0ec23bf9c39878ada56f541899315db710ddffac4edf5",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/backend_health.py": "c1e728ed39d4065bbc0ab43f365345aa5a534f85c0afb9d40fb7b1e73c04d78c",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/error_codes.py": "c7b5aff2295bc5ce3436d24fbfe3ab1f41190c88826c28747cf7339f5b23ccf1",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/skill_result.py": "473bd79ffd4317799d8ad2619095b9128d01162d9efd971d39a69a99fdc10572",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/safety_gate.py": "d3f056b3c8d089604cea472952bd4b3984417ba638e1b8e5c111196010a4e057",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/goal_response.py": "0e322fc4d4d676f6684b4e96333f4ecc62a379845daa8a06bd24292dbb0d711e",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/metrics.py": "feaa7ccbf36b10af0affb2c11cde820136aec1e49ecd5d405662df5038fb06ed",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/routing_audit.py": "74c2bafce23c01a821af8e3a12a44237af7109774503adbc8be9f91a08d6fc10"
+  },
+  "models": {
+    "runtime": {
+      "version": "llama.cpp-b11284-win-vulkan-x64",
+      "file": "llama-b11284-bin-win-vulkan-x64.zip",
+      "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11284/llama-b11284-bin-win-vulkan-x64.zip",
+      "sha256": "69c70371c2c9fe3e80859cdbb48596aed3e4265627e470a90d5a9f66dd6779d5"
+    },
+    "fast": {
+      "model": "Qwen/Qwen2.5-1.5B-Instruct-GGUF",
+      "revision": "91cad51170dc346986eccefdc2dd33a9da36ead9",
+      "file": "qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "url": "https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct-GGUF/resolve/91cad51170dc346986eccefdc2dd33a9da36ead9/qwen2.5-1.5b-instruct-q4_k_m.gguf",
+      "sha256": "6a1a2eb6d15622bf3c96857206351ba97e1af16c30d7a74ee38970e434e9407e"
+    },
+    "slow": {
+      "model": "Qwen/Qwen2.5-3B-Instruct-GGUF",
+      "revision": "7dabda4d13d513e3e842b20f0d435c732f172cbe",
+      "file": "qwen2.5-3b-instruct-q4_k_m.gguf",
+      "url": "https://huggingface.co/Qwen/Qwen2.5-3B-Instruct-GGUF/resolve/7dabda4d13d513e3e842b20f0d435c732f172cbe/qwen2.5-3b-instruct-q4_k_m.gguf",
+      "sha256": "626b4a6678b86442240e33df819e00132d3ba7dddfe1cdc4fbb18e0a9615c62d"
+    },
+    "linux_runtime": {
+      "version": "llama.cpp-b11284-linux-cpu",
+      "file": "llama-b11284-bin-ubuntu-x64.tar.gz",
+      "url": "https://github.com/ggml-org/llama.cpp/releases/download/b11284/llama-b11284-bin-ubuntu-x64.tar.gz",
+      "sha256": "f53f2534e7ac8df1ef056117d215f1581feb6c426310d6423efac9adcdd5c2c8"
+    }
+  },
+  "active_backends": {
+    "fast": {
+      "endpoint": "http://100.87.190.44:11435/v1/systemone",
+      "model": "clef-flash-q8_0",
+      "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+      "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c"
+    },
+    "slow": {
+      "endpoint": "https://api.deepseek.com/chat/completions",
+      "model": "deepseek-flash",
+      "backend": "deepseek-official",
+      "response_format": "json_object",
+      "thinking": "disabled",
+      "max_tokens": 512,
+      "budget_limit_cny": 5,
+      "credential_configured": true
+    }
+  },
+  "policy_timeouts_s": {
+    "fast": 45.0,
+    "slow": 30.0
+  },
+  "server_context_tokens": 8192,
+  "startup_health_timeout_s": 10.0,
+  "ros_domain_id": 45,
+  "rmw_implementation": "rmw_cyclonedds_cpp",
+  "world_sha256": "951e15d282eec23142ad0d1c76c06fa4c8bfef7378fe9cdc95717fc8497ce7d7",
+  "dds_profile_sha256": "76797884e6745ec21ca2d23fd903e23f5cc77f01a60c6fc5ca4f3e59da057b30",
+  "runtime_fingerprint": "b673f3fda4ca050c3782054c564ac0cad19a34a68af1fb23bed7c7ffba470385"
+}

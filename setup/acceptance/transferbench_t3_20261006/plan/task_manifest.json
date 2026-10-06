@@ -1,0 +1,60 @@
+{
+  "protocol_id": "flexcell-transferbench-t3-swap-v1",
+  "migration_axis": "T3",
+  "arms": [
+    "fsm",
+    "hybrid"
+  ],
+  "order": "FSM then Hybrid, fixed",
+  "composite_attempts_per_arm": 1,
+  "components_per_composite": 3,
+  "source_regression_per_arm": 1,
+  "total_max_native_episodes": 8,
+  "stages": [
+    {
+      "id": "buffer-B",
+      "target": "target_box_b",
+      "destination": [
+        0.12,
+        -0.15,
+        0.0175
+      ],
+      "depends_on": null
+    },
+    {
+      "id": "relocate-A",
+      "target": "target_box_a",
+      "destination": [
+        0.2,
+        -0.18,
+        0.0175
+      ],
+      "depends_on": "buffer-B"
+    },
+    {
+      "id": "return-B",
+      "target": "target_box_b",
+      "destination": [
+        0.22,
+        0.0,
+        0.0175
+      ],
+      "depends_on": "relocate-A"
+    }
+  ],
+  "expected_fingerprints": {
+    "fsm": "b673f3fda4ca050c3782054c564ac0cad19a34a68af1fb23bed7c7ffba470385",
+    "hybrid": "9250f98b789514e57f3779d6efa326989b576d8e0bea925a6f37dd3f2dbbcf93"
+  },
+  "baseline_revision": "1bcc7c09fede9d2b5cbb6afec4e375dd72ae0446",
+  "shared_executor_revision": "96c233d552b604c7afeea47e959317d51c15a180",
+  "shared_executor_sha256": "23a8809243b59608c5a75f54b588d29e65324f2394eb8c195fc1b447a9598d26",
+  "ledger_sha256": "6e1f68e920ccb032daf09eb598243eddc5aea35f7a622c36d30bcf1224942cf9",
+  "no_failure_replacement": true,
+  "qualification": "FROZEN",
+  "additional_paid_stop_threshold_cny": 0.25,
+  "admission": "require confirmed reset, cleared injection, measured expected initial state and vacant destination; stop globally on unknown/quarantined goal, signal, identity or routing failure; ordinary task failure ends composite then one source regression",
+  "adaptation": "fixed common outer chain; no model/prompt/calibration tuning; models route within native tasks, not cross-stage planning",
+  "cost": "shared new executor code is engineering work, reported once; not zero-cost migration; human minutes and early planning not measured",
+  "n_ge_50": "FROZEN"
+}

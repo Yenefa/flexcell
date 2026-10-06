@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/src/flexcell/flexcell_skills/test/w1_client.py",
+    "--action",
+    "observe"
+  ],
+  "return_code": 0,
+  "stdout": "SENDING action=observe object=target_box pose=[0.12, -0.15, 0.0175]\nGOAL_UUID 577d2d57d0e041ed9f5c7595cac8674e\nRESULT {\n  \"action\": \"observe\",\n  \"goal_uuid\": \"577d2d57d0e041ed9f5c7595cac8674e\",\n  \"outcome\": \"OUTCOME_SUCCEEDED\",\n  \"outcome_val\": 0,\n  \"error_code\": \"ERR_NONE\",\n  \"detail\": \"\",\n  \"evidence_id\": \"auto-5-22112ced-0a88671b\",\n  \"wall_seconds\": 0.028,\n  \"revision\": 3,\n  \"source\": \"SIMULATION_GROUND_TRUTH\",\n  \"objects\": [\n    {\n      \"name\": \"target_box_a\",\n      \"available\": true,\n      \"position\": [\n        0.22,\n        0.0,\n        0.0175\n      ]\n    },\n    {\n      \"name\": \"target_box_b\",\n      \"available\": true,\n      \"position\": [\n        0.1253,\n        -0.1499,\n        0.0175\n      ]\n    }\n  ],\n  \"carry\": {\n    \"engaged\": false,\n    \"object_id\": \"\"\n  },\n  \"zones\": [\n    {\n      \"id\": \"zone_1\",\n      \"occupancy\": 1\n    },\n    {\n      \"id\": \"zone_2\",\n      \"occupancy\": 1\n    }\n  ],\n  \"ee\": [\n    0.1222,\n    -0.1519,\n    0.2854\n  ],\n  \"notes\": []\n}\n",
+  "stderr": "",
+  "elapsed_ms": 817.296463
+}

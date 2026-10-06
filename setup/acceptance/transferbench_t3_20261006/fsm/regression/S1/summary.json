@@ -1,0 +1,51 @@
+{
+  "record_kind": "ACTUAL_NATIVE_TASK",
+  "arm": "fsm",
+  "stage_id": "S1-source-regression",
+  "purpose": "regression",
+  "target": null,
+  "destination": null,
+  "run_id": "week1_demo_v1-d6699f5a",
+  "outcome": "SUCCEEDED",
+  "harness_error": null,
+  "command_rc": 0,
+  "reported_client_result": {
+    "action": "demo",
+    "goal_uuid": "dc82ffb803fd45aa9aa3754be8ae11b8",
+    "outcome": "OUTCOME_SUCCEEDED",
+    "outcome_val": 0,
+    "error_code": "ERR_NONE",
+    "detail": "task done: all assignments verified",
+    "evidence_id": "week1_demo_v1-19659a48",
+    "wall_seconds": 27.597,
+    "fsm_trace": [
+      "PICK_A(attempt=1):OK",
+      "PLACE_A:OK",
+      "VERIFY_A(attempt=1):OK",
+      "PICK_B(attempt=1):OK",
+      "PLACE_B:OK",
+      "VERIFY_B(attempt=1):OK"
+    ],
+    "object_a_at_zone": true,
+    "object_b_at_zone": true,
+    "zone_a_error_m": 0.005835260712867946,
+    "zone_b_error_m": 0.005047438991474354,
+    "run_id": "week1_demo_v1-d6699f5a",
+    "scenario_id": "week1_demo_v1"
+  },
+  "runtime_fingerprint": "b673f3fda4ca050c3782054c564ac0cad19a34a68af1fb23bed7c7ffba470385",
+  "audit": {
+    "replay_status": "PASS",
+    "replayed_steps": 8
+  },
+  "raw_evidence": [
+    {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t3_20261006/fsm/regression/S1/client.json",
+      "sha256": "3f0b0b409fa730ddec97a4e313fbf77260306648a3c39f57e3ac6af642878928"
+    },
+    {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t3_20261006/fsm/regression/S1/episode.json",
+      "sha256": "404b2702b50d1c9a72af3a6e53f1b04f23607bb2f71ca55643389e0ba6e6846d"
+    }
+  ]
+}

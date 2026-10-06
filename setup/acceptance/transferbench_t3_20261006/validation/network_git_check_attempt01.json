@@ -1,0 +1,6 @@
+{
+  "check": "git diff --cached --check",
+  "return_code": 2,
+  "reason": "two trailing-whitespace warnings in retained netcheck log snapshots, not code",
+  "action": "preserved raw snapshot whitespace and committed; validate code/docs separately"
+}

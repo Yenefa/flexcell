@@ -1,0 +1,49 @@
+{
+  "record_kind": "ACTUAL_NATIVE_TASK",
+  "arm": "fsm",
+  "stage_id": "buffer-B",
+  "purpose": "adaptation",
+  "target": "target_box_b",
+  "destination": [
+    0.12,
+    -0.15,
+    0.0175
+  ],
+  "run_id": "pick_place_v1-8b0c0a8a",
+  "outcome": "SUCCEEDED",
+  "harness_error": null,
+  "command_rc": 0,
+  "reported_client_result": {
+    "action": "task",
+    "goal_uuid": "5f7564aa88c544f2ab0641a8bc8a34e0",
+    "outcome": "OUTCOME_SUCCEEDED",
+    "outcome_val": 0,
+    "error_code": "ERR_NONE",
+    "detail": "task done: all assignments verified",
+    "evidence_id": "pick_place_v1-9f55c2c0",
+    "wall_seconds": 14.63,
+    "fsm_trace": [
+      "PICK_A(attempt=1):OK",
+      "PLACE_A:OK",
+      "VERIFY_A(attempt=1):OK"
+    ],
+    "object_at_place": true,
+    "final_position_error_m": 0.006384055732409989,
+    "skip_verify": false
+  },
+  "runtime_fingerprint": "b673f3fda4ca050c3782054c564ac0cad19a34a68af1fb23bed7c7ffba470385",
+  "audit": {
+    "replay_status": "PASS",
+    "replayed_steps": 4
+  },
+  "raw_evidence": [
+    {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t3_20261006/fsm/composite/buffer-B/client.json",
+      "sha256": "a3b03788bde970b7550c697d409d109a91736dd0d49302db923022dc9e7f0f58"
+    },
+    {
+      "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t3_20261006/fsm/composite/buffer-B/episode.json",
+      "sha256": "90ed57962c30d5b4143df06c9f750fa72f4a501d7461d12d403ee2a27c3de51a"
+    }
+  ]
+}

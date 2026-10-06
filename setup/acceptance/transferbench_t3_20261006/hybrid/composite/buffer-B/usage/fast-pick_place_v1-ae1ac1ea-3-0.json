@@ -1,0 +1,28 @@
+{
+  "record_kind": "OBSERVED_POLICY_PROPOSAL",
+  "run_id": "pick_place_v1-ae1ac1ea",
+  "seq": 3,
+  "proposal": {
+    "action": "PLACE",
+    "confidence": 0.856878875,
+    "fallback": false,
+    "gate_ok": true,
+    "gate_reason": null,
+    "policy": "jev",
+    "policy_trace": {
+      "backend": "clef",
+      "calibration": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+      "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+      "confidence_calibrated": true,
+      "confidence_label": "FSM_ACTION_AGREEMENT",
+      "fallback": false,
+      "model": "clef-flash-q8_0",
+      "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+      "reported_confidence": 0.929831533,
+      "source": "jev",
+      "tokens": 1379
+    },
+    "target": "target_box_b"
+  },
+  "invoice": "UNKNOWN; input/output token split unavailable"
+}

@@ -1,0 +1,29 @@
+{
+  "record_kind": "PROSPECTIVE_PARTIAL_SHARED_DEVELOPMENT_INTERVAL",
+  "baseline_revision": "1bcc7c09fede9d2b5cbb6afec4e375dd72ae0446",
+  "executor_revision": "96c233d552b604c7afeea47e959317d51c15a180",
+  "clock_id": "9a6838ce-bcf6-4ea1-a70e-0daa30dcf9ab",
+  "start_ns": 29564217283419,
+  "end_ns": 30116616472095,
+  "elapsed_minutes": 9.206653165683333,
+  "scope": "shared T3 executor writing/review/unit testing; interval also includes network-receipt delivery overhead; not active work time",
+  "earlier_planning": "NOT_RUN",
+  "network_fix_engineering_time": "NOT_RUN",
+  "human_minutes": "NOT_RUN",
+  "coding_assistant_tokens_and_fees": "NOT_RUN",
+  "allocation": "report once as shared work; do not duplicate across arms or infer zero migration cost",
+  "code_changes": [
+    {
+      "path": "setup/transferbench/t3_swap_pilot.py",
+      "added": 352,
+      "deleted": 0
+    },
+    {
+      "path": "setup/transferbench/test_t3_swap_pilot.py",
+      "added": 59,
+      "deleted": 0
+    }
+  ],
+  "rules_added": null,
+  "states_added": null
+}

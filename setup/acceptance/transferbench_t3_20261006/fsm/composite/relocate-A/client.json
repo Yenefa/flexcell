@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/src/flexcell/flexcell_skills/test/w1_client.py",
+    "--action",
+    "task",
+    "--object",
+    "target_box_a",
+    "--pose",
+    "0.2",
+    "-0.18",
+    "0.0175"
+  ],
+  "return_code": 0,
+  "stdout": "SENDING action=task object=target_box_a pose=[0.2, -0.18, 0.0175]\nGOAL_UUID c2dba695a2574c3fb5a4fbc6144c9f45\nRESULT {\n  \"action\": \"task\",\n  \"goal_uuid\": \"c2dba695a2574c3fb5a4fbc6144c9f45\",\n  \"outcome\": \"OUTCOME_SUCCEEDED\",\n  \"outcome_val\": 0,\n  \"error_code\": \"ERR_NONE\",\n  \"detail\": \"task done: all assignments verified\",\n  \"evidence_id\": \"pick_place_v1-9af11519\",\n  \"wall_seconds\": 14.662,\n  \"fsm_trace\": [\n    \"PICK_A(attempt=1):OK\",\n    \"PLACE_A:OK\",\n    \"VERIFY_A(attempt=1):OK\"\n  ],\n  \"object_at_place\": true,\n  \"final_position_error_m\": 0.00983290136965292,\n  \"skip_verify\": false\n}\n",
+  "stderr": "",
+  "elapsed_ms": 15371.048705
+}

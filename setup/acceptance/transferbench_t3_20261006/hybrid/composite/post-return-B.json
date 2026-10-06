@@ -1,0 +1,12 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/src/flexcell/flexcell_skills/test/w1_client.py",
+    "--action",
+    "observe"
+  ],
+  "return_code": 0,
+  "stdout": "SENDING action=observe object=target_box pose=[0.12, -0.15, 0.0175]\nGOAL_UUID efb7eb8bc2ba4e8ca6023cc04db4dcea\nRESULT {\n  \"action\": \"observe\",\n  \"goal_uuid\": \"efb7eb8bc2ba4e8ca6023cc04db4dcea\",\n  \"outcome\": \"OUTCOME_SUCCEEDED\",\n  \"outcome_val\": 0,\n  \"error_code\": \"ERR_NONE\",\n  \"detail\": \"revision bumped: tracked object moved past 0.002m\",\n  \"evidence_id\": \"auto-10-186c6244-cff329c5\",\n  \"wall_seconds\": 0.034,\n  \"revision\": 5,\n  \"source\": \"SIMULATION_GROUND_TRUTH\",\n  \"objects\": [\n    {\n      \"name\": \"target_box_a\",\n      \"available\": true,\n      \"position\": [\n        0.1915,\n        -0.1807,\n        0.0175\n      ]\n    },\n    {\n      \"name\": \"target_box_b\",\n      \"available\": true,\n      \"position\": [\n        0.209,\n        0.0025,\n        0.0175\n      ]\n    }\n  ],\n  \"carry\": {\n    \"engaged\": false,\n    \"object_id\": \"\"\n  },\n  \"zones\": [\n    {\n      \"id\": \"zone_1\",\n      \"occupancy\": 0\n    },\n    {\n      \"id\": \"zone_2\",\n      \"occupancy\": 0\n    }\n  ],\n  \"ee\": [\n    0.2266,\n    -0.0038,\n    0.2907\n  ],\n  \"notes\": [\n    \"revision bumped: tracked object moved past 0.002m\"\n  ]\n}\n",
+  "stderr": "",
+  "elapsed_ms": 765.888706
+}

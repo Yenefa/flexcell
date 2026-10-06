@@ -1,0 +1,63 @@
+{
+  "source": {
+    "target_box_a": [
+      0.22,
+      0.0,
+      0.0175
+    ],
+    "target_box_b": [
+      0.2,
+      -0.18,
+      0.0175
+    ]
+  },
+  "buffer": [
+    0.12,
+    -0.15,
+    0.0175
+  ],
+  "stages": [
+    {
+      "id": "buffer-B",
+      "target": "target_box_b",
+      "destination": [
+        0.12,
+        -0.15,
+        0.0175
+      ],
+      "depends_on": null
+    },
+    {
+      "id": "relocate-A",
+      "target": "target_box_a",
+      "destination": [
+        0.2,
+        -0.18,
+        0.0175
+      ],
+      "depends_on": "buffer-B"
+    },
+    {
+      "id": "return-B",
+      "target": "target_box_b",
+      "destination": [
+        0.22,
+        0.0,
+        0.0175
+      ],
+      "depends_on": "relocate-A"
+    }
+  ],
+  "final": {
+    "target_box_a": [
+      0.2,
+      -0.18,
+      0.0175
+    ],
+    "target_box_b": [
+      0.22,
+      0.0,
+      0.0175
+    ]
+  }
+}

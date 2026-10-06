@@ -1,0 +1,216 @@
+{
+  "record_kind": "ACTUAL_COMPOSITE_TASK",
+  "composite_id": "t3-swap-fsm-a45424af",
+  "arm": "fsm",
+  "runtime_fingerprint": "b673f3fda4ca050c3782054c564ac0cad19a34a68af1fb23bed7c7ffba470385",
+  "outcome": "SUCCEEDED",
+  "failure": null,
+  "components": [
+    {
+      "record_kind": "ACTUAL_NATIVE_TASK",
+      "arm": "fsm",
+      "stage_id": "buffer-B",
+      "purpose": "adaptation",
+      "target": "target_box_b",
+      "destination": [
+        0.12,
+        -0.15,
+        0.0175
+      ],
+      "run_id": "pick_place_v1-8b0c0a8a",
+      "outcome": "SUCCEEDED",
+      "harness_error": null,
+      "command_rc": 0,
+      "reported_client_result": {
+        "action": "task",
+        "goal_uuid": "5f7564aa88c544f2ab0641a8bc8a34e0",
+        "outcome": "OUTCOME_SUCCEEDED",
+        "outcome_val": 0,
+        "error_code": "ERR_NONE",
+        "detail": "task done: all assignments verified",
+        "evidence_id": "pick_place_v1-9f55c2c0",
+        "wall_seconds": 14.63,
+        "fsm_trace": [
+          "PICK_A(attempt=1):OK",
+          "PLACE_A:OK",
+          "VERIFY_A(attempt=1):OK"
+        ],
+        "object_at_place": true,
+        "final_position_error_m": 0.006384055732409989,
+        "skip_verify": false
+      },
+      "runtime_fingerprint": "b673f3fda4ca050c3782054c564ac0cad19a34a68af1fb23bed7c7ffba470385",
+      "audit": {
+        "replay_status": "PASS",
+        "replayed_steps": 4
+      },
+      "raw_evidence": [
+        {
+          "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t3_20261006/fsm/composite/buffer-B/client.json",
+          "sha256": "a3b03788bde970b7550c697d409d109a91736dd0d49302db923022dc9e7f0f58"
+        },
+        {
+          "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t3_20261006/fsm/composite/buffer-B/episode.json",
+          "sha256": "90ed57962c30d5b4143df06c9f750fa72f4a501d7461d12d403ee2a27c3de51a"
+        }
+      ]
+    },
+    {
+      "record_kind": "ACTUAL_NATIVE_TASK",
+      "arm": "fsm",
+      "stage_id": "relocate-A",
+      "purpose": "adaptation",
+      "target": "target_box_a",
+      "destination": [
+        0.2,
+        -0.18,
+        0.0175
+      ],
+      "run_id": "pick_place_v1-54d35a2c",
+      "outcome": "SUCCEEDED",
+      "harness_error": null,
+      "command_rc": 0,
+      "reported_client_result": {
+        "action": "task",
+        "goal_uuid": "c2dba695a2574c3fb5a4fbc6144c9f45",
+        "outcome": "OUTCOME_SUCCEEDED",
+        "outcome_val": 0,
+        "error_code": "ERR_NONE",
+        "detail": "task done: all assignments verified",
+        "evidence_id": "pick_place_v1-9af11519",
+        "wall_seconds": 14.662,
+        "fsm_trace": [
+          "PICK_A(attempt=1):OK",
+          "PLACE_A:OK",
+          "VERIFY_A(attempt=1):OK"
+        ],
+        "object_at_place": true,
+        "final_position_error_m": 0.00983290136965292,
+        "skip_verify": false
+      },
+      "runtime_fingerprint": "b673f3fda4ca050c3782054c564ac0cad19a34a68af1fb23bed7c7ffba470385",
+      "audit": {
+        "replay_status": "PASS",
+        "replayed_steps": 4
+      },
+      "raw_evidence": [
+        {
+          "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t3_20261006/fsm/composite/relocate-A/client.json",
+          "sha256": "7150190ca1b60f34e69de611e0dfaee811dd02e1b123f215d3d387ed5b984e18"
+        },
+        {
+          "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t3_20261006/fsm/composite/relocate-A/episode.json",
+          "sha256": "b3dcb0f9212e59ebf2d0cbf931541a4b4cf1cd03ab866ea51318fd3388a3aba3"
+        }
+      ]
+    },
+    {
+      "record_kind": "ACTUAL_NATIVE_TASK",
+      "arm": "fsm",
+      "stage_id": "return-B",
+      "purpose": "adaptation",
+      "target": "target_box_b",
+      "destination": [
+        0.22,
+        0.0,
+        0.0175
+      ],
+      "run_id": "pick_place_v1-6d8bc995",
+      "outcome": "SUCCEEDED",
+      "harness_error": null,
+      "command_rc": 0,
+      "reported_client_result": {
+        "action": "task",
+        "goal_uuid": "d8f68d5f3dc449ab88d2017c330b4a8b",
+        "outcome": "OUTCOME_SUCCEEDED",
+        "outcome_val": 0,
+        "error_code": "ERR_NONE",
+        "detail": "task done: all assignments verified",
+        "evidence_id": "pick_place_v1-2bc7b83e",
+        "wall_seconds": 14.804,
+        "fsm_trace": [
+          "PICK_A(attempt=1):OK",
+          "PLACE_A:OK",
+          "VERIFY_A(attempt=1):OK"
+        ],
+        "object_at_place": true,
+        "final_position_error_m": 0.008558811514821612,
+        "skip_verify": false
+      },
+      "runtime_fingerprint": "b673f3fda4ca050c3782054c564ac0cad19a34a68af1fb23bed7c7ffba470385",
+      "audit": {
+        "replay_status": "PASS",
+        "replayed_steps": 4
+      },
+      "raw_evidence": [
+        {
+          "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t3_20261006/fsm/composite/return-B/client.json",
+          "sha256": "2d94a37539d1dd25ec3feef2b2cb6b6a1569218d1b0b7bf5239102778ec3ea08"
+        },
+        {
+          "path": "/home/ros/agentic_workcell_ws/setup/acceptance/transferbench_t3_20261006/fsm/composite/return-B/episode.json",
+          "sha256": "8d546d4349c9c7fb25fc6704cc6e486ba34e6d32cd84307286ea8cd44d588c18"
+        }
+      ]
+    }
+  ],
+  "final_observe": {
+    "action": "observe",
+    "goal_uuid": "d12a3434ea334634b391c5aa1c539972",
+    "outcome": "OUTCOME_SUCCEEDED",
+    "outcome_val": 0,
+    "error_code": "ERR_NONE",
+    "detail": "revision bumped: tracked object moved past 0.002m",
+    "evidence_id": "auto-10-8d212c65-c9be4a88",
+    "wall_seconds": 0.034,
+    "revision": 5,
+    "source": "SIMULATION_GROUND_TRUTH",
+    "objects": [
+      {
+        "name": "target_box_a",
+        "available": true,
+        "position": [
+          0.209,
+          -0.1761,
+          0.0175
+        ]
+      },
+      {
+        "name": "target_box_b",
+        "available": true,
+        "position": [
+          0.2152,
+          0.0071,
+          0.0175
+        ]
+      }
+    ],
+    "carry": {
+      "engaged": false,
+      "object_id": ""
+    },
+    "zones": [
+      {
+        "id": "zone_1",
+        "occupancy": 0
+      },
+      {
+        "id": "zone_2",
+        "occupancy": 1
+      }
+    ],
+    "ee": [
+      0.2134,
+      0.0002,
+      0.2931
+    ],
+    "notes": [
+      "revision bumped: tracked object moved past 0.002m"
+    ]
+  },
+  "scheduled_components": 3,
+  "completed_native_components": 3,
+  "unexecuted_components": [],
+  "qualifications": "NOT_RUN",
+  "model_scope": "native-task action routing; common fixed outer dependency executor"
+}

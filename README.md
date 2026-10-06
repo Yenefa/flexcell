@@ -71,6 +71,16 @@ After coding — update the Issue, record evidence in EXPERIMENTS.md, link the c
 
 ## Status
 
+2026-10-06 registered T3 buffer-swap pilot: FSM and Hybrid each completed one
+three-stage composite and one S1 source regression; 8 native episodes retained.
+Clef selected all 9 target-stage model decisions. The common outer chain is fixed,
+and its new engineering work is counted separately; this does not establish
+autonomous composition planning or a cost advantage. 260 skills tests and 36
+instrument tests passed. The school startup probe now uses an explicit 10s deadline
+without changing prompt/calibration identity; DERP network stability remains unaccepted.
+See [T3 evidence](setup/acceptance/transferbench_t3_20261006/README.md) and
+[startup probe correction](setup/acceptance/startup_health_20261006/README.md).
+
 2026-10-06 transfer-cost instrument: the L1 Skill / L2 composition / L3 engineering-cost
 design and an offline append-only ledger are implemented, with 30 targeted tests passing.
 The registered T1 simulation pilot completed two target layouts and one source regression
