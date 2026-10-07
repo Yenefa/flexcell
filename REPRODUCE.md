@@ -86,11 +86,10 @@ Windows side first, or fetch it from WSL directly):
    Measured on the 2026-09-29 bring-up (i5-13500H, 16 threads, 10 GB WSL):
    `colcon test` → **130 tests, 0 errors, 0 failures, 0 skipped** (~12 s);
    `colcon build` at 4 workers → upstream exit 0 + flexcell exit 0. The static
-   scan has one known false positive (`jev_backends.py -> self.name`): `name`
-   is a _class_ attribute and the scanner only collects `self.X = ...` stores,
-   so it cannot see it — `make_backend('local').name` returns
-   `'local-reproduction'` at runtime. Fix the scanner (per-class attribute
-   scope); do not "fix" the backends.
+   scanner's class-attribute false positive (#24) is repaired as of 2026-10-07:
+   definitions are class-scoped and source inheritance is resolved; missing
+   members now exit 1 and invalid scan input exits 2. The 35-file source scan
+   is clean. See [repair and offline verification](docs/STATIC_SCAN_20261007.md).
 
 ## 3. Staging area (F: convention)
 
