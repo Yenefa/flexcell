@@ -16,10 +16,12 @@ def main():
     for mode in (dry, reg):
         mode.add_argument('--package', required=True, type=Path)
         mode.add_argument('--expected-sha256', required=True)
+        mode.add_argument('--order', choices=['paired', 'local-first'], default='paired')
     reg.add_argument('--out', required=True, type=Path)
     reg.add_argument('--history', required=True, type=Path)
     reg.add_argument('--budget', required=True, type=Path)
     reg.add_argument('--revision', required=True)
+    reg.add_argument('--predecessor', type=Path)
     execute = modes.add_parser('run'); inspect = modes.add_parser('status')
     for mode in (execute, inspect): mode.add_argument('--root', required=True, type=Path)
     execute.add_argument('--execute', action='store_true')
@@ -29,10 +31,10 @@ def main():
     args = parser.parse_args()
     try:
         if args.mode == 'dry-run':
-            result = runner.preview(args.package, args.expected_sha256, args.workspace)
+            result = runner.preview(args.package, args.expected_sha256, args.workspace, args.order)
         elif args.mode == 'register':
             result = runner.register(args.out, args.package, args.expected_sha256, args.workspace,
-                                     args.history, args.budget, args.revision)
+                                     args.history, args.budget, args.revision, args.order, args.predecessor)
         elif args.mode == 'status' or not args.execute:
             result = runner.status(args.root, args.workspace)
             result['dispatch_authorized'] = False

@@ -4,7 +4,7 @@ import pytest
 
 import qualification_prepare as q
 import bounded_runner as runner
-from bounded_live import result_json, uncertain, transport_unknown
+from bounded_live import LiveBackend, result_json, uncertain, transport_unknown
 from test_qualification_prepare import fixture
 
 
@@ -163,3 +163,81 @@ def test_client_status_and_transport_uncertainty(tmp_path):
     p = tmp_path / 'move_to_pose_transport.jsonl'
     p.write_text('{"event":"goal_response_unknown"}\n')
     assert transport_unknown(tmp_path)
+
+
+def local_collection(collection):
+    old, workspace, package, sha = collection
+    runner.run(old, workspace, FakeBackend(failure_boundary=1))
+    plan = q.loads((old / 'plan.json').read_bytes())
+    root = old.parent / 'local-first'
+    runner.register(root, package, sha, workspace, Path(plan['history_path']),
+                    Path(plan['budget_path']), 'd'*40, order='local-first', predecessor=old)
+    return root, workspace
+
+
+def test_local_first_preserves_task_set_and_total_quota(collection):
+    _, workspace, package, sha = collection
+    paired = runner.preview(package, sha, workspace)
+    local = runner.preview(package, sha, workspace, 'local-first')
+    identity = lambda jobs: {(j['case_id'], j['arm'], q.digest(j['request']), q.digest(j['initial_objects'])) for j in jobs}
+    assert identity(paired['jobs']) == identity(local['jobs'])
+    assert [j['arm'] for j in local['jobs']] == ['fsm']*3 + ['hybrid']*3
+    assert [j['axis'] for j in local['jobs'][:3]] == ['T1','T3','S1']
+    assert sum(j['native_episode_limit'] for j in local['jobs'][:3]) == 5
+    assert local['native_episode_limit'] == 10 and local['n_ge_50'] == 'FROZEN'
+
+
+def test_local_prefix_pauses_with_hybrid_slots_still_unclaimed(collection):
+    root, workspace = local_collection(collection)
+    backend = FakeBackend({0:'FAILED'})
+    result = runner.run(root, workspace, backend, max_slots=3)
+    assert result['state'] == 'PAUSED' and result['native_dispatch_quota_used'] == 5
+    assert result['outcomes'] == ['FAILED','SUCCEEDED','SUCCEEDED']
+    assert result['pending_jobs'] == [{'axis':axis,'arm':'hybrid'} for axis in ('T1','T3','S1')]
+    final = runner.run(root, workspace, backend)
+    assert final['state'] == 'COMPLETE' and backend.calls == list(range(6))
+    assert final['native_episode_count'] == 10 and not final['all_trials_succeeded']
+
+
+def test_source_failure_in_local_prefix_stops_before_hybrid(collection):
+    root, workspace = local_collection(collection)
+    backend = FakeBackend({2:'FAILED'})
+    result = runner.run(root, workspace, backend, max_slots=3)
+    assert result['state'] == 'STOPPED' and backend.calls == [0,1,2]
+    assert result['native_dispatch_quota_used'] == 5
+
+
+def test_remote_dependency_failure_consumes_no_new_slot(collection):
+    root, workspace = local_collection(collection)
+    class OfflineHybrid(FakeBackend):
+        def dependencies(self, root, plan, job):
+            if job['arm'] == 'hybrid': raise ValueError('remote dependency offline')
+    backend = OfflineHybrid()
+    first = runner.run(root, workspace, backend, max_slots=3)
+    assert first['state'] == 'PAUSED' and backend.calls == [0,1,2]
+    stopped = runner.run(root, workspace, backend)
+    assert stopped['state'] == 'STOPPED' and backend.calls == [0,1,2]
+    assert stopped['native_dispatch_quota_used'] == 5
+
+
+def test_claimed_predecessor_cannot_be_replaced(collection):
+    old, workspace, package, sha = collection
+    runner.run(old, workspace, FakeBackend(), max_slots=1)
+    with pytest.raises(ValueError, match='claimed or completed'):
+        runner.predecessor_pin(old, sha, workspace)
+
+
+def test_predecessor_drift_prevents_local_resume(collection):
+    root, workspace = local_collection(collection)
+    link = q.loads((root / 'plan.json').read_bytes())['predecessor']
+    with (Path(link['root']) / 'events.jsonl').open('ab') as stream: stream.write(b'{}\n')
+    backend = FakeBackend()
+    with pytest.raises(ValueError):runner.run(root, workspace, backend)
+    assert not backend.calls
+
+
+def test_live_fsm_dependencies_do_not_touch_remote_probe(tmp_path):
+    backend = LiveBackend.__new__(LiveBackend)
+    def forbidden():raise AssertionError('FSM must not read model connection')
+    backend.current = forbidden
+    backend.dependencies(tmp_path, {}, {'arm':'fsm'})

@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 REPO=Path(__file__).resolve().parents[2]
 spec=importlib.util.spec_from_file_location('prebatch',REPO/'setup/131_prebatch_readiness.py');M=importlib.util.module_from_spec(spec);spec.loader.exec_module(M)
 
@@ -29,6 +30,25 @@ class ReadinessTests(unittest.TestCase):
             with self.assertRaises(ValueError):M.verify_seal(root)
     def test_deployment_digest_mismatch_is_refused_before_file_reads(self):
         with self.assertRaises(ValueError):M.verify_deployment(dict(policy='hybrid',runtime_fingerprint='0'*64),REPO)
+    def test_fsm_has_no_remote_backend_dependency(self):
+        with patch.object(M, 'remote_probe', side_effect=AssertionError('FSM must stay local')):
+            report=M.policy_probe(dict(policy='fsm'))
+        self.assertTrue(report['ok']);self.assertFalse(report['model_routes_required'])
+        self.assertEqual(report['model_health'],'NOT_REQUIRED_FOR_FSM')
+        self.assertIsNone(report['tcp_reachable']);self.assertIsNone(report['route_eligible'])
+        self.assertEqual(report['inference_calls'],0)
+    def test_hybrid_keeps_the_real_remote_gate(self):
+        failed=dict(ok=False,tcp_reachable=False,error='offline')
+        with patch.object(M, 'remote_probe', return_value=failed) as probe:
+            report=M.policy_probe(dict(policy='hybrid'))
+        probe.assert_called_once_with(dict(policy='hybrid'));self.assertFalse(report['ok'])
+    def test_nested_receipt_manifest_is_part_of_the_outer_seal(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);(root/'inputs').mkdir()
+            inner=root/'inputs/SHA256SUMS.json';inner.write_text('{}')
+            (root/'SHA256SUMS.json').write_text(json.dumps({'inputs/SHA256SUMS.json':dict(bytes=inner.stat().st_size,sha256=M.sha(inner))}))
+            self.assertTrue(M.verify_seal(root)['ok']);inner.write_text('{"changed":true}')
+            with self.assertRaises(ValueError):M.verify_seal(root)
 
 
 if __name__=='__main__':unittest.main()

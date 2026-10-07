@@ -18,6 +18,9 @@ TB-RUN-001 的[受限执行器](BOUNDED_RUNNER.md)已接入既有任务链，
 首次实际执行停在初始健康门：家用 GPU tailnet 节点离线、三端口超时；零认领、
 零新增原生 episode，实际六槽位验收尚未完成。
 [失败与网络诊断回执](../setup/acceptance/bounded_runner_20261007/README.md)完整保留原 STOPPED 日志。
+后续入口支持 `--order local-first`：FSM 的 T1/T3/S1 可独立于家用 GPU 执行，
+其只读健康门按实际已部署 FSM 策略核验。Hybrid 仍要求真实模型网络、身份和校准。
+六槽位/十份原生配额不变，正式资格采样仍冻结。
 
 ## 已完成的入口
 

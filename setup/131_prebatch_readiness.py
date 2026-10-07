@@ -39,7 +39,7 @@ def verify_deployment(deployment,workspace):
 def verify_seal(root):
     items=loads((root/'SHA256SUMS.json').read_text())
     if type(items) is not dict:raise ValueError('current receipt map required')
-    actual={str(p.relative_to(root)) for p in root.rglob('*') if p.is_file() and p.name!='SHA256SUMS.json' and '__pycache__' not in p.parts}
+    actual={str(p.relative_to(root)) for p in root.rglob('*') if p.is_file() and p!=root/'SHA256SUMS.json' and '__pycache__' not in p.parts}
     if actual!=set(items):raise ValueError('receipt file set mismatch')
     for rel,entry in items.items():
         p=root/rel
@@ -56,16 +56,11 @@ def confirmed_health(command):
     return data
 
 
-def live_probe(workspace,deployment):
+def remote_probe(deployment):
     from flexcell_skills.confidence_calibration import ConfidenceCalibration,prompt_digest
     from flexcell_skills.jev_policy import JevPolicy
     from flexcell_skills.jev_backends import make_backend
     from flexcell_skills.contracts.backend_health import startup_health
-    from flexcell_interfaces.action import RunComposite
-    from flexcell_interfaces.srv import QueryCarry
-    from rcl_interfaces.srv import GetParameters
-    import rclpy
-    from rclpy.action import ActionClient
     fast=deployment['active_backends']['fast'];c=ConfidenceCalibration();backend=make_backend('clef');p=JevPolicy(backend)
     if c.error or c.sha256!=fast['calibration_sha256'] or not p.route_eligible(deployment['threshold']):raise ValueError('active calibration gate invalid')
     for key,value in [('FLEXCELL_JEV_ENDPOINT',fast['endpoint']),('FLEXCELL_JEV_MODEL',fast['model']),('FLEXCELL_JEV_MODEL_SHA256',fast['model_sha256'])]:
@@ -78,11 +73,32 @@ def live_probe(workspace,deployment):
         if not math.isfinite(got) or got!=want:raise ValueError('active timeout drift: '+key)
     health=float(os.environ.get('FLEXCELL_JEV_HEALTH_TIMEOUT_S','nan'))
     if not math.isfinite(health) or min(health,float(os.environ['FLEXCELL_JEV_TIMEOUT_S']))!=deployment['startup_health_timeout_s']:raise ValueError('health deadline drift')
-    if int(os.environ.get('ROS_DOMAIN_ID','-1'))!=deployment['ros_domain_id'] or os.environ.get('RMW_IMPLEMENTATION')!=deployment['rmw_implementation']:raise ValueError('ROS environment drift')
     from urllib.parse import urlparse
     if urlparse(fast['endpoint']).hostname not in [v.strip() for v in os.environ.get('no_proxy','').split(',')]:raise ValueError('literal endpoint proxy bypass missing')
     started=time.perf_counter_ns();reachable,detail=startup_health(backend,'clef');elapsed=(time.perf_counter_ns()-started)/1e6
-    if not reachable:return dict(ok=False,error=detail,tcp_probe_elapsed_ms=elapsed,tcp_reachable=False,inference_calls=0,native_episodes=0)
+    return dict(ok=reachable,model_routes_required=True,calibration_sha256=c.sha256,
+                prompt_sha256=prompt_digest(),route_eligible=True,tcp_probe_elapsed_ms=elapsed,
+                tcp_reachable=reachable,tcp_detail=detail,error=None if reachable else detail,
+                inference_calls=0,native_episodes=0)
+
+
+def policy_probe(deployment):
+    if deployment['policy']=='fsm':
+        return dict(ok=True,model_routes_required=False,model_health='NOT_REQUIRED_FOR_FSM',
+                    calibration_sha256=None,prompt_sha256=None,route_eligible=None,
+                    tcp_reachable=None,tcp_probe_elapsed_ms=None,inference_calls=0,native_episodes=0)
+    return remote_probe(deployment)
+
+
+def live_probe(workspace,deployment):
+    from flexcell_interfaces.action import RunComposite
+    from flexcell_interfaces.srv import QueryCarry
+    from rcl_interfaces.srv import GetParameters
+    import rclpy
+    from rclpy.action import ActionClient
+    if int(os.environ.get('ROS_DOMAIN_ID','-1'))!=deployment['ros_domain_id'] or os.environ.get('RMW_IMPLEMENTATION')!=deployment['rmw_implementation']:raise ValueError('ROS environment drift')
+    result=policy_probe(deployment)
+    if result['ok'] is not True:return result
     rclpy.init();node=rclpy.create_node('flexcell_prebatch_readonly')
     try:
         action=ActionClient(node,RunComposite,'/run_composite')
@@ -100,7 +116,8 @@ def live_probe(workspace,deployment):
         if not future.done() or future.result() is None:raise ValueError('carry snapshot timed out')
         carry=future.result()
         if not carry.success or carry.state.engaged or carry.state.object_id:raise ValueError('carry authority not confirmed released')
-        result=dict(ok=True,calibration_sha256=c.sha256,prompt_sha256=prompt_digest(),route_eligible=True,composite_action_available=True,carry_released=True,carry_revision=int(carry.revision),tcp_reachable=True,tcp_probe_elapsed_ms=elapsed,tcp_detail=detail,inference_calls=0,native_episodes=0)
+        result.update(composite_action_available=True,active_policy=values[0].string_value,
+                      carry_released=True,carry_revision=int(carry.revision))
     finally:node.destroy_node();rclpy.shutdown()
     started=time.perf_counter_ns()
     try:

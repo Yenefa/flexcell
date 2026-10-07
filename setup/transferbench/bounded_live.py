@@ -82,6 +82,12 @@ class LiveBackend:
         index = len(list(folder.glob('*.json')))
         self.health(folder, 'boundary-%03d' % index, self.current())
 
+    def dependencies(self, root, plan, job):
+        if job['arm'] == 'hybrid':
+            report = self.readiness.remote_probe(q.loads(self.current().read_bytes()))
+            runner.write(root / 'boundaries' / ('dependency-' + job['slot_id'] + '.json'), report)
+            q.require(report.get('ok') is True, 'next Hybrid slot requires real model connectivity')
+
     def usage(self, directory, episodes, before, after):
         folder = directory / 'usage'; folder.mkdir()
         prior = {c['id'] for c in before['calls']}

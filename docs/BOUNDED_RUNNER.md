@@ -9,6 +9,12 @@ T3 使用 RunComposite，S1 回测同一冻结 Skill/Policy。正式 n≥50 资�
 开发请求的 scenario_id 明确加 `development_` 前缀；几何和任务链保持冻结候选定义。
 register 保存输入副本、源码身份、已有预算与历史摘要；生成目录已有即拒绝覆盖。
 
+`--order local-first` 将相同六个开发任务排序为 FSM 的 T1/T3/S1，再到 Hybrid 的 T1/T3/S1。
+任务、几何和十份总配额不变；这是开发排序，不修改冻结的正式候选清单或配对顺序。
+已部署 FSM 的只读预检检查实际 ROS 策略、控制器与 carry，模型健康标记为
+NOT_REQUIRED_FOR_FSM；Hybrid 的校准、身份与真实 TCP 门保留，并在认领下一槽位前复核。
+FSM 不能用当前 Hybrid 的成功健康报告冒充激活；实际任务前必须切换并核验 FSM 指纹。
+
 实际执行必须显式 `--execute`。每个槽位在切策略、reset 或运行任务前持久化 CLAIMED，
 每次终态均封存命令、episode、原始 JSONL 差量、模型使用和回执后再提交。
 同一采集目录只有一个 runner 可持锁；已完成、已停止、未知尾部均不自动重新发送。
@@ -44,7 +50,7 @@ python3 setup/133_bounded_runner.py dry-run \
 python3 setup/133_bounded_runner.py register \
   --package setup/acceptance/qualification_inputs_20261007/inputs \
   --expected-sha256 3bc42291a1ee7a4b60d69a376619dd4e7835604f73c83dc764fc50e361983a5f \
-  --out setup/acceptance/bounded_runner_20261007/run \
+  --out /home/ros/fc_sync_logs/bounded_development_next/run \
   --history /home/ros/.ros/flexcell/episodes \
   --budget "$FLEXCELL_LLM_BUDGET_FILE" --revision <完整feature提交SHA>
 ```
@@ -53,11 +59,21 @@ python3 setup/133_bounded_runner.py register \
 随后同一目录继续尚未执行的 T3 和 S1，没有重新发送已完成任务。
 
 ```bash
-python3 setup/133_bounded_runner.py run --root setup/acceptance/bounded_runner_20261007/run
-python3 setup/133_bounded_runner.py run --root setup/acceptance/bounded_runner_20261007/run --execute --max-slots 2
-python3 setup/133_bounded_runner.py status --root setup/acceptance/bounded_runner_20261007/run
-python3 setup/133_bounded_runner.py run --root setup/acceptance/bounded_runner_20261007/run --execute
+python3 setup/133_bounded_runner.py run --root /home/ros/fc_sync_logs/bounded_development_next/run
+python3 setup/133_bounded_runner.py run --root /home/ros/fc_sync_logs/bounded_development_next/run --execute --max-slots 2
+python3 setup/133_bounded_runner.py status --root /home/ros/fc_sync_logs/bounded_development_next/run
+python3 setup/133_bounded_runner.py run --root /home/ros/fc_sync_logs/bounded_development_next/run --execute
 ```
+
+家用 GPU 离线时，先确认本机 idle/released，再将 owned fleet 切到 FSM 0.85；
+登记时加 `--order local-first`，执行使用 `--max-slots 3`，在三份 FSM 逻辑任务后暂停，
+最多消耗五份原生配额。不要立即执行 Hybrid；恢复后只续跑同一日志中的未认领槽位。
+源任务失败、未知终态或信号仍会 STOPPED，不能因 GPU 离线跳过这些门。
+
+`--predecessor <旧run目录>` 只接受 REGISTERED→STOPPED、零认领、零完成、无 attempt 的旧记录，
+新 plan 固定旧 plan/events 的摘要；旧文件变动拒绝执行。旧失败留在原处，不覆盖或续跑。
+若旧任务已有认领、终态或未知尾部，禁止借此选项重建任务。已封存的源码身份不同，
+旧实录只能审阅，不能使用新执行器继续其 STOPPED 日志。
 
 `development_complete` 描述六个槽位均已处理，`all_trials_succeeded` 描述实际终态全部成功；
 两者分开。两臂不同运行指纹与校准 cell 独立保留，不能合池报告资格成功率。

@@ -13,7 +13,8 @@ EXECUTOR_FILES = ('setup/133_bounded_runner.py', 'setup/transferbench/bounded_ru
                   'src/flexcell/flexcell_skills/test/w1_client.py')
 
 
-def jobs(package):
+def jobs(package, order='paired'):
+    q.require(order in ('paired', 'local-first'), 'unsupported development job order')
     cases = q.loads((package / 'cases.json').read_bytes())
     source = q.loads((package / 'regressions.json').read_bytes())[0]
     result = []
@@ -31,17 +32,22 @@ def jobs(package):
                 'purpose': 'source_regression' if axis == 'S1' else 'development',
                 'initial_objects': item['initial_objects'], 'request': request,
                 'native_episode_limit': item['native_episodes_per_task']})
+    if order == 'local-first':
+        result = [job for arm in ('fsm', 'hybrid') for job in result if job['arm'] == arm]
+        for slot, job in enumerate(result):
+            job['slot'] = slot
+            job['slot_id'] = '%02d-%s-%s' % (slot, job['axis'], job['arm'])
     return result
 
 
-def preview(package, expected_sha, workspace):
+def preview(package, expected_sha, workspace, order='paired'):
     verified = q.verify(package, expected_sha, workspace=workspace)
     schedule = q.loads((package / 'schedule.json').read_bytes())
-    selected = jobs(package)
+    selected = jobs(package, order)
     return {'record_kind': 'BOUNDED_RUNNER_DRY_RUN', 'ok': True,
         'input_package_sha256': verified['package_sha256'],
         'full_schedule_slots': len(schedule), 'full_schedule_sha256': q.digest(schedule),
-        'jobs': selected, 'logical_task_limit': 6,
+        'jobs': selected, 'job_order': order, 'logical_task_limit': 6,
         'native_episode_limit': sum(j['native_episode_limit'] for j in selected),
         'model_calls': 0, 'native_episodes_executed': 0,
         'dispatch_authorized': False, 'qualification_sampling_authorized': False,
@@ -84,16 +90,45 @@ def append(root, rows, event, **fields):
     rows.append(payload)
 
 
-def register(root, package, expected_sha, workspace, history_root, budget_path, revision):
+def predecessor_pin(root, package_sha, workspace):
+    """Link a stopped legacy run only when no slot was ever claimed."""
+    plan_path = q.regular(root, 'plan.json'); journal_path = q.regular(root, 'events.jsonl')
+    plan = q.loads(plan_path.read_bytes()); raw = journal_path.read_bytes()
+    q.require(raw.endswith(b'\n'), 'predecessor has an incomplete journal')
+    rows = [q.loads(line) for line in raw.splitlines()]
+    q.require(len(rows) == 2 and rows[0]['event'] == 'REGISTERED'
+              and rows[1]['event'] == 'STOPPED' and type(rows[1]['completed_slots']) is int
+              and rows[1]['completed_slots'] == 0, 'predecessor has claimed or completed work')
+    for index, row in enumerate(rows):
+        q.require(type(row['seq']) is int and row['seq'] == index
+                  and row['previous_sha256'] == (rows[0]['sha256'] if index else None)
+                  and row['sha256'] == q.digest({k:v for k,v in row.items() if k != 'sha256'}),
+                  'predecessor journal chain changed')
+    q.require(rows[0]['plan_sha256'] == q.sha(plan_path)
+              and plan['input_package_sha256'] == package_sha
+              and q.same_typed(plan['jobs'], jobs(root / 'inputs', plan.get('job_order', 'paired'))),
+              'predecessor plan or input identity changed')
+    q.verify(root / 'inputs', package_sha, workspace=workspace)
+    attempts = root / 'attempts'
+    q.require(not attempts.exists() or not any(attempts.iterdir()), 'predecessor has attempt evidence')
+    return dict(root=str(root.resolve()), plan_sha256=q.sha(plan_path),
+                journal_sha256=q.sha(journal_path), input_package_sha256=package_sha,
+                native_dispatch_quota_used=0, disposition='RETAINED_ZERO_CLAIM_STOP')
+
+
+def register(root, package, expected_sha, workspace, history_root, budget_path, revision,
+             order='paired', predecessor=None):
     q.require(not root.exists(), 'run root already exists; never replace registered trials')
-    report = preview(package, expected_sha, workspace)
+    report = preview(package, expected_sha, workspace, order)
     q.verify(package, expected_sha, workspace=workspace, history_root=history_root)
     q.sha_value(revision, 40)
     budget_raw = budget_path.read_bytes(); budget = q.budget_snapshot(budget_raw)
+    link = predecessor_pin(predecessor, expected_sha, workspace) if predecessor is not None else None
     plan = {'schema_version': 1, 'record_kind': 'REGISTERED_BOUNDED_DEVELOPMENT',
         'input_package_sha256': expected_sha, 'executor_revision': revision,
         'executor_sha256': {rel: q.sha(q.regular(workspace, rel)) for rel in EXECUTOR_FILES},
-        'jobs': report['jobs'], 'logical_task_limit': 6, 'native_episode_limit': 10,
+        'jobs': report['jobs'], 'job_order': order, 'predecessor': link,
+        'logical_task_limit': 6, 'native_episode_limit': 10,
         'budget_path': str(budget_path.resolve()), 'registration_budget': budget,
         'history_path': str(history_root.resolve()),
         'history_files': q.history_snapshot(history_root)['files'],
@@ -118,7 +153,11 @@ def read(root, workspace):
               and plan['ready_for_large_test'] is False and plan['n_ge_50'] == 'FROZEN',
               'large collection or coercive quota refused')
     q.verify(root / 'inputs', plan['input_package_sha256'], workspace=workspace)
-    q.require(q.same_typed(plan['jobs'], jobs(root / 'inputs')), 'registered job order or input changed')
+    q.require(q.same_typed(plan['jobs'], jobs(root / 'inputs', plan.get('job_order', 'paired'))), 'registered job order or input changed')
+    if plan.get('predecessor') is not None:
+        link = plan['predecessor']
+        q.require(q.same_typed(link, predecessor_pin(Path(link['root']), plan['input_package_sha256'], workspace)),
+                  'predecessor changed')
     for rel, digest in plan['executor_sha256'].items():
         q.require(q.sha(q.regular(workspace, rel)) == digest, 'executor source drift: ' + rel)
     q.require(set(plan['executor_sha256']) == set(EXECUTOR_FILES), 'executor identity set changed')
@@ -173,7 +212,8 @@ def status(root, workspace):
         'completed_slots': len(committed), 'native_episode_count': len(ids),
         'native_episode_count_status': 'UNKNOWN_TOTAL' if pending is not None or any(r['outcome'] == 'UNKNOWN' for r in committed) else 'MEASURED_SNAPSHOT',
         'native_dispatch_quota_used': sum(plan['jobs'][r['slot']]['native_episode_limit'] for r in rows if r['event'] == 'CLAIMED'),
-        'outcomes': [r['outcome'] for r in committed],
+        'outcomes': [r['outcome'] for r in committed], 'job_order': plan.get('job_order', 'paired'),
+        'pending_jobs': [{'axis': j['axis'], 'arm': j['arm']} for j in plan['jobs'][len(committed):]],
         'resume_allowed': pending is None and state not in ('STOPPED', 'COMPLETE'),
         'development_complete': state == 'COMPLETE',
         'all_trials_succeeded': state == 'COMPLETE' and all(r['outcome'] == 'SUCCEEDED' for r in committed),
@@ -195,6 +235,11 @@ def run(root, workspace, backend, max_slots=6):
         start = len(committed)
         for slot in range(start, min(6, start + max_slots)):
             job = plan['jobs'][slot]
+            try:
+                if hasattr(backend, 'dependencies'): backend.dependencies(root, plan, job)
+            except Exception as exc:
+                append(root, rows, 'STOPPED', completed_slots=len(committed), reason=type(exc).__name__ + ': ' + str(exc))
+                break
             append(root, rows, 'CLAIMED', slot=slot)
             directory = root / 'attempts' / job['slot_id']; directory.mkdir(exist_ok=False)
             try:
