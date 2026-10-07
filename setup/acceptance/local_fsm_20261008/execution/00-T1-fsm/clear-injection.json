@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/src/flexcell/flexcell_skills/test/w1_client.py",
+    "--action",
+    "inject",
+    "--inject",
+    "",
+    "--inject-request-id",
+    "run-00-T1-fsm",
+    "--expect-inject-state",
+    "cleared"
+  ],
+  "return_code": 0,
+  "stdout": "INJECT payload='#run-00-T1-fsm' expect=cleared observed={\"applied_count\": 0, \"error\": \"\", \"live\": false, \"mode\": \"\", \"request_id\": \"run-00-T1-fsm\", \"scenario\": \"\", \"state\": \"cleared\", \"target_object\": \"\"}\n",
+  "stderr": "",
+  "elapsed_ms": 1475.897889
+}

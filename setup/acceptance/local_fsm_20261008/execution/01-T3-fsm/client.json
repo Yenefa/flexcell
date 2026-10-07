@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/src/flexcell/flexcell_skills/test/w1_client.py",
+    "--action",
+    "composite",
+    "--plan",
+    "/home/ros/agentic_workcell_ws/setup/acceptance/local_fsm_20261008/run/attempts/01-T3-fsm/input_plan.json",
+    "--timeout",
+    "420"
+  ],
+  "return_code": 0,
+  "stdout": "SENDING action=composite object=target_box pose=[0.12, -0.15, 0.0175]\nGOAL_UUID d37e7d95d8d94b5b9729a119276d734f\nRESULT {\n  \"action\": \"composite\",\n  \"goal_uuid\": \"d37e7d95d8d94b5b9729a119276d734f\",\n  \"outcome\": \"OUTCOME_SUCCEEDED\",\n  \"outcome_val\": 0,\n  \"action_status\": 4,\n  \"error_code\": \"ERR_NONE\",\n  \"detail\": \"all native stages and fresh joint conditions confirmed\",\n  \"evidence_id\": \"/home/ros/.ros/flexcell/composites/composite-e886d2a276614c9b.jsonl\",\n  \"wall_seconds\": 43.856,\n  \"run_id\": \"composite-e886d2a276614c9b\",\n  \"completed_stage_ids\": [\n    \"buffer-B\",\n    \"relocate-A\",\n    \"return-B\"\n  ],\n  \"component_run_ids\": [\n    \"pick_place_v1-faf3fe99\",\n    \"pick_place_v1-87bc900d\",\n    \"pick_place_v1-e6be4aaa\"\n  ],\n  \"component_goal_uuids\": [\n    \"bfda2cb53a1c47c787153d35b2e9ae81\",\n    \"1f3a8161393b46a4b27cb4d3de50419a\",\n    \"0068ce2ea7bb4aa3b3b40b2fcf39d07b\"\n  ],\n  \"resumed_from_run_id\": \"\",\n  \"inherited_stages\": 0\n}\n",
+  "stderr": "",
+  "elapsed_ms": 44353.114725
+}

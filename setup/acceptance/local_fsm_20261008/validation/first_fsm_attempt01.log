@@ -1,0 +1,43 @@
+{"slot": 0, "arm": "fsm", "axis": "T1", "outcome": "SUCCEEDED", "native_episode_count": 1}
+{
+  "ok": true,
+  "record_kind": "BOUNDED_DEVELOPMENT_STATUS",
+  "state": "PAUSED",
+  "completed_slots": 1,
+  "native_episode_count": 1,
+  "native_episode_count_status": "MEASURED_SNAPSHOT",
+  "native_dispatch_quota_used": 1,
+  "outcomes": [
+    "SUCCEEDED"
+  ],
+  "job_order": "local-first",
+  "pending_jobs": [
+    {
+      "axis": "T3",
+      "arm": "fsm"
+    },
+    {
+      "axis": "S1",
+      "arm": "fsm"
+    },
+    {
+      "axis": "T1",
+      "arm": "hybrid"
+    },
+    {
+      "axis": "T3",
+      "arm": "hybrid"
+    },
+    {
+      "axis": "S1",
+      "arm": "hybrid"
+    }
+  ],
+  "resume_allowed": true,
+  "development_complete": false,
+  "all_trials_succeeded": false,
+  "qualification_sampling_authorized": false,
+  "ready_for_large_test": false,
+  "n_ge_50": "FROZEN",
+  "AC90": "NOT_RUN"
+}

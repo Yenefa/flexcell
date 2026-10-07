@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/setup/133_bounded_runner.py",
+    "register",
+    "--package",
+    "/home/ros/agentic_workcell_ws/setup/acceptance/qualification_inputs_20261007/inputs",
+    "--expected-sha256",
+    "3bc42291a1ee7a4b60d69a376619dd4e7835604f73c83dc764fc50e361983a5f",
+    "--order",
+    "local-first",
+    "--predecessor",
+    "/home/ros/agentic_workcell_ws/setup/acceptance/bounded_runner_20261007/run",
+    "--out",
+    "/home/ros/agentic_workcell_ws/setup/acceptance/local_fsm_20261008/run",
+    "--history",
+    "/home/ros/.ros/flexcell/episodes",
+    "--budget",
+    "/home/ros/.config/flexcell/deepseek_budget_20261001.json",
+    "--revision",
+    "7c479e040211afe929484d2c94c2022ea20d126b"
+  ],
+  "elapsed_ms": 1168.083636,
+  "return_code": 0,
+  "stdout_stderr_combined": "{\n  \"ok\": true,\n  \"record_kind\": \"BOUNDED_DEVELOPMENT_STATUS\",\n  \"state\": \"REGISTERED\",\n  \"completed_slots\": 0,\n  \"native_episode_count\": 0,\n  \"native_episode_count_status\": \"MEASURED_SNAPSHOT\",\n  \"native_dispatch_quota_used\": 0,\n  \"outcomes\": [],\n  \"job_order\": \"local-first\",\n  \"pending_jobs\": [\n    {\n      \"axis\": \"T1\",\n      \"arm\": \"fsm\"\n    },\n    {\n      \"axis\": \"T3\",\n      \"arm\": \"fsm\"\n    },\n    {\n      \"axis\": \"S1\",\n      \"arm\": \"fsm\"\n    },\n    {\n      \"axis\": \"T1\",\n      \"arm\": \"hybrid\"\n    },\n    {\n      \"axis\": \"T3\",\n      \"arm\": \"hybrid\"\n    },\n    {\n      \"axis\": \"S1\",\n      \"arm\": \"hybrid\"\n    }\n  ],\n  \"resume_allowed\": true,\n  \"development_complete\": false,\n  \"all_trials_succeeded\": false,\n  \"qualification_sampling_authorized\": false,\n  \"ready_for_large_test\": false,\n  \"n_ge_50\": \"FROZEN\",\n  \"AC90\": \"NOT_RUN\"\n}\n"
+}

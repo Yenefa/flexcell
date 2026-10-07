@@ -1,0 +1,10 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/setup/flexcell_admin.py",
+    "health"
+  ],
+  "elapsed_ms": 11262.385432,
+  "return_code": 0,
+  "stdout_stderr_combined": "{\n  \"ok\": true,\n  \"checks\": {\n    \"action /move_to_pose\": \"OK\",\n    \"action /observe\": \"OK\",\n    \"action /pick_object\": \"OK\",\n    \"action /place_object\": \"OK\",\n    \"action /verify_object\": \"OK\",\n    \"action /run_demo\": \"OK\",\n    \"action /run_pick_place\": \"OK\",\n    \"service /controller_manager/list_controllers\": \"OK\",\n    \"controller arm_controller\": \"OK\",\n    \"controller gripper_controller\": \"OK\",\n    \"controller joint_state_broadcaster\": \"OK\",\n    \"service /get_planning_scene\": \"OK\",\n    \"gz world models\": \"OK\",\n    \"object target_box_a pose\": \"OK ['0.220', '0.000', '0.017']\",\n    \"object target_box_b pose\": \"OK ['0.200', '-0.180', '0.017']\",\n    \"service /flexcell/carry_engage\": \"OK\",\n    \"service /flexcell/carry_snapshot\": \"OK\",\n    \"carry_state publishers\": \"OK (1)\",\n    \"task_state\": \"IDLE\",\n    \"carry_engaged\": false\n  },\n  \"hard_fail\": [],\n  \"busy\": false\n}\n"
+}

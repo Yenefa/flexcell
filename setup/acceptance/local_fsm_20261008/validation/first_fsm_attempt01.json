@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/setup/133_bounded_runner.py",
+    "run",
+    "--root",
+    "/home/ros/agentic_workcell_ws/setup/acceptance/local_fsm_20261008/run",
+    "--execute",
+    "--max-slots",
+    "1"
+  ],
+  "elapsed_ms": 66535.318979,
+  "return_code": 0,
+  "stdout_stderr_combined": "{\"slot\": 0, \"arm\": \"fsm\", \"axis\": \"T1\", \"outcome\": \"SUCCEEDED\", \"native_episode_count\": 1}\n{\n  \"ok\": true,\n  \"record_kind\": \"BOUNDED_DEVELOPMENT_STATUS\",\n  \"state\": \"PAUSED\",\n  \"completed_slots\": 1,\n  \"native_episode_count\": 1,\n  \"native_episode_count_status\": \"MEASURED_SNAPSHOT\",\n  \"native_dispatch_quota_used\": 1,\n  \"outcomes\": [\n    \"SUCCEEDED\"\n  ],\n  \"job_order\": \"local-first\",\n  \"pending_jobs\": [\n    {\n      \"axis\": \"T3\",\n      \"arm\": \"fsm\"\n    },\n    {\n      \"axis\": \"S1\",\n      \"arm\": \"fsm\"\n    },\n    {\n      \"axis\": \"T1\",\n      \"arm\": \"hybrid\"\n    },\n    {\n      \"axis\": \"T3\",\n      \"arm\": \"hybrid\"\n    },\n    {\n      \"axis\": \"S1\",\n      \"arm\": \"hybrid\"\n    }\n  ],\n  \"resume_allowed\": true,\n  \"development_complete\": false,\n  \"all_trials_succeeded\": false,\n  \"qualification_sampling_authorized\": false,\n  \"ready_for_large_test\": false,\n  \"n_ge_50\": \"FROZEN\",\n  \"AC90\": \"NOT_RUN\"\n}\n"
+}

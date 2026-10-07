@@ -21,6 +21,10 @@ TB-RUN-001 的[受限执行器](BOUNDED_RUNNER.md)已接入既有任务链，
 后续入口支持 `--order local-first`：FSM 的 T1/T3/S1 可独立于家用 GPU 执行，
 其只读健康门按实际已部署 FSM 策略核验。Hybrid 仍要求真实模型网络、身份和校准。
 六槽位/十份原生配额不变，正式资格采样仍冻结。
+2026-10-08 的[本地 FSM 实录](../setup/acceptance/local_fsm_20261008/README.md)已完成
+T1、三段 T3、S1 三份逻辑任务，新增五份原生 episode，全部成功，真实暂停续跑通过。
+模型调用和新增预算 reservation 为零；活跃 collector 停在三个未认领 Hybrid 槽位之前。
+仓库保留独立封存快照，可续跑日志放在永久 `fc_sync_logs`；不在已封存证据里追加任务。
 
 ## 已完成的入口
 

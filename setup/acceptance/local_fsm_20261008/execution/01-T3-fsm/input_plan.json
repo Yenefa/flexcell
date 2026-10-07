@@ -1,0 +1,54 @@
+{
+  "clearance_m": 0.05,
+  "final_empty_positions": [
+    [
+      0.12,
+      -0.15,
+      0.0175
+    ]
+  ],
+  "initial_objects": {
+    "target_box_a": [
+      0.2324,
+      -0.0075,
+      0.0175
+    ],
+    "target_box_b": [
+      0.1833,
+      -0.1582,
+      0.0175
+    ]
+  },
+  "motion_profile_id": "demo_slow",
+  "position_tolerance_m": 0.06,
+  "scenario_id": "development_T3-001",
+  "stages": [
+    {
+      "destination": [
+        0.12,
+        -0.15,
+        0.0175
+      ],
+      "object_name": "target_box_b",
+      "stage_id": "buffer-B"
+    },
+    {
+      "destination": [
+        0.1833,
+        -0.1582,
+        0.0175
+      ],
+      "object_name": "target_box_a",
+      "stage_id": "relocate-A"
+    },
+    {
+      "destination": [
+        0.2324,
+        -0.0075,
+        0.0175
+      ],
+      "object_name": "target_box_b",
+      "stage_id": "return-B"
+    }
+  ]
+}

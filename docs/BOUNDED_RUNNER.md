@@ -81,3 +81,5 @@ python3 setup/133_bounded_runner.py run --root /home/ros/fc_sync_logs/bounded_de
 `ready_for_large_test` 永远为 false，AC@90 仍 NOT_RUN。
 
 [本机实录证据](../setup/acceptance/bounded_runner_20261007/README.md)保留真实执行结果和所有失败。
+[不依赖家用 GPU 的 FSM 前缀](../setup/acceptance/local_fsm_20261008/README.md)已完成三份逻辑任务、
+五份原生 episode；可续跑 collector 与仓库冻结快照分别保存，Hybrid 尚未认领。

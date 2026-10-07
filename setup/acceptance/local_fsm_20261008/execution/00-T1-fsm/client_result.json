@@ -1,0 +1,25 @@
+{
+  "action": "demo",
+  "action_status": 4,
+  "detail": "task done: all assignments verified",
+  "error_code": "ERR_NONE",
+  "evidence_id": "development_T1-001-6b56a45b",
+  "fsm_trace": [
+    "PICK_A(attempt=1):OK",
+    "PLACE_A:OK",
+    "VERIFY_A(attempt=1):OK",
+    "PICK_B(attempt=1):OK",
+    "PLACE_B:OK",
+    "VERIFY_B(attempt=1):OK"
+  ],
+  "goal_uuid": "fa24b7682aaa4e8d94738752a8eaa674",
+  "object_a_at_zone": true,
+  "object_b_at_zone": true,
+  "outcome": "OUTCOME_SUCCEEDED",
+  "outcome_val": 0,
+  "run_id": "development_T1-001-5eceb7af",
+  "scenario_id": "development_T1-001",
+  "wall_seconds": 28.63,
+  "zone_a_error_m": 0.009703725307350535,
+  "zone_b_error_m": 0.01068271680321639
+}

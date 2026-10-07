@@ -1,0 +1,154 @@
+{
+  "AC90": "NOT_RUN",
+  "B_grasp_root_cause": "UNKNOWN",
+  "actual_runtime_fingerprint": "fa0a1c6af0016f74741983d401d31ed170e5d8cdf6e52d823488b4f2ce596917",
+  "arm": "fsm",
+  "collector_active_root": "/home/ros/fc_sync_logs/local_fsm_active_20261008/run",
+  "collector_snapshot_separate": true,
+  "collector_status": {
+    "AC90": "NOT_RUN",
+    "all_trials_succeeded": false,
+    "completed_slots": 3,
+    "development_complete": false,
+    "job_order": "local-first",
+    "n_ge_50": "FROZEN",
+    "native_dispatch_quota_used": 5,
+    "native_episode_count": 5,
+    "native_episode_count_status": "MEASURED_SNAPSHOT",
+    "ok": true,
+    "outcomes": [
+      "SUCCEEDED",
+      "SUCCEEDED",
+      "SUCCEEDED"
+    ],
+    "pending_jobs": [
+      {
+        "arm": "hybrid",
+        "axis": "T1"
+      },
+      {
+        "arm": "hybrid",
+        "axis": "T3"
+      },
+      {
+        "arm": "hybrid",
+        "axis": "S1"
+      }
+    ],
+    "qualification_sampling_authorized": false,
+    "ready_for_large_test": false,
+    "record_kind": "BOUNDED_DEVELOPMENT_STATUS",
+    "resume_allowed": true,
+    "state": "PAUSED"
+  },
+  "controller_goal_terminals": 42,
+  "controller_terminal_statuses": [
+    4
+  ],
+  "current_history_files": 374,
+  "full_six_slot_development_complete": false,
+  "gpu_and_actual_api_fees": "UNKNOWN",
+  "implementation_revision": "7c479e040211afe929484d2c94c2022ea20d126b",
+  "independent_holdout": "NOT_ESTABLISHED",
+  "inference_calls": 0,
+  "live_pause_resume": "MEASURED_COMMITTED_BOUNDARY",
+  "local_prefix_all_succeeded": true,
+  "local_prefix_processed": true,
+  "logical_tasks": 3,
+  "n_ge_50": "FROZEN",
+  "native_episodes": 5,
+  "network_stability": "NOT_ACCEPTED",
+  "new_budget_reservations": 0,
+  "no_failure_replacement": true,
+  "partial_wall_time_is_complete_labor": false,
+  "persistent_budget_unchanged": true,
+  "policy_decisions": 28,
+  "postflight_read_only_ok": true,
+  "previous_history_files": 369,
+  "previous_history_unchanged": true,
+  "public_development_exposure": [
+    "T1-001",
+    "T3-001"
+  ],
+  "qualification_sampling_authorized": false,
+  "ready_for_large_test": false,
+  "record_kind": "LOCAL_FSM_DEVELOPMENT_PREFIX",
+  "remaining_logical_tasks": 3,
+  "remaining_native_episode_cap": 5,
+  "sealed_utc": "2026-10-07T16:58:39.631151+00:00",
+  "tasks": [
+    {
+      "action_status": 4,
+      "arm": "fsm",
+      "axis": "T1",
+      "case_id": "T1-001",
+      "client_return_code": 0,
+      "decision_latency": {
+        "clock": "perf_counter_ns",
+        "n": 7,
+        "p50_ms": 0.007543,
+        "p95_ms": 0.012366899999999998,
+        "percentile_method": "linear interpolation, index=(n-1)*q",
+        "scope": "non-bootstrap complete policy.decide including escalation; not GPU-only latency",
+        "status": "MEASURED_DIAGNOSTIC"
+      },
+      "native_episode_count": 1,
+      "native_episode_ids": [
+        "development_T1-001-5eceb7af"
+      ],
+      "outcome": "SUCCEEDED",
+      "outcome_val": 0
+    },
+    {
+      "action_status": 4,
+      "arm": "fsm",
+      "axis": "T3",
+      "case_id": "T3-001",
+      "client_return_code": 0,
+      "decision_latency": {
+        "clock": "perf_counter_ns",
+        "n": 9,
+        "p50_ms": 0.008122,
+        "p95_ms": 0.0100604,
+        "percentile_method": "linear interpolation, index=(n-1)*q",
+        "scope": "non-bootstrap complete policy.decide including escalation; not GPU-only latency",
+        "status": "MEASURED_DIAGNOSTIC"
+      },
+      "native_episode_count": 3,
+      "native_episode_ids": [
+        "pick_place_v1-87bc900d",
+        "pick_place_v1-e6be4aaa",
+        "pick_place_v1-faf3fe99"
+      ],
+      "outcome": "SUCCEEDED",
+      "outcome_val": 0
+    },
+    {
+      "action_status": 4,
+      "arm": "fsm",
+      "axis": "S1",
+      "case_id": "S1",
+      "client_return_code": 0,
+      "decision_latency": {
+        "clock": "perf_counter_ns",
+        "n": 7,
+        "p50_ms": 0.007508,
+        "p95_ms": 0.008679899999999999,
+        "percentile_method": "linear interpolation, index=(n-1)*q",
+        "scope": "non-bootstrap complete policy.decide including escalation; not GPU-only latency",
+        "status": "MEASURED_DIAGNOSTIC"
+      },
+      "native_episode_count": 1,
+      "native_episode_ids": [
+        "development_S1-d4be7b61"
+      ],
+      "outcome": "SUCCEEDED",
+      "outcome_val": 0
+    }
+  ],
+  "tests": {
+    "all_offline_instruments": 121,
+    "targeted": 44
+  },
+  "unknown_transport_events": 0
+}

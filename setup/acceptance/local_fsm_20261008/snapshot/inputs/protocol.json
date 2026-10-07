@@ -1,0 +1,45 @@
+{
+  "AC90": "NOT_RUN",
+  "arms": [
+    "fsm",
+    "hybrid"
+  ],
+  "axes": [
+    "T1",
+    "T3"
+  ],
+  "composition_scope": "frozen three-stage swap under layouts; not unseen composition generalization",
+  "custody": "NOT_INDEPENDENT; candidate inputs disclosed in repository; no blind holdout claim",
+  "geometry": "SHA256 stream, +/-25mm around canonical positions; >=120mm separation and >=50mm from zones; 1mm two-object historical exclusion",
+  "large_tests_started": false,
+  "model_calls": 0,
+  "n_ge_50": "FROZEN",
+  "n_per_cell": 100,
+  "native_episodes_executed": 0,
+  "protocol_id": "transferbench-qualification-v2-candidate",
+  "reachability": "NOT_EVALUATED; static geometry is not IK or physical acceptance",
+  "ready_for_large_test": false,
+  "record_kind": "QUALIFICATION_INPUT_PREPARATION",
+  "regression_native_episodes": 50,
+  "remaining_gates": [
+    "independent custody and protocol ratification",
+    "NET-001 stability NOT_ACCEPTED",
+    "GRASP-B-001 root UNKNOWN",
+    "budget envelope NOT_RATIFIED",
+    "qualification ledger/runner NOT_IMPLEMENTED"
+  ],
+  "sampling_authorized": false,
+  "schema_version": 1,
+  "seed": 2026100701,
+  "statistical_assumptions": "NOT_RATIFIED; fixed-four-cell proposal remains separate",
+  "status": "PREPARED_NOT_RATIFIED",
+  "success_predicates": {
+    "T1": "typed task/client outcome 0; matching run/goal UUID; both native measured zone errors <=0.06m; PICK/PLACE/VERIFY per object",
+    "T3": "three native stage successes and fresh joint swapped positions; buffer empty; components are not independent samples",
+    "signals": "reject all signals including -6/134 even after earlier ok:true",
+    "source_regression_failure": "stop phase; preserve every registered slot",
+    "unknown_or_quarantine": "stop; preserve partial matrix; no replacement sampling"
+  },
+  "target_logical_tasks": 400,
+  "target_native_episodes": 800
+}

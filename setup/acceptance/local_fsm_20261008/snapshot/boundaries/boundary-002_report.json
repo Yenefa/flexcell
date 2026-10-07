@@ -1,0 +1,74 @@
+{
+  "record_kind": "PRE_BATCH_DEVELOPMENT_READINESS",
+  "schema_version": 1,
+  "read_only_preflight_ok": true,
+  "ready_for_large_test": false,
+  "large_tests_started": false,
+  "qualification": "FROZEN",
+  "AC90": "NOT_RUN",
+  "n_ge_50": "FROZEN",
+  "checks": {
+    "deployment": {
+      "ok": true,
+      "runtime_fingerprint": "fa0a1c6af0016f74741983d401d31ed170e5d8cdf6e52d823488b4f2ce596917",
+      "source_files": 38,
+      "installed_files": 38
+    },
+    "live_readonly": {
+      "ok": true,
+      "model_routes_required": false,
+      "model_health": "NOT_REQUIRED_FOR_FSM",
+      "calibration_sha256": null,
+      "prompt_sha256": null,
+      "route_eligible": null,
+      "tcp_reachable": null,
+      "tcp_probe_elapsed_ms": null,
+      "inference_calls": 0,
+      "native_episodes": 0,
+      "composite_action_available": true,
+      "active_policy": "fsm",
+      "carry_released": true,
+      "carry_revision": 10,
+      "strict_health_command": {
+        "return_code": 0,
+        "stdout": "{\n  \"ok\": true,\n  \"checks\": {\n    \"action /move_to_pose\": \"OK\",\n    \"action /observe\": \"OK\",\n    \"action /pick_object\": \"OK\",\n    \"action /place_object\": \"OK\",\n    \"action /verify_object\": \"OK\",\n    \"action /run_demo\": \"OK\",\n    \"action /run_pick_place\": \"OK\",\n    \"service /controller_manager/list_controllers\": \"OK\",\n    \"controller arm_controller\": \"OK\",\n    \"controller gripper_controller\": \"OK\",\n    \"controller joint_state_broadcaster\": \"OK\",\n    \"service /get_planning_scene\": \"OK\",\n    \"gz world models\": \"OK\",\n    \"object target_box_a pose\": \"OK ['0.119', '-0.140', '0.017']\",\n    \"object target_box_b pose\": \"OK ['0.246', '0.060', '0.017']\",\n    \"service /flexcell/carry_engage\": \"OK\",\n    \"service /flexcell/carry_snapshot\": \"OK\",\n    \"carry_state publishers\": \"OK (1)\",\n    \"task_state\": \"IDLE\",\n    \"carry_engaged\": false\n  },\n  \"hard_fail\": [],\n  \"busy\": false\n}\n",
+        "stderr": "",
+        "elapsed_ms": 4636.541761
+      },
+      "strict_health": {
+        "ok": true,
+        "checks": {
+          "action /move_to_pose": "OK",
+          "action /observe": "OK",
+          "action /pick_object": "OK",
+          "action /place_object": "OK",
+          "action /verify_object": "OK",
+          "action /run_demo": "OK",
+          "action /run_pick_place": "OK",
+          "service /controller_manager/list_controllers": "OK",
+          "controller arm_controller": "OK",
+          "controller gripper_controller": "OK",
+          "controller joint_state_broadcaster": "OK",
+          "service /get_planning_scene": "OK",
+          "gz world models": "OK",
+          "object target_box_a pose": "OK ['0.119', '-0.140', '0.017']",
+          "object target_box_b pose": "OK ['0.246', '0.060', '0.017']",
+          "service /flexcell/carry_engage": "OK",
+          "service /flexcell/carry_snapshot": "OK",
+          "carry_state publishers": "OK (1)",
+          "task_state": "IDLE",
+          "carry_engaged": false
+        },
+        "hard_fail": [],
+        "busy": false
+      }
+    }
+  },
+  "remaining_gates": [
+    "independent qualification split/sample size/confidence/budget not ratified",
+    "network stability NOT_ACCEPTED; DERP direct-path cause UNKNOWN",
+    "B-grasp limitation root cause UNKNOWN; do not hide FSM/Hybrid failures",
+    "complete human effort and actual GPU/API fees unmeasured"
+  ],
+  "dispatch_authorized": false
+}
