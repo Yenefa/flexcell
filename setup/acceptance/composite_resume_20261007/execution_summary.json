@@ -1,0 +1,134 @@
+{
+  "paused": {
+    "action": "composite",
+    "goal_uuid": "94ab8c0a59d145d8a3ece43531a0fc58",
+    "outcome": "OUTCOME_PAUSED",
+    "outcome_val": 3,
+    "action_status": 4,
+    "error_code": "ERR_NONE",
+    "detail": "requested committed prefix measured; explicit resume required",
+    "evidence_id": "/home/ros/.ros/flexcell/composites/composite-4de53ef286084c67.jsonl",
+    "wall_seconds": 20.213,
+    "run_id": "composite-4de53ef286084c67",
+    "completed_stage_ids": [
+      "buffer-B"
+    ],
+    "component_run_ids": [
+      "pick_place_v1-b3570325"
+    ],
+    "component_goal_uuids": [
+      "2f023d4c41cf437dad6e6cb971ce8743"
+    ],
+    "resumed_from_run_id": "",
+    "inherited_stages": 0
+  },
+  "resumed": {
+    "action": "composite",
+    "goal_uuid": "bb6e1eb143e84fd48edb829fc17e402a",
+    "outcome": "OUTCOME_SUCCEEDED",
+    "outcome_val": 0,
+    "action_status": 4,
+    "error_code": "ERR_NONE",
+    "detail": "all native stages and fresh joint conditions confirmed",
+    "evidence_id": "/home/ros/.ros/flexcell/composites/composite-acf2d2c5156b4c44.jsonl",
+    "wall_seconds": 41.793,
+    "run_id": "composite-acf2d2c5156b4c44",
+    "completed_stage_ids": [
+      "buffer-B",
+      "relocate-A",
+      "return-B"
+    ],
+    "component_run_ids": [
+      "pick_place_v1-b3570325",
+      "pick_place_v1-675d4dc3",
+      "pick_place_v1-ff8067fd"
+    ],
+    "component_goal_uuids": [
+      "2f023d4c41cf437dad6e6cb971ce8743",
+      "8150e7d6195943328d546940991d9665",
+      "ec9d44a8a5e84b0b970a3d54aad6216c"
+    ],
+    "resumed_from_run_id": "composite-4de53ef286084c67",
+    "inherited_stages": 1
+  },
+  "duplicate": {
+    "action": "composite",
+    "goal_uuid": "477af4e1cdfc4b99a8aae9b76f59b73a",
+    "outcome": "OUTCOME_FAILED",
+    "outcome_val": 1,
+    "action_status": 6,
+    "error_code": "ERR_RESUME_REJECTED",
+    "detail": "unhandled exception: CompositeError: checkpoint already consumed; inspect its recorded resume attempt (File \"/home/ros/agentic_workcell_ws/build/flexcell_skills/flexcell_skills/contracts/composite_checkpoint.py\", line 118, in claim_checkpoint | raise CompositeError(65, 'checkpoint already consumed; inspect its recorded resume attempt') | flexcell_skills.contracts.composite.CompositeError: checkpoint already consumed; inspect its recorded resume attempt)",
+    "evidence_id": "/home/ros/.ros/flexcell/composites/composite-7c5fa4ea1c01409a.jsonl",
+    "wall_seconds": 0.009,
+    "run_id": "composite-7c5fa4ea1c01409a",
+    "completed_stage_ids": [],
+    "component_run_ids": [],
+    "component_goal_uuids": [],
+    "resumed_from_run_id": "",
+    "inherited_stages": 0
+  },
+  "source_result": {
+    "record_kind": "ACTUAL_NATIVE_TASK",
+    "arm": "hybrid",
+    "stage_id": "S1-source-regression",
+    "purpose": "regression",
+    "target": null,
+    "destination": null,
+    "run_id": "week1_demo_v1-59000162",
+    "outcome": "SUCCEEDED",
+    "harness_error": null,
+    "command_rc": 0,
+    "reported_client_result": {
+      "action": "demo",
+      "goal_uuid": "27816e844899494c9cadedde1a50424e",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "outcome_val": 0,
+      "action_status": 4,
+      "error_code": "ERR_NONE",
+      "detail": "task done: all assignments verified",
+      "evidence_id": "week1_demo_v1-4f02a1d5",
+      "wall_seconds": 42.385,
+      "fsm_trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK",
+        "PICK_B(attempt=1):OK",
+        "PLACE_B:OK",
+        "VERIFY_B(attempt=1):OK"
+      ],
+      "object_a_at_zone": true,
+      "object_b_at_zone": true,
+      "zone_a_error_m": 0.0018090372045566738,
+      "zone_b_error_m": 0.0060337599506495145,
+      "run_id": "week1_demo_v1-59000162",
+      "scenario_id": "week1_demo_v1"
+    },
+    "runtime_fingerprint": "b65aa2e2c0258d3ec705ee6cb4a4a6bb85f846dcdc987c556bb2ffde2188148f",
+    "audit": {
+      "ok": true,
+      "errors": [],
+      "bootstrap": 1,
+      "model_decisions": 7,
+      "fast_selected": 6,
+      "slow_selected": 1,
+      "fsm_fallbacks": 0,
+      "fast_calls": 7,
+      "fast_tokens": 10107
+    },
+    "raw_evidence": [
+      {
+        "path": "/home/ros/agentic_workcell_ws/setup/acceptance/composite_resume_20261007/execution/S1/client.json",
+        "sha256": "be70685c9b6e7c89a048ad3edd89aced86db5ca0ac9cf77135c91b7b1da64581"
+      },
+      {
+        "path": "/home/ros/agentic_workcell_ws/setup/acceptance/composite_resume_20261007/execution/S1/episode.json",
+        "sha256": "94e31f9e42bcb091a9a869ff71bd6e6b845cec49b4b83619a36c51f7005fbcb2"
+      }
+    ]
+  },
+  "elapsed_minutes": 2.3668743873,
+  "max_native_episodes": 4,
+  "no_resampling": true,
+  "n_ge_50": "FROZEN"
+}

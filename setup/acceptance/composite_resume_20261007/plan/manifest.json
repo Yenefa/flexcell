@@ -1,0 +1,42 @@
+{
+  "record_kind": "PROSPECTIVE_PLAN",
+  "protocol_id": "mainline-composite-resume-v2",
+  "baseline_revision": "d14c7954049a2eeb799f18e76afe29b706cf992b",
+  "implementation_revision": "6624bb7b60bf2895593da5083f2153214afcec9d",
+  "runtime_fingerprint": "b65aa2e2c0258d3ec705ee6cb4a4a6bb85f846dcdc987c556bb2ffde2188148f",
+  "policy": "hybrid",
+  "threshold": 0.85,
+  "composite_attempts": 1,
+  "pause_after_stages": 1,
+  "resume_attempts": 1,
+  "duplicate_guard_attempts": 1,
+  "source_regressions": 1,
+  "max_native_components": 3,
+  "max_native_episodes": 4,
+  "additional_paid_stop_threshold_cny": 0.25,
+  "no_failure_replacement": true,
+  "n_ge_50": "FROZEN",
+  "qualification": "FROZEN",
+  "stop": "unknown acceptance/terminal, signal, quarantine, missing identity or failed routing stops globally; known task failure stops its chain and permits only registered source regression",
+  "success": "pause typed3/status4; same-fingerprint owned fleet restart; resume typed0/status4; exactly three unique native components and no replay; duplicate typed65 and no dispatch; source unchanged S1 predicate",
+  "component_ids": "internal in-process execution correlation, not separately accepted DDS RunPickPlace goals",
+  "executor_sha256": "f5087f7248f34c612116249f158bebc5907320ae86875dcf5cf4dae04d16178c",
+  "helpers_sha256": {
+    "setup/125_transfer_cost.py": "6e1f68e920ccb032daf09eb598243eddc5aea35f7a622c36d30bcf1224942cf9",
+    "setup/transferbench/t1_pilot.py": "44c4d8caed64c37fed267acef35af6651fe4f90a23b5d00b7c8d86be82d477f6",
+    "setup/transferbench/t3_swap_pilot.py": "23a8809243b59608c5a75f54b588d29e65324f2394eb8c195fc1b447a9598d26"
+  },
+  "source_sha256": {
+    "src/flexcell/flexcell_interfaces/action/RunComposite.action": "a1cfd7e51b0e374041327cbfd2b1151a39631d29dde763c2ccddcf3502e5628c",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/composite.py": "549d4816d48a693262099261f7310da3a92229107c662bb2d1db2108ce02f4f5",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/composite_checkpoint.py": "b62c4d79d27217cfd2b17c6ee9e1cfd7de8616b41a41420c919c87fc3962de11",
+    "src/flexcell/flexcell_skills/flexcell_skills/task_fsm_server.py": "a666976ca3f433a7369228436561188aa24328e69b367344ce394021b4c1e061",
+    "src/flexcell/flexcell_skills/test/w1_client.py": "92ab65ef644de75abe549c2436eed9d0ee1ebe47007f91b5f978c280fe4f0713",
+    "src/flexcell/flexcell_skills/test/test_composite_checkpoint.py": "dc5c95694ad0bc37468b4646170537be46b8de17eea1579c300d076504b9700e",
+    "src/flexcell/flexcell_skills/test/test_composite_server.py": "f03f8e341eb981db317b8451f7bdfdcb6655ac9883a531df3bdc7e23e068d94d",
+    "src/flexcell/flexcell_skills/test/test_composite_resume_audit.py": "ec38a6a5c0d0ce8e21f089cdcbe4c14712649b54631dd608ad763455cb86477a",
+    "setup/129_composite_resume_audit.py": "9d956fae2f581b7c056597915971c91cc83878ccc545f01727555b3eaf9b9a91",
+    "docs/COMPOSITE_TASKS.md": "a6d77888d81d88bd6f2f92b131a47b818972f9d9f73ef76c98d0b03580136b02"
+  },
+  "cost": "shared API code and previous executor reuse are engineering work; partial agent elapsed only; human minutes and assistant tokens/fees NOT_RUN"
+}

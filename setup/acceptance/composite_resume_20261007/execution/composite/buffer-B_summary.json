@@ -1,0 +1,55 @@
+{
+  "record_kind": "ACTUAL_NATIVE_COMPONENT",
+  "component": {
+    "detail": "task done: all assignments verified",
+    "episode_path": "/home/ros/.ros/flexcell/episodes/pick_place_v1_pick_place_v1-b3570325.json",
+    "error_code": 0,
+    "final_position_error_m": 0.0062772798658965664,
+    "final_state": {
+      "component_execution_id": "2f023d4c41cf437dad6e6cb971ce8743",
+      "detail": "task done: all assignments verified",
+      "duration_s": 20.04660583100008,
+      "error_code": 0,
+      "evidence_id": "pick_place_v1-987e1a79",
+      "execution_kind": "IN_PROCESS_COMPONENT",
+      "final_position_error_m": 0.0062772798658965664,
+      "fsm_trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK"
+      ],
+      "goal_uuid": "2f023d4c41cf437dad6e6cb971ce8743",
+      "object_at_place": true,
+      "outcome": "0",
+      "parent_run_id": "composite-4de53ef286084c67",
+      "safety": {
+        "evaluated": 4,
+        "invalid_per_1000": 0.0,
+        "rejected": 0
+      },
+      "stage_id": "buffer-B"
+    },
+    "goal_uuid": "2f023d4c41cf437dad6e6cb971ce8743",
+    "object_at_place": true,
+    "outcome": 0,
+    "parent_run_id": "composite-4de53ef286084c67",
+    "run_id": "pick_place_v1-b3570325",
+    "stage_id": "buffer-B",
+    "terminal_status": "SUCCEEDED"
+  },
+  "audit": {
+    "ok": true,
+    "errors": [],
+    "bootstrap": 1,
+    "model_decisions": 3,
+    "fast_selected": 3,
+    "slow_selected": 0,
+    "fsm_fallbacks": 0,
+    "fast_calls": 3,
+    "fast_tokens": 4132
+  },
+  "raw_episode": {
+    "path": "/home/ros/agentic_workcell_ws/setup/acceptance/composite_resume_20261007/execution/composite/episodes/pick_place_v1_pick_place_v1-b3570325.json",
+    "sha256": "722a7e291a2c314602a61785b6dc1e76c2df2e38daf048e21d2e2397f5fae8cb"
+  }
+}

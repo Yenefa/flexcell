@@ -1,0 +1,18 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/src/flexcell/flexcell_skills/test/w1_client.py",
+    "--action",
+    "inject",
+    "--inject",
+    "",
+    "--inject-request-id",
+    "hybrid-t3-composite",
+    "--expect-inject-state",
+    "cleared"
+  ],
+  "return_code": 0,
+  "stdout": "INJECT payload='#hybrid-t3-composite' expect=cleared observed={\"applied_count\": 0, \"error\": \"\", \"live\": false, \"mode\": \"\", \"request_id\": \"hybrid-t3-composite\", \"scenario\": \"\", \"state\": \"cleared\", \"target_object\": \"\"}\n",
+  "stderr": "",
+  "elapsed_ms": 1516.370595
+}

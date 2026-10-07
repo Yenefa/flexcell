@@ -1,0 +1,58 @@
+........................................................................ [ 22%]
+......................................................F................. [ 44%]
+........................................................................ [ 66%]
+........................................................................ [ 88%]
+.....................................                                    [100%]
+=================================== FAILURES ===================================
+_______________ test_proven_prefix_is_inherited_and_claimed_once _______________
+
+tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-2/test_proven_prefix_is_inherite0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x71bb954f4230>
+
+    def test_proven_prefix_is_inherited_and_claimed_once(tmp_path, monkeypatch):
+        from test_composite_checkpoint import paused, PLAN, FP
+        import hashlib
+        from flexcell_skills.contracts.composite import Journal
+        rig,events,path,episodes=paused(tmp_path)
+        n=server(tmp_path);n._policy=SimpleNamespace(name='hybrid',version='1.1')
+        n._episodes=SimpleNamespace(_dir=str(episodes));monkeypatch.setenv('FLEXCELL_RUNTIME_FINGERPRINT',FP)
+        h=goal();q=h.request;q.scenario_id=PLAN['scenario_id'];q.initial_objects=[];q.stages=[]
+        for name,xyz in PLAN['initial_objects'].items():
+            o=ObjectPosition();o.object_name=name;o.position.x,o.position.y,o.position.z=map(float,xyz);q.initial_objects.append(o)
+        for stage in PLAN['stages']:
+            s=CompositeStage();s.stage_id=stage['stage_id'];s.object_name=stage['object_name']
+            s.place_pose.header.frame_id='world';s.place_pose.pose.orientation.w=1.
+            s.place_pose.pose.position.x,s.place_pose.pose.position.y,s.place_pose.pose.position.z=map(float,stage['destination']);q.stages.append(s)
+        from geometry_msgs.msg import Point
+        q.final_empty_positions=[]
+        for xyz in PLAN['final_empty_positions']:
+            p=Point();p.x,p.y,p.z=map(float,xyz);q.final_empty_positions.append(p)
+        q.motion_profile_id=PLAN['motion_profile_id'];q.resume_run_id=events[0]['run_id'];q.resume_receipt_sha256=hashlib.sha256(path.read_bytes()).hexdigest()
+        def observe(*args):
+            assert n._admission.locked()
+            reply=Observe.Result();reply.evidence_id='fresh';reply.world_state.source='SIMULATION_GROUND_TRUTH'
+            for name,xyz in rig.actual.items():
+                o=WorldObject();o.name=name;o.available=True;o.pose.position.x,o.pose.position.y,o.pose.position.z=map(float,xyz)
+                reply.world_state.objects.append(o)
+            return reply,None
+        def native(view,single,admission_held,component):
+            assert n._admission.locked() and admission_held
+            stage=next(s for s in PLAN['stages'] if s['stage_id']==component['stage_id'])
+            c=rig.native(stage,bytes(view.goal_id.uuid).hex());component.update({k:c[k] for k in ['run_id','episode_path','final_state']})
+            r=RunPickPlace.Result();r.object_at_place=True;r.final_position_error_m=.001;view.succeed();return r
+        n._demo_call.side_effect=observe;n._execute_plan.side_effect=native
+        r=n._execute_composite(h)
+>       assert r.outcome==0 and r.inherited_stages==1 and r.resumed_from_run_id==q.resume_run_id
+E       AssertionError: assert (1 == 0)
+E        +  where 1 = flexcell_interfaces.action.RunComposite_Result(outcome=1, error_code=65, run_id='composite-c9b73598a3f44162', complete...ts.composite.CompositeError: checkpoint rejected: original plan mismatch)', resumed_from_run_id='', inherited_stages=0).outcome
+
+src/flexcell/flexcell_skills/test/test_composite_server.py:172: AssertionError
+=============================== warnings summary ===============================
+test/test_inference_budget.py::test_parallel_processes_cannot_oversubscribe_or_reset_budget
+test/test_inference_budget.py::test_parallel_processes_cannot_oversubscribe_or_reset_budget
+test/test_inference_budget.py::test_parallel_processes_cannot_oversubscribe_or_reset_budget
+  Warning: This process (pid=6146) is multi-threaded, use of fork() may lead to deadlocks in the child.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED src/flexcell/flexcell_skills/test/test_composite_server.py::test_proven_prefix_is_inherited_and_claimed_once

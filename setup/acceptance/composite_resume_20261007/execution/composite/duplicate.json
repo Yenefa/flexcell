@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/src/flexcell/flexcell_skills/test/w1_client.py",
+    "--action",
+    "composite",
+    "--plan",
+    "/home/ros/agentic_workcell_ws/setup/acceptance/composite_resume_20261007/plan/input.json",
+    "--timeout",
+    "360",
+    "--resume-run-id",
+    "composite-4de53ef286084c67",
+    "--resume-receipt-sha256",
+    "a62d315f06f5d5680cb25a15e5a075e907b46d7f42040d8f7e5d622bf21ac49c"
+  ],
+  "return_code": 1,
+  "stdout": "SENDING action=composite object=target_box pose=[0.12, -0.15, 0.0175]\nGOAL_UUID 477af4e1cdfc4b99a8aae9b76f59b73a\nRESULT {\n  \"action\": \"composite\",\n  \"goal_uuid\": \"477af4e1cdfc4b99a8aae9b76f59b73a\",\n  \"outcome\": \"OUTCOME_FAILED\",\n  \"outcome_val\": 1,\n  \"action_status\": 6,\n  \"error_code\": \"ERR_RESUME_REJECTED\",\n  \"detail\": \"unhandled exception: CompositeError: checkpoint already consumed; inspect its recorded resume attempt (File \\\"/home/ros/agentic_workcell_ws/build/flexcell_skills/flexcell_skills/contracts/composite_checkpoint.py\\\", line 118, in claim_checkpoint | raise CompositeError(65, 'checkpoint already consumed; inspect its recorded resume attempt') | flexcell_skills.contracts.composite.CompositeError: checkpoint already consumed; inspect its recorded resume attempt)\",\n  \"evidence_id\": \"/home/ros/.ros/flexcell/composites/composite-7c5fa4ea1c01409a.jsonl\",\n  \"wall_seconds\": 0.009,\n  \"run_id\": \"composite-7c5fa4ea1c01409a\",\n  \"completed_stage_ids\": [],\n  \"component_run_ids\": [],\n  \"component_goal_uuids\": [],\n  \"resumed_from_run_id\": \"\",\n  \"inherited_stages\": 0\n}\n",
+  "stderr": "",
+  "elapsed_ms": 688.177383
+}

@@ -1,0 +1,64 @@
+{
+  "ok": true,
+  "record_kind": "ACTUAL_COMPOSITE_RESUME_AUDIT",
+  "paused_run_id": "composite-4de53ef286084c67",
+  "resumed_run_id": "composite-acf2d2c5156b4c44",
+  "runtime_fingerprint": "b65aa2e2c0258d3ec705ee6cb4a4a6bb85f846dcdc987c556bb2ffde2188148f",
+  "inherited_stages": 1,
+  "new_stages": 2,
+  "component_run_ids": [
+    "pick_place_v1-b3570325",
+    "pick_place_v1-675d4dc3",
+    "pick_place_v1-ff8067fd"
+  ],
+  "routing": [
+    {
+      "ok": true,
+      "errors": [],
+      "bootstrap": 1,
+      "model_decisions": 3,
+      "fast_selected": 3,
+      "slow_selected": 0,
+      "fsm_fallbacks": 0,
+      "fast_calls": 3,
+      "fast_tokens": 4132
+    },
+    {
+      "ok": true,
+      "errors": [],
+      "bootstrap": 1,
+      "model_decisions": 3,
+      "fast_selected": 3,
+      "slow_selected": 0,
+      "fsm_fallbacks": 0,
+      "fast_calls": 3,
+      "fast_tokens": 4210
+    },
+    {
+      "ok": true,
+      "errors": [],
+      "bootstrap": 1,
+      "model_decisions": 3,
+      "fast_selected": 3,
+      "slow_selected": 0,
+      "fsm_fallbacks": 0,
+      "fast_calls": 3,
+      "fast_tokens": 4203
+    }
+  ],
+  "final_positions": {
+    "target_box_a": [
+      0.1946076787791383,
+      -0.18425542647944826,
+      0.017499639863069866
+    ],
+    "target_box_b": [
+      0.22547469043191315,
+      0.008890063441180486,
+      0.01749885485951974
+    ]
+  },
+  "no_replayed_stage": true,
+  "qualification": "FROZEN",
+  "physical_safety": "NOT_RUN"
+}

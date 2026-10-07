@@ -1,0 +1,20 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/src/flexcell/flexcell_skills/test/w1_client.py",
+    "--action",
+    "composite",
+    "--plan",
+    "/home/ros/agentic_workcell_ws/setup/acceptance/composite_resume_20261007/plan/input.json",
+    "--timeout",
+    "360",
+    "--resume-run-id",
+    "composite-4de53ef286084c67",
+    "--resume-receipt-sha256",
+    "a62d315f06f5d5680cb25a15e5a075e907b46d7f42040d8f7e5d622bf21ac49c"
+  ],
+  "return_code": 0,
+  "stdout": "SENDING action=composite object=target_box pose=[0.12, -0.15, 0.0175]\nGOAL_UUID bb6e1eb143e84fd48edb829fc17e402a\nRESULT {\n  \"action\": \"composite\",\n  \"goal_uuid\": \"bb6e1eb143e84fd48edb829fc17e402a\",\n  \"outcome\": \"OUTCOME_SUCCEEDED\",\n  \"outcome_val\": 0,\n  \"action_status\": 4,\n  \"error_code\": \"ERR_NONE\",\n  \"detail\": \"all native stages and fresh joint conditions confirmed\",\n  \"evidence_id\": \"/home/ros/.ros/flexcell/composites/composite-acf2d2c5156b4c44.jsonl\",\n  \"wall_seconds\": 41.793,\n  \"run_id\": \"composite-acf2d2c5156b4c44\",\n  \"completed_stage_ids\": [\n    \"buffer-B\",\n    \"relocate-A\",\n    \"return-B\"\n  ],\n  \"component_run_ids\": [\n    \"pick_place_v1-b3570325\",\n    \"pick_place_v1-675d4dc3\",\n    \"pick_place_v1-ff8067fd\"\n  ],\n  \"component_goal_uuids\": [\n    \"2f023d4c41cf437dad6e6cb971ce8743\",\n    \"8150e7d6195943328d546940991d9665\",\n    \"ec9d44a8a5e84b0b970a3d54aad6216c\"\n  ],\n  \"resumed_from_run_id\": \"composite-4de53ef286084c67\",\n  \"inherited_stages\": 1\n}\n",
+  "stderr": "",
+  "elapsed_ms": 42256.458661
+}

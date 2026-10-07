@@ -73,7 +73,10 @@ flush/fsync，COMMITTED 仅在新观察通过后写入。父任务通过 action 
 
 进程中断后的 STARTED、失败、取消、旧 contract v1 或不完整回执均不能授权续跑。
 需要确认 ownership 和现场状态后另行制定计划，旧回执及失败尝试全部保留。
-该功能的单元及 ROS 回调测试属于控制流证据；跨进程实时仿真验收尚未执行。
+2026-10-07 有界仿真试点已完成暂停、相同指纹重启、仅剩余两段续跑及重复拒绝；
+共 4 份原生 episode，含一次成功 S1 回测。
+[原始回执及独立审计](../setup/acceptance/composite_resume_20261007/README.md)保留全部失败，
+不代表运动中崩溃恢复或实体安全验收。
 
 `setup/129_composite_resume_audit.py` 提供只读父子回执审计，参数为 `--paused`、
 `--resumed`、`--episodes`、`--deployment` 和 `--claim`。它核验前缀继承、一次性 claim、
