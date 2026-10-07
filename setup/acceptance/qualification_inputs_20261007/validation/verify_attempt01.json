@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/setup/132_qualification_prepare.py",
+    "verify",
+    "--root",
+    "/home/ros/agentic_workcell_ws/setup/acceptance/qualification_inputs_20261007/inputs",
+    "--expected-sha256",
+    "3bc42291a1ee7a4b60d69a376619dd4e7835604f73c83dc764fc50e361983a5f",
+    "--workspace",
+    "/home/ros/agentic_workcell_ws",
+    "--history",
+    "/home/ros/.ros/flexcell/episodes"
+  ],
+  "return_code": 0,
+  "stdout": "{\n  \"ok\": true,\n  \"frozen_package_ok\": true,\n  \"package_sha256\": \"3bc42291a1ee7a4b60d69a376619dd4e7835604f73c83dc764fc50e361983a5f\",\n  \"implementation_verified\": true,\n  \"history_verified\": true,\n  \"target_cases\": 200,\n  \"schedule_slots\": 450,\n  \"sampling_authorized\": false,\n  \"ready_for_large_test\": false,\n  \"model_calls\": 0,\n  \"native_episodes_executed\": 0\n}\n",
+  "stderr": "",
+  "elapsed_ms": 986.412101
+}
