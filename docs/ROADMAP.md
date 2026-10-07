@@ -55,6 +55,9 @@ Clef 已在真实仿真 episode 中接管快臂决策；有类型组合、确认
 [大批测前检查点](PRE_BATCH_CHECKPOINT.md)列出当前入口和仍冻结的资格协议。
 该状态属于 feature 开发完成，不解锁 M3 n≥50、AC@90、网络稳定性或实体安全验收。
 
+TB-PREP-001 已提供[离线资格候选包](QUALIFICATION_PREPARATION.md)的冻结与复核，
+包括配对顺序和源任务回测；公开候选仍待独立保管和正式协议核定，没有执行资格采样。
+
 ## Future
 
 The current M3 claim is a cost hypothesis with independent task outcomes and a

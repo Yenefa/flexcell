@@ -9,7 +9,9 @@ T1 执行器复用本机现有 ROS/Gazebo 部署，不安装外部仿真栈。
 [开发检查点](PRE_BATCH_CHECKPOINT.md)与[本轮回执](../setup/acceptance/prebatch_ready_20261007/README.md)
 记录 2 份原生功能回归及一次零动作拒绝。负向任务保持 FAILED 标签，首轮状态常量
 错误的 harness 失败只读纠正后保留；不计作资格样本，也不重发请求。
-资格 v2 仅有不可执行的统计审阅草案，v1 qualification、AC@90 与 n≥50 继续冻结。
+资格 v2 已另补[离线候选输入准备](QUALIFICATION_PREPARATION.md)：固定 T1/T3 清单、配对顺序、
+旧任务回测、源码及校准身份，可独占生成并严格复核。候选包公开且待核定，不称盲留出集；
+统计方案仍为不可执行审阅草案，v1 qualification、AC@90 与 n≥50 继续冻结。
 
 ## 官方 benchmark 能借鉴什么
 

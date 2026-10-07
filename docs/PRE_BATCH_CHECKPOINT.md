@@ -8,6 +8,10 @@
 [路径校正证据](../setup/acceptance/authority_world_20261007/README.md)保留拥有的进程组和部署日志；
 此前功能试点的封存文件保持原样。
 
+后续已交付[批测候选输入准备](QUALIFICATION_PREPARATION.md)：可离线生成和复核冻结的
+T1/T3 场景、FSM/Hybrid 配对顺序和旧任务回测清单。输出仍为 PREPARED_NOT_RATIFIED，
+没有新原生 episode、模型调用或资格授权。
+
 ## 已完成的入口
 
 | 能力          | 结果与证据                                                                                       |
@@ -74,7 +78,7 @@ WSL Git checkout 的旧 `head` 不是本次实现提交。代码身份由内容�
 
 [资格评估 v2 草案](../setup/acceptance/prebatch_ready_20261007/plan/qualification_v2_draft.json)
 提出 T1/T3 × FSM/Hybrid 共四个 cell、每 cell 固定 100 个逻辑任务、仅一个终点检查。
-这只是统计方案，**没有生成留出状态、没有实现或调用资格采样器、没有启动任何大批次**。
+这只是统计方案。另有公开的候选布局包，但独立保管未建立，**没有盲留出集、没有实现或调用资格采样器、没有启动任何大批次**。
 T3 测冻结三段交换的适配后可靠性，不宣称未见组合泛化；component episodes 不作为独立成功样本。
 
 草案参考 [NIST 精确二项区间](https://www.itl.nist.gov/div898/handbook/prc/section2/prc241.htm)，
@@ -85,7 +89,7 @@ T3 测冻结三段交换的适配后可靠性，不宣称未见组合泛化；co
 
 | 仍未完成的资格门     | 当前结论与下一步                                                                                  |
 | -------------------- | ------------------------------------------------------------------------------------------------- |
-| 独立留出集与正式协议 | NOT_GENERATED / NOT_RATIFIED；历史适配和诊断 episode 不能改名成资格集                             |
+| 独立留出集与正式协议 | 公开候选包 PREPARED_NOT_RATIFIED；独立保管未建立，历史适配和诊断 episode 不能改名成资格集         |
 | NET-001              | 网络稳定性 NOT_ACCEPTED、直连根因 UNKNOWN；校园 mirrored / proxy 约束保持                         |
 | GRASP-B-001          | B 抓取失败根因 UNKNOWN；本轮一次成功不能消除已保留失败，需独立诊断                                |
 | 预算与成本           | 既有 ¥5 上限不重置；新增 ¥0.25 只是累积边界停止阈值。大批方案费用信封未核定，GPU/实际账单 UNKNOWN |

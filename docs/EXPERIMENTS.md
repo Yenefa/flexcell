@@ -1,5 +1,15 @@
 # EXPERIMENTS — log
 
+> 2026-10-07 TB-PREP-001: offline qualification-input preparation freezes 200
+> candidate layouts, 400 paired target slots and 50 source-regression slots.
+> Available history scan: 369 episode files, 2,484 recorded states and 483 unique
+> two-object layouts. Candidate geometry and exact schedule are reproducible;
+> calibration bytes, source identity and existing budget are preserved.
+> 82 offline instrument tests passed. No new native episodes, inference, reset
+> or policy deployment. Public candidates are PREPARED_NOT_RATIFIED, not a blind
+> holdout; qualification, AC@90 and n≥50 remain frozen.
+> [Inputs and verification evidence](../setup/acceptance/qualification_inputs_20261007/README.md).
+
 > 2026-10-07 CORE-001: bounded RunComposite action uses the existing policy/Skill
 > seam and one common arm admission lease throughout all stages. One registered
 > Hybrid swap and one S1 regression completed; 4 native episodes, Clef 9/0 on the
