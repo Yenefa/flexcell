@@ -1,5 +1,17 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-10-07 下一份 PR（待审核）：修复 Hybrid 快臂完全跳过仍可通过的批次
+> 来源门禁；不完整部署身份在派发前拒收，缺少真实快臂的模型回合停批，
+> baseline 前重新核验 smoke 校准和指纹。批次审计单独存放，物理失败与原始
+> Episode 保留。新增 22 项回归；本云环境无 ROS/Gazebo，线上资格仍待新指纹
+> smoke，n≥50 继续冻结。[修复与证据](HYBRID_BATCH_GATE_20261007.md) ·
+> [当前架构图和规划图](ARCHITECTURE_AND_PLAN_20261007.md)。
+
+> PR #27 已于本轮按预先授权合并（`a9b6a62`）。其 ROS Jazzy CI 构建与
+> 全套 colcon 测试通过：246 tests、零错误/失败/跳过，扫描 35 文件零缺失。
+> [CI 记录](https://github.com/Yenefa/flexcell/actions/runs/37665173778)。
+> 下条 172 项和 NOT_RUN 描述的是云环境本地验证，独立于 ROS CI。
+
 > 2026-10-07 issue #24 静态扫描修复：按类与源码继承关系收集属性，消除
 > 当前 35 个源文件中的 5 文件误报；真缺失属性退出 1，非法扫描输入退出 2。
 > 172 项无 ROS 依赖测试通过，含 20 项新增扫描器回归；11 个 ROS 依赖测试

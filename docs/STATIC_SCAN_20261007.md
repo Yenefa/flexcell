@@ -51,6 +51,13 @@ ROS/colcon builds, the complete ROS test suite and Gazebo acceptance batteries
 are **NOT_RUN** in this cloud environment. The new regressions are under the
 existing `test_*.py` configuration and will run in ROS CI.
 
+**CI follow-up:** PR [#27](https://github.com/Yenefa/flexcell/pull/27) passed
+the [ROS Jazzy workflow](https://github.com/Yenefa/flexcell/actions/runs/37665173778):
+both packages built, **246 tests / 0 errors / 0 failures / 0 skipped**, and
+35 scanned source files with zero missing attributes. It was merged as
+`a9b6a6255d91a568e44eea555ecb33f7e0d7d49f`. This is separate CI evidence;
+Gazebo runtime acceptance was not part of that workflow.
+
 To repeat the scanner and its dedicated suite from the repository root:
 
 ```bash

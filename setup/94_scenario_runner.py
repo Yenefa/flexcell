@@ -36,7 +36,7 @@ import time
 from flexcell_skills.contracts.benchmark_protocol import load_protocol, check_scenario_execution
 from flexcell_skills.contracts.episode import replay_episode
 from flexcell_skills.contracts.metrics import wilson
-from flexcell_skills.contracts.routing_audit import audit_routing_episode
+from flexcell_skills.contracts.routing_audit import audit_routing_batch, audit_routing_episode
 from flexcell_skills.decision_policy import FSMPolicy
 
 ROS_LOG = os.path.expanduser('~/.ros/flexcell')
@@ -187,6 +187,11 @@ def main():
         ap.error('batch must contain at least one cell')
     if not args.dry_run and args.policy == 'hybrid' and deployment is None:
         ap.error('hybrid execution requires --deployment for routing provenance')
+    if not args.dry_run and deployment:
+        fast_identity = deployment.get('active_backends', {}).get('fast', {})
+        if not deployment.get('runtime_fingerprint') or any(
+                not fast_identity.get(key) for key in ('model', 'model_sha256', 'calibration_sha256')):
+            ap.error('hybrid deployment requires runtime fingerprint and fast model/weight/calibration identity')
     baseline_profile = None
     if not args.dry_run and args.stage == 'smoke' and any(n > 5 for _, n in plan):
         ap.error('smoke is capped at n=5 per cell; baseline requires a passing smoke summary')
@@ -214,6 +219,11 @@ def main():
                       else r.get('model_decisions', 0) > 0)]
             if len(valid) < 5:
                 ap.error('baseline blocked: %s has fewer than five passing same-policy smoke runs' % sid)
+            if deployment:
+                smoke_audit = audit_routing_batch(valid, deployment)
+                if not smoke_audit['ok']:
+                    ap.error('baseline blocked: hybrid smoke provenance failed: ' +
+                             '; '.join(smoke_audit['errors']))
     schedule = [(sid, i + 1, n) for i in range(max(n for _, n in plan))
                 for sid, n in plan if i < n]
     if args.dry_run:
@@ -331,8 +341,28 @@ def main():
             print('    stopping batch: ' + harness_error)
             break
 
+    batch_audit = None
+    if deployment:
+        batch_audit = audit_routing_batch(rows, deployment)
+        # Keep this sidecar outside the episode root: existing episode and
+        # metrics readers enumerate root-level *.json files.
+        audit_dir = os.path.join(EPISODE_DIR, 'batch_audits')
+        os.makedirs(audit_dir, exist_ok=True)
+        audit_path = os.path.join(audit_dir, batch_id + '.json')
+        with open(audit_path, 'w') as stream:
+            json.dump(dict(record_type='routing_batch_audit', schema_version=1,
+                           batch_id=batch_id, summary=summary_path,
+                           protocol_sha256=PROTOCOL_SHA256, stage=args.stage,
+                           policy=args.policy, routing_audit=batch_audit),
+                      stream, indent=2, allow_nan=False)
+            stream.write('\n')
+        print('batch routing audit: %s' % audit_path)
+        if not batch_audit['ok']:
+            print('HARNESS_ERROR: hybrid batch provenance failed: ' +
+                  '; '.join(batch_audit['errors']))
+
     print('\n=== per-scenario results (metric #1, Wilson 95%% CI) ===')
-    bad = 0
+    bad = int(batch_audit is not None and not batch_audit['ok'])
     for sid in dict(plan):
         sel = [r for r in rows if r['scenario'] == sid]
         # a HARNESS_ERROR episode is not a policy outcome: it is excluded from
