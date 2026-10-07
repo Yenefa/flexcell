@@ -49,7 +49,8 @@ from flexcell_skills.contracts.error_codes import task_abort_error_code
 from flexcell_skills.contracts.action_result import AcceptedGoalResult
 from flexcell_skills.contracts.goal_response import LateGoalCleanup
 from flexcell_skills.contracts.backend_health import startup_health
-from flexcell_skills.contracts.composite import Journal, execute as execute_composite
+from flexcell_skills.contracts.composite import CompositeError, Journal, execute as execute_composite
+from flexcell_skills.contracts.composite_checkpoint import load_checkpoint, claim_checkpoint
 
 from flexcell_skills.contracts.episode import EpisodeRecorder, EpisodeStore
 from flexcell_skills.contracts.benchmark_protocol import load_protocol
@@ -457,7 +458,7 @@ class TaskFsmServer(Node):
             journal = Journal(self._composite_dir, res.run_id, dict(
                 goal_uuid=bytes(goal_handle.goal_id.uuid).hex(),
                 runtime_fingerprint=os.environ.get('FLEXCELL_RUNTIME_FINGERPRINT'),
-                policy=self._policy.name, policy_version=self._policy.version))
+                policy=self._policy.name, policy_version=self._policy.version, contract_version=2))
             res.evidence_id = str(journal.path)
             if not self._admission.acquire(blocking=False):
                 res.error_code, res.detail = res.ERR_RESOURCE_BUSY, 'another task owns the arm'
@@ -488,6 +489,21 @@ class TaskFsmServer(Node):
                                 stages=stages, final_empty_positions=[xyz(p) for p in goal.final_empty_positions],
                                 position_tolerance_m=goal.position_tolerance_m, clearance_m=goal.clearance_m,
                                 motion_profile_id=goal.motion_profile_id)
+                    checkpoint = None
+                    if goal.resume_run_id or goal.resume_receipt_sha256:
+                        if goal.pause_after_stages:
+                            raise CompositeError(65, 'resume must finish the remaining chain')
+                        try:
+                            checkpoint = load_checkpoint(self._composite_dir, goal.resume_run_id, goal.resume_receipt_sha256,
+                                                         plan, os.environ.get('FLEXCELL_RUNTIME_FINGERPRINT'), self._episodes._dir)
+                        except (ValueError, KeyError, TypeError, OSError) as exc:
+                            raise CompositeError(65, 'checkpoint rejected: ' + str(exc))
+                        if checkpoint['policy'] != self._policy.name or checkpoint['policy_version'] != self._policy.version:
+                            raise CompositeError(65, 'checkpoint policy identity mismatch')
+                        checkpoint['claim'] = claim_checkpoint(self._composite_dir, checkpoint, res.run_id)
+                        res.resumed_from_run_id = checkpoint['source_run_id']
+                        res.inherited_stages = len(checkpoint['completed_stage_ids'])
+                        progress.extend(checkpoint['completed_stage_ids'])
                     def emit(event, **data):
                         journal.emit(event, **data)
                         if event == 'COMMITTED':
@@ -518,12 +534,13 @@ class TaskFsmServer(Node):
                         return dict(context, goal_uuid=goal_uuid, terminal_status=view.terminal_status,
                                     outcome=int(result.outcome), error_code=int(result.error_code), detail=result.detail,
                                     object_at_place=bool(result.object_at_place), final_position_error_m=result.final_position_error_m)
-                    result = execute_composite(plan, observe, native, emit, lambda: goal_handle.is_cancel_requested)
+                    result = execute_composite(plan, observe, native, emit, lambda: goal_handle.is_cancel_requested,
+                                               pause_after_stages=int(goal.pause_after_stages), checkpoint=checkpoint)
                     for field in ('outcome', 'error_code', 'detail', 'completed_stage_ids', 'component_run_ids', 'component_goal_uuids'):
                         setattr(res, field, result[field])
         except Exception as exc:
             res.outcome = res.OUTCOME_FAILED
-            res.error_code = res.ERR_INVALID_PLAN if isinstance(exc, ValueError) else res.ERR_INTERNAL
+            res.error_code = exc.code if isinstance(exc, CompositeError) else res.ERR_INVALID_PLAN if isinstance(exc, ValueError) else res.ERR_INTERNAL
             res.detail = crash_detail(exc)
             if journal is not None:
                 try:
@@ -539,7 +556,7 @@ class TaskFsmServer(Node):
                     journal.close()
                 except Exception as exc:
                     res.outcome, res.error_code, res.detail = res.OUTCOME_FAILED, res.ERR_INTERNAL, crash_detail(exc)
-        if res.outcome == res.OUTCOME_SUCCEEDED:
+        if res.outcome in (res.OUTCOME_SUCCEEDED, res.OUTCOME_PAUSED):
             goal_handle.succeed()
         elif res.outcome == res.OUTCOME_CANCELED:
             goal_handle.canceled()

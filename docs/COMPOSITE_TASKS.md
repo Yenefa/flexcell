@@ -55,9 +55,29 @@ flush/fsync，COMMITTED 仅在新观察通过后写入。父任务通过 action 
 `execution_kind=IN_PROCESS_COMPONENT`、`component_execution_id`、`parent_run_id`
 及 `stage_id`。真实 Skill/controller goal 仍走现有有类型的 action 传输。
 
-进程中断后 STARTED 不能证明阶段成功或已经停止；v1 不自动重放或续跑。
-应先确认 ownership、carry 和新测量状态，再提交明确的新计划；旧回执保留。
-本接口不改变 reset 行为，也不实现跨进程事务恢复。
+## 显式暂停与一次性续跑（contract v2）
+
+目标字段 `pause_after_stages` 默认 0，表示完成全链。设为 1..阶段数减一时，
+仅在该段原生终态、持久化 episode 和新后置观察全部确认后暂停。
+此时 action 请求完成，状态为 4，但任务结果为 `OUTCOME_PAUSED=3`，不能计为全链成功。
+
+续跑须提交同一计划，以及原回执的 `resume_run_id` 和 `resume_receipt_sha256`；
+`pause_after_stages` 必须为 0。服务端只读取自身 composites 和 episodes 目录，
+重新核验完整前缀、原生终态、策略版本及 runtime fingerprint，再以独占创建和 fsync
+写入一次性 `.resume-claim.json`。新 action 返回 `resumed_from_run_id`、`inherited_stages`，
+仅执行剩余阶段；前缀 IDs 保留来源，不产生重复原生执行。
+
+续跑前的新 Observe 必须与已提交状态一致，carry 必须释放。失败、取消或重启都不会
+撤销一次性 claim；重复使用返回 `ERR_RESUME_REJECTED=65`。不能在续跑中再次暂停。
+允许在相同部署身份下重启后显式续跑已确认的 PAUSED 回执；不自动续跑。
+
+进程中断后的 STARTED、失败、取消、旧 contract v1 或不完整回执均不能授权续跑。
+需要确认 ownership 和现场状态后另行制定计划，旧回执及失败尝试全部保留。
+该功能的单元及 ROS 回调测试属于控制流证据；跨进程实时仿真验收尚未执行。
+
+`setup/129_composite_resume_audit.py` 提供只读父子回执审计，参数为 `--paused`、
+`--resumed`、`--episodes`、`--deployment` 和 `--claim`。它核验前缀继承、一次性 claim、
+剩余阶段、最终联合测量和原生路由，不驱动机器人。
 
 ## 只读审计
 

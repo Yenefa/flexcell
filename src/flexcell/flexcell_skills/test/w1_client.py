@@ -51,6 +51,9 @@ def main():
     ap.add_argument('--skip-verify', action='store_true')
     ap.add_argument('--scenario', default='week1_demo_v1')
     ap.add_argument('--plan', type=Path, help='declared RunComposite JSON plan')
+    ap.add_argument('--pause-after-stages', type=int, default=0)
+    ap.add_argument('--resume-run-id', default='')
+    ap.add_argument('--resume-receipt-sha256', default='')
     ap.add_argument('--inject', default='')
     ap.add_argument('--inject-request-id', default='',
                     help='correlate the injection lifecycle transition')
@@ -176,6 +179,8 @@ def main():
         from geometry_msgs.msg import Point
         g.scenario_id, g.motion_profile_id = plan['scenario_id'], plan['motion_profile_id']
         g.position_tolerance_m, g.clearance_m = plan['position_tolerance_m'], plan['clearance_m']
+        g.pause_after_stages = args.pause_after_stages
+        g.resume_run_id, g.resume_receipt_sha256 = args.resume_run_id, args.resume_receipt_sha256
         for name, xyz in plan['initial_objects'].items():
             obj = ObjectPosition(); obj.object_name = name
             obj.position.x, obj.position.y, obj.position.z = map(float, xyz)
@@ -276,11 +281,15 @@ def main():
         out['final_position_error_m'] = r.final_position_error_m
     if args.action == 'composite':
         out.update(run_id=r.run_id, completed_stage_ids=list(r.completed_stage_ids),
-                   component_run_ids=list(r.component_run_ids), component_goal_uuids=list(r.component_goal_uuids))
+                   component_run_ids=list(r.component_run_ids), component_goal_uuids=list(r.component_goal_uuids),
+                   resumed_from_run_id=r.resumed_from_run_id, inherited_stages=int(r.inherited_stages))
     out.update(extra)
     print('RESULT ' + json.dumps(out, indent=2), flush=True)
 
     success_vals = {0}
+    if args.action == 'composite':
+        # The pause request is fulfilled; JSON outcome remains PAUSED, not task success.
+        success_vals.add(cls.Result.OUTCOME_PAUSED)
     for attr in ('OUTCOME_SUCCEEDED', 'OUTCOME_VERIFIED'):
         if hasattr(cls.Result, attr):
             success_vals.add(getattr(cls.Result, attr))

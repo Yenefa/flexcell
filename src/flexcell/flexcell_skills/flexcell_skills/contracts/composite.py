@@ -140,7 +140,7 @@ class Journal:
         self.file.close()
 
 
-def execute(plan, observe, native, emit, cancelled=lambda: False):
+def execute(plan, observe, native, emit, cancelled=lambda: False, pause_after_stages=0, checkpoint=None):
     completed, components, goal_ids = [], [], []
     def terminal(outcome, code, detail):
         result = dict(outcome=outcome, error_code=code, detail=detail,
@@ -152,8 +152,20 @@ def execute(plan, observe, native, emit, cancelled=lambda: False):
             raise CompositeError(32, 'canceled; no subsequent stage dispatched')
     try:
         plan = validate_plan(plan)
-        emit('PLAN', plan=plan, plan_sha256=hashlib.sha256(json.dumps(plan, sort_keys=True).encode()).hexdigest())
+        if type(pause_after_stages) is not int or not 0 <= pause_after_stages < len(plan['stages']):
+            raise CompositeError(60, 'pause must be zero or a proper committed prefix')
+        if checkpoint is not None and pause_after_stages:
+            raise CompositeError(65, 'resume must finish the remaining chain')
+        emit('PLAN', plan=plan, plan_sha256=hashlib.sha256(json.dumps(plan, sort_keys=True).encode()).hexdigest(), pause_after_stages=pause_after_stages)
         expected = copy.deepcopy(plan['initial_objects'])
+        inherited = 0
+        if checkpoint is not None:
+            inherited = len(checkpoint['completed_stage_ids'])
+            if not 0 < inherited < len(plan['stages']) or checkpoint['completed_stage_ids'] != [s['stage_id'] for s in plan['stages'][:inherited]]:
+                raise CompositeError(65, 'checkpoint prefix does not match plan')
+            completed.extend(checkpoint['completed_stage_ids']); components.extend(checkpoint['component_run_ids']); goal_ids.extend(checkpoint['component_goal_uuids'])
+            expected = copy.deepcopy(checkpoint['expected_positions'])
+            emit('RESUME', checkpoint=checkpoint)
         tolerance, clearance = plan['position_tolerance_m'], plan['clearance_m']
         def snapshot(stage, boundary):
             check_cancel()
@@ -161,7 +173,7 @@ def execute(plan, observe, native, emit, cancelled=lambda: False):
             emit('OBSERVATION', stage_id=stage, boundary=boundary, observation=observation)
             check_cancel()
             return positions(observation, expected)
-        for stage in plan['stages']:
+        for stage in plan['stages'][inherited:]:
             sid, name, dest = stage['stage_id'], stage['object_name'], stage['destination']
             actual = snapshot(sid, 'before')
             if not matches(actual, expected, tolerance) or not vacant(actual, dest, clearance, name):
@@ -182,6 +194,8 @@ def execute(plan, observe, native, emit, cancelled=lambda: False):
                 raise CompositeError(63, 'measured postcondition failed for ' + sid)
             completed.append(sid)
             emit('COMMITTED', stage_id=sid, component_run_id=component['run_id'], expected_positions=expected)
+            if pause_after_stages and len(completed) == pause_after_stages:
+                return terminal(3, 0, 'requested committed prefix measured; explicit resume required')
         actual = snapshot('', 'final')
         if not matches(actual, expected, tolerance) or not all(vacant(actual, dest, clearance) for dest in plan['final_empty_positions']):
             raise CompositeError(63, 'joint final positions or empty-space condition failed')
