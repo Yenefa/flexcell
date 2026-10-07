@@ -1,0 +1,82 @@
+{
+  "record_kind": "PRE_BATCH_DEVELOPMENT_READINESS",
+  "schema_version": 1,
+  "read_only_preflight_ok": true,
+  "ready_for_large_test": false,
+  "large_tests_started": false,
+  "qualification": "FROZEN",
+  "AC90": "NOT_RUN",
+  "n_ge_50": "FROZEN",
+  "checks": {
+    "deployment": {
+      "ok": true,
+      "runtime_fingerprint": "5909f3720f821b112313dfbd8cd38231da0204214dd8f97544f93de716962fca",
+      "source_files": 38,
+      "installed_files": 38
+    },
+    "seal-0": {
+      "ok": true,
+      "files": 141,
+      "manifest_sha256": "16a0e9b1c06ddab88f9bb53342cac74b84fe4b32f90f270e1e334f5a26d47279"
+    },
+    "seal-1": {
+      "ok": true,
+      "files": 135,
+      "manifest_sha256": "443b4bc39cd4ac43ab5eca705cf37358e9801b610633219e7b9a3d2b4e476a3d"
+    },
+    "live_readonly": {
+      "ok": true,
+      "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+      "prompt_sha256": "b37e71cd0b9b0ff81cfa3638111da8375251be2fadeabc01468ce46b5f4e85b8",
+      "route_eligible": true,
+      "composite_action_available": true,
+      "carry_released": true,
+      "carry_revision": 1,
+      "tcp_reachable": true,
+      "tcp_probe_elapsed_ms": 346.652853,
+      "tcp_detail": "TCP startup reachable (deadline 10.000s; typed inference checked on decision)",
+      "inference_calls": 0,
+      "native_episodes": 0,
+      "strict_health_command": {
+        "return_code": 0,
+        "stdout": "{\n  \"ok\": true,\n  \"checks\": {\n    \"action /move_to_pose\": \"OK\",\n    \"action /observe\": \"OK\",\n    \"action /pick_object\": \"OK\",\n    \"action /place_object\": \"OK\",\n    \"action /verify_object\": \"OK\",\n    \"action /run_demo\": \"OK\",\n    \"action /run_pick_place\": \"OK\",\n    \"service /controller_manager/list_controllers\": \"OK\",\n    \"controller arm_controller\": \"OK\",\n    \"controller gripper_controller\": \"OK\",\n    \"controller joint_state_broadcaster\": \"OK\",\n    \"service /get_planning_scene\": \"OK\",\n    \"gz world models\": \"OK\",\n    \"object target_box_a pose\": \"OK ['0.122', '-0.149', '0.017']\",\n    \"object target_box_b pose\": \"OK ['0.255', '0.047', '0.017']\",\n    \"service /flexcell/carry_engage\": \"OK\",\n    \"service /flexcell/carry_snapshot\": \"OK\",\n    \"carry_state publishers\": \"OK (1)\",\n    \"task_state\": \"IDLE\",\n    \"carry_engaged\": false\n  },\n  \"hard_fail\": [],\n  \"busy\": false\n}\n",
+        "stderr": "",
+        "elapsed_ms": 7128.553774
+      },
+      "strict_health": {
+        "ok": true,
+        "checks": {
+          "action /move_to_pose": "OK",
+          "action /observe": "OK",
+          "action /pick_object": "OK",
+          "action /place_object": "OK",
+          "action /verify_object": "OK",
+          "action /run_demo": "OK",
+          "action /run_pick_place": "OK",
+          "service /controller_manager/list_controllers": "OK",
+          "controller arm_controller": "OK",
+          "controller gripper_controller": "OK",
+          "controller joint_state_broadcaster": "OK",
+          "service /get_planning_scene": "OK",
+          "gz world models": "OK",
+          "object target_box_a pose": "OK ['0.122', '-0.149', '0.017']",
+          "object target_box_b pose": "OK ['0.255', '0.047', '0.017']",
+          "service /flexcell/carry_engage": "OK",
+          "service /flexcell/carry_snapshot": "OK",
+          "carry_state publishers": "OK (1)",
+          "task_state": "IDLE",
+          "carry_engaged": false
+        },
+        "hard_fail": [],
+        "busy": false
+      }
+    }
+  },
+  "remaining_gates": [
+    "independent qualification split/sample size/confidence/budget not ratified",
+    "network stability NOT_ACCEPTED; DERP direct-path cause UNKNOWN",
+    "B-grasp limitation root cause UNKNOWN; do not hide FSM/Hybrid failures",
+    "complete human effort and actual GPU/API fees unmeasured"
+  ],
+  "dispatch_authorized": false
+}

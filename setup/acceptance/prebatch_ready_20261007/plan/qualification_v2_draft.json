@@ -1,0 +1,97 @@
+{
+  "schema_version": 1,
+  "record_kind": "DRAFT_PLAN",
+  "protocol_id": "transferbench-qualification-v2-proposal",
+  "status": "FROZEN_NOT_EXECUTABLE",
+  "sampling_authorized": false,
+  "implementation_freeze_candidate": "f10be54fee2a4ae3dd1ef7479e155baee8fd4062",
+  "proposed_runtime_fingerprints": {
+    "fsm": "fa0a1c6af0016f74741983d401d31ed170e5d8cdf6e52d823488b4f2ce596917",
+    "hybrid": "5909f3720f821b112313dfbd8cd38231da0204214dd8f97544f93de716962fca"
+  },
+  "proposed_cells": [
+    {
+      "axis": "T1",
+      "arm": "fsm",
+      "n_logical_tasks": 100
+    },
+    {
+      "axis": "T1",
+      "arm": "hybrid",
+      "n_logical_tasks": 100
+    },
+    {
+      "axis": "T3",
+      "arm": "fsm",
+      "n_logical_tasks": 100
+    },
+    {
+      "axis": "T3",
+      "arm": "hybrid",
+      "n_logical_tasks": 100
+    }
+  ],
+  "proposed_statistic": {
+    "method": "one-sided exact binomial Clopper-Pearson lower bound; Bonferroni across 4 fixed cell claims",
+    "family_alpha": 0.05,
+    "alpha_per_cell": 0.0125,
+    "target_lower_bound": 0.9,
+    "min_successes_at_n100": 97,
+    "lower_at_min": 0.9058385366629349,
+    "lower_at_previous": 0.8912523898861622,
+    "checks": "one final fixed checkpoint only; no repeated looks or sample replenishment",
+    "assumption": "independent Bernoulli outcomes at fixed cell settings; reset/time/transport prerequisites must be ratified"
+  },
+  "sample_units": {
+    "target": "logical complete task; T3 component episodes correlated, never separate successes",
+    "T1": "paired independent heldout layouts; training/diagnostic states excluded",
+    "T3": "post-adaptation reliability of frozen three-stage swap; does not establish unseen-composition generalization"
+  },
+  "holdout": {
+    "status": "NOT_GENERATED_NOT_EVALUATED",
+    "custodian": "designate an independent keeper before evaluation; freeze artifacts without tuning from their outcomes",
+    "paired_arms_use_identical_inputs": true,
+    "source_history_manifest_required": true
+  },
+  "ordering": {
+    "phase_order": [
+      "T1",
+      "T3"
+    ],
+    "arm_order": "balanced paired AB/BA in blocks; freeze exact schedule before outcomes",
+    "old_task_regression": "every 20 target tasks: S1 in T1 phase; S1 plus 3 frozen familiar T1 cases in T3 phase",
+    "planned_target_logical_tasks": 400,
+    "planned_target_native_episodes": 800,
+    "planned_regression_native_episodes": 50
+  },
+  "budget": {
+    "absolute_cny_cap": 5,
+    "existing_budget_never_reset": true,
+    "status": "COST_ENVELOPE_NOT_RATIFIED; API reservations and elapsed/GPU costs still required",
+    "additional_paid_stop_threshold_cny": 0.25,
+    "threshold_scope": "cumulative new reservations since protocol registration, checked at boundaries; not per episode or an invoice"
+  },
+  "failure_handling": {
+    "known_failures": "retain in fixed registered denominator, no replacement; proceed only after confirmed idle/ownership and successful reset",
+    "unknown_signal_or_quarantine": "stop all collection; incomplete/censored, never success from an earlier JSON",
+    "source_regression": "failure stops that qualification phase; keep partial matrix"
+  },
+  "AC90": {
+    "status": "NOT_RUN",
+    "reason": "historical adaptation labor and invoices incomplete; new prospective adaptation blocks needed for any complete cost claim"
+  },
+  "prerequisites": [
+    "ratify this proposed count, primary cells and binomial assumptions",
+    "freeze independent inputs, exact arm schedule, success predicates, source/cali/model/profile identities",
+    "resolve or formally assess NET-001 and GRASP-B-001 while preserving failed baselines",
+    "confirm existing budget coverage without resets or invented bills",
+    "implement reviewed qualification ledger/runner separately; v1 recorder still refuses qualification"
+  ],
+  "large_tests_started": false,
+  "n_ge_50": "FROZEN",
+  "qualification_executor": "NOT_IMPLEMENTED_NOT_INVOKED",
+  "references": [
+    "https://www.itl.nist.gov/div898/handbook/prc/section2/prc241.htm",
+    "https://www.itl.nist.gov/div898/handbook/prc/section4/prc463.htm"
+  ]
+}

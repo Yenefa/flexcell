@@ -1,0 +1,238 @@
+{
+  "record_kind": "PRE_LARGE_TEST_DEVELOPMENT_CHECKPOINT",
+  "ok": true,
+  "development_checkpoint": "COMPLETE_FOR_DECLARED_SCOPE",
+  "read_only_preflight_ok": true,
+  "ready_for_large_test": false,
+  "large_tests_started": false,
+  "native_episodes": 2,
+  "expected_rejection_controls": 1,
+  "retained_trial_records": 3,
+  "original_harness_failure": "RETAINED; status5 wrongly used for ABORTED; observed status6; corrected read-only with original goal never resubmitted",
+  "runtime_fingerprint": "5909f3720f821b112313dfbd8cd38231da0204214dd8f97544f93de716962fca",
+  "target_routing": {
+    "ok": true,
+    "errors": [],
+    "bootstrap": 1,
+    "model_decisions": 3,
+    "fast_selected": 3,
+    "slow_selected": 0,
+    "fsm_fallbacks": 0,
+    "fast_calls": 3,
+    "fast_tokens": 4135
+  },
+  "source_routing": {
+    "ok": true,
+    "errors": [],
+    "bootstrap": 1,
+    "model_decisions": 7,
+    "fast_selected": 6,
+    "slow_selected": 1,
+    "fsm_fallbacks": 0,
+    "fast_calls": 7,
+    "fast_tokens": 10100
+  },
+  "controller_goal_terminals": 18,
+  "controller_statuses": [
+    4
+  ],
+  "unknown_transport_events": 0,
+  "skills_tests": 345,
+  "instrument_tests": 54,
+  "build": "PASS",
+  "policy_decide_latency": {
+    "target": {
+      "status": "MEASURED_DIAGNOSTIC",
+      "clock": "perf_counter_ns",
+      "n": 3,
+      "p50_ms": 2737.687049,
+      "p95_ms": 3562.6038047,
+      "percentile_method": "linear interpolation, index=(n-1)*q",
+      "scope": "non-bootstrap complete policy.decide including escalation; not GPU-only latency"
+    },
+    "source": {
+      "status": "MEASURED_DIAGNOSTIC",
+      "clock": "perf_counter_ns",
+      "n": 7,
+      "p50_ms": 2772.220476,
+      "p95_ms": 3046.1257122999996,
+      "percentile_method": "linear interpolation, index=(n-1)*q",
+      "scope": "non-bootstrap complete policy.decide including escalation; not GPU-only latency"
+    }
+  },
+  "costs": {
+    "schema_version": 1,
+    "record_kind": "PROSPECTIVE_PLAN",
+    "protocol_id": "mainline-prebatch-development-v1",
+    "plan_sha256": "a37654e017832c5702cebb984cf58facb6bdf988ade7b29bb9909e640e4ed1d2",
+    "ledger_tail_sha256": "b56fd6ce87fa4729cb05d1ca4663cce5bae6d51c95b5d16e197a104f1c0c25f6",
+    "accounting_basis": "CLI timing; other values asserted from pinned evidence, not auto-extracted",
+    "effort_minutes": {
+      "hybrid": {
+        "human": null,
+        "coding_agent": null,
+        "wait": null
+      }
+    },
+    "effort_status": {
+      "hybrid": {
+        "human": "NOT_RUN",
+        "coding_agent": "NOT_RUN",
+        "wait": "NOT_RUN"
+      }
+    },
+    "open_effort_sessions": [],
+    "unmeasured_effort_sessions": [],
+    "api_usage": [
+      {
+        "arm": "hybrid",
+        "scope": "adaptation",
+        "currency": "CNY",
+        "requests": 3,
+        "known_amount_subtotal": 0,
+        "unknown_amount_requests": 3,
+        "known_input_tokens": 0,
+        "known_output_tokens": 0,
+        "unknown_token_requests": 3,
+        "amount_status": "INCOMPLETE"
+      },
+      {
+        "arm": "hybrid",
+        "scope": "evaluation",
+        "currency": "CNY",
+        "requests": 8,
+        "known_amount_subtotal": 0,
+        "unknown_amount_requests": 8,
+        "known_input_tokens": 1508,
+        "known_output_tokens": 62,
+        "unknown_token_requests": 7,
+        "amount_status": "INCOMPLETE"
+      }
+    ],
+    "latest_change_snapshot": {
+      "hybrid": {
+        "arm": "hybrid",
+        "base_revision": "bf53df5e3339f9b55ed4a4b897c7e2e863e38952",
+        "code_added": 420,
+        "code_deleted": 20,
+        "config_added": 0,
+        "config_deleted": 0,
+        "event_id": "shared-prebatch-source-snapshot",
+        "evidence": [
+          {
+            "path": "/home/ros/agentic_workcell_ws/setup/acceptance/prebatch_ready_20261007/validation/source_change.json",
+            "sha256": "8869ad5154712c93e6dae484798f95a9c0445eca6b44875c7e8e8f1f705d1356"
+          }
+        ],
+        "kind": "change_snapshot",
+        "rules_added": null,
+        "states_added": null,
+        "target_revision": "f10be54fee2a4ae3dd1ef7479e155baee8fd4062"
+      }
+    },
+    "trial_cells": [
+      {
+        "arm": "hybrid",
+        "purpose": "adaptation",
+        "case_id": "invalid-chain-control",
+        "runtime_fingerprint": "5909f3720f821b112313dfbd8cd38231da0204214dd8f97544f93de716962fca",
+        "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+        "outcomes": {
+          "FAILED": 1
+        },
+        "completed_denominator": 1,
+        "retained_attempts": 1,
+        "observed_success_rate": 0.0,
+        "diagnostic_wilson_95_lower": 0.0,
+        "large_sample_review_required": false
+      },
+      {
+        "arm": "hybrid",
+        "purpose": "adaptation",
+        "case_id": "single-A",
+        "runtime_fingerprint": "5909f3720f821b112313dfbd8cd38231da0204214dd8f97544f93de716962fca",
+        "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+        "outcomes": {
+          "SUCCEEDED": 1
+        },
+        "completed_denominator": 1,
+        "retained_attempts": 1,
+        "observed_success_rate": 1.0,
+        "diagnostic_wilson_95_lower": 0.20654329147389294,
+        "large_sample_review_required": false
+      },
+      {
+        "arm": "hybrid",
+        "purpose": "regression",
+        "case_id": "S1-source-regression",
+        "runtime_fingerprint": "5909f3720f821b112313dfbd8cd38231da0204214dd8f97544f93de716962fca",
+        "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+        "outcomes": {
+          "SUCCEEDED": 1
+        },
+        "completed_denominator": 1,
+        "retained_attempts": 1,
+        "observed_success_rate": 1.0,
+        "diagnostic_wilson_95_lower": 0.20654329147389294,
+        "large_sample_review_required": false
+      }
+    ],
+    "attempt_totals": [
+      {
+        "arm": "hybrid",
+        "purpose": "adaptation",
+        "retained_attempts": 2,
+        "large_sample_review_required": false
+      },
+      {
+        "arm": "hybrid",
+        "purpose": "regression",
+        "retained_attempts": 1,
+        "large_sample_review_required": false
+      }
+    ],
+    "AC@90": {
+      "status": "NOT_RUN",
+      "reason": "v1 qualification is FROZEN"
+    },
+    "decision_latency": {
+      "status": "NOT_RUN",
+      "reason": "use episode perf_counter_ns measurements"
+    },
+    "safety_acceptance": {
+      "status": "NOT_RUN",
+      "reason": "no physical safety evaluation in this tool"
+    }
+  },
+  "source_change": {
+    "record_kind": "GIT_SOURCE_CHANGE_SNAPSHOT",
+    "base_revision": "bf53df5e3339f9b55ed4a4b897c7e2e863e38952",
+    "target_revision": "f10be54fee2a4ae3dd1ef7479e155baee8fd4062",
+    "code_added": 420,
+    "code_deleted": 20,
+    "config_added": 0,
+    "config_deleted": 0,
+    "rules_added": null,
+    "states_added": null,
+    "scope": "production, client, auditors and initial tests; receipt-local tooling and later regression tests additional and incompletely measured"
+  },
+  "partial_development": {
+    "record_kind": "PARTIAL_AGENT_WALL_INTERVAL",
+    "start_perf_counter_ns": 1406927930096,
+    "boot_id": "f49b066b-91c6-43e2-834c-0e5d9a38b385",
+    "earlier_scoping": "UNMEASURED",
+    "human_minutes": "NOT_RUN",
+    "assistant_tokens_fees": "NOT_RUN",
+    "end_perf_counter_ns": 2718979132458,
+    "elapsed_minutes": 21.867520039366667,
+    "scope": "partial wall interval includes build, wait, correction and documentation; not complete labor"
+  },
+  "qualification": "FROZEN",
+  "AC90": "NOT_RUN",
+  "n_ge_50": "FROZEN",
+  "network_stability": "NOT_ACCEPTED",
+  "B_grasp_root_cause": "UNKNOWN",
+  "physical_safety": "NOT_RUN",
+  "gpu_and_actual_api_fees": "UNKNOWN",
+  "no_failure_replacement": true
+}

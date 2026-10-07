@@ -48,6 +48,13 @@ Replay → Jev → LLM**. Work is tracked in sub-milestones (implementation) plu
 | HybridRouter + threshold sweep τ∈{0.5,0.7,0.9} + calibration report        | #12                                                            | #15            |
 | ADR set from the ratified preparation                                      | #2                                                             | —              |
 
+### 2026-10-07 feature 开发检查点
+
+Clef 已在真实仿真 episode 中接管快臂决策；有类型组合、确认前缀暂停/一次性续跑、
+整链预检与只读就绪入口已交付并有有界功能证据。
+[大批测前检查点](PRE_BATCH_CHECKPOINT.md)列出当前入口和仍冻结的资格协议。
+该状态属于 feature 开发完成，不解锁 M3 n≥50、AC@90、网络稳定性或实体安全验收。
+
 ## Future
 
 The current M3 claim is a cost hypothesis with independent task outcomes and a

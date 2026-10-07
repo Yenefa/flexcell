@@ -55,6 +55,20 @@ flush/fsync，COMMITTED 仅在新观察通过后写入。父任务通过 action 
 `execution_kind=IN_PROCESS_COMPONENT`、`component_execution_id`、`parent_run_id`
 及 `stage_id`。真实 Skill/controller goal 仍走现有有类型的 action 传输。
 
+## 计划预检与状态查询
+
+`setup/130_composite_prepare.py plan --plan PLAN.json` 不连接 ROS，只检查整链声明的
+目标占用与最终空置条件。执行器和正常客户端也在任何动作之前做相同的预检；
+它不证明 IK 或实体安全可行，新 Observe 和原生 Skill 门仍按段执行。
+
+`setup/130_composite_prepare.py checkpoint --run-id ID --fingerprint SHA` 只读检查
+服务端已有回执和原生 episode，区分可用、已消费、非暂停、未知尾部及损坏状态。
+查询不创建一次性 claim，AVAILABLE 仍需在实际提交时核验当前现场和机械臂归属。
+重复 JSON 键、非有限数或持久化终态中把数值 0 改成 false 都会拒绝。
+
+[大批测前检查点与操作示例](PRE_BATCH_CHECKPOINT.md)提供统一只读就绪入口；
+其通过不授权批量采样。回执输出独占创建，失败和旧版本全部保留。
+
 ## 显式暂停与一次性续跑（contract v2）
 
 目标字段 `pause_after_stages` 默认 0，表示完成全链。设为 1..阶段数减一时，

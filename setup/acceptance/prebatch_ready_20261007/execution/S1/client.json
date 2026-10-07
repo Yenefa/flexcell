@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/src/flexcell/flexcell_skills/test/w1_client.py",
+    "--action",
+    "demo",
+    "--scenario",
+    "week1_demo_v1"
+  ],
+  "return_code": 0,
+  "stdout": "SENDING action=demo object=target_box pose=[0.12, -0.15, 0.0175]\nGOAL_UUID a498a5b0b2ee438fad158ce73ab7b66d\nRESULT {\n  \"action\": \"demo\",\n  \"goal_uuid\": \"a498a5b0b2ee438fad158ce73ab7b66d\",\n  \"outcome\": \"OUTCOME_SUCCEEDED\",\n  \"outcome_val\": 0,\n  \"action_status\": 4,\n  \"error_code\": \"ERR_NONE\",\n  \"detail\": \"task done: all assignments verified\",\n  \"evidence_id\": \"week1_demo_v1-920ef030\",\n  \"wall_seconds\": 47.251,\n  \"fsm_trace\": [\n    \"PICK_A(attempt=1):OK\",\n    \"PLACE_A:OK\",\n    \"VERIFY_A(attempt=1):OK\",\n    \"PICK_B(attempt=1):OK\",\n    \"PLACE_B:OK\",\n    \"VERIFY_B(attempt=1):OK\"\n  ],\n  \"object_a_at_zone\": true,\n  \"object_b_at_zone\": true,\n  \"zone_a_error_m\": 0.004600753263611424,\n  \"zone_b_error_m\": 0.0076753876487071345,\n  \"run_id\": \"week1_demo_v1-1f12cc67\",\n  \"scenario_id\": \"week1_demo_v1\"\n}\n",
+  "stderr": "",
+  "elapsed_ms": 47935.869835
+}

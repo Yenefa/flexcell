@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "/home/ros/agentic_workcell_ws/setup/acceptance/prebatch_ready_20261007/scripts/pilot.py", line 109, in <module>
+    elif sys.argv[1:]==['run']:run()
+                               ^^^^^
+  File "/home/ros/agentic_workcell_ws/setup/acceptance/prebatch_ready_20261007/scripts/pilot.py", line 78, in run
+    COST.require(command['return_code']==0 and result and result['outcome_val']==1 and result['error_code_val']==60 and result['action_status']==5 and not result['component_run_ids'] and unchanged and set((base.LOGS/'episodes').glob('*.json'))==episodes_before,'negative control not confirmed; stop without replacement')
+  File "/home/ros/agentic_workcell_ws/setup/125_transfer_cost.py", line 28, in require
+    raise LedgerError(message)
+transfer_cost.LedgerError: negative control not confirmed; stop without replacement
