@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/setup/133_bounded_runner.py",
+    "run",
+    "--root",
+    "/home/ros/agentic_workcell_ws/setup/acceptance/bounded_runner_20261007/run",
+    "--execute",
+    "--max-slots",
+    "2"
+  ],
+  "elapsed_ms": 11253.001692,
+  "return_code": 2,
+  "stdout_stderr_combined": "{\n  \"ok\": true,\n  \"record_kind\": \"BOUNDED_DEVELOPMENT_STATUS\",\n  \"state\": \"STOPPED\",\n  \"completed_slots\": 0,\n  \"native_episode_count\": 0,\n  \"native_episode_count_status\": \"MEASURED_SNAPSHOT\",\n  \"native_dispatch_quota_used\": 0,\n  \"outcomes\": [],\n  \"resume_allowed\": false,\n  \"development_complete\": false,\n  \"all_trials_succeeded\": false,\n  \"qualification_sampling_authorized\": false,\n  \"ready_for_large_test\": false,\n  \"n_ge_50\": \"FROZEN\",\n  \"AC90\": \"NOT_RUN\"\n}\n"
+}

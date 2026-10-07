@@ -1,0 +1,33 @@
+{
+  "record_kind": "PRE_BATCH_DEVELOPMENT_READINESS",
+  "schema_version": 1,
+  "read_only_preflight_ok": false,
+  "ready_for_large_test": false,
+  "large_tests_started": false,
+  "qualification": "FROZEN",
+  "AC90": "NOT_RUN",
+  "n_ge_50": "FROZEN",
+  "checks": {
+    "deployment": {
+      "ok": true,
+      "runtime_fingerprint": "5909f3720f821b112313dfbd8cd38231da0204214dd8f97544f93de716962fca",
+      "source_files": 38,
+      "installed_files": 38
+    },
+    "live_readonly": {
+      "ok": false,
+      "error": "TCP startup probe unavailable: TimeoutError (deadline 10.000s)",
+      "tcp_probe_elapsed_ms": 10009.002611,
+      "tcp_reachable": false,
+      "inference_calls": 0,
+      "native_episodes": 0
+    }
+  },
+  "remaining_gates": [
+    "independent qualification split/sample size/confidence/budget not ratified",
+    "network stability NOT_ACCEPTED; DERP direct-path cause UNKNOWN",
+    "B-grasp limitation root cause UNKNOWN; do not hide FSM/Hybrid failures",
+    "complete human effort and actual GPU/API fees unmeasured"
+  ],
+  "dispatch_authorized": false
+}

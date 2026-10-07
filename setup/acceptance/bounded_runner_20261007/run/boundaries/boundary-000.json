@@ -1,0 +1,17 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/setup/131_prebatch_readiness.py",
+    "--live",
+    "--workspace",
+    "/home/ros/agentic_workcell_ws",
+    "--deployment",
+    "/home/ros/.local/share/flexcell/mainline/runtime/20261007_132145/deployment.json",
+    "--out",
+    "/home/ros/agentic_workcell_ws/setup/acceptance/bounded_runner_20261007/run/boundaries/boundary-000_report.json"
+  ],
+  "return_code": 2,
+  "stdout": "{\n  \"record_kind\": \"PRE_BATCH_DEVELOPMENT_READINESS\",\n  \"schema_version\": 1,\n  \"read_only_preflight_ok\": false,\n  \"ready_for_large_test\": false,\n  \"large_tests_started\": false,\n  \"qualification\": \"FROZEN\",\n  \"AC90\": \"NOT_RUN\",\n  \"n_ge_50\": \"FROZEN\",\n  \"checks\": {\n    \"deployment\": {\n      \"ok\": true,\n      \"runtime_fingerprint\": \"5909f3720f821b112313dfbd8cd38231da0204214dd8f97544f93de716962fca\",\n      \"source_files\": 38,\n      \"installed_files\": 38\n    },\n    \"live_readonly\": {\n      \"ok\": false,\n      \"error\": \"TCP startup probe unavailable: TimeoutError (deadline 10.000s)\",\n      \"tcp_probe_elapsed_ms\": 10009.002611,\n      \"tcp_reachable\": false,\n      \"inference_calls\": 0,\n      \"native_episodes\": 0\n    }\n  },\n  \"remaining_gates\": [\n    \"independent qualification split/sample size/confidence/budget not ratified\",\n    \"network stability NOT_ACCEPTED; DERP direct-path cause UNKNOWN\",\n    \"B-grasp limitation root cause UNKNOWN; do not hide FSM/Hybrid failures\",\n    \"complete human effort and actual GPU/API fees unmeasured\"\n  ],\n  \"dispatch_authorized\": false\n}\n",
+  "stderr": "",
+  "elapsed_ms": 10845.361082
+}

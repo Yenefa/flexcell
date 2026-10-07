@@ -15,6 +15,9 @@ T1/T3 场景、FSM/Hybrid 配对顺序和旧任务回测清单。输出仍为 PR
 TB-RUN-001 的[受限执行器](BOUNDED_RUNNER.md)已接入既有任务链，
 默认只读、显式执行六个开发槽位，上限 10 份原生 episode。
 它支持已提交边界的暂停续跑和一次性槽位认领，正式资格采样仍冻结。
+首次实际执行停在初始健康门：家用 GPU tailnet 节点离线、三端口超时；零认领、
+零新增原生 episode，实际六槽位验收尚未完成。
+[失败与网络诊断回执](../setup/acceptance/bounded_runner_20261007/README.md)完整保留原 STOPPED 日志。
 
 ## 已完成的入口
 

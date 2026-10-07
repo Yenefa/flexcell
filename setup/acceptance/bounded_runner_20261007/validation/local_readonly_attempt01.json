@@ -1,0 +1,40 @@
+{
+  "record_kind": "POST_STOP_READ_ONLY_DIAGNOSTIC",
+  "started_utc": "2026-10-07T14:45:26.443933+00:00",
+  "finished_utc": "2026-10-07T14:45:32.945129+00:00",
+  "local_health": {
+    "return_code": 0,
+    "stdout": "{\n  \"ok\": true,\n  \"checks\": {\n    \"action /move_to_pose\": \"OK\",\n    \"action /observe\": \"OK\",\n    \"action /pick_object\": \"OK\",\n    \"action /place_object\": \"OK\",\n    \"action /verify_object\": \"OK\",\n    \"action /run_demo\": \"OK\",\n    \"action /run_pick_place\": \"OK\",\n    \"service /controller_manager/list_controllers\": \"OK\",\n    \"controller arm_controller\": \"OK\",\n    \"controller gripper_controller\": \"OK\",\n    \"controller joint_state_broadcaster\": \"OK\",\n    \"service /get_planning_scene\": \"OK\",\n    \"gz world models\": \"OK\",\n    \"object target_box_a pose\": \"OK ['0.220', '0.000', '0.017']\",\n    \"object target_box_b pose\": \"OK ['0.200', '-0.180', '0.017']\",\n    \"service /flexcell/carry_engage\": \"OK\",\n    \"service /flexcell/carry_snapshot\": \"OK\",\n    \"carry_state publishers\": \"OK (1)\",\n    \"task_state\": \"IDLE\",\n    \"carry_engaged\": false\n  },\n  \"hard_fail\": [],\n  \"busy\": false\n}\n",
+    "stderr": "",
+    "elapsed_ms": 6499.015598
+  },
+  "network": {
+    "return_code": 0,
+    "backend_state": "Running",
+    "self_online": true,
+    "peer": [
+      {
+        "HostName": "\u5b89\u5e05\u6f6e\u4e4b\u795e",
+        "TailscaleIPs": [
+          "100.87.190.44",
+          "fd7a:115c:a1e0::f31:be2d"
+        ],
+        "Online": false,
+        "LastSeen": "2026-10-07T12:22:49.1Z",
+        "CurAddr": "",
+        "Relay": "tok"
+      }
+    ],
+    "ping": {
+      "return_code": 1,
+      "stdout": "ping \"100.87.190.44\" timed out\n",
+      "stderr": "no reply\n"
+    }
+  },
+  "ros_domain_id": "45",
+  "rmw_implementation": "rmw_cyclonedds_cpp",
+  "literal_endpoint_proxy_bypass": true,
+  "native_episodes_dispatched": 0,
+  "inference_calls": 0,
+  "qualification_sampling_authorized": false
+}

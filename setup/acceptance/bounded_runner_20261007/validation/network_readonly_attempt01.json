@@ -1,0 +1,43 @@
+{
+  "tcp_probes": [
+    {
+      "port": 11435,
+      "reachable": false,
+      "error_type": "TimeoutError",
+      "elapsed_ms": 10011.32254
+    },
+    {
+      "port": 22,
+      "reachable": false,
+      "error_type": "TimeoutError",
+      "elapsed_ms": 10010.670935
+    },
+    {
+      "port": 3389,
+      "reachable": false,
+      "error_type": "TimeoutError",
+      "elapsed_ms": 10010.041005
+    }
+  ],
+  "inference_calls": 0,
+  "native_episodes": 0,
+  "windows_tailscale_cli_exists": true,
+  "tailscale_status_return_code": 0,
+  "backend_state": "Running",
+  "self_online": true,
+  "peer": [
+    {
+      "HostName": "\u5b89\u5e05\u6f6e\u4e4b\u795e",
+      "TailscaleIPs": [
+        "100.87.190.44",
+        "fd7a:115c:a1e0::f31:be2d"
+      ],
+      "Online": false,
+      "LastSeen": "2026-10-07T12:22:49.1Z",
+      "LastHandshake": "0001-01-01T00:00:00Z",
+      "CurAddr": "",
+      "Relay": "tok",
+      "Active": true
+    }
+  ]
+}
