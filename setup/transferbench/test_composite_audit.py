@@ -54,3 +54,27 @@ class CompositeAuditTests(unittest.TestCase):
 
 
 if __name__=='__main__':unittest.main()
+
+
+class TypedPersistedAuditTests(unittest.TestCase):
+    setUp=CompositeAuditTests.setUp
+    def test_persisted_false_error_cannot_equal_raw_zero(self):
+        import shutil
+        directory=Path(self.directory.name)/'episodes';shutil.copytree(ROOT/'execution/composite/episodes',directory)
+        p=next(directory.glob('*.json'));e=json.loads(p.read_text());e['final_state']['error_code']=False;p.write_text(json.dumps(e))
+        self.path.write_text(''.join(json.dumps(e)+'\n' for e in self.events))
+        with self.assertRaises(ValueError):AUDIT.audit(self.path,directory,self.deployment)
+
+    def test_persisted_false_skill_outcome_is_not_success(self):
+        import shutil
+        directory=Path(self.directory.name)/'episodes';shutil.copytree(ROOT/'execution/composite/episodes',directory)
+        p=next(directory.glob('*.json'));e=json.loads(p.read_text())
+        for s in e['steps']:
+            if s['policy_output']['action']=='PICK':s['executor_result']['outcome']=False
+        p.write_text(json.dumps(e));self.path.write_text(''.join(json.dumps(e)+'\n' for e in self.events))
+        with self.assertRaises(ValueError):AUDIT.audit(self.path,directory,self.deployment)
+
+    def test_duplicate_identity_key_is_refused(self):
+        raw=''.join(json.dumps(e)+'\n' for e in self.events).replace('"seq": 0','"seq": 7, "seq": 0',1)
+        self.path.write_text(raw)
+        with self.assertRaises(ValueError):AUDIT.audit(self.path,ROOT/'execution/composite/episodes',self.deployment)

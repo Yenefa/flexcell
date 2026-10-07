@@ -66,10 +66,11 @@ def main():
     args = ap.parse_args()
     plan = None
     if args.action == 'composite':
-        from flexcell_skills.contracts.composite import validate_plan
+        from flexcell_skills.contracts.composite import prepare_plan
         if args.plan is None:
             ap.error('--plan required for composite')
-        plan = validate_plan(json.loads(args.plan.read_text()))
+        from flexcell_skills.contracts.receipt_json import loads
+        plan = prepare_plan(loads(args.plan.read_text()))
 
     rclpy.init()
     n = Node('w1_client')

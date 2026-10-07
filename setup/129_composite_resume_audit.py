@@ -8,6 +8,7 @@ from pathlib import Path
 from flexcell_skills.contracts.composite import matches, native_success, positions, vacant
 from flexcell_skills.contracts.composite_checkpoint import validate_paused
 from flexcell_skills.contracts.episode import _sanitize
+from flexcell_skills.contracts.receipt_json import loads, same_typed
 from flexcell_skills.contracts.routing_audit import audit_routing_episode
 
 
@@ -17,14 +18,14 @@ def require(value, detail):
 
 
 def audit(paused_path, resumed_path, episode_directory, deployment, claim_path):
-    paused_raw=Path(paused_path).read_bytes();paused=[json.loads(x) for x in paused_raw.decode().splitlines()]
-    resumed=[json.loads(x) for x in Path(resumed_path).read_text().splitlines()]
+    paused_raw=Path(paused_path).read_bytes();paused=[loads(x) for x in paused_raw.decode().splitlines()]
+    resumed=[loads(x) for x in Path(resumed_path).read_text().splitlines()]
     def episode(component):
         candidates=list(Path(episode_directory).glob('*_'+component['run_id']+'.json'))
         exact=Path(episode_directory)/(component['run_id']+'.json')
         if exact.is_file():candidates.append(exact)
         require(len(candidates)==1,'exactly one persisted native episode required')
-        return json.loads(candidates[0].read_text())
+        return loads(candidates[0].read_text())
     plan=paused[0]['plan'];fp=deployment['runtime_fingerprint']
     checkpoint=validate_paused(paused,plan,fp,episode)
     require(bool(resumed) and resumed[0]['event']=='PLAN' and resumed[0]['plan']==plan and resumed[0]['plan_sha256']==checkpoint['plan_sha256']
@@ -35,7 +36,7 @@ def audit(paused_path, resumed_path, episode_directory, deployment, claim_path):
     require(type(resumed[0]['contract_version']) is int and resumed[0]['contract_version']==2 and resumed[0]['runtime_fingerprint']==fp
             and resumed[0]['policy']==checkpoint['policy'] and resumed[0]['policy_version']==checkpoint['policy_version'],'resume runtime/policy mismatch')
     require(resumed[1]['event']=='RESUME','resume provenance missing')
-    inherited=resumed[1]['checkpoint'];claim=json.loads(Path(claim_path).read_text())
+    inherited=resumed[1]['checkpoint'];claim=loads(Path(claim_path).read_text())
     for name,value in checkpoint.items():require(inherited.get(name)==value,'checkpoint mismatch: '+name)
     source_sha=hashlib.sha256(paused_raw).hexdigest()
     require(inherited['source_receipt_sha256']==source_sha and inherited['claim']==claim
@@ -55,7 +56,7 @@ def audit(paused_path, resumed_path, episode_directory, deployment, claim_path):
         require(matches(actual,expected,tolerance) and vacant(actual,stage['destination'],clearance,stage['object_name']),'resumed precondition failed')
         c=native['component'];goal_id=start['component_goal_uuid'];require(native_success(c,goal_id,tolerance),'resumed native terminal unconfirmed')
         e=episode(c);final=e['final_state']
-        require(e['run_id']==c['run_id'] and e['runtime_fingerprint']==fp and final==_sanitize(c['final_state'])
+        require(e['run_id']==c['run_id'] and e['runtime_fingerprint']==fp and same_typed(final,_sanitize(c['final_state']))
                 and final['parent_run_id']==resumed[0]['run_id'] and final['stage_id']==sid
                 and final['execution_kind']=='IN_PROCESS_COMPONENT' and final['component_execution_id']==goal_id,'resumed native identity mismatch')
         require(all(s['policy_input']['goal']['assignments']==[[stage['object_name'],'task_place']] for s in e['steps']),'native target mismatch')
@@ -86,7 +87,7 @@ def main():
     ap=argparse.ArgumentParser(description=__doc__)
     for name in ['paused','resumed','episodes','deployment','claim']:ap.add_argument('--'+name,required=True,type=Path)
     args=ap.parse_args()
-    try:result=audit(args.paused,args.resumed,args.episodes,json.loads(args.deployment.read_text()),args.claim)
+    try:result=audit(args.paused,args.resumed,args.episodes,loads(args.deployment.read_text()),args.claim)
     except Exception as exc:
         print(json.dumps(dict(ok=False,error=type(exc).__name__+': '+str(exc))));return 1
     print(json.dumps(result,indent=2));return 0

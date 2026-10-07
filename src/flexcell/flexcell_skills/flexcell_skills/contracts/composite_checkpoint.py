@@ -12,6 +12,7 @@ import re
 
 from flexcell_skills.contracts.composite import CompositeError, matches, native_success, positions, vacant, validate_plan
 from flexcell_skills.contracts.episode import _sanitize
+from flexcell_skills.contracts.receipt_json import loads, same_typed
 
 
 def require(value, detail):
@@ -62,7 +63,7 @@ def validate_paused(events, plan, fingerprint, read_episode):
                 'persisted native identity mismatch')
         require(episode.get('policy') == {'name':first['policy'], 'version':first['policy_version']}, 'persisted native policy mismatch')
         final = episode.get('final_state') or {}
-        require(final == _sanitize(component['final_state']) and final.get('parent_run_id') == first['run_id']
+        require(same_typed(final, _sanitize(component['final_state'])) and final.get('parent_run_id') == first['run_id']
                 and final.get('stage_id') == sid and final.get('execution_kind') == 'IN_PROCESS_COMPONENT'
                 and final.get('component_execution_id') == goal_id, 'persisted native final state mismatch')
         steps = episode.get('steps') or []
@@ -90,14 +91,12 @@ def load_checkpoint(directory, run_id, digest, plan, fingerprint, episode_direct
     path = root / (run_id + '.jsonl')
     require(path.is_file() and not path.is_symlink(), 'server-owned receipt missing')
     raw = path.read_bytes(); require(hashlib.sha256(raw).hexdigest() == digest, 'receipt hash mismatch')
-    def invalid_number(value):
-        raise CompositeError(65, 'nonfinite receipt number: ' + value)
-    events = [json.loads(line, parse_constant=invalid_number) for line in raw.decode().splitlines()]
+    events = [loads(line) for line in raw.decode().splitlines()]
     episode_root = Path(episode_directory).expanduser().resolve()
     def read_episode(component):
         p = Path(component['episode_path']).expanduser()
         require(p.is_file() and not p.is_symlink() and p.resolve().parent == episode_root, 'native episode is outside server storage')
-        return json.loads(p.read_text(), parse_constant=invalid_number)
+        return loads(p.read_text())
     checkpoint = validate_paused(events, plan, fingerprint, read_episode)
     require(checkpoint['source_run_id'] == run_id, 'source run ID mismatch')
     checkpoint['source_receipt_sha256'] = digest

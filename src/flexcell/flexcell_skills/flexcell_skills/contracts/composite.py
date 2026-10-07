@@ -69,6 +69,23 @@ def validate_plan(plan):
     return copy.deepcopy(plan)
 
 
+
+def prepare_plan(plan):
+    """Reject contradictions in the declared chain before any observation/motion.
+
+    These are center-position conditions only. Fresh observations, IK and the
+    existing native skill gates still decide whether execution can proceed.
+    """
+    plan=validate_plan(plan);expected=copy.deepcopy(plan['initial_objects'])
+    for stage in plan['stages']:
+        if not vacant(expected,stage['destination'],plan['clearance_m'],stage['object_name']):
+            raise CompositeError(60,'declared destination occupied at '+stage['stage_id'])
+        expected[stage['object_name']]=list(stage['destination'])
+    if not all(vacant(expected,p,plan['clearance_m']) for p in plan['final_empty_positions']):
+        raise CompositeError(60,'declared final empty position conflicts with the chain')
+    return plan
+
+
 def positions(observation, names):
     carry = observation.get('carry') if type(observation) is dict else None
     if (type(observation) is not dict or type(observation.get('outcome')) is not int or observation['outcome'] != 0
@@ -151,7 +168,7 @@ def execute(plan, observe, native, emit, cancelled=lambda: False, pause_after_st
         if cancelled():
             raise CompositeError(32, 'canceled; no subsequent stage dispatched')
     try:
-        plan = validate_plan(plan)
+        plan = prepare_plan(plan)
         if type(pause_after_stages) is not int or not 0 <= pause_after_stages < len(plan['stages']):
             raise CompositeError(60, 'pause must be zero or a proper committed prefix')
         if checkpoint is not None and pause_after_stages:

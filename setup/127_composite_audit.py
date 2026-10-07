@@ -8,6 +8,7 @@ from pathlib import Path
 from flexcell_skills.contracts.composite import matches, native_success, positions, vacant, validate_plan
 from flexcell_skills.contracts.routing_audit import audit_routing_episode
 from flexcell_skills.contracts.episode import _sanitize
+from flexcell_skills.contracts.receipt_json import loads, same_typed
 
 
 def require(value, detail):
@@ -16,7 +17,7 @@ def require(value, detail):
 
 
 def audit(receipt, episodes, deployment):
-    events = [json.loads(line) for line in Path(receipt).read_text().splitlines()]
+    events = [loads(line) for line in Path(receipt).read_text().splitlines()]
     require(bool(events), 'empty receipt')
     first = events[0]
     identity = ['record_kind', 'run_id', 'goal_uuid', 'runtime_fingerprint', 'policy', 'policy_version']
@@ -46,19 +47,20 @@ def audit(receipt, episodes, deployment):
         exact = Path(episodes) / (component['run_id'] + '.json')
         if exact.is_file(): candidates.append(exact)
         require(len(candidates) == 1, 'exactly one persisted component episode required')
-        episode = json.loads(candidates[0].read_text())
+        episode = loads(candidates[0].read_text())
         require(episode['runtime_fingerprint'] == first['runtime_fingerprint'] and episode['run_id'] == component['run_id'], 'component identity mismatch')
         final = episode['final_state']
         # EpisodeRecorder freezes floats to nine decimals. Compare that exact
         # representation; native_success still checks unrounded finite errors.
-        require(final == _sanitize(component['final_state']), 'native final state differs from recorded component')
+        require(same_typed(final, _sanitize(component['final_state'])), 'native final state differs from recorded component')
         require(final['parent_run_id'] == first['run_id'] and final['stage_id'] == sid
                 and final['execution_kind'] == 'IN_PROCESS_COMPONENT' and final['component_execution_id'] == goal_uuid,
                 'internal execution correlation mismatch')
         require(all(s['policy_input']['goal']['assignments'] == [[stage['object_name'],'task_place']] for s in episode['steps']), 'native target mismatch')
         for action in ('PICK','PLACE','VERIFY'):
             require(any(s['policy_output']['action'] == action and s['policy_output']['target'] == stage['object_name']
-                        and (s.get('executor_result') or {}).get('outcome') == 0 for s in episode['steps']), 'missing successful '+action)
+                        and type((s.get('executor_result') or {}).get('outcome')) is int
+                        and s['executor_result']['outcome'] == 0 for s in episode['steps']), 'missing successful '+action)
         if first['policy'] == 'hybrid':
             route = audit_routing_episode(episode, deployment); require(route['ok'], 'routing failed'); routing.append(route)
         expected[stage['object_name']] = stage['destination']
@@ -86,7 +88,7 @@ def main():
     ap.add_argument('--deployment', required=True, type=Path)
     args = ap.parse_args()
     try:
-        result = audit(args.receipt, args.episodes, json.loads(args.deployment.read_text()))
+        result = audit(args.receipt, args.episodes, loads(args.deployment.read_text()))
     except Exception as exc:
         print(json.dumps(dict(ok=False, error=type(exc).__name__+': '+str(exc))))
         return 1

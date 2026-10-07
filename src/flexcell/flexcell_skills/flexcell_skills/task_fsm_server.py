@@ -49,7 +49,7 @@ from flexcell_skills.contracts.error_codes import task_abort_error_code
 from flexcell_skills.contracts.action_result import AcceptedGoalResult
 from flexcell_skills.contracts.goal_response import LateGoalCleanup
 from flexcell_skills.contracts.backend_health import startup_health
-from flexcell_skills.contracts.composite import CompositeError, Journal, execute as execute_composite
+from flexcell_skills.contracts.composite import CompositeError, Journal, prepare_plan, execute as execute_composite
 from flexcell_skills.contracts.composite_checkpoint import load_checkpoint, claim_checkpoint
 
 from flexcell_skills.contracts.episode import EpisodeRecorder, EpisodeStore
@@ -489,6 +489,7 @@ class TaskFsmServer(Node):
                                 stages=stages, final_empty_positions=[xyz(p) for p in goal.final_empty_positions],
                                 position_tolerance_m=goal.position_tolerance_m, clearance_m=goal.clearance_m,
                                 motion_profile_id=goal.motion_profile_id)
+                    plan = prepare_plan(plan)
                     checkpoint = None
                     if goal.resume_run_id or goal.resume_receipt_sha256:
                         if goal.pause_after_stages:

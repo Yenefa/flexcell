@@ -182,3 +182,12 @@ def test_proven_prefix_is_inherited_and_claimed_once(tmp_path, monkeypatch):
     n._demo_call.reset_mock();n._execute_plan.reset_mock()
     retry=goal();retry.request=q;r=n._execute_composite(retry)
     assert r.error_code==65;n._demo_call.assert_not_called();n._execute_plan.assert_not_called()
+
+
+def test_declared_final_occupancy_is_refused_before_observation(tmp_path):
+    from geometry_msgs.msg import Point
+    n=server(tmp_path);h=goal();p=Point();p.x=.12;p.y=-.15;p.z=.0175
+    h.request.final_empty_positions=[p]
+    r=n._execute_composite(h)
+    assert r.error_code==60 and r.outcome==1
+    n._demo_call.assert_not_called();n._execute_plan.assert_not_called()
