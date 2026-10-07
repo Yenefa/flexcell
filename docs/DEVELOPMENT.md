@@ -71,6 +71,10 @@ Start condition: M2 definition-of-done met. Results are recorded in
 
 ## Maintenance policy (every change, from now on)
 
+The CI attribute scanner is class-scoped and fails the job on missing members
+or invalid scan input (#24, 2026-10-07). Its 20 CLI regressions run through the
+existing pytest configuration. See [repair and evidence](STATIC_SCAN_20261007.md).
+
 **Before coding:**
 
 - Which Issue does this belong to? (none → open one, or extend an existing RFC)

@@ -1,0 +1,92 @@
+{
+  "base_commit": "ffde775a0ef9d1cb0f6a3b39436fbe1f97927370",
+  "python_version": "Python 3.12.14",
+  "pytest_command": [
+    "/workspace/.venv-flexcell/bin/python",
+    "-m",
+    "pytest",
+    "-o",
+    "addopts=",
+    "-q",
+    "--junitxml=/workspace/flexcell/setup/acceptance/issue24_static_scan_20261007/pytest.xml",
+    "src/flexcell/flexcell_skills/test/test_acceptance_gate.py",
+    "src/flexcell/flexcell_skills/test/test_action_result.py",
+    "src/flexcell/flexcell_skills/test/test_clef_backend.py",
+    "src/flexcell/flexcell_skills/test/test_confidence_calibration.py",
+    "src/flexcell/flexcell_skills/test/test_contracts.py",
+    "src/flexcell/flexcell_skills/test/test_decision_policy.py",
+    "src/flexcell/flexcell_skills/test/test_hybrid_policy.py",
+    "src/flexcell/flexcell_skills/test/test_inference_budget.py",
+    "src/flexcell/flexcell_skills/test/test_injection.py",
+    "src/flexcell/flexcell_skills/test/test_llm_policy.py",
+    "src/flexcell/flexcell_skills/test/test_metrics.py",
+    "src/flexcell/flexcell_skills/test/test_recovery.py",
+    "src/flexcell/flexcell_skills/test/test_routing_audit.py",
+    "src/flexcell/flexcell_skills/test/test_runtime_guards.py",
+    "src/flexcell/flexcell_skills/test/test_safety_gate.py",
+    "src/flexcell/flexcell_skills/test/test_skill_contract.py",
+    "src/flexcell/flexcell_skills/test/test_undefined_attr_check.py"
+  ],
+  "pytest_rc": 0,
+  "selected_test_files": [
+    "src/flexcell/flexcell_skills/test/test_acceptance_gate.py",
+    "src/flexcell/flexcell_skills/test/test_action_result.py",
+    "src/flexcell/flexcell_skills/test/test_clef_backend.py",
+    "src/flexcell/flexcell_skills/test/test_confidence_calibration.py",
+    "src/flexcell/flexcell_skills/test/test_contracts.py",
+    "src/flexcell/flexcell_skills/test/test_decision_policy.py",
+    "src/flexcell/flexcell_skills/test/test_hybrid_policy.py",
+    "src/flexcell/flexcell_skills/test/test_inference_budget.py",
+    "src/flexcell/flexcell_skills/test/test_injection.py",
+    "src/flexcell/flexcell_skills/test/test_llm_policy.py",
+    "src/flexcell/flexcell_skills/test/test_metrics.py",
+    "src/flexcell/flexcell_skills/test/test_recovery.py",
+    "src/flexcell/flexcell_skills/test/test_routing_audit.py",
+    "src/flexcell/flexcell_skills/test/test_runtime_guards.py",
+    "src/flexcell/flexcell_skills/test/test_safety_gate.py",
+    "src/flexcell/flexcell_skills/test/test_skill_contract.py",
+    "src/flexcell/flexcell_skills/test/test_undefined_attr_check.py"
+  ],
+  "excluded_ros_dependent_files": [
+    "test_admin_exit_contract.py",
+    "test_admin_pose_rpc.py",
+    "test_canonical_state.py",
+    "test_carry_release.py",
+    "test_carry_snapshot.py",
+    "test_episode.py",
+    "test_executor_integration.py",
+    "test_gz_stream.py",
+    "test_helpers_world.py",
+    "test_jev_policy.py",
+    "test_pose_worker_shutdown.py"
+  ],
+  "limitations": [
+    "ROS 2 and Gazebo are not installed; colcon/build, ROS-dependent suites and runtime batteries NOT_RUN."
+  ],
+  "pytest": {
+    "tests": 172,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "scanner_regression_tests": 20,
+  "before_scan": {
+    "rc": 0,
+    "stdout": "MISSING src/flexcell/flexcell_skills/flexcell_skills/carry_server.py -> self.create_service\nMISSING src/flexcell/flexcell_skills/flexcell_skills/inference_budget.py -> self.INPUT_MICROYUAN, self.LIMIT_MICROYUAN, self.MAX_OUTPUT_TOKENS, self.OUTPUT_MICROYUAN\nMISSING src/flexcell/flexcell_skills/flexcell_skills/jev_backends.py -> self._CRITERIA_ENRICHMENT, self._INSTRUCTIONS_TEMPLATE, self.name\nMISSING src/flexcell/flexcell_skills/flexcell_skills/jev_policy.py -> self.name\nMISSING src/flexcell/flexcell_skills/flexcell_skills/place_server.py -> self.create_service\nSCAN COMPLETE: 35 files scanned, 5 files with problems\n",
+    "stderr": ""
+  },
+  "after_scan": {
+    "rc": 0,
+    "stdout": "SCAN COMPLETE: 35 files scanned, 0 files with problems\n",
+    "stderr": ""
+  },
+  "planted_ghost": {
+    "rc": 1,
+    "stdout": "MISSING <fixture>/skill.py Broken -> self._gate\nSCAN COMPLETE: 1 files scanned, 1 files with problems\n",
+    "stderr": ""
+  },
+  "source_sha256": {
+    "setup/82_undefined_attr_check.py": "b71ec98802671a2c2ae33a309ab6d008299e0ff287545536e268efaed0e894d1",
+    "src/flexcell/flexcell_skills/test/test_undefined_attr_check.py": "f0d30529fb45569197ec8e8a6b5763d14ae325a8646e5f6ad13e9a15a5f6d7cc"
+  }
+}

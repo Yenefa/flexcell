@@ -75,6 +75,7 @@
 | E-019 | Q8 per-decision provenance + two-regime pilot                           | 215 TESTS PASS; HIGH 14/17 + RESET ERROR; LOW SMOKE TRUNCATED; n>=50 FROZEN                  | [Q8_PILOT_20261005.md](Q8_PILOT_20261005.md)                          |
 | E-020 | Pose callback finalization barrier + bounded fresh-process reset RPC    | 226 TESTS PASS; LIFECYCLE 100/100; RESET 20/20 EACH; LOW 18/20; HIGH SMOKE 4/5; n>=50 FROZEN | [Q8_TEARDOWN_20261005.md](Q8_TEARDOWN_20261005.md)                    |
 | E-021 | Three-arm S1 comparison, same machine, same night, unattended           | FSM 19/20 · hybrid τ=0.03 18/20 · hybrid τ=0.85 17/20; CIs OVERLAP; grasp-physics noise ~15% cross-arm | `setup/acceptance/tau_sweep_desktop_20261005/`                        |
+| E-022 | Class-scoped static attribute scan and effective CI failure exit (#24) | 172 TESTS PASS (20 NEW); SCAN 35/0; PLANTED GHOST RC=1; ROS/Gazebo NOT_RUN | [STATIC_SCAN_20261007.md](STATIC_SCAN_20261007.md) |
 | M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN                                                                                      | — (RFC #15; harness #7/#8/#9)                                         |
 
 ## Entries
@@ -715,6 +716,22 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
   incl. both τ=0.85 smoke attempts, pooled summary, two hybrid deployments,
   campaign log `F:\flexcell-models\campaign_20261005.log`).
 
+
+### E-022 — Static attribute scanner repair (2026-10-07, cloud)
+
+- **Purpose:** repair #24 class-attribute false positives and make the existing
+  CI scan reject genuine missing attributes. Scope is verification tooling.
+- **Configuration:** source baseline `ffde775a0ef9d1cb0f6a3b39436fbe1f97927370`,
+  Python 3.12; no ROS/Gazebo installed. Source code is parsed, never imported.
+- **Result:** baseline scan reports five files among 35 but exits 0; repaired
+  scan reports zero, and a planted `self._gate` defect exits 1. The selected
+  ROS-independent pytest suite passes 172/172, including 20 new scanner cases.
+  Eleven ROS-dependent test files, colcon builds and runtime batteries are
+  NOT_RUN; broader attempts hit missing ROS imports and are excluded from the
+  passing count.
+- **Evidence:** `setup/acceptance/issue24_static_scan_20261007/` contains before/
+  after scan output, the planted failure, exact test command, source hashes,
+  pytest log and JUnit results. See [repair details](STATIC_SCAN_20261007.md).
 
 ## Evidence locations
 
