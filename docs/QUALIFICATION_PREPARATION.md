@@ -2,7 +2,8 @@
 
 TB-PREP-001 延续 [RFC #15](https://github.com/Yenefa/flexcell/issues/15) 的实验准备工作。
 `setup/132_qualification_prepare.py` 已实现离线 `prepare` / `verify`；它写出可复核的候选包，
-不创建 ROS node、不调用模型、不 reset、不运行原生 task。正式资格执行器仍未实现，n≥50 仍冻结。
+不创建 ROS node、不调用模型、不 reset、不运行原生 task。
+后续[受限执行器](BOUNDED_RUNNER.md)可独立登记并执行六个开发槽位；正式 n≥50 资格采样仍冻结。
 
 每个包固定 T1、T3 各 100 个不同候选布局。同一 case 的 FSM/Hybrid 使用相同输入，
 以 AB/BA 交替顺序配对，每 20 对各有 10 个 AB 和 10 个 BA。每 20 对之后插入源任务回测：
