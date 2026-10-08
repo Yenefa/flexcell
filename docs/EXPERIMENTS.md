@@ -77,6 +77,7 @@
 | E-021 | Three-arm S1 comparison, same machine, same night, unattended           | FSM 19/20 · hybrid τ=0.03 18/20 · hybrid τ=0.85 17/20; CIs OVERLAP; grasp-physics noise ~15% cross-arm | `setup/acceptance/tau_sweep_desktop_20261005/`                        |
 | E-022 | Class-scoped static attribute scan and effective CI failure exit (#24) | LOCAL 172 PASS (20 NEW); ROS CI 246 PASS; SCAN 35/0; GAZEBO NOT_RUN | [STATIC_SCAN_20261007.md](STATIC_SCAN_20261007.md) |
 | E-023 | Hybrid batch fast-arm gate + smoke qualification (#8/#12)              | LOCAL 194 PASS (22 NEW); SCAN 35/0; ROBOT/MODEL NOT_RUN | [HYBRID_BATCH_GATE_20261007.md](HYBRID_BATCH_GATE_20261007.md) |
+| E-024 | Grasp-probe action/result boundaries and trial evidence                 | LOCAL 227 PASS (33 NEW); THREE SYNTHETIC CLI REPRODUCTIONS PASS; LIVE NOT_RUN | [GRASP_PROBE_20261008.md](GRASP_PROBE_20261008.md) |
 | M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN                                                                                      | — (RFC #15; harness #7/#8/#9)                                         |
 
 ## Entries
@@ -760,6 +761,35 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
   before/after reports, exact test commands, source hashes, JUnit and logs.
   [Repair details](HYBRID_BATCH_GATE_20261007.md) and
   [requested architecture/planning diagrams](ARCHITECTURE_AND_PLAN_20261007.md).
+- **CI follow-up:** PR #28 passed the ROS Jazzy build and 268 tests, zero
+  errors/failures/skips; scan 35/0. It remains unmerged at this update.
+  [Workflow](https://github.com/Yenefa/flexcell/actions/runs/37668836039).
+
+### E-024 — Grasp diagnostic client repair (2026-10-08, cloud)
+
+- **Purpose:** prepare trustworthy evidence for the E-021 cross-arm grasp
+  failure. The frozen carry mechanism and skill/runtime contracts are unchanged.
+- **Configuration:** base `c79e0c672c95e2d9cd04112ef42b65e4c67e1845`
+  (unmerged PR #28), Python 3.12, offline fake action/reset transport.
+- **Reproduction:** actual old CLI accepts default success, continues after a
+  missing pick result and returns 0; B is placed at A's hardcoded pose. Actual
+  repaired CLI stops the two invalid cases after one pick with exit 1, and
+  places B at its measured start. These are synthetic observations.
+- **Repair:** one physical dispatch per goal, bounded cancellation/terminal
+  checks, complete pick/place result validation, canonical reset and sealed
+  injection clear between trials, separate physical/harness results, flushed
+  output and no evidence-file overwrite.
+- **Verification:** 227 local ROS-independent tests pass, zero errors/failures/
+  skips, including 33 new cases; static scan 35/0. Eleven ROS-dependent test
+  files excluded; no live grasp/model/robot calls or Gazebo acceptance.
+- **Next:** after dependent PR review/merge and rebuild, a short A/B probe
+  accompanied by matching skill/carry/motion logs. The physical root cause
+  remains UNKNOWN; old data is not pooled with the changed trial conditions;
+  full M3 and n≥50 remain frozen.
+- **Evidence:** `setup/acceptance/grasp_probe_20261008/` contains a runnable
+  before/after reproduction, raw reports, archived failure inventory with
+  source fingerprints, exact commands/hashes, pytest JUnit and logs.
+  [Repair and online evidence instructions](GRASP_PROBE_20261008.md).
 
 ## Evidence locations
 
