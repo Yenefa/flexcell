@@ -17,7 +17,7 @@ def command(outcome=0, rc=None):
                   grasp_attached=outcome == 0, motion_error_code=0,
                   evidence_id='measured-grasp', detail='measured result')
     return dict(return_code=(0 if outcome == 0 else 1) if rc is None else rc,
-                stdout='GOAL_UUID ' + result['goal_uuid'] + '\nRESULT ' + json.dumps(result) + '\n', stderr='')
+                stdout='GOAL_UUID ' + result['goal_uuid'] + '\nRESULT ' + json.dumps(result, indent=2) + '\n', stderr='')
 
 
 def record(outcome=0):
@@ -142,6 +142,14 @@ def test_default_or_mismatched_success_result_fails(key, value):
     cmd = command(); result = q.loads(cmd['stdout'].split('RESULT ')[1]); result[key] = value
     cmd['stdout'] = 'GOAL_UUID ' + 'a' * 32 + '\nRESULT ' + json.dumps(result) + '\n'
     with pytest.raises(ValueError): g.result_json(cmd, 'pick')
+
+
+def test_real_client_multiline_observe_result_and_trailing_noise():
+    cmd = command(); result = q.loads(cmd['stdout'].split('RESULT ')[1]); result['action'] = 'observe'
+    cmd['stdout'] = 'SENDING action=observe\nGOAL_UUID ' + 'a' * 32 + '\nRESULT ' + json.dumps(result, indent=2) + '\n\n'
+    assert g.result_json(cmd, 'observe')['action_status'] == 4
+    cmd['stdout'] += 'unexpected second payload\n'
+    with pytest.raises(ValueError): g.result_json(cmd, 'observe')
 
 
 @pytest.mark.parametrize('key', ['box_before', 'box_after', 'carry_offset', 'attach_gap_m', 'box_rise_m', 'carry_engage_confirmed'])

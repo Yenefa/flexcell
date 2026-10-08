@@ -104,7 +104,8 @@ def result_json(command, action):
     goals = [s[10:] for s in lines if s.startswith('GOAL_UUID ')]
     q.require(len(marked) == len(goals) == 1 and re.fullmatch('[0-9a-f]{32}', goals[0]),
               'one correlated goal and terminal result required')
-    value = q.loads(marked[0])
+    # w1_client prints indent=2 JSON; consume the complete terminal payload.
+    value = q.loads(command['stdout'].split('RESULT ', 1)[1])
     q.require(type(value) is dict and value.get('goal_uuid') == goals[0] and value.get('action') == action
               and type(value.get('outcome_val')) is int and type(value.get('action_status')) is int,
               'typed, correlated action result required')
