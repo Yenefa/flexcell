@@ -122,6 +122,7 @@ def test_post_observe_failure_cleans_only_known_terminal_then_stops(registered):
     assert report['state'] == 'STOPPED' and len(report['trials']) == 1
     assert len([c for c in backend.calls if c[0] == 'reset_after']) == 1
     assert backend.count == 1
+    assert (root / 'execution/00-target_box_a/full_raw/pick.jsonl').exists()
 
 
 def test_unavailable_health_sends_no_motion(registered):
@@ -190,3 +191,13 @@ def test_default_cli_inspects_without_importing_ros_or_creating_claim(registered
         'run', '--root', str(root), '--workspace', str(workspace), '--expected-sha256', sha], capture_output=True, text=True)
     assert cmd.returncode == 0 and json.loads(cmd.stdout)['state'] == 'REGISTERED'
     assert not (root / 'execution').exists()
+
+
+def test_clear_request_ids_cannot_reuse_an_old_latched_acknowledgement(tmp_path):
+    backend = g.LiveBackend(g.AUTHORITY); ids = []
+    def captured(directory, name, argv, timeout):
+        rid = argv[argv.index('--inject-request-id') + 1]; ids.append(rid)
+        return dict(return_code=0, stdout='INJECT observed=' + json.dumps(dict(request_id=rid, state='cleared')))
+    backend.command = captured
+    backend.clear(tmp_path, q.OBJECTS[0]); backend.clear(tmp_path, q.OBJECTS[0])
+    assert ids[0] != ids[1]

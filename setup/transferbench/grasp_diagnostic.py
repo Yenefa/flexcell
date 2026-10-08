@@ -6,6 +6,7 @@ import re
 import subprocess
 import sys
 import time
+import uuid
 
 import qualification_prepare as q
 
@@ -223,7 +224,7 @@ class LiveBackend:
                   'reset unconfirmed; no next goal')
 
     def clear(self, directory, target):
-        rid = 'grasp-diagnostic-' + target
+        rid = 'grasp-diagnostic-' + uuid.uuid4().hex
         cmd = self.command(directory, 'clear', [sys.executable, str(self.client), '--action', 'inject',
             '--inject-request-id', rid, '--expect-inject-state', 'cleared'], 25)
         q.require(command_ok(cmd) and cmd['stdout'].count(' observed=') == 1, 'injection clear unconfirmed')
@@ -286,13 +287,16 @@ def run(root, expected, workspace, backend):
             event('PICK_TERMINAL', object=target, outcome=summary['outcome'], goal_uuid=result['goal_uuid'])
             # The known terminal permits cleanup even if post-pick observation fails.
             try:
-                post = positions(backend.observe(trial, 'observe_after'))
-                write(trial / 'exposure_after.json', dict(record_kind='DIRECT_SKILL_DIAGNOSTIC_EXPOSURE', initial_objects=post))
+                try:
+                    post = positions(backend.observe(trial, 'observe_after'))
+                    write(trial / 'exposure_after.json', dict(record_kind='DIRECT_SKILL_DIAGNOSTIC_EXPOSURE', initial_objects=post))
+                finally:
+                    backend.reset(trial, 'reset_after')
+                    boundary = trial / 'after'; boundary.mkdir(); backend.health(boundary, plan)
+                    event('RESET_CONFIRMED', object=target)
             finally:
-                backend.reset(trial, 'reset_after')
-                boundary = trial / 'after'; boundary.mkdir(); backend.health(boundary, plan)
-                event('RESET_CONFIRMED', object=target)
-            backend.capture(trial / 'full_raw', before)
+                # Read-only capture also preserves a failed observation/cleanup tail.
+                backend.capture(trial / 'full_raw', before)
             verify(root, expected, workspace)
         report['state'] = 'COMPLETE'
     except Exception as exc:
