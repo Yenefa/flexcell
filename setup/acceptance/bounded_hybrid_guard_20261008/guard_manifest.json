@@ -1,0 +1,43 @@
+{
+  "AC90": "NOT_RUN",
+  "additional_cumulative_stop_microyuan": 250000,
+  "baseline_completed_slots": 3,
+  "baseline_native_episodes": 5,
+  "budget_reset": false,
+  "collector_budget_path": "/home/ros/.config/flexcell/deepseek_budget_20261001.json",
+  "collector_plan_sha256": "3fc29ddd21c345166afad754a7bcd258a835905577f484a0fe92af977fb44058",
+  "collector_root": "/home/ros/fc_sync_logs/local_fsm_active_20261008/run",
+  "fast_selection_required": false,
+  "guard_source_sha256": {
+    "setup/135_bounded_hybrid_resume.py": "f187875d104ed4a8a36267bc7a4f6b19871fc5c87573f524a7c0bb0cf945db79",
+    "setup/transferbench/bounded_hybrid_guard.py": "2d6a4c1e72dad8a113911ab87a67753e7ca656046a2c329ded060df2099dc34c"
+  },
+  "implementation_revision": "f2f3ff11d70fea8b7d8ad77dd245698d04d7a6a2",
+  "input_package_sha256": "3bc42291a1ee7a4b60d69a376619dd4e7835604f73c83dc764fc50e361983a5f",
+  "instrument_scope": "ADDITIONAL_DEVELOPMENT_GATE; not a new production deployment",
+  "model_identity": {
+    "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+    "endpoint": "http://100.87.190.44:11435/v1/systemone",
+    "model": "clef-flash-q8_0",
+    "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9"
+  },
+  "n_ge_50": "FROZEN",
+  "pooling_with_unguarded_attempts": "FORBIDDEN",
+  "qualification_sampling_authorized": false,
+  "ready_for_large_test": false,
+  "record_kind": "REGISTERED_HYBRID_RESUME_GUARD",
+  "registered_prefix_sha256": "69120b8b5ca037110be089e2e7903109938ebfd4e7cf29892e9feb646eac8b7d",
+  "registered_prefix_tail_sha256": "660bf1ba52d409f186a5393c21fc5326ef9f114d197ca46b7064f3ccf87a4cc7",
+  "registration_model_calls": 0,
+  "registration_native_episodes_executed": 0,
+  "remaining_native_episode_cap": 5,
+  "remaining_slots": [
+    3,
+    4,
+    5
+  ],
+  "rule": "each model-driven episode has real fast proposals and positive measured tokens; each Hybrid task has positive total fast usage",
+  "runtime_fingerprint": "5909f3720f821b112313dfbd8cd38231da0204214dd8f97544f93de716962fca",
+  "schema_version": 1,
+  "threshold": 0.85
+}

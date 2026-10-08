@@ -1,0 +1,17 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/setup/135_bounded_hybrid_resume.py",
+    "run",
+    "--guard",
+    "/home/ros/fc_sync_logs/local_fsm_active_20261008/hybrid_resume_guard.json",
+    "--expected-sha256",
+    "0f8c9ea79dec8686c37c0d465b4cc70692c28b99f2c3235f8cb53f63429f5179",
+    "--workspace",
+    "/home/ros/agentic_workcell_ws"
+  ],
+  "cwd": "/home/ros/agentic_workcell_ws",
+  "return_code": 0,
+  "stderr": "",
+  "stdout": "{\n  \"ok\": true,\n  \"record_kind\": \"BOUNDED_DEVELOPMENT_STATUS\",\n  \"state\": \"PAUSED\",\n  \"completed_slots\": 3,\n  \"native_episode_count\": 5,\n  \"native_episode_count_status\": \"MEASURED_SNAPSHOT\",\n  \"native_dispatch_quota_used\": 5,\n  \"outcomes\": [\n    \"SUCCEEDED\",\n    \"SUCCEEDED\",\n    \"SUCCEEDED\"\n  ],\n  \"job_order\": \"local-first\",\n  \"pending_jobs\": [\n    {\n      \"axis\": \"T1\",\n      \"arm\": \"hybrid\"\n    },\n    {\n      \"axis\": \"T3\",\n      \"arm\": \"hybrid\"\n    },\n    {\n      \"axis\": \"S1\",\n      \"arm\": \"hybrid\"\n    }\n  ],\n  \"resume_allowed\": true,\n  \"development_complete\": false,\n  \"all_trials_succeeded\": false,\n  \"qualification_sampling_authorized\": false,\n  \"ready_for_large_test\": false,\n  \"n_ge_50\": \"FROZEN\",\n  \"AC90\": \"NOT_RUN\",\n  \"guard_sha256\": \"0f8c9ea79dec8686c37c0d465b4cc70692c28b99f2c3235f8cb53f63429f5179\",\n  \"guard_verified\": true,\n  \"dispatch_authorized\": false,\n  \"read_only_model_calls\": 0,\n  \"read_only_native_episodes_executed\": 0\n}\n"
+}

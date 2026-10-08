@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/setup/135_bounded_hybrid_resume.py",
+    "register",
+    "--root",
+    "/home/ros/fc_sync_logs/local_fsm_active_20261008/run",
+    "--out",
+    "/home/ros/fc_sync_logs/local_fsm_active_20261008/hybrid_resume_guard.json",
+    "--revision",
+    "f2f3ff11d70fea8b7d8ad77dd245698d04d7a6a2",
+    "--workspace",
+    "/home/ros/agentic_workcell_ws"
+  ],
+  "cwd": "/home/ros/agentic_workcell_ws",
+  "return_code": 2,
+  "stderr": "",
+  "stdout": "{\n  \"ok\": false,\n  \"error\": \"ValueError: guard output already exists; never replace\",\n  \"dispatch_authorized\": false,\n  \"ready_for_large_test\": false,\n  \"n_ge_50\": \"FROZEN\"\n}\n"
+}

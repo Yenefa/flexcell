@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/setup/135_bounded_hybrid_resume.py",
+    "register",
+    "--root",
+    "/home/ros/fc_sync_logs/local_fsm_active_20261008/run",
+    "--out",
+    "/home/ros/fc_sync_logs/local_fsm_active_20261008/hybrid_resume_guard.json",
+    "--revision",
+    "f2f3ff11d70fea8b7d8ad77dd245698d04d7a6a2",
+    "--workspace",
+    "/home/ros/agentic_workcell_ws"
+  ],
+  "cwd": "/home/ros/agentic_workcell_ws",
+  "return_code": 0,
+  "stderr": "",
+  "stdout": "{\n  \"ok\": true,\n  \"guard_sha256\": \"0f8c9ea79dec8686c37c0d465b4cc70692c28b99f2c3235f8cb53f63429f5179\",\n  \"collector_state\": \"PAUSED\",\n  \"completed_slots\": 3,\n  \"pending_hybrid_slots\": 3,\n  \"dispatch_authorized\": false,\n  \"model_calls\": 0,\n  \"native_episodes_executed\": 0,\n  \"qualification_sampling_authorized\": false,\n  \"ready_for_large_test\": false,\n  \"n_ge_50\": \"FROZEN\"\n}\n"
+}

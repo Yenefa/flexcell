@@ -1,0 +1,62 @@
+{
+  "budget_sha256": "e031ecfc71c1bec91c76fb078b7f5c97f7fb59ad0427b42835ffb05085b68662",
+  "budget_unchanged": true,
+  "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+  "calibration_unchanged": true,
+  "collector_status": {
+    "AC90": "NOT_RUN",
+    "all_trials_succeeded": false,
+    "completed_slots": 3,
+    "development_complete": false,
+    "job_order": "local-first",
+    "n_ge_50": "FROZEN",
+    "native_dispatch_quota_used": 5,
+    "native_episode_count": 5,
+    "native_episode_count_status": "MEASURED_SNAPSHOT",
+    "ok": true,
+    "outcomes": [
+      "SUCCEEDED",
+      "SUCCEEDED",
+      "SUCCEEDED"
+    ],
+    "pending_jobs": [
+      {
+        "arm": "hybrid",
+        "axis": "T1"
+      },
+      {
+        "arm": "hybrid",
+        "axis": "T3"
+      },
+      {
+        "arm": "hybrid",
+        "axis": "S1"
+      }
+    ],
+    "qualification_sampling_authorized": false,
+    "ready_for_large_test": false,
+    "record_kind": "BOUNDED_DEVELOPMENT_STATUS",
+    "resume_allowed": true,
+    "state": "PAUSED"
+  },
+  "collector_tree_sha256": "29f287059f3ef4ff4f9f8aea6fb4de38a5e6c78bbd5aa1c24b11773215011c97",
+  "collector_unchanged": true,
+  "history_files": 374,
+  "history_sha256": "af19aa59059d0ca6e14f05b9bc434b2a8f9470a86718060fafdab6a1086cb8a0",
+  "history_unchanged": true,
+  "old_evidence_seals": {
+    "bounded_runner_20261007": {
+      "files": 46,
+      "seal_sha256": "5a9fec70c0cb5413a1f592a9f267fb1b9aa4e3d0d996b822f05ce4eb44ca3269"
+    },
+    "local_fsm_20261008": {
+      "files": 153,
+      "seal_sha256": "eff3c0e7a3d90c6a10a80b30948a634ac4244796db540b6ae46d7cad0873b046"
+    },
+    "qualification_private_20261008": {
+      "files": 30,
+      "seal_sha256": "6c0c679cb0e8c3200555ed7d0090a0477ba71bdd607ea646c52574a871912838"
+    }
+  },
+  "recorded_utc": "2026-10-08T10:27:31.115991+00:00"
+}

@@ -768,6 +768,23 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
   incl. both τ=0.85 smoke attempts, pooled summary, two hybrid deployments,
   campaign log `F:\flexcell-models\campaign_20261005.log`).
 
+### TB-RUN-003 — Guarded Hybrid continuation prepared (2026-10-08)
+
+- **Change**: an independently pinned `135_bounded_hybrid_resume.py` adapter
+  checks raw fast proposals and positive measured tokens before committing each
+  remaining Hybrid logical task. Zero-fast green results halt the original
+  collector; original native failures and all evidence remain intact.
+- **Validation**: 31 targeted and 174 authoritative offline instrument tests
+  passed. Actual register/status/default-run returned rc=0; overwrite refused
+  with rc=2. The current 3-task / 5-episode FSM prefix, 374-file history, budget,
+  calibration and old seals are unchanged; private inputs still verify.
+- **Boundary**: home GPU remains offline; actual guarded Hybrid execution,
+  qualification and AC@90 are NOT_RUN, n≥50 stays FROZEN. The guard is a new
+  development instrument and cannot be pooled with unguarded attempts. No new
+  native episodes, model calls or budget reservations occurred.
+- **Evidence**: [sealed preparation receipt](../setup/acceptance/bounded_hybrid_guard_20261008/README.md),
+  [operator entry](BOUNDED_HYBRID_GUARD.md).
+
 ## Evidence locations
 
 - Delivery host: `F:\flexcell-stage\setup\acceptance\{day1,day2,week1,week15}\`
