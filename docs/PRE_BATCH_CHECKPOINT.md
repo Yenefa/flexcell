@@ -25,6 +25,8 @@ TB-RUN-001 的[受限执行器](BOUNDED_RUNNER.md)已接入既有任务链，
 T1、三段 T3、S1 三份逻辑任务，新增五份原生 episode，全部成功，真实暂停续跑通过。
 模型调用和新增预算 reservation 为零；活跃 collector 停在三个未认领 Hybrid 槽位之前。
 仓库保留独立封存快照，可续跑日志放在永久 `fc_sync_logs`；不在已封存证据里追加任务。
+后续[私有候选暂存](PRIVATE_QUALIFICATION_INPUTS.md)排除已公开候选和新增历史，
+新种子及布局留在 Git 工作树外，仓库只收录摘要；独立保管和正式协议仍未建立，n≥50 保持冻结。
 
 ## 已完成的入口
 
