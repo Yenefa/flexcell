@@ -1,0 +1,21 @@
+{
+  "arguments": [
+    "verify",
+    "--commitment",
+    "/home/ros/agentic_workcell_ws/setup/acceptance/qualification_private_20261008/commitment.json",
+    "--expected-sha256",
+    "8d572dce24e7e3b5d97e2e3337842cda68055b133cc406da0a344475a311dd99",
+    "--workspace",
+    "/home/ros/agentic_workcell_ws",
+    "--history",
+    "/home/ros/.ros/flexcell/episodes",
+    "--calibration",
+    "/home/ros/.config/flexcell/jev_calibration_clef_q8_20261005.json",
+    "--budget",
+    "/home/ros/.config/flexcell/deepseek_budget_20261001.json"
+  ],
+  "elapsed_ms": 514.121665,
+  "return_code": 0,
+  "stderr": "",
+  "stdout": "{\n  \"ok\": true,\n  \"status\": \"PREPARED_NOT_RATIFIED\",\n  \"commitment_sha256\": \"8d572dce24e7e3b5d97e2e3337842cda68055b133cc406da0a344475a311dd99\",\n  \"private_package_sha256\": \"dbeb61e627226e31431c680b815c2577aa3e4873f84598ed9963be3a820d752c\",\n  \"target_cases\": 200,\n  \"schedule_slots\": 450,\n  \"history_files\": 374,\n  \"published_layouts\": 200,\n  \"published_overlap_count\": 0,\n  \"independent_custody\": \"NOT_ESTABLISHED\",\n  \"sampling_authorized\": false,\n  \"ready_for_large_test\": false,\n  \"n_ge_50\": \"FROZEN\",\n  \"model_calls\": 0,\n  \"native_episodes_executed\": 0\n}\n"
+}

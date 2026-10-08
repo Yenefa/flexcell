@@ -7,6 +7,7 @@
 固定顺序为 A 然后 B，每次从 canonical reset 开始，clear injection 后读取新 Observe。
 Pick 完成且终态与 raw pick/controller 日志匹配后，再读取 Observe 并 reset。
 reset 是抓取后的生命周期恢复，没有 Place 测量。参数、生产源码、校准与原 Hybrid collector 不改动。
+每次 clear 采用独立请求 ID，拒绝旧的 latched acknowledgement；观测或清理失败的日志尾部也保存。
 
 客户端超时、未知接受状态、信号退出或控制器终态未知时立即停止，不再复位或发送下一个目标。
 已知失败保留原始记录；复位及严格健康确认后可继续另一个预先声明的对象。
@@ -63,3 +64,9 @@ python3 setup/136_grasp_diagnostic.py run \
 
 两次成功也不能解释历史 B 抓取故障。机制根因继续 UNKNOWN；NET-001、Hybrid 在线验收和正式协议
 仍未完成，`ready_for_large_test=false`，`qualification_sampling_authorized=false`，`n_ge_50=FROZEN`。
+
+2026-10-08 本机记录见 `setup/acceptance/grasp_diagnostic_school_20261008`。
+首次入口因多行 RESULT 解析错误 STOPPED，Pick 数为 0，原目录保留；修正身份后 A/B 各一次均有测得抬升。
+实际执行身份是 `b5cac91c44a57b35fa6470e82994f5248e6ed40d`，随后独立 clear ID 和失败尾部保存
+在 `73054433b067e1669cdb2641ce54404bcf8f41a7` 加固，只做定向离线检查，没有补采实体动作。
+已完成旧计划的 source pin 不随新工具改写；其复核使用封存源码和回执，不以新源码身份重新归类。

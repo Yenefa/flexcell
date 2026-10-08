@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/src/flexcell/flexcell_skills/test/w1_client.py",
+    "--action",
+    "pick",
+    "--object",
+    "target_box_a",
+    "--timeout",
+    "90"
+  ],
+  "elapsed_ms": 7890.659305,
+  "return_code": 0,
+  "stderr": "",
+  "stdout": "SENDING action=pick object=target_box_a pose=[0.12, -0.15, 0.0175]\nGOAL_UUID 2deb2a5c5a6148b8a60de30717e94ce5\nRESULT {\n  \"action\": \"pick\",\n  \"goal_uuid\": \"2deb2a5c5a6148b8a60de30717e94ce5\",\n  \"outcome\": \"OUTCOME_SUCCEEDED\",\n  \"outcome_val\": 0,\n  \"action_status\": 4,\n  \"error_code\": \"ERR_NONE\",\n  \"detail\": \"picked target_box_a: attached, measured rise 0.097m\",\n  \"evidence_id\": \"target_box_a-325172ad\",\n  \"wall_seconds\": 7.354,\n  \"grasp_attached\": true,\n  \"motion_error_code\": 0\n}\n"
+}

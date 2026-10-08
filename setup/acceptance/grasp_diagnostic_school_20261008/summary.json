@@ -1,0 +1,136 @@
+{
+  "GRASP_B_001": "NOT_RESOLVED; historical failure not reproduced",
+  "NET_001": "NOT_ACCEPTED",
+  "executed_instrument_revision": "b5cac91c44a57b35fa6470e82994f5248e6ed40d",
+  "failed_pre_pick_attempt": {
+    "instrument_revision": "6e38b44b3487b864edd7537b980595c725d05e40",
+    "pick_goals": 0,
+    "reason": "JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)",
+    "replacement_or_overwrite": false,
+    "state": "STOPPED"
+  },
+  "gpu_status": {
+    "inference_calls": 0,
+    "ip": "100.87.190.44",
+    "last_seen": "2026-10-07T12:22:49.1Z",
+    "observed_at_utc": "2026-10-08T14:16:47.389883+00:00",
+    "online": false,
+    "record_kind": "TAILNET_PEER_METADATA_ONLY",
+    "relay": "tok",
+    "tcp_test": "NOT_RUN"
+  },
+  "large_tests_started": false,
+  "latest_hardening_real_action_check": "NOT_RUN; preserve the fixed two-Pick boundary",
+  "latest_tool_revision": "73054433b067e1669cdb2641ce54404bcf8f41a7",
+  "local_diagnostic_completed": true,
+  "n_ge_50": "FROZEN",
+  "physical_hardware": "NOT_RUN",
+  "plan_sha256": "c03e722eec98000a5bb1bb11a88c6d59b00fa2ffa3e7da7707a24c7901da6ade",
+  "postcheck": {
+    "historical_episode_count": 374,
+    "n_ge_50": "FROZEN",
+    "new_budget_calls": 0,
+    "new_task_episodes": 0,
+    "ok": true,
+    "paused_collector_completed_slots": 3,
+    "paused_collector_native_episodes": 5,
+    "policy_inference_calls": 0,
+    "private_commitment_verified": true,
+    "private_overlap_cases": 0,
+    "protected_unchanged": {
+      "/home/ros/.config/flexcell/deepseek_budget_20261001.json": true,
+      "/home/ros/.config/flexcell/jev_calibration_clef_q8_20261005.json": true,
+      "/home/ros/.ros/flexcell/episodes": true,
+      "/home/ros/fc_sync_logs/grasp_diagnostic_school_20261008/run": true,
+      "/home/ros/fc_sync_logs/grasp_diagnostic_school_20261008/v1_source": true,
+      "/home/ros/fc_sync_logs/local_fsm_active_20261008": true,
+      "/home/ros/fc_sync_logs/qualification_private_20261008/inputs": true
+    },
+    "qualification_sampling_authorized": false,
+    "ready_for_large_test": false,
+    "record_kind": "DIRECT_GRASP_DIAGNOSTIC_POSTCHECK",
+    "repeat_refused_rc": 2,
+    "run_tree_unchanged_after_readonly_and_repeat": true
+  },
+  "qualification_sampling_authorized": false,
+  "ready_for_large_test": false,
+  "record_kind": "SCHOOL_DIRECT_GRASP_DEVELOPMENT_EVIDENCE",
+  "runtime_fingerprint": "fa0a1c6af0016f74741983d401d31ed170e5d8cdf6e52d823488b4f2ce596917",
+  "schema_version": 1,
+  "targeted_tests": {
+    "command": "PYTHONPATH=setup/transferbench python3 -m pytest -q setup/transferbench/test_grasp_diagnostic.py setup/transferbench/test_prebatch_readiness.py",
+    "executed_revision_passed": 37,
+    "final_failed": 0,
+    "final_passed": 38
+  },
+  "trials": [
+    {
+      "carry_engage_confirmed": true,
+      "controllers": {
+        "rejected_goals": 0,
+        "requested_goals": 3,
+        "terminal_goals": 3
+      },
+      "decision_latency_ms": "NOT_RUN",
+      "evidence_id": "target_box_a-325172ad",
+      "goal_uuid": "2deb2a5c5a6148b8a60de30717e94ce5",
+      "measured": {
+        "attach_gap_m": 0.16441960249959356,
+        "box_after": [
+          0.2080390020049188,
+          -0.005994446917681939,
+          0.11408670259774117
+        ],
+        "box_before": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ],
+        "box_rise_m": 0.09658670508599643,
+        "carry_offset": [
+          -0.006084775074393506,
+          -0.0013620125770989284,
+          -0.16430132720145085
+        ]
+      },
+      "mechanism_root_cause": "UNKNOWN",
+      "object": "target_box_a",
+      "outcome": "SUCCEEDED",
+      "success_rate": "NOT_ESTIMATED"
+    },
+    {
+      "carry_engage_confirmed": true,
+      "controllers": {
+        "rejected_goals": 0,
+        "requested_goals": 3,
+        "terminal_goals": 3
+      },
+      "decision_latency_ms": "NOT_RUN",
+      "evidence_id": "target_box_b-36bc98c1",
+      "goal_uuid": "c62e412b2b404e409151241777d772b5",
+      "measured": {
+        "attach_gap_m": 0.16117935881371043,
+        "box_after": [
+          0.2022905870863031,
+          -0.17671304241830163,
+          0.12059342415129296
+        ],
+        "box_before": [
+          0.2,
+          -0.18,
+          0.01749999751174475
+        ],
+        "box_rise_m": 0.10309342663954821,
+        "carry_offset": [
+          -0.0005714520774838805,
+          0.004021927641734174,
+          -0.1611281578376871
+        ]
+      },
+      "mechanism_root_cause": "UNKNOWN",
+      "object": "target_box_b",
+      "outcome": "SUCCEEDED",
+      "success_rate": "NOT_ESTIMATED"
+    }
+  ]
+}

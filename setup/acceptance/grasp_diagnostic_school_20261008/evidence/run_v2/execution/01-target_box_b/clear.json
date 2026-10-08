@@ -1,0 +1,16 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/src/flexcell/flexcell_skills/test/w1_client.py",
+    "--action",
+    "inject",
+    "--inject-request-id",
+    "grasp-diagnostic-target_box_b",
+    "--expect-inject-state",
+    "cleared"
+  ],
+  "elapsed_ms": 1487.172827,
+  "return_code": 0,
+  "stderr": "",
+  "stdout": "INJECT payload='#grasp-diagnostic-target_box_b' expect=cleared observed={\"applied_count\": 0, \"error\": \"\", \"live\": false, \"mode\": \"\", \"request_id\": \"grasp-diagnostic-target_box_b\", \"scenario\": \"\", \"state\": \"cleared\", \"target_object\": \"\"}\n"
+}

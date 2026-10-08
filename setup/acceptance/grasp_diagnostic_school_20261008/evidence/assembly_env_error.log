@@ -1,0 +1,5 @@
+First artifact assembly was invoked without sourcing the mainline profile.
+Read-only verify_deployment rejected the default world's hash before copying runtime or creating receipt:
+ValueError: configuration drift: world_sha256
+No action, model call or protected-data write occurred in that attempt.
+Corrected assembly is finalize.sh, which sources the authoritative profile without a pipe.

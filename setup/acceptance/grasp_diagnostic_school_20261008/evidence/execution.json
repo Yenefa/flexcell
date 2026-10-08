@@ -1,0 +1,14 @@
+{
+  "return_code": 2,
+  "stdout": "{\n  \"state\": \"STOPPED\",\n  \"trials\": [],\n  \"pick_goals\": 0,\n  \"policy_inference_calls\": 0,\n  \"task_episode_generation\": \"NOT_EXPECTED; VERIFY_PROTECTED_HISTORY\",\n  \"evidence_scope\": \"TWO_ONCE_ONLY_DIRECT_PICKS; RESET_AFTER_EACH\",\n  \"mechanism_root_cause\": \"UNKNOWN\",\n  \"n_ge_50\": \"FROZEN\",\n  \"ready_for_large_test\": false,\n  \"stop_reason\": \"JSONDecodeError: Expecting property name enclosed in double quotes: line 1 column 2 (char 1)\",\n  \"ok\": false,\n  \"plan_sha256\": \"29ba595fdab95cd8067874b3ea41ece567dd8979dfc319304caab5cf244ec456\",\n  \"qualification_sampling_authorized\": false,\n  \"dispatch_authorized\": false\n}\n",
+  "stderr": "",
+  "elapsed_ms": 21507.828752,
+  "arguments": [
+    "run",
+    "--root",
+    "/home/ros/fc_sync_logs/grasp_diagnostic_school_20261008/run",
+    "--expected-sha256",
+    "29ba595fdab95cd8067874b3ea41ece567dd8979dfc319304caab5cf244ec456",
+    "--execute"
+  ]
+}

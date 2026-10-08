@@ -1,0 +1,14 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "/home/ros/agentic_workcell_ws/src/flexcell/flexcell_skills/test/w1_client.py",
+    "--action",
+    "observe",
+    "--timeout",
+    "25"
+  ],
+  "elapsed_ms": 667.789719,
+  "return_code": 0,
+  "stderr": "",
+  "stdout": "SENDING action=observe object=target_box pose=[0.12, -0.15, 0.0175]\nGOAL_UUID 1f8f691553b24281a358f08985ec5fdb\nRESULT {\n  \"action\": \"observe\",\n  \"goal_uuid\": \"1f8f691553b24281a358f08985ec5fdb\",\n  \"outcome\": \"OUTCOME_SUCCEEDED\",\n  \"outcome_val\": 0,\n  \"action_status\": 4,\n  \"error_code\": \"ERR_NONE\",\n  \"detail\": \"carry: confirmed backend engaged on target_box_b; revision bumped: tracked object moved past 0.002m\",\n  \"evidence_id\": \"auto-9-1c3ee70a-a399a0be\",\n  \"wall_seconds\": 0.026,\n  \"revision\": 5,\n  \"source\": \"SIMULATION_GROUND_TRUTH\",\n  \"objects\": [\n    {\n      \"name\": \"target_box_a\",\n      \"available\": true,\n      \"position\": [\n        0.22,\n        0.0,\n        0.0175\n      ]\n    },\n    {\n      \"name\": \"target_box_b\",\n      \"available\": true,\n      \"position\": [\n        0.2023,\n        -0.1767,\n        0.1206\n      ]\n    }\n  ],\n  \"carry\": {\n    \"engaged\": true,\n    \"object_id\": \"target_box_b\"\n  },\n  \"zones\": [\n    {\n      \"id\": \"zone_1\",\n      \"occupancy\": 0\n    },\n    {\n      \"id\": \"zone_2\",\n      \"occupancy\": 1\n    }\n  ],\n  \"ee\": [\n    0.2029,\n    -0.1807,\n    0.282\n  ],\n  \"notes\": [\n    \"carry: confirmed backend engaged on target_box_b\",\n    \"revision bumped: tracked object moved past 0.002m\"\n  ]\n}\n"
+}

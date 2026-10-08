@@ -1,0 +1,144 @@
+{
+  "evidence_scope": "TWO_ONCE_ONLY_DIRECT_PICKS; RESET_AFTER_EACH",
+  "mechanism_root_cause": "UNKNOWN",
+  "n_ge_50": "FROZEN",
+  "pick_goals": 2,
+  "policy_inference_calls": 0,
+  "ready_for_large_test": false,
+  "state": "COMPLETE",
+  "task_episode_generation": "NOT_EXPECTED; VERIFY_PROTECTED_HISTORY",
+  "trials": [
+    {
+      "carry_engage_confirmed": true,
+      "controllers": {
+        "rejected_goals": 0,
+        "requested_goals": 3,
+        "terminal_goals": 3
+      },
+      "decision_latency_ms": "NOT_RUN",
+      "evidence_id": "target_box_a-325172ad",
+      "goal_uuid": "2deb2a5c5a6148b8a60de30717e94ce5",
+      "measured": {
+        "attach_gap_m": 0.16441960249959356,
+        "box_after": [
+          0.2080390020049188,
+          -0.005994446917681939,
+          0.11408670259774117
+        ],
+        "box_before": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ],
+        "box_rise_m": 0.09658670508599643,
+        "carry_offset": [
+          -0.006084775074393506,
+          -0.0013620125770989284,
+          -0.16430132720145085
+        ]
+      },
+      "mechanism_root_cause": "UNKNOWN",
+      "object": "target_box_a",
+      "outcome": "SUCCEEDED",
+      "raw_pick": {
+        "attach_gap_m": 0.16441960249959356,
+        "box_after": [
+          0.2080390020049188,
+          -0.005994446917681939,
+          0.11408670259774117
+        ],
+        "box_before": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ],
+        "box_rise_m": 0.09658670508599643,
+        "carry_engage_confirmed": true,
+        "carry_offset": [
+          -0.006084775074393506,
+          -0.0013620125770989284,
+          -0.16430132720145085
+        ],
+        "detail": "picked target_box_a: attached, measured rise 0.097m",
+        "elapsed_ms": 7348,
+        "error_code": 0,
+        "evidence_id": "target_box_a-325172ad",
+        "motion_error_code": 0,
+        "object_name": "target_box_a",
+        "outcome": "0",
+        "profile": "demo_slow",
+        "request_id": "target_box_a",
+        "scene_box_added": true,
+        "status": 1,
+        "wall_ts": 1791468735.2413192
+      },
+      "success_rate": "NOT_ESTIMATED"
+    },
+    {
+      "carry_engage_confirmed": true,
+      "controllers": {
+        "rejected_goals": 0,
+        "requested_goals": 3,
+        "terminal_goals": 3
+      },
+      "decision_latency_ms": "NOT_RUN",
+      "evidence_id": "target_box_b-36bc98c1",
+      "goal_uuid": "c62e412b2b404e409151241777d772b5",
+      "measured": {
+        "attach_gap_m": 0.16117935881371043,
+        "box_after": [
+          0.2022905870863031,
+          -0.17671304241830163,
+          0.12059342415129296
+        ],
+        "box_before": [
+          0.2,
+          -0.18,
+          0.01749999751174475
+        ],
+        "box_rise_m": 0.10309342663954821,
+        "carry_offset": [
+          -0.0005714520774838805,
+          0.004021927641734174,
+          -0.1611281578376871
+        ]
+      },
+      "mechanism_root_cause": "UNKNOWN",
+      "object": "target_box_b",
+      "outcome": "SUCCEEDED",
+      "raw_pick": {
+        "attach_gap_m": 0.16117935881371043,
+        "box_after": [
+          0.2022905870863031,
+          -0.17671304241830163,
+          0.12059342415129296
+        ],
+        "box_before": [
+          0.2,
+          -0.18,
+          0.01749999751174475
+        ],
+        "box_rise_m": 0.10309342663954821,
+        "carry_engage_confirmed": true,
+        "carry_offset": [
+          -0.0005714520774838805,
+          0.004021927641734174,
+          -0.1611281578376871
+        ],
+        "detail": "picked target_box_b: attached, measured rise 0.103m",
+        "elapsed_ms": 7862,
+        "error_code": 0,
+        "evidence_id": "target_box_b-36bc98c1",
+        "motion_error_code": 0,
+        "object_name": "target_box_b",
+        "outcome": "0",
+        "profile": "demo_slow",
+        "request_id": "target_box_b",
+        "scene_box_added": true,
+        "status": 1,
+        "wall_ts": 1791468785.6253703
+      },
+      "success_rate": "NOT_ESTIMATED"
+    }
+  ]
+}

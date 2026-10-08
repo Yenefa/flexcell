@@ -1,0 +1,29 @@
+{
+  "record_kind": "PRE_BATCH_DEVELOPMENT_READINESS",
+  "schema_version": 1,
+  "read_only_preflight_ok": false,
+  "ready_for_large_test": false,
+  "large_tests_started": false,
+  "qualification": "FROZEN",
+  "AC90": "NOT_RUN",
+  "n_ge_50": "FROZEN",
+  "checks": {
+    "deployment": {
+      "ok": true,
+      "runtime_fingerprint": "fa0a1c6af0016f74741983d401d31ed170e5d8cdf6e52d823488b4f2ce596917",
+      "source_files": 38,
+      "installed_files": 38
+    },
+    "live_readonly": {
+      "ok": false,
+      "error": "ValueError: RunComposite unavailable"
+    }
+  },
+  "remaining_gates": [
+    "independent qualification split/sample size/confidence/budget not ratified",
+    "network stability NOT_ACCEPTED; DERP direct-path cause UNKNOWN",
+    "B-grasp limitation root cause UNKNOWN; do not hide FSM/Hybrid failures",
+    "complete human effort and actual GPU/API fees unmeasured"
+  ],
+  "dispatch_authorized": false
+}
