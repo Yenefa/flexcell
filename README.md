@@ -71,6 +71,13 @@ After coding — update the Issue, record evidence in EXPERIMENTS.md, link the c
 
 ## Status
 
+2026-10-08 offline continuation: the local FSM T1/T3/S1 prefix passed (3 logical
+tasks, 5 native episodes), with three Hybrid slots still unclaimed while the home
+GPU is offline. A separately pinned [Hybrid resume guard](docs/BOUNDED_HYBRID_GUARD.md)
+now rejects zero-fast-call results before terminal commit and subsequent dispatch.
+New private candidates remain outside Git; independent custody, online Hybrid
+acceptance and n≥50 qualification remain pending.
+
 2026-10-07 mainline composition: `/run_composite` now holds the shared arm lease
 across a declared 1..8-stage chain, preserving native episodes and fresh boundary
 observations. One Hybrid buffer swap and one S1 regression succeeded (4 episodes);
