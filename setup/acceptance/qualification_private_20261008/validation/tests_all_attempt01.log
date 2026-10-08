@@ -1,0 +1,30 @@
+........................................................................ [ 50%]
+...................................................F...................  [100%]
+=================================== FAILURES ===================================
+____ SwapTests.test_report_rechecks_real_receipts_without_modifying_ledger _____
+
+self = <test_t3_swap_pilot.SwapTests testMethod=test_report_rechecks_real_receipts_without_modifying_ledger>
+
+    def test_report_rechecks_real_receipts_without_modifying_ledger(self):
+        import report_t3_swap
+        root=Path(__file__).resolve().parents[1]/'acceptance/transferbench_t3_20261006'
+        before=(root/'cost.jsonl').read_bytes()
+>       result=report_t3_swap.report(root)
+
+setup/transferbench/test_t3_swap_pilot.py:82: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+setup/transferbench/report_t3_swap.py:61: in report
+    pilot.COST.require(event is not None and event['evidence'] == [pilot.COST.pin(p)] and event['reported_outcome'] == summary['outcome'], 'ledger/native receipt binding mismatch')
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+condition = False, message = 'ledger/native receipt binding mismatch'
+
+    def require(condition, message):
+        if not condition:
+>           raise LedgerError(message)
+E           transfer_cost.LedgerError: ledger/native receipt binding mismatch
+
+setup/125_transfer_cost.py:28: LedgerError
+=========================== short test summary info ============================
+FAILED setup/transferbench/test_t3_swap_pilot.py::SwapTests::test_report_rechecks_real_receipts_without_modifying_ledger
+1 failed, 142 passed in 13.93s

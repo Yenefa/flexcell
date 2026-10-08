@@ -1,0 +1,52 @@
+{
+  "AC90": "NOT_RUN",
+  "baseline_use": "FROZEN_CONFIGURATION_SNAPSHOT; not current live Hybrid deployment",
+  "budget_envelope": "NOT_RATIFIED",
+  "budget_reset": false,
+  "budget_sha256": "e031ecfc71c1bec91c76fb078b7f5c97f7fb59ad0427b42835ffb05085b68662",
+  "calibration_sha256": "34eac55fcfdda978286df25b3f6a13f4047e4ca9002ec829d83f262073215f0c",
+  "dispatch_authorized": false,
+  "exclusion_rule": "both object positions within 1mm; recorded history and published candidates",
+  "generation_policy": "CSPRNG; reject geometric exposure collisions before writing; at most 20 seeds; no outcome selection",
+  "history_files": 374,
+  "history_observed_states": 2507,
+  "history_sha256": "af19aa59059d0ca6e14f05b9bc434b2a8f9470a86718060fafdab6a1086cb8a0",
+  "history_unique_layouts": 496,
+  "identity_sha256": "8f99134dc78ea14d900255d951b5ca44d94515cffd6d94aaa7ac152fd0c7b8de",
+  "implementation_revision": "4cdca5d878d473ad0e1ebdc4ad97b44eaa674c18",
+  "independent_custody": "NOT_ESTABLISHED",
+  "large_tests_started": false,
+  "legacy_custody_template": "schema-1 conservative NOT_INDEPENDENT declaration retained; storage visibility stated here",
+  "model_calls": 0,
+  "model_identity_sha256": "ba26e6bbeb78626b4153789772e541a21a19f2c0868914e07f58c637f6704cb3",
+  "n_ge_50": "FROZEN",
+  "native_episodes_executed": 0,
+  "private_package_sha256": "dbeb61e627226e31431c680b815c2577aa3e4873f84598ed9963be3a820d752c",
+  "private_root": "/home/ros/fc_sync_logs/qualification_private_20261008/inputs",
+  "proposed_runtime_fingerprints": {
+    "fsm": "fa0a1c6af0016f74741983d401d31ed170e5d8cdf6e52d823488b4f2ce596917",
+    "hybrid": "5909f3720f821b112313dfbd8cd38231da0204214dd8f97544f93de716962fca"
+  },
+  "published_exclusions": [
+    {
+      "package_sha256": "3bc42291a1ee7a4b60d69a376619dd4e7835604f73c83dc764fc50e361983a5f",
+      "root": "/home/ros/agentic_workcell_ws/setup/acceptance/qualification_inputs_20261007/inputs"
+    }
+  ],
+  "published_layouts": 200,
+  "published_overlap_count": 0,
+  "reachability": "NOT_EVALUATED",
+  "ready_for_large_test": false,
+  "record_kind": "PRIVATE_CANDIDATE_COMMITMENT",
+  "sampling_authorized": false,
+  "schedule_slots": 450,
+  "schema_version": 1,
+  "status": "PREPARED_NOT_RATIFIED",
+  "storage_visibility": "PRIVATE_UNPUBLISHED_STAGING",
+  "target_cases": 200,
+  "unrecorded_exposure": "UNKNOWN",
+  "wrapper_source_sha256": {
+    "setup/134_qualification_private.py": "439e7cf2ecb3fa525ccec9c470c4aef3390e4057db90462383c549052240faa2",
+    "setup/transferbench/qualification_private.py": "4d3dc90830c41e8453b13e9b6af664df64ac5ade9f3e8957e7e2128e5f7c77cd"
+  }
+}

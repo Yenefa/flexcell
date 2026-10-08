@@ -1,0 +1,20 @@
+[
+  {
+    "cause": "historical ledger pin includes authoritative absolute receipt path; task worktree path differs",
+    "command": "python3 -m pytest -q setup/transferbench",
+    "cwd": "/home/ros/.codex/worktrees/16d1/flexcell",
+    "failed": 1,
+    "log": "tests_all_attempt01.log",
+    "passed": 142,
+    "resolution": "run unchanged tests and unchanged historical receipts in authoritative workspace",
+    "return_code": 1
+  },
+  {
+    "artifact": "prepare_delivery.py",
+    "cause": "producer used wrong plan key; correct registered key is executor_sha256",
+    "command": "python3 prepare_delivery.py",
+    "error": "KeyError: 'source_sha256'",
+    "resolution": "capture_before.py only; original producer and collector preserved",
+    "return_code": 1
+  }
+]
