@@ -1,0 +1,38 @@
+flowchart TB
+    baseline["已实现 M2 组件与 n=20 先导"]
+    batchGate["本 PR：批次来源门禁"]
+    graspRoot["P0：定位抓取失败"]
+    qualification["M2 资格：固定模型重放与同指纹 smoke"]
+    entryReview["M3 入口：验收与 ADR 复查"]
+    smallStudy["预登记 S1-S7 与两种阈值对照"]
+    unlockGate{"证据足够且人工解冻 n≥50？"}
+    freezeHold["保持冻结，继续小样本"]
+    formalStudy["交错统计：每臂固定指纹"]
+    decisionMemo["成本与成功率 Go / No-Go"]
+    mtcStudy["计划：MTC 技能对照"]
+    contactGrasp["触发后：接触抓取"]
+    vision["触发后：视觉观测"]
+    realRobot["触发后：真机后端"]
+    devSandbox["测得瓶颈后：NVIDIA 开发沙箱"]
+
+    baseline --> batchGate
+    baseline --> graspRoot
+    batchGate --> qualification
+    graspRoot --> qualification
+    qualification --> entryReview
+    entryReview --> smallStudy
+    smallStudy --> unlockGate
+    unlockGate -->|"否"| freezeHold
+    unlockGate -->|"是"| formalStudy
+    formalStudy --> decisionMemo
+    entryReview -.->|"独立实验变量"| mtcStudy
+    mtcStudy -.->|"同一技能接口"| decisionMemo
+    decisionMemo -.->|"承载机制瓶颈"| contactGrasp
+    decisionMemo -.->|"观测瓶颈"| vision
+    decisionMemo -.->|"硬件目标确定"| realRobot
+    decisionMemo -.->|"开发工具瓶颈"| devSandbox
+
+    style baseline fill:#C2E5FF,stroke:#3DADFF
+    style batchGate fill:#FFECBD,stroke:#FFC943
+    style graspRoot fill:#FFE0C2,stroke:#FF9E42
+    style freezeHold fill:#FFCDC2,stroke:#FF7556

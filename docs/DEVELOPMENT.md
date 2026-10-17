@@ -26,8 +26,10 @@ reference for all future parity claims.
 
 ## M2 — Runtime Decision Foundation 🔵 CURRENT
 
-Ratified order: **WorldState → Decision Interface → FSMPolicy → Scenario Replay → Jev →
-LLM**. LLM is explicitly deferred (③) until interface + scenario runner + replay exist.
+Ratified implementation order: **WorldState → Decision Interface → FSMPolicy →
+Scenario Replay → Jev → LLM**. Those source layers now exist, including LLM and
+Hybrid; source implementation is distinct from complete benchmark qualification.
+See the [current architecture and planning diagrams](ARCHITECTURE_AND_PLAN_20261007.md).
 
 Checklist (ratified order — check off as issues close):
 
@@ -41,9 +43,10 @@ Checklist (ratified order — check off as issues close):
       (`contracts/episode.py` + executor recorder + `setup/93_replay.py`
       offline replay + `setup/94_scenario_runner.py` S1/S2/S4/S5 orchestration
       with Wilson-CI batch summaries; 2026-09-28)
-- [x] Benchmark harness + metrics report generator — #8
+- [ ] Benchmark harness + metrics report generator — #8 (qualification still open)
       (`contracts/metrics.py` primitives + `setup/95_metrics_report.py`
-      regenerating every number from the replay store; 2026-09-28)
+      and scenario runner implemented; hybrid batch provenance repair in E-023;
+      pinned model replay and complete online acceptance remain pending)
 - [x] S7 perturbation scenario builder — #9
       (`setup/96_s7_perturb.py` seeded off-canonical placement + runner
       integration; S7:2 batch green; 2026-09-28)
@@ -51,8 +54,11 @@ Checklist (ratified order — check off as issues close):
       (`jev_policy.py` Choice-over-menu + typed policy_failure → FSM fallback;
       `jev_backends.py` import-guarded vendor SDK + transport-injected local
       endpoint; executor `decision_policy=jev`; 2026-09-28)
-- [ ] LLMPolicy — #11 (**DEFERRED ③** — do not start before the four items above exist)
-- [ ] HybridRouter + threshold sweep τ∈{0.5,0.7,0.9} + calibration report — #12
+- [x] LLMPolicy — #11 (typed official DeepSeek backend, budget ledger and
+      recorded online use; see E-013/E-021)
+- [ ] HybridRouter + threshold sweep + calibration report — #12
+      (router implemented; Q8 n=20 pilots in E-021, supported-bin regimes
+      τ=0.03/0.85; full acceptance and n≥50 remain frozen)
 - [x] ADR set from the ratified Week-2 preparation — #2 (ADR-001 simulation
       backend, ADR-002 decision-layer boundary + **Accepted B5 addendum**;
       plus ADR-003 orchestration substrate — ratified with three amendments
@@ -74,6 +80,13 @@ Start condition: M2 definition-of-done met. Results are recorded in
 The CI attribute scanner is class-scoped and fails the job on missing members
 or invalid scan input (#24, 2026-10-07). Its 20 CLI regressions run through the
 existing pytest configuration. See [repair and evidence](STATIC_SCAN_20261007.md).
+
+The E-023 hybrid harness repair rejects a batch without real fast proposals and
+measured tokens, and rechecks archived smoke calibration/fingerprint before
+baseline dispatch. Keep batch audits under `episodes/batch_audits/`, separate
+from episode JSON. After merge, qualify the changed source with a new deployment
+fingerprint; old smoke cannot carry that qualification forward. See
+[repair, offline verification and pending online gates](HYBRID_BATCH_GATE_20261007.md).
 
 **Before coding:**
 

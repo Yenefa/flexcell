@@ -1,0 +1,38 @@
+flowchart LR
+    subgraph service ["已实现的运行组件"]
+        taskExec["TaskFsmServer：策略与门禁"]
+        observeServer["Observe：WorldState v2"]
+        pickServer["Pick"]
+        placeServer["Place"]
+        verifyServer["Verify：独立测量"]
+        carryServer["Carry：可替换承载"]
+        motionServer["MoveToPose"]
+        moveGroup["MoveIt 2"]
+        gazeboSim["Gazebo + ros2_control"]
+        fastModel["Clef-Flash Q8 服务"]
+    end
+    subgraph datastore ["持久证据与预算"]
+        episodeStore["Episode / JSONL"]
+        budgetLedger["推理预算账本"]
+    end
+    subgraph external ["外部慢模型"]
+        slowApi["DeepSeek 官方 API"]
+    end
+
+    taskExec <-->|"Observe 与世界状态"| observeServer
+    taskExec <-->|"动作与结果"| pickServer
+    taskExec <-->|"动作与结果"| placeServer
+    taskExec <-->|"动作与结果"| verifyServer
+    pickServer -->|"确认承载"| carryServer
+    placeServer -->|"确认释放"| carryServer
+    pickServer -->|"目标位姿"| motionServer
+    placeServer -->|"目标位姿"| motionServer
+    motionServer -->|"规划与执行"| moveGroup
+    moveGroup -->|"关节轨迹"| gazeboSim
+    carryServer -->|"承载实现"| gazeboSim
+    gazeboSim -->|"真实位姿"| observeServer
+    gazeboSim -->|"独立位姿采样"| verifyServer
+    taskExec <-->|"typed 决策请求"| fastModel
+    taskExec -.->|"TaskFsmServer：慢模型推理"| slowApi
+    taskExec -->|"记录输入与结果"| episodeStore
+    taskExec -->|"预留与结算"| budgetLedger
