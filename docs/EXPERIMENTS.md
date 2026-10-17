@@ -53,30 +53,30 @@
 
 ## Index
 
-| ID    | Experiment                                                              | Outcome                                                                                                | Evidence                                                              |
-| ----- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
-| E-001 | Day-1 environment verification                                          | PASS                                                                                                   | acceptance/day1 (delivery host) + [DAY1_REPORT.md](../DAY1_REPORT.md) |
-| E-002 | Day-2 MoveToPose acceptance                                             | PASS 10/10                                                                                             | acceptance/day2 + [DAY2_MOVETOPOSE.md](DAY2_MOVETOPOSE.md)            |
-| E-003 | Week-1 deterministic skills battery                                     | PASS                                                                                                   | acceptance/week1                                                      |
-| E-004 | Week-1.5 demo hardening — delivery acceptance (att3)                    | PASS                                                                                                   | acceptance/week15/delivery_20260926/                                  |
-| E-005 | Week-1.5 cold-start re-verification                                     | PASS                                                                                                   | acceptance/week15/cs_20260926/                                        |
-| E-006 | M2.3 audit remediation — runtime acceptance                             | PASS (gated)                                                                                           | acceptance/sessions/ (FLEXCELL_STAGE) + ~/.ros/flexcell/referee.jsonl |
-| E-007 | Scenario runner batch (S1×2 + S2 + S5), episode replay                  | PASS                                                                                                   | ~/.ros/flexcell/episodes/batch_20260928_051219.jsonl                  |
-| E-008 | Metrics report over real store + S7 adaptation probe                    | PASS                                                                                                   | ~/.ros/flexcell/episodes/batch_20260928_124615.jsonl                  |
-| E-009 | New-machine (RTX 4060 laptop) bring-up + first official benchmark batch | SUPERSEDED (not citable)                                                                               | setup/acceptance/m3_seed_batch_20260929\*/                            |
-| E-010 | T6 hardening: gate_flood + injection lifecycle + reset determinism      | PASS                                                                                                   | this entry (measurements inline)                                      |
-| E-012 | Shared task policy seam + distinct models + protocol v2 online smoke    | ONLINE PARTIAL; BASELINE FROZEN                                                                        | [MAINLINE_20260930.md](MAINLINE_20260930.md)                          |
-| E-013 | Official DeepSeek policy + persistent RMB 5 budget + action handoff     | ONLINE PARTIAL; S1 3/5; BASELINE FROZEN                                                                | [DEEPSEEK_20261001.md](DEEPSEEK_20261001.md)                          |
-| E-014 | DDS fragment-path diagnosis + servo velocity controls                   | MECHANISM PROBES; NOT BENCHMARK                                                                        | [MECHANISM_20261001.md](MECHANISM_20261001.md)                        |
-| E-015 | Leased velocity carry + engage receipt + PLACE dependency readiness     | DEPLOYED; FINAL SINGLE PASS; SMOKE INCOMPLETE                                                          | [CARRY_VELOCITY_20261001.md](CARRY_VELOCITY_20261001.md)              |
-| E-016 | Lifecycle paths + authoritative carry + local calibration/replay        | FSM CONTROL PASS; HYBRID/REPLAY FAIL; NOT BENCHMARK                                                    | [HARDENING_20261002.md](HARDENING_20261002.md)                        |
-| E-017 | Desktop revival; hybrid online n=5 at one fingerprint                   | 5/5 SUCCEEDED; E-016 hybrid hang modes absent on the NAT host; NOT BENCHMARK                           | staging `hybrid_n5_desktop_20261004/`                                 |
-| E-018 | Clef-flash fast arm — offline calibration on the desktop                | GPU: 17/30, TOP BIN 8/8 (LB 0.676), 1.9 s, 35/35 SUCCESS; τ=0.5 ELIGIBLE                               | desktop `jev_calibration_clef_gpu.json`; code pending feat branch     |
-| E-019 | Q8 per-decision provenance + two-regime pilot                           | 215 TESTS PASS; HIGH 14/17 + RESET ERROR; LOW SMOKE TRUNCATED; n>=50 FROZEN                            | [Q8_PILOT_20261005.md](Q8_PILOT_20261005.md)                          |
-| E-020 | Pose callback finalization barrier + bounded fresh-process reset RPC    | 226 TESTS PASS; LIFECYCLE 100/100; RESET 20/20 EACH; LOW 18/20; HIGH SMOKE 4/5; n>=50 FROZEN           | [Q8_TEARDOWN_20261005.md](Q8_TEARDOWN_20261005.md)                    |
-| E-021 | Three-arm S1 comparison, same machine, same night, unattended           | FSM 19/20 · hybrid τ=0.03 18/20 · hybrid τ=0.85 17/20; CIs OVERLAP; grasp-physics noise ~15% cross-arm | `setup/acceptance/tau_sweep_desktop_20261005/`                        |
-| E-022 | Class-scoped static attribute scan and effective CI failure exit (#24)  | 172 TESTS PASS (20 NEW); SCAN 35/0; PLANTED GHOST RC=1; ROS/Gazebo NOT_RUN                             | [STATIC_SCAN_20261007.md](STATIC_SCAN_20261007.md)                    |
-| M3-\* | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN                                                                                                | — (RFC #15; harness #7/#8/#9)                                         |
+| ID    | Experiment                                                              | Outcome                                                                                                                                 | Evidence                                                              |
+| ----- | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| E-001 | Day-1 environment verification                                          | PASS                                                                                                                                    | acceptance/day1 (delivery host) + [DAY1_REPORT.md](../DAY1_REPORT.md) |
+| E-002 | Day-2 MoveToPose acceptance                                             | PASS 10/10                                                                                                                              | acceptance/day2 + [DAY2_MOVETOPOSE.md](DAY2_MOVETOPOSE.md)            |
+| E-003 | Week-1 deterministic skills battery                                     | PASS                                                                                                                                    | acceptance/week1                                                      |
+| E-004 | Week-1.5 demo hardening — delivery acceptance (att3)                    | PASS                                                                                                                                    | acceptance/week15/delivery_20260926/                                  |
+| E-005 | Week-1.5 cold-start re-verification                                     | PASS                                                                                                                                    | acceptance/week15/cs_20260926/                                        |
+| E-006 | M2.3 audit remediation — runtime acceptance                             | PASS (gated)                                                                                                                            | acceptance/sessions/ (FLEXCELL_STAGE) + ~/.ros/flexcell/referee.jsonl |
+| E-007 | Scenario runner batch (S1×2 + S2 + S5), episode replay                  | PASS                                                                                                                                    | ~/.ros/flexcell/episodes/batch_20260928_051219.jsonl                  |
+| E-008 | Metrics report over real store + S7 adaptation probe                    | PASS                                                                                                                                    | ~/.ros/flexcell/episodes/batch_20260928_124615.jsonl                  |
+| E-009 | New-machine (RTX 4060 laptop) bring-up + first official benchmark batch | SUPERSEDED (not citable)                                                                                                                | setup/acceptance/m3_seed_batch_20260929\*/                            |
+| E-010 | T6 hardening: gate_flood + injection lifecycle + reset determinism      | PASS                                                                                                                                    | this entry (measurements inline)                                      |
+| E-012 | Shared task policy seam + distinct models + protocol v2 online smoke    | ONLINE PARTIAL; BASELINE FROZEN                                                                                                         | [MAINLINE_20260930.md](MAINLINE_20260930.md)                          |
+| E-013 | Official DeepSeek policy + persistent RMB 5 budget + action handoff     | ONLINE PARTIAL; S1 3/5; BASELINE FROZEN                                                                                                 | [DEEPSEEK_20261001.md](DEEPSEEK_20261001.md)                          |
+| E-014 | DDS fragment-path diagnosis + servo velocity controls                   | MECHANISM PROBES; NOT BENCHMARK                                                                                                         | [MECHANISM_20261001.md](MECHANISM_20261001.md)                        |
+| E-015 | Leased velocity carry + engage receipt + PLACE dependency readiness     | DEPLOYED; FINAL SINGLE PASS; SMOKE INCOMPLETE                                                                                           | [CARRY_VELOCITY_20261001.md](CARRY_VELOCITY_20261001.md)              |
+| E-016 | Lifecycle paths + authoritative carry + local calibration/replay        | FSM CONTROL PASS; HYBRID/REPLAY FAIL; NOT BENCHMARK                                                                                     | [HARDENING_20261002.md](HARDENING_20261002.md)                        |
+| E-017 | Desktop revival; hybrid online n=5 at one fingerprint                   | 5/5 SUCCEEDED; E-016 hybrid hang modes absent on the NAT host; NOT BENCHMARK                                                            | staging `hybrid_n5_desktop_20261004/`                                 |
+| E-018 | Clef-flash fast arm — offline calibration on the desktop                | GPU: 17/30, TOP BIN 8/8 (LB 0.676), 1.9 s, 35/35 SUCCESS; τ=0.5 ELIGIBLE                                                                | desktop `jev_calibration_clef_gpu.json`; code pending feat branch     |
+| E-019 | Q8 per-decision provenance + two-regime pilot                           | 215 TESTS PASS; HIGH 14/17 + RESET ERROR; LOW SMOKE TRUNCATED; n>=50 FROZEN                                                             | [Q8_PILOT_20261005.md](Q8_PILOT_20261005.md)                          |
+| E-020 | Pose callback finalization barrier + bounded fresh-process reset RPC    | 226 TESTS PASS; LIFECYCLE 100/100; RESET 20/20 EACH; LOW 18/20; HIGH SMOKE 4/5; n>=50 FROZEN                                            | [Q8_TEARDOWN_20261005.md](Q8_TEARDOWN_20261005.md)                    |
+| E-021 | Three-arm S1 comparison, same machine, same night, unattended           | FSM 19/20 · hybrid τ=0.03 18/20 · hybrid τ=0.85 17/20; CIs OVERLAP; all six baseline failures have grasp/recovery-exhaustion signatures | `setup/acceptance/tau_sweep_desktop_20261005/`                        |
+| E-022 | Class-scoped static attribute scan and effective CI failure exit (#24)  | 172 TESTS PASS (20 NEW); SCAN 35/0; PLANTED GHOST RC=1; ROS/Gazebo NOT_RUN                                                              | [STATIC_SCAN_20261007.md](STATIC_SCAN_20261007.md)                    |
+| M3-\* | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN                                                                                                                                 | — (RFC #15; harness #7/#8/#9)                                         |
 
 ## Entries
 
@@ -708,19 +708,22 @@ See [the read-only inventory](../competition/iyaic-2026/evidence/e021-audit.json
   The archived summary reports passing routing provenance (139 decisions in the
   τ=0.85 baseline, zero violations); missing native Episodes prevent an independent
   full re-audit of that claim. Night total ¥0.576 / ¥5 upper bound.
-- **The dominant confounder**: 6 of tonight's 7 non-success episodes (FSM run20,
-  hybrid τ=0.85 runs 3/10/13, hybrid smoke ×2) are the SAME grasp-physics family —
-  `PICK_B`/`PICK_A` fails twice with ERR_GRASP_FAILED (23) → recovery exhausted
-  (51); cross-arm, ~15% episode incidence, root cause UNKNOWN. It caps every
-  arm's success rate equally and swamps arm-to-arm success comparison below n≈50.
-  Runner "FAIL (N)" labels here mean the strict expected-outcome gate, not
-  harness faults.
-- **Reading (cost hypothesis)**: hybrid at τ=0.03 delivers 0.90 at near-zero paid
-  cost vs FSM 0.95 at zero cost — FSM remains the free control; the hybrid's
-  saving is measured against a PURE-LLM arm (≈3-5× the slow-arm spend), not
-  against FSM. τ=0.85's ~20% slow fraction ≈ 80% paid-call reduction. These are
-  n=20 descriptive results with correlated steps and sequential arms (no
-  time-drift interleaving) — NOT a benchmark.
+- **Observed failure signature (2026-10-17 recount):** all six failed baseline
+  episodes (FSM run20; hybrid τ=0.03 runs5/9; hybrid τ=0.85 runs3/10/13)
+  report ERR_GRASP_FAILED (23) followed by recovery exhaustion (51). Separately,
+  the pooled high-tau smoke contains two failed episodes with the same signature.
+  Baseline and smoke remain separate denominators. This does not establish the
+  physical root cause, that the arms are affected equally, or a minimum sample
+  size that would resolve the comparison. Runner "FAIL (N)" labels here refer to
+  the expected-outcome gate; they are not automatically harness faults.
+- **Reading (cost hypothesis)**: hybrid at τ=0.03 reports 0.90 with low paid API
+  spend, while FSM reports 0.95 with zero API spend. Local inference still has
+  compute costs. The ~20% slow-selection fraction at τ=0.85 is observed routing;
+  an approximately 80% reduction relative to selecting slow on every decision is
+  a counterfactual call-count comparison, not a measured pure-LLM cost saving.
+  No matched pure-LLM batch is in this comparison. These are n=20 descriptive
+  results with correlated steps and sequential arms (no time-drift interleaving),
+  not a qualified benchmark or an established cost/success advantage.
 - **Next**: B-grasp root cause (the single highest-value open item), batch-level
   fast-arm presence gate for unattended batches, S7 differentiation design,
   n≥50 freeze maintained.

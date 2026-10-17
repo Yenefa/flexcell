@@ -1,6 +1,6 @@
 {
   "record_kind": "SUMMARY_INVENTORY_AUDIT",
-  "created_utc": "2026-10-17T18:43:43.236757+00:00",
+  "created_utc": "2026-10-17T18:49:27.272106+00:00",
   "scope": "E-021 archived JSONL recount and basename inventory under setup/acceptance",
   "status": "EPISODE_ARCHIVE_INCOMPLETE",
   "baselines": [
@@ -20,6 +20,9 @@
         "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19"
       ],
       "dual_object_client_results": 20,
+      "client_failure_signatures": {
+        "GRASP_FAILED_THEN_RECOVERY_EXHAUSTED": 1
+      },
       "arm": "fsm",
       "episode_inventory": [
         {
@@ -140,6 +143,9 @@
         "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a"
       ],
       "dual_object_client_results": 20,
+      "client_failure_signatures": {
+        "GRASP_FAILED_THEN_RECOVERY_EXHAUSTED": 2
+      },
       "arm": "hybrid_0.03",
       "episode_inventory": [
         {
@@ -260,6 +266,9 @@
         "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b"
       ],
       "dual_object_client_results": 20,
+      "client_failure_signatures": {
+        "GRASP_FAILED_THEN_RECOVERY_EXHAUSTED": 3
+      },
       "arm": "hybrid_0.85",
       "episode_inventory": [
         {
@@ -381,6 +390,9 @@
       "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b"
     ],
     "dual_object_client_results": 10,
+    "client_failure_signatures": {
+      "GRASP_FAILED_THEN_RECOVERY_EXHAUSTED": 2
+    },
     "derived_pool_not_additional_trials": true
   },
   "episode_inventory_counts": {
@@ -394,6 +406,7 @@
     "FOUND means a basename candidate exists, not validated episode identity or replay.",
     "No physical success, safety, calibrated accuracy or policy superiority is established.",
     "Baseline arms and pooled smoke are separate; no pooled success rate is computed.",
-    "Original files and their failed outcomes are read-only."
+    "Original files and their failed outcomes are read-only.",
+    "Failure signatures do not identify physical root causes or equal confounding across arms."
   ]
 }

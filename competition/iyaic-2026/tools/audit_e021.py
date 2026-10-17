@@ -66,6 +66,7 @@ def recount(path, repo):
     if len(set(references)) != len(references):
         raise ValueError(str(path) + ': duplicate episode references')
     dual = 0
+    failure_signatures = Counter()
     for row in records:
         output = row.get('client_output', '')
         if 'RESULT ' not in output:
@@ -75,6 +76,13 @@ def recount(path, repo):
         result, _ = json.JSONDecoder().raw_decode(output.split('RESULT ', 1)[1])
         dual += isinstance(result, dict) and all(
             key in result for key in ('object_a_at_zone', 'object_b_at_zone'))
+        if row.get('outcome') == 'FAILED':
+            if (isinstance(result, dict) and
+                    result.get('error_code') == 'ERR_RECOVERY_EXHAUSTED' and
+                    any('ERR_GRASP_FAILED' in step for step in result.get('fsm_trace', []))):
+                failure_signatures['GRASP_FAILED_THEN_RECOVERY_EXHAUSTED'] += 1
+            else:
+                failure_signatures['UNCLASSIFIED_CLIENT_FAILURE'] += 1
     return {
         'summary': str(path.relative_to(repo)), 'sha256': digest(path),
         'attempted_rows': len(records), 'outcomes': dict(sorted(outcomes.items())),
@@ -83,6 +91,7 @@ def recount(path, repo):
         'harness_error_rows': sum(bool(row.get('harness_error')) for row in records),
         'stages': stages, 'runtime_fingerprints': fingerprints,
         'dual_object_client_results': dual,
+        'client_failure_signatures': dict(sorted(failure_signatures.items())),
         'episode_basenames': [Path(value).name for value in references],
     }
 
@@ -131,6 +140,7 @@ def audit(repo):
             'No physical success, safety, calibrated accuracy or policy superiority is established.',
             'Baseline arms and pooled smoke are separate; no pooled success rate is computed.',
             'Original files and their failed outcomes are read-only.',
+            'Failure signatures do not identify physical root causes or equal confounding across arms.',
         ],
     }
 
