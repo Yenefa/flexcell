@@ -84,3 +84,18 @@ new-fingerprint smoke plus the required acceptance battery, alongside diagnosis
 of the cross-arm grasp failure.
 
 See the requested [current architecture and development planning diagrams](ARCHITECTURE_AND_PLAN_20261007.md).
+
+## Review follow-up — 2026-10-17
+
+PR #28 review identified a missing pre-dispatch threshold check. A manifest with
+valid fingerprint/model/weight/calibration fields but no threshold reached robot
+dispatch before its eventual routing-audit mismatch. The runner now requires a
+finite numeric threshold in [0,1], rejecting missing/null, booleans, strings,
+non-finite and out-of-range values before transport or evidence-store writes.
+Valid values including 0 and 1 retain dispatch eligibility.
+
+[New synthetic counterexample and verification](../setup/acceptance/hybrid_threshold_preflight_20261017/)
+retain the c79e0c6 base behavior and the repaired argument rejection. The selected
+ROS-independent suite passed **208 tests**, including 14 new threshold cases;
+static scan remains 35 files/0 problems. No robot or model call occurred.
+This extends E-023 verification; the original 2026-10-07 evidence is unchanged.

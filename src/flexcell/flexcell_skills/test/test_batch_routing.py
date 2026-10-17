@@ -172,6 +172,44 @@ def test_incomplete_hybrid_manifest_is_rejected_before_dispatch(tmp_path, monkey
     assert error.value.code == 2
 
 
+@pytest.mark.parametrize('threshold', ['missing', None, True, False, '0.85',
+                                     -.01, 1.01, float('nan'),
+                                     float('inf'), -float('inf')])
+def test_invalid_threshold_is_rejected_before_dispatch(tmp_path, monkeypatch, threshold):
+    runner, store, dispatched = configure_runner(tmp_path, monkeypatch, ['fast'])
+    path = tmp_path / 'deployment.json'
+    manifest = deployment()
+    if threshold == 'missing':
+        manifest.pop('threshold')
+    else:
+        manifest['threshold'] = threshold
+    path.write_text(json.dumps(manifest))
+    with pytest.raises(SystemExit) as error:
+        runner.main()
+    assert error.value.code == 2
+    assert dispatched == []
+    assert list(store.iterdir()) == []
+
+
+@pytest.mark.parametrize('threshold', [0, .03, .85, 1])
+def test_valid_threshold_reaches_dispatch(tmp_path, monkeypatch, threshold):
+    runner, _, _ = configure_runner(tmp_path, monkeypatch, ['fast'])
+    path = tmp_path / 'deployment.json'
+    manifest = deployment()
+    manifest['threshold'] = threshold
+    path.write_text(json.dumps(manifest))
+
+    class DispatchReached(Exception):
+        pass
+
+    def stop_before_transport(*args, **kwargs):
+        raise DispatchReached
+
+    monkeypatch.setattr(runner, 'run_episode', stop_before_transport)
+    with pytest.raises(DispatchReached):
+        runner.main()
+
+
 @pytest.mark.parametrize('mode', ['zero', 'calibration'])
 def test_smoke_with_invalid_fast_provenance_cannot_unlock_baseline(tmp_path, monkeypatch, mode):
     runner = runner_module()

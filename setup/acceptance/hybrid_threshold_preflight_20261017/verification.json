@@ -1,0 +1,63 @@
+{
+  "record_kind": "OFFLINE_VERIFICATION",
+  "source_base": "c79e0c672c95e2d9cd04112ef42b65e4c67e1845",
+  "python": "3.12.14",
+  "pytest_command": [
+    "python3",
+    "-m",
+    "pytest",
+    "-o",
+    "addopts=",
+    "-q",
+    "-p",
+    "no:cacheprovider",
+    "src/flexcell/flexcell_skills/test/test_acceptance_gate.py",
+    "src/flexcell/flexcell_skills/test/test_action_result.py",
+    "src/flexcell/flexcell_skills/test/test_clef_backend.py",
+    "src/flexcell/flexcell_skills/test/test_confidence_calibration.py",
+    "src/flexcell/flexcell_skills/test/test_contracts.py",
+    "src/flexcell/flexcell_skills/test/test_decision_policy.py",
+    "src/flexcell/flexcell_skills/test/test_hybrid_policy.py",
+    "src/flexcell/flexcell_skills/test/test_inference_budget.py",
+    "src/flexcell/flexcell_skills/test/test_injection.py",
+    "src/flexcell/flexcell_skills/test/test_llm_policy.py",
+    "src/flexcell/flexcell_skills/test/test_metrics.py",
+    "src/flexcell/flexcell_skills/test/test_recovery.py",
+    "src/flexcell/flexcell_skills/test/test_routing_audit.py",
+    "src/flexcell/flexcell_skills/test/test_runtime_guards.py",
+    "src/flexcell/flexcell_skills/test/test_safety_gate.py",
+    "src/flexcell/flexcell_skills/test/test_skill_contract.py",
+    "src/flexcell/flexcell_skills/test/test_undefined_attr_check.py",
+    "src/flexcell/flexcell_skills/test/test_batch_routing.py"
+  ],
+  "environment": {
+    "PYTHONPATH": "src/flexcell/flexcell_skills",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  "pytest": {
+    "passed": 208,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 0,
+    "exit_code": 0,
+    "new_threshold_cases": 14
+  },
+  "static_scan": {
+    "command": [
+      "python3",
+      "setup/82_undefined_attr_check.py",
+      "src/flexcell"
+    ],
+    "files": 35,
+    "problems": 0,
+    "exit_code": 0
+  },
+  "source_sha256": {
+    "setup/94_scenario_runner.py": "09eb40a21bb8fdff625f039378984eaf4c8d7e68cc4ac64cfca9cee48d5067a4",
+    "src/flexcell/flexcell_skills/test/test_batch_routing.py": "67e6e491d4265a8a9b3a5c6f604cfd00dc668a502973400a02ac0987bd014ed1",
+    "setup/acceptance/hybrid_threshold_preflight_20261017/reproduce.py": "395d67cdf07a6c898f3fc4cb2166a8376b4d0da90f2b88ddca85695b79693f6f"
+  },
+  "ros_gazebo_acceptance": "NOT_RUN",
+  "live_model_calls": "NOT_RUN",
+  "n_ge_50": "FROZEN"
+}

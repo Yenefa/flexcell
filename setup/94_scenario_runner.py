@@ -28,6 +28,7 @@ replayed cleanly AND every outcome matched its expectation.
 import argparse
 import glob
 import json
+import math
 import os
 import subprocess
 import sys
@@ -192,6 +193,10 @@ def main():
         if not deployment.get('runtime_fingerprint') or any(
                 not fast_identity.get(key) for key in ('model', 'model_sha256', 'calibration_sha256')):
             ap.error('hybrid deployment requires runtime fingerprint and fast model/weight/calibration identity')
+        threshold = deployment.get('threshold')
+        if (type(threshold) not in (int, float) or
+                not math.isfinite(threshold) or not 0 <= threshold <= 1):
+            ap.error('hybrid deployment requires a finite numeric threshold in [0,1]')
     baseline_profile = None
     if not args.dry_run and args.stage == 'smoke' and any(n > 5 for _, n in plan):
         ap.error('smoke is capped at n=5 per cell; baseline requires a passing smoke summary')
