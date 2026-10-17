@@ -173,7 +173,7 @@ def test_incomplete_hybrid_manifest_is_rejected_before_dispatch(tmp_path, monkey
 
 
 @pytest.mark.parametrize('threshold', ['missing', None, True, False, '0.85',
-                                     -.01, 1.01, float('nan'),
+                                     -.01, 1.01, 10 ** 400, -(10 ** 400), float('nan'),
                                      float('inf'), -float('inf')])
 def test_invalid_threshold_is_rejected_before_dispatch(tmp_path, monkeypatch, threshold):
     runner, store, dispatched = configure_runner(tmp_path, monkeypatch, ['fast'])

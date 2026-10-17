@@ -92,10 +92,12 @@ valid fingerprint/model/weight/calibration fields but no threshold reached robot
 dispatch before its eventual routing-audit mismatch. The runner now requires a
 finite numeric threshold in [0,1], rejecting missing/null, booleans, strings,
 non-finite and out-of-range values before transport or evidence-store writes.
+Range checking precedes float finiteness conversion so huge JSON integers also
+produce an argument rejection instead of an overflow exception.
 Valid values including 0 and 1 retain dispatch eligibility.
 
 [New synthetic counterexample and verification](../setup/acceptance/hybrid_threshold_preflight_20261017/)
 retain the c79e0c6 base behavior and the repaired argument rejection. The selected
-ROS-independent suite passed **208 tests**, including 14 new threshold cases;
+ROS-independent suite passed **210 tests**, including 16 new threshold cases;
 static scan remains 35 files/0 problems. No robot or model call occurred.
 This extends E-023 verification; the original 2026-10-07 evidence is unchanged.

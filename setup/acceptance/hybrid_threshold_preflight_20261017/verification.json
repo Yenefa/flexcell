@@ -35,12 +35,12 @@
     "PYTHONDONTWRITEBYTECODE": "1"
   },
   "pytest": {
-    "passed": 208,
+    "passed": 210,
     "failed": 0,
     "errors": 0,
     "skipped": 0,
     "exit_code": 0,
-    "new_threshold_cases": 14
+    "new_threshold_cases": 16
   },
   "static_scan": {
     "command": [
@@ -53,11 +53,16 @@
     "exit_code": 0
   },
   "source_sha256": {
-    "setup/94_scenario_runner.py": "09eb40a21bb8fdff625f039378984eaf4c8d7e68cc4ac64cfca9cee48d5067a4",
-    "src/flexcell/flexcell_skills/test/test_batch_routing.py": "67e6e491d4265a8a9b3a5c6f604cfd00dc668a502973400a02ac0987bd014ed1",
+    "setup/94_scenario_runner.py": "09016dd473e3e4d096a63c33793fc839e7c37ee23d34ee0e346e69c173a784b1",
+    "src/flexcell/flexcell_skills/test/test_batch_routing.py": "4ca26f486e30a87c84d9dfa9a1212858610247e9dcaa706941094e0c924b43d7",
     "setup/acceptance/hybrid_threshold_preflight_20261017/reproduce.py": "395d67cdf07a6c898f3fc4cb2166a8376b4d0da90f2b88ddca85695b79693f6f"
   },
   "ros_gazebo_acceptance": "NOT_RUN",
   "live_model_calls": "NOT_RUN",
-  "n_ge_50": "FROZEN"
+  "n_ge_50": "FROZEN",
+  "prior_verification": {
+    "commit": "5bcc5639be98109601900f4c2866f63e1a48650a",
+    "passed": 208,
+    "new_threshold_cases": 14
+  }
 }

@@ -195,7 +195,7 @@ def main():
             ap.error('hybrid deployment requires runtime fingerprint and fast model/weight/calibration identity')
         threshold = deployment.get('threshold')
         if (type(threshold) not in (int, float) or
-                not math.isfinite(threshold) or not 0 <= threshold <= 1):
+                not 0 <= threshold <= 1 or not math.isfinite(threshold)):
             ap.error('hybrid deployment requires a finite numeric threshold in [0,1]')
     baseline_profile = None
     if not args.dry_run and args.stage == 'smoke' and any(n > 5 for _, n in plan):
