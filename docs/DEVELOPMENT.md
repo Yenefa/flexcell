@@ -51,8 +51,11 @@ Checklist (ratified order — check off as issues close):
       (`jev_policy.py` Choice-over-menu + typed policy_failure → FSM fallback;
       `jev_backends.py` import-guarded vendor SDK + transport-injected local
       endpoint; executor `decision_policy=jev`; 2026-09-28)
-- [ ] LLMPolicy — #11 (**DEFERRED ③** — do not start before the four items above exist)
-- [ ] HybridRouter + threshold sweep τ∈{0.5,0.7,0.9} + calibration report — #12
+- [x] LLMPolicy — #11 implementation exists; the original prerequisite order was
+      satisfied. Fixed-model replay and full runtime qualification remain open.
+- [x] HybridRouter implementation and Clef-backed calibration/pilots — #12;
+      supported-bin pilot thresholds are 0.03/0.85. Full comparative acceptance
+      and independent episode-level evaluation remain incomplete.
 - [x] ADR set from the ratified Week-2 preparation — #2 (ADR-001 simulation
       backend, ADR-002 decision-layer boundary + **Accepted B5 addendum**;
       plus ADR-003 orchestration substrate — ratified with three amendments
@@ -62,6 +65,12 @@ Checklist (ratified order — check off as issues close):
 **Definition of done for M2**: every benchmark cell can run offline on the replay store;
 FSMPolicy trace parity is proven; the safety gate deterministically rejects planted
 out-of-contract proposals; Week-1.5 acceptance battery is still green.
+
+Implementation checkmarks above do not certify this definition of done. Current
+model replay/online qualification and complete portable evidence remain open.
+Issues #30–#37 track the [IYAIC milestone](../competition/iyaic-2026/PLAN.md).
+PRs #28/#29 and TransferBench capabilities remain pending integration, not main
+release features. Existing open issue states are not silently closed by this doc update.
 
 ## M3 — Hybrid Agent Benchmark ⚪ FUTURE
 

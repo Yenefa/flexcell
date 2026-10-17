@@ -1,0 +1,22 @@
+{
+  "record_kind": "HOME_FAST_CONNECTIVITY_PROBE",
+  "observed_http_date_utc": "2026-10-17T18:38:20Z",
+  "method": "GET",
+  "url": "http://100.87.190.44:11435/health",
+  "execution_path": "inherited HTTP proxy (sidecar)",
+  "policy_snapshot": {
+    "vpn_configured": false,
+    "tcp_domains": [],
+    "tcp_ip_ranges": []
+  },
+  "connect_timeout_s": 5,
+  "max_time_s": 15,
+  "http_status": 503,
+  "response_server": "envoy",
+  "sanitized_response": "upstream connect error or disconnect/reset before headers. reset reason: connection termination",
+  "service_health": "NOT_VERIFIED",
+  "home_machine_online": "UNKNOWN",
+  "model_inference": "NOT_RUN",
+  "robot_actions": "NOT_RUN",
+  "interpretation": "This cloud environment is not configured for the home tailnet; HTTP503 does not establish that the home machine is offline."
+}

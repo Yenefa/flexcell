@@ -53,30 +53,30 @@
 
 ## Index
 
-| ID    | Experiment                                                              | Outcome                                                                                      | Evidence                                                              |
-| ----- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| E-001 | Day-1 environment verification                                          | PASS                                                                                         | acceptance/day1 (delivery host) + [DAY1_REPORT.md](../DAY1_REPORT.md) |
-| E-002 | Day-2 MoveToPose acceptance                                             | PASS 10/10                                                                                   | acceptance/day2 + [DAY2_MOVETOPOSE.md](DAY2_MOVETOPOSE.md)            |
-| E-003 | Week-1 deterministic skills battery                                     | PASS                                                                                         | acceptance/week1                                                      |
-| E-004 | Week-1.5 demo hardening — delivery acceptance (att3)                    | PASS                                                                                         | acceptance/week15/delivery_20260926/                                  |
-| E-005 | Week-1.5 cold-start re-verification                                     | PASS                                                                                         | acceptance/week15/cs_20260926/                                        |
-| E-006 | M2.3 audit remediation — runtime acceptance                             | PASS (gated)                                                                                 | acceptance/sessions/ (FLEXCELL_STAGE) + ~/.ros/flexcell/referee.jsonl |
-| E-007 | Scenario runner batch (S1×2 + S2 + S5), episode replay                  | PASS                                                                                         | ~/.ros/flexcell/episodes/batch_20260928_051219.jsonl                  |
-| E-008 | Metrics report over real store + S7 adaptation probe                    | PASS                                                                                         | ~/.ros/flexcell/episodes/batch_20260928_124615.jsonl                  |
-| E-009 | New-machine (RTX 4060 laptop) bring-up + first official benchmark batch | SUPERSEDED (not citable)                                                                     | setup/acceptance/m3_seed_batch_20260929*/                             |
-| E-010 | T6 hardening: gate_flood + injection lifecycle + reset determinism      | PASS                                                                                         | this entry (measurements inline)                                      |
-| E-012 | Shared task policy seam + distinct models + protocol v2 online smoke    | ONLINE PARTIAL; BASELINE FROZEN                                                              | [MAINLINE_20260930.md](MAINLINE_20260930.md)                          |
-| E-013 | Official DeepSeek policy + persistent RMB 5 budget + action handoff     | ONLINE PARTIAL; S1 3/5; BASELINE FROZEN                                                      | [DEEPSEEK_20261001.md](DEEPSEEK_20261001.md)                          |
-| E-014 | DDS fragment-path diagnosis + servo velocity controls                   | MECHANISM PROBES; NOT BENCHMARK                                                              | [MECHANISM_20261001.md](MECHANISM_20261001.md)                        |
-| E-015 | Leased velocity carry + engage receipt + PLACE dependency readiness     | DEPLOYED; FINAL SINGLE PASS; SMOKE INCOMPLETE                                                | [CARRY_VELOCITY_20261001.md](CARRY_VELOCITY_20261001.md)              |
-| E-016 | Lifecycle paths + authoritative carry + local calibration/replay        | FSM CONTROL PASS; HYBRID/REPLAY FAIL; NOT BENCHMARK                                          | [HARDENING_20261002.md](HARDENING_20261002.md)                        |
-| E-017 | Desktop revival; hybrid online n=5 at one fingerprint                   | 5/5 SUCCEEDED; E-016 hybrid hang modes absent on the NAT host; NOT BENCHMARK                 | staging `hybrid_n5_desktop_20261004/`                                 |
-| E-018 | Clef-flash fast arm — offline calibration on the desktop                | GPU: 17/30, TOP BIN 8/8 (LB 0.676), 1.9 s, 35/35 SUCCESS; τ=0.5 ELIGIBLE                     | desktop `jev_calibration_clef_gpu.json`; code pending feat branch     |
-| E-019 | Q8 per-decision provenance + two-regime pilot                           | 215 TESTS PASS; HIGH 14/17 + RESET ERROR; LOW SMOKE TRUNCATED; n>=50 FROZEN                  | [Q8_PILOT_20261005.md](Q8_PILOT_20261005.md)                          |
-| E-020 | Pose callback finalization barrier + bounded fresh-process reset RPC    | 226 TESTS PASS; LIFECYCLE 100/100; RESET 20/20 EACH; LOW 18/20; HIGH SMOKE 4/5; n>=50 FROZEN | [Q8_TEARDOWN_20261005.md](Q8_TEARDOWN_20261005.md)                    |
+| ID    | Experiment                                                              | Outcome                                                                                                | Evidence                                                              |
+| ----- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- |
+| E-001 | Day-1 environment verification                                          | PASS                                                                                                   | acceptance/day1 (delivery host) + [DAY1_REPORT.md](../DAY1_REPORT.md) |
+| E-002 | Day-2 MoveToPose acceptance                                             | PASS 10/10                                                                                             | acceptance/day2 + [DAY2_MOVETOPOSE.md](DAY2_MOVETOPOSE.md)            |
+| E-003 | Week-1 deterministic skills battery                                     | PASS                                                                                                   | acceptance/week1                                                      |
+| E-004 | Week-1.5 demo hardening — delivery acceptance (att3)                    | PASS                                                                                                   | acceptance/week15/delivery_20260926/                                  |
+| E-005 | Week-1.5 cold-start re-verification                                     | PASS                                                                                                   | acceptance/week15/cs_20260926/                                        |
+| E-006 | M2.3 audit remediation — runtime acceptance                             | PASS (gated)                                                                                           | acceptance/sessions/ (FLEXCELL_STAGE) + ~/.ros/flexcell/referee.jsonl |
+| E-007 | Scenario runner batch (S1×2 + S2 + S5), episode replay                  | PASS                                                                                                   | ~/.ros/flexcell/episodes/batch_20260928_051219.jsonl                  |
+| E-008 | Metrics report over real store + S7 adaptation probe                    | PASS                                                                                                   | ~/.ros/flexcell/episodes/batch_20260928_124615.jsonl                  |
+| E-009 | New-machine (RTX 4060 laptop) bring-up + first official benchmark batch | SUPERSEDED (not citable)                                                                               | setup/acceptance/m3_seed_batch_20260929\*/                            |
+| E-010 | T6 hardening: gate_flood + injection lifecycle + reset determinism      | PASS                                                                                                   | this entry (measurements inline)                                      |
+| E-012 | Shared task policy seam + distinct models + protocol v2 online smoke    | ONLINE PARTIAL; BASELINE FROZEN                                                                        | [MAINLINE_20260930.md](MAINLINE_20260930.md)                          |
+| E-013 | Official DeepSeek policy + persistent RMB 5 budget + action handoff     | ONLINE PARTIAL; S1 3/5; BASELINE FROZEN                                                                | [DEEPSEEK_20261001.md](DEEPSEEK_20261001.md)                          |
+| E-014 | DDS fragment-path diagnosis + servo velocity controls                   | MECHANISM PROBES; NOT BENCHMARK                                                                        | [MECHANISM_20261001.md](MECHANISM_20261001.md)                        |
+| E-015 | Leased velocity carry + engage receipt + PLACE dependency readiness     | DEPLOYED; FINAL SINGLE PASS; SMOKE INCOMPLETE                                                          | [CARRY_VELOCITY_20261001.md](CARRY_VELOCITY_20261001.md)              |
+| E-016 | Lifecycle paths + authoritative carry + local calibration/replay        | FSM CONTROL PASS; HYBRID/REPLAY FAIL; NOT BENCHMARK                                                    | [HARDENING_20261002.md](HARDENING_20261002.md)                        |
+| E-017 | Desktop revival; hybrid online n=5 at one fingerprint                   | 5/5 SUCCEEDED; E-016 hybrid hang modes absent on the NAT host; NOT BENCHMARK                           | staging `hybrid_n5_desktop_20261004/`                                 |
+| E-018 | Clef-flash fast arm — offline calibration on the desktop                | GPU: 17/30, TOP BIN 8/8 (LB 0.676), 1.9 s, 35/35 SUCCESS; τ=0.5 ELIGIBLE                               | desktop `jev_calibration_clef_gpu.json`; code pending feat branch     |
+| E-019 | Q8 per-decision provenance + two-regime pilot                           | 215 TESTS PASS; HIGH 14/17 + RESET ERROR; LOW SMOKE TRUNCATED; n>=50 FROZEN                            | [Q8_PILOT_20261005.md](Q8_PILOT_20261005.md)                          |
+| E-020 | Pose callback finalization barrier + bounded fresh-process reset RPC    | 226 TESTS PASS; LIFECYCLE 100/100; RESET 20/20 EACH; LOW 18/20; HIGH SMOKE 4/5; n>=50 FROZEN           | [Q8_TEARDOWN_20261005.md](Q8_TEARDOWN_20261005.md)                    |
 | E-021 | Three-arm S1 comparison, same machine, same night, unattended           | FSM 19/20 · hybrid τ=0.03 18/20 · hybrid τ=0.85 17/20; CIs OVERLAP; grasp-physics noise ~15% cross-arm | `setup/acceptance/tau_sweep_desktop_20261005/`                        |
-| E-022 | Class-scoped static attribute scan and effective CI failure exit (#24) | 172 TESTS PASS (20 NEW); SCAN 35/0; PLANTED GHOST RC=1; ROS/Gazebo NOT_RUN | [STATIC_SCAN_20261007.md](STATIC_SCAN_20261007.md) |
-| M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN                                                                                      | — (RFC #15; harness #7/#8/#9)                                         |
+| E-022 | Class-scoped static attribute scan and effective CI failure exit (#24)  | 172 TESTS PASS (20 NEW); SCAN 35/0; PLANTED GHOST RC=1; ROS/Gazebo NOT_RUN                             | [STATIC_SCAN_20261007.md](STATIC_SCAN_20261007.md)                    |
+| M3-\* | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN                                                                                                | — (RFC #15; harness #7/#8/#9)                                         |
 
 ## Entries
 
@@ -163,9 +163,9 @@
     P0-2 path end-to-end) — detected, not masked.
 - **Evidence**: `$FLEXCELL_STAGE/setup/acceptance/sessions/` (versioned session dirs);
   `~/.ros/flexcell/referee.jsonl`.
-- **Open**: box_rise two-sided referee agreement is blocked by the carry-servo
+- **Open**: box*rise two-sided referee agreement is blocked by the carry-servo
   catch-up variance — contact grasping (D4) is the structural fix; the demo result
-  detail prints `zone_%s_error_m` as 0.0000 while verify measures mm-scale (verify
+  detail prints `zone*%s_error_m` as 0.0000 while verify measures mm-scale (verify
   sampling moment to be checked in hardening).
 
 ### E-007 — Scenario runner batch: S1×2 + S2 + S5 with episode replay (2026-09-28)
@@ -258,11 +258,11 @@ return`, and the pick server log shows the clear landing
   replay store over `batch_merged.jsonl` (70 rows); the report is committed
   verbatim as `95_metrics_report.md`.
 
-  | Cell | Scenario                        | success (metric 1)                                                       | Wilson 95% CI       | replay integrity |
-  | ---- | ------------------------------- | ------------------------------------------------------------------------ | ------------------- | ---------------- |
-  | S1   | canonical happy demo            | 18/20 = **0.90**                                                         | [0.70, 0.97]        | 20/20 clean      |
-  | S2   | injected failure, first attempt | 8/20 = **0.40**                                                          | [0.22, 0.61]        | 20/20 clean      |
-  | S5   | retry exhaustion                | 1/20 SUCCEEDED → 19/20 correctly FAILED (typed `ERR_RECOVERY_EXHAUSTED`) | [0.01, 0.24]        | 20/20 clean      |
+  | Cell | Scenario                        | success (metric 1)                                                       | Wilson 95% CI        | replay integrity |
+  | ---- | ------------------------------- | ------------------------------------------------------------------------ | -------------------- | ---------------- |
+  | S1   | canonical happy demo            | 18/20 = **0.90**                                                         | [0.70, 0.97]         | 20/20 clean      |
+  | S2   | injected failure, first attempt | 8/20 = **0.40**                                                          | [0.22, 0.61]         | 20/20 clean      |
+  | S5   | retry exhaustion                | 1/20 SUCCEEDED → 19/20 correctly FAILED (typed `ERR_RECOVERY_EXHAUSTED`) | [0.01, 0.24]         | 20/20 clean      |
   | S7   | off-canonical placement         | 6/10 = **0.60**                                                          | [0.31, 0.83] ⚠ n<20 | 10/10 clean      |
 
   `REPORT: PASS (70 episodes, 0 replay-dirty)`, 0 `dev/*` buckets (S7 is a real
@@ -336,7 +336,7 @@ reset` does not restore the canonical world after an abort-while-carrying
 
 #### ① gate_flood — the `gz.msgs.Pose` traceback flood
 
-- **What it was**: `for ent in msg.pose` inside the gz Pose_V callback raised
+- **What it was**: `for ent in msg.pose` inside the gz `Pose_V` callback raised
   `TypeError: No message class registered for 'gz.msgs.Pose'`, and
   gz-transport's python shim prints a **full traceback per message**. Measured
   4-reset baseline: **954 / 895 / 896 / 899** lines on _stdout_ (fd 2 was
@@ -639,7 +639,7 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
 - **Prompt v2 + Q8_0 (2026-10-05 evening)**: two upgrades:
   ① prompt v2 folds the frozen FSM cycle semantics into the ClefBackend
   instructions and enriches per-option criteria (backend-scoped; the shared
-  _choice_options contract text untouched);
+  `_choice_options` contract text untouched);
   ② Q8_0 weights replace Q4_K_M on the same Vulkan server.
   In-sample 35: agreement 26/30, top bin 23/23 (LB 0.857).
 - **⚠ CORRECTION (2026-10-05, chief counter-audit)**: three claims in this
@@ -679,23 +679,35 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
 
 ### E-021 — Three-arm S1 comparison on one machine in one night (2026-10-05, unattended)
 
+**Archive correction (2026-10-17, issue #31):** the archived client results are
+dual-object S1, not single-object. `pooled_smoke_085.jsonl` contains ten attempts:
+eight successes and two failures. The historical runner selected passing rows
+to unlock the pilot; that is not a fresh fixed-window 5/5 qualification and is
+not retrospectively ratified here. The three baseline summaries retain 19/20,
+18/20 and 17/20, but their 60 referenced native Episode files are not archived
+under the checked main/TransferBench trees. Summary recount is possible; full
+model provenance/replay cannot be independently reconstructed from this bundle.
+See [the read-only inventory](../competition/iyaic-2026/evidence/e021-audit.json).
+
 - **Setup**: desktop as the only fully-qualified executor (shutdown race repaired,
   per-decision routing gates live, 7-day unattended hardening: updates disabled at
   three layers, sleep structurally impossible on this firmware, Storage Sense off —
   service snapshot + rollback script on `F:\flexcell-models\`). Three arms, S1
-  single-object, n=20 each, sequential deployments (one fingerprint per arm; no
+  dual-object, n=20 each, sequential deployments (one fingerprint per arm; no
   pooling across arms). τ=0.85 unlock used the runner's fingerprint-scoped smoke
   rule: attempt 1 (3/5, two grasp-physics failures) + attempt 2 (5/5, all routing
-  audits green) = **8 pooled valid rows**, BOTH batch files archived and disclosed.
+  audits green) = **10 pooled attempts: 8 successes and 2 failures**. Both batch
+  files are archived and disclosed; qualification consistency remains open (#31).
 - **Result**:
   | arm | S1 n=20 | Wilson 95% CI | paid slow fraction | cost ceiling |
   | --- | ------- | ------------- | ------------------ | ------------ |
   | FSM control | 19/20 (0.95) | [0.76, 0.99] | 0% | ¥0 |
   | hybrid τ=0.03 | 18/20 (0.90) | [0.69, 0.98] | ~0% | ~¥0.02 |
   | hybrid τ=0.85 | 17/20 (0.85) | [0.64, 0.95] | ~20% | ~¥0.3 |
-  All CIs overlap: **no significant success-rate difference at n=20**. Every model
-  decision passed the routing provenance audit (139 decisions in the τ=0.85
-  baseline, zero violations). Night total ¥0.576 / ¥5 upper bound.
+  CIs overlap; these descriptive pilots do not establish policy superiority.
+  The archived summary reports passing routing provenance (139 decisions in the
+  τ=0.85 baseline, zero violations); missing native Episodes prevent an independent
+  full re-audit of that claim. Night total ¥0.576 / ¥5 upper bound.
 - **The dominant confounder**: 6 of tonight's 7 non-success episodes (FSM run20,
   hybrid τ=0.85 runs 3/10/13, hybrid smoke ×2) are the SAME grasp-physics family —
   `PICK_B`/`PICK_A` fails twice with ERR_GRASP_FAILED (23) → recovery exhausted
@@ -715,7 +727,6 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
 - **Evidence**: `setup/acceptance/tau_sweep_desktop_20261005/` (12 batch files
   incl. both τ=0.85 smoke attempts, pooled summary, two hybrid deployments,
   campaign log `F:\flexcell-models\campaign_20261005.log`).
-
 
 ### E-022 — Static attribute scanner repair (2026-10-07, cloud)
 
