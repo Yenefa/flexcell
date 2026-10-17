@@ -4,6 +4,13 @@
 > Execution detail lives in [DEVELOPMENT.md](DEVELOPMENT.md); the ratified Week-2 design of
 > record is [WEEK2_PREPARATION.md](WEEK2_PREPARATION.md) (§0.5).
 
+> 2026-10-17 status reconciliation: all four decision policies and the shared
+> executor/gate/recorder exist in main. M2 implementation does not establish
+> complete replay or online qualification; M3 remains incomplete. The dated
+> plan below records sequencing, not a claim that LLM/Hybrid are still absent.
+> [IYAIC preparation and dated priorities](../competition/iyaic-2026/PLAN.md)
+> is a milestone delivery inside this long-term project.
+
 ## Milestone map
 
 | Milestone                              | Scope                                                                            | Status                                                       |
@@ -34,19 +41,19 @@ Ratified implementation order: **WorldState → Decision Interface → FSMPolicy
 Replay → Jev → LLM**. Work is tracked in sub-milestones (implementation) plus RFC issues
 (architecture of record):
 
-| Step                                                                       | Implementation issues                                          | RFC / contract |
-| -------------------------------------------------------------------------- | -------------------------------------------------------------- | -------------- |
-| WorldState v2 freeze + versioned canonical serializer                      | #3                                                             | #16            |
-| DecisionPolicy interface + Decision/TaskGoal/Constraints/TaskHistory types | #4                                                             | #14 (+#1)      |
-| FSMPolicy + executor seam (default=fsm) + trace-shape parity               | #5                                                             | #14            |
-| Deterministic safety gate + invalid-decision accounting                    | #6                                                             | #14            |
-| Scenario runner + episode record + policy-input replay store               | #7                                                             | #15            |
-| Benchmark harness + metrics report generator                               | #8                                                             | #15            |
-| S7 perturbation scenario builder                                           | #9                                                             | #15            |
-| JevPolicy + pluggable JevBackend (TypeSafe \| Local)                       | #10                                                            | #14            |
-| LLMPolicy                                                                  | #11 — **DEFERRED (③)** until interface + runner + replay exist | #15            |
-| HybridRouter + threshold sweep τ∈{0.5,0.7,0.9} + calibration report        | #12                                                            | #15            |
-| ADR set from the ratified preparation                                      | #2                                                             | —              |
+| Step                                                                       | Implementation issues                                   | RFC / contract |
+| -------------------------------------------------------------------------- | ------------------------------------------------------- | -------------- |
+| WorldState v2 freeze + versioned canonical serializer                      | #3                                                      | #16            |
+| DecisionPolicy interface + Decision/TaskGoal/Constraints/TaskHistory types | #4                                                      | #14 (+#1)      |
+| FSMPolicy + executor seam (default=fsm) + trace-shape parity               | #5                                                      | #14            |
+| Deterministic safety gate + invalid-decision accounting                    | #6                                                      | #14            |
+| Scenario runner + episode record + policy-input replay store               | #7                                                      | #15            |
+| Benchmark harness + metrics report generator                               | #8                                                      | #15            |
+| S7 perturbation scenario builder                                           | #9                                                      | #15            |
+| JevPolicy + pluggable JevBackend (TypeSafe \| Local)                       | #10                                                     | #14            |
+| LLMPolicy — implemented; model replay/qualification incomplete             | #11 (original deferred order satisfied)                 | #15            |
+| HybridRouter — implemented; complete benchmark incomplete                  | #12 (historical grid superseded by supported-bin pilot) | #15            |
+| ADR set from the ratified preparation                                      | #2                                                      | —              |
 
 ## Future
 

@@ -58,6 +58,8 @@ discussion → Issue/ADR → milestone task → implementation → experiment ev
 - [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — execution calendar + maintenance policy
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system architecture (current vs target)
 - [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) — experiment log with evidence locations
+- [competition/iyaic-2026/](competition/iyaic-2026/) — competition plan, demo/material
+  drafts and evidence inventory; preparation only, no competition release yet
 - [docs/ADR/](docs/ADR/) — architecture decision records (ADR-001: simulation manipulation backend)
 - [docs/WEEK2_PREPARATION.md](docs/WEEK2_PREPARATION.md) — ratified Week-2 design of record
 - Milestones: **M1** Deterministic Workcell Baseline (done) · **M2** Runtime Decision
@@ -69,6 +71,16 @@ After coding — update the Issue, record evidence in EXPERIMENTS.md, link the c
 ---
 
 ## Status
+
+2026-10-17 competition preparation: the decision layer is implemented on main
+(FSM/Jev/Clef/LLM/Hybrid, shared executor, safety gate and EpisodeRecorder).
+Full M3 qualification is incomplete. PRs #28/#29 are still pending, while
+TransferBench composition and confirmed-boundary pause/resume exist on a separate
+feature branch. E-021 is dual-object S1; its archived pooled smoke is 8 successes
+in 10 attempts, and 60 referenced baseline Episodes remain missing from the
+checked archive. See the [competition work queue](competition/iyaic-2026/PLAN.md)
+and [inventory](competition/iyaic-2026/evidence/e021-audit.json).
+The historical machine status entries below are dated evidence, not live health.
 
 2026-10-02 mainline hardening (E-016): lifecycle paths and typed controller
 readiness are fixed; Observe now reads confirmed carry authority instead of a
