@@ -53,6 +53,7 @@ from flexcell_skills.contracts.safety_gate import (
 from flexcell_skills.contracts.recovery import (
     RECIPE_PICK, RECIPE_VERIFY, recovery_eligible)
 from flexcell_skills.contracts.skill_result import previous_skill_result
+from flexcell_skills.contracts.task_result import task_abort_detail
 from flexcell_skills.decision_policy import (
     ACTION_ABORT, ACTION_OBSERVE, ACTION_PICK, ACTION_PLACE, ACTION_VERIFY,
     Constraints, Decision, FSMPolicy, HistoryRecord, PolicyStateError,
@@ -883,9 +884,9 @@ class TaskFsmServer(Node):
                     episode.record_executor_result()
                     return finish(result_type.OUTCOME_FAILED,
                                   task_abort_error_code(decision.reason_code),
-                                  'policy abort (%s): %s (trace=%s)'
-                                  % (decision.reason_code, decision.explanation,
-                                     ','.join(trace)))
+                                  task_abort_detail(decision.reason_code,
+                                                    decision.explanation,
+                                                    trace, prev))
 
                 # ---------------- WAIT / unknown ----------------
                 if decision.action == 'WAIT':

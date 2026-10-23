@@ -409,12 +409,13 @@ class PickServer(Node):
                 # policy will retry this pick. Leaving the carry servo engaged
                 # made that retry inadmissible (safety gate: already_carried)
                 # and masked the typed failure as ERR_SAFETY_REJECTED. Release
-                # here so recovery sees a free gripper and the object back on
-                # the table (measured: S7 seed 20260931, lift NO_IK_SOLUTION).
+                # here so recovery can re-observe the released object
+                # (measured: S7 seed 20260931, lift NO_IK_SOLUTION). This
+                # helper requests release; it does not confirm a table pose.
                 self._release_everything(goal.object_name)
                 attached = False
                 return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
-                              'lift motion failed: %s (carry released for the '
+                              'lift motion failed: %s (carry release requested for the '
                               'recovery retry)' % detail,
                               motion_err=merr_code)
 

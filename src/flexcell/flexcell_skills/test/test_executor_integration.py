@@ -33,6 +33,7 @@ from flexcell_skills.contracts.episode import EpisodeStore, replay_episode
 from flexcell_skills.contracts.injection import InjectionLifecycle
 from flexcell_skills.common import JsonlLog
 from flexcell_skills.decision_policy import FSMPolicy
+from flexcell_skills.jev_policy import JevBackend, JevPolicy, JevResponse
 from flexcell_skills.task_fsm_server import TaskFsmServer
 from flexcell_skills import pick_server as pick_server_module
 from flexcell_skills.pick_server import PickServer
@@ -45,6 +46,20 @@ class _Logger:
     warn = info
     error = info
     fatal = info
+
+
+class _ScriptedJevBackend(JevBackend):
+    """Synthetic model choices; exercise the real JevPolicy and executor."""
+    name = 'scripted-test'
+
+    def __init__(self, choices):
+        self._choices = iter(choices)
+
+    def health(self):
+        return True, 'synthetic backend'
+
+    def classify(self, state, question):
+        return JevResponse(next(self._choices), 0.9, {'tokens': 7})
 
 
 class _StubNode:
@@ -219,13 +234,32 @@ class TestDemoAbortPath(unittest.TestCase):
         self.assertEqual(res.error_code, RunDemo.Result.ERR_RESOURCE_BUSY)
         node._admission.release()
 
+    def test_jev_budget_abort_retains_51_and_last_skill_cause(self):
+        calls = []
+        script = {
+            'OBSERVE': [(_skill_result(world_state=_world_state()), None)],
+            'PICK': [(_skill_result(outcome=1, error_code=23), None)],
+            'PLACE': [], 'VERIFY': [],
+        }
+        node = _make_fsm(self.tmp, _make_demo_call(script, calls))
+        node._policy = JevPolicy(_ScriptedJevBackend(
+            ['PICK', 'OBSERVE', 'PICK', 'ABORT']))
+        gh = _GoalHandle(RunDemo.Goal())
+        gh.request.scenario_id = 'it_jev_exhaust'
+        result = node._execute_demo(gh)
+        self.assertEqual(result.error_code, RunDemo.Result.ERR_RECOVERY_EXHAUSTED)
+        self.assertIn('previous_skill=PICK cause=ERR_GRASP_FAILED', result.detail)
+        self.assertEqual(gh.terminal, 'abort')
+        self.assertEqual(sum(c.startswith('PICK') for c in calls), 2)
+
 
 class TestSingleTaskPolicySeam(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp(prefix='fx_single_it_')
         self.addCleanup(shutil.rmtree, self.tmp, True)
 
-    def drive(self, place_fails=False, skip_verify=False, recover_pick=False):
+    def drive(self, place_fails=False, skip_verify=False, recover_pick=False,
+              policy=None):
         calls = []
         pick = [(_skill_result(), None)]
         if recover_pick:
@@ -243,6 +277,8 @@ class TestSingleTaskPolicySeam(unittest.TestCase):
                                         position_error_m=0.002), None)],
         }
         node = _make_fsm(self.tmp, _make_demo_call(script, calls))
+        if policy is not None:
+            node._policy = policy
         goal = RunPickPlace.Goal()
         goal.object_name = 'target_box_a'
         goal.place_pose.pose = _pose(0.12, -0.15)
@@ -272,6 +308,18 @@ class TestSingleTaskPolicySeam(unittest.TestCase):
         self.assertEqual(episode['steps'][-1]['policy_output']['action'], 'ABORT')
         self.assertFalse(any(c.startswith('VERIFY') for c in calls))
         self.assertTrue(all(r['ok'] for r in replay_episode(episode, FSMPolicy())))
+
+    def test_jev_s4_preserves_typed_skill_cause_in_result_and_episode(self):
+        result, episode, calls = self.drive(
+            place_fails=True,
+            policy=JevPolicy(_ScriptedJevBackend(['PICK', 'PLACE', 'ABORT'])))
+        self.assertEqual(result.error_code, RunPickPlace.Result.ERR_SKILL_FAILED)
+        self.assertIn('previous_skill=PLACE cause=ERR_IK_UNREACHABLE', result.detail)
+        self.assertEqual(episode['final_state']['detail'], result.detail)
+        output = episode['steps'][-1]['policy_output']
+        self.assertEqual(output['policy_trace']['source'], 'jev')
+        self.assertFalse(output['policy_trace']['fallback'])
+        self.assertFalse(any(c.startswith('VERIFY') for c in calls))
 
     def test_pick_recovery_uses_policy_and_counts_attempt_two(self):
         result, episode, calls = self.drive(recover_pick=True)
