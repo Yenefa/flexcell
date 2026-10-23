@@ -209,9 +209,16 @@ class PickServer(Node):
         return detail
 
     def _release_everything(self, name):
+        """Request physical release and require scene/gripper cleanup responses."""
         self._carry_stop.publish(EmptyMsg())
-        self._gripper.command(self._gripper_open)
-        self._scene.remove(name)
+        _, gripper_error = self._gripper.command(self._gripper_open)
+        removed, scene_error = self._scene.remove(name, detach_attached=True)
+        errors = []
+        if gripper_error is not None:
+            errors.append('gripper open: %s' % gripper_error)
+        if not removed:
+            errors.append('planning-scene cleanup: %s' % (scene_error or 'rejected'))
+        return not errors, '; '.join(errors)
 
     def _engage_carry(self, object_id, offset):
         if not self._carry_engage.wait_for_service(timeout_sec=2.0):
@@ -267,7 +274,6 @@ class PickServer(Node):
         if not self._admission.acquire(blocking=False):
             return finish(R.OUTCOME_FAILED, R.ERR_RESOURCE_BUSY,
                           'another pick goal is active')
-        attached = False
         try:
             # ---------- VALIDATING ----------
             self._feedback(goal_handle, 'VALIDATING', t0)
@@ -369,8 +375,11 @@ class PickServer(Node):
                 confirmed, message = self._engage_carry(goal.object_name, offset)
                 rec['carry_engage_confirmed'] = confirmed
                 if not confirmed:
-                    self._release_everything(goal.object_name)
-                    return finish(R.OUTCOME_FAILED, R.ERR_GRASP_FAILED, message)
+                    cleaned, cleanup_error = self._release_everything(goal.object_name)
+                    return finish(R.OUTCOME_FAILED,
+                                  R.ERR_GRASP_FAILED if cleaned else R.ERR_INTERNAL,
+                                  message if cleaned else
+                                  message + '; cleanup failed: ' + cleanup_error)
             else:
                 self._carry_start.publish(StringMsg(data=json.dumps({
                     'object': goal.object_name, 'offset': offset, 'frame': self._base,
@@ -389,7 +398,6 @@ class PickServer(Node):
                 self._carry_stop.publish(EmptyMsg())
                 return finish(R.OUTCOME_FAILED, R.ERR_GRASP_FAILED,
                               'planning-scene attach failed: %s' % serr)
-            attached = True
             if interruptible_sleep(0.5, cancel_requested):
                 return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
                               'canceled after attach (box attached and '
@@ -412,11 +420,12 @@ class PickServer(Node):
                 # here so recovery can re-observe the released object
                 # (measured: S7 seed 20260931, lift NO_IK_SOLUTION). This
                 # helper requests release; it does not confirm a table pose.
-                self._release_everything(goal.object_name)
-                attached = False
-                return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
-                              'lift motion failed: %s (carry release requested for the '
-                              'recovery retry)' % detail,
+                cleaned, cleanup_error = self._release_everything(goal.object_name)
+                return finish(R.OUTCOME_FAILED,
+                              R.ERR_MOTION_FAILED if cleaned else R.ERR_INTERNAL,
+                              'lift motion failed: %s; %s' % (
+                                  detail, 'carry release requested for the recovery retry'
+                                  if cleaned else 'cleanup failed: ' + cleanup_error),
                               motion_err=merr_code)
 
             sampled, err = sample_gz_pose(goal.object_name)
@@ -441,11 +450,13 @@ class PickServer(Node):
             rec['box_rise_m'] = rise
             if rise < self._follow_min:
                 # measured dishonesty guard: the box did not come along
-                self._release_everything(goal.object_name)
-                attached = False
-                return finish(R.OUTCOME_FAILED, R.ERR_GRASP_FAILED,
+                cleaned, cleanup_error = self._release_everything(goal.object_name)
+                return finish(R.OUTCOME_FAILED,
+                              R.ERR_GRASP_FAILED if cleaned else R.ERR_INTERNAL,
                               'box did not follow the lift (rise=%.3fm < %.3fm); '
-                              'released for safety' % (rise, self._follow_min))
+                              '%s' % (rise, self._follow_min,
+                                      'carry release requested' if cleaned else
+                                      'cleanup failed: ' + cleanup_error))
 
             res.grasp_attached = True
             return finish(R.OUTCOME_SUCCEEDED, R.ERR_NONE,
