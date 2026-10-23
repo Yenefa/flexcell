@@ -21,6 +21,10 @@ jobs:
       - name: checkout
         uses: actions/checkout@v4
 
+      - name: Clef recorded-input client tests (synthetic HTTP, no model or GPU)
+        shell: bash
+        run: python3 -m unittest discover -s setup/model_validation -p 'test_clef_replay.py' -v
+
       - name: install test deps
         shell: bash
         run: |
