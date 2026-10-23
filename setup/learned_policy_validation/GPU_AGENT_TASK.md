@@ -1,59 +1,38 @@
-# SMOLVLA-GPU-001：家用 RX 6800 环境与推理验证
+# SMOLVLA-GPU-001：现有 RX 6800 上的增量推理测试
 
-你是家里电脑上的执行 Agent。云端 Agent 已负责实现代码，你负责本机 GPU 验证并回传可核验结果。当前显卡是 **AMD Radeon RX 6800**；不要沿用 NVIDIA 4060 Ti 的安装命令。用户通过手机转交任务，不要要求他回家操作，也不需要配置云端 Tailscale。
+你是家里电脑上的执行 Agent。用户确认已有跑通的 RX 6800 环境，本轮直接复用现有解释器、GPU 后端和模型缓存。云端负责写代码，本机负责执行下面的测试并回传结果。
 
-## 代码与任务范围
+仓库：`Yenefa/flexcell`，分支：`research/smolvla-gpu-handoff`。固定到用户提供的完整提交 SHA；保留现有工作区修改。先读适用的 `AGENTS.md`（若有）。
 
-仓库：`Yenefa/flexcell`，分支：`research/smolvla-gpu-handoff`。以用户随提示词提供的完整提交 SHA 为准，核对 `git rev-parse HEAD`。若未附 SHA，拉取该分支后先记录实际 SHA。使用独立 worktree/副本保留原工作区。先读仓库适用的 `AGENTS.md`（若有）和 `setup/learned_policy_validation/README.md`。
+## 本轮只需要的测试
 
-任务是判断现有 RX 6800 环境能否执行固定 SmolVLA 的离线 GPU 推理。先检查操作系统与现有 GPU 软件，再选择可用解释器；不要先假定 Windows、WSL 或 Linux。保留现有驱动、ROS 环境和模型服务，不重装系统、不重启、不安装 NVIDIA CUDA、不强行覆盖依赖。不把 GPU 驱动或系统层的迁移作为本轮测试的前提。
+PR #39 的云端 CPU 推理、资源校验和 ROS 离线 CI 已通过。本机只补当前固定检查点的完整 GPU 推理，不重复环境盘点、矩阵运算专项测试、安装/部署流程或云端已通过的测试。
 
-## 执行顺序
+先查看本机已有结果：若同一推理脚本、同一资产清单/检查点、FP32、batch=1、10 次采样、3 次预热加 20 次测量已有完整 RX 6800 报告，直接回传该报告及其原提交 SHA，不重跑。若只差部分结果，只补缺项。文档提交变化本身不要求重跑；判断脚本与资产清单内容是否相同。
 
-1. 收集实际系统、显卡名称和显存、AMD 驱动、现有 Python 环境，以及 ROCm/HIP、Vulkan 和现有模型服务的可用情况。Windows 可读 `Get-CimInstance Win32_VideoController`；Linux 可读 `lspci`，存在时使用 `rocminfo` / `amd-smi` / `vulkaninfo --summary`。不要因命令不存在就判定显卡不存在，不输出完整环境变量或凭据。
-2. 优先找电脑上已有的 GPU PyTorch 环境。在选定解释器下执行：
+没有符合条件的结果时：
 
-   ```text
-   python setup/learned_policy_validation/run_policy_smoke.py --device gpu --expected-gpu rx6800 --probe-only --report setup/learned_policy_validation/reports/gpu_probe.json
-   ```
-
-   ROCm 的 PyTorch 也使用 `torch.cuda` 接口，`torch.version.hip` 才用于区分 AMD 后端。本探测包含实际 GPU 矩阵运算。若没有合适解释器/可运行的 AMD PyTorch，或探测为 `BLOCKED_ENV`，保存输出与原因后结束本轮，不下载 1.20 GB 模型，不换成 CPU 宣布通过。存在 Vulkan/llama.cpp 服务只作为环境信息，不能计作 SmolVLA 已支持 Vulkan。
-3. 仅在实际 AMD GPU 内核探测成功后，准备独立 Python 环境。复用已验证 GPU torch/torchvision 的版本和来源，不破坏原环境。安装锁定的其余依赖，再执行 `python -m pip check`。LeRobot 所需范围为 `torch>=2.7,<2.12`、`torchvision>=0.22,<0.27`，注意配对；如果现有 GPU 构建不满足，回传依赖阻塞，不擅自换用 CPU wheel。记录所有版本调整。安装后重新运行探测确认没有失去 GPU。
-4. 使用以下命令下载并校验固定资源，约 1.20 GB。文件 hash 不符时停止，不手改归一化统计或换检查点：
+1. 复用现有模型缓存，脚本会核验固定的 20 个文件。缓存目录不在本目录时传入 `--assets-dir <已有缓存根目录>`。只在缺少清单中的资源时运行 `prepare_artifacts.py` 补齐，已有 hash 正确的文件不会重下。模型为 `anuaju/smolvla_openmanipulator`，revision `660b5d90e0c62b9eec6a996c8ef0122eaa623550`，子目录 `checkpoints/008000/pretrained_model`，使用其配套 5 维处理器。
+2. 使用已有 GPU 解释器，直接执行以下完整推理。将报告路径的 `<commit>_<UTC时间>` 替换为实际值，保留旧报告；需要复用其他位置的缓存时追加 `--assets-dir`。
 
    ```text
-   python -m pip install -r setup/learned_policy_validation/requirements-policy-lock.txt
-   python -m pip check
-   python setup/learned_policy_validation/prepare_artifacts.py
+   python setup/learned_policy_validation/run_policy_smoke.py --device gpu --expected-gpu rx6800 --warmup 3 --repeat 20 --report setup/learned_policy_validation/reports/gpu_<commit>_<UTC时间>.json
    ```
 
-5. 下载完成后，按实际 shell 设置 `HF_HUB_OFFLINE=1`、`TRANSFORMERS_OFFLINE=1`、`TOKENIZERS_PARALLELISM=false`。运行 FP32、batch=1、保留 10 个采样步骤的基线，3 次预热加 20 次测量：
+3. 保存 stdout/stderr 与退出码。检查每次输出均为 `[1,50,5]` 且数值有限；报告应包含实际 GPU 后端、模型/输入设备、20 次测量耗时、p50/p95 和显存峰值。脚本中的设备校验属于本次推理的运行断言，不需要额外执行 `--probe-only`。
 
-   ```text
-   python setup/learned_policy_validation/run_policy_smoke.py --device gpu --expected-gpu rx6800 --warmup 3 --repeat 20 --report setup/learned_policy_validation/reports/gpu_report.json
-   ```
+不要为使测试通过而重装驱动、重启、替换现有模型服务、改采样步数/精度或切到 CPU。若执行失败，直接回传完整错误及出错命令，交由云端修复。本轮不训练、不运行 Gazebo、不发送机器人动作。
 
-   将 stdout/stderr 保存在 `reports/gpu_run.log`，记录退出码。出现显存不足、缺少 GPU 内核、版本/API 错误时，保留完整堆栈；不要减少采样步数、量化、换模型或静默改用 CPU。
-
-## 通过条件与回传
-
-环境通过与完整推理通过分开报告。完整通过要求实际 RX 6800 上严格加载固定权重，模型/输入/原始输出确实在 GPU，所有预热和 20 次测量的动作形状均为 `[1,50,5]` 且数值有限。报告应含实际 AMD 后端、显存峰值、样本数和 p50/p95。此任务不训练、不启动 Gazebo、不下发机器人动作，不能据此声称闭环抓取成功。
-
-直接回复以下内容，方便用户整体转交云端 Agent：
+## 回传格式
 
 ```text
-任务编号：SMOLVLA-GPU-001
+任务：SMOLVLA-GPU-001
+结果：PASS / BLOCKED_ENV / FAIL
+证据：本轮新测 / 复用已有报告
 代码提交：<完整 SHA>；本地改动：<无 / diff>
-结果：GPU_INFERENCE_PASS / BLOCKED_ENV / FAIL
-系统、RX 6800 实测名称/显存、驱动：
-解释器路径、PyTorch/HIP/CUDA/LeRobot/Transformers 版本：
-实际运行命令与退出码：
-环境探测：<粘贴完整 gpu_probe.json>
-完整推理：<粘贴完整 gpu_report.json；未执行则写原因>
-运行日志：<失败时完整堆栈，成功时关键输出>
-依赖：<pip freeze，或以附件提供>
-Vulkan/现有模型服务：<只报检测到的事实，不含 token>
-阻塞原因与建议的最小下一步：
+实际命令、解释器路径与退出码：
+完整报告：<粘贴 JSON 或附文件>
+运行日志：<关键输出；失败时完整堆栈>
 ```
 
-可以附 `reports/` 压缩包与依赖清单，不附模型权重、私人文件或账号凭据。若本轮阻塞，明确是当前 PyTorch 后端/版本兼容性问题还是硬件识别问题，把事实交给云端继续适配。
+硬件/后端/依赖版本已在 JSON 中记录，无需另做环境清单。若复用旧报告，保留原时间与原提交身份，不改写成新测结果。一次记录观测的推理报告不作为闭环抓取成功率。

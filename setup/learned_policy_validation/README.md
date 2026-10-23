@@ -4,26 +4,21 @@
 
 **RX 6800 能运行 Vulkan 大模型，不代表能运行 PyTorch/ROCm 的 SmolVLA。** 本脚本实现 PyTorch CUDA/ROCm 路径；ROCm 也使用 `torch.cuda` / `cuda:0` API，报告用 `torch.version.hip` 区分真实后端。Vulkan 和 DirectML 尚未接入本脚本。RX 6800 在实际操作系统、驱动和 PyTorch 构建上的兼容性须先探测，不能只看显存容量或设备枚举结果。
 
-## 先探测，后下载
+## 已有环境：直接执行增量测试
 
-使用电脑上已有的 GPU Python 环境，先运行不依赖 LeRobot 或模型下载的探测：
-
-```text
-python setup/learned_policy_validation/run_policy_smoke.py --device gpu --expected-gpu rx6800 --probe-only --report setup/learned_policy_validation/reports/gpu_probe.json
-```
-
-探测会记录 PyTorch/HIP/CUDA 版本、实际设备与显存，并执行一次 GPU 矩阵运算。没有 PyTorch、GPU 不可用、卡型不符或内核不可执行时，返回 `BLOCKED_ENV` 和退出码 2，不自动改用 CPU。`ENV_READY` 仅表示探测通过，尚未验证完整模型。
-
-GPU Python 环境通过后，在隔离环境中安装 `requirements-policy-lock.txt`。此文件有意不固定 torch/torchvision；应先安装或复用已在该 RX 6800 上验证可执行的匹配版本。LeRobot 0.6.1 要求 `torch>=2.7,<2.12`、`torchvision>=0.22,<0.27`，并须满足对应版本配对关系。**不要给 AMD 机器安装 NVIDIA CUDA wheel，也不要用 CPU wheel 替代 GPU。** 此仓库不提供已验证的 RX 6800 驱动/ROCm 安装方案。
+用户确认家用 RX 6800 已有跑通的环境。日常按 [GPU_AGENT_TASK.md](GPU_AGENT_TASK.md) 复用现有 GPU 解释器和缓存，只补当前缺失的完整推理报告。已有相同脚本、资产和测试参数的报告可直接回传，不重跑。
 
 ```text
-python -m pip install -r setup/learned_policy_validation/requirements-policy-lock.txt
-python -m pip check
-python setup/learned_policy_validation/prepare_artifacts.py
-python setup/learned_policy_validation/run_policy_smoke.py --device gpu --expected-gpu rx6800 --warmup 3 --repeat 20 --report setup/learned_policy_validation/reports/gpu_report.json
+python setup/learned_policy_validation/run_policy_smoke.py --device gpu --expected-gpu rx6800 --warmup 3 --repeat 20 --report setup/learned_policy_validation/reports/gpu_<commit>_<UTC时间>.json
 ```
 
-运行前设置 `HF_HUB_OFFLINE=1`、`TRANSFORMERS_OFFLINE=1` 和 `TOKENIZERS_PARALLELISM=false` 可让推理阶段明确只用本地资源。先完成资源下载，再设置离线模式。所有命令中的 `python` 均指选定隔离环境的解释器；按实际 shell 设置环境变量和解释器路径。
+将报告文件名中的占位符替换为实际值，保留旧报告。缓存位于其他目录时追加 `--assets-dir <目录>`。只在缺少固定资源时使用 `prepare_artifacts.py` 补齐；该脚本会跳过 hash 正确的已有文件。若执行报错，回传日志交由云端修复，不为本轮测试重做系统或服务部署。
+
+## 按需诊断与新环境参考
+
+`--probe-only` 仅用于环境变化或针对性诊断，不是日常任务的前置步骤。它会记录 PyTorch/HIP/CUDA 版本、实际设备与显存，并执行一次 GPU 矩阵运算。没有 PyTorch、GPU 不可用、卡型不符或内核不可执行时，返回 `BLOCKED_ENV` 和退出码 2，不自动改用 CPU；`ENV_READY` 尚不代表完整模型通过。
+
+依赖参考文件为 `requirements-policy-lock.txt`，有意不固定 torch/torchvision；须先有已在该 RX 6800 上验证可执行的匹配 GPU 构建。LeRobot 0.6.1 要求 `torch>=2.7,<2.12`、`torchvision>=0.22,<0.27`，还须满足版本配对。本仓库未验证 RX 6800 驱动/ROCm 的安装方案，不把 NVIDIA CUDA 或 CPU wheel 当作 AMD GPU 依赖。
 
 资源清单固定 20 个公开文件的 revision 和 SHA-256，总下载量约 1.20 GB。包括完整策略和处理器、基础 VLM 的配置/tokenizer、公开样例视频和状态表；不下载额外基础模型权重。下载与运行产生的文件已在本目录忽略规则内。
 
