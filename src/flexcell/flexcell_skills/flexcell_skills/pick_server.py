@@ -405,8 +405,17 @@ class PickServer(Node):
                     return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
                                   'canceled during lift (motion stopped; box '
                                   'attached and carried)')
+                # ERR_MOTION_FAILED (30) is a RECOVERABLE pick class, so the
+                # policy will retry this pick. Leaving the carry servo engaged
+                # made that retry inadmissible (safety gate: already_carried)
+                # and masked the typed failure as ERR_SAFETY_REJECTED. Release
+                # here so recovery sees a free gripper and the object back on
+                # the table (measured: S7 seed 20260931, lift NO_IK_SOLUTION).
+                self._release_everything(goal.object_name)
+                attached = False
                 return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
-                              'lift motion failed: %s' % detail,
+                              'lift motion failed: %s (carry released for the '
+                              'recovery retry)' % detail,
                               motion_err=merr_code)
 
             sampled, err = sample_gz_pose(goal.object_name)
