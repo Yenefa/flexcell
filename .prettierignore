@@ -1,0 +1,21 @@
+# Formatter boundary for this repository.
+#
+# FlexCell is a Python/ROS 2 project. Nothing here is a JavaScript toolchain and
+# no tree below was ever formatted with prettier, so a blanket `prettier --check`
+# over Markdown/JSON/YAML reports style drift that nobody introduced and that
+# rewriting would destroy real content.
+#
+# The non-negotiable case is `setup/acceptance/`: it holds frozen evidence whose
+# value is byte identity. Episode payloads, batch JSONL and recovery manifests
+# are verified by SHA256 in
+# `setup/acceptance/e021_native_recovery_20261024/verify_recovery.py` and
+# compared against `fixed_smoke_window_20261024/historical_inventory.json`.
+# Pretty-printing any of those files changes the digest and silently voids the
+# evidence. A formatter must never be allowed to touch an archived artefact.
+#
+# Documents under `docs/` are hand-wrapped with aligned tables; regrouping them
+# would produce whole-file diffs that hide the actual change under review.
+setup/
+competition/
+docs/
+.github/
