@@ -1,0 +1,1001 @@
+Starting >>> flexcell_interfaces
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Found ament_cmake: 2.5.6 (/opt/ros/jazzy/share/ament_cmake/cmake)
+-- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+-- Found rosidl_default_generators: 1.6.1 (/opt/ros/jazzy/share/rosidl_default_generators/cmake)
+-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+-- Found rosidl_adapter: 4.6.9 (/opt/ros/jazzy/share/rosidl_adapter/cmake)
+-- Found geometry_msgs: 5.3.8 (/opt/ros/jazzy/share/geometry_msgs/cmake)
+-- Found ament_cmake_ros: 0.12.1 (/opt/ros/jazzy/share/ament_cmake_ros/cmake)
+-- Using all available rosidl_typesupport_c: rosidl_typesupport_fastrtps_c;rosidl_typesupport_introspection_c
+-- Using all available rosidl_typesupport_cpp: rosidl_typesupport_fastrtps_cpp;rosidl_typesupport_introspection_cpp
+-- Found python_cmake_module: 0.11.1 (/opt/ros/jazzy/share/python_cmake_module/cmake)
+-- Found PythonExtra: /usr/bin/python3  
+-- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter Development NumPy Development.Module Development.Embed 
+-- Found Python3: /usr/bin/python3 (found version "3.12.3") found components: Interpreter 
+-- Configuring done (3.4s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_interfaces
+[  1%] Generating Rust code for ROS interfaces
+[  2%] Generating type hashes for ROS interfaces
+[  2%] Built target ament_cmake_python_copy_flexcell_interfaces
+running egg_info
+creating flexcell_interfaces.egg-info
+writing flexcell_interfaces.egg-info/PKG-INFO
+writing dependency_links to flexcell_interfaces.egg-info/dependency_links.txt
+writing top-level names to flexcell_interfaces.egg-info/top_level.txt
+writing manifest file 'flexcell_interfaces.egg-info/SOURCES.txt'
+reading manifest file 'flexcell_interfaces.egg-info/SOURCES.txt'
+writing manifest file 'flexcell_interfaces.egg-info/SOURCES.txt'
+[  2%] Built target ament_cmake_python_build_flexcell_interfaces_egg
+[  2%] Built target flexcell_interfaces__rosidl_generator_type_description
+[  3%] Generating C code for ROS interfaces
+[  3%] Generating C++ code for ROS interfaces
+[  3%] Built target flexcell_interfaces__rs
+[  3%] Built target flexcell_interfaces__cpp
+[  3%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/srv/detail/engage_carry__type_support.c.o
+[  3%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/srv/detail/engage_carry__description.c.o
+[  4%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/srv/detail/query_carry__description.c.o
+[  4%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/srv/detail/query_carry__functions.c.o
+[  5%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/srv/detail/engage_carry__functions.c.o
+[  6%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/task_constraints__type_support.c.o
+[  6%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/assignment__description.c.o
+[  7%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/history_entry__functions.c.o
+[  8%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/task_constraints__description.c.o
+[ 10%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/assignment__functions.c.o
+[ 10%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/srv/detail/query_carry__type_support.c.o
+[ 10%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/task_constraints__functions.c.o
+[ 10%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/assignment__type_support.c.o
+[ 10%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/history_entry__type_support.c.o
+[ 10%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/history_entry__description.c.o
+[ 11%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/task_context__description.c.o
+[ 11%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/task_context__functions.c.o
+[ 12%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/task_context__type_support.c.o
+[ 12%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/world_object__type_support.c.o
+[ 12%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/world_object__description.c.o
+[ 13%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/world_object__functions.c.o
+[ 13%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/world_state__functions.c.o
+[ 15%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/world_state__description.c.o
+[ 15%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/world_state__type_support.c.o
+[ 15%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/robot_state_summary__description.c.o
+[ 16%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/robot_state_summary__type_support.c.o
+[ 16%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/robot_state_summary__functions.c.o
+[ 17%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/carry_state__description.c.o
+[ 17%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/carry_state__functions.c.o
+[ 18%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/carry_state__type_support.c.o
+[ 19%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/zone_state__functions.c.o
+[ 19%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/zone_state__description.c.o
+[ 19%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/msg/detail/zone_state__type_support.c.o
+[ 19%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/move_to_pose__functions.c.o
+[ 20%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/move_to_pose__type_support.c.o
+[ 21%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/move_to_pose__description.c.o
+[ 22%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/observe__functions.c.o
+[ 22%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/observe__type_support.c.o
+[ 22%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/observe__description.c.o
+[ 22%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/pick_object__type_support.c.o
+[ 22%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/pick_object__description.c.o
+[ 23%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/pick_object__functions.c.o
+[ 24%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/place_object__description.c.o
+[ 25%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/place_object__type_support.c.o
+[ 25%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/place_object__functions.c.o
+[ 25%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/verify_object__description.c.o
+[ 26%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/verify_object__functions.c.o
+[ 27%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/run_pick_place__description.c.o
+[ 27%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/verify_object__type_support.c.o
+[ 27%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/run_pick_place__functions.c.o
+[ 27%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/run_demo__description.c.o
+[ 28%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/run_pick_place__type_support.c.o
+[ 29%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/run_demo__functions.c.o
+[ 29%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_c.dir/rosidl_generator_c/flexcell_interfaces/action/detail/run_demo__type_support.c.o
+[ 30%] Linking C shared library libflexcell_interfaces__rosidl_generator_c.so
+[ 30%] Built target flexcell_interfaces__rosidl_generator_c
+[ 31%] Generating C type support for eProsima Fast-RTPS
+[ 31%] Generating C introspection for ROS interfaces
+[ 32%] Generating C++ type support dispatch for ROS interfaces
+[ 32%] Generating C type support dispatch for ROS interfaces
+[ 32%] Generating C++ type support for eProsima Fast-RTPS
+[ 33%] Generating C++ introspection for ROS interfaces
+[ 34%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/flexcell_interfaces/srv/query_carry__type_support.cpp.o
+[ 34%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/flexcell_interfaces/srv/engage_carry__type_support.cpp.o
+[ 34%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/flexcell_interfaces/msg/assignment__type_support.cpp.o
+[ 34%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/flexcell_interfaces/msg/history_entry__type_support.cpp.o
+[ 35%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/flexcell_interfaces/msg/task_constraints__type_support.cpp.o
+[ 36%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/flexcell_interfaces/msg/task_context__type_support.cpp.o
+[ 36%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/flexcell_interfaces/msg/robot_state_summary__type_support.cpp.o
+[ 37%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/flexcell_interfaces/msg/world_state__type_support.cpp.o
+[ 37%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/flexcell_interfaces/msg/world_object__type_support.cpp.o
+[ 38%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/flexcell_interfaces/msg/zone_state__type_support.cpp.o
+[ 38%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/flexcell_interfaces/msg/carry_state__type_support.cpp.o
+[ 39%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/flexcell_interfaces/srv/engage_carry__type_support.cpp.o
+[ 39%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/flexcell_interfaces/srv/query_carry__type_support.cpp.o
+[ 40%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/flexcell_interfaces/msg/assignment__type_support.cpp.o
+[ 40%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/flexcell_interfaces/msg/task_constraints__type_support.cpp.o
+[ 40%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/flexcell_interfaces/msg/history_entry__type_support.cpp.o
+[ 41%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/flexcell_interfaces/msg/task_context__type_support.cpp.o
+[ 41%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/flexcell_interfaces/msg/world_object__type_support.cpp.o
+[ 42%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/flexcell_interfaces/msg/world_state__type_support.cpp.o
+[ 43%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/flexcell_interfaces/action/move_to_pose__type_support.cpp.o
+[ 43%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/flexcell_interfaces/msg/robot_state_summary__type_support.cpp.o
+[ 43%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/flexcell_interfaces/action/observe__type_support.cpp.o
+[ 43%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/flexcell_interfaces/msg/zone_state__type_support.cpp.o
+[ 44%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/flexcell_interfaces/action/pick_object__type_support.cpp.o
+[ 45%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/flexcell_interfaces/msg/carry_state__type_support.cpp.o
+[ 45%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/flexcell_interfaces/action/place_object__type_support.cpp.o
+[ 46%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/flexcell_interfaces/action/verify_object__type_support.cpp.o
+[ 47%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/flexcell_interfaces/action/move_to_pose__type_support.cpp.o
+[ 47%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/flexcell_interfaces/action/run_pick_place__type_support.cpp.o
+[ 48%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_cpp.dir/rosidl_typesupport_cpp/flexcell_interfaces/action/run_demo__type_support.cpp.o
+[ 48%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/flexcell_interfaces/action/observe__type_support.cpp.o
+[ 49%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/flexcell_interfaces/action/pick_object__type_support.cpp.o
+[ 49%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/flexcell_interfaces/action/place_object__type_support.cpp.o
+[ 50%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/flexcell_interfaces/action/verify_object__type_support.cpp.o
+[ 50%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/flexcell_interfaces/action/run_pick_place__type_support.cpp.o
+[ 51%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_c.dir/rosidl_typesupport_c/flexcell_interfaces/action/run_demo__type_support.cpp.o
+[ 51%] Linking CXX shared library libflexcell_interfaces__rosidl_typesupport_c.so
+[ 51%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/flexcell_interfaces/msg/detail/assignment__type_support.cpp.o
+[ 52%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/flexcell_interfaces/srv/detail/query_carry__type_support.cpp.o
+[ 52%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/flexcell_interfaces/msg/detail/history_entry__type_support.cpp.o
+[ 53%] Building C object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/flexcell_interfaces/srv/detail/engage_carry__type_support.c.o
+[ 53%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/flexcell_interfaces/srv/detail/engage_carry__type_support.cpp.o
+[ 54%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/flexcell_interfaces/msg/detail/task_constraints__type_support.cpp.o
+[ 54%] Building C object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/flexcell_interfaces/srv/detail/query_carry__type_support.c.o
+[ 54%] Built target flexcell_interfaces__rosidl_typesupport_c
+[ 55%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/flexcell_interfaces/msg/detail/task_context__type_support.cpp.o
+[ 56%] Building C object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/flexcell_interfaces/msg/detail/assignment__type_support.c.o
+[ 56%] Building C object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/flexcell_interfaces/msg/detail/task_constraints__type_support.c.o
+[ 57%] Building C object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/flexcell_interfaces/msg/detail/history_entry__type_support.c.o
+[ 57%] Building C object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/flexcell_interfaces/msg/detail/task_context__type_support.c.o
+[ 57%] Building C object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/flexcell_interfaces/msg/detail/world_object__type_support.c.o
+[ 57%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/flexcell_interfaces/msg/detail/world_object__type_support.cpp.o
+[ 58%] Building C object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/flexcell_interfaces/msg/detail/world_state__type_support.c.o
+[ 58%] Building C object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/flexcell_interfaces/msg/detail/robot_state_summary__type_support.c.o
+[ 59%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/flexcell_interfaces/msg/detail/world_state__type_support.cpp.o
+[ 60%] Building C object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/flexcell_interfaces/msg/detail/carry_state__type_support.c.o
+[ 60%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/flexcell_interfaces/msg/detail/robot_state_summary__type_support.cpp.o
+[ 60%] Building C object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/flexcell_interfaces/msg/detail/zone_state__type_support.c.o
+[ 61%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/flexcell_interfaces/msg/detail/carry_state__type_support.cpp.o
+[ 61%] Building C object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/flexcell_interfaces/action/detail/observe__type_support.c.o
+[ 62%] Building C object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/flexcell_interfaces/action/detail/move_to_pose__type_support.c.o
+[ 62%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/flexcell_interfaces/msg/detail/zone_state__type_support.cpp.o
+[ 63%] Building C object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/flexcell_interfaces/action/detail/pick_object__type_support.c.o
+[ 64%] Building C object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/flexcell_interfaces/action/detail/verify_object__type_support.c.o
+[ 64%] Building C object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/flexcell_interfaces/action/detail/place_object__type_support.c.o
+[ 65%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/flexcell_interfaces/action/detail/move_to_pose__type_support.cpp.o
+[ 65%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/flexcell_interfaces/action/detail/observe__type_support.cpp.o
+[ 66%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/flexcell_interfaces/action/detail/pick_object__type_support.cpp.o
+[ 66%] Building C object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/flexcell_interfaces/action/detail/run_pick_place__type_support.c.o
+[ 66%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/flexcell_interfaces/action/detail/place_object__type_support.cpp.o
+[ 67%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/flexcell_interfaces/action/detail/verify_object__type_support.cpp.o
+[ 67%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/flexcell_interfaces/action/detail/run_pick_place__type_support.cpp.o
+[ 68%] Building C object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_c.dir/rosidl_typesupport_introspection_c/flexcell_interfaces/action/detail/run_demo__type_support.c.o
+[ 69%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_introspection_cpp.dir/rosidl_typesupport_introspection_cpp/flexcell_interfaces/action/detail/run_demo__type_support.cpp.o
+[ 69%] Linking C shared library libflexcell_interfaces__rosidl_typesupport_introspection_c.so
+[ 69%] Built target flexcell_interfaces__rosidl_typesupport_introspection_c
+[ 69%] Linking CXX shared library libflexcell_interfaces__rosidl_typesupport_cpp.so
+[ 70%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/flexcell_interfaces/msg/detail/dds_fastrtps/history_entry__type_support.cpp.o
+[ 70%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/flexcell_interfaces/srv/detail/dds_fastrtps/query_carry__type_support.cpp.o
+[ 70%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/flexcell_interfaces/msg/detail/dds_fastrtps/task_constraints__type_support.cpp.o
+[ 71%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/flexcell_interfaces/srv/detail/dds_fastrtps/engage_carry__type_support.cpp.o
+[ 72%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/flexcell_interfaces/msg/detail/dds_fastrtps/assignment__type_support.cpp.o
+[ 72%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/flexcell_interfaces/msg/detail/dds_fastrtps/task_context__type_support.cpp.o
+[ 73%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/flexcell_interfaces/msg/detail/dds_fastrtps/world_object__type_support.cpp.o
+[ 73%] Built target flexcell_interfaces__rosidl_typesupport_cpp
+[ 73%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/flexcell_interfaces/msg/detail/dds_fastrtps/world_state__type_support.cpp.o
+[ 74%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/flexcell_interfaces/msg/detail/dds_fastrtps/robot_state_summary__type_support.cpp.o
+[ 74%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/flexcell_interfaces/msg/detail/dds_fastrtps/carry_state__type_support.cpp.o
+[ 75%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/flexcell_interfaces/msg/detail/dds_fastrtps/zone_state__type_support.cpp.o
+[ 75%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/flexcell_interfaces/action/detail/dds_fastrtps/move_to_pose__type_support.cpp.o
+[ 76%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/flexcell_interfaces/action/detail/dds_fastrtps/observe__type_support.cpp.o
+[ 76%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/flexcell_interfaces/action/detail/dds_fastrtps/pick_object__type_support.cpp.o
+[ 77%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/flexcell_interfaces/action/detail/dds_fastrtps/place_object__type_support.cpp.o
+[ 77%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/flexcell_interfaces/action/detail/dds_fastrtps/verify_object__type_support.cpp.o
+[ 78%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/flexcell_interfaces/action/detail/dds_fastrtps/run_pick_place__type_support.cpp.o
+[ 78%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_cpp.dir/rosidl_typesupport_fastrtps_cpp/flexcell_interfaces/action/detail/dds_fastrtps/run_demo__type_support.cpp.o
+[ 78%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/flexcell_interfaces/srv/detail/engage_carry__type_support_c.cpp.o
+[ 79%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/flexcell_interfaces/srv/detail/query_carry__type_support_c.cpp.o
+[ 79%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/flexcell_interfaces/msg/detail/assignment__type_support_c.cpp.o
+[ 80%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/flexcell_interfaces/msg/detail/task_constraints__type_support_c.cpp.o
+[ 80%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/flexcell_interfaces/msg/detail/history_entry__type_support_c.cpp.o
+[ 80%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/flexcell_interfaces/msg/detail/task_context__type_support_c.cpp.o
+[ 81%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/flexcell_interfaces/msg/detail/world_object__type_support_c.cpp.o
+[ 81%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/flexcell_interfaces/msg/detail/world_state__type_support_c.cpp.o
+[ 81%] Linking CXX shared library libflexcell_interfaces__rosidl_typesupport_introspection_cpp.so
+[ 82%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/flexcell_interfaces/msg/detail/robot_state_summary__type_support_c.cpp.o
+[ 82%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/flexcell_interfaces/msg/detail/carry_state__type_support_c.cpp.o
+[ 83%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/flexcell_interfaces/msg/detail/zone_state__type_support_c.cpp.o
+[ 83%] Built target flexcell_interfaces__rosidl_typesupport_introspection_cpp
+[ 83%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/flexcell_interfaces/action/detail/move_to_pose__type_support_c.cpp.o
+[ 84%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/flexcell_interfaces/action/detail/observe__type_support_c.cpp.o
+[ 84%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/flexcell_interfaces/action/detail/pick_object__type_support_c.cpp.o
+[ 85%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/flexcell_interfaces/action/detail/place_object__type_support_c.cpp.o
+[ 85%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/flexcell_interfaces/action/detail/verify_object__type_support_c.cpp.o
+[ 86%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/flexcell_interfaces/action/detail/run_pick_place__type_support_c.cpp.o
+[ 86%] Building CXX object CMakeFiles/flexcell_interfaces__rosidl_typesupport_fastrtps_c.dir/rosidl_typesupport_fastrtps_c/flexcell_interfaces/action/detail/run_demo__type_support_c.cpp.o
+[ 87%] Linking CXX shared library libflexcell_interfaces__rosidl_typesupport_fastrtps_cpp.so
+[ 88%] Linking CXX shared library libflexcell_interfaces__rosidl_typesupport_fastrtps_c.so
+[ 88%] Built target flexcell_interfaces__rosidl_typesupport_fastrtps_cpp
+[ 88%] Built target flexcell_interfaces__rosidl_typesupport_fastrtps_c
+[ 88%] Built target flexcell_interfaces
+[ 88%] Generating Python code for ROS interfaces
+[ 88%] Built target flexcell_interfaces__py
+[ 88%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_py.dir/rosidl_generator_py/flexcell_interfaces/srv/_engage_carry_s.c.o
+[ 89%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_py.dir/rosidl_generator_py/flexcell_interfaces/srv/_query_carry_s.c.o
+[ 90%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_py.dir/rosidl_generator_py/flexcell_interfaces/msg/_task_context_s.c.o
+[ 90%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_py.dir/rosidl_generator_py/flexcell_interfaces/msg/_history_entry_s.c.o
+[ 90%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_py.dir/rosidl_generator_py/flexcell_interfaces/msg/_robot_state_summary_s.c.o
+[ 92%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_py.dir/rosidl_generator_py/flexcell_interfaces/msg/_world_state_s.c.o
+[ 92%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_py.dir/rosidl_generator_py/flexcell_interfaces/msg/_task_constraints_s.c.o
+[ 93%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_py.dir/rosidl_generator_py/flexcell_interfaces/action/_pick_object_s.c.o
+[ 93%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_py.dir/rosidl_generator_py/flexcell_interfaces/msg/_assignment_s.c.o
+[ 93%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_py.dir/rosidl_generator_py/flexcell_interfaces/msg/_world_object_s.c.o
+[ 93%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_py.dir/rosidl_generator_py/flexcell_interfaces/action/_place_object_s.c.o
+[ 94%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_py.dir/rosidl_generator_py/flexcell_interfaces/action/_move_to_pose_s.c.o
+[ 94%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_py.dir/rosidl_generator_py/flexcell_interfaces/msg/_zone_state_s.c.o
+[ 95%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_py.dir/rosidl_generator_py/flexcell_interfaces/msg/_carry_state_s.c.o
+[ 95%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_py.dir/rosidl_generator_py/flexcell_interfaces/action/_observe_s.c.o
+[ 96%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_py.dir/rosidl_generator_py/flexcell_interfaces/action/_verify_object_s.c.o
+[ 96%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_py.dir/rosidl_generator_py/flexcell_interfaces/action/_run_pick_place_s.c.o
+[ 97%] Building C object CMakeFiles/flexcell_interfaces__rosidl_generator_py.dir/rosidl_generator_py/flexcell_interfaces/action/_run_demo_s.c.o
+[ 97%] Linking C shared library libflexcell_interfaces__rosidl_generator_py.so
+[ 97%] Built target flexcell_interfaces__rosidl_generator_py
+[ 97%] Building C object CMakeFiles/flexcell_interfaces_s__rosidl_typesupport_fastrtps_c.dir/rosidl_generator_py/flexcell_interfaces/_flexcell_interfaces_s.ep.rosidl_typesupport_fastrtps_c.c.o
+[ 97%] Building C object CMakeFiles/flexcell_interfaces_s__rosidl_typesupport_c.dir/rosidl_generator_py/flexcell_interfaces/_flexcell_interfaces_s.ep.rosidl_typesupport_c.c.o
+[ 97%] Building C object CMakeFiles/flexcell_interfaces_s__rosidl_typesupport_introspection_c.dir/rosidl_generator_py/flexcell_interfaces/_flexcell_interfaces_s.ep.rosidl_typesupport_introspection_c.c.o
+[ 98%] Linking C shared module rosidl_generator_py/flexcell_interfaces/flexcell_interfaces_s__rosidl_typesupport_c.so
+[ 99%] Linking C shared module rosidl_generator_py/flexcell_interfaces/flexcell_interfaces_s__rosidl_typesupport_fastrtps_c.so
+[100%] Linking C shared module rosidl_generator_py/flexcell_interfaces/flexcell_interfaces_s__rosidl_typesupport_introspection_c.so
+[100%] Built target flexcell_interfaces_s__rosidl_typesupport_c
+[100%] Built target flexcell_interfaces_s__rosidl_typesupport_fastrtps_c
+[100%] Built target flexcell_interfaces_s__rosidl_typesupport_introspection_c
+-- Install configuration: ""
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/ament_index/resource_index/rosidl_interfaces/flexcell_interfaces
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/srv/EngageCarry.json
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/srv/QueryCarry.json
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/Assignment.json
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/TaskConstraints.json
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/HistoryEntry.json
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/TaskContext.json
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/WorldObject.json
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/WorldState.json
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/RobotStateSummary.json
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/CarryState.json
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/ZoneState.json
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/MoveToPose.json
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/Observe.json
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/PickObject.json
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/PlaceObject.json
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/VerifyObject.json
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/RunPickPlace.json
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/RunDemo.json
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/observe.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/run_pick_place.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/place_object.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/pick_object.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/pick_object__type_support.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/observe__functions.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/move_to_pose__type_support.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_pick_place__description.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_pick_place__type_support.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/move_to_pose__struct.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_demo__struct.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/pick_object__functions.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_pick_place__functions.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/place_object__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_demo__functions.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/place_object__functions.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/place_object__type_support.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/move_to_pose__description.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/observe__functions.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/pick_object__functions.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_pick_place__struct.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/verify_object__type_support.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/place_object__functions.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/pick_object__description.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/observe__type_support.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/verify_object__functions.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/observe__struct.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/place_object__description.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/verify_object__description.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_pick_place__functions.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/verify_object__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/place_object__struct.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/pick_object__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_demo__description.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/observe__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/pick_object__struct.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/move_to_pose__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_pick_place__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_demo__type_support.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/move_to_pose__functions.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_demo__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/move_to_pose__functions.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/verify_object__struct.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/verify_object__functions.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/observe__description.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_demo__functions.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/run_demo.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/verify_object.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/move_to_pose.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/query_carry.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/engage_carry.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/query_carry__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/engage_carry__functions.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/engage_carry__struct.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/query_carry__functions.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/query_carry__description.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/engage_carry__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/engage_carry__functions.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/query_carry__functions.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/query_carry__type_support.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/query_carry__struct.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/engage_carry__type_support.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/engage_carry__description.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/rosidl_generator_c__visibility_control.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/assignment.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/world_object.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/robot_state_summary.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_context__type_support.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/robot_state_summary__description.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_state__description.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_context__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_state__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/carry_state__functions.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_context__struct.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_context__functions.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_constraints__struct.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_object__functions.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_object__functions.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_context__description.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/robot_state_summary__functions.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/carry_state__functions.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_constraints__description.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/history_entry__functions.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/history_entry__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/zone_state__struct.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_state__type_support.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_object__type_support.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/carry_state__struct.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/carry_state__type_support.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/robot_state_summary__functions.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_object__struct.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/zone_state__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_state__struct.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/robot_state_summary__struct.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/assignment__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/history_entry__description.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_state__functions.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/assignment__description.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_constraints__functions.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/robot_state_summary__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/assignment__functions.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/history_entry__functions.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/assignment__struct.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_object__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_object__description.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_constraints__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/history_entry__type_support.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_constraints__type_support.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_constraints__functions.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/assignment__functions.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_context__functions.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/robot_state_summary__type_support.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_state__functions.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/carry_state__description.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/assignment__type_support.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/zone_state__functions.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/history_entry__struct.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/zone_state__type_support.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/zone_state__description.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/carry_state__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/zone_state__functions.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/world_state.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/history_entry.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/task_constraints.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/task_context.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/carry_state.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/zone_state.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/environment/library_path.sh
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/environment/library_path.dsv
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/libflexcell_interfaces__rosidl_generator_c.so
+-- Set non-toolchain portion of runtime path of "/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/libflexcell_interfaces__rosidl_generator_c.so" to ""
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_demo__rosidl_typesupport_fastrtps_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/pick_object__rosidl_typesupport_fastrtps_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/observe__rosidl_typesupport_fastrtps_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/place_object__rosidl_typesupport_fastrtps_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_pick_place__rosidl_typesupport_fastrtps_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/move_to_pose__rosidl_typesupport_fastrtps_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/verify_object__rosidl_typesupport_fastrtps_c.h
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/query_carry__rosidl_typesupport_fastrtps_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/engage_carry__rosidl_typesupport_fastrtps_c.h
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_constraints__rosidl_typesupport_fastrtps_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/robot_state_summary__rosidl_typesupport_fastrtps_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_object__rosidl_typesupport_fastrtps_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_state__rosidl_typesupport_fastrtps_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/zone_state__rosidl_typesupport_fastrtps_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/history_entry__rosidl_typesupport_fastrtps_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/assignment__rosidl_typesupport_fastrtps_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_context__rosidl_typesupport_fastrtps_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/carry_state__rosidl_typesupport_fastrtps_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/rosidl_typesupport_fastrtps_c__visibility_control.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/libflexcell_interfaces__rosidl_typesupport_fastrtps_c.so
+-- Set non-toolchain portion of runtime path of "/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/libflexcell_interfaces__rosidl_typesupport_fastrtps_c.so" to ""
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/place_object__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_pick_place__rosidl_typesupport_introspection_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/verify_object__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/move_to_pose__rosidl_typesupport_introspection_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/pick_object__rosidl_typesupport_introspection_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/pick_object__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/verify_object__rosidl_typesupport_introspection_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/observe__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/move_to_pose__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_pick_place__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/place_object__rosidl_typesupport_introspection_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/observe__rosidl_typesupport_introspection_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_demo__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_demo__rosidl_typesupport_introspection_c.h
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/query_carry__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/engage_carry__rosidl_typesupport_introspection_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/engage_carry__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/query_carry__rosidl_typesupport_introspection_c.h
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/rosidl_typesupport_introspection_c__visibility_control.h
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/assignment__rosidl_typesupport_introspection_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_context__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/robot_state_summary__rosidl_typesupport_introspection_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_state__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/carry_state__rosidl_typesupport_introspection_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/history_entry__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_constraints__rosidl_typesupport_introspection_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/history_entry__rosidl_typesupport_introspection_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/zone_state__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/assignment__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/zone_state__rosidl_typesupport_introspection_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_object__rosidl_typesupport_introspection_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/robot_state_summary__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_state__rosidl_typesupport_introspection_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_object__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_constraints__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_context__rosidl_typesupport_introspection_c.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/carry_state__type_support.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/libflexcell_interfaces__rosidl_typesupport_introspection_c.so
+-- Set non-toolchain portion of runtime path of "/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/libflexcell_interfaces__rosidl_typesupport_introspection_c.so" to ""
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/libflexcell_interfaces__rosidl_typesupport_c.so
+-- Set non-toolchain portion of runtime path of "/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/libflexcell_interfaces__rosidl_typesupport_c.so" to ""
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/pick_object.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/run_demo.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/observe.hpp
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/move_to_pose__traits.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/place_object__struct.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/move_to_pose__builder.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/pick_object__struct.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/pick_object__builder.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/verify_object__struct.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_demo__struct.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/move_to_pose__struct.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/place_object__type_support.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/verify_object__type_support.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_demo__traits.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/pick_object__type_support.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/place_object__traits.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/verify_object__traits.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/verify_object__builder.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_pick_place__builder.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_pick_place__traits.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/observe__type_support.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_demo__type_support.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/observe__struct.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/move_to_pose__type_support.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/pick_object__traits.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_pick_place__type_support.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_demo__builder.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/observe__traits.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/observe__builder.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/place_object__builder.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_pick_place__struct.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/move_to_pose.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/run_pick_place.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/place_object.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/verify_object.hpp
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/query_carry__type_support.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/engage_carry__builder.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/engage_carry__type_support.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/engage_carry__struct.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/engage_carry__traits.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/query_carry__builder.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/query_carry__struct.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/query_carry__traits.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/engage_carry.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/query_carry.hpp
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/robot_state_summary.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/zone_state.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/task_context.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/world_state.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/world_object.hpp
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/history_entry__builder.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_context__traits.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/assignment__type_support.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_context__struct.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/history_entry__type_support.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_state__traits.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/zone_state__builder.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/robot_state_summary__type_support.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/carry_state__type_support.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/assignment__builder.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/carry_state__traits.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_state__struct.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/robot_state_summary__builder.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_constraints__type_support.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/carry_state__builder.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_object__builder.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_state__builder.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_context__type_support.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/carry_state__struct.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_constraints__builder.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/zone_state__type_support.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/history_entry__struct.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_constraints__traits.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/zone_state__struct.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/robot_state_summary__traits.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/zone_state__traits.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/history_entry__traits.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_state__type_support.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/assignment__struct.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_constraints__struct.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_object__type_support.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/robot_state_summary__struct.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_object__traits.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_context__builder.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/assignment__traits.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_object__struct.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/assignment.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/carry_state.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/history_entry.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/rosidl_generator_cpp__visibility_control.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/task_constraints.hpp
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/place_object__rosidl_typesupport_fastrtps_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/move_to_pose__rosidl_typesupport_fastrtps_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/observe__rosidl_typesupport_fastrtps_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_demo__rosidl_typesupport_fastrtps_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/verify_object__rosidl_typesupport_fastrtps_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_pick_place__rosidl_typesupport_fastrtps_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/pick_object__rosidl_typesupport_fastrtps_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/dds_fastrtps
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/query_carry__rosidl_typesupport_fastrtps_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/engage_carry__rosidl_typesupport_fastrtps_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/dds_fastrtps
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_object__rosidl_typesupport_fastrtps_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_constraints__rosidl_typesupport_fastrtps_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/zone_state__rosidl_typesupport_fastrtps_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_state__rosidl_typesupport_fastrtps_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/robot_state_summary__rosidl_typesupport_fastrtps_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/history_entry__rosidl_typesupport_fastrtps_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_context__rosidl_typesupport_fastrtps_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/carry_state__rosidl_typesupport_fastrtps_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/assignment__rosidl_typesupport_fastrtps_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/dds_fastrtps
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/rosidl_typesupport_fastrtps_cpp__visibility_control.h
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/libflexcell_interfaces__rosidl_typesupport_fastrtps_cpp.so
+-- Set non-toolchain portion of runtime path of "/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/libflexcell_interfaces__rosidl_typesupport_fastrtps_cpp.so" to ""
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/verify_object__type_support.cpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/observe__type_support.cpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_demo__rosidl_typesupport_introspection_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/place_object__rosidl_typesupport_introspection_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_pick_place__rosidl_typesupport_introspection_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_demo__type_support.cpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/run_pick_place__type_support.cpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/verify_object__rosidl_typesupport_introspection_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/move_to_pose__type_support.cpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/place_object__type_support.cpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/pick_object__rosidl_typesupport_introspection_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/pick_object__type_support.cpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/observe__rosidl_typesupport_introspection_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/action/detail/move_to_pose__rosidl_typesupport_introspection_cpp.hpp
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/engage_carry__type_support.cpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/engage_carry__rosidl_typesupport_introspection_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/query_carry__rosidl_typesupport_introspection_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/srv/detail/query_carry__type_support.cpp
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg
+-- Up-to-date: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/assignment__rosidl_typesupport_introspection_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_context__type_support.cpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_object__type_support.cpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_object__rosidl_typesupport_introspection_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_constraints__type_support.cpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/history_entry__type_support.cpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/history_entry__rosidl_typesupport_introspection_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/zone_state__rosidl_typesupport_introspection_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_constraints__rosidl_typesupport_introspection_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/zone_state__type_support.cpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_state__type_support.cpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/carry_state__rosidl_typesupport_introspection_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/world_state__rosidl_typesupport_introspection_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/robot_state_summary__type_support.cpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/assignment__type_support.cpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/task_context__rosidl_typesupport_introspection_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/robot_state_summary__rosidl_typesupport_introspection_cpp.hpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/include/flexcell_interfaces/flexcell_interfaces/msg/detail/carry_state__type_support.cpp
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/libflexcell_interfaces__rosidl_typesupport_introspection_cpp.so
+-- Set non-toolchain portion of runtime path of "/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/libflexcell_interfaces__rosidl_typesupport_introspection_cpp.so" to ""
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/libflexcell_interfaces__rosidl_typesupport_cpp.so
+-- Set non-toolchain portion of runtime path of "/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/libflexcell_interfaces__rosidl_typesupport_cpp.so" to ""
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/environment/pythonpath.sh
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/environment/pythonpath.dsv
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces-0.1.0-py3.12.egg-info
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces-0.1.0-py3.12.egg-info/SOURCES.txt
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces-0.1.0-py3.12.egg-info/top_level.txt
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces-0.1.0-py3.12.egg-info/PKG-INFO
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces-0.1.0-py3.12.egg-info/dependency_links.txt
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_run_demo.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_run_demo_s.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_verify_object.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_observe_s.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_observe.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/__init__.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_pick_object_s.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_move_to_pose.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_pick_object.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_place_object_s.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_run_pick_place.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_verify_object_s.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_place_object.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_move_to_pose_s.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_run_pick_place_s.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/_flexcell_interfaces_s.ep.rosidl_typesupport_c.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/_flexcell_interfaces_s.ep.rosidl_typesupport_introspection_c.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/_flexcell_interfaces_s.ep.rosidl_typesupport_fastrtps_c.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/flexcell_interfaces_s__rosidl_typesupport_fastrtps_c.so
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/__init__.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/srv
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/srv/_engage_carry.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/srv/__init__.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/srv/_engage_carry_s.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/srv/_query_carry_s.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/srv/_query_carry.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/flexcell_interfaces_s__rosidl_typesupport_introspection_c.so
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_world_state.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_world_object_s.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_task_constraints_s.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_history_entry_s.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_task_context.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/__init__.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_world_state_s.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_world_object.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_robot_state_summary.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_carry_state_s.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_task_context_s.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_assignment.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_task_constraints.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_history_entry.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_assignment_s.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_zone_state_s.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_zone_state.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_robot_state_summary_s.c
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_carry_state.py
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/flexcell_interfaces_s__rosidl_typesupport_c.so
+Listing '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/__init__.py'...
+Listing '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/__init__.py'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_move_to_pose.py'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_observe.py'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_pick_object.py'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_place_object.py'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_run_demo.py'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_run_pick_place.py'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/action/_verify_object.py'...
+Listing '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/__init__.py'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_assignment.py'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_carry_state.py'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_history_entry.py'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_robot_state_summary.py'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_task_constraints.py'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_task_context.py'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_world_object.py'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_world_state.py'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/msg/_zone_state.py'...
+Listing '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/srv'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/srv/__init__.py'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/srv/_engage_carry.py'...
+Compiling '/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/srv/_query_carry.py'...
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/flexcell_interfaces_s__rosidl_typesupport_fastrtps_c.so
+-- Set non-toolchain portion of runtime path of "/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/flexcell_interfaces_s__rosidl_typesupport_fastrtps_c.so" to ""
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/flexcell_interfaces_s__rosidl_typesupport_introspection_c.so
+-- Set non-toolchain portion of runtime path of "/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/flexcell_interfaces_s__rosidl_typesupport_introspection_c.so" to ""
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/flexcell_interfaces_s__rosidl_typesupport_c.so
+-- Set non-toolchain portion of runtime path of "/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/python3.12/site-packages/flexcell_interfaces/flexcell_interfaces_s__rosidl_typesupport_c.so" to ""
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/libflexcell_interfaces__rosidl_generator_py.so
+-- Set non-toolchain portion of runtime path of "/home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/lib/libflexcell_interfaces__rosidl_generator_py.so" to ""
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/rust
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/rust/Cargo.toml
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/rust/build.rs
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/rust/src
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/rust/src/action
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/rust/src/action/rmw.rs
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/rust/src/srv.rs
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/rust/src/msg.rs
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/rust/src/srv
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/rust/src/srv/rmw.rs
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/rust/src/action.rs
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/rust/src/msg
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/rust/src/msg/rmw.rs
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/rust/src/lib.rs
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/srv/EngageCarry.idl
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/srv/QueryCarry.idl
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/Assignment.idl
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/TaskConstraints.idl
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/HistoryEntry.idl
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/TaskContext.idl
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/WorldObject.idl
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/WorldState.idl
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/RobotStateSummary.idl
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/CarryState.idl
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/ZoneState.idl
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/MoveToPose.idl
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/Observe.idl
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/PickObject.idl
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/PlaceObject.idl
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/VerifyObject.idl
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/RunPickPlace.idl
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/RunDemo.idl
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/srv/EngageCarry.srv
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/srv/QueryCarry.srv
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/Assignment.msg
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/TaskConstraints.msg
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/HistoryEntry.msg
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/TaskContext.msg
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/WorldObject.msg
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/WorldState.msg
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/RobotStateSummary.msg
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/CarryState.msg
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/msg/ZoneState.msg
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/MoveToPose.action
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/Observe.action
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/PickObject.action
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/PlaceObject.action
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/VerifyObject.action
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/RunPickPlace.action
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/action/RunDemo.action
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/ament_index/resource_index/package_run_dependencies/flexcell_interfaces
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/ament_index/resource_index/parent_prefix_path/flexcell_interfaces
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/environment/ament_prefix_path.sh
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/environment/ament_prefix_path.dsv
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/environment/path.sh
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/environment/path.dsv
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/local_setup.bash
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/local_setup.sh
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/local_setup.zsh
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/local_setup.dsv
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/package.dsv
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/ament_index/resource_index/packages/flexcell_interfaces
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/export_flexcell_interfaces__rosidl_generator_cExport.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/export_flexcell_interfaces__rosidl_generator_cExport-noconfig.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/export_flexcell_interfaces__rosidl_typesupport_fastrtps_cExport.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/export_flexcell_interfaces__rosidl_typesupport_fastrtps_cExport-noconfig.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/flexcell_interfaces__rosidl_typesupport_introspection_cExport.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/flexcell_interfaces__rosidl_typesupport_introspection_cExport-noconfig.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/flexcell_interfaces__rosidl_typesupport_cExport.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/flexcell_interfaces__rosidl_typesupport_cExport-noconfig.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/export_flexcell_interfaces__rosidl_generator_cppExport.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/export_flexcell_interfaces__rosidl_typesupport_fastrtps_cppExport.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/export_flexcell_interfaces__rosidl_typesupport_fastrtps_cppExport-noconfig.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/flexcell_interfaces__rosidl_typesupport_introspection_cppExport.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/flexcell_interfaces__rosidl_typesupport_introspection_cppExport-noconfig.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/flexcell_interfaces__rosidl_typesupport_cppExport.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/flexcell_interfaces__rosidl_typesupport_cppExport-noconfig.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/export_flexcell_interfaces__rosidl_generator_pyExport.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/export_flexcell_interfaces__rosidl_generator_pyExport-noconfig.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/rosidl_cmake-extras.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/ament_cmake_export_dependencies-extras.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/ament_cmake_export_include_directories-extras.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/ament_cmake_export_libraries-extras.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/ament_cmake_export_targets-extras.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/rosidl_cmake_export_typesupport_targets-extras.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/rosidl_cmake_export_typesupport_libraries-extras.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/rosidl_cmake_aggregate_target-extras.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/flexcell_interfacesConfig.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/cmake/flexcell_interfacesConfig-version.cmake
+-- Installing: /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_interfaces/share/flexcell_interfaces/package.xml
+Finished <<< flexcell_interfaces [20.2s]
+Starting >>> flexcell_skills
+running egg_info
+creating ../../../../../../../.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/flexcell_skills.egg-info
+writing ../../../../../../../.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/flexcell_skills.egg-info/PKG-INFO
+writing dependency_links to ../../../../../../../.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/flexcell_skills.egg-info/dependency_links.txt
+writing entry points to ../../../../../../../.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/flexcell_skills.egg-info/entry_points.txt
+writing requirements to ../../../../../../../.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/flexcell_skills.egg-info/requires.txt
+writing top-level names to ../../../../../../../.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/flexcell_skills.egg-info/top_level.txt
+writing manifest file '../../../../../../../.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/flexcell_skills.egg-info/SOURCES.txt'
+reading manifest file '../../../../../../../.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/flexcell_skills.egg-info/SOURCES.txt'
+writing manifest file '../../../../../../../.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/flexcell_skills.egg-info/SOURCES.txt'
+running build
+running build_py
+creating /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build
+creating /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib
+creating /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/place_server.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/jev_policy.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/hybrid_policy.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/carry_server.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/canonical_state.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/decision_policy.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/__init__.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/pose_stream_worker.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/observe_server.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/skill_contract.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/llm_policy.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/confidence_calibration.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/inference_budget.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/pose_request_worker.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/task_fsm_server.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/common.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/verify_server.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/pick_server.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/move_to_pose_server.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+copying flexcell_skills/jev_backends.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills
+creating /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts
+copying flexcell_skills/contracts/recovery.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts
+copying flexcell_skills/contracts/injection.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts
+copying flexcell_skills/contracts/benchmark_protocol.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts
+copying flexcell_skills/contracts/episode.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts
+copying flexcell_skills/contracts/trajectory.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts
+copying flexcell_skills/contracts/__init__.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts
+copying flexcell_skills/contracts/action_result.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts
+copying flexcell_skills/contracts/error_codes.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts
+copying flexcell_skills/contracts/skill_result.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts
+copying flexcell_skills/contracts/safety_gate.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts
+copying flexcell_skills/contracts/smoke_window.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts
+copying flexcell_skills/contracts/metrics.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts
+copying flexcell_skills/contracts/routing_audit.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts
+copying flexcell_skills/contracts/benchmark_protocol_v2.json -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts
+running install
+running install_lib
+creating /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/place_server.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/jev_policy.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/hybrid_policy.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/carry_server.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/canonical_state.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/decision_policy.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/__init__.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/pose_stream_worker.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+creating /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts/benchmark_protocol_v2.json -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts/recovery.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts/injection.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts/benchmark_protocol.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts/episode.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts/trajectory.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts/__init__.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts/action_result.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts/error_codes.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts/skill_result.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts/safety_gate.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts/smoke_window.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts/metrics.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/contracts/routing_audit.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/observe_server.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/skill_contract.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/llm_policy.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/confidence_calibration.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/inference_budget.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/pose_request_worker.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/task_fsm_server.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/common.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/verify_server.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/pick_server.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/move_to_pose_server.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+copying /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/build/lib/flexcell_skills/jev_backends.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/place_server.py to place_server.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/jev_policy.py to jev_policy.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/hybrid_policy.py to hybrid_policy.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/carry_server.py to carry_server.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/canonical_state.py to canonical_state.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/decision_policy.py to decision_policy.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/__init__.py to __init__.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/pose_stream_worker.py to pose_stream_worker.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts/recovery.py to recovery.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts/injection.py to injection.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts/benchmark_protocol.py to benchmark_protocol.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts/episode.py to episode.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts/trajectory.py to trajectory.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts/__init__.py to __init__.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts/action_result.py to action_result.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts/error_codes.py to error_codes.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts/skill_result.py to skill_result.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts/safety_gate.py to safety_gate.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts/smoke_window.py to smoke_window.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts/metrics.py to metrics.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/contracts/routing_audit.py to routing_audit.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/observe_server.py to observe_server.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/skill_contract.py to skill_contract.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/llm_policy.py to llm_policy.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/confidence_calibration.py to confidence_calibration.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/inference_budget.py to inference_budget.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/pose_request_worker.py to pose_request_worker.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/task_fsm_server.py to task_fsm_server.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/common.py to common.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/verify_server.py to verify_server.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/pick_server.py to pick_server.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/move_to_pose_server.py to move_to_pose_server.cpython-312.pyc
+byte-compiling /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/jev_backends.py to jev_backends.cpython-312.pyc
+running install_data
+creating /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/share/ament_index
+creating /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/share/ament_index/resource_index
+creating /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/share/ament_index/resource_index/packages
+copying resource/flexcell_skills -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/share/ament_index/resource_index/packages
+copying package.xml -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/share/flexcell_skills
+creating /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/share/flexcell_skills/launch
+copying launch/move_to_pose.launch.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/share/flexcell_skills/launch
+copying launch/week1.launch.py -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/share/flexcell_skills/launch
+creating /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/share/flexcell_skills/config
+copying config/move_to_pose.yaml -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/share/flexcell_skills/config
+copying config/week1.yaml -> /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/share/flexcell_skills/config
+running install_egg_info
+Copying ../../../../../../../.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/flexcell_skills.egg-info to /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills-0.1.0-py3.12.egg-info
+running install_scripts
+Installing carry_server script to /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/flexcell_skills
+Installing move_to_pose_server script to /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/flexcell_skills
+Installing observe_server script to /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/flexcell_skills
+Installing pick_server script to /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/flexcell_skills
+Installing place_server script to /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/flexcell_skills
+Installing task_fsm_server script to /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/flexcell_skills
+Installing verify_server script to /home/ros/.local/share/flexcell/fixed_smoke_20261024/install/flexcell_skills/lib/flexcell_skills
+writing list of installed files to '/home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/install.log'
+Finished <<< flexcell_skills [1.80s]
+
+Summary: 2 packages finished [22.4s]
