@@ -1,0 +1,255 @@
+{
+  "kind": "failure inventory only; no pooling or rescoring of historical outcomes",
+  "raw_pick_carry_logs_available": false,
+  "physical_root_cause": "UNKNOWN",
+  "rows": [
+    {
+      "file": "setup/acceptance/tau_sweep_desktop_20261005/batch_20261005_141611.jsonl",
+      "file_sha256": "344840c3be94b354f8370c636508e4a063659863b9e449beb47d88f78c654cd9",
+      "run": 4,
+      "policy": "hybrid",
+      "stage": "baseline",
+      "runtime_fingerprint": "b66edd87c8f3b06ee33a8d5abe583db4020290256aa7aa355f72acef8df1b299",
+      "outcome": "FAILED",
+      "harness_error": null,
+      "result_error_code": "ERR_RECOVERY_EXHAUSTED",
+      "evidence_id": "week1_demo_v1-de542acf",
+      "fsm_trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK",
+        "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED",
+        "RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1))",
+        "PICK_B(attempt=2):FAIL:ERR_GRASP_FAILED"
+      ]
+    },
+    {
+      "file": "setup/acceptance/tau_sweep_desktop_20261005/batch_20261005_141611.jsonl",
+      "file_sha256": "344840c3be94b354f8370c636508e4a063659863b9e449beb47d88f78c654cd9",
+      "run": 14,
+      "policy": "hybrid",
+      "stage": "baseline",
+      "runtime_fingerprint": "b66edd87c8f3b06ee33a8d5abe583db4020290256aa7aa355f72acef8df1b299",
+      "outcome": "FAILED",
+      "harness_error": null,
+      "result_error_code": "ERR_RECOVERY_EXHAUSTED",
+      "evidence_id": "week1_demo_v1-53ff045a",
+      "fsm_trace": [
+        "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+        "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+        "PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED"
+      ]
+    },
+    {
+      "file": "setup/acceptance/tau_sweep_desktop_20261005/batch_20261005_141611.jsonl",
+      "file_sha256": "344840c3be94b354f8370c636508e4a063659863b9e449beb47d88f78c654cd9",
+      "run": 15,
+      "policy": "hybrid",
+      "stage": "baseline",
+      "runtime_fingerprint": "b66edd87c8f3b06ee33a8d5abe583db4020290256aa7aa355f72acef8df1b299",
+      "outcome": "FAILED",
+      "harness_error": null,
+      "result_error_code": "ERR_RECOVERY_EXHAUSTED",
+      "evidence_id": "week1_demo_v1-86a648a5",
+      "fsm_trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK",
+        "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED",
+        "RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1))",
+        "PICK_B(attempt=2):FAIL:ERR_GRASP_FAILED"
+      ]
+    },
+    {
+      "file": "setup/acceptance/tau_sweep_desktop_20261005/batch_20261005_160611.jsonl",
+      "file_sha256": "48901701618d9caeb1d5cc299cbc27b6ef5e997f23bcecc6bc3ceca4d2956aa9",
+      "run": 5,
+      "policy": "hybrid",
+      "stage": "smoke",
+      "runtime_fingerprint": "268b31b2899f40408392e95be092e6d6f017c61dfc3572edd27108ef411791eb",
+      "outcome": "FAILED",
+      "harness_error": null,
+      "result_error_code": "ERR_RECOVERY_EXHAUSTED",
+      "evidence_id": "week1_demo_v1-38976228",
+      "fsm_trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK",
+        "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED",
+        "PICK_B(attempt=2):FAIL:ERR_GRASP_FAILED"
+      ]
+    },
+    {
+      "file": "setup/acceptance/tau_sweep_desktop_20261005/batch_20261005_161922.jsonl",
+      "file_sha256": "6a549de712e05c166578e48360214ae039368ca9908e74bf12d2a9bb9676d942",
+      "run": 5,
+      "policy": "hybrid",
+      "stage": "baseline",
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "outcome": "FAILED",
+      "harness_error": null,
+      "result_error_code": "ERR_RECOVERY_EXHAUSTED",
+      "evidence_id": "week1_demo_v1-6962cac6",
+      "fsm_trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK",
+        "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED",
+        "PICK_B(attempt=2):FAIL:ERR_GRASP_FAILED"
+      ]
+    },
+    {
+      "file": "setup/acceptance/tau_sweep_desktop_20261005/batch_20261005_161922.jsonl",
+      "file_sha256": "6a549de712e05c166578e48360214ae039368ca9908e74bf12d2a9bb9676d942",
+      "run": 9,
+      "policy": "hybrid",
+      "stage": "baseline",
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "outcome": "FAILED",
+      "harness_error": null,
+      "result_error_code": "ERR_RECOVERY_EXHAUSTED",
+      "evidence_id": "week1_demo_v1-febca8f2",
+      "fsm_trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK",
+        "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED",
+        "PICK_B(attempt=2):FAIL:ERR_GRASP_FAILED"
+      ]
+    },
+    {
+      "file": "setup/acceptance/tau_sweep_desktop_20261005/batch_20261005_164336.jsonl",
+      "file_sha256": "12bd137e2acd9f8214d805eef6542508c03878596bb18cfe3a7cb88fc4ae6b9a",
+      "run": 5,
+      "policy": "hybrid",
+      "stage": "smoke",
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "outcome": "FAILED",
+      "harness_error": null,
+      "result_error_code": "ERR_RECOVERY_EXHAUSTED",
+      "evidence_id": "week1_demo_v1-c0eae15d",
+      "fsm_trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK",
+        "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED",
+        "RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1))",
+        "PICK_B(attempt=2):FAIL:ERR_GRASP_FAILED"
+      ]
+    },
+    {
+      "file": "setup/acceptance/tau_sweep_desktop_20261005/batch_20261005_184822.jsonl",
+      "file_sha256": "0a70683c8dab0fa1b1a6030d060402c2cd2f530f9acee929e7adb3b52f6e314f",
+      "run": 2,
+      "policy": "hybrid",
+      "stage": "smoke",
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "outcome": "FAILED",
+      "harness_error": null,
+      "result_error_code": "ERR_RECOVERY_EXHAUSTED",
+      "evidence_id": "week1_demo_v1-2cb97ba7",
+      "fsm_trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK",
+        "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED",
+        "RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1))",
+        "PICK_B(attempt=2):FAIL:ERR_GRASP_FAILED"
+      ]
+    },
+    {
+      "file": "setup/acceptance/tau_sweep_desktop_20261005/batch_20261005_184822.jsonl",
+      "file_sha256": "0a70683c8dab0fa1b1a6030d060402c2cd2f530f9acee929e7adb3b52f6e314f",
+      "run": 3,
+      "policy": "hybrid",
+      "stage": "smoke",
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "outcome": "FAILED",
+      "harness_error": null,
+      "result_error_code": "ERR_RECOVERY_EXHAUSTED",
+      "evidence_id": "week1_demo_v1-5911f999",
+      "fsm_trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK",
+        "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED",
+        "RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1))",
+        "PICK_B(attempt=2):FAIL:ERR_GRASP_FAILED"
+      ]
+    },
+    {
+      "file": "setup/acceptance/tau_sweep_desktop_20261005/batch_20261005_185833.jsonl",
+      "file_sha256": "41afe4003fd21ca8af046fff666a9a0bc933c84538551817af7392211ed65642",
+      "run": 20,
+      "policy": "fsm",
+      "stage": "baseline",
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "outcome": "FAILED",
+      "harness_error": null,
+      "result_error_code": "ERR_RECOVERY_EXHAUSTED",
+      "evidence_id": "week1_demo_v1-932ced6e",
+      "fsm_trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK",
+        "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED",
+        "RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1))",
+        "PICK_B(attempt=2):FAIL:ERR_GRASP_FAILED"
+      ]
+    },
+    {
+      "file": "setup/acceptance/tau_sweep_desktop_20261005/batch_20261005_192253.jsonl",
+      "file_sha256": "7fbba098b9a9fc47f8a7df193fae8cd9aaf3b80d49843d91dd3d21782fd95774",
+      "run": 3,
+      "policy": "hybrid",
+      "stage": "baseline",
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "outcome": "FAILED",
+      "harness_error": null,
+      "result_error_code": "ERR_RECOVERY_EXHAUSTED",
+      "evidence_id": "week1_demo_v1-7b5793db",
+      "fsm_trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK",
+        "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED",
+        "RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1))",
+        "PICK_B(attempt=2):FAIL:ERR_GRASP_FAILED"
+      ]
+    },
+    {
+      "file": "setup/acceptance/tau_sweep_desktop_20261005/batch_20261005_192253.jsonl",
+      "file_sha256": "7fbba098b9a9fc47f8a7df193fae8cd9aaf3b80d49843d91dd3d21782fd95774",
+      "run": 10,
+      "policy": "hybrid",
+      "stage": "baseline",
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "outcome": "FAILED",
+      "harness_error": null,
+      "result_error_code": "ERR_RECOVERY_EXHAUSTED",
+      "evidence_id": "week1_demo_v1-25b2a539",
+      "fsm_trace": [
+        "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+        "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+        "PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED"
+      ]
+    },
+    {
+      "file": "setup/acceptance/tau_sweep_desktop_20261005/batch_20261005_192253.jsonl",
+      "file_sha256": "7fbba098b9a9fc47f8a7df193fae8cd9aaf3b80d49843d91dd3d21782fd95774",
+      "run": 13,
+      "policy": "hybrid",
+      "stage": "baseline",
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "outcome": "FAILED",
+      "harness_error": null,
+      "result_error_code": "ERR_RECOVERY_EXHAUSTED",
+      "evidence_id": "week1_demo_v1-d82bcf45",
+      "fsm_trace": [
+        "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+        "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+        "PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED"
+      ]
+    }
+  ]
+}

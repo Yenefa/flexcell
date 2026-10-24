@@ -1,0 +1,439 @@
+{
+  "source_base": "c79e0c672c95e2d9cd04112ef42b65e4c67e1845",
+  "kind": "synthetic CLI reproduction; no ROS/Gazebo/model/robot calls",
+  "cases": [
+    {
+      "mode": "ghost",
+      "before": {
+        "exit_code": 0,
+        "dispatch": {
+          "picks": 2,
+          "place_targets": [
+            [
+              0.22,
+              0.0,
+              0.0175
+            ],
+            [
+              0.22,
+              0.0,
+              0.0175
+            ]
+          ]
+        },
+        "rows": [
+          {
+            "trial": 1,
+            "accepted": true,
+            "outcome": 0,
+            "error_code": 0,
+            "status": 0,
+            "grasp_attached": false,
+            "rise_m": -0.0175,
+            "after_z": 0.0,
+            "before_z": 0.0175,
+            "elapsed_s": 0.0,
+            "detail": "synthetic result",
+            "release": {
+              "outcome": 0,
+              "error_code": 0
+            }
+          },
+          {
+            "trial": 2,
+            "accepted": true,
+            "outcome": 0,
+            "error_code": 0,
+            "status": 0,
+            "grasp_attached": false,
+            "rise_m": -0.0175,
+            "after_z": 0.0,
+            "before_z": 0.0175,
+            "elapsed_s": 0.0,
+            "detail": "synthetic result",
+            "release": {
+              "outcome": 0,
+              "error_code": 0
+            }
+          }
+        ],
+        "stdout": "waiting for /pick_object and /place_object ...\n   1/2  outcome=0 err=0 rise=-0.0175 attached=False  0.0s\n   2/2  outcome=0 err=0 rise=-0.0175 attached=False  0.0s\n\n=== GRASP PROBE SUMMARY ===\n  trials:            2\n  goal accepted:     2\n  grasp OK (err 0):  2\n  ERR_GRASP_FAILED:  0\n  other errors:      0  []\n  success rate:      2/2 = 1.000  Wilson95 [0.342, 1.000]\n  rise_m on success: min=-0.0175 p50=-0.0175 max=-0.0175\n  rows: /tmp/tmp5jzht3td/ghost-before.jsonl\n\n  NOTE: a Wilson interval this wide cannot separate a real grasp\n  regression from servo jitter. It bounds the rate, nothing finer.\n"
+      },
+      "after": {
+        "exit_code": 1,
+        "dispatch": {
+          "picks": 1,
+          "place_targets": []
+        },
+        "rows": [
+          {
+            "trial": 1,
+            "object_name": "target_box_b",
+            "precondition": {
+              "ok": true,
+              "reset": {
+                "ok": true,
+                "rc": 0,
+                "report": {
+                  "ok": true
+                },
+                "stdout": "{\"ok\": true}",
+                "stderr": ""
+              },
+              "injection_clear": {
+                "rc": 0,
+                "stdout": "{\"ok\": true}",
+                "stderr": ""
+              }
+            },
+            "action": {
+              "accepted": true,
+              "terminal_confirmed": true,
+              "ros_status": 4,
+              "goal_uuid": "000102030405060708090a0b0c0d0e0f",
+              "harness_error": null
+            },
+            "pick_ok": false,
+            "outcome": 0,
+            "error_code": 0,
+            "status": 0,
+            "grasp_attached": false,
+            "evidence_id": "synthetic-pick",
+            "detail": "synthetic result",
+            "before": null,
+            "after": null,
+            "rise_m": null,
+            "harness_error": "inconsistent ROS terminal / skill result contract",
+            "cleanup": {
+              "ok": true,
+              "rc": 0,
+              "report": {
+                "ok": true
+              },
+              "stdout": "{\"ok\": true}",
+              "stderr": ""
+            },
+            "elapsed_s": 0.0
+          }
+        ],
+        "stdout": "trial 1/2: pick_ok=False error=0 harness=inconsistent ROS terminal / skill result contract\nObserved picks: 0/0 succeeded; Wilson95 [0.000, 1.000]; grasp failures=0\nRows: /tmp/tmp5jzht3td/ghost-after.jsonl; diagnostic observations only, not benchmark qualification\n"
+      }
+    },
+    {
+      "mode": "timeout",
+      "before": {
+        "exit_code": 0,
+        "dispatch": {
+          "picks": 2,
+          "place_targets": [
+            [
+              0.22,
+              0.0,
+              0.0175
+            ]
+          ]
+        },
+        "rows": [
+          {
+            "trial": 1,
+            "accepted": true,
+            "reason": "no result"
+          },
+          {
+            "trial": 2,
+            "accepted": true,
+            "outcome": 0,
+            "error_code": 0,
+            "status": 1,
+            "grasp_attached": true,
+            "rise_m": 0.0925,
+            "after_z": 0.11,
+            "before_z": 0.0175,
+            "elapsed_s": 0.0,
+            "detail": "synthetic result",
+            "release": {
+              "outcome": 0,
+              "error_code": 0
+            }
+          }
+        ],
+        "stdout": "waiting for /pick_object and /place_object ...\n   1/2  NO RESULT\n   2/2  outcome=0 err=0 rise=+0.0925 attached=True  0.0s\n\n=== GRASP PROBE SUMMARY ===\n  trials:            2\n  goal accepted:     2\n  grasp OK (err 0):  1\n  ERR_GRASP_FAILED:  0\n  other errors:      0  []\n  success rate:      1/2 = 0.500  Wilson95 [0.095, 0.905]\n  rise_m on success: min=+0.0925 p50=+0.0925 max=+0.0925\n  rows: /tmp/tmp5jzht3td/timeout-before.jsonl\n\n  NOTE: a Wilson interval this wide cannot separate a real grasp\n  regression from servo jitter. It bounds the rate, nothing finer.\n"
+      },
+      "after": {
+        "exit_code": 1,
+        "dispatch": {
+          "picks": 1,
+          "place_targets": []
+        },
+        "rows": [
+          {
+            "trial": 1,
+            "object_name": "target_box_b",
+            "precondition": {
+              "ok": true,
+              "reset": {
+                "ok": true,
+                "rc": 0,
+                "report": {
+                  "ok": true
+                },
+                "stdout": "{\"ok\": true}",
+                "stderr": ""
+              },
+              "injection_clear": {
+                "rc": 0,
+                "stdout": "{\"ok\": true}",
+                "stderr": ""
+              }
+            },
+            "action": {
+              "accepted": true,
+              "terminal_confirmed": false,
+              "ros_status": null,
+              "goal_uuid": "000102030405060708090a0b0c0d0e0f",
+              "harness_error": "action result timed out",
+              "cancel_acknowledged": true
+            },
+            "pick_ok": false,
+            "harness_error": "action result timed out",
+            "cleanup": {
+              "ok": false,
+              "not_run": "action termination unknown"
+            },
+            "elapsed_s": 0.0
+          }
+        ],
+        "stdout": "trial 1/2: pick_ok=False error=None harness=action result timed out\nObserved picks: 0/0 succeeded; Wilson95 [0.000, 1.000]; grasp failures=0\nRows: /tmp/tmp5jzht3td/timeout-after.jsonl; diagnostic observations only, not benchmark qualification\n"
+      }
+    },
+    {
+      "mode": "b_position",
+      "before": {
+        "exit_code": 0,
+        "dispatch": {
+          "picks": 2,
+          "place_targets": [
+            [
+              0.22,
+              0.0,
+              0.0175
+            ],
+            [
+              0.22,
+              0.0,
+              0.0175
+            ]
+          ]
+        },
+        "rows": [
+          {
+            "trial": 1,
+            "accepted": true,
+            "outcome": 0,
+            "error_code": 0,
+            "status": 1,
+            "grasp_attached": true,
+            "rise_m": 0.0925,
+            "after_z": 0.11,
+            "before_z": 0.0175,
+            "elapsed_s": 0.0,
+            "detail": "synthetic result",
+            "release": {
+              "outcome": 0,
+              "error_code": 0
+            }
+          },
+          {
+            "trial": 2,
+            "accepted": true,
+            "outcome": 0,
+            "error_code": 0,
+            "status": 1,
+            "grasp_attached": true,
+            "rise_m": 0.0925,
+            "after_z": 0.11,
+            "before_z": 0.0175,
+            "elapsed_s": 0.0,
+            "detail": "synthetic result",
+            "release": {
+              "outcome": 0,
+              "error_code": 0
+            }
+          }
+        ],
+        "stdout": "waiting for /pick_object and /place_object ...\n   1/2  outcome=0 err=0 rise=+0.0925 attached=True  0.0s\n   2/2  outcome=0 err=0 rise=+0.0925 attached=True  0.0s\n\n=== GRASP PROBE SUMMARY ===\n  trials:            2\n  goal accepted:     2\n  grasp OK (err 0):  2\n  ERR_GRASP_FAILED:  0\n  other errors:      0  []\n  success rate:      2/2 = 1.000  Wilson95 [0.342, 1.000]\n  rise_m on success: min=+0.0925 p50=+0.0925 max=+0.0925\n  rows: /tmp/tmp5jzht3td/b_position-before.jsonl\n\n  NOTE: a Wilson interval this wide cannot separate a real grasp\n  regression from servo jitter. It bounds the rate, nothing finer.\n"
+      },
+      "after": {
+        "exit_code": 0,
+        "dispatch": {
+          "picks": 2,
+          "place_targets": [
+            [
+              0.2,
+              -0.18,
+              0.0175
+            ],
+            [
+              0.2,
+              -0.18,
+              0.0175
+            ]
+          ]
+        },
+        "rows": [
+          {
+            "trial": 1,
+            "object_name": "target_box_b",
+            "precondition": {
+              "ok": true,
+              "reset": {
+                "ok": true,
+                "rc": 0,
+                "report": {
+                  "ok": true
+                },
+                "stdout": "{\"ok\": true}",
+                "stderr": ""
+              },
+              "injection_clear": {
+                "rc": 0,
+                "stdout": "{\"ok\": true}",
+                "stderr": ""
+              }
+            },
+            "action": {
+              "accepted": true,
+              "terminal_confirmed": true,
+              "ros_status": 4,
+              "goal_uuid": "000102030405060708090a0b0c0d0e0f",
+              "harness_error": null
+            },
+            "pick_ok": true,
+            "outcome": 0,
+            "error_code": 0,
+            "status": 1,
+            "grasp_attached": true,
+            "evidence_id": "synthetic-pick",
+            "detail": "synthetic result",
+            "before": [
+              0.2,
+              -0.18,
+              0.0175
+            ],
+            "after": [
+              0.2,
+              -0.18,
+              0.11
+            ],
+            "rise_m": 0.0925,
+            "harness_error": null,
+            "release": {
+              "accepted": true,
+              "terminal_confirmed": true,
+              "ros_status": 4,
+              "goal_uuid": "000102030405060708090a0b0c0d0e0f",
+              "harness_error": null,
+              "outcome": 0,
+              "error_code": 0,
+              "status": 1,
+              "released": true,
+              "evidence_id": "synthetic-place",
+              "detail": "synthetic place",
+              "measured_after": [
+                0.2,
+                -0.18,
+                0.0175
+              ]
+            },
+            "cleanup": {
+              "ok": true,
+              "rc": 0,
+              "report": {
+                "ok": true
+              },
+              "stdout": "{\"ok\": true}",
+              "stderr": ""
+            },
+            "elapsed_s": 0.0
+          },
+          {
+            "trial": 2,
+            "object_name": "target_box_b",
+            "precondition": {
+              "ok": true,
+              "reset": {
+                "ok": true,
+                "rc": 0,
+                "report": {
+                  "ok": true
+                },
+                "stdout": "{\"ok\": true}",
+                "stderr": ""
+              },
+              "injection_clear": {
+                "rc": 0,
+                "stdout": "{\"ok\": true}",
+                "stderr": ""
+              }
+            },
+            "action": {
+              "accepted": true,
+              "terminal_confirmed": true,
+              "ros_status": 4,
+              "goal_uuid": "000102030405060708090a0b0c0d0e0f",
+              "harness_error": null
+            },
+            "pick_ok": true,
+            "outcome": 0,
+            "error_code": 0,
+            "status": 1,
+            "grasp_attached": true,
+            "evidence_id": "synthetic-pick",
+            "detail": "synthetic result",
+            "before": [
+              0.2,
+              -0.18,
+              0.0175
+            ],
+            "after": [
+              0.2,
+              -0.18,
+              0.11
+            ],
+            "rise_m": 0.0925,
+            "harness_error": null,
+            "release": {
+              "accepted": true,
+              "terminal_confirmed": true,
+              "ros_status": 4,
+              "goal_uuid": "000102030405060708090a0b0c0d0e0f",
+              "harness_error": null,
+              "outcome": 0,
+              "error_code": 0,
+              "status": 1,
+              "released": true,
+              "evidence_id": "synthetic-place",
+              "detail": "synthetic place",
+              "measured_after": [
+                0.2,
+                -0.18,
+                0.0175
+              ]
+            },
+            "cleanup": {
+              "ok": true,
+              "rc": 0,
+              "report": {
+                "ok": true
+              },
+              "stdout": "{\"ok\": true}",
+              "stderr": ""
+            },
+            "elapsed_s": 0.0
+          }
+        ],
+        "stdout": "trial 1/2: pick_ok=True error=0 harness=None\ntrial 2/2: pick_ok=True error=0 harness=None\nObserved picks: 2/2 succeeded; Wilson95 [0.342, 1.000]; grasp failures=0\nMeasured rise: min=+0.0925 median=+0.0925 max=+0.0925\nRows: /tmp/tmp5jzht3td/b_position-after.jsonl; diagnostic observations only, not benchmark qualification\n"
+      }
+    }
+  ]
+}

@@ -1,0 +1,94 @@
+{
+  "source_base": "c79e0c672c95e2d9cd04112ef42b65e4c67e1845",
+  "python": "Python 3.12.14",
+  "pytest": {
+    "command": [
+      "/workspace/.venv-flexcell/bin/python",
+      "-m",
+      "pytest",
+      "-o",
+      "addopts=",
+      "-q",
+      "--junitxml=/workspace/flexcell/setup/acceptance/grasp_probe_20261008/pytest.xml",
+      "src/flexcell/flexcell_skills/test/test_acceptance_gate.py",
+      "src/flexcell/flexcell_skills/test/test_action_result.py",
+      "src/flexcell/flexcell_skills/test/test_batch_routing.py",
+      "src/flexcell/flexcell_skills/test/test_clef_backend.py",
+      "src/flexcell/flexcell_skills/test/test_confidence_calibration.py",
+      "src/flexcell/flexcell_skills/test/test_contracts.py",
+      "src/flexcell/flexcell_skills/test/test_decision_policy.py",
+      "src/flexcell/flexcell_skills/test/test_grasp_probe.py",
+      "src/flexcell/flexcell_skills/test/test_hybrid_policy.py",
+      "src/flexcell/flexcell_skills/test/test_inference_budget.py",
+      "src/flexcell/flexcell_skills/test/test_injection.py",
+      "src/flexcell/flexcell_skills/test/test_llm_policy.py",
+      "src/flexcell/flexcell_skills/test/test_metrics.py",
+      "src/flexcell/flexcell_skills/test/test_recovery.py",
+      "src/flexcell/flexcell_skills/test/test_routing_audit.py",
+      "src/flexcell/flexcell_skills/test/test_runtime_guards.py",
+      "src/flexcell/flexcell_skills/test/test_safety_gate.py",
+      "src/flexcell/flexcell_skills/test/test_skill_contract.py",
+      "src/flexcell/flexcell_skills/test/test_undefined_attr_check.py"
+    ],
+    "environment": {
+      "PYTHONPATH": "src/flexcell/flexcell_skills"
+    },
+    "exit_code": 0,
+    "counts": {
+      "tests": 227,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0
+    },
+    "selected_files": [
+      "src/flexcell/flexcell_skills/test/test_acceptance_gate.py",
+      "src/flexcell/flexcell_skills/test/test_action_result.py",
+      "src/flexcell/flexcell_skills/test/test_batch_routing.py",
+      "src/flexcell/flexcell_skills/test/test_clef_backend.py",
+      "src/flexcell/flexcell_skills/test/test_confidence_calibration.py",
+      "src/flexcell/flexcell_skills/test/test_contracts.py",
+      "src/flexcell/flexcell_skills/test/test_decision_policy.py",
+      "src/flexcell/flexcell_skills/test/test_grasp_probe.py",
+      "src/flexcell/flexcell_skills/test/test_hybrid_policy.py",
+      "src/flexcell/flexcell_skills/test/test_inference_budget.py",
+      "src/flexcell/flexcell_skills/test/test_injection.py",
+      "src/flexcell/flexcell_skills/test/test_llm_policy.py",
+      "src/flexcell/flexcell_skills/test/test_metrics.py",
+      "src/flexcell/flexcell_skills/test/test_recovery.py",
+      "src/flexcell/flexcell_skills/test/test_routing_audit.py",
+      "src/flexcell/flexcell_skills/test/test_runtime_guards.py",
+      "src/flexcell/flexcell_skills/test/test_safety_gate.py",
+      "src/flexcell/flexcell_skills/test/test_skill_contract.py",
+      "src/flexcell/flexcell_skills/test/test_undefined_attr_check.py"
+    ],
+    "excluded_ros_files": [
+      "test_admin_exit_contract.py",
+      "test_admin_pose_rpc.py",
+      "test_canonical_state.py",
+      "test_carry_release.py",
+      "test_carry_snapshot.py",
+      "test_episode.py",
+      "test_executor_integration.py",
+      "test_gz_stream.py",
+      "test_helpers_world.py",
+      "test_jev_policy.py",
+      "test_pose_worker_shutdown.py"
+    ]
+  },
+  "static_scan": {
+    "command": [
+      "/workspace/.venv-flexcell/bin/python",
+      "setup/82_undefined_attr_check.py",
+      "src/flexcell"
+    ],
+    "exit_code": 0
+  },
+  "source_sha256": {
+    "setup/111_grasp_probe.py": "7e01ff6d363454a288cf5661dc2c125779b521b4399160b77edd09df3db6966c",
+    "src/flexcell/flexcell_skills/test/test_grasp_probe.py": "f99d49f963a612152581541ebfb6755ef49bea70e79ac82be600b269c635d8e4",
+    "setup/acceptance/grasp_probe_20261008/reproduce_probe.py": "a238fd94350acb2e9017f51594ba6c5f669134f604ab0f14af50a334026d70d1"
+  },
+  "live_grasp_probe": "NOT_RUN: no ROS/Gazebo on cloud executor",
+  "physical_grasp_root_cause": "UNKNOWN",
+  "n_ge_50": "FROZEN"
+}
