@@ -72,9 +72,13 @@ out-of-contract proposals; Week-1.5 acceptance battery is still green.
 Implementation checkmarks above do not certify this definition of done. Current
 model replay/online qualification and complete portable evidence remain open.
 Issues #30–#37 track the [IYAIC milestone](../competition/iyaic-2026/PLAN.md).
-#28 is merged; #29 and the TransferBench capabilities remain pending integration,
-not main release features. Existing open issue states are not silently closed by
-this doc update.
+#28/#29/#40/#41/#42/#44 are merged as of 2026-10-24. E-021's 60 native
+episodes are recovered and their provenance audit is independently repeatable;
+model replay and competition deployment qualification remain open. TransferBench
+capabilities remain pending integration. The existing single-task regression
+coverage and in-memory cell handoff are documented by the
+[follow-up review](https://github.com/Yenefa/flexcell/pull/45). Existing open issue
+states are not silently closed by this doc update.
 
 ## M3 — Hybrid Agent Benchmark ⚪ FUTURE
 

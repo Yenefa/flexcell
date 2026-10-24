@@ -757,9 +757,12 @@ and its [2026-10-24 recheck](../competition/iyaic-2026/evidence/e021-audit-reche
   episode recovery is closed** — the 60 files were recovered byte-identically
   from the execution host and are re-verifiable offline
   ([recovery archive](../setup/acceptance/e021_native_recovery_20261024/README.md)).
-  Model replay stays NOT_RUN (no recorded `initial_world_state`), full M3 stays
-  NOT RUN, and n≥50 stays frozen. Recovery restores auditability; it does not
-  qualify history.
+  Model replay stays NOT_RUN: a pinned model has not been re-invoked on the
+  recovered inputs. The missing `initial_world_state` separately limits physical
+  re-execution; it does not prevent per-step model-input evaluation. Full M3
+  stays NOT RUN and n≥50 stays frozen. Recovery restores auditability; it does
+  not qualify history. The fast-arm and fixed-window tools are now merged via
+  #28/#41; new sampling still requires its own eligibility decision.
 
 
 ### E-022 — Static attribute scanner repair (2026-10-07, cloud)

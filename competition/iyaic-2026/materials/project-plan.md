@@ -27,6 +27,11 @@ Clef/LLM是上层策略实现，MoveIt/ROS/Gazebo及模型来自外部项目；�
   2026-10-24 这些文件已从原执行机按字节找回并入库，同一工具复检结果为
   [`FOUND_NOT_REPLAYED: 60`](../evidence/e021-audit-recheck-20261024.json)，即**清单完整但模型重放仍为 NOT_RUN**。
   因此仍不称完整可复现benchmark——缺的不是文件，是重放与物理验收。
+- [原生记录的来源审计](../../../setup/acceptance/e021_native_recovery_20261024/README.md)
+  可独立重算 275 个 fast 提案的权重身份；这是来源核验，不是重新调用模型。
+- [家用 RX 6800 功能回归](../../../setup/acceptance/home_gpu_abort_20261024/README.md)
+  已完成 S4 两次预期失败、S5 两次预期失败、S1 一次成功及 20 次真实 Jev 决策；
+  不作为比赛版本验收或五次任务成功率，模型重放仍为 NOT_RUN。
 
 ## 技术与落地边界
 

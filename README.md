@@ -72,14 +72,18 @@ After coding — update the Issue, record evidence in EXPERIMENTS.md, link the c
 
 ## Status
 
-2026-10-17 competition preparation: the decision layer is implemented on main
+2026-10-24 competition preparation: the decision layer is implemented on main
 (FSM/Jev/Clef/LLM/Hybrid, shared executor, safety gate and EpisodeRecorder).
-Full M3 qualification is incomplete. PRs #28/#29 are still pending, while
+PRs #28/#29/#40/#41/#42/#44 are merged; full M3 qualification is incomplete.
 TransferBench composition and confirmed-boundary pause/resume exist on a separate
 feature branch. E-021 is dual-object S1; its archived pooled smoke is 8 successes
-in 10 attempts, and 60 referenced baseline Episodes remain missing from the
-checked archive. See the [competition work queue](competition/iyaic-2026/PLAN.md)
-and [inventory](competition/iyaic-2026/evidence/e021-audit.json).
+in 10 attempts. Its 60 native baseline episodes have been recovered byte-for-byte,
+and per-decision provenance can be recomputed; model replay remains NOT_RUN.
+See the [recovery archive](setup/acceptance/e021_native_recovery_20261024/README.md)
+and [competition work queue](competition/iyaic-2026/PLAN.md).
+Five later home-RX-6800 functional regressions have
+[separate evidence](setup/acceptance/home_gpu_abort_20261024/README.md);
+they do not qualify a competition deployment or replace historical samples.
 The historical machine status entries below are dated evidence, not live health.
 
 2026-10-02 mainline hardening (E-016): lifecycle paths and typed controller

@@ -1,17 +1,23 @@
 # 执行计划与任务追踪
 
-截至2026-10-17。本表是执行计划，复选框只按实际证据完成，不把计划当成果。
+截至2026-10-24，复核 main=`a7cd3cb`。本表是执行计划，复选框只按实际证据完成，不把计划当成果。
 
 | 优先级 | 任务                                                                          | 当前状态                                      |
 | ------ | ----------------------------------------------------------------------------- | --------------------------------------------- |
-| P0     | [#30 主线/PR/TransferBench收敛](https://github.com/Yenefa/flexcell/issues/30) | 本 PR 增加比赛目录与文档；运行分支整合待审    |
-| P0     | [#31 E-021便携证据与smoke口径](https://github.com/Yenefa/flexcell/issues/31)  | 摘要已只读复算；60份episode仍缺；资格规则待改 |
-| P0     | [#32 GRASP-B-001](https://github.com/Yenefa/flexcell/issues/32)               | 复用已有诊断；根因UNKNOWN                     |
-| P0     | [#33 比赛机器与快模型连接](https://github.com/Yenefa/flexcell/issues/33)      | 本环境未接VPN，health=503；真实推理NOT_RUN    |
+| P0     | [#30 主线/PR/TransferBench收敛](https://github.com/Yenefa/flexcell/issues/30) | #28/#29/#40/#41/#42/#44 已合并；TransferBench 未合，比赛版本未固定 |
+| P0     | [#31 E-021便携证据与smoke口径](https://github.com/Yenefa/flexcell/issues/31)  | 已关闭；60/60 回收、来源审计及完整窗口工具已入 main；不追认历史资格 |
+| P0     | [#32 GRASP-B-001](https://github.com/Yenefa/flexcell/issues/32)               | #29 探针已合并；匹配阶段日志的诊断待执行，根因 UNKNOWN |
+| P0     | [#33 比赛机器与快模型连接](https://github.com/Yenefa/flexcell/issues/33)      | 家用 RX 6800 五项功能回归已归档并停服；比赛机器与现场部署仍未冻结 |
 | P0     | [#34 报名与材料](https://github.com/Yenefa/flexcell/issues/34)                | 初稿已建；人员/赛项细则待确认                 |
 | P1     | [#35 公平小样本方案](https://github.com/Yenefa/flexcell/issues/35)            | 待预登记，不执行资格采样                      |
 | P1     | [#36 只读Dashboard](https://github.com/Yenefa/flexcell/issues/36)             | 待实现                                        |
 | P1     | [#37 Demo与答辩](https://github.com/Yenefa/flexcell/issues/37)                | 场景与脚本初稿，现场验收待完成                |
+
+当前工作分工：云端写代码、做可运行的离线检查并给出提示词；用户手动转发给电脑 Agent，
+由电脑 Agent 执行需要 ROS/Gazebo/GPU 的已定任务，再返回原始产物。无需为这条交接链路另配云端 VPN。
+[#22 重新核定](../../setup/acceptance/issue22_readjudication_20261024/README.md)已入 main；
+[#45 修正复核记录](https://github.com/Yenefa/flexcell/pull/45)待审，指出既有单物体测试和有效内存标签生产者。
+不另建“零 task 回归覆盖”issue；#22 的关闭由维护者决定。
 
 ## 日历
 

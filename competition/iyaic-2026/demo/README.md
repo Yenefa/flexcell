@@ -29,6 +29,9 @@
 
 ## 现场准入表（每次固定演示版本填写）
 
+下表只描述比赛现场版本。家用 RX 6800 的固定五项功能回归已另有
+[回执](../../../setup/acceptance/home_gpu_abort_20261024/README.md)，不能据此填写现场 PASS。
+
 | 项                                                       | 当前值               |
 | -------------------------------------------------------- | -------------------- |
 | commit/tag、runtime fingerprint、protocol、carry backend | UNKNOWN / NOT_FROZEN |

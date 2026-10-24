@@ -4,7 +4,8 @@
 本目录收敛比赛场景、材料、演示与只读证据；通用能力留在 `src/flexcell/`，原始实验留在 `setup/acceptance/`。
 
 **交付状态：PREPARATION / NOT_READY。** 尚无比赛部署 tag，未完成现场或实体硬件验收。
-2026-10-17 审阅基线为 `a9b6a6255d91a568e44eea555ecb33f7e0d7d49f`。
+2026-10-24 状态复核基线为 `a7cd3cbf5bac747d72d4df002e5a3f743dfb2802`；
+此前 2026-10-17 审阅基线为 `a9b6a6255d91a568e44eea555ecb33f7e0d7d49f`。
 
 ## 入口
 
@@ -36,8 +37,9 @@
 | 能力                                                     | 实现/交付位置                                                         | 可说的结论                 |
 | -------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------- |
 | FSM/Jev/Clef/LLM/Hybrid、统一执行、安全门、验证、episode | main 审阅基线                                                         | 已有实现，完整 M3 未验收   |
-| 防止零快臂调用冒充 Hybrid                                | [PR #28](https://github.com/Yenefa/flexcell/pull/28)                  | 待合并；运行指纹更新后重验 |
-| 抓取探针动作终态与证据                                   | [PR #29](https://github.com/Yenefa/flexcell/pull/29)，依赖 #28        | 待合并；物理根因未知       |
+| 防止零快臂调用冒充 Hybrid                                | [PR #28](https://github.com/Yenefa/flexcell/pull/28)，已合并          | 新指纹仍需独立资格验收     |
+| 抓取探针动作终态与证据                                   | [PR #29](https://github.com/Yenefa/flexcell/pull/29)，已合并          | 探针可用；物理根因未知     |
+| 真实 Skill 错因、失败清理与完整 smoke 窗口                | [PR #40](https://github.com/Yenefa/flexcell/pull/40) / [#41](https://github.com/Yenefa/flexcell/pull/41)，已合并 | 功能回归和准入工具已归档；不追认旧资格 |
 | T1/T3、组合任务、确认边界暂停续跑                        | [TransferBench 分支](https://github.com/Yenefa/flexcell/tree/01fd76f) | 有界仿真试点，未合入 main  |
 
 现有 T1/T3 小试点双方成功。T3 外层计划由调用者提供，模型决定段内动作；不称自主生成组合计划。
@@ -52,4 +54,12 @@ Hybrid 付费节省以纯 LLM 为对照，本地推理仍有硬件/能耗/时延
 `n≥50`、AC@90 和正式资格保持原冻结状态；比赛目录不授予新的采样资格。
 
 E-021 为双物体 S1 描述性先导：FSM 19/20、Hybrid 0.03 18/20、Hybrid 0.85 17/20，
-区间重叠且顺序运行，未证明策略优越。完整原生 episode 的归档仍缺失，详见审计报告。
+区间重叠且顺序运行，未证明策略优越。60 份原生 episode 已按 SHA 和大小核对回收，
+275 个 fast 提案均有权重身份，来源审计可从原生记录重算；
+[回收与逐决策审计](../../setup/acceptance/e021_native_recovery_20261024/README.md)已入 main。
+摘要复算、字节回收及来源审计通过；模型重放和物理验收仍为 NOT_RUN。
+上述两份审计 JSON 分别保留回收前和回收后的历史快照，不能把旧 MISSING 当作当前文件状态。
+
+2026-10-24 家用 RX 6800 已完成另一个固定五项功能回归：S4 两次预期失败、S5 两次预期失败、
+S1 一次成功，20 次真实 Jev 决策；[证据与关机回执](../../setup/acceptance/home_gpu_abort_20261024/README.md)。
+它不等于五次任务成功，也不解锁 baseline 或比赛部署；服务在回执中已停止。
