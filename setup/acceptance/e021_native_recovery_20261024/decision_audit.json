@@ -1,0 +1,140 @@
+{
+  "archive": "setup/acceptance/e021_native_recovery_20261024/",
+  "source": "recomputed from recovered native episodes, not from batch summaries",
+  "method": "Every step's policy_output.policy_trace is walked. Candidate proposals are split into the fast arm (policy=jev, local weights) and the paid arm (policy=llm, remote backend). Gate outcomes, escalation reasons, weight and calibration digests and token counts are tallied per batch.",
+  "arms": {
+    "batch_20261005_161922.jsonl": {
+      "episodes": 20,
+      "policy": {
+        "hybrid/1.1": 20
+      },
+      "steps": 156,
+      "decisions_by_source": {
+        "fsm": 20,
+        "jev": 131,
+        "llm": 5
+      },
+      "trace_less_steps": 0,
+      "escalation_reasons": {
+        "uncalibrated_fast_confidence": 5
+      },
+      "calibration_sha256": {
+        "0af588a8d02a91efe60a8a84497c3fe587e590e3d060233fccbb762e88ec3fa7": 156
+      },
+      "thresholds": {
+        "0.03": 156
+      },
+      "fast_arm": {
+        "proposals": 136,
+        "models": {
+          "clef-flash-q8_0": 136
+        },
+        "model_sha256": {
+          "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9": 136
+        },
+        "backends": {
+          "clef": 136
+        },
+        "gate_failed": 0,
+        "gate_reasons": {},
+        "calibrated_proposals": 131,
+        "tokens": 195216
+      },
+      "paid_arm": {
+        "proposals": 5,
+        "backends": {
+          "deepseek-official": 5
+        },
+        "cost_status": {
+          "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING": 5
+        },
+        "completion_tokens": 295,
+        "mean_latency_ms": 866.6
+      }
+    },
+    "batch_20261005_185833.jsonl": {
+      "episodes": 20,
+      "policy": {
+        "fsm/1.0": 20
+      },
+      "steps": 163,
+      "decisions_by_source": {},
+      "trace_less_steps": 163,
+      "escalation_reasons": {},
+      "calibration_sha256": {},
+      "thresholds": {},
+      "fast_arm": {
+        "proposals": 0,
+        "models": {},
+        "model_sha256": {},
+        "backends": {},
+        "gate_failed": 0,
+        "gate_reasons": {},
+        "calibrated_proposals": 0,
+        "tokens": 0
+      },
+      "paid_arm": {
+        "proposals": 0,
+        "backends": {},
+        "cost_status": {},
+        "completion_tokens": 0,
+        "mean_latency_ms": 0.0
+      }
+    },
+    "batch_20261005_192253.jsonl": {
+      "episodes": 20,
+      "policy": {
+        "hybrid/1.1": 20
+      },
+      "steps": 159,
+      "decisions_by_source": {
+        "fsm": 20,
+        "jev": 113,
+        "llm": 26
+      },
+      "trace_less_steps": 0,
+      "escalation_reasons": {
+        "fast_unavailable_or_below_threshold": 21,
+        "uncalibrated_fast_confidence": 5
+      },
+      "calibration_sha256": {
+        "0af588a8d02a91efe60a8a84497c3fe587e590e3d060233fccbb762e88ec3fa7": 159
+      },
+      "thresholds": {
+        "0.85": 159
+      },
+      "fast_arm": {
+        "proposals": 139,
+        "models": {
+          "clef-flash-q8_0": 139
+        },
+        "model_sha256": {
+          "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9": 139
+        },
+        "backends": {
+          "clef": 139
+        },
+        "gate_failed": 0,
+        "gate_reasons": {},
+        "calibrated_proposals": 134,
+        "tokens": 200914
+      },
+      "paid_arm": {
+        "proposals": 26,
+        "backends": {
+          "deepseek-official": 26
+        },
+        "cost_status": {
+          "USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING": 26
+        },
+        "completion_tokens": 1596,
+        "mean_latency_ms": 900.7
+      }
+    }
+  },
+  "problems": [],
+  "limitations": [
+    "batch_20261005_161922.jsonl: 5 paid proposals carry no weight digest — remote-backend weight identity is not auditable from this archive",
+    "batch_20261005_192253.jsonl: 26 paid proposals carry no weight digest — remote-backend weight identity is not auditable from this archive"
+  ]
+}

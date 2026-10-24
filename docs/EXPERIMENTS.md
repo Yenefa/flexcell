@@ -703,15 +703,27 @@ See [the read-only inventory](../competition/iyaic-2026/evidence/e021-audit.json
 - **Result**:
   | arm | S1 n=20 | Wilson 95% CI | paid slow fraction | cost ceiling |
   | --- | ------- | ------------- | ------------------ | ------------ |
-  | FSM control | 19/20 (0.95) | [0.76, 0.99] | 0% | ¥0 |
-  | hybrid τ=0.03 | 18/20 (0.90) | [0.69, 0.98] | ~0% | ~¥0.02 |
-  | hybrid τ=0.85 | 17/20 (0.85) | [0.64, 0.95] | ~20% | ~¥0.3 |
+  | FSM control | 19/20 (0.95) | [0.76, 0.99] | 0/163 = 0% | ¥0 |
+  | hybrid τ=0.03 | 18/20 (0.90) | [0.69, 0.98] | 5/156 = 3.2% | ~¥0.02 |
+  | hybrid τ=0.85 | 17/20 (0.85) | [0.64, 0.95] | 26/159 = 16.4% | ~¥0.3 |
   All CIs overlap: **no significant success-rate difference at n=20**. Every model
   decision was reported as passing the routing provenance audit in the archived
   summaries (139 decisions in the τ=0.85 baseline, zero reported violations).
-  The 60 referenced native episodes are absent from this checkout and current
-  laptop episode store, so their complete inputs and per-decision provenance
-  cannot be independently re-audited here. Night total ¥0.576 / ¥5 upper bound.
+  The 60 referenced native episodes were recovered from the execution host on
+  2026-10-24 and now live in
+  [`setup/acceptance/e021_native_recovery_20261024/`](../setup/acceptance/e021_native_recovery_20261024/README.md)
+  with SHA256-verified bytes and an explicit origin mapping. Recomputing from
+  those native records (not from the summaries) reproduces **139 fast-arm
+  proposals with 0 gate failures** in the τ=0.85 baseline, a single weight
+  identity `clef-flash-q8_0@8754b06f…` and a single calibration digest across
+  both hybrid arms, and reconciles every escalation: 21
+  `fast_unavailable_or_below_threshold` + 5 `uncalibrated_fast_confidence` = the
+  26 paid decisions at τ=0.85, 5 of 5 at τ=0.03. Paid spend stays an upper bound
+  because every paid proposal settled at
+  `USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING`. Night total ¥0.576 / ¥5 upper bound.
+  What recovery does not add: no episode records `initial_world_state`, so
+  physics cannot be re-executed, only decisions can be re-audited against the
+  recorded `policy_input`/`policy_output` pairs.
 - **Observed failure signature (2026-10-17 recount):** all six failed baseline
   episodes (FSM run20; hybrid τ=0.03 runs5/9; hybrid τ=0.85 runs3/10/13)
   report ERR_GRASP_FAILED (23) followed by recovery exhaustion (51). Separately,
@@ -720,27 +732,33 @@ See [the read-only inventory](../competition/iyaic-2026/evidence/e021-audit.json
   physical root cause, that the arms are affected equally, or a minimum sample
   size that would resolve the comparison. Runner "FAIL (N)" labels here refer to
   the expected-outcome gate; they are not automatically harness faults.
-- **Reading (cost hypothesis)**: hybrid at τ=0.03 reports 0.90 with low paid API
-  spend, while FSM reports 0.95 with zero API spend. Local inference still has
-  compute costs. The ~20% slow-selection fraction at τ=0.85 is observed routing;
-  an approximately 80% reduction relative to selecting slow on every decision is
-  a counterfactual call-count comparison, not a measured pure-LLM cost saving.
-  No matched pure-LLM batch is in this comparison. These are n=20 descriptive
-  results with correlated steps and sequential arms (no time-drift interleaving),
-  not a qualified benchmark or an established cost/success advantage.
+- **Reading (cost hypothesis)**: hybrid at τ=0.03 delivers 0.90 at near-zero paid
+  cost vs FSM 0.95 at zero cost — FSM remains the free control; the hybrid's
+  saving is measured against a PURE-LLM arm (≈3-5× the slow-arm spend), not
+  against FSM. τ=0.85's 16.4% slow fraction (83.6% of decisions stayed local)
+  is the paid-call reduction that matters. These are
+  n=20 descriptive results with correlated steps and sequential arms (no
+  time-drift interleaving) — NOT a benchmark.
 - **Next**: B-grasp root cause (the single highest-value open item), batch-level
   fast-arm presence gate for unattended batches, S7 differentiation design,
   n≥50 freeze maintained.
 - **Evidence**: `setup/acceptance/tau_sweep_desktop_20261005/` (12 batch files
   incl. both τ=0.85 smoke attempts, pooled summary, two hybrid deployments,
-  campaign log `F:\flexcell-models\campaign_20261005.log`).
+  campaign log `F:\flexcell-models\campaign_20261005.log`);
+  `setup/acceptance/e021_native_recovery_20261024/` (all 60 native episodes with
+  per-file SHA256, offline verifier and recomputed decision audit).
 - **2026-10-24 correction / #31**: all 60 baseline rows' client outputs contain
   A/B result checks; the former single-object description was incorrect.
   Raw JSONL bytes and historical outcomes are unchanged. These remain
   descriptive small samples, without retrospective fixed-window qualification.
   The [fixed-window admission repair](FIXED_SMOKE_WINDOW_20261024.md) rejects
-  pooling, clipping, duplicate native evidence and incomplete windows. Native
-  episode recovery, model replay, full M3 and n≥50 remain pending/frozen.
+  pooling, clipping, duplicate native evidence and incomplete windows. **Native
+  episode recovery is closed** — the 60 files were recovered byte-identically
+  from the execution host and are re-verifiable offline
+  ([recovery archive](../setup/acceptance/e021_native_recovery_20261024/README.md)).
+  Model replay stays NOT_RUN (no recorded `initial_world_state`), full M3 stays
+  NOT RUN, and n≥50 stays frozen. Recovery restores auditability; it does not
+  qualify history.
 
 
 ### E-022 — Static attribute scanner repair (2026-10-07, cloud)

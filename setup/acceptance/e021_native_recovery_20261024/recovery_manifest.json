@@ -1,0 +1,1282 @@
+{
+  "archive": "setup/acceptance/e021_native_recovery_20261024/",
+  "recovered_from": {
+    "host": "execution host (WSL Ubuntu-24.04), original episode store",
+    "store_root": "/home/ros/.ros/flexcell/episodes",
+    "recovered_utc": "2026-10-24"
+  },
+  "mapping_rule": "Each 'original' value is the absolute path recorded verbatim in the batch row. 'archive' is the basename this checkout resolves it to, relative to this archive directory. No path inside the batches or in historical_inventory.json was edited.",
+  "batches": {
+    "batch_20261005_161922.jsonl": {
+      "archived_copy": "../tau_sweep_desktop_20261005/batch_20261005_161922.jsonl",
+      "sha256": "6a549de712e05c166578e48360214ae039368ca9908e74bf12d2a9bb9676d942",
+      "sha256_matches_frozen_inventory": true,
+      "archived_sha256": "6a549de712e05c166578e48360214ae039368ca9908e74bf12d2a9bb9676d942",
+      "archived_bytes_identical": true,
+      "rows": 20,
+      "outcomes": {
+        "SUCCEEDED": 18,
+        "FAILED": 2
+      },
+      "host_copy_sha256": "6a549de712e05c166578e48360214ae039368ca9908e74bf12d2a9bb9676d942",
+      "host_copy_matches_archive": true
+    },
+    "batch_20261005_185833.jsonl": {
+      "archived_copy": "../tau_sweep_desktop_20261005/batch_20261005_185833.jsonl",
+      "sha256": "41afe4003fd21ca8af046fff666a9a0bc933c84538551817af7392211ed65642",
+      "sha256_matches_frozen_inventory": true,
+      "archived_sha256": "41afe4003fd21ca8af046fff666a9a0bc933c84538551817af7392211ed65642",
+      "archived_bytes_identical": true,
+      "rows": 20,
+      "outcomes": {
+        "SUCCEEDED": 19,
+        "FAILED": 1
+      },
+      "host_copy_sha256": "41afe4003fd21ca8af046fff666a9a0bc933c84538551817af7392211ed65642",
+      "host_copy_matches_archive": true
+    },
+    "batch_20261005_192253.jsonl": {
+      "archived_copy": "../tau_sweep_desktop_20261005/batch_20261005_192253.jsonl",
+      "sha256": "7fbba098b9a9fc47f8a7df193fae8cd9aaf3b80d49843d91dd3d21782fd95774",
+      "sha256_matches_frozen_inventory": true,
+      "archived_sha256": "7fbba098b9a9fc47f8a7df193fae8cd9aaf3b80d49843d91dd3d21782fd95774",
+      "archived_bytes_identical": true,
+      "rows": 20,
+      "outcomes": {
+        "SUCCEEDED": 17,
+        "FAILED": 3
+      },
+      "host_copy_sha256": "7fbba098b9a9fc47f8a7df193fae8cd9aaf3b80d49843d91dd3d21782fd95774",
+      "host_copy_matches_archive": true
+    }
+  },
+  "episodes": {
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-b5cbf374.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-b5cbf374.json",
+      "sha256": "001fc98c2a3fe5d4ad9c2ef9191f28671f3e2a8661d2e4c2d4f93a5ee82498a5",
+      "size_bytes": 28638,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 7,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-bc3265bd.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-bc3265bd.json",
+      "sha256": "3747a14335785ae099f4845c51d189f903b08ed4dc8970fc508c3b2cf2cc9359",
+      "size_bytes": 28677,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 7,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-b7b5733c.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-b7b5733c.json",
+      "sha256": "dfb9a274bdd09482ae973cafd52956963b0d49d3abf410f1198c4129c9a00608",
+      "size_bytes": 28666,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 7,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-10b9e0db.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-10b9e0db.json",
+      "sha256": "19e6d0b46af0921568185eb8cd9789f09c5579ca3b8c2224b2068386140ffab7",
+      "size_bytes": 38861,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 9,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-8fa8e637.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-8fa8e637.json",
+      "sha256": "d353975b13dce3194e75cc46bb3e81fdd61791b580046d69be493c83353991fc",
+      "size_bytes": 34296,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-962aa803.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-962aa803.json",
+      "sha256": "c7de44405346469486d3504709fb6f9a03c651f0427119058fa738183b9261fe",
+      "size_bytes": 28669,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 7,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-a5713b76.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-a5713b76.json",
+      "sha256": "d82900d6f599b4e9d733825ba874c6647963caa8918b6aa6510f031a6142db24",
+      "size_bytes": 28663,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 7,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-5eb5d7f3.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-5eb5d7f3.json",
+      "sha256": "3310b4625832a9b59a898d7f5d3cc593706143219412129adbd8beedfaabad3c",
+      "size_bytes": 28667,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 7,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-5ecb035a.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-5ecb035a.json",
+      "sha256": "be6c7c3e8e05d4143eb1bf9120cfc49561ea409779e856e0d7adaee67057bde6",
+      "size_bytes": 34291,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-5ddde205.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-5ddde205.json",
+      "sha256": "e0c17f6512746c7228bab02801addd3409eea7eceb51fdfa9cdeb1442016c6e2",
+      "size_bytes": 28673,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 7,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-d1bff85b.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-d1bff85b.json",
+      "sha256": "d7c4ec85859c1b7c15c82f0360d052de9bf12a0747b8bd9955981a37995919e0",
+      "size_bytes": 28683,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 7,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-0e81c40b.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-0e81c40b.json",
+      "sha256": "d976d7124a51e3ff54d224732a1839fc99df8309e3796cb730eed90ba2aa8cd7",
+      "size_bytes": 44542,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 10,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-f01c4b7a.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-f01c4b7a.json",
+      "sha256": "ade3c3ce916ce3d3eb45be2f32ff08fc4c801ceaa1af893d459593b2b2ae4a88",
+      "size_bytes": 28655,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 7,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-20aa1705.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-20aa1705.json",
+      "sha256": "70363fea4c1390fb82317b3d7ba84361efc60cd5987b3941c64c7f4b1823c461",
+      "size_bytes": 44538,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 10,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-26c4fd7b.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-26c4fd7b.json",
+      "sha256": "7a2a07bbe063589db3179567aa11ae8f612f2faf5644737e271d4cffa29bf9c4",
+      "size_bytes": 28669,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 7,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-7eb37906.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-7eb37906.json",
+      "sha256": "a0ea97a193b1e3cf77ba86e43883948e641d25cee379621c9f0bb40006658571",
+      "size_bytes": 38808,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 9,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-515cf98c.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-515cf98c.json",
+      "sha256": "133059960e0712ebaad52dfdb988519fa296d26a6768d91895762d381779640c",
+      "size_bytes": 28699,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 7,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-617fbe4f.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-617fbe4f.json",
+      "sha256": "805c8a14aeda54057420925636f05c5070d19023c1bd06f3b3d6f89d26405927",
+      "size_bytes": 28675,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 7,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-286feea5.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-286feea5.json",
+      "sha256": "de50e4f21327d119000046e8fe89e512b54af05e803b7bfd9632bb2623dfdb56",
+      "size_bytes": 50008,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 11,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-389c1e5d.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-389c1e5d.json",
+      "sha256": "42eabce74f25f71037a498dd48671b4225fbd2af0ec3b4daf6caa609bc2d925c",
+      "size_bytes": 28694,
+      "referenced_by_batches": [
+        "batch_20261005_161922.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 7,
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-e7dfb29d.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-e7dfb29d.json",
+      "sha256": "250dfcb22c93d3f3598d719aa1e0cec692884aa3c196c26ef20fc7cc62aa215f",
+      "size_bytes": 25833,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-bee926db.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-bee926db.json",
+      "sha256": "a5fc611995a7c64d595f53eea2eec5c66db25493daba96703e04673d7d20d902",
+      "size_bytes": 25847,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-ff7e3df2.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-ff7e3df2.json",
+      "sha256": "77502af4b73e73af7183bca3df11f9559607049dccedd7f89624d864bbfc372d",
+      "size_bytes": 25816,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-8db8eb80.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-8db8eb80.json",
+      "sha256": "3355cfd0347712f2d5da2d99664b5c56422038585613879a496377309e946f56",
+      "size_bytes": 25816,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-f83ab86a.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-f83ab86a.json",
+      "sha256": "3730514e403a53eaeee2cfba81f6114d9014543c73273f711e9aa48f181698b0",
+      "size_bytes": 25827,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-54ef16e7.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-54ef16e7.json",
+      "sha256": "afcdb150dd2629e0a56ca2765d498ee4a16525a98e0f2a9e57e96527299381ef",
+      "size_bytes": 25849,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-447a4923.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-447a4923.json",
+      "sha256": "8e5d1203e44d9f2c5847133d19d19bca4f2bd68e45ccaa36c98b04a5c2cc0832",
+      "size_bytes": 25843,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-f43fb55f.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-f43fb55f.json",
+      "sha256": "9834fde58589de7a8d7cb4efae62acf5c08d65b9353edf4acfd8d037ed2393fa",
+      "size_bytes": 25819,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-4a51742e.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-4a51742e.json",
+      "sha256": "a33ba703449b57642c0d08e8daa84544f99209bf58cf46bd5b45bed2b7fb5ccf",
+      "size_bytes": 25820,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-54d6ea14.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-54d6ea14.json",
+      "sha256": "32d9774364f5380172983d45bf4bd391043da7c0ce5dc3e4f389b430a056db4a",
+      "size_bytes": 25826,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-93b09809.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-93b09809.json",
+      "sha256": "6bf369c4d50235b867584b1528a31ab96ddb140346ca6b31db1ab17522fe771d",
+      "size_bytes": 25820,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-6919e3cb.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-6919e3cb.json",
+      "sha256": "31907fc41a9b44abf2a350e7b907cb079016e7f79ac7b83942873d090c96ea14",
+      "size_bytes": 25817,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-5763ee2d.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-5763ee2d.json",
+      "sha256": "14e502509c1b7bb22f65889567d941cf5ecff69f5d4162e5c2c53ae7d0c20003",
+      "size_bytes": 25842,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-b12b2b9b.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-b12b2b9b.json",
+      "sha256": "81647c764298a53b466125c8c789206f8e81e9f6233bcb9a63b1f0a663152c88",
+      "size_bytes": 25817,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-d796770a.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-d796770a.json",
+      "sha256": "eb99d8c99dd53cc5d5581c4b34a77502b2360f1784f378816c2eb55c2781bc79",
+      "size_bytes": 25820,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-f00f3fab.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-f00f3fab.json",
+      "sha256": "d1c5f9e93e0ccdacdcad0a59fddf47e88b918f7e3bd0e67298ff60014e050638",
+      "size_bytes": 25822,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-e6c9afbb.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-e6c9afbb.json",
+      "sha256": "98080af16381b931389421e99b2644d38312ea59883b280dbb996cdf6826a2d9",
+      "size_bytes": 25819,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-a28c15ec.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-a28c15ec.json",
+      "sha256": "17051eeaf14a92cf471a3583615a9510bdbb3d46ce0de377c85bd5bca7528774",
+      "size_bytes": 34096,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 10,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-597eb350.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-597eb350.json",
+      "sha256": "176538349423673daf8d4344a9b0c02040ddb53f79140427f153ac8084a59342",
+      "size_bytes": 25850,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-749d8acf.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-749d8acf.json",
+      "sha256": "104f173480e4802a1c64c9f1b4c4563f0e8010d606f515702f780c4102faf01f",
+      "size_bytes": 30203,
+      "referenced_by_batches": [
+        "batch_20261005_185833.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 9,
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-97e4d925.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-97e4d925.json",
+      "sha256": "f90fa3538d826b1e20e27644ca82fa17071d5307afd1d876b25d03470b552555",
+      "size_bytes": 34130,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-98b184e5.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-98b184e5.json",
+      "sha256": "e9f78bb48a35057bfe22842a77107b6ae30546dcb868da4cfa4f8f2cc0beaef8",
+      "size_bytes": 34150,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-776be369.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-776be369.json",
+      "sha256": "e061d2600e5edc3f85b2bc3c65c24b74873f1729bfe5a0eb0adff46f5efc2228",
+      "size_bytes": 40389,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 9,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-00cf80da.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-00cf80da.json",
+      "sha256": "acce93e0a7b14d5aa31928691628173edb9b0b4bc10a64a605bae11fa07c0fcf",
+      "size_bytes": 34146,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-abfc9f1c.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-abfc9f1c.json",
+      "sha256": "cb2c4acaef89e91b9f2e123b4125ffd09e5bcceb02c1957d32b397cac19bd68c",
+      "size_bytes": 34140,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-df0497e3.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-df0497e3.json",
+      "sha256": "9f9ccc518575441fa027d8ec15d5423271491fa852083745fbc41b3d4f70371f",
+      "size_bytes": 34138,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-0e0bf060.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-0e0bf060.json",
+      "sha256": "e1ace258f9da62744c12ed57b4036bfdfe9cc26c673f8d938c15cb32b4bcddec",
+      "size_bytes": 34139,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-c0aa4819.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-c0aa4819.json",
+      "sha256": "523c028506c2c5d21127b6ed924f731e52c9b04fd6da92d9f385373eaa196289",
+      "size_bytes": 45009,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 10,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-f6a60af1.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-f6a60af1.json",
+      "sha256": "09c25d1bbd9bb1cbd2cfbb2bffae58b698675ab0921e964b7216146afba55d6e",
+      "size_bytes": 34166,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-afe1a382.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-afe1a382.json",
+      "sha256": "7bb9fb15af619956c9d3afc11832eebed694b985ca0c5ae300352251e6570399",
+      "size_bytes": 20323,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 5,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-b5ca60d2.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-b5ca60d2.json",
+      "sha256": "c77e50a23ea1d3a933be08360b459556fad0a1a26844505b729979a06efd0ea9",
+      "size_bytes": 34127,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-9cb09bec.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-9cb09bec.json",
+      "sha256": "d0a11be0a96fb9e1f239d820b35c20097e340427826061ba419392e04786376c",
+      "size_bytes": 34151,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-55aa60e6.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-55aa60e6.json",
+      "sha256": "78787504e47552bdd18f7d83389c6d4926cc3faefec223e7c50a7f9617621e52",
+      "size_bytes": 20361,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 5,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-474827b6.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-474827b6.json",
+      "sha256": "a140c7cce2e834dd77029ab6d2e331cb605b9510f85e62346a3492ef0bb92112",
+      "size_bytes": 45077,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 10,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-cedd2daa.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-cedd2daa.json",
+      "sha256": "a31a5984c6b7f20c16e06a624cc84d6981a1b28fc3fe544d2777042569531636",
+      "size_bytes": 34138,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-4609b31b.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-4609b31b.json",
+      "sha256": "4a02a6c47beb09f08450e6363fe8dc16791145a54ecb34812ea02c5ff0fe6bf5",
+      "size_bytes": 34152,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-5814fc7d.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-5814fc7d.json",
+      "sha256": "3bbeaa830efdc4b50f8fb1cd2e788f95ad5ba213bc08f6f62bf25d58d1e0ec3f",
+      "size_bytes": 34126,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-eafe5804.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-eafe5804.json",
+      "sha256": "e5922b1000865baa1b47bca8ee1fa4473e9e71e373217647f294fd053edd21f3",
+      "size_bytes": 34148,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-179cd46b.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-179cd46b.json",
+      "sha256": "02ddd413b99c241eff9224540c7f2f9e4b30d32b2d2e968121c5521d138dee5a",
+      "size_bytes": 34178,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    },
+    "/home/ros/.ros/flexcell/episodes/week1_demo_v1_week1_demo_v1-369e39d7.json": {
+      "status": "PRESENT",
+      "archive": "episodes/week1_demo_v1_week1_demo_v1-369e39d7.json",
+      "sha256": "5081009c3363eda93ddf3768e06b1c184efc27b4fa4ed4bd878ced0978b41386",
+      "size_bytes": 34175,
+      "referenced_by_batches": [
+        "batch_20261005_192253.jsonl"
+      ],
+      "row_count": 1,
+      "scenario_id": "week1_demo_v1",
+      "seed": 0,
+      "step_count": 8,
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "benchmark_protocol": {
+        "id": "flexcell-benchmark-v2",
+        "sha256": "e37cebe00ab6d6e711cc16332079eb502127d91aac3cb00d06edf70e66c4d51a",
+        "version": 2
+      },
+      "initial_world_state_recorded": false
+    }
+  },
+  "counts": {
+    "batch_files": 3,
+    "native_refs_total": 60,
+    "native_refs_unique": 60,
+    "native_present": 60,
+    "native_missing": 0,
+    "bytes_recovered": 1870637,
+    "distinct_runtime_fingerprints": 3,
+    "distinct_scenarios": [
+      "week1_demo_v1"
+    ],
+    "distinct_seeds": [
+      0
+    ],
+    "episodes_with_initial_world_state": 0,
+    "step_count_range": [
+      5,
+      11
+    ]
+  },
+  "cross_check": {
+    "frozen_inventory_refs": 60,
+    "recovered_refs": 60,
+    "identical_reference_set": true,
+    "only_in_frozen": [],
+    "only_in_recovery": []
+  }
+}
