@@ -49,6 +49,14 @@ basenames. Verification uses those copied local files rather than silently
 following stale absolute paths back to the original machine. Missing native
 files remain missing and block admission.
 
+`105_snapshot_smoke.py` now includes an exact-byte `qualification_window/`
+subtree when the source has a plan. It carries the original summary basename,
+plan and local native basenames, while preserving the existing original and
+presentation JSONL exports. Its manifest points to the copied window.
+Historical input without a plan remains an unqualified snapshot; no plan is
+invented. A copied window can be snapshotted again after the original directory
+has disappeared, and moved to another directory without losing verification.
+
 ## Evidence and limits
 
 [Local validation and counterexamples](../setup/acceptance/fixed_smoke_window_20261024/)
@@ -57,6 +65,13 @@ errors/failures/skips**. Forty-six new cases cover complete/failed/truncated/
 pooled windows, duplicates, file changes, relocation, unknown schemas, source
 drift, native terminal results and real CLI admission with synthetic transports.
 The scanner reports 36 source files and zero problems.
+
+The [snapshot compatibility follow-up](../setup/acceptance/smoke_snapshot_20261024/)
+adds two end-to-end filesystem cases and brings the local ROS Jazzy suite to
+**332 tests, zero errors/failures/skips**. They exercise exact-byte copies,
+legacy presentation exports, a second snapshot after deleting the original,
+and final verification after relocation. The initial 330-test receipts remain
+unchanged.
 
 The actual old and new CLI entrypoints were compared using synthetic files.
 Both pooled and duplicated evidence reach the old transport boundary and are

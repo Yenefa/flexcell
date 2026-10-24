@@ -280,3 +280,49 @@ def test_runner_freezes_plan_before_first_reset_and_emits_qualifiable_rows(tmp_p
     assert runner.main() == 0
     summary = next(tmp_path.glob('*.jsonl'))
     assert qualify(summary)[0] == 'runtime' and len(calls) == 5
+
+
+@pytest.mark.parametrize('with_plan', [True, False])
+def test_existing_snapshot_tool_preserves_window_or_keeps_legacy_unqualified(tmp_path, monkeypatch, with_plan):
+    original = tmp_path / 'original'
+    summary, rows, plan = make_window(original)
+    if not with_plan:
+        (original / 'batch_plans' / (summary.stem + '.json')).unlink()
+    repo = Path(__file__).resolve().parents[4]
+    spec = importlib.util.spec_from_file_location('snapshot_window_test', repo / 'setup/105_snapshot_smoke.py')
+    snapshot = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(snapshot)
+    deployment = tmp_path / 'deployment.json'
+    deployment.write_text('{}')
+    log = tmp_path / 'runner.log'
+    log.write_text('SYNTHETIC TEST ONLY\n')
+    out = tmp_path / 'snapshot'
+    monkeypatch.setattr(sys, 'argv', ['snapshot', '--batch', str(summary), '--out', str(out),
+                                    '--deployment', str(deployment), '--runner-log', str(log)])
+    snapshot.main()
+    manifest = json.loads((out / 'manifest.json').read_bytes())
+    assert (out / 'batch_original.jsonl').read_bytes() == summary.read_bytes()
+    presentation = tmp_path / 'presentation-copy'
+    monkeypatch.setattr(sys, 'argv', ['snapshot', '--batch', str(out / 'batch_portable.jsonl'),
+                                    '--out', str(presentation), '--deployment', str(deployment),
+                                    '--runner-log', str(log)])
+    snapshot.main()
+    assert json.loads((presentation / 'manifest.json').read_bytes())['qualification_window'] is None
+    if not with_plan:
+        assert manifest['qualification_window'] is None
+        assert not (out / 'qualification_window').exists()
+        return
+    frozen = out / manifest['qualification_window']
+    assert frozen.read_bytes() == summary.read_bytes()
+    assert json.loads((frozen.parent / 'batch_plans' / (summary.stem + '.json')).read_bytes()) == plan
+    for row in rows:
+        assert (frozen.parent / row['episode_relative']).read_bytes() == (original / row['episode_relative']).read_bytes()
+    # A snapshot can itself be snapshotted, with the original host unavailable.
+    shutil.rmtree(original)
+    second = tmp_path / 'second-snapshot'
+    monkeypatch.setattr(sys, 'argv', ['snapshot', '--batch', str(frozen), '--out', str(second),
+                                    '--deployment', str(deployment), '--runner-log', str(log)])
+    snapshot.main()
+    moved = tmp_path / 'moved'
+    shutil.move(str(second), moved)
+    assert qualify(moved / 'qualification_window' / summary.name)[0] == 'runtime'

@@ -22,10 +22,25 @@ def main():
     shutil.copyfile(args.deployment, out / 'deployment.json')
     shutil.copyfile(args.runner_log, out / 'runner.log')
     rows = [json.loads(line) for line in original.read_text().splitlines() if line.strip()]
+    plan = original.parent / 'batch_plans' / (original.stem + '.json')
+    window = None
+    if plan.is_file():
+        # Keep an exact-byte copy with its original basename and plan. The
+        # separate presentation JSONL below still rewrites absolute paths.
+        window = out / 'qualification_window'
+        (window / 'batch_plans').mkdir(parents=True)
+        shutil.copyfile(original, window / original.name)
+        shutil.copyfile(plan, window / 'batch_plans' / plan.name)
     for row in rows:
         if row.get('episode'):
             p = Path(row['episode'])
+            if row.get('episode_relative') and (original.parent / row['episode_relative']).is_file():
+                p = original.parent / row['episode_relative']
+            elif not p.is_absolute():
+                p = original.parent / p
             shutil.copyfile(p, out / 'episodes' / p.name)
+            if window is not None:
+                shutil.copyfile(p, window / p.name)
             row['episode'] = str(out / 'episodes' / p.name)
     with (out / 'batch_portable.jsonl').open('w') as stream:
         for row in rows:
@@ -56,7 +71,9 @@ def main():
     files = {str(p.relative_to(out)): hashlib.sha256(p.read_bytes()).hexdigest()
              for p in sorted(out.rglob('*')) if p.is_file()}
     manifest = dict(stage='ONLINE_SMOKE_NOT_STATISTICAL_BASELINE', source_batch=str(original),
-                    cells=facts, files_sha256=files)
+                    cells=facts, files_sha256=files,
+                    qualification_window=str(Path('qualification_window') / original.name)
+                    if window is not None else None)
     (out / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
     print(json.dumps(facts, indent=2))
 
