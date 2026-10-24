@@ -1,0 +1,194 @@
+{
+  "status": "FUNCTIONAL_REGRESSION_PASS",
+  "episodes": 5,
+  "runtime_head": "29b1cf6551aee3e2ba85dc93a340d32d8729d2aa",
+  "runtime_fingerprint": "14bb873817cc222f6db7e28fbc6201e6af9d014f697160d8c6e4f0372b06113d",
+  "results": [
+    {
+      "scenario": "S4",
+      "run": 1,
+      "outcome": "FAILED",
+      "task_error_code": 50,
+      "model_decisions": [
+        {
+          "seq": 2,
+          "action": "PICK",
+          "tokens": 1330,
+          "source": "jev"
+        },
+        {
+          "seq": 3,
+          "action": "PLACE",
+          "tokens": 1378,
+          "source": "jev"
+        },
+        {
+          "seq": 4,
+          "action": "ABORT",
+          "tokens": 1423,
+          "source": "jev"
+        }
+      ]
+    },
+    {
+      "scenario": "S5",
+      "run": 1,
+      "outcome": "FAILED",
+      "task_error_code": 51,
+      "model_decisions": [
+        {
+          "seq": 2,
+          "action": "PICK",
+          "tokens": 1299,
+          "source": "jev"
+        },
+        {
+          "seq": 3,
+          "action": "OBSERVE",
+          "tokens": 1345,
+          "source": "jev"
+        },
+        {
+          "seq": 4,
+          "action": "PICK",
+          "tokens": 1381,
+          "source": "jev"
+        },
+        {
+          "seq": 5,
+          "action": "ABORT",
+          "tokens": 1416,
+          "source": "jev"
+        }
+      ]
+    },
+    {
+      "scenario": "S1",
+      "run": 1,
+      "outcome": "SUCCEEDED",
+      "task_error_code": 0,
+      "model_decisions": [
+        {
+          "seq": 2,
+          "action": "PICK",
+          "tokens": 1302,
+          "source": "jev"
+        },
+        {
+          "seq": 3,
+          "action": "PLACE",
+          "tokens": 1350,
+          "source": "jev"
+        },
+        {
+          "seq": 4,
+          "action": "VERIFY",
+          "tokens": 1396,
+          "source": "jev"
+        },
+        {
+          "seq": 5,
+          "action": "PICK",
+          "tokens": 1439,
+          "source": "jev"
+        },
+        {
+          "seq": 6,
+          "action": "PLACE",
+          "tokens": 1488,
+          "source": "jev"
+        },
+        {
+          "seq": 7,
+          "action": "VERIFY",
+          "tokens": 1534,
+          "source": "jev"
+        }
+      ]
+    },
+    {
+      "scenario": "S4",
+      "run": 2,
+      "outcome": "FAILED",
+      "task_error_code": 50,
+      "model_decisions": [
+        {
+          "seq": 2,
+          "action": "PICK",
+          "tokens": 1328,
+          "source": "jev"
+        },
+        {
+          "seq": 3,
+          "action": "PLACE",
+          "tokens": 1376,
+          "source": "jev"
+        },
+        {
+          "seq": 4,
+          "action": "ABORT",
+          "tokens": 1421,
+          "source": "jev"
+        }
+      ]
+    },
+    {
+      "scenario": "S5",
+      "run": 2,
+      "outcome": "FAILED",
+      "task_error_code": 51,
+      "model_decisions": [
+        {
+          "seq": 2,
+          "action": "PICK",
+          "tokens": 1302,
+          "source": "jev"
+        },
+        {
+          "seq": 3,
+          "action": "OBSERVE",
+          "tokens": 1348,
+          "source": "jev"
+        },
+        {
+          "seq": 4,
+          "action": "PICK",
+          "tokens": 1375,
+          "source": "jev"
+        },
+        {
+          "seq": 5,
+          "action": "ABORT",
+          "tokens": 1410,
+          "source": "jev"
+        }
+      ]
+    }
+  ],
+  "model_decisions": 20,
+  "recorded_tokens": 27641,
+  "model_weight_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+  "gpu": [
+    {
+      "Name": "AMD Radeon RX 6800",
+      "DriverVersion": "32.0.21043.19003"
+    }
+  ],
+  "shutdown": {
+    "action": "stopped_owned_process",
+    "pid": 6432,
+    "exited": true,
+    "watchdog_exited": true,
+    "port_11435_listening": false,
+    "remaining_inference_processes": [],
+    "utc": "2026-10-24T05:24:21.0444162Z"
+  },
+  "context_metadata": {
+    "legacy_manifest_value": 8192,
+    "observed_server_argument": 16384,
+    "discrepancy_retained": true
+  },
+  "full_raw_model_responses_archived": false,
+  "model_replay": "NOT_RUN",
+  "scope": "Five functional cases only; no baseline qualification or historical replay"
+}

@@ -1,5 +1,9 @@
 # Abort diagnostics and PICK recovery cleanup
 
+The subsequent five-case home GPU regression and verified shutdown are now
+archived in [home_gpu_abort_20261024](../home_gpu_abort_20261024/README.md).
+The GPU status below is the earlier pre-run snapshot; its receipt is retained.
+
 PICK failure cleanup now removes the attached collision body and its world
 object in one acknowledged planning-scene diff. A rejected cleanup or failed
 gripper-open response returns `ERR_INTERNAL`, retaining the original motion

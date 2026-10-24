@@ -1,0 +1,196 @@
+[INFO] [launch]: All log files can be found below /home/ros/.ros/log/2026-10-24-13-21-18-329940-Yenefa-33616
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [parameter_bridge-1]: process started with pid [33629]
+[INFO] [gazebo-2]: process started with pid [33630]
+[INFO] [robot_state_publisher-3]: process started with pid [33631]
+[INFO] [create-4]: process started with pid [33632]
+[robot_state_publisher-3] [INFO] [1792819279.714148426] [robot_state_publisher]: Robot initialized
+[create-4] [INFO] [1792819280.211280401] [ros_gz_sim]: Requesting list of world names.
+[parameter_bridge-1] [INFO] [1792819280.264781069] [ros_gz_bridge]: Creating GZ->ROS Bridge: [/clock (gz.msgs.Clock) -> /clock (rosgraph_msgs/msg/Clock)] (Lazy 0)
+[create-4] [INFO] [1792819280.720875791] [ros_gz_sim]: Entity creation successful.
+[INFO] [create-4]: process has finished cleanly [pid 33632]
+[INFO] [spawner-5]: process started with pid [33706]
+[spawner-5] [INFO] [1792819281.197975006] [spawner_joint_state_broadcaster]: waiting for service /controller_manager/list_controllers to become available...
+[gazebo-2] [INFO] [1792819282.357305097] [gz_ros_control]: [gz_ros2_control] Fixed joint ['world_fixed'] (Entity='47') is skipped.
+[gazebo-2] [INFO] [1792819282.367976999] [gz_ros_control]: Loading controller_manager
+[gazebo-2] [INFO] [1792819282.403299169] [controller_manager]: Using ROS clock for triggering controller manager cycles.
+[gazebo-2] [WARN] [1792819282.403359162] [controller_manager]: The resource manager is not yet initialized, will wait for the robot description to initialize it..
+[gazebo-2] [INFO] [1792819282.409152623] [controller_manager]: Subscribing to '/robot_description' topic for robot description.
+[gazebo-2] [WARN] [1792819282.409238681] [gz_ros_control]: Waiting RM to load and initialize hardware...
+[gazebo-2] [INFO] [1792819282.411769246] [controller_manager]: Received robot description from topic.
+[gazebo-2] [INFO] [1792819282.411854065] [controller_manager]: Enforcing command limits is disabled. Command limits from URDF will be ignored.
+[gazebo-2] [INFO] [1792819282.417130750] [gz_ros_control]: The position_proportional_gain has been set to: 0.1
+[gazebo-2] [INFO] [1792819282.417218388] [gz_ros_control]: Loading joint: joint1
+[gazebo-2] [INFO] [1792819282.417225626] [gz_ros_control]: 	State:
+[gazebo-2] [INFO] [1792819282.417231429] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1792819282.417234173] [gz_ros_control]: 		 velocity
+[gazebo-2] [INFO] [1792819282.417241595] [gz_ros_control]: 		 effort
+[gazebo-2] [INFO] [1792819282.417244727] [gz_ros_control]: 	Command:
+[gazebo-2] [INFO] [1792819282.417246912] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1792819282.417256809] [gz_ros_control]: Loading joint: joint2
+[gazebo-2] [INFO] [1792819282.417258981] [gz_ros_control]: 	State:
+[gazebo-2] [INFO] [1792819282.417261385] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1792819282.417263335] [gz_ros_control]: 		 velocity
+[gazebo-2] [INFO] [1792819282.417265855] [gz_ros_control]: 		 effort
+[gazebo-2] [INFO] [1792819282.417267809] [gz_ros_control]: 	Command:
+[gazebo-2] [INFO] [1792819282.417269829] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1792819282.417276692] [gz_ros_control]: Loading joint: joint3
+[gazebo-2] [INFO] [1792819282.417278990] [gz_ros_control]: 	State:
+[gazebo-2] [INFO] [1792819282.417280838] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1792819282.417282791] [gz_ros_control]: 		 velocity
+[gazebo-2] [INFO] [1792819282.417284669] [gz_ros_control]: 		 effort
+[gazebo-2] [INFO] [1792819282.417287353] [gz_ros_control]: 	Command:
+[gazebo-2] [INFO] [1792819282.417289417] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1792819282.417294804] [gz_ros_control]: Loading joint: joint4
+[gazebo-2] [INFO] [1792819282.417296854] [gz_ros_control]: 	State:
+[gazebo-2] [INFO] [1792819282.417298708] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1792819282.417300541] [gz_ros_control]: 		 velocity
+[gazebo-2] [INFO] [1792819282.417302285] [gz_ros_control]: 		 effort
+[gazebo-2] [INFO] [1792819282.417304066] [gz_ros_control]: 	Command:
+[gazebo-2] [INFO] [1792819282.417305919] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1792819282.417310930] [gz_ros_control]: Loading joint: gripper_left_joint
+[gazebo-2] [INFO] [1792819282.417313750] [gz_ros_control]: 	State:
+[gazebo-2] [INFO] [1792819282.417315565] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1792819282.417317485] [gz_ros_control]: 		 velocity
+[gazebo-2] [INFO] [1792819282.417319320] [gz_ros_control]: 		 effort
+[gazebo-2] [INFO] [1792819282.417321180] [gz_ros_control]: 	Command:
+[gazebo-2] [INFO] [1792819282.417322903] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1792819282.417328759] [gz_ros_control]: Loading joint: gripper_right_joint
+[gazebo-2] [INFO] [1792819282.417333655] [gz_ros_control]: Joint 'gripper_right_joint'is mimicking joint 'gripper_left_joint' with multiplier: 1 and offset: 0
+[gazebo-2] [INFO] [1792819282.417336419] [gz_ros_control]: 	State:
+[gazebo-2] [INFO] [1792819282.417338371] [gz_ros_control]: 		 position
+[gazebo-2] [INFO] [1792819282.417340301] [gz_ros_control]: 		 velocity
+[gazebo-2] [INFO] [1792819282.417343309] [gz_ros_control]: 		 effort
+[gazebo-2] [INFO] [1792819282.417345327] [gz_ros_control]: 	Command:
+[gazebo-2] [INFO] [1792819282.417442325] [controller_manager]: Initialize hardware 'OpenManipulatorXSystem' 
+[gazebo-2] [WARN] [1792819282.417458541] [controller_manager.hardware_component.system.OpenManipulatorXSystem]: Executor is not available during hardware component initialization for 'OpenManipulatorXSystem'. Skipping node creation!
+[gazebo-2] [INFO] [1792819282.417532345] [controller_manager]: Successful initialization of hardware 'OpenManipulatorXSystem'
+[gazebo-2] [INFO] [1792819282.417639837] [controller_manager]: Activating component 'OpenManipulatorXSystem'.
+[gazebo-2] [INFO] [1792819282.417665522] [resource_manager]: 'configure' hardware 'OpenManipulatorXSystem' 
+[gazebo-2] [INFO] [1792819282.417669696] [gz_ros_control]: System Successfully configured!
+[gazebo-2] [INFO] [1792819282.417673797] [resource_manager]: Successful 'configure' of hardware 'OpenManipulatorXSystem'
+[gazebo-2] [INFO] [1792819282.417679036] [resource_manager]: 'activate' hardware 'OpenManipulatorXSystem' 
+[gazebo-2] [INFO] [1792819282.417689511] [resource_manager]: Successful 'activate' of hardware 'OpenManipulatorXSystem'
+[gazebo-2] [WARN] [1792819282.417712137] [controller_manager]: Component 'OpenManipulatorXSystem' does not have read or write statistics initialized, skipping registration.
+[gazebo-2] [INFO] [1792819282.417716389] [controller_manager]: Resource Manager has been successfully initialized. Starting Controller Manager services...
+[gazebo-2] [INFO] [1792819282.451767293] [controller_manager]: Loading controller : 'joint_state_broadcaster' of type 'joint_state_broadcaster/JointStateBroadcaster'
+[gazebo-2] [INFO] [1792819282.451813651] [controller_manager]: Loading controller 'joint_state_broadcaster'
+[gazebo-2] [INFO] [1792819282.458673719] [controller_manager]: Controller 'joint_state_broadcaster' node arguments: --ros-args --params-file /home/ros/agentic_workcell_ws/install/open_manipulator_bringup/share/open_manipulator_bringup/config/open_manipulator_x/hardware_controller_manager.yaml -p use_sim_time:=true --param use_sim_time:=true 
+[spawner-5] [INFO] [1792819282.463995081] [spawner_joint_state_broadcaster]: Loaded joint_state_broadcaster
+[gazebo-2] [INFO] [1792819282.475908636] [controller_manager]: Configuring controller: 'joint_state_broadcaster'
+[gazebo-2] [INFO] [1792819282.476304795] [joint_state_broadcaster]: 'joints' or 'interfaces' parameter is empty. All available state interfaces will be published
+[gazebo-2] [INFO] [1792819282.496410582] [controller_manager]: Activating controllers: [ joint_state_broadcaster ]
+[gazebo-2] [1;31m[Err] [Physics.cc:1906] [0m[1;31mAttempting to create a mimic constraint for joint [[0m[1;31mgripper_right_joint[0m[1;31m] but the chosen physics engine does not support [0m[1;31mmimic constraints, so no constraint will be [0m[1;31mcreated.[0m[1;31m[0m
+[gazebo-2] [WARN] [1792819284.505110057] [gz_ros_control]:  Desired controller update period (0.01 s) is slower than the gazebo simulation period (0.005 s).
+[gazebo-2] [INFO] [1792819284.506712736] [controller_manager]: Successfully switched controllers!
+[spawner-5] [INFO] [1792819284.516749664] [spawner_joint_state_broadcaster]: Configured and activated joint_state_broadcaster
+[INFO] [spawner-5]: process has finished cleanly [pid 33706]
+[INFO] [spawner-6]: process started with pid [33888]
+[INFO] [spawner-7]: process started with pid [33889]
+[gazebo-2] [INFO] [1792819285.028050835] [controller_manager]: Loading controller : 'gripper_controller' of type 'position_controllers/GripperActionController'
+[gazebo-2] [INFO] [1792819285.028109285] [controller_manager]: Loading controller 'gripper_controller'
+[gazebo-2] [INFO] [1792819285.034884901] [controller_manager]: Controller 'gripper_controller' node arguments: --ros-args --params-file /home/ros/agentic_workcell_ws/install/open_manipulator_bringup/share/open_manipulator_bringup/config/open_manipulator_x/hardware_controller_manager.yaml -p use_sim_time:=true --param use_sim_time:=true 
+[gazebo-2] [WARN] [1792819285.040891842] [gripper_controller]: [Deprecated]: the `position_controllers/GripperActionController` and `effort_controllers::GripperActionController` controllers are replaced by 'parallel_gripper_controllers/GripperActionController' controller
+[spawner-7] [INFO] [1792819285.056871860] [spawner_gripper_controller]: Loaded gripper_controller
+[gazebo-2] [INFO] [1792819285.068739589] [controller_manager]: Configuring controller: 'gripper_controller'
+[gazebo-2] [INFO] [1792819285.068849969] [gripper_controller]: Action status changes will be monitored at 20.000000 Hz.
+[gazebo-2] [INFO] [1792819285.088681747] [controller_manager]: Activating controllers: [ gripper_controller ]
+[gazebo-2] [INFO] [1792819285.098894429] [controller_manager]: Successfully switched controllers!
+[spawner-7] [INFO] [1792819285.107081166] [spawner_gripper_controller]: Configured and activated gripper_controller
+[INFO] [spawner-7]: process has finished cleanly [pid 33889]
+[gazebo-2] [INFO] [1792819285.506773690] [controller_manager]: Loading controller : 'arm_controller' of type 'joint_trajectory_controller/JointTrajectoryController'
+[gazebo-2] [INFO] [1792819285.506855454] [controller_manager]: Loading controller 'arm_controller'
+[gazebo-2] [INFO] [1792819285.512396539] [controller_manager]: Controller 'arm_controller' node arguments: --ros-args --params-file /home/ros/agentic_workcell_ws/install/open_manipulator_bringup/share/open_manipulator_bringup/config/open_manipulator_x/hardware_controller_manager.yaml -p use_sim_time:=true --param use_sim_time:=true 
+[spawner-6] [INFO] [1792819285.536336511] [spawner_arm_controller]: Loaded arm_controller
+[gazebo-2] [INFO] [1792819285.537674180] [controller_manager]: Configuring controller: 'arm_controller'
+[gazebo-2] [INFO] [1792819285.537927214] [arm_controller]: No specific joint names are used for command interfaces. Using 'joints' parameter.
+[gazebo-2] [INFO] [1792819285.537977653] [arm_controller]: Command interfaces are [position] and state interfaces are [position velocity].
+[gazebo-2] [INFO] [1792819285.538067465] [arm_controller]: Using 'splines' interpolation method.
+[gazebo-2] [INFO] [1792819285.539615578] [arm_controller]: Goals with partial set of joints are allowed
+[gazebo-2] [INFO] [1792819285.539670413] [arm_controller]: Action status changes will be monitored at 20.00 Hz.
+[gazebo-2] [INFO] [1792819285.542469585] [arm_controller]: Setting initial scaling factor to 1.000000
+[gazebo-2] [INFO] [1792819285.542522047] [arm_controller]: No scaling interface set. This controller will not read speed scaling from the hardware.
+[gazebo-2] [INFO] [1792819285.548508270] [controller_manager]: Activating controllers: [ arm_controller ]
+[gazebo-2] [INFO] [1792819285.557036081] [controller_manager]: Successfully switched controllers!
+[spawner-6] [INFO] [1792819285.567524900] [spawner_arm_controller]: Configured and activated arm_controller
+[INFO] [spawner-6]: process has finished cleanly [pid 33888]
+[gazebo-2] [INFO] [1792819298.749918696] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819298.750027640] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819298.818442169] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819311.476630252] [gripper_controller]: Received & accepted new action goal
+[gazebo-2] [INFO] [1792819311.643674437] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819311.643736480] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819312.957084005] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819313.118589125] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819313.118627741] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819314.096901606] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819314.150230372] [gripper_controller]: Received & accepted new action goal
+[gazebo-2] [INFO] [1792819315.395883963] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819315.395924743] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819316.706821541] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819331.048146984] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819331.048179284] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819331.786801372] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819357.586105381] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819357.586184165] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819357.704256143] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819369.635337501] [gripper_controller]: Received & accepted new action goal
+[gazebo-2] [INFO] [1792819369.863025508] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819369.863065587] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819371.267114758] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819371.386342921] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819371.386418089] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819372.347164586] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819372.417277187] [gripper_controller]: Received & accepted new action goal
+[gazebo-2] [INFO] [1792819373.664817637] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819373.664861016] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819374.936958442] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819378.860121606] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819378.860182253] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819380.817120810] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819380.936261582] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819380.936298675] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819382.347250386] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819382.459731812] [gripper_controller]: Received & accepted new action goal
+[gazebo-2] [INFO] [1792819383.965683437] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819383.965750599] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819385.366881353] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819389.792315609] [gripper_controller]: Received & accepted new action goal
+[gazebo-2] [INFO] [1792819389.918119615] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819389.918156187] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819391.247168671] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819391.343271215] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819391.343310238] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819392.447096253] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819392.523746761] [gripper_controller]: Received & accepted new action goal
+[gazebo-2] [INFO] [1792819393.870282034] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819393.870365519] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819395.387020746] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819399.843074911] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819399.843115356] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819401.777336568] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819401.870302176] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819401.870341721] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819403.317145315] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819403.392299685] [gripper_controller]: Received & accepted new action goal
+[gazebo-2] [INFO] [1792819404.618493229] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819404.618581589] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819406.117000514] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819415.499377792] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819415.499419068] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819416.406822438] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819428.322617888] [gripper_controller]: Received & accepted new action goal
+[gazebo-2] [INFO] [1792819428.468511046] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819428.468548085] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819429.804810898] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819429.943183112] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819429.943220325] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819430.845124812] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819430.953276898] [gripper_controller]: Received & accepted new action goal
+[gazebo-2] [INFO] [1792819432.239953880] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819432.240026028] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819433.545044789] [arm_controller]: Goal reached, success!
+[gazebo-2] [INFO] [1792819447.396707462] [arm_controller]: Received new action goal
+[gazebo-2] [INFO] [1792819447.396752103] [arm_controller]: Accepted new action goal
+[gazebo-2] [INFO] [1792819448.124976069] [arm_controller]: Goal reached, success!
+[gazebo-2] NodeShared::RecvSrvRequest() error sending response: Host unreachable

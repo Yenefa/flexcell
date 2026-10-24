@@ -1,0 +1,5 @@
+# Raw process outputs retain original CRLF and trailing spaces byte-for-byte.
+# Keep large frozen logs out of source diffs; their hashes remain inspectable.
+*.log -text -diff
+runtime_logs/*.log -text -diff
+final_home_process_check.json -text whitespace=cr-at-eol
