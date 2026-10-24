@@ -62,6 +62,12 @@ jobs:
           python3 setup/acceptance/e021_native_recovery_20261024/selftest_verify_recovery.py
           python3 setup/acceptance/e021_native_recovery_20261024/decision_audit.py
 
+      - name: issue #22 re-adjudication (#31 item 6)
+        shell: bash
+        run: |
+          python3 setup/acceptance/issue22_readjudication_20261024/verify_issue22_claims.py
+          python3 setup/acceptance/issue22_readjudication_20261024/selftest_verify_issue22.py
+
       - name: build (first-party packages)
         shell: bash
         run: |
