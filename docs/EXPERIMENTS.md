@@ -687,7 +687,8 @@ eight successes and two failures. The historical runner selected passing rows
 to unlock the pilot; that is not a fresh fixed-window 5/5 qualification and is
 not retrospectively ratified here. The three baseline summaries retain 19/20,
 18/20 and 17/20, independently of the pooled smoke denominator.
-See [the read-only inventory](../competition/iyaic-2026/evidence/e021-audit.json).
+See [the read-only inventory](../competition/iyaic-2026/evidence/e021-audit.json)
+and its [2026-10-24 recheck](../competition/iyaic-2026/evidence/e021-audit-recheck-20261024.json).
 
 - **Setup**: desktop as the only fully-qualified executor (shutdown race repaired,
   per-decision routing gates live, 7-day unattended hardening: updates disabled at

@@ -23,7 +23,10 @@ Clef/LLM是上层策略实现，MoveIt/ROS/Gazebo及模型来自外部项目；�
 - E-021双物体S1：FSM19/20，Hybrid0.03为18/20，Hybrid0.85为17/20；顺序小样本，未证明优越。
 - TransferBench有T1布局与T3三段交换试点，双方成功；外层组合计划明确给定，不声称自主组合。
 - 有界暂停续跑已有分支试点，范围仅已提交的确认边界。
-- [审计清单](../evidence/e021-audit.json)明确原生episode缺口；未补齐前不称完整可复现benchmark。
+- [审计清单](../evidence/e021-audit.json)（2026-10-17 快照）当时明确原生episode缺口为60份；
+  2026-10-24 这些文件已从原执行机按字节找回并入库，同一工具复检结果为
+  [`FOUND_NOT_REPLAYED: 60`](../evidence/e021-audit-recheck-20261024.json)，即**清单完整但模型重放仍为 NOT_RUN**。
+  因此仍不称完整可复现benchmark——缺的不是文件，是重放与物理验收。
 
 ## 技术与落地边界
 

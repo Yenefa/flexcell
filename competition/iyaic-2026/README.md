@@ -13,7 +13,8 @@
 - [项目创意计划书初稿](materials/project-plan.md)
 - [PPT、视频与答辩提纲](materials/presentation.md)
 - [家用快模型连接与交付检查](RUNBOOK.md)
-- [E-021 只读归档审计](evidence/e021-audit.json)
+- [E-021 只读归档审计（2026-10-17 快照，`MISSING: 60`）](evidence/e021-audit.json)
+- [同一工具在原生 episode 回收后的复检（2026-10-24，`FOUND_NOT_REPLAYED: 60`）](evidence/e021-audit-recheck-20261024.json)
 
 ## 比赛条件及来源
 
