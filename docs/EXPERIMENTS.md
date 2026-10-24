@@ -775,7 +775,8 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
   [Repair details](HYBRID_BATCH_GATE_20261007.md) and
   [requested architecture/planning diagrams](ARCHITECTURE_AND_PLAN_20261007.md).
 - **CI follow-up:** PR #28 passed the ROS Jazzy build and 268 tests, zero
-  errors/failures/skips; scan 35/0. It remains unmerged at this update.
+  errors/failures/skips; scan 35/0. It was unmerged at this update and merged to
+  main as `8194bdc` on 2026-10-24.
   [Workflow](https://github.com/Yenefa/flexcell/actions/runs/37668836039).
 
 ### E-024 — Grasp diagnostic client repair (2026-10-08, cloud)
@@ -783,7 +784,8 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
 - **Purpose:** prepare trustworthy evidence for the E-021 cross-arm grasp
   failure. The frozen carry mechanism and skill/runtime contracts are unchanged.
 - **Configuration:** base `c79e0c672c95e2d9cd04112ef42b65e4c67e1845`
-  (unmerged PR #28), Python 3.12, offline fake action/reset transport.
+  (PR #28's branch, merged to main as `8194bdc` on 2026-10-24), Python 3.12,
+  offline fake action/reset transport.
 - **Reproduction:** actual old CLI accepts default success, continues after a
   missing pick result and returns 0; B is placed at A's hardcoded pose. Actual
   repaired CLI stops the two invalid cases after one pick with exit 1, and
@@ -795,6 +797,17 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
 - **Verification:** 227 local ROS-independent tests pass, zero errors/failures/
   skips, including 33 new cases; static scan 35/0. Eleven ROS-dependent test
   files excluded; no live grasp/model/robot calls or Gazebo acceptance.
+- **2026-10-24 rebase check:** on `main@6c0e000` with #28 and #41 merged, the
+  same 33 new cases contribute to **409 colcon tests, zero errors/failures/
+  skips**, static scan 37 files/0 problems. An independent adversarial probe
+  (not the PR's own tests) confirmed the ten properties this entry depends on:
+  a negative measured rise cannot pass as a pick, an all-zero quaternion is
+  treated as unmeasured, a physical grasp failure is kept as data and the batch
+  continues, a harness error stops the batch with the row already on disk, a
+  failed reset dispatches nothing, an existing `--out` is refused, box B returns
+  to its measured start (y=-0.18), an unconfirmed place blocks the next trial,
+  a terminal-status/skill-payload mismatch is flagged, and exactly one goal is
+  sent per trial when the result never arrives.
 - **Next:** after dependent PR review/merge and rebuild, a short A/B probe
   accompanied by matching skill/carry/motion logs. The physical root cause
   remains UNKNOWN; old data is not pooled with the changed trial conditions;

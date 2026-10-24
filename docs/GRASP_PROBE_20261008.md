@@ -1,7 +1,8 @@
 # Grasp probe repair and next physical diagnosis — 2026-10-08
 
 Source base: `c79e0c672c95e2d9cd04112ef42b65e4c67e1845`, the head of
-[PR #28](https://github.com/Yenefa/flexcell/pull/28), which remains unmerged.
+[PR #28](https://github.com/Yenefa/flexcell/pull/28), which was unmerged when
+this diagnostic was written and merged to main as `8194bdc` on 2026-10-24.
 This follow-up belongs to #8 measurement integrity and the grasp-diagnosis
 backlog described in E-021/#13. It changes a diagnostic client; the frozen carry
 mechanism, skill servers, decision policies and recovery budget are unchanged.
