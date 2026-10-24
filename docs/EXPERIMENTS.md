@@ -684,10 +684,13 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
   per-decision routing gates live, 7-day unattended hardening: updates disabled at
   three layers, sleep structurally impossible on this firmware, Storage Sense off —
   service snapshot + rollback script on `F:\flexcell-models\`). Three arms, S1
-  single-object, n=20 each, sequential deployments (one fingerprint per arm; no
+  dual-object `RunDemo`, n=20 each, sequential deployments (one fingerprint per arm; no
   pooling across arms). τ=0.85 unlock used the runner's fingerprint-scoped smoke
   rule: attempt 1 (3/5, two grasp-physics failures) + attempt 2 (5/5, all routing
-  audits green) = **8 pooled valid rows**, BOTH batch files archived and disclosed.
+  audits green) = **10 attempts: 8 SUCCEEDED and 2 FAILED**. The historical
+  runner selected the eight successful rows for admission; both batch files
+  and the unfiltered pooled summary remain archived. This is not a fixed
+  five-attempt smoke qualification.
 - **Result**:
   | arm | S1 n=20 | Wilson 95% CI | paid slow fraction | cost ceiling |
   | --- | ------- | ------------- | ------------------ | ------------ |
@@ -695,8 +698,11 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
   | hybrid τ=0.03 | 18/20 (0.90) | [0.69, 0.98] | ~0% | ~¥0.02 |
   | hybrid τ=0.85 | 17/20 (0.85) | [0.64, 0.95] | ~20% | ~¥0.3 |
   All CIs overlap: **no significant success-rate difference at n=20**. Every model
-  decision passed the routing provenance audit (139 decisions in the τ=0.85
-  baseline, zero violations). Night total ¥0.576 / ¥5 upper bound.
+  decision was reported as passing the routing provenance audit in the archived
+  summaries (139 decisions in the τ=0.85 baseline, zero reported violations).
+  The 60 referenced native episodes are absent from this checkout and current
+  laptop episode store, so their complete inputs and per-decision provenance
+  cannot be independently re-audited here. Night total ¥0.576 / ¥5 upper bound.
 - **The dominant confounder**: 6 of tonight's 7 non-success episodes (FSM run20,
   hybrid τ=0.85 runs 3/10/13, hybrid smoke ×2) are the SAME grasp-physics family —
   `PICK_B`/`PICK_A` fails twice with ERR_GRASP_FAILED (23) → recovery exhausted
@@ -716,6 +722,13 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
 - **Evidence**: `setup/acceptance/tau_sweep_desktop_20261005/` (12 batch files
   incl. both τ=0.85 smoke attempts, pooled summary, two hybrid deployments,
   campaign log `F:\flexcell-models\campaign_20261005.log`).
+- **2026-10-24 correction / #31**: all 60 baseline rows' client outputs contain
+  A/B result checks; the former single-object description was incorrect.
+  Raw JSONL bytes and historical outcomes are unchanged. These remain
+  descriptive small samples, without retrospective fixed-window qualification.
+  The [fixed-window admission repair](FIXED_SMOKE_WINDOW_20261024.md) rejects
+  pooling, clipping, duplicate native evidence and incomplete windows. Native
+  episode recovery, model replay, full M3 and n≥50 remain pending/frozen.
 
 
 ### E-022 — Static attribute scanner repair (2026-10-07, cloud)

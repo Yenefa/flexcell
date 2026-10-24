@@ -27,17 +27,21 @@ replayed cleanly AND every outcome matched its expectation.
 """
 import argparse
 import glob
+import hashlib
 import json
 import math
 import os
+from pathlib import Path
 import subprocess
 import sys
 import time
+import uuid
 
 from flexcell_skills.contracts.benchmark_protocol import load_protocol, check_scenario_execution
 from flexcell_skills.contracts.episode import replay_episode
 from flexcell_skills.contracts.metrics import wilson
 from flexcell_skills.contracts.routing_audit import audit_routing_batch, audit_routing_episode
+from flexcell_skills.contracts.smoke_window import encode_plan, make_batch_plan, qualify_smoke_window
 from flexcell_skills.decision_policy import FSMPolicy
 
 ROS_LOG = os.path.expanduser('~/.ros/flexcell')
@@ -151,7 +155,7 @@ def main():
     ap.add_argument('--dry-run', action='store_true', help='print the interleaved plan without ROS actions')
     ap.add_argument('--seed', type=int, default=20260930)
     ap.add_argument('--stage', choices=('smoke', 'baseline'), default='smoke')
-    ap.add_argument('--smoke-summary', help='passing same-protocol smoke required for baseline')
+    ap.add_argument('--smoke-summary', help='complete fixed five-run window with batch_plans sidecar required for baseline')
     ap.add_argument('--deployment', help='frozen hybrid deployment JSON; enforce per-decision provenance')
     ap.add_argument('--policy', choices=('fsm', 'jev', 'llm', 'hybrid'), default='fsm',
                     help='expected policy of the running fleet (model replay is reported NOT_RUN)')
@@ -180,9 +184,14 @@ def main():
         if sid not in SCENARIOS:
             print('unknown scenario %r (have %s)' % (sid, sorted(SCENARIOS)))
             return 2
-        n = int(count or 1)
+        try:
+            n = int(count or 1)
+        except ValueError:
+            ap.error('counts must be positive integers')
         if n < 1:
             ap.error('counts must be positive')
+        if sid in dict(plan):
+            ap.error('duplicate scenario in batch: %s' % sid)
         plan += [(sid, n)]
     if not plan:
         ap.error('batch must contain at least one cell')
@@ -203,32 +212,19 @@ def main():
     if not args.dry_run and args.stage == 'baseline':
         if not args.smoke_summary:
             ap.error('baseline is blocked until --smoke-summary is supplied')
-        with open(args.smoke_summary) as stream:
-            smoke = [json.loads(line) for line in stream if line.strip()]
-        profiles = {r.get('runtime_fingerprint') for r in smoke
-                    if r.get('policy') == args.policy and r.get('runtime_fingerprint')}
-        if len(profiles) != 1:
-            ap.error('baseline requires smoke from one fingerprinted runtime')
-        baseline_profile = profiles.pop()
+        try:
+            baseline_profile, smoke = qualify_smoke_window(
+                args.smoke_summary, [sid for sid, _ in plan], args.policy,
+                PROTOCOL, PROTOCOL_SHA256, deployment)
+        except (OSError, ValueError, KeyError, TypeError) as error:
+            ap.error('baseline blocked: fixed smoke window invalid: %s' % error)
         if deployment and deployment.get('runtime_fingerprint') != baseline_profile:
             ap.error('deployment differs from the qualifying smoke runtime')
-        for sid, _ in plan:
-            valid = [r for r in smoke if r.get('scenario') == sid and
-                     r.get('protocol_sha256') == PROTOCOL_SHA256 and
-                     r.get('runtime_fingerprint') == baseline_profile and
-                     r.get('policy') == args.policy and r.get('stage') == 'smoke' and
-                     (not deployment or (r.get('routing_audit') or {}).get('ok') is True) and
-                     r.get('scenario_exercised') and not r.get('harness_error') and
-                     r.get('outcome') == r.get('expected') and
-                     (r.get('replay_ok') is True if args.policy == 'fsm'
-                      else r.get('model_decisions', 0) > 0)]
-            if len(valid) < 5:
-                ap.error('baseline blocked: %s has fewer than five passing same-policy smoke runs' % sid)
-            if deployment:
-                smoke_audit = audit_routing_batch(valid, deployment)
-                if not smoke_audit['ok']:
-                    ap.error('baseline blocked: hybrid smoke provenance failed: ' +
-                             '; '.join(smoke_audit['errors']))
+        if deployment:
+            smoke_audit = audit_routing_batch(smoke, deployment)
+            if not smoke_audit['ok']:
+                ap.error('baseline blocked: hybrid smoke provenance failed: ' +
+                         '; '.join(smoke_audit['errors']))
     schedule = [(sid, i + 1, n) for i in range(max(n for _, n in plan))
                 for sid, n in plan if i < n]
     if args.dry_run:
@@ -241,18 +237,31 @@ def main():
     policy = FSMPolicy()
     rows = []
     batch_fingerprint = None
-    batch_id = 'batch_%s' % time.strftime('%Y%m%d_%H%M%S')
+    batch_id = 'batch_%s_%s' % (time.strftime('%Y%m%d_%H%M%S'), uuid.uuid4().hex[:8])
     summary_path = os.path.join(EPISODE_DIR, '%s.jsonl' % batch_id)
     os.makedirs(EPISODE_DIR, exist_ok=True)
+    batch_plan = make_batch_plan(batch_id, plan, args.policy, args.stage, args.seed,
+                                 PROTOCOL, PROTOCOL_SHA256, deployment)
+    plan_bytes = encode_plan(batch_plan)
+    plan_sha = hashlib.sha256(plan_bytes).hexdigest()
+    plan_dir = os.path.join(EPISODE_DIR, 'batch_plans')
+    os.makedirs(plan_dir, exist_ok=True)
+    # Reserve both outputs before the first reset; never append to an old batch.
+    with open(summary_path, 'x'):
+        pass
+    with open(os.path.join(plan_dir, batch_id + '.json'), 'xb') as stream:
+        stream.write(plan_bytes)
     print('scenario runner: %s' % dict(
         (k, v) for k, v in plan))
-    for sid, run, count in schedule:
+    for slot in batch_plan['schedule']:
+        sid, run = slot['scenario'], slot['run']
+        count = dict(plan)[sid]
         spec = SCENARIOS[sid]
         i = run - 1
         print('  %s run %d/%d' % (sid, i + 1, count))
         before = set(glob.glob(os.path.join(EPISODE_DIR, '*.json')))
         rc, out, extra = run_episode(client, spec, args.ws,
-                                     seed=args.seed + len(rows))
+                                     seed=slot['seed'])
         harness_error = extra.get('harness_error')
         if rc == 90 and not harness_error:
             harness_error = extra.get('inject_arm')
@@ -314,15 +323,19 @@ def main():
                 replay_ok = False
                 replay_status = 'FAIL'
         row = {
+            'batch_id': batch_id, 'batch_plan_sha256': plan_sha,
             'scenario': sid, 'run': i + 1, 'rc': rc, 'outcome': outcome,
             'expected': spec['expect'], 'episode': ep_path,
+            'episode_relative': os.path.basename(ep_path) if ep_path else None,
+            'episode_sha256': hashlib.sha256(Path(ep_path).read_bytes()).hexdigest() if ep_path else None,
+            'evidence_id': record.get('final_state', {}).get('evidence_id') if ep_path else None,
             'replay_ok': replay_ok, 'replay_steps': replay_n,
             'perturb': extra.get('perturb'),
             'inject_arm': extra.get('inject_arm'),
             'inject_clear': extra.get('inject_clear'),
             'harness_error': harness_error,
             'ts': time.time(),
-            'protocol_version': 2, 'seed': args.seed + len(rows),
+            'protocol_version': 2, 'seed': slot['seed'],
             'policy': args.policy, 'replay_status': replay_status,
             'protocol_id': PROTOCOL['protocol_id'], 'protocol_sha256': PROTOCOL_SHA256,
             'stage': args.stage, 'scenario_exercised': scenario_exercised,
