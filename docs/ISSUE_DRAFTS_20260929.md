@@ -10,6 +10,17 @@
 Prepared 2026-09-29 during the new-machine (RTX 4060 laptop) bring-up +
 first official benchmark batch, at `main` = `070aed6`.
 
+> **Correction 2026-10-24 — Issue A (#22) is falsified; treat its body as
+> history, not as current fact.** All four of its claims were true at
+> `070aed6` (2026-09-28) but were already false on `main` by the time the body
+> was posted on 2026-10-03: `fd9bf72` (2026-10-02) rewired `_execute` to
+> `_execute_plan(single=True)` and added the `fsm_s3_s4` evidence archive in the
+> same commit, and E-013 had recorded real S3/S4 runs on 2026-10-01. The one
+> claim worth keeping — `pick_place_v1` must not be hard-mapped to S4 — is
+> preserved as a checked invariant. See
+> [the re-adjudication](../setup/acceptance/issue22_readjudication_20261024/README.md).
+> Issue B (#23) and Issue C (#24) are outside this correction.
+
 ---
 
 ## Issue A — M3 benchmark cells S3/S4 are not instrumented: the task path
