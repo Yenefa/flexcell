@@ -55,6 +55,13 @@ jobs:
           assert report['status'] == 'INCOMPLETE_EVIDENCE'
           PY
 
+      - name: E-021 native recovery verification (#31)
+        shell: bash
+        run: |
+          python3 setup/acceptance/e021_native_recovery_20261024/verify_recovery.py
+          python3 setup/acceptance/e021_native_recovery_20261024/selftest_verify_recovery.py
+          python3 setup/acceptance/e021_native_recovery_20261024/decision_audit.py
+
       - name: build (first-party packages)
         shell: bash
         run: |
