@@ -1,0 +1,61 @@
+{
+  "task_id": "CLEF-RECORDED-001",
+  "kind": "RECORDED_INPUT_MODEL_API_SMOKE",
+  "created_at_utc": "2026-10-24T13:20:11.138346+00:00",
+  "repository_commit": "1ad314d1935abb460638f9eb3906fce376c49d30",
+  "platform": "Windows-11-10.0.26100-SP0",
+  "python_version": "3.13.14 (main, Jun 11 2026, 04:04:46) [MSC v.1944 64 bit (AMD64)]",
+  "endpoint": "http://100.87.190.44:11435/v1/systemone",
+  "requested_model": "clef-flash-q8_0",
+  "expected_local_weight_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+  "served_weight_identity": "REQUIRES_SERVER_PROCESS_AND_LOG_CHECK",
+  "gpu_execution": "REQUIRES_SERVER_LOG_EVIDENCE",
+  "robot_commands_sent": 0,
+  "paid_slow_model_calls": 0,
+  "closed_loop_success_measured": false,
+  "model_calls_attempted": 1,
+  "rows": [
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-178e4d9e.json.raw",
+      "episode_sha256": "2f132b0ebbbfae1c1009882652823458ba893c99cbe7f1db6e68061316242b82",
+      "seq": 2,
+      "state_sha256": "2cdcea50f05e2f5800bf56dc119298d5780f1599994512cbffee58bf82cbfc5a",
+      "latency_ms": 7652.067100003478,
+      "recorded_decision": {
+        "action": "PICK",
+        "target": "target_box_a",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "PICK",
+        "target": "target_box_a",
+        "confidence": 1.0,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev policy_failure (backend error): <HTTPError 502: 'Bad Gateway'>",
+        "policy_trace": {
+          "source": "fsm",
+          "fallback": true,
+          "requested_policy": "jev",
+          "failure": "backend error"
+        }
+      },
+      "recorded_action_agreement": true,
+      "response_json": "null",
+      "pass": false,
+      "errors": [
+        "No real Clef proposal; FSM fallback is not a pass",
+        "Missing positive measured token usage",
+        "Client model identity mismatch",
+        "Missing or invalid probability distribution"
+      ]
+    }
+  ],
+  "status": "FAIL",
+  "local_weight_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+  "input_manifest_sha256": "b507b08e55148b8a2004fd5b8fc74b738997eaa7b3e41906aa7493308d824ca4",
+  "prompt_sha256": "b37e71cd0b9b0ff81cfa3638111da8375251be2fadeabc01468ce46b5f4e85b8",
+  "calibration_sha256": null,
+  "routing_qualification": "NOT_TESTED",
+  "error": "No real Clef proposal; FSM fallback is not a pass; Missing positive measured token usage; Client model identity mismatch; Missing or invalid probability distribution",
+  "traceback": "Traceback (most recent call last):\n  File \"C:\\Users\\fuker\\WorkBuddy\\2026-10-23-15-02-50\\flexcell\\setup\\model_validation\\run_clef_replay.py\", line 200, in main\n    run(args, report, save)\n    ~~~^^^^^^^^^^^^^^^^^^^^\n  File \"C:\\Users\\fuker\\WorkBuddy\\2026-10-23-15-02-50\\flexcell\\setup\\model_validation\\run_clef_replay.py\", line 142, in run\n    raise RuntimeError('; '.join(failures))\nRuntimeError: No real Clef proposal; FSM fallback is not a pass; Missing positive measured token usage; Client model identity mismatch; Missing or invalid probability distribution\n"
+}

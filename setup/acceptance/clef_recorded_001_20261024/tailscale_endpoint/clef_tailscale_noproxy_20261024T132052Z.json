@@ -1,0 +1,753 @@
+{
+  "task_id": "CLEF-RECORDED-001",
+  "kind": "RECORDED_INPUT_MODEL_API_SMOKE",
+  "created_at_utc": "2026-10-24T13:20:52.523450+00:00",
+  "repository_commit": "1ad314d1935abb460638f9eb3906fce376c49d30",
+  "platform": "Windows-11-10.0.26100-SP0",
+  "python_version": "3.13.14 (main, Jun 11 2026, 04:04:46) [MSC v.1944 64 bit (AMD64)]",
+  "endpoint": "http://100.87.190.44:11435/v1/systemone",
+  "requested_model": "clef-flash-q8_0",
+  "expected_local_weight_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+  "served_weight_identity": "REQUIRES_SERVER_PROCESS_AND_LOG_CHECK",
+  "gpu_execution": "REQUIRES_SERVER_LOG_EVIDENCE",
+  "robot_commands_sent": 0,
+  "paid_slow_model_calls": 0,
+  "closed_loop_success_measured": false,
+  "model_calls_attempted": 20,
+  "rows": [
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-178e4d9e.json.raw",
+      "episode_sha256": "2f132b0ebbbfae1c1009882652823458ba893c99cbe7f1db6e68061316242b82",
+      "seq": 2,
+      "state_sha256": "2cdcea50f05e2f5800bf56dc119298d5780f1599994512cbffee58bf82cbfc5a",
+      "latency_ms": 1922.3660999996355,
+      "recorded_decision": {
+        "action": "PICK",
+        "target": "target_box_a",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "PICK",
+        "target": "target_box_a",
+        "confidence": 0.923651525,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.924 raw={\"backend\": \"clef\", \"concentration\": 0.9083818299662567, \"input_tokens\": 1296, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_t",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.9236515249718806,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1296
+        }
+      },
+      "recorded_action_agreement": true,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"PICK\", \"probabilities\": {\"ABORT\": 0.018829407050937767, \"OBSERVE\": 0.023274253354475884, \"PICK\": 0.9236515249718806, \"PLACE\": 0.013778519560122958, \"VERIFY\": 0.0093223547648828, \"WAIT\": 0.011143940297699965}, \"confidence\": 0.9083818299662567}}, \"usage\": {\"input_tokens\": 1296, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-178e4d9e.json.raw",
+      "episode_sha256": "2f132b0ebbbfae1c1009882652823458ba893c99cbe7f1db6e68061316242b82",
+      "seq": 3,
+      "state_sha256": "0dee5393956f44f505a34d57c3e45bd256493b30a3031328d5251d5f2638b8c0",
+      "latency_ms": 1909.5560999994632,
+      "recorded_decision": {
+        "action": "PLACE",
+        "target": "target_box_a",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "PLACE",
+        "target": "target_box_a",
+        "confidence": 0.924330151,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.924 raw={\"backend\": \"clef\", \"concentration\": 0.9091961815621067, \"input_tokens\": 1344, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_t",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.9243301513017556,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1344
+        }
+      },
+      "recorded_action_agreement": true,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"PLACE\", \"probabilities\": {\"ABORT\": 0.020390734955140717, \"OBSERVE\": 0.009093069732685075, \"PICK\": 0.010351384025124562, \"PLACE\": 0.9243301513017556, \"VERIFY\": 0.027629817031534266, \"WAIT\": 0.008204842953760056}, \"confidence\": 0.9091961815621067}}, \"usage\": {\"input_tokens\": 1344, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-178e4d9e.json.raw",
+      "episode_sha256": "2f132b0ebbbfae1c1009882652823458ba893c99cbe7f1db6e68061316242b82",
+      "seq": 4,
+      "state_sha256": "61253c18a7a1944956e0e384231ea5116c77babd430bad4d19f523fa035e609c",
+      "latency_ms": 2007.9161999892676,
+      "recorded_decision": {
+        "action": "VERIFY",
+        "target": "target_box_a",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "VERIFY",
+        "target": "target_box_a",
+        "confidence": 0.88515599,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.885 raw={\"backend\": \"clef\", \"concentration\": 0.8621871882148269, \"input_tokens\": 1390, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_t",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.8851559901790224,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1390
+        }
+      },
+      "recorded_action_agreement": true,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"VERIFY\", \"probabilities\": {\"ABORT\": 0.02206092284417446, \"OBSERVE\": 0.016827992732342076, \"PICK\": 0.013145243304524476, \"PLACE\": 0.05084158707077299, \"VERIFY\": 0.8851559901790224, \"WAIT\": 0.01196826386916369}, \"confidence\": 0.8621871882148269}}, \"usage\": {\"input_tokens\": 1390, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-178e4d9e.json.raw",
+      "episode_sha256": "2f132b0ebbbfae1c1009882652823458ba893c99cbe7f1db6e68061316242b82",
+      "seq": 5,
+      "state_sha256": "61253c18a7a1944956e0e384231ea5116c77babd430bad4d19f523fa035e609c",
+      "latency_ms": 2087.1158999943873,
+      "recorded_decision": {
+        "action": "OBSERVE",
+        "target": "target_box_b",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "PICK",
+        "target": "target_box_b",
+        "confidence": 0.754507775,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.755 raw={\"backend\": \"clef\", \"concentration\": 0.705409330174022, \"input_tokens\": 1433, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_to",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.7545077751450183,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1433
+        }
+      },
+      "recorded_action_agreement": false,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"PICK\", \"probabilities\": {\"ABORT\": 0.034261619397351756, \"OBSERVE\": 0.022813970069574224, \"PICK\": 0.7545077751450183, \"PLACE\": 0.09470001006881784, \"VERIFY\": 0.08217075830752675, \"WAIT\": 0.011545867011711146}, \"confidence\": 0.705409330174022}}, \"usage\": {\"input_tokens\": 1433, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-178e4d9e.json.raw",
+      "episode_sha256": "2f132b0ebbbfae1c1009882652823458ba893c99cbe7f1db6e68061316242b82",
+      "seq": 6,
+      "state_sha256": "9f7070286d0d8cf812666b9f4031c38bb4b1d4485c3fcf2ea878f34da6b4bd5d",
+      "latency_ms": 2147.7767000033055,
+      "recorded_decision": {
+        "action": "PICK",
+        "target": "target_box_b",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "PICK",
+        "target": "target_box_b",
+        "confidence": 0.819938547,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.820 raw={\"backend\": \"clef\", \"concentration\": 0.7839262564495841, \"input_tokens\": 1499, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_t",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.8199385470413201,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1499
+        }
+      },
+      "recorded_action_agreement": true,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"PICK\", \"probabilities\": {\"ABORT\": 0.046031231780477605, \"OBSERVE\": 0.02516572889923383, \"PICK\": 0.8199385470413201, \"PLACE\": 0.05090906491186575, \"VERIFY\": 0.04267959445010471, \"WAIT\": 0.015275832916997951}, \"confidence\": 0.7839262564495841}}, \"usage\": {\"input_tokens\": 1499, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-178e4d9e.json.raw",
+      "episode_sha256": "2f132b0ebbbfae1c1009882652823458ba893c99cbe7f1db6e68061316242b82",
+      "seq": 7,
+      "state_sha256": "cf49871e60ca336b12ebd800e36c7490e8fcaa42e46f0b6fb3f3159b2bd9ff7d",
+      "latency_ms": 2269.9742000113474,
+      "recorded_decision": {
+        "action": "PLACE",
+        "target": "target_box_b",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "PLACE",
+        "target": "target_box_b",
+        "confidence": 0.879285843,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.879 raw={\"backend\": \"clef\", \"concentration\": 0.8551430118947831, \"input_tokens\": 1547, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_t",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.8792858432456526,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1547
+        }
+      },
+      "recorded_action_agreement": true,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"PLACE\", \"probabilities\": {\"ABORT\": 0.0283460313642134, \"OBSERVE\": 0.011650854995350911, \"PICK\": 0.01788081494267353, \"PLACE\": 0.8792858432456526, \"VERIFY\": 0.05103833291369169, \"WAIT\": 0.011798122538418051}, \"confidence\": 0.8551430118947831}}, \"usage\": {\"input_tokens\": 1547, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-178e4d9e.json.raw",
+      "episode_sha256": "2f132b0ebbbfae1c1009882652823458ba893c99cbe7f1db6e68061316242b82",
+      "seq": 8,
+      "state_sha256": "e67b06eb790ff789f2377b6bce0dd995fbdacc46dcf76c4fd6b58eeddfd3cde0",
+      "latency_ms": 2339.1219999903115,
+      "recorded_decision": {
+        "action": "VERIFY",
+        "target": "target_box_b",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "VERIFY",
+        "target": "target_box_b",
+        "confidence": 0.874072061,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.874 raw={\"backend\": \"clef\", \"concentration\": 0.8488864728789247, \"input_tokens\": 1592, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_t",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.8740720607324373,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1592
+        }
+      },
+      "recorded_action_agreement": true,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"VERIFY\", \"probabilities\": {\"ABORT\": 0.026164694200483472, \"OBSERVE\": 0.01315104665887081, \"PICK\": 0.016264025891674822, \"PLACE\": 0.057097955661521406, \"VERIFY\": 0.8740720607324373, \"WAIT\": 0.013250216855012265}, \"confidence\": 0.8488864728789247}}, \"usage\": {\"input_tokens\": 1592, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-1f07d5a3.json.raw",
+      "episode_sha256": "78e614fcc08bcdac1cafd8d6c0295faa031cdc0260dc86da15c83d87a856ba24",
+      "seq": 2,
+      "state_sha256": "f4b181edfe5b34006a05733904baf905c4dd947bcd2679959547f1ef44c5a69e",
+      "latency_ms": 1653.2044000050519,
+      "recorded_decision": {
+        "action": "PICK",
+        "target": "target_box_a",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "PICK",
+        "target": "target_box_a",
+        "confidence": 0.92342374,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.923 raw={\"backend\": \"clef\", \"concentration\": 0.9081084874860248, \"input_tokens\": 1294, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_t",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.9234237395716873,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1294
+        }
+      },
+      "recorded_action_agreement": true,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"PICK\", \"probabilities\": {\"ABORT\": 0.019388255453351513, \"OBSERVE\": 0.02304864615785514, \"PICK\": 0.9234237395716873, \"PLACE\": 0.013634009365312373, \"VERIFY\": 0.009493016319798537, \"WAIT\": 0.011012333131995036}, \"confidence\": 0.9081084874860248}}, \"usage\": {\"input_tokens\": 1294, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-1f07d5a3.json.raw",
+      "episode_sha256": "78e614fcc08bcdac1cafd8d6c0295faa031cdc0260dc86da15c83d87a856ba24",
+      "seq": 3,
+      "state_sha256": "1db46078d2b40793d462cf64810f10d7c86ee70cfe192dbefe10a3a2f7baae1d",
+      "latency_ms": 1675.8878999971785,
+      "recorded_decision": {
+        "action": "PLACE",
+        "target": "target_box_a",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "PLACE",
+        "target": "target_box_a",
+        "confidence": 0.919003952,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.919 raw={\"backend\": \"clef\", \"concentration\": 0.9028047421742159, \"input_tokens\": 1342, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_t",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.9190039518118466,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1342
+        }
+      },
+      "recorded_action_agreement": true,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"PLACE\", \"probabilities\": {\"ABORT\": 0.021887159544473806, \"OBSERVE\": 0.00942152313444845, \"PICK\": 0.010828543165594189, \"PLACE\": 0.9190039518118466, \"VERIFY\": 0.03031662585201953, \"WAIT\": 0.008542196491617315}, \"confidence\": 0.9028047421742159}}, \"usage\": {\"input_tokens\": 1342, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-1f07d5a3.json.raw",
+      "episode_sha256": "78e614fcc08bcdac1cafd8d6c0295faa031cdc0260dc86da15c83d87a856ba24",
+      "seq": 4,
+      "state_sha256": "68526402b8d81359a30a33f189f8841a98bdd89476c80374a5aa9fcb34fe7ef2",
+      "latency_ms": 1772.5683999888133,
+      "recorded_decision": {
+        "action": "VERIFY",
+        "target": "target_box_a",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "VERIFY",
+        "target": "target_box_a",
+        "confidence": 0.88825815,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.888 raw={\"backend\": \"clef\", \"concentration\": 0.8659097805136806, \"input_tokens\": 1386, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_t",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.8882581504280672,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1386
+        }
+      },
+      "recorded_action_agreement": true,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"VERIFY\", \"probabilities\": {\"ABORT\": 0.02150906871912489, \"OBSERVE\": 0.01743985057008681, \"PICK\": 0.013322867856950154, \"PLACE\": 0.04749694709384481, \"VERIFY\": 0.8882581504280672, \"WAIT\": 0.01197311533192617}, \"confidence\": 0.8659097805136806}}, \"usage\": {\"input_tokens\": 1386, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-1f07d5a3.json.raw",
+      "episode_sha256": "78e614fcc08bcdac1cafd8d6c0295faa031cdc0260dc86da15c83d87a856ba24",
+      "seq": 5,
+      "state_sha256": "68526402b8d81359a30a33f189f8841a98bdd89476c80374a5aa9fcb34fe7ef2",
+      "latency_ms": 1842.515700001968,
+      "recorded_decision": {
+        "action": "OBSERVE",
+        "target": "target_box_b",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "PICK",
+        "target": "target_box_b",
+        "confidence": 0.695955858,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.696 raw={\"backend\": \"clef\", \"concentration\": 0.6351470297349558, \"input_tokens\": 1429, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_t",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.6959558581124632,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1429
+        }
+      },
+      "recorded_action_agreement": false,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"PICK\", \"probabilities\": {\"ABORT\": 0.034944307478288486, \"OBSERVE\": 0.023496681935604474, \"PICK\": 0.6959558581124632, \"PLACE\": 0.1241233128743933, \"VERIFY\": 0.10963686230992141, \"WAIT\": 0.011842977289329086}, \"confidence\": 0.6351470297349558}}, \"usage\": {\"input_tokens\": 1429, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-1f07d5a3.json.raw",
+      "episode_sha256": "78e614fcc08bcdac1cafd8d6c0295faa031cdc0260dc86da15c83d87a856ba24",
+      "seq": 6,
+      "state_sha256": "cc66d629f46fd7537b4adb016fd2a2436a6ff28a3f9978d7c7efb974945b68a7",
+      "latency_ms": 1901.0183999926085,
+      "recorded_decision": {
+        "action": "PICK",
+        "target": "target_box_b",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "PICK",
+        "target": "target_box_b",
+        "confidence": 0.811741991,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.812 raw={\"backend\": \"clef\", \"concentration\": 0.77409038870412, \"input_tokens\": 1497, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_tok",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.8117419905867667,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1497
+        }
+      },
+      "recorded_action_agreement": true,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"PICK\", \"probabilities\": {\"ABORT\": 0.047119656696564406, \"OBSERVE\": 0.025792037937859644, \"PICK\": 0.8117419905867667, \"PLACE\": 0.052794063447471354, \"VERIFY\": 0.04759173021761326, \"WAIT\": 0.014960521113724612}, \"confidence\": 0.77409038870412}}, \"usage\": {\"input_tokens\": 1497, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-1f07d5a3.json.raw",
+      "episode_sha256": "78e614fcc08bcdac1cafd8d6c0295faa031cdc0260dc86da15c83d87a856ba24",
+      "seq": 7,
+      "state_sha256": "d27511ffbedc6eec946c1f9cd1be1c926ebcc9f7453bc2ae7f75f9edd3004847",
+      "latency_ms": 2002.280900007463,
+      "recorded_decision": {
+        "action": "PLACE",
+        "target": "target_box_b",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "PLACE",
+        "target": "target_box_b",
+        "confidence": 0.861504982,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.862 raw={\"backend\": \"clef\", \"concentration\": 0.8338059789950893, \"input_tokens\": 1545, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_t",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.8615049824959078,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1545
+        }
+      },
+      "recorded_action_agreement": true,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"PLACE\", \"probabilities\": {\"ABORT\": 0.03174224032580975, \"OBSERVE\": 0.013490638007850969, \"PICK\": 0.021207642262532474, \"PLACE\": 0.8615049824959078, \"VERIFY\": 0.05884920770103185, \"WAIT\": 0.013205289206867291}, \"confidence\": 0.8338059789950893}}, \"usage\": {\"input_tokens\": 1545, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-1f07d5a3.json.raw",
+      "episode_sha256": "78e614fcc08bcdac1cafd8d6c0295faa031cdc0260dc86da15c83d87a856ba24",
+      "seq": 8,
+      "state_sha256": "a0aed2225b3e5e0002973791ee5ee600bbed3826f9a9a9b1bd9ab8e039ea66b3",
+      "latency_ms": 2058.530399997835,
+      "recorded_decision": {
+        "action": "VERIFY",
+        "target": "target_box_b",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "VERIFY",
+        "target": "target_box_b",
+        "confidence": 0.87214815,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.872 raw={\"backend\": \"clef\", \"concentration\": 0.8465777804201706, \"input_tokens\": 1591, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_t",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.8721481503501421,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1591
+        }
+      },
+      "recorded_action_agreement": true,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"VERIFY\", \"probabilities\": {\"ABORT\": 0.02716472213754588, \"OBSERVE\": 0.013273215401087654, \"PICK\": 0.01602563901937012, \"PLACE\": 0.05822245709225366, \"VERIFY\": 0.8721481503501421, \"WAIT\": 0.013165815999600516}, \"confidence\": 0.8465777804201706}}, \"usage\": {\"input_tokens\": 1591, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-23b8de89.json.raw",
+      "episode_sha256": "ef61e034a929b5c0aea4b1a95600601460fed1dfac2dd5723291983b162462f7",
+      "seq": 2,
+      "state_sha256": "e389480016ee1d1b022bf6bc503a5d7525de10db06475986e66e99d446f5016f",
+      "latency_ms": 1646.618099999614,
+      "recorded_decision": {
+        "action": "PICK",
+        "target": "target_box_a",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "PICK",
+        "target": "target_box_a",
+        "confidence": 0.924167717,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.924 raw={\"backend\": \"clef\", \"concentration\": 0.9090012600240219, \"input_tokens\": 1294, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_t",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.924167716686685,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1294
+        }
+      },
+      "recorded_action_agreement": true,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"PICK\", \"probabilities\": {\"ABORT\": 0.01844958850855804, \"OBSERVE\": 0.023108786610017664, \"PICK\": 0.924167716686685, \"PLACE\": 0.014029299941304642, \"VERIFY\": 0.009381747990862568, \"WAIT\": 0.010862860262572285}, \"confidence\": 0.9090012600240219}}, \"usage\": {\"input_tokens\": 1294, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-23b8de89.json.raw",
+      "episode_sha256": "ef61e034a929b5c0aea4b1a95600601460fed1dfac2dd5723291983b162462f7",
+      "seq": 3,
+      "state_sha256": "4ee1cc7f329e3dad0a56dbf0ee98f9b5e740f14d4c26063de7f062928b5c408b",
+      "latency_ms": 1681.3634999998612,
+      "recorded_decision": {
+        "action": "PLACE",
+        "target": "target_box_a",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "PLACE",
+        "target": "target_box_a",
+        "confidence": 0.921438594,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.921 raw={\"backend\": \"clef\", \"concentration\": 0.9057263122698811, \"input_tokens\": 1342, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_t",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.9214385935582342,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1342
+        }
+      },
+      "recorded_action_agreement": true,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"PLACE\", \"probabilities\": {\"ABORT\": 0.021050461916770322, \"OBSERVE\": 0.009383017769507342, \"PICK\": 0.010515438757256327, \"PLACE\": 0.9214385935582342, \"VERIFY\": 0.029308065473016974, \"WAIT\": 0.00830442252521479}, \"confidence\": 0.9057263122698811}}, \"usage\": {\"input_tokens\": 1342, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-23b8de89.json.raw",
+      "episode_sha256": "ef61e034a929b5c0aea4b1a95600601460fed1dfac2dd5723291983b162462f7",
+      "seq": 4,
+      "state_sha256": "9e6ed1650386ad89689a0d5854a41a5b822109828de73e0cf6d589d982167b37",
+      "latency_ms": 1759.6960000082618,
+      "recorded_decision": {
+        "action": "VERIFY",
+        "target": "target_box_a",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "VERIFY",
+        "target": "target_box_a",
+        "confidence": 0.886865125,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.887 raw={\"backend\": \"clef\", \"concentration\": 0.8642381498216072, \"input_tokens\": 1389, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_t",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.8868651248513393,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1389
+        }
+      },
+      "recorded_action_agreement": true,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"VERIFY\", \"probabilities\": {\"ABORT\": 0.02131143042501458, \"OBSERVE\": 0.01702387937093266, \"PICK\": 0.013127056073117701, \"PLACE\": 0.049920833817613725, \"VERIFY\": 0.8868651248513393, \"WAIT\": 0.01175167546198206}, \"confidence\": 0.8642381498216072}}, \"usage\": {\"input_tokens\": 1389, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-23b8de89.json.raw",
+      "episode_sha256": "ef61e034a929b5c0aea4b1a95600601460fed1dfac2dd5723291983b162462f7",
+      "seq": 5,
+      "state_sha256": "9e6ed1650386ad89689a0d5854a41a5b822109828de73e0cf6d589d982167b37",
+      "latency_ms": 1845.5653999990318,
+      "recorded_decision": {
+        "action": "OBSERVE",
+        "target": "target_box_b",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "PICK",
+        "target": "target_box_b",
+        "confidence": 0.71275147,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.713 raw={\"backend\": \"clef\", \"concentration\": 0.6553017643179604, \"input_tokens\": 1432, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_t",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.712751470264967,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1432
+        }
+      },
+      "recorded_action_agreement": false,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"PICK\", \"probabilities\": {\"ABORT\": 0.033263043272853746, \"OBSERVE\": 0.02269583981664399, \"PICK\": 0.712751470264967, \"PLACE\": 0.11881822336462715, \"VERIFY\": 0.10085386620155662, \"WAIT\": 0.011617557079351448}, \"confidence\": 0.6553017643179604}}, \"usage\": {\"input_tokens\": 1432, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-23b8de89.json.raw",
+      "episode_sha256": "ef61e034a929b5c0aea4b1a95600601460fed1dfac2dd5723291983b162462f7",
+      "seq": 6,
+      "state_sha256": "015f2bb6bcda8d87d6b3fb7ba06adb9181fd726c308995868c7d72ed16f9454b",
+      "latency_ms": 1902.456900003017,
+      "recorded_decision": {
+        "action": "PICK",
+        "target": "target_box_b",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "PICK",
+        "target": "target_box_b",
+        "confidence": 0.819334033,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.819 raw={\"backend\": \"clef\", \"concentration\": 0.7832008394915163, \"input_tokens\": 1499, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_t",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.8193340329095969,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1499
+        }
+      },
+      "recorded_action_agreement": true,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"PICK\", \"probabilities\": {\"ABORT\": 0.04644026052740317, \"OBSERVE\": 0.024551777612694503, \"PICK\": 0.8193340329095969, \"PLACE\": 0.050820410205798576, \"VERIFY\": 0.04373021448079615, \"WAIT\": 0.015123304263710637}, \"confidence\": 0.7832008394915163}}, \"usage\": {\"input_tokens\": 1499, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "episode": "setup/acceptance/q8_pilot_20261005/episodes/week1_demo_v1_week1_demo_v1-23b8de89.json.raw",
+      "episode_sha256": "ef61e034a929b5c0aea4b1a95600601460fed1dfac2dd5723291983b162462f7",
+      "seq": 7,
+      "state_sha256": "2f6d0a248fcb4f1d42f99f65588a291bebc95f2e92c185971838f15828e4ca90",
+      "latency_ms": 2001.3343000027817,
+      "recorded_decision": {
+        "action": "PLACE",
+        "target": "target_box_b",
+        "reason_code": "PLAN_NEXT"
+      },
+      "decision": {
+        "action": "PLACE",
+        "target": "target_box_b",
+        "confidence": 0.875224923,
+        "reason_code": "PLAN_NEXT",
+        "explanation": "jev backend=clef prob=0.875 raw={\"backend\": \"clef\", \"concentration\": 0.8502699070272697, \"input_tokens\": 1547, \"model\": \"clef-flash-q8_0\", \"model_sha256\": \"8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9\", \"output_t",
+        "policy_trace": {
+          "source": "jev",
+          "fallback": false,
+          "backend": "clef",
+          "model": "clef-flash-q8_0",
+          "model_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+          "reported_confidence": 0.8752249225227248,
+          "confidence_calibrated": false,
+          "calibration": "calibration_not_configured",
+          "calibration_sha256": null,
+          "confidence_label": "FSM_ACTION_AGREEMENT",
+          "tokens": 1547
+        }
+      },
+      "recorded_action_agreement": true,
+      "response_json": "{\"model\": \"F:\\\\flexcell-models\\\\Clef-Flash-Q8_0.gguf\", \"answers\": {\"next_action\": {\"type\": \"choice\", \"choice\": \"PLACE\", \"probabilities\": {\"ABORT\": 0.029343144040695424, \"OBSERVE\": 0.012275742871729098, \"PICK\": 0.018865576590344386, \"PLACE\": 0.8752249225227248, \"VERIFY\": 0.051774812898412584, \"WAIT\": 0.012515801076093739}, \"confidence\": 0.8502699070272697}}, \"usage\": {\"input_tokens\": 1547, \"output_tokens\": 0}}",
+      "pass": true,
+      "errors": []
+    }
+  ],
+  "status": "MODEL_API_PASS",
+  "local_weight_sha256": "8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9",
+  "input_manifest_sha256": "b507b08e55148b8a2004fd5b8fc74b738997eaa7b3e41906aa7493308d824ca4",
+  "prompt_sha256": "b37e71cd0b9b0ff81cfa3638111da8375251be2fadeabc01468ce46b5f4e85b8",
+  "calibration_sha256": null,
+  "routing_qualification": "NOT_TESTED",
+  "summary": {
+    "model_calls": 20,
+    "p50_ms": 1906.00650000124,
+    "p95_ms_nearest_rank": 2269.9742000113474,
+    "tokens": 28688,
+    "recorded_action_agreements": 17,
+    "note": "Agreement is descriptive; it is not a physical success rate."
+  }
+}

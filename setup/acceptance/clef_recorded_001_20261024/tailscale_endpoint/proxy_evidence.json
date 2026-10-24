@@ -1,0 +1,19 @@
+{
+  "task_id": "CLEF-RECORDED-001 / #33 endpoint reachability",
+  "collected_at_utc": "2026-10-24T13:21:46.811867Z",
+  "windows_internet_settings": {
+    "ProxyEnable": 1,
+    "ProxyServer": "127.0.0.1:7890",
+    "ProxyOverride": "*zhihu.com;*zhimg.com;*jd.com;100ime-iat-api.xfyun.cn;*360buyimg.com;localhost;*.local;127.*;10.*;172.16.*;172.17.*;172.18.*;172.19.*;172.2*;172.30.*;172.31.*;192.168.*"
+  },
+  "urllib_getproxies_without_override": {
+    "http": "http://127.0.0.1:7890",
+    "https": "http://127.0.0.1:7890",
+    "ftp": "http://127.0.0.1:7890"
+  },
+  "tailscale_ipv4": "100.87.190.44",
+  "in_bypass_list": false,
+  "finding": "System proxy is enabled. The bypass list covers localhost, 127.*, 10.*, 172.16-31.* and 192.168.* but NOT 100.87.190.44 (the Tailscale address). urllib therefore routes the Tailscale endpoint through 127.0.0.1:7890, which answers 502 Bad Gateway. curl does not read the Windows registry proxy, which is why curl succeeded on the same URL at the same time.",
+  "consequence": "Two runs of the same client against the same server differ only by destination address: 127.0.0.1 -> 20/20 PASS; 100.87.190.44 without no_proxy -> first call 502 after 7.6 s and FSM fallback; 100.87.190.44 with no_proxy=100.87.190.44 -> 20/20 PASS.",
+  "same_root_cause_as": "issue #33 comment 2026-10-17: GET /health via environment proxy returned HTTP503"
+}
