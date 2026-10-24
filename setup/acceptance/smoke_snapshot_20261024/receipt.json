@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "scope": "LOCAL_ROS_CONTRACT_AND_FILESYSTEM_TESTS",
+  "source_commit": "e96257b209e8aedef3f549e9bab00aa9a6a0507f",
+  "source_sha256": {
+    "setup/105_snapshot_smoke.py": "458ca8e41d6266fe8f8b01eb3066ea42e8f9d1bd54f61921c78a826cca33f59d",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/smoke_window.py": "a6f2fdebc2963e2f0c59da4bfba35681bd0ccc268eb09923254cf45cc58c9d5b",
+    "src/flexcell/flexcell_skills/test/test_smoke_window.py": "dbe11adaab3ac5529b5a335a4cffd63e31a99490ee926d6edfc89156bf6854bc"
+  },
+  "tests": {
+    "tests": 332,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "snapshot_cases": 2,
+  "static_scan": {
+    "files": 36,
+    "problems": 0
+  },
+  "assertions": [
+    "original_summary_bytes_preserved",
+    "native_and_plan_bytes_preserved",
+    "legacy_presentation_export_stays_unqualified",
+    "second_snapshot_without_original_files",
+    "relocated_window_qualifies"
+  ],
+  "robot_calls": 0,
+  "model_calls": 0,
+  "external_services_started": false
+}
