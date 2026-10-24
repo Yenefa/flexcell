@@ -39,7 +39,12 @@ replay must pass; model-decision counts must be positive integers. Runtime
 fingerprints must be present and identical.
 
 Admission rereads every native file, verifies schema, SHA, unique path/evidence
-ID, policy, protocol, runtime and terminal result. A changed summary cannot turn
+ID, policy, protocol, runtime and terminal result. **Deduplication is at the
+file/evidence-ID level, not the content level**: five files carrying the same
+episode payload under five rewritten `evidence_id` values and recomputed SHAs
+would be admitted. This is an honest-count and stale-path gate, not a tamper-proof
+content fingerprint; content-level campaign deduplication belongs with the
+registry work in #31. A changed summary cannot turn
 a native failure into success. Hybrid native routing is re-audited against the
 frozen deployment and compared with the saved audit, followed by PR #28's whole
 batch audit. Real fast calls may all escalate to the slow arm.
@@ -81,9 +86,13 @@ calls. This checks admission behavior, without claiming robot qualification.
 
 E-021 is corrected to dual-object RunDemo and **10 pooled attempts: 8 SUCCEEDED,
 2 FAILED**. The three baseline files retain their original counts of 19/20,
-18/20 and 17/20; raw bytes are unchanged. Their 60 native episode references are
-missing from this checkout and the current laptop episode store. The exact
-inventory and summary hashes are archived, without claiming global loss.
+18/20 and 17/20; raw bytes are unchanged. Their 60 native episode references were
+absent from this checkout and the laptop store at the time of this repair. The
+exact inventory and summary hashes are archived here, without claiming global
+loss. They were subsequently recovered byte-identically from the execution host —
+see [`e021_native_recovery_20261024/`](../setup/acceptance/e021_native_recovery_20261024/README.md).
+That recovery is independent of this directory: it does not modify the frozen
+inventory, does not qualify anything, and leaves every count above untouched.
 
 Legacy summaries remain descriptive records and cannot be retrospectively given
 a predeclared plan. This repair neither supplies missing episodes nor qualifies
@@ -92,4 +101,5 @@ or a tamper-proof signature. Failed windows must remain reported; choosing a new
 window after a failure is not authorization to repeat until green. A repaired
 deployment needs its own frozen protocol/fingerprint and qualification decision.
 No robot batches or model services were started here, and n≥50/full M3 remain
-frozen. The broader native recovery and model replay work in #31 stays open.
+frozen. Of the #31 work, native episode recovery is done; model replay stays
+NOT_RUN because no recovered episode records `initial_world_state`.
