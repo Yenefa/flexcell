@@ -1,0 +1,19 @@
+{
+  "record_kind": "SYNTHETIC_TRANSPORT_COUNTEREXAMPLE",
+  "source_base": "c79e0c672c95e2d9cd04112ef42b65e4c67e1845",
+  "before": {
+    "terminal": "REACHED_OFFLINE_TRANSPORT_SENTINEL",
+    "reached_dispatch_boundary": true,
+    "threshold_error": false,
+    "robot_dispatch": "NOT_RUN",
+    "model_calls": "NOT_RUN"
+  },
+  "after": {
+    "terminal": "ARGUMENT_REJECTED",
+    "exit_code": 2,
+    "reached_dispatch_boundary": false,
+    "threshold_error": true,
+    "robot_dispatch": "NOT_RUN",
+    "model_calls": "NOT_RUN"
+  }
+}

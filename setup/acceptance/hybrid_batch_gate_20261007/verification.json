@@ -1,0 +1,93 @@
+{
+  "source_base": "a9b6a6255d91a568e44eea555ecb33f7e0d7d49f",
+  "python": "Python 3.12.14",
+  "pytest": {
+    "command": [
+      "/workspace/.venv-flexcell/bin/python",
+      "-m",
+      "pytest",
+      "-o",
+      "addopts=",
+      "-q",
+      "--junitxml=/workspace/flexcell/setup/acceptance/hybrid_batch_gate_20261007/pytest.xml",
+      "src/flexcell/flexcell_skills/test/test_acceptance_gate.py",
+      "src/flexcell/flexcell_skills/test/test_action_result.py",
+      "src/flexcell/flexcell_skills/test/test_batch_routing.py",
+      "src/flexcell/flexcell_skills/test/test_clef_backend.py",
+      "src/flexcell/flexcell_skills/test/test_confidence_calibration.py",
+      "src/flexcell/flexcell_skills/test/test_contracts.py",
+      "src/flexcell/flexcell_skills/test/test_decision_policy.py",
+      "src/flexcell/flexcell_skills/test/test_hybrid_policy.py",
+      "src/flexcell/flexcell_skills/test/test_inference_budget.py",
+      "src/flexcell/flexcell_skills/test/test_injection.py",
+      "src/flexcell/flexcell_skills/test/test_llm_policy.py",
+      "src/flexcell/flexcell_skills/test/test_metrics.py",
+      "src/flexcell/flexcell_skills/test/test_recovery.py",
+      "src/flexcell/flexcell_skills/test/test_routing_audit.py",
+      "src/flexcell/flexcell_skills/test/test_runtime_guards.py",
+      "src/flexcell/flexcell_skills/test/test_safety_gate.py",
+      "src/flexcell/flexcell_skills/test/test_skill_contract.py",
+      "src/flexcell/flexcell_skills/test/test_undefined_attr_check.py"
+    ],
+    "environment": {
+      "PYTHONPATH": "src/flexcell/flexcell_skills"
+    },
+    "exit_code": 0,
+    "counts": {
+      "tests": 194,
+      "errors": 0,
+      "failures": 0,
+      "skipped": 0
+    },
+    "selected_files": [
+      "src/flexcell/flexcell_skills/test/test_acceptance_gate.py",
+      "src/flexcell/flexcell_skills/test/test_action_result.py",
+      "src/flexcell/flexcell_skills/test/test_batch_routing.py",
+      "src/flexcell/flexcell_skills/test/test_clef_backend.py",
+      "src/flexcell/flexcell_skills/test/test_confidence_calibration.py",
+      "src/flexcell/flexcell_skills/test/test_contracts.py",
+      "src/flexcell/flexcell_skills/test/test_decision_policy.py",
+      "src/flexcell/flexcell_skills/test/test_hybrid_policy.py",
+      "src/flexcell/flexcell_skills/test/test_inference_budget.py",
+      "src/flexcell/flexcell_skills/test/test_injection.py",
+      "src/flexcell/flexcell_skills/test/test_llm_policy.py",
+      "src/flexcell/flexcell_skills/test/test_metrics.py",
+      "src/flexcell/flexcell_skills/test/test_recovery.py",
+      "src/flexcell/flexcell_skills/test/test_routing_audit.py",
+      "src/flexcell/flexcell_skills/test/test_runtime_guards.py",
+      "src/flexcell/flexcell_skills/test/test_safety_gate.py",
+      "src/flexcell/flexcell_skills/test/test_skill_contract.py",
+      "src/flexcell/flexcell_skills/test/test_undefined_attr_check.py"
+    ],
+    "excluded_ros_files": [
+      "test_admin_exit_contract.py",
+      "test_admin_pose_rpc.py",
+      "test_canonical_state.py",
+      "test_carry_release.py",
+      "test_carry_snapshot.py",
+      "test_episode.py",
+      "test_executor_integration.py",
+      "test_gz_stream.py",
+      "test_helpers_world.py",
+      "test_jev_policy.py",
+      "test_pose_worker_shutdown.py"
+    ]
+  },
+  "static_scan": {
+    "command": [
+      "/workspace/.venv-flexcell/bin/python",
+      "setup/82_undefined_attr_check.py",
+      "src/flexcell"
+    ],
+    "exit_code": 0
+  },
+  "source_sha256": {
+    "setup/94_scenario_runner.py": "fc188c1cc43246ac8eab2ca9798be40fe11bba63d16737805033c2a5f58c1f4f",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/routing_audit.py": "4256453e5ebdd4f810a86a87b77146dca0363b80efa9c411aa069e3f51a80de8",
+    "src/flexcell/flexcell_skills/test/test_batch_routing.py": "8367505c82972b8d15ec1f64f92aa7a2d405f0380f279123212f6465a38227cf"
+  },
+  "gazebo_acceptance": "NOT_RUN: no ROS/Gazebo on cloud executor",
+  "live_model_calls": "NOT_RUN",
+  "model_backend_replay": "NOT_RUN",
+  "n_ge_50": "FROZEN"
+}

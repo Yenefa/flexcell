@@ -75,7 +75,8 @@
 | E-019 | Q8 per-decision provenance + two-regime pilot                           | 215 TESTS PASS; HIGH 14/17 + RESET ERROR; LOW SMOKE TRUNCATED; n>=50 FROZEN                  | [Q8_PILOT_20261005.md](Q8_PILOT_20261005.md)                          |
 | E-020 | Pose callback finalization barrier + bounded fresh-process reset RPC    | 226 TESTS PASS; LIFECYCLE 100/100; RESET 20/20 EACH; LOW 18/20; HIGH SMOKE 4/5; n>=50 FROZEN | [Q8_TEARDOWN_20261005.md](Q8_TEARDOWN_20261005.md)                    |
 | E-021 | Three-arm S1 comparison, same machine, same night, unattended           | FSM 19/20 · hybrid τ=0.03 18/20 · hybrid τ=0.85 17/20; CIs OVERLAP; grasp-physics noise ~15% cross-arm | `setup/acceptance/tau_sweep_desktop_20261005/`                        |
-| E-022 | Class-scoped static attribute scan and effective CI failure exit (#24) | 172 TESTS PASS (20 NEW); SCAN 35/0; PLANTED GHOST RC=1; ROS/Gazebo NOT_RUN | [STATIC_SCAN_20261007.md](STATIC_SCAN_20261007.md) |
+| E-022 | Class-scoped static attribute scan and effective CI failure exit (#24) | LOCAL 172 PASS (20 NEW); ROS CI 246 PASS; SCAN 35/0; GAZEBO NOT_RUN | [STATIC_SCAN_20261007.md](STATIC_SCAN_20261007.md) |
+| E-023 | Hybrid batch fast-arm gate + smoke qualification (#8/#12)              | LOCAL 194 PASS (22 NEW); SCAN 35/0; ROBOT/MODEL NOT_RUN | [HYBRID_BATCH_GATE_20261007.md](HYBRID_BATCH_GATE_20261007.md) |
 | M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN                                                                                      | — (RFC #15; harness #7/#8/#9)                                         |
 
 ## Entries
@@ -732,6 +733,33 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
 - **Evidence:** `setup/acceptance/issue24_static_scan_20261007/` contains before/
   after scan output, the planted failure, exact test command, source hashes,
   pytest log and JUnit results. See [repair details](STATIC_SCAN_20261007.md).
+- **CI follow-up:** PR #27 passed the ROS Jazzy build, 246 tests with zero
+  errors/failures/skips and the clean scanner, then merged as `a9b6a62`.
+  [Workflow](https://github.com/Yenefa/flexcell/actions/runs/37665173778).
+
+### E-023 — Hybrid batch fast-arm provenance gate (2026-10-07, cloud)
+
+- **Purpose:** address #8/#12 and E-021's batch-level fast-arm presence gap.
+  This changes benchmark qualification, not HybridRouter or robot execution.
+- **Configuration:** base `a9b6a6255d91a568e44eea555ecb33f7e0d7d49f`,
+  Python 3.12; offline synthetic trace fixtures, no live model or robot calls.
+- **Reproduction:** skipped/missing fast proposals with valid slow decisions
+  pass the base audit despite zero fast calls/tokens. Both now fail; genuine
+  fast proposals that all escalate to slow remain valid.
+- **Repair:** reject incomplete deployment identity before dispatch; stop a
+  model-driven episode without a real fast arm; audit counts, calibration and
+  fingerprint across the batch; recheck smoke before baseline dispatch. Store
+  the sidecar below `episodes/batch_audits/`, preserving raw episodes and rows.
+- **Verification:** 194 ROS-independent tests passed, zero errors/failures/skips,
+  including 22 new gate/runner regressions. Static scan: 35 files, zero missing
+  members. Eleven ROS-dependent test files excluded; live model replay and
+  Gazebo acceptance NOT_RUN. Historical outcomes are not re-scored.
+- **Next:** after review/merge, new-fingerprint online smoke and runtime
+  acceptance; grasp-failure root cause remains open, n≥50 remains frozen.
+- **Evidence:** `setup/acceptance/hybrid_batch_gate_20261007/` contains synthetic
+  before/after reports, exact test commands, source hashes, JUnit and logs.
+  [Repair details](HYBRID_BATCH_GATE_20261007.md) and
+  [requested architecture/planning diagrams](ARCHITECTURE_AND_PLAN_20261007.md).
 
 ## Evidence locations
 

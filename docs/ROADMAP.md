@@ -4,12 +4,17 @@
 > Execution detail lives in [DEVELOPMENT.md](DEVELOPMENT.md); the ratified Week-2 design of
 > record is [WEEK2_PREPARATION.md](WEEK2_PREPARATION.md) (§0.5).
 
+Current source architecture and the evidence-gated development path are shown
+in [the 2026-10-07 diagrams](ARCHITECTURE_AND_PLAN_20261007.md). This update
+records implemented decision layers; it does not unfreeze n≥50 or declare M3
+qualification complete.
+
 ## Milestone map
 
 | Milestone                              | Scope                                                                            | Status                                                       |
 | -------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------ |
 | **M1** Deterministic Workcell Baseline | Day 1-2 + Week 1 + Week 1.5                                                      | ✅ DONE (accepted; delivery baseline `7956d63`)              |
-| **M2** Runtime Decision Foundation     | WorldState v2 → DecisionPolicy → FSMPolicy → replay harness → Jev (LLM deferred) | 🔵 CURRENT — umbrella over sub-milestones M2.1 / M2.2 / M2.3 |
+| **M2** Runtime Decision Foundation     | WorldState v2 → DecisionPolicy → FSMPolicy → replay harness → Jev / LLM / Hybrid | 🔵 CURRENT — source implemented; qualification incomplete |
 | **M3** Hybrid Agent Benchmark          | Execute cells A-D on S1-S7; threshold sweep; calibration                         | ⚪ FUTURE — RFC #15                                          |
 
 ## Completed
@@ -41,11 +46,11 @@ Replay → Jev → LLM**. Work is tracked in sub-milestones (implementation) plu
 | FSMPolicy + executor seam (default=fsm) + trace-shape parity               | #5                                                             | #14            |
 | Deterministic safety gate + invalid-decision accounting                    | #6                                                             | #14            |
 | Scenario runner + episode record + policy-input replay store               | #7                                                             | #15            |
-| Benchmark harness + metrics report generator                               | #8                                                             | #15            |
+| Benchmark harness + metrics report generator                               | #8 — implemented; batch qualification and pinned model replay pending | #15            |
 | S7 perturbation scenario builder                                           | #9                                                             | #15            |
 | JevPolicy + pluggable JevBackend (TypeSafe \| Local)                       | #10                                                            | #14            |
-| LLMPolicy                                                                  | #11 — **DEFERRED (③)** until interface + runner + replay exist | #15            |
-| HybridRouter + threshold sweep τ∈{0.5,0.7,0.9} + calibration report        | #12                                                            | #15            |
+| LLMPolicy                                                                  | #11 — implemented; official-backend evidence in E-013/E-021 | #15            |
+| HybridRouter + supported-bin threshold sweep + calibration report         | #12 — implemented; Q8 pilot τ=0.03/0.85, acceptance incomplete | #15            |
 | ADR set from the ratified preparation                                      | #2                                                             | —              |
 
 ## Future
@@ -56,6 +61,13 @@ the two supported-bin regimes tau=0.03/0.85; the historical 0.5/0.7/0.9 grid doe
 not distinguish the current calibrated bins. Narrower bins and policy superiority
 are unqualified. S7 placement perturbation alone is not a differentiation oracle.
 The truncated pilots leave n>=50 frozen. See [Q8 pilot](Q8_PILOT_20261005.md).
+
+Immediate sequence: land the [batch provenance repair](HYBRID_BATCH_GATE_20261007.md),
+diagnose the cross-arm grasp failure, then complete pinned model replay and a
+new-fingerprint online smoke/acceptance battery. Review M3 entry under ADR-003,
+pre-register differentiated S1-S7 cells and interleaved arm order, and retain
+the sample freeze until evidence and human review permit a larger campaign.
+Each arm keeps its own stable fingerprint under shared physics/verifier conditions.
 
 - **M3 Hybrid Agent Benchmark** — cells A-D on S1-S7 (S7 perturbation track kept in
   primary, ⑥); pass/fail gates in #15. Gate rule: FSM ≥ every other cell on task success
@@ -91,3 +103,9 @@ conclusion lands in an ADR or ROADMAP update:
 | T4  | **Before implementing #11 LLMPolicy**                                                                                              | VLA / LLM-planning landscape (the fastest-moving input; the deferred item is where staleness bites hardest)                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | T5  | **Before any vendor number becomes load-bearing** (e.g. Jev vendor's ~200× / 1-400 cost claims, p95 UNKNOWN per WEEK2_PREPARATION) | Independent reproduction before trusting                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | T6  | **Before any M3 cell number is quoted** (added 2026-09-29)                                                                         | Two measurement-integrity preconditions: (a) the `gate_flood` zero-traceback gate must actually be green — it has never been, the committed delivery-host reset artifacts carry the same ~1000-count `gz.msgs.Pose` flood, so the M2.3 "pb2 fix in place" claim is unsupported; (b) `flexcell_admin.py reset` must restore the canonical world after an abort-while-carrying (it reports `scene_cleared: false` + `DRIFT`), otherwise per-episode cell independence is not established and long batches confound each other |
+
+T4 and the defect descriptions in T6 above record the 2026-09-28/29 review
+context, rather than present host health. LLMPolicy subsequently shipped;
+pose-worker/reset repairs and their qualified runs are recorded in E-020.
+The underlying gates still apply: clean reset exits, canonical state and
+flood-free acceptance must be proven for the deployment being measured.
