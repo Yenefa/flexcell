@@ -7,9 +7,10 @@ were already in the tree.
 
 **Verdict: #22 is a phantom issue.** Its four factual claims are not "partly
 stale" — each one is contradicted by an artifact committed to this repository on
-2026-10-01 or 2026-10-02, i.e. before the issue was posted on 2026-10-03. One of
-its claims (the `pick_place_v1` hard-mapping warning) is correct and load-bearing,
-and is preserved below as a checked invariant rather than thrown away with the rest.
+2026-10-01 or 2026-10-02, i.e. before the issue was posted on 2026-10-03.
+The re-adjudication also preserves a separate invariant: `pick_place_v1` must
+not be hard-mapped to S4. The issue's proposed work suggested adding S3/S4
+entries to `CELL_OF_SCENARIO`; it did not establish this warning itself.
 
 ## How the drift happened
 
@@ -68,15 +69,17 @@ section with `replay integrity 1/1 episodes clean` and ends
 `scenario: S4, outcome: FAILED, expected: FAILED, scenario_exercised: True,
 replay_ok: True, replay_steps: 4, harness_error: None`.
 
-> **Correction 2026-10-24 — the `replay_ok: True` above is a 2026-09-30 fact and
-> no longer reproduces.** Regenerating the report from the same archived bytes on
-> current `main` yields `REPORT: FAIL (2 episodes, 1 replay-dirty)`: step 4 of the
-> S4 episode now diverges on `explanation` alone, because `5462124`
+> **Correction 2026-10-24 — the `replay_ok: True` above is the archived
+> report's own historical result, not a claim that current FSM code replays every
+> historical decision exactly.** Regenerating the report from the same archived
+> bytes on current `main` yields `REPORT: FAIL (2 episodes, 1 replay-dirty)`:
+> step 4 of the S4 episode now diverges on `explanation` alone, because `5462124`
 > (2026-10-23) reworded the PLACE-abort text to embed the typed skill code.
 > `action`, `target`, `reason_code` and `confidence` still match exactly. The
-> cell itself is still emitted, so C3 — the claim that S4 has no cell and is
-> forced to FAIL — stands; what does not stand is any suggestion that the
-> archived episode replays cleanly today. See
+> cell itself is still emitted, and the S4 batch cell remains correctly assigned,
+> so C3 — the claim that S4 has no cell and is forced to FAIL — stands; what does
+> not stand is any suggestion that the archived episode replays cleanly today.
+> The current-policy check below records the divergence in full; see
 > [`../replay_drift_20261024/`](../replay_drift_20261024/README.md) for the
 > measurement and the corrected invariant.
 
@@ -85,7 +88,7 @@ replay_ok: True, replay_steps: 4, harness_error: None`.
 **FALSE (already landed).** `setup/94_scenario_runner.py:230-231` builds the
 schedule round-robin and `--dry-run` emits `order: round_robin`.
 
-## What #22 got right — do not delete this along with the rest
+## Cell identity invariant retained by this re-adjudication
 
 `CELL_OF_SCENARIO` must **not** gain `'pick_place_v1': 'S4'`. Two code facts make
 that a real constraint, not a preference:
@@ -96,9 +99,10 @@ that a real constraint, not a preference:
   skip_verify` — there is **no** scenario field to distinguish an S4 run from an
   ordinary reachable-target run.
 
-A reachable-target single-object episode and an S4 episode are therefore
-indistinguishable inside the episode file, so a hard mapping would relabel every
-ordinary run as S4.
+A reachable-target single-object episode and an S4 episode share the same
+scenario id. Their observations, goals and results may differ, but the scenario
+id alone cannot classify them; a hard mapping would relabel every ordinary run
+as S4.
 
 That is why S4's cell identity comes from **batch metadata**, on two levels:
 
@@ -111,26 +115,60 @@ That is why S4's cell identity comes from **batch metadata**, on two levels:
 
 The batch row is the authority; the episode cannot be.
 
-## Residual gaps (real, and none of them is what #22 describes)
+## Follow-up correction (2026-10-24)
 
-1. **No test covers the task path's recording.** `grep -rn "S4\|pick_place_v1"`
-   over `src/flexcell/flexcell_skills/test/` and `setup/` returns nothing. If
-   `_execute` stopped delegating tomorrow, the suite would stay green. This is
-   the only gap here worth its own issue.
-2. **Without `--batch`, an S4 episode lands in `dev/pick_place_v1`.** A
-   consequence of (R3) above, not a defect, but undocumented — easy to
-   rediscover as a bug.
-3. **`95_metrics_report.py:56` reads `record.get('benchmark_cell')`, which has no
-   producer.** The only write (`:93`) targets the in-memory record. The read path
-   is dead; harmless, but it advertises a capability that does not exist.
-4. **S3/S4 are n=1.** That is #31's `n≥50` freeze, not #22's scope.
+The first version of this record incorrectly claimed zero task-path tests and
+a dead `benchmark_cell` read. The eleven-claim checker below did not check
+either assertion, so its success did not validate them.
+
+**Task recording already has execution tests.**
+[`TestSingleTaskPolicySeam`](../../../src/flexcell/flexcell_skills/test/test_executor_integration.py)
+calls the real `_execute` entry point and reads the episode written by the real
+`EpisodeStore`, with skill replies supplied by the test harness. It covers:
+
+- successful task, measured verifier result and FSM replay;
+- S4 PLACE failure, policy ABORT and FSM replay;
+- Jev S4 typed failure in both action result and episode;
+- recoverable PICK failure followed by attempt two;
+- skipped verification without inventing a measurement.
+
+Four of these tests were already present in `fd9bf721fea44172fb70fa2fd12dd9486af0e094`,
+alongside the seam change and native archive. The Jev test was added by
+`be3abe8c4770e2ba71d114ee0581050a0edf2e50`. Both predate this record. These are
+executor tests with ROS message classes and scripted skill replies, not Gazebo,
+model inference or physical acceptance. No new zero-coverage issue is warranted.
+
+**`benchmark_cell` is a live in-memory handoff.** `load_episodes(store, batch)`
+loads an episode, adds the batch row's cell to that decoded record and returns
+it; `episode_rows` calls `cell_of` on the same record. Its read therefore consumes
+the loader's write. The original episode bytes stay unchanged. The field does
+not need an on-disk producer.
+
+[`test_metrics_cell_identity.py`](../../../src/flexcell/flexcell_skills/test/test_metrics_cell_identity.py)
+now exercises that loader-to-report path, the four-step archived FSM S4 replay,
+and the rule that unlabelled single-object tasks remain `dev/pick_place_v1`.
+The reporter's usage text documents this behavior with and without `--batch`.
+**Current-policy replay differs from the archived PASS.** Replaying the original
+S4 bytes with `FSMPolicy` from `a7cd3cbf5bac747d72d4df002e5a3f743dfb2802`
+produces three matching decisions and one mismatch. The recorded ABORT explanation
+is `place failed (carried box is not retried)`; current code produces
+`place failed (ERR_MOTION_FAILED, carried box is not retried)`. Action, target,
+confidence and reason code match. Because replay compares the complete decision,
+the current reporter correctly emits `REPORT: FAIL`, with the episode still in
+Cell S4 when batch metadata is supplied. Without batch metadata it is a
+`dev/pick_place_v1` replay failure. The tests preserve that distinction; the
+episode and the old report are not rewritten to manufacture a current PASS.
+This is a policy-version comparison, not a new robot execution or physical test.
+
+**S3/S4 here remain n=1.** The archive supports the implementation claims above;
+it does not complete a benchmark comparison or release the `n≥50` freeze.
 
 ## Recommendation
 
-Close #22 with the C1–C4 refutations above and a pointer to this record; open one
-narrow issue for residual 1 (regression coverage for task-path recording); note
-residuals 2 and 3 in the closing comment instead of leaving them to be
-rediscovered.
+Use the C1–C4 evidence above when deciding #22's disposition. Do not create an
+issue for absent task-path coverage or remove the live in-memory cell field.
+Issue closure remains an explicit maintainer decision; this correction does not
+change issue state or sampling eligibility.
 
 ## Verifying this document
 
@@ -145,3 +183,7 @@ when the archive is absent. The self-test requires all eight tampers to be
 rejected, including one that hard-maps `pick_place_v1` to S4 (the R1 invariant)
 and one that adds a scenario field to `RunPickPlace.Goal` (which would make R1's
 premise obsolete and force a fresh re-adjudication).
+
+The checker inspects source structure and historical artifacts; it does not run
+the executor integration tests or verify all narrative and historical claims in
+this document. Run the execution and reporting suites for those behavior checks.
