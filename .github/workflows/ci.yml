@@ -25,6 +25,12 @@ jobs:
         shell: bash
         run: python3 -m unittest discover -s setup/model_validation -p 'test_clef_replay.py' -v
 
+      - name: CLEF-RECORDED-001 receipt verification
+        shell: bash
+        run: |
+          python3 setup/acceptance/clef_recorded_001_20261024/verify_clef_receipt.py
+          python3 setup/acceptance/clef_recorded_001_20261024/selftest_verify_clef_receipt.py
+
       - name: install test deps
         shell: bash
         run: |

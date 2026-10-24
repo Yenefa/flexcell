@@ -1,0 +1,26 @@
+{
+  "task_id": "CLEF-RECORDED-001",
+  "collected_at_utc": "2026-10-24T13:16:03.688505Z",
+  "process": {
+    "pid": 21464,
+    "executable_path": "F:\\flexcell-models\\llama-b11389-vulkan\\llama-server.exe",
+    "command_line": "F:\\flexcell-models\\llama-b11389-vulkan\\llama-server.exe -m F:\\flexcell-models\\Clef-Flash-Q8_0.gguf --host 127.0.0.1 --port 11435 -ngl 99 -ub 32768 -c 16384",
+    "working_set_bytes": 11797233664
+  },
+  "loaded_gpu_modules": [
+    "ggml-base.dll",
+    "ggml.dll",
+    "ggml-rpc.dll",
+    "ggml-vulkan.dll",
+    "vulkan-1.dll",
+    "ggml-cpu-haswell.dll"
+  ],
+  "gpu": {
+    "adapter_name": "AMD Radeon RX 6800",
+    "driver_version": "32.0.21043.19003",
+    "dedicated_usage_bytes": 9921011712,
+    "adapter_ram_reported_bytes": 4293918720
+  },
+  "evidence_scope": "Process module load + adapter dedicated memory. llama.cpp server log does not emit per-layer offload lines in this build.",
+  "note_host_omitted": "hostname omitted deliberately; it is not required to reproduce"
+}
