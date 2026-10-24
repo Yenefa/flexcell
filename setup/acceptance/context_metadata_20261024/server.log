@@ -1,0 +1,10 @@
+0.00.048.150 I srv  llama_server: initializing ...
+0.00.048.181 I cmn  common_param: common_params_print_info: verbosity = 3 (adjust with the `-lv N` CLI arg)
+0.00.048.490 W srv  llama_server: security: no API key is set and CORS allows all origins (see https://github.com/ggml-org/llama.cpp/pull/25655)
+0.00.052.130 I srv    load_model: loading model '/home/ros/.local/share/flexcell/inference/linux/qwen2.5-1.5b-instruct-q4_k_m.gguf'
+0.00.412.246 W load: control-looking token: 128247 '</s>' was not control-type; this is probably a bug in the model. its type will be overridden
+0.01.534.374 I cmn          init: llama threadpool init, n_threads = 2
+0.01.946.589 I srv    load_model: initializing, n_slots = 1, n_ctx_slot = 12288, kv_unified = 'false'
+0.01.952.796 I srv  llama_server: model loaded
+0.01.952.835 I srv  llama_server: listening on http://127.0.0.1:21881
+Received second interrupt, terminating immediately.

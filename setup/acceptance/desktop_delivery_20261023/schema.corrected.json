@@ -1,0 +1,276 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "flexcell episode record",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "batch_id",
+    "scenario",
+    "outcome",
+    "expected",
+    "as_expected",
+    "runtime_fingerprint",
+    "replay_ok"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "batch_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "batch_date": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "scenario": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "run": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "seed": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "stage": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "policy": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "protocol_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "protocol_version": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "protocol_sha256": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "runtime_fingerprint": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "outcome": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "expected": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "as_expected": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "error_code": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "detail": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "detail_codes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "fsm_trace": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "run_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "evidence_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "wall_seconds": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "object_a_at_zone": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "object_b_at_zone": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "zone_a_error_m": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "zone_b_error_m": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "final_position_error_m": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "replay_ok": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "replay_status": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "replay_steps": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "model_decisions": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "inject_arm": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "inject_clear": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "reset_rc": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "rc": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "harness_error": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "scenario_exercised": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "p_a_x": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "p_a_y": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "p_a_z": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "p_b_x": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "p_b_y": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "p_b_z": {
+      "type": [
+        "number",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false
+}

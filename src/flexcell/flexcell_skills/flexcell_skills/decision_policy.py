@@ -23,6 +23,7 @@ probabilistic policies (Jev/LLM, later per the ratified order).
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
+from flexcell_skills.contracts.error_codes import canonicalize, error_name
 from flexcell_skills.contracts.recovery import (
     RECOVERABLE_PICK_ERRORS,      # noqa: F401  re-exported (frozen set)
     recovery_eligible)
@@ -213,9 +214,16 @@ class FSMPolicy(DecisionPolicy):
                     'expected PLACE for %s, got %s' % (object_id, rec.action))
             idx += 1
             if rec.outcome != 0:
+                # The task-level code stays generic by design (a carried box is
+                # not retried), but the detail must not hide WHAT failed: a bare
+                # "place failed" made an IK-unreachable negative indistinguishable
+                # from a ghost success to the acceptance gates.
+                place_code = error_name(
+                    canonicalize(ACTION_PLACE, rec.error_code, rec.outcome)[0])
                 return Decision(ACTION_ABORT, object_id,
                                 reason_code=RC_NON_RECOVERABLE,
-                                explanation='place failed (carried box is not retried)')
+                                explanation='place failed (%s, carried box is not retried)'
+                                            % place_code)
 
             # ---- VERIFY with bounded re-verification ----
             vattempt = 1
