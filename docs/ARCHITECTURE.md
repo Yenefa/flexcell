@@ -1,136 +1,101 @@
 # ARCHITECTURE — FlexCell system
 
-> Implementation snapshot: main `a9b6a62`, reviewed 2026-10-17. Week-1.5 delivery
-> `7956d63` remains the historical parity reference, not today's full architecture.
-> Implementation and online qualification are separate. The ratified design lives in
-> [WEEK2_PREPARATION.md](WEEK2_PREPARATION.md); decisions live in [ADR/](ADR/); the
-> decision-layer RFC is #14.
+> Current source: merged PR [#27](https://github.com/Yenefa/flexcell/pull/27),
+> base `a9b6a62`, 2026-10-07. Runtime evidence is the archived E-020/E-021
+> record; this document does not claim a live check of either robot host.
+> The Week-1.5 behavior reference `7956d63` remains frozen.
 
-## Layered view
+## Current runtime
 
-    Runtime Decision Layer        ← implemented: FSM / Jev(Clef) / LLM / Hybrid
-            |  Decision objects only
-    Task Executor                 ← task_fsm_server.py: gate, dispatch, budget, episode
-            |  typed skill actions
-    Skill Server                  ← observe / pick / place / verify / carry / move_to_pose
-            |  ROS 2 topics & actions
-    ROS 2 Jazzy / MoveIt 2        ← planning, execution, ros2_control
-            |
-    Robot Backend                 ← today: Gazebo Harmonic 8.15 sim (ADR-001); real arm later
+![Current runtime components](diagrams/current-architecture.svg)
 
-Models may only decide **task-level actions**; they never control joints, trajectories,
-parameters, or safety. That separation is enforced by the deterministic gate (#6), not by
-policy goodwill.
+[Editable Mermaid](diagrams/current-architecture.mmd) ·
+[PNG preview](diagrams/current-architecture.png) ·
+[Chinese diagram guide and development plan](ARCHITECTURE_AND_PLAN_20261007.md)
 
-## Pipeline: historical reference and current implementation (ADR-002)
+The diagram shows deployable runtime components. CLI clients and
+`setup/94_scenario_runner.py` submit goals through `/run_demo` and
+`/run_pick_place` to TaskFsmServer; lifecycle/admin reset and health operations
+are a separate control path. Policies, the deterministic gate, recovery
+accounting and episode recording are modules inside the task executor, rather
+than additional services.
 
-    HISTORICAL REFERENCE (Week-1.5, frozen):
+The decision layer, safety gate and episode seam **are implemented**. The
+previous Week-1.5/current versus Week-2/future sketch described an earlier
+source state. The ratified boundary remains
+[ADR-002](ADR/ADR-002-runtime-decision-layer-boundary.md).
 
-        w1_client / admin
-              │  /run_demo · /run_pick_place
-              ▼
-        task_fsm_server  (historical hard-coded FSM + bounded recovery)
-              │  /observe · /pick_object · /place_object · /verify_object
-              ▼
-        Skills (observe · pick · place · verify · carry · move_to_pose)
-              │
-              ▼
-        MoveIt 2 → ros2_control → Gazebo Harmonic (ADR-001 backend)
+## Three responsibilities
 
-    CURRENT (M2 implementation; default=fsm retains the frozen policy grammar):
+**Decision — what happens next.** FSMPolicy, JevPolicy, LLMPolicy or
+HybridRouter receives the versioned canonical WorldState plus TaskGoal,
+Constraints and TaskHistory, and returns a typed Decision. Hybrid proposes
+through the fast model, escalates below a supported confidence threshold, and
+retains FSM fallback. Bootstrap before the first world observation uses FSM.
+Policies cannot dispatch motion or change executor-owned safety parameters.
 
-        Policy (FSM │ Jev │ LLM │ Hybrid)
-              │  Decision objects — the only channel down
-              ▼
-        Executor  (safety gate · dispatch · budget accounting · evidence)
-              │  typed skill actions
-              ▼
-        Skills → ROS  (verification stays policy-blind; executor checks postconditions)
+The current measured fast route uses Clef-Flash Q8 behind the typed
+`/v1/systemone` interface; the slow route uses the official DeepSeek API.
+The adapters remain replaceable. Local reproduction and TypeSafe adapters
+exist in source; that does not establish qualification for those backends.
+Model weights, loaded calibration, thresholds and runtime fingerprints are
+recorded. Confidence and real token counts are telemetry, not physical success.
 
-Policy objects and the gate are modules inside TaskFsmServer, not separate ROS
-services. Both `/run_demo` and `/run_pick_place` use `_execute_plan`, the policy
-seam and EpisodeRecorder. The original missing-seam description in issue #22 is
-superseded; remaining scenario/report qualification still needs reconciliation.
-The batch report can supply an explicit S4 cell; generic `pick_place_v1` records
-must not all be relabeled S4.
+**Execution — how it happens.** TaskFsmServer owns admission/mutex, cancellation,
+the action menu, dispatch, recovery budget, result interpretation and evidence.
+Both RunDemo and RunPickPlace use the policy/skill seam. Every proposal passes
+the deterministic gate before dispatch; only sanitized action/target fields
+reach skills. Free-text explanations are evidence, not commands. Canonical state
+comes from Observe; the executor adds the task portion.
 
-Boundary rules B1-B6 (typed channels, budget ceiling, gate-before-dispatch,
-policy-blind verification, parity bar, replaceable parts) are frozen in
-[ADR/ADR-002-runtime-decision-layer-boundary.md](ADR/ADR-002-runtime-decision-layer-boundary.md);
-the line-anchored extraction map for `task_fsm_server.py` is its Appendix A.
+**Verification — whether it worked.** SkillResult status and postconditions
+prevent a default action result from masquerading as success. Pick checks that
+the object follows the lift; Place confirms release and checks the drop;
+Verify independently samples Gazebo ground truth against the target zone.
+A backend's carry belief is not a measurement of a successful physical grasp.
 
-## The three separated concerns
+## State, motion and persistence
 
-### Decision layer — WHAT to do next (models allowed here)
+| Interface               | Producer / owner           | Role                                                                                                                                                                      |
+| ----------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/flexcell/world_state` | ObserveServer              | WorldState v2: robot, objects, carry and zones; revision and freshness. Policy bytes use `WorldStateSchemaVersion=2`, deterministic serialization and no notes/free text. |
+| `/flexcell/carry_state` | CarryServer                | Latched carry belief. Observe obtains confirmed carry authority through `/flexcell/carry_snapshot` instead of trusting a stale cached topic.                              |
+| `/flexcell/task_state`  | TaskFsmServer              | IDLE/BUSY lifecycle state.                                                                                                                                                |
+| `/flexcell/inject`      | Benchmark/admin            | Sealed failure-injection input; arm/clear acknowledgments are checked.                                                                                                    |
+| Episode JSON / JSONL    | Executor and skill servers | Exact policy inputs, proposals, selected actions, skill results, verifier results, timing and fingerprints.                                                               |
+| Budget ledger           | LLM backend                | Persistent reservations and settlement against the operator's authorized spend.                                                                                           |
 
-- Answers exactly one bounded question: "which task action next?"
-  (observe / pick / place / verify / wait / abort + target).
-- Implemented policies: FSMPolicy, JevPolicy with pluggable backends including
-  ClefBackend, LLMPolicy, and HybridRouter (fast → slow → explicit FSM fallback).
-- Clef confidence is routed through an FSM-action-agreement calibration, not a
-  physical success or safety probability. See [MODEL_IDENTITY.md](MODEL_IDENTITY.md).
-- Contract: pure `decide()` over canonical WorldState bytes + TaskGoal + Constraints +
-  TaskHistory → `Decision(action, target, confidence, reason_code, evidence_ref)`.
-- Byte-identical input for every policy; `notes[]` and free text excluded (#16).
-- No safety authority, ever: no joint values, no motion scaling, no tolerance or budget
-  control.
+Pick and Place call MoveToPose, which drives MoveIt planning/execution;
+ros2_control executes trajectories in Gazebo Harmonic. Carry uses the
+deployment-selected magnetic backend: the original pose servo or
+`velocity_servo_v1` with bounded pose/velocity control, leases and confirmation.
+The Q8 E-020/E-021 evidence used teleport carry; the velocity implementation
+has a separate E-015 evidence chain. They are not pooled.
 
-### Execution layer — HOW it is done (deterministic, no model)
+Raw pose subscription and bounded pose RPC workers isolate native transport
+from the ROS/admin parent. Health uses typed controller readiness and the
+current 19-check strict gate. Reset must exit cleanly and restore the canonical
+world; a success-looking JSON payload does not override a signal/crash.
 
-- `task_fsm_server` today: admission/mutex, skill dispatch plumbing, cancellation
-  semantics, evidence chain (run_id → step evidence_id), task-state topic,
-  recovery-budget accounting (budget=1).
-- Implemented deterministic safety gate (#6) validates every decision before
-  dispatch (allowed-action menu, target existence, world freshness, revision gates,
-  no policy free text in any goal field); invalid decisions are rejected typed and
-  counted, never executed.
-- World-revision gates on Pick/Place/MoveToPose goals already protect against stale
-  decisions.
+## Evaluation seam and remaining work
 
-### Verification layer — WHETHER it worked (measured, not inherited)
+The scenario runner resets the world, seals injection, dispatches a task,
+matches the episode by evidence ID, checks the scenario and records its row.
+FSM policy-input replay is distinct from model replay and Gazebo physics replay.
+The metrics report recomputes results from recorded episodes.
 
-- `verify_server`: independent gz ground-truth sampling vs expected; MISMATCH is an
-  honest result, not a server failure.
-- Pick physical check (box must follow the lift ≥ 0.03 m) · place drop check (0.06 m) ·
-  reset canonical re-verification (±0.005 m) · strict lifecycle health gate
-  (mainline readiness records 19 checks; historical delivery used 17).
-- Executor-side `skill_contract.py` checks declared successes, while independent
-  Verify/referee logic samples the simulation. Both still use simulation truth;
-  no independent real-world sensor or physical safety certification is claimed.
+The next PR adds hybrid batch qualification: fast-model presence and measured
+tokens, calibration/fingerprint consistency, a separate batch audit, and
+pre-dispatch smoke validation. An online run under the changed source requires
+a new fingerprint and qualification. Runtime fallback behavior is unchanged.
 
-## Canonical state & topics (v2 IMPLEMENTED, issue #3; policy input = versioned envelope)
+E-021's n=20 control/low/high-threshold pilots have overlapping success-rate
+intervals. Grasp failures remain an unresolved shared confounder; model replay
+qualification and full M3 acceptance remain incomplete. n≥50 stays frozen.
 
-| Topic                   | Producer                         | Content                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ----------------------- | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/flexcell/world_state` | observe_server (single producer) | WorldState v2: revision counter, `source=SIMULATION_GROUND_TRUTH`, `schema_version="2.0"`, robot (+gripper aperture)/objects (+klass, pose_age_s)/carry/zones (+occupied_by); `TaskContext task` field is executor-owned at decide() time (default-empty from observe). Policy-facing bytes = `flexcell_skills.canonical_state` envelope, `WorldStateSchemaVersion=2`, `notes[]` stripped, deterministic (sort_keys + 9-decimal rounding); unit-tested 13/13 (`test/test_canonical_state.py`) |
-| `/flexcell/carry_state` | carry_server (latched)           | backend **belief** — never physical evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `/flexcell/task_state`  | task_fsm_server (latched)        | IDLE / BUSY                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `/flexcell/inject`      | admin/benchmark                  | failure injection (`scenario:once\|always`) — seeded benchmark input                                                                                                                                                                                                                                                                                                                                                                                                                          |
-
-Runtime component map (client/admin → run_demo & run_pick_place → task_fsm_server → six
-skill servers → MoveIt / ros2_control / Gazebo; per-request JSONL evidence in
-`~/.ros/flexcell/`): see WEEK2_PREPARATION §1.1 for the annotated diagram.
-
-## Simulation manipulation backend
-
-The default `teleport` backend pins objects to the measured end-effector offset
-with a pose servo. The implemented `velocity_servo` alternative uses a leased
-native pose/velocity constraint, engage receipt and release acknowledgment;
-its evidence is separate from the Q8 teleport pilots. Both are magnetic simulation,
-not contact grasping. This deliberate compromise is formalized in
-[ADR/ADR-001-simulation-manipulation-backend.md](ADR/ADR-001-simulation-manipulation-backend.md):
-the backend is replaceable; skill contracts must not depend on simulation shortcuts; a
-future real-gripper backend replaces the implementation only.
-
-## Pending integration and qualification
-
-- [PR #28](https://github.com/Yenefa/flexcell/pull/28): reject hybrid evidence with
-  no real fast calls/tokens; [PR #29](https://github.com/Yenefa/flexcell/pull/29):
-  trustworthy grasp-probe terminal handling. Neither is part of this main snapshot.
-- [TransferBench at 01fd76f](https://github.com/Yenefa/flexcell/tree/01fd76f):
-  typed composite tasks, shared admission and confirmed-boundary pause/resume.
-  Outer stage plans are caller-provided; this is not autonomous composition.
-- Cross-arm grasp failures, complete model replay, portable E-021 Episodes and
-  full M3 remain open. n≥50 and AC@90 remain frozen.
-- [IYAIC preparation](../competition/iyaic-2026/README.md) reuses the runtime and
-  evidence; it does not introduce another decision/control layer.
+[ADR-003](ADR/ADR-003-orchestration-substrate.md) places future MTC below the
+executor at the skill seam. It is not another decision layer and is not
+implemented. Contact grasping, camera observation and a real-arm backend remain
+future work, triggered by measured needs and the relevant route decisions.
+See [the planning diagram](diagrams/development-roadmap.svg) and
+[ROADMAP](ROADMAP.md).

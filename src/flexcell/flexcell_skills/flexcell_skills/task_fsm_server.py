@@ -53,6 +53,7 @@ from flexcell_skills.contracts.safety_gate import (
 from flexcell_skills.contracts.recovery import (
     RECIPE_PICK, RECIPE_VERIFY, recovery_eligible)
 from flexcell_skills.contracts.skill_result import previous_skill_result
+from flexcell_skills.contracts.task_result import task_abort_detail
 from flexcell_skills.decision_policy import (
     ACTION_ABORT, ACTION_OBSERVE, ACTION_PICK, ACTION_PLACE, ACTION_VERIFY,
     Constraints, Decision, FSMPolicy, HistoryRecord, PolicyStateError,
@@ -446,6 +447,17 @@ class TaskFsmServer(Node):
             zone_of = dict(goal_obj.assignments)
             world = None
             history = []
+            last_skill_result = None
+
+            def record_skill_evidence(action, result, error):
+                # Policy history has frozen OBSERVE sentinel semantics. Keep
+                # diagnostics separate so a real failure is not called a timeout.
+                nonlocal last_skill_result
+                has_reply = error is None and result is not None
+                last_skill_result = previous_skill_result(
+                    action, result.outcome if has_reply else 255,
+                    result.error_code if has_reply else -1)
+
             decision_seq = 0
             tag = 'A'
             attempt = 1
@@ -507,10 +519,7 @@ class TaskFsmServer(Node):
                 # skill result and the recovery context) are needed by BOTH
                 # the gate's rejection record and the regular decision log -
                 # compute them before the gate
-                prev = (previous_skill_result(history[-1].action,
-                                              history[-1].outcome,
-                                              history[-1].error_code)
-                        if history else None)
+                prev = last_skill_result
                 recovery_audit = None
                 world_dict = (json.loads(world_canonical)
                               if world_canonical is not None else None)
@@ -610,6 +619,7 @@ class TaskFsmServer(Node):
                     og.refresh = True
                     r, err = self._demo_call(self._cli_observe, og, label,
                                              goal_handle, t0, 30.0)
+                    record_skill_evidence(ACTION_OBSERVE, r, err)
                     o_outcome = int(r.outcome) if r is not None else 255
                     o_evidence = getattr(r, 'evidence_id', '') if r else ''
                     episode.record_executor_result(
@@ -674,6 +684,7 @@ class TaskFsmServer(Node):
                     pg.motion_profile_id = constraints.motion_profile_id
                     r, err = self._demo_call(self._cli_pick, pg, label,
                                              goal_handle, t0, 90.0)
+                    record_skill_evidence(ACTION_PICK, r, err)
                     pick_ok = (err is None and r is not None and
                                int(r.outcome) == PickObject.Result.OUTCOME_SUCCEEDED)
                     code = int(r.error_code) if (err is None and r is not None) else -1
@@ -744,6 +755,7 @@ class TaskFsmServer(Node):
                     pg.motion_profile_id = constraints.motion_profile_id
                     r, err = self._demo_call(self._cli_place, pg, label,
                                              goal_handle, t0, 90.0)
+                    record_skill_evidence(ACTION_PLACE, r, err)
                     place_ok = (err is None and r is not None and
                                 int(r.outcome) == PlaceObject.Result.OUTCOME_SUCCEEDED)
                     episode.record_executor_result(
@@ -822,6 +834,7 @@ class TaskFsmServer(Node):
                     vg.position_tolerance_m = constraints.verify_tolerance_m
                     r, err = self._demo_call(self._cli_verify, vg, label,
                                              goal_handle, t0, 30.0)
+                    record_skill_evidence(ACTION_VERIFY, r, err)
                     v_ok = (err is None and r is not None and
                             int(r.outcome) == VerifyObject.Result.OUTCOME_VERIFIED)
                     episode.record_executor_result(
@@ -883,9 +896,9 @@ class TaskFsmServer(Node):
                     episode.record_executor_result()
                     return finish(result_type.OUTCOME_FAILED,
                                   task_abort_error_code(decision.reason_code),
-                                  'policy abort (%s): %s (trace=%s)'
-                                  % (decision.reason_code, decision.explanation,
-                                     ','.join(trace)))
+                                  task_abort_detail(decision.reason_code,
+                                                    decision.explanation,
+                                                    trace, prev))
 
                 # ---------------- WAIT / unknown ----------------
                 if decision.action == 'WAIT':

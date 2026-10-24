@@ -63,7 +63,7 @@
 | E-006 | M2.3 audit remediation — runtime acceptance                             | PASS (gated)                                                                                                                            | acceptance/sessions/ (FLEXCELL_STAGE) + ~/.ros/flexcell/referee.jsonl |
 | E-007 | Scenario runner batch (S1×2 + S2 + S5), episode replay                  | PASS                                                                                                                                    | ~/.ros/flexcell/episodes/batch_20260928_051219.jsonl                  |
 | E-008 | Metrics report over real store + S7 adaptation probe                    | PASS                                                                                                                                    | ~/.ros/flexcell/episodes/batch_20260928_124615.jsonl                  |
-| E-009 | New-machine (RTX 4060 laptop) bring-up + first official benchmark batch | SUPERSEDED (not citable)                                                                                                                | setup/acceptance/m3_seed_batch_20260929\*/                            |
+| E-009 | New-machine (RTX 4060 laptop) bring-up + first official benchmark batch | SUPERSEDED (not citable)                                                                                                                | setup/acceptance/m3_seed_batch_20260929*/                             |
 | E-010 | T6 hardening: gate_flood + injection lifecycle + reset determinism      | PASS                                                                                                                                    | this entry (measurements inline)                                      |
 | E-012 | Shared task policy seam + distinct models + protocol v2 online smoke    | ONLINE PARTIAL; BASELINE FROZEN                                                                                                         | [MAINLINE_20260930.md](MAINLINE_20260930.md)                          |
 | E-013 | Official DeepSeek policy + persistent RMB 5 budget + action handoff     | ONLINE PARTIAL; S1 3/5; BASELINE FROZEN                                                                                                 | [DEEPSEEK_20261001.md](DEEPSEEK_20261001.md)                          |
@@ -75,8 +75,9 @@
 | E-019 | Q8 per-decision provenance + two-regime pilot                           | 215 TESTS PASS; HIGH 14/17 + RESET ERROR; LOW SMOKE TRUNCATED; n>=50 FROZEN                                                             | [Q8_PILOT_20261005.md](Q8_PILOT_20261005.md)                          |
 | E-020 | Pose callback finalization barrier + bounded fresh-process reset RPC    | 226 TESTS PASS; LIFECYCLE 100/100; RESET 20/20 EACH; LOW 18/20; HIGH SMOKE 4/5; n>=50 FROZEN                                            | [Q8_TEARDOWN_20261005.md](Q8_TEARDOWN_20261005.md)                    |
 | E-021 | Three-arm S1 comparison, same machine, same night, unattended           | FSM 19/20 · hybrid τ=0.03 18/20 · hybrid τ=0.85 17/20; CIs OVERLAP; all six baseline failures have grasp/recovery-exhaustion signatures | `setup/acceptance/tau_sweep_desktop_20261005/`                        |
-| E-022 | Class-scoped static attribute scan and effective CI failure exit (#24)  | 172 TESTS PASS (20 NEW); SCAN 35/0; PLANTED GHOST RC=1; ROS/Gazebo NOT_RUN                                                              | [STATIC_SCAN_20261007.md](STATIC_SCAN_20261007.md)                    |
-| M3-\* | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN                                                                                                                                 | — (RFC #15; harness #7/#8/#9)                                         |
+| E-022 | Class-scoped static attribute scan and effective CI failure exit (#24)  | LOCAL 172 PASS (20 NEW); ROS CI 246 PASS; SCAN 35/0; GAZEBO NOT_RUN                                                                     | [STATIC_SCAN_20261007.md](STATIC_SCAN_20261007.md)                    |
+| E-023 | Hybrid batch fast-arm gate + smoke qualification (#8/#12)               | LOCAL 194 PASS (22 NEW); SCAN 35/0; ROBOT/MODEL NOT_RUN                                                                                 | [HYBRID_BATCH_GATE_20261007.md](HYBRID_BATCH_GATE_20261007.md)        |
+| M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN                                                                                                                                 | — (RFC #15; harness #7/#8/#9)                                         |
 
 ## Entries
 
@@ -163,9 +164,9 @@
     P0-2 path end-to-end) — detected, not masked.
 - **Evidence**: `$FLEXCELL_STAGE/setup/acceptance/sessions/` (versioned session dirs);
   `~/.ros/flexcell/referee.jsonl`.
-- **Open**: box*rise two-sided referee agreement is blocked by the carry-servo
+- **Open**: box_rise two-sided referee agreement is blocked by the carry-servo
   catch-up variance — contact grasping (D4) is the structural fix; the demo result
-  detail prints `zone*%s_error_m` as 0.0000 while verify measures mm-scale (verify
+  detail prints `zone_%s_error_m` as 0.0000 while verify measures mm-scale (verify
   sampling moment to be checked in hardening).
 
 ### E-007 — Scenario runner batch: S1×2 + S2 + S5 with episode replay (2026-09-28)
@@ -258,11 +259,11 @@ return`, and the pick server log shows the clear landing
   replay store over `batch_merged.jsonl` (70 rows); the report is committed
   verbatim as `95_metrics_report.md`.
 
-  | Cell | Scenario                        | success (metric 1)                                                       | Wilson 95% CI        | replay integrity |
-  | ---- | ------------------------------- | ------------------------------------------------------------------------ | -------------------- | ---------------- |
-  | S1   | canonical happy demo            | 18/20 = **0.90**                                                         | [0.70, 0.97]         | 20/20 clean      |
-  | S2   | injected failure, first attempt | 8/20 = **0.40**                                                          | [0.22, 0.61]         | 20/20 clean      |
-  | S5   | retry exhaustion                | 1/20 SUCCEEDED → 19/20 correctly FAILED (typed `ERR_RECOVERY_EXHAUSTED`) | [0.01, 0.24]         | 20/20 clean      |
+  | Cell | Scenario                        | success (metric 1)                                                       | Wilson 95% CI       | replay integrity |
+  | ---- | ------------------------------- | ------------------------------------------------------------------------ | ------------------- | ---------------- |
+  | S1   | canonical happy demo            | 18/20 = **0.90**                                                         | [0.70, 0.97]        | 20/20 clean      |
+  | S2   | injected failure, first attempt | 8/20 = **0.40**                                                          | [0.22, 0.61]        | 20/20 clean      |
+  | S5   | retry exhaustion                | 1/20 SUCCEEDED → 19/20 correctly FAILED (typed `ERR_RECOVERY_EXHAUSTED`) | [0.01, 0.24]        | 20/20 clean      |
   | S7   | off-canonical placement         | 6/10 = **0.60**                                                          | [0.31, 0.83] ⚠ n<20 | 10/10 clean      |
 
   `REPORT: PASS (70 episodes, 0 replay-dirty)`, 0 `dev/*` buckets (S7 is a real
@@ -336,7 +337,7 @@ reset` does not restore the canonical world after an abort-while-carrying
 
 #### ① gate_flood — the `gz.msgs.Pose` traceback flood
 
-- **What it was**: `for ent in msg.pose` inside the gz `Pose_V` callback raised
+- **What it was**: `for ent in msg.pose` inside the gz Pose_V callback raised
   `TypeError: No message class registered for 'gz.msgs.Pose'`, and
   gz-transport's python shim prints a **full traceback per message**. Measured
   4-reset baseline: **954 / 895 / 896 / 899** lines on _stdout_ (fd 2 was
@@ -639,7 +640,7 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
 - **Prompt v2 + Q8_0 (2026-10-05 evening)**: two upgrades:
   ① prompt v2 folds the frozen FSM cycle semantics into the ClefBackend
   instructions and enriches per-option criteria (backend-scoped; the shared
-  `_choice_options` contract text untouched);
+  _choice_options contract text untouched);
   ② Q8_0 weights replace Q4_K_M on the same Vulkan server.
   In-sample 35: agreement 26/30, top bin 23/23 (LB 0.857).
 - **⚠ CORRECTION (2026-10-05, chief counter-audit)**: three claims in this
@@ -684,30 +685,32 @@ dual-object S1, not single-object. `pooled_smoke_085.jsonl` contains ten attempt
 eight successes and two failures. The historical runner selected passing rows
 to unlock the pilot; that is not a fresh fixed-window 5/5 qualification and is
 not retrospectively ratified here. The three baseline summaries retain 19/20,
-18/20 and 17/20, but their 60 referenced native Episode files are not archived
-under the checked main/TransferBench trees. Summary recount is possible; full
-model provenance/replay cannot be independently reconstructed from this bundle.
+18/20 and 17/20, independently of the pooled smoke denominator.
 See [the read-only inventory](../competition/iyaic-2026/evidence/e021-audit.json).
 
 - **Setup**: desktop as the only fully-qualified executor (shutdown race repaired,
   per-decision routing gates live, 7-day unattended hardening: updates disabled at
   three layers, sleep structurally impossible on this firmware, Storage Sense off —
   service snapshot + rollback script on `F:\flexcell-models\`). Three arms, S1
-  dual-object, n=20 each, sequential deployments (one fingerprint per arm; no
+  dual-object `RunDemo`, n=20 each, sequential deployments (one fingerprint per arm; no
   pooling across arms). τ=0.85 unlock used the runner's fingerprint-scoped smoke
   rule: attempt 1 (3/5, two grasp-physics failures) + attempt 2 (5/5, all routing
-  audits green) = **10 pooled attempts: 8 successes and 2 failures**. Both batch
-  files are archived and disclosed; qualification consistency remains open (#31).
+  audits green) = **10 attempts: 8 SUCCEEDED and 2 FAILED**. The historical
+  runner selected the eight successful rows for admission; both batch files
+  and the unfiltered pooled summary remain archived. This is not a fixed
+  five-attempt smoke qualification.
 - **Result**:
   | arm | S1 n=20 | Wilson 95% CI | paid slow fraction | cost ceiling |
   | --- | ------- | ------------- | ------------------ | ------------ |
   | FSM control | 19/20 (0.95) | [0.76, 0.99] | 0% | ¥0 |
   | hybrid τ=0.03 | 18/20 (0.90) | [0.69, 0.98] | ~0% | ~¥0.02 |
   | hybrid τ=0.85 | 17/20 (0.85) | [0.64, 0.95] | ~20% | ~¥0.3 |
-  CIs overlap; these descriptive pilots do not establish policy superiority.
-  The archived summary reports passing routing provenance (139 decisions in the
-  τ=0.85 baseline, zero violations); missing native Episodes prevent an independent
-  full re-audit of that claim. Night total ¥0.576 / ¥5 upper bound.
+  All CIs overlap: **no significant success-rate difference at n=20**. Every model
+  decision was reported as passing the routing provenance audit in the archived
+  summaries (139 decisions in the τ=0.85 baseline, zero reported violations).
+  The 60 referenced native episodes are absent from this checkout and current
+  laptop episode store, so their complete inputs and per-decision provenance
+  cannot be independently re-audited here. Night total ¥0.576 / ¥5 upper bound.
 - **Observed failure signature (2026-10-17 recount):** all six failed baseline
   episodes (FSM run20; hybrid τ=0.03 runs5/9; hybrid τ=0.85 runs3/10/13)
   report ERR_GRASP_FAILED (23) followed by recovery exhaustion (51). Separately,
@@ -730,6 +733,14 @@ See [the read-only inventory](../competition/iyaic-2026/evidence/e021-audit.json
 - **Evidence**: `setup/acceptance/tau_sweep_desktop_20261005/` (12 batch files
   incl. both τ=0.85 smoke attempts, pooled summary, two hybrid deployments,
   campaign log `F:\flexcell-models\campaign_20261005.log`).
+- **2026-10-24 correction / #31**: all 60 baseline rows' client outputs contain
+  A/B result checks; the former single-object description was incorrect.
+  Raw JSONL bytes and historical outcomes are unchanged. These remain
+  descriptive small samples, without retrospective fixed-window qualification.
+  The [fixed-window admission repair](FIXED_SMOKE_WINDOW_20261024.md) rejects
+  pooling, clipping, duplicate native evidence and incomplete windows. Native
+  episode recovery, model replay, full M3 and n≥50 remain pending/frozen.
+
 
 ### E-022 — Static attribute scanner repair (2026-10-07, cloud)
 
@@ -746,6 +757,33 @@ See [the read-only inventory](../competition/iyaic-2026/evidence/e021-audit.json
 - **Evidence:** `setup/acceptance/issue24_static_scan_20261007/` contains before/
   after scan output, the planted failure, exact test command, source hashes,
   pytest log and JUnit results. See [repair details](STATIC_SCAN_20261007.md).
+- **CI follow-up:** PR #27 passed the ROS Jazzy build, 246 tests with zero
+  errors/failures/skips and the clean scanner, then merged as `a9b6a62`.
+  [Workflow](https://github.com/Yenefa/flexcell/actions/runs/37665173778).
+
+### E-023 — Hybrid batch fast-arm provenance gate (2026-10-07, cloud)
+
+- **Purpose:** address #8/#12 and E-021's batch-level fast-arm presence gap.
+  This changes benchmark qualification, not HybridRouter or robot execution.
+- **Configuration:** base `a9b6a6255d91a568e44eea555ecb33f7e0d7d49f`,
+  Python 3.12; offline synthetic trace fixtures, no live model or robot calls.
+- **Reproduction:** skipped/missing fast proposals with valid slow decisions
+  pass the base audit despite zero fast calls/tokens. Both now fail; genuine
+  fast proposals that all escalate to slow remain valid.
+- **Repair:** reject incomplete deployment identity before dispatch; stop a
+  model-driven episode without a real fast arm; audit counts, calibration and
+  fingerprint across the batch; recheck smoke before baseline dispatch. Store
+  the sidecar below `episodes/batch_audits/`, preserving raw episodes and rows.
+- **Verification:** 194 ROS-independent tests passed, zero errors/failures/skips,
+  including 22 new gate/runner regressions. Static scan: 35 files, zero missing
+  members. Eleven ROS-dependent test files excluded; live model replay and
+  Gazebo acceptance NOT_RUN. Historical outcomes are not re-scored.
+- **Next:** after review/merge, new-fingerprint online smoke and runtime
+  acceptance; grasp-failure root cause remains open, n≥50 remains frozen.
+- **Evidence:** `setup/acceptance/hybrid_batch_gate_20261007/` contains synthetic
+  before/after reports, exact test commands, source hashes, JUnit and logs.
+  [Repair details](HYBRID_BATCH_GATE_20261007.md) and
+  [requested architecture/planning diagrams](ARCHITECTURE_AND_PLAN_20261007.md).
 
 ## Evidence locations
 

@@ -162,3 +162,20 @@ def status_from_outcome(skill, outcome):
     if o == PLUMBING_OUTCOME:
         return STATUS_NONE             # plumbing: no skill verdict exists
     return STATUS_FAILURE
+
+
+# ---------------------------------------------------------------- reverse lookup
+_CANONICAL_NAMES = {
+    value: name for name, value in globals().items()
+    if name.startswith('ERR_') and isinstance(value, int)
+}
+
+
+def error_name(code):
+    """Canonical numeric code -> symbolic name (unknown values render ERR_<n>).
+
+    Detail strings must be able to carry the typed semantics even where the
+    task-level code is deliberately generic (see TASK_ERR_SKILL_FAILED).
+    """
+    code = int(code)
+    return _CANONICAL_NAMES.get(code, 'ERR_%d' % code)

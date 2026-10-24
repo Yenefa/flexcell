@@ -519,11 +519,20 @@ class PlanningSceneOps:
         scene.world.collision_objects.append(co)
         return self._apply_scene(scene)
 
-    def remove(self, name):
+    def remove(self, name, detach_attached=False):
+        # MoveIt keeps attached bodies separately from world objects. In a
+        # planning-scene diff the robot-state update runs before world updates,
+        # so detach first, then remove the resulting world body in the same RPC.
+        scene = PlanningScene()
+        if detach_attached:
+            aco = AttachedCollisionObject()
+            aco.object.id = name
+            aco.object.operation = CollisionObject.REMOVE
+            scene.robot_state.attached_collision_objects.append(aco)
+            scene.robot_state.is_diff = True
         co = CollisionObject()
         co.id = name
         co.operation = CollisionObject.REMOVE
-        scene = PlanningScene()
         scene.world.collision_objects.append(co)
         return self._apply_scene(scene)
 

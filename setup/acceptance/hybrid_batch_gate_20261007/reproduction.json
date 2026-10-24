@@ -1,0 +1,229 @@
+{
+  "source_base": "a9b6a6255d91a568e44eea555ecb33f7e0d7d49f",
+  "kind": "synthetic offline fixture, not a robot/model measurement",
+  "deployment": {
+    "policy": "hybrid",
+    "runtime_fingerprint": "synthetic-runtime",
+    "threshold": 0.85,
+    "active_backends": {
+      "fast": {
+        "model": "synthetic-q8",
+        "model_sha256": "synthetic-weights",
+        "calibration_sha256": "synthetic-cal"
+      }
+    }
+  },
+  "cases": [
+    {
+      "mode": "skipped",
+      "record": {
+        "runtime_fingerprint": "synthetic-runtime",
+        "steps": [
+          {
+            "seq": 1,
+            "policy_input": {
+              "world_state_canonical": "{}"
+            },
+            "policy_output": {
+              "policy_trace": {
+                "source": "llm",
+                "fallback": false,
+                "threshold": 0.85,
+                "calibration_sha256": "synthetic-cal",
+                "proposals": [
+                  {
+                    "policy": "jev",
+                    "skipped": true
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "before": {
+        "ok": true,
+        "errors": [],
+        "bootstrap": 0,
+        "model_decisions": 1,
+        "fast_selected": 0,
+        "slow_selected": 1,
+        "fsm_fallbacks": 0,
+        "fast_calls": 0,
+        "fast_tokens": 0
+      },
+      "after": {
+        "ok": false,
+        "errors": [
+          "no real fast proposal in a model-driven hybrid episode"
+        ],
+        "bootstrap": 0,
+        "model_decisions": 1,
+        "fast_selected": 0,
+        "slow_selected": 1,
+        "fsm_fallbacks": 0,
+        "fast_calls": 0,
+        "fast_tokens": 0,
+        "calibration_sha256": "synthetic-cal"
+      },
+      "batch_after": {
+        "ok": false,
+        "errors": [
+          "row=1: episode routing audit failed",
+          "row=1: no real fast proposal in this hybrid episode",
+          "batch has no real fast calls with measured tokens"
+        ],
+        "episodes": 1,
+        "runtime_fingerprint": "synthetic-runtime",
+        "calibration_sha256": "synthetic-cal",
+        "bootstrap": 0,
+        "model_decisions": 1,
+        "fast_selected": 0,
+        "slow_selected": 1,
+        "fsm_fallbacks": 0,
+        "fast_calls": 0,
+        "fast_tokens": 0
+      }
+    },
+    {
+      "mode": "missing",
+      "record": {
+        "runtime_fingerprint": "synthetic-runtime",
+        "steps": [
+          {
+            "seq": 1,
+            "policy_input": {
+              "world_state_canonical": "{}"
+            },
+            "policy_output": {
+              "policy_trace": {
+                "source": "llm",
+                "fallback": false,
+                "threshold": 0.85,
+                "calibration_sha256": "synthetic-cal",
+                "proposals": []
+              }
+            }
+          }
+        ]
+      },
+      "before": {
+        "ok": true,
+        "errors": [],
+        "bootstrap": 0,
+        "model_decisions": 1,
+        "fast_selected": 0,
+        "slow_selected": 1,
+        "fsm_fallbacks": 0,
+        "fast_calls": 0,
+        "fast_tokens": 0
+      },
+      "after": {
+        "ok": false,
+        "errors": [
+          "no real fast proposal in a model-driven hybrid episode"
+        ],
+        "bootstrap": 0,
+        "model_decisions": 1,
+        "fast_selected": 0,
+        "slow_selected": 1,
+        "fsm_fallbacks": 0,
+        "fast_calls": 0,
+        "fast_tokens": 0,
+        "calibration_sha256": "synthetic-cal"
+      },
+      "batch_after": {
+        "ok": false,
+        "errors": [
+          "row=1: episode routing audit failed",
+          "row=1: no real fast proposal in this hybrid episode",
+          "batch has no real fast calls with measured tokens"
+        ],
+        "episodes": 1,
+        "runtime_fingerprint": "synthetic-runtime",
+        "calibration_sha256": "synthetic-cal",
+        "bootstrap": 0,
+        "model_decisions": 1,
+        "fast_selected": 0,
+        "slow_selected": 1,
+        "fsm_fallbacks": 0,
+        "fast_calls": 0,
+        "fast_tokens": 0
+      }
+    },
+    {
+      "mode": "slow",
+      "record": {
+        "runtime_fingerprint": "synthetic-runtime",
+        "steps": [
+          {
+            "seq": 1,
+            "policy_input": {
+              "world_state_canonical": "{}"
+            },
+            "policy_output": {
+              "policy_trace": {
+                "source": "llm",
+                "fallback": false,
+                "threshold": 0.85,
+                "calibration_sha256": "synthetic-cal",
+                "proposals": [
+                  {
+                    "policy": "jev",
+                    "policy_trace": {
+                      "source": "jev",
+                      "fallback": false,
+                      "model": "synthetic-q8",
+                      "model_sha256": "synthetic-weights",
+                      "calibration_sha256": "synthetic-cal",
+                      "calibration": "synthetic-cal",
+                      "confidence_calibrated": true,
+                      "tokens": 42
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "before": {
+        "ok": true,
+        "errors": [],
+        "bootstrap": 0,
+        "model_decisions": 1,
+        "fast_selected": 0,
+        "slow_selected": 1,
+        "fsm_fallbacks": 0,
+        "fast_calls": 1,
+        "fast_tokens": 42
+      },
+      "after": {
+        "ok": true,
+        "errors": [],
+        "bootstrap": 0,
+        "model_decisions": 1,
+        "fast_selected": 0,
+        "slow_selected": 1,
+        "fsm_fallbacks": 0,
+        "fast_calls": 1,
+        "fast_tokens": 42,
+        "calibration_sha256": "synthetic-cal"
+      },
+      "batch_after": {
+        "ok": true,
+        "errors": [],
+        "episodes": 1,
+        "runtime_fingerprint": "synthetic-runtime",
+        "calibration_sha256": "synthetic-cal",
+        "bootstrap": 0,
+        "model_decisions": 1,
+        "fast_selected": 0,
+        "slow_selected": 1,
+        "fsm_fallbacks": 0,
+        "fast_calls": 1,
+        "fast_tokens": 42
+      }
+    }
+  ]
+}

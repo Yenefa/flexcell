@@ -1,0 +1,25 @@
+=== 61_C_exhausted | 2026-10-21T10:24:09+08:00 | scenario=exhaust_demo_v1 ===
+SENDING action=demo object=target_box pose=[0.12, -0.15, 0.0175]
+GOAL_UUID db1a5f15050e4d91aed209b557b9a1d9
+RESULT {
+  "action": "demo",
+  "goal_uuid": "db1a5f15050e4d91aed209b557b9a1d9",
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_RECOVERY_EXHAUSTED",
+  "detail": "policy abort (BUDGET_EXHAUSTED): pick attempt 2 failed (error 23) (trace=PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED,RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1)),PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED)",
+  "evidence_id": "exhaust_demo_v1-4de954b9",
+  "wall_seconds": 0.289,
+  "fsm_trace": [
+    "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+    "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+    "PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED"
+  ],
+  "object_a_at_zone": false,
+  "object_b_at_zone": false,
+  "zone_a_error_m": NaN,
+  "zone_b_error_m": NaN,
+  "run_id": "exhaust_demo_v1-1af05647",
+  "scenario_id": "exhaust_demo_v1"
+}
+RC=1

@@ -1,0 +1,28 @@
+Starting >>> flexcell_skills
+........................................................................ [ 21%]
+........................................................................ [ 43%]
+........................................................................ [ 65%]
+........................................................................ [ 87%]
+=============================== warnings summary ===============================
+test/test_inference_budget.py::test_parallel_processes_cannot_oversubscribe_or_reset_budget
+test/test_inference_budget.py::test_parallel_processes_cannot_oversubscribe_or_reset_budget
+test/test_inference_budget.py::test_parallel_processes_cannot_oversubscribe_or_reset_budget
+  Warning: This process (pid=48527) is multi-threaded, use of fork() may lead to deadlocks in the child.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+..........................................                               [100%]
+- generated xml file: /home/ros/.local/share/flexcell/fixed_smoke_20261024/build/flexcell_skills/pytest.xml -
+330 passed, 3 warnings in 2.91s
+--- stderr: flexcell_skills
+=============================== warnings summary ===============================
+test/test_inference_budget.py::test_parallel_processes_cannot_oversubscribe_or_reset_budget
+test/test_inference_budget.py::test_parallel_processes_cannot_oversubscribe_or_reset_budget
+test/test_inference_budget.py::test_parallel_processes_cannot_oversubscribe_or_reset_budget
+  Warning: This process (pid=48527) is multi-threaded, use of fork() may lead to deadlocks in the child.
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+---
+Finished <<< flexcell_skills [3.39s]
+
+Summary: 1 package finished [3.56s]
+  1 package had stderr output: flexcell_skills
