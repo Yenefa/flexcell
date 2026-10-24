@@ -28,8 +28,12 @@ CANONICAL = {
 }
 ZONES = {(0.12, -0.15), (0.25, 0.05)}
 MIN_SEP = 0.12
-X_RANGE = (0.16, 0.28)
-Y_RANGE = (-0.24, 0.20)
+# Envelope measured on DESKTOP-8JBM0GF (2026-10-21): y = -0.226 m is graspable
+# but the LIFT pose (grasp + 0.10 m) has NO_IK_SOLUTION, so a placement there
+# tests kinematics rather than adaptation. Canonical B (y = -0.18 m) lifts
+# fine. Keep a margin until an IK-based filter lands with #9.
+X_RANGE = (0.17, 0.26)
+Y_RANGE = (-0.185, 0.16)
 
 
 def gz_set_pose(name, xyz, world='empty'):

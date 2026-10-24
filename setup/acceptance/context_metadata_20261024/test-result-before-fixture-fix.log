@@ -1,0 +1,9 @@
+/home/ros/.local/share/flexcell/pr40_20261024/build/flexcell_skills/pytest.xml: 290 tests, 0 errors, 1 failure, 0 skipped
+- flexcell_skills.test.test_runtime_backend_metadata test_truncated_http_body_does_not_interrupt_deployment
+  <<< failure message
+    AssertionError: assert 'JSONDecodeError' == 'IncompleteRead'
+      - IncompleteRead
+      + JSONDecodeError
+  >>>
+
+Summary: 290 tests, 0 errors, 1 failure, 0 skipped

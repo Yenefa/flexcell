@@ -26,13 +26,34 @@ jobs:
         run: |
           apt-get update -qq
           apt-get install -y -qq \
-            python3-pytest \
+            python3-pytest python3-jsonschema \
             ros-jazzy-moveit-msgs \
             ros-jazzy-control-msgs \
             ros-jazzy-tf2-ros \
             ros-jazzy-ros2-control \
             ros-jazzy-joint-state-broadcaster \
             ros-jazzy-joint-trajectory-controller > /dev/null
+
+      - name: frozen desktop delivery audit (incomplete evidence is expected)
+        shell: bash
+        run: |
+          set +e
+          python3 setup/audit_desktop_delivery.py \
+            setup/acceptance/desktop_delivery_20261023/original-delivery.zip \
+            --out /tmp/desktop-delivery-audit.json
+          audit_rc=$?
+          set -e
+          test "$audit_rc" -eq 2
+          python3 - <<'PY'
+          import json
+          report = json.load(open('/tmp/desktop-delivery-audit.json'))
+          assert report['raw_export_consistency'] == 'PASS'
+          assert report['rows'] == 176
+          assert report['original_schema_errors'] == 176
+          assert report['corrected_schema_errors'] == 0
+          assert report['native_episode_files'] == 0
+          assert report['status'] == 'INCOMPLETE_EVIDENCE'
+          PY
 
       - name: build (first-party packages)
         shell: bash

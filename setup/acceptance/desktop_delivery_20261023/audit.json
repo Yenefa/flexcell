@@ -1,0 +1,605 @@
+{
+  "scope": "Frozen package integrity and batch-summary audit; no robot/model calls",
+  "source_archive_sha256": "9aaee5fa2b24388c2523ebcb434a175bf4d2fbf72213987c0157df62b0eed30a",
+  "manifest_entries_verified": 27,
+  "manifest_unlisted": [
+    "MANIFEST.json",
+    "README.md",
+    "dataset/README.md"
+  ],
+  "raw_batches": 12,
+  "rows": 176,
+  "raw_export_consistency": "PASS",
+  "task_successes": 114,
+  "expected_failures": 60,
+  "unexpected": 2,
+  "stage_counts": {
+    "smoke": 81,
+    "baseline": 95
+  },
+  "fingerprint_counts": {
+    "dd4b99d4217852026dd617d5c8b349a950ef14371b3e7703208f476c02ec16f2": 50,
+    "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055": 71,
+    "d0aa7a79107f9a48d02c600d817d14a07de8f5965bef9cc0b0290706046c1287": 55
+  },
+  "groups": [
+    {
+      "fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "policy": "fsm",
+      "scenario": "S1",
+      "stage": "baseline",
+      "n": 10,
+      "succeeded": 10,
+      "as_expected": 10
+    },
+    {
+      "fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "policy": "fsm",
+      "scenario": "S1",
+      "stage": "smoke",
+      "n": 5,
+      "succeeded": 5,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "policy": "fsm",
+      "scenario": "S2",
+      "stage": "baseline",
+      "n": 5,
+      "succeeded": 5,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "policy": "fsm",
+      "scenario": "S2",
+      "stage": "smoke",
+      "n": 5,
+      "succeeded": 5,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "policy": "fsm",
+      "scenario": "S3",
+      "stage": "baseline",
+      "n": 5,
+      "succeeded": 5,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "policy": "fsm",
+      "scenario": "S3",
+      "stage": "smoke",
+      "n": 5,
+      "succeeded": 5,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "policy": "fsm",
+      "scenario": "S4",
+      "stage": "baseline",
+      "n": 5,
+      "succeeded": 0,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "policy": "fsm",
+      "scenario": "S4",
+      "stage": "smoke",
+      "n": 5,
+      "succeeded": 0,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "policy": "fsm",
+      "scenario": "S5",
+      "stage": "baseline",
+      "n": 5,
+      "succeeded": 0,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "policy": "fsm",
+      "scenario": "S5",
+      "stage": "smoke",
+      "n": 5,
+      "succeeded": 0,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "policy": "fsm",
+      "scenario": "S7",
+      "stage": "baseline",
+      "n": 10,
+      "succeeded": 10,
+      "as_expected": 10
+    },
+    {
+      "fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "policy": "fsm",
+      "scenario": "S7",
+      "stage": "smoke",
+      "n": 6,
+      "succeeded": 5,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "d0aa7a79107f9a48d02c600d817d14a07de8f5965bef9cc0b0290706046c1287",
+      "policy": "jev",
+      "scenario": "S1",
+      "stage": "baseline",
+      "n": 10,
+      "succeeded": 10,
+      "as_expected": 10
+    },
+    {
+      "fingerprint": "d0aa7a79107f9a48d02c600d817d14a07de8f5965bef9cc0b0290706046c1287",
+      "policy": "jev",
+      "scenario": "S1",
+      "stage": "smoke",
+      "n": 5,
+      "succeeded": 5,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "d0aa7a79107f9a48d02c600d817d14a07de8f5965bef9cc0b0290706046c1287",
+      "policy": "jev",
+      "scenario": "S2",
+      "stage": "baseline",
+      "n": 5,
+      "succeeded": 5,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "d0aa7a79107f9a48d02c600d817d14a07de8f5965bef9cc0b0290706046c1287",
+      "policy": "jev",
+      "scenario": "S2",
+      "stage": "smoke",
+      "n": 5,
+      "succeeded": 5,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "d0aa7a79107f9a48d02c600d817d14a07de8f5965bef9cc0b0290706046c1287",
+      "policy": "jev",
+      "scenario": "S3",
+      "stage": "baseline",
+      "n": 5,
+      "succeeded": 5,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "d0aa7a79107f9a48d02c600d817d14a07de8f5965bef9cc0b0290706046c1287",
+      "policy": "jev",
+      "scenario": "S3",
+      "stage": "smoke",
+      "n": 5,
+      "succeeded": 5,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "d0aa7a79107f9a48d02c600d817d14a07de8f5965bef9cc0b0290706046c1287",
+      "policy": "jev",
+      "scenario": "S4",
+      "stage": "baseline",
+      "n": 5,
+      "succeeded": 0,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "d0aa7a79107f9a48d02c600d817d14a07de8f5965bef9cc0b0290706046c1287",
+      "policy": "jev",
+      "scenario": "S4",
+      "stage": "smoke",
+      "n": 5,
+      "succeeded": 0,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "d0aa7a79107f9a48d02c600d817d14a07de8f5965bef9cc0b0290706046c1287",
+      "policy": "jev",
+      "scenario": "S5",
+      "stage": "baseline",
+      "n": 5,
+      "succeeded": 0,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "d0aa7a79107f9a48d02c600d817d14a07de8f5965bef9cc0b0290706046c1287",
+      "policy": "jev",
+      "scenario": "S5",
+      "stage": "smoke",
+      "n": 5,
+      "succeeded": 0,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "dd4b99d4217852026dd617d5c8b349a950ef14371b3e7703208f476c02ec16f2",
+      "policy": "fsm",
+      "scenario": "S1",
+      "stage": "baseline",
+      "n": 10,
+      "succeeded": 10,
+      "as_expected": 10
+    },
+    {
+      "fingerprint": "dd4b99d4217852026dd617d5c8b349a950ef14371b3e7703208f476c02ec16f2",
+      "policy": "fsm",
+      "scenario": "S1",
+      "stage": "smoke",
+      "n": 5,
+      "succeeded": 5,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "dd4b99d4217852026dd617d5c8b349a950ef14371b3e7703208f476c02ec16f2",
+      "policy": "fsm",
+      "scenario": "S2",
+      "stage": "baseline",
+      "n": 5,
+      "succeeded": 5,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "dd4b99d4217852026dd617d5c8b349a950ef14371b3e7703208f476c02ec16f2",
+      "policy": "fsm",
+      "scenario": "S2",
+      "stage": "smoke",
+      "n": 5,
+      "succeeded": 5,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "dd4b99d4217852026dd617d5c8b349a950ef14371b3e7703208f476c02ec16f2",
+      "policy": "fsm",
+      "scenario": "S4",
+      "stage": "baseline",
+      "n": 5,
+      "succeeded": 0,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "dd4b99d4217852026dd617d5c8b349a950ef14371b3e7703208f476c02ec16f2",
+      "policy": "fsm",
+      "scenario": "S4",
+      "stage": "smoke",
+      "n": 5,
+      "succeeded": 0,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "dd4b99d4217852026dd617d5c8b349a950ef14371b3e7703208f476c02ec16f2",
+      "policy": "fsm",
+      "scenario": "S5",
+      "stage": "baseline",
+      "n": 5,
+      "succeeded": 0,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "dd4b99d4217852026dd617d5c8b349a950ef14371b3e7703208f476c02ec16f2",
+      "policy": "fsm",
+      "scenario": "S5",
+      "stage": "smoke",
+      "n": 5,
+      "succeeded": 0,
+      "as_expected": 5
+    },
+    {
+      "fingerprint": "dd4b99d4217852026dd617d5c8b349a950ef14371b3e7703208f476c02ec16f2",
+      "policy": "fsm",
+      "scenario": "S7",
+      "stage": "smoke",
+      "n": 5,
+      "succeeded": 4,
+      "as_expected": 4
+    }
+  ],
+  "original_schema_errors": 176,
+  "original_schema_error_paths": {
+    "batch_id": 176
+  },
+  "corrected_schema_errors": 0,
+  "missing_run_id_rows": 30,
+  "duplicate_nonempty_run_ids": [],
+  "episode_references": 176,
+  "unique_episode_references": 176,
+  "native_episode_files": 0,
+  "model_decisions_reported_by_runner": 320,
+  "model_trace_and_token_audit": "UNAVAILABLE: native episode files absent",
+  "model_replay": "NOT_RUN",
+  "fsm_replay": "Batch PASS claims retained; not independently replayed here",
+  "jev_s4_rows_missing_typed_cause": 10,
+  "s7": [
+    {
+      "batch_id": "batch_20261021_100909",
+      "run": 1,
+      "seed": 20260930,
+      "runtime_fingerprint": "dd4b99d4217852026dd617d5c8b349a950ef14371b3e7703208f476c02ec16f2",
+      "outcome": "SUCCEEDED",
+      "as_expected": true,
+      "p_a_x": 0.166,
+      "p_a_y": 0.0249,
+      "p_b_x": 0.26,
+      "p_b_y": -0.184,
+      "inside_restricted_envelope": false
+    },
+    {
+      "batch_id": "batch_20261021_100909",
+      "run": 2,
+      "seed": 20260931,
+      "runtime_fingerprint": "dd4b99d4217852026dd617d5c8b349a950ef14371b3e7703208f476c02ec16f2",
+      "outcome": "FAILED",
+      "as_expected": false,
+      "p_a_x": 0.1786,
+      "p_a_y": 0.0411,
+      "p_b_x": 0.2484,
+      "p_b_y": -0.226,
+      "inside_restricted_envelope": false
+    },
+    {
+      "batch_id": "batch_20261021_100909",
+      "run": 3,
+      "seed": 20260932,
+      "runtime_fingerprint": "dd4b99d4217852026dd617d5c8b349a950ef14371b3e7703208f476c02ec16f2",
+      "outcome": "SUCCEEDED",
+      "as_expected": true,
+      "p_a_x": 0.1966,
+      "p_a_y": -0.0102,
+      "p_b_x": 0.1706,
+      "p_b_y": -0.1478,
+      "inside_restricted_envelope": true
+    },
+    {
+      "batch_id": "batch_20261021_100909",
+      "run": 4,
+      "seed": 20260933,
+      "runtime_fingerprint": "dd4b99d4217852026dd617d5c8b349a950ef14371b3e7703208f476c02ec16f2",
+      "outcome": "SUCCEEDED",
+      "as_expected": true,
+      "p_a_x": 0.1703,
+      "p_a_y": -0.0219,
+      "p_b_x": 0.1814,
+      "p_b_y": -0.1789,
+      "inside_restricted_envelope": true
+    },
+    {
+      "batch_id": "batch_20261021_100909",
+      "run": 5,
+      "seed": 20260934,
+      "runtime_fingerprint": "dd4b99d4217852026dd617d5c8b349a950ef14371b3e7703208f476c02ec16f2",
+      "outcome": "SUCCEEDED",
+      "as_expected": true,
+      "p_a_x": 0.171,
+      "p_a_y": -0.0517,
+      "p_b_x": 0.2163,
+      "p_b_y": -0.196,
+      "inside_restricted_envelope": false
+    },
+    {
+      "batch_id": "batch_20261021_101654",
+      "run": 1,
+      "seed": 20260931,
+      "runtime_fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "outcome": "FAILED",
+      "as_expected": false,
+      "p_a_x": 0.1786,
+      "p_a_y": 0.0411,
+      "p_b_x": 0.2484,
+      "p_b_y": -0.226,
+      "inside_restricted_envelope": false
+    },
+    {
+      "batch_id": "batch_20261021_101822",
+      "run": 1,
+      "seed": 20260930,
+      "runtime_fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "outcome": "SUCCEEDED",
+      "as_expected": true,
+      "p_a_x": 0.17,
+      "p_a_y": 0.0249,
+      "p_b_x": 0.26,
+      "p_b_y": -0.184,
+      "inside_restricted_envelope": true
+    },
+    {
+      "batch_id": "batch_20261021_101822",
+      "run": 2,
+      "seed": 20260931,
+      "runtime_fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "outcome": "SUCCEEDED",
+      "as_expected": true,
+      "p_a_x": 0.1786,
+      "p_a_y": 0.0411,
+      "p_b_x": 0.2484,
+      "p_b_y": -0.185,
+      "inside_restricted_envelope": true
+    },
+    {
+      "batch_id": "batch_20261021_101822",
+      "run": 3,
+      "seed": 20260932,
+      "runtime_fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "outcome": "SUCCEEDED",
+      "as_expected": true,
+      "p_a_x": 0.1966,
+      "p_a_y": -0.0102,
+      "p_b_x": 0.1706,
+      "p_b_y": -0.1478,
+      "inside_restricted_envelope": true
+    },
+    {
+      "batch_id": "batch_20261021_101822",
+      "run": 4,
+      "seed": 20260933,
+      "runtime_fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "outcome": "SUCCEEDED",
+      "as_expected": true,
+      "p_a_x": 0.1703,
+      "p_a_y": -0.0219,
+      "p_b_x": 0.1814,
+      "p_b_y": -0.1789,
+      "inside_restricted_envelope": true
+    },
+    {
+      "batch_id": "batch_20261021_101822",
+      "run": 5,
+      "seed": 20260934,
+      "runtime_fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "outcome": "SUCCEEDED",
+      "as_expected": true,
+      "p_a_x": 0.171,
+      "p_a_y": -0.0517,
+      "p_b_x": 0.2163,
+      "p_b_y": -0.185,
+      "inside_restricted_envelope": true
+    },
+    {
+      "batch_id": "batch_20261021_102851",
+      "run": 1,
+      "seed": 20260930,
+      "runtime_fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "outcome": "SUCCEEDED",
+      "as_expected": true,
+      "p_a_x": 0.17,
+      "p_a_y": 0.0249,
+      "p_b_x": 0.26,
+      "p_b_y": -0.184,
+      "inside_restricted_envelope": true
+    },
+    {
+      "batch_id": "batch_20261021_102851",
+      "run": 2,
+      "seed": 20260931,
+      "runtime_fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "outcome": "SUCCEEDED",
+      "as_expected": true,
+      "p_a_x": 0.1786,
+      "p_a_y": 0.0411,
+      "p_b_x": 0.2484,
+      "p_b_y": -0.185,
+      "inside_restricted_envelope": true
+    },
+    {
+      "batch_id": "batch_20261021_102851",
+      "run": 3,
+      "seed": 20260932,
+      "runtime_fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "outcome": "SUCCEEDED",
+      "as_expected": true,
+      "p_a_x": 0.1966,
+      "p_a_y": -0.0102,
+      "p_b_x": 0.1706,
+      "p_b_y": -0.1478,
+      "inside_restricted_envelope": true
+    },
+    {
+      "batch_id": "batch_20261021_102851",
+      "run": 4,
+      "seed": 20260933,
+      "runtime_fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "outcome": "SUCCEEDED",
+      "as_expected": true,
+      "p_a_x": 0.1703,
+      "p_a_y": -0.0219,
+      "p_b_x": 0.1814,
+      "p_b_y": -0.1789,
+      "inside_restricted_envelope": true
+    },
+    {
+      "batch_id": "batch_20261021_102851",
+      "run": 5,
+      "seed": 20260934,
+      "runtime_fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "outcome": "SUCCEEDED",
+      "as_expected": true,
+      "p_a_x": 0.171,
+      "p_a_y": -0.0517,
+      "p_b_x": 0.2163,
+      "p_b_y": -0.185,
+      "inside_restricted_envelope": true
+    },
+    {
+      "batch_id": "batch_20261021_102851",
+      "run": 6,
+      "seed": 20260935,
+      "runtime_fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "outcome": "SUCCEEDED",
+      "as_expected": true,
+      "p_a_x": 0.2151,
+      "p_a_y": -0.0395,
+      "p_b_x": 0.176,
+      "p_b_y": -0.1735,
+      "inside_restricted_envelope": true
+    },
+    {
+      "batch_id": "batch_20261021_102851",
+      "run": 7,
+      "seed": 20260936,
+      "runtime_fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "outcome": "SUCCEEDED",
+      "as_expected": true,
+      "p_a_x": 0.2431,
+      "p_a_y": -0.0434,
+      "p_b_x": 0.2368,
+      "p_b_y": -0.185,
+      "inside_restricted_envelope": true
+    },
+    {
+      "batch_id": "batch_20261021_102851",
+      "run": 8,
+      "seed": 20260937,
+      "runtime_fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "outcome": "SUCCEEDED",
+      "as_expected": true,
+      "p_a_x": 0.1839,
+      "p_a_y": 0.0102,
+      "p_b_x": 0.2185,
+      "p_b_y": -0.185,
+      "inside_restricted_envelope": true
+    },
+    {
+      "batch_id": "batch_20261021_102851",
+      "run": 9,
+      "seed": 20260938,
+      "runtime_fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "outcome": "SUCCEEDED",
+      "as_expected": true,
+      "p_a_x": 0.2486,
+      "p_a_y": -0.0496,
+      "p_b_x": 0.2507,
+      "p_b_y": -0.185,
+      "inside_restricted_envelope": true
+    },
+    {
+      "batch_id": "batch_20261021_102851",
+      "run": 10,
+      "seed": 20260939,
+      "runtime_fingerprint": "ab65f43fb279c107aa541798adb3e4c23778b14d7903520f4e7e048236eed055",
+      "outcome": "SUCCEEDED",
+      "as_expected": true,
+      "p_a_x": 0.2246,
+      "p_a_y": -0.0094,
+      "p_b_x": 0.17,
+      "p_b_y": -0.185,
+      "inside_restricted_envelope": true
+    }
+  ],
+  "status": "INCOMPLETE_EVIDENCE",
+  "findings": [
+    "Original schema declares batch_id integer but all exported IDs are strings.",
+    "30 S4 run_id fields are empty; raw batches retain distinct episode paths.",
+    "Native episode files, per-decision model traces and measured tokens are not archived.",
+    "Jev S4 typed skill causes are missing in the historical result detail.",
+    "S7 includes old-envelope counterexamples; retain fingerprint, stage and actual placements.",
+    "dataset/README.md is stale: it says fsm-only despite 55 jev rows."
+  ]
+}

@@ -51,10 +51,15 @@ if [ "$action" = cold ]; then
     launch_owned move_to_pose ros2 launch flexcell_skills move_to_pose.launch.py
 fi
 fingerprint=$(python3 - "$logs/deployment.json" "$repo" "$policy" "$threshold" "$FLEXCELL_INSTALL" <<'PY'
-import hashlib,importlib.util,json,os,pathlib,subprocess,sys
+import hashlib,importlib.util,json,os,pathlib,subprocess,sys,yaml
 from flexcell_skills.contracts.benchmark_protocol import load_protocol
 path,repo,policy,threshold,install=sys.argv[1:]
+sys.path.insert(0,str(pathlib.Path(repo)/'setup'))
+from runtime_backend_metadata import snapshot_contexts
 spec,digest=load_protocol()
+params_path=pathlib.Path(repo)/'src/flexcell/flexcell_skills/config/week1.yaml'
+fast_backend=yaml.safe_load(params_path.read_text())['task_fsm_server']['ros__parameters'].get('jev_backend','local')
+server_metadata,metadata_observations=snapshot_contexts(policy,pathlib.Path(path).parent,fast_backend=fast_backend)
 profile_path=os.environ.get('FLEXCELL_DDS_PROFILE')
 sources={str(p.relative_to(repo)):hashlib.sha256(p.read_bytes()).hexdigest()
          for p in pathlib.Path(repo).glob('src/flexcell/flexcell_skills/flexcell_skills/**/*.py')}
@@ -67,19 +72,21 @@ installed_sources={str(p.relative_to(installed_root)):hashlib.sha256(p.read_byte
                    for p in installed_root.rglob('*.py')}
 if carry_backend == 'velocity_servo' and not native_plugin.is_file():
     raise SystemExit('velocity carry plugin is not installed')
-profile=dict(policy=policy,threshold=float(threshold),protocol_sha256=digest,
+profile=dict(manifest_version=2,policy=policy,threshold=float(threshold),protocol_sha256=digest,
              interface_sources_sha256={str(p.relative_to(repo)):hashlib.sha256(p.read_bytes()).hexdigest()
                                        for p in pathlib.Path(repo).glob('src/flexcell/flexcell_interfaces/**/*') if p.is_file()},
              installed_source_sha256=installed_sources,
              simulation_backend={'carry':carry_backend,'native_sources':native_sources,
                                  'plugin_sha256':hashlib.sha256(native_plugin.read_bytes()).hexdigest() if carry_backend=='velocity_servo' else None},
-             params_sha256=hashlib.sha256((pathlib.Path(repo)/'src/flexcell/flexcell_skills/config/week1.yaml').read_bytes()).hexdigest(),
+             params_sha256=hashlib.sha256(params_path.read_bytes()).hexdigest(),
              harness_sha256={name:hashlib.sha256((pathlib.Path(repo)/name).read_bytes()).hexdigest()
                              for name in ('setup/94_scenario_runner.py','setup/flexcell_admin.py','setup/108_wait_policy.py',
+                                          'setup/102_mainline_runtime.sh','setup/runtime_backend_metadata.py',
                                           'src/flexcell/flexcell_skills/test/w1_client.py')},
              source_sha256=sources,models=json.load(open(pathlib.Path(repo)/'setup/local_inference_assets.json')),
              active_backends={
                  'fast':{'endpoint':os.environ['FLEXCELL_JEV_ENDPOINT'], 'model':os.environ['FLEXCELL_JEV_MODEL'],
+                         'backend':fast_backend,
                          'model_sha256':os.environ.get('FLEXCELL_JEV_MODEL_SHA256'),
                          'calibration_sha256':hashlib.sha256(pathlib.Path(os.environ['FLEXCELL_JEV_CALIBRATION']).read_bytes()).hexdigest() if os.environ.get('FLEXCELL_JEV_CALIBRATION') and pathlib.Path(os.environ['FLEXCELL_JEV_CALIBRATION']).is_file() else None},
                  'slow':{'endpoint':os.environ['FLEXCELL_LLM_ENDPOINT'], 'model':os.environ['FLEXCELL_LLM_MODEL'],
@@ -89,13 +96,16 @@ profile=dict(policy=policy,threshold=float(threshold),protocol_sha256=digest,
                          'max_tokens':int(os.environ.get('FLEXCELL_LLM_MAX_TOKENS','160')),
                          'budget_limit_cny':5 if os.environ.get('FLEXCELL_LLM_BUDGET_FILE') else None,
                          'credential_configured':bool(os.environ.get('FLEXCELL_LLM_API_KEY_FILE'))}},
-             policy_timeouts_s={'fast':float(os.environ.get('FLEXCELL_JEV_TIMEOUT_S','2')),'slow':float(os.environ.get('FLEXCELL_LLM_TIMEOUT_S','5'))},server_context_tokens=8192,
+             policy_timeouts_s={'fast':float(os.environ.get('FLEXCELL_JEV_TIMEOUT_S','2')),'slow':float(os.environ.get('FLEXCELL_LLM_TIMEOUT_S','5'))},
+             server_context_tokens={arm:metadata['context_tokens'] for arm,metadata in server_metadata.items()},
+             server_metadata=server_metadata,
              ros_domain_id=int(os.environ['ROS_DOMAIN_ID']),
              rmw_implementation=os.environ['RMW_IMPLEMENTATION'],
              world_sha256=hashlib.sha256(pathlib.Path(os.environ.get('FLEXCELL_WORLD',repo+'/worlds/flexcell_world')+'.sdf').read_bytes()).hexdigest(),
              dds_profile_sha256=hashlib.sha256(pathlib.Path(profile_path).read_bytes()).hexdigest() if profile_path else 'builtin')
 fingerprint=hashlib.sha256(json.dumps(profile,sort_keys=True).encode()).hexdigest()
 json.dump(dict(profile, runtime_fingerprint=fingerprint,install=install,
+               backend_metadata_observations=metadata_observations,
                head=subprocess.check_output(['git','-C',repo,'rev-parse','HEAD'],text=True).strip()),open(path,'w'),indent=2)
 print(fingerprint)
 PY

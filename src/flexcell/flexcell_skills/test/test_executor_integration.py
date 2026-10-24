@@ -16,13 +16,16 @@ plus the atomic admission lock (second concurrent task -> RESOURCE_BUSY).
 """
 
 import json
+from pathlib import Path
 import shutil
 import tempfile
 import threading
 import unittest
+from unittest.mock import patch
 from types import SimpleNamespace
 
 from geometry_msgs.msg import Point, Pose
+from moveit_msgs.msg import CollisionObject
 from std_msgs.msg import Header as StdHeader
 
 from flexcell_interfaces.action import PickObject, RunDemo, RunPickPlace
@@ -31,8 +34,9 @@ from flexcell_interfaces.msg import (
 
 from flexcell_skills.contracts.episode import EpisodeStore, replay_episode
 from flexcell_skills.contracts.injection import InjectionLifecycle
-from flexcell_skills.common import JsonlLog
+from flexcell_skills.common import JsonlLog, PlanningSceneOps
 from flexcell_skills.decision_policy import FSMPolicy
+from flexcell_skills.jev_policy import JevBackend, JevPolicy, JevResponse
 from flexcell_skills.task_fsm_server import TaskFsmServer
 from flexcell_skills import pick_server as pick_server_module
 from flexcell_skills.pick_server import PickServer
@@ -45,6 +49,20 @@ class _Logger:
     warn = info
     error = info
     fatal = info
+
+
+class _ScriptedJevBackend(JevBackend):
+    """Synthetic model choices; exercise the real JevPolicy and executor."""
+    name = 'scripted-test'
+
+    def __init__(self, choices):
+        self._choices = iter(choices)
+
+    def health(self):
+        return True, 'synthetic backend'
+
+    def classify(self, state, question):
+        return JevResponse(next(self._choices), 0.9, {'tokens': 7})
 
 
 class _StubNode:
@@ -219,13 +237,75 @@ class TestDemoAbortPath(unittest.TestCase):
         self.assertEqual(res.error_code, RunDemo.Result.ERR_RESOURCE_BUSY)
         node._admission.release()
 
+    def test_jev_budget_abort_retains_51_and_last_skill_cause(self):
+        calls = []
+        script = {
+            'OBSERVE': [(_skill_result(world_state=_world_state()), None)],
+            'PICK': [(_skill_result(outcome=1, error_code=23), None)],
+            'PLACE': [], 'VERIFY': [],
+        }
+        node = _make_fsm(self.tmp, _make_demo_call(script, calls))
+        node._policy = JevPolicy(_ScriptedJevBackend(
+            ['PICK', 'OBSERVE', 'PICK', 'ABORT']))
+        gh = _GoalHandle(RunDemo.Goal())
+        gh.request.scenario_id = 'it_jev_exhaust'
+        result = node._execute_demo(gh)
+        self.assertEqual(result.error_code, RunDemo.Result.ERR_RECOVERY_EXHAUSTED)
+        self.assertIn('previous_skill=PICK cause=ERR_GRASP_FAILED', result.detail)
+        self.assertEqual(gh.terminal, 'abort')
+        self.assertEqual(sum(c.startswith('PICK') for c in calls), 2)
+
+    def test_observe_abort_uses_real_reply_without_changing_policy_history(self):
+        for code, name in [(2, 'ERR_INTERNAL'), (3, 'ERR_WORLD_STATE_UNAVAILABLE')]:
+            with self.subTest(code=code):
+                script = {
+                    'OBSERVE': [(_skill_result(outcome=1, error_code=code,
+                                              detail='real observe failure'), None)],
+                    'PICK': [], 'PLACE': [], 'VERIFY': [],
+                }
+                node = _make_fsm(self.tmp, _make_demo_call(script, []))
+                node._policy = JevPolicy(_ScriptedJevBackend([]))
+                gh = _GoalHandle(RunDemo.Goal())
+                gh.request.scenario_id = 'it_observe_%d' % code
+                result = node._execute_demo(gh)
+                self.assertEqual(result.error_code, 50)
+                self.assertIn('previous_skill=OBSERVE cause=%s legacy_error_code=%d'
+                              % (name, code), result.detail)
+                path = next(Path(self.tmp).glob(
+                    'it_observe_%d_*.json' % code))
+                episode = json.loads(path.read_text())
+                self.assertEqual(episode['steps'][0]['executor_result']['error_code'], code)
+                history = episode['steps'][1]['policy_input']['history'][-1]
+                self.assertEqual((history['outcome'], history['error_code']), (255, -1))
+                self.assertEqual(episode['final_state']['detail'], result.detail)
+
+    def test_observe_transport_timeout_remains_a_timeout(self):
+        script = {'OBSERVE': [(None, 'observe result timeout')],
+                  'PICK': [], 'PLACE': [], 'VERIFY': []}
+        node = _make_fsm(self.tmp, _make_demo_call(script, []))
+        result = node._execute_demo(_GoalHandle(RunDemo.Goal()))
+        self.assertEqual(result.error_code, 50)
+        self.assertIn('previous_skill=OBSERVE cause=ERR_TIMEOUT legacy_error_code=-1',
+                      result.detail)
+
+    def test_successful_reobserve_does_not_reuse_old_pick_failure(self):
+        script = {'OBSERVE': [(_skill_result(world_state=_world_state()), None)],
+                  'PICK': [(_skill_result(outcome=1, error_code=23), None)],
+                  'PLACE': [], 'VERIFY': []}
+        node = _make_fsm(self.tmp, _make_demo_call(script, []))
+        node._policy = JevPolicy(_ScriptedJevBackend(['PICK', 'OBSERVE', 'ABORT']))
+        result = node._execute_demo(_GoalHandle(RunDemo.Goal()))
+        self.assertEqual(result.error_code, 50)
+        self.assertNotIn('previous_skill=', result.detail)
+
 
 class TestSingleTaskPolicySeam(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.mkdtemp(prefix='fx_single_it_')
         self.addCleanup(shutil.rmtree, self.tmp, True)
 
-    def drive(self, place_fails=False, skip_verify=False, recover_pick=False):
+    def drive(self, place_fails=False, skip_verify=False, recover_pick=False,
+              policy=None):
         calls = []
         pick = [(_skill_result(), None)]
         if recover_pick:
@@ -243,6 +323,8 @@ class TestSingleTaskPolicySeam(unittest.TestCase):
                                         position_error_m=0.002), None)],
         }
         node = _make_fsm(self.tmp, _make_demo_call(script, calls))
+        if policy is not None:
+            node._policy = policy
         goal = RunPickPlace.Goal()
         goal.object_name = 'target_box_a'
         goal.place_pose.pose = _pose(0.12, -0.15)
@@ -272,6 +354,18 @@ class TestSingleTaskPolicySeam(unittest.TestCase):
         self.assertEqual(episode['steps'][-1]['policy_output']['action'], 'ABORT')
         self.assertFalse(any(c.startswith('VERIFY') for c in calls))
         self.assertTrue(all(r['ok'] for r in replay_episode(episode, FSMPolicy())))
+
+    def test_jev_s4_preserves_typed_skill_cause_in_result_and_episode(self):
+        result, episode, calls = self.drive(
+            place_fails=True,
+            policy=JevPolicy(_ScriptedJevBackend(['PICK', 'PLACE', 'ABORT'])))
+        self.assertEqual(result.error_code, RunPickPlace.Result.ERR_SKILL_FAILED)
+        self.assertIn('previous_skill=PLACE cause=ERR_IK_UNREACHABLE', result.detail)
+        self.assertEqual(episode['final_state']['detail'], result.detail)
+        output = episode['steps'][-1]['policy_output']
+        self.assertEqual(output['policy_trace']['source'], 'jev')
+        self.assertFalse(output['policy_trace']['fallback'])
+        self.assertFalse(any(c.startswith('VERIFY') for c in calls))
 
     def test_pick_recovery_uses_policy_and_counts_attempt_two(self):
         result, episode, calls = self.drive(recover_pick=True)
@@ -396,6 +490,97 @@ class TestPickEngageFailure(unittest.TestCase):
         # the safety release ran: the carry servo was told to stop
         self.assertGreaterEqual(len(stopped), 1)
         self.assertEqual(gh.terminal, 'abort')
+
+
+class TestPickLiftCleanup(unittest.TestCase):
+    """Drive the real lift failure branch and real planning-scene messages."""
+
+    def drive(self, scene_ok=True, gripper_ok=True, cancel=False):
+        node = PickServer.__new__(PickServer)
+        values = dict(_seq=0, _admission=threading.Lock(),
+                      _profiles=['demo_slow'], _default_profile='demo_slow',
+                      _deadline=30000, _inject=InjectionLifecycle(), _base='world',
+                      _size=[0.035] * 3, _hover=0.22, _grasp_dz=0.16, _raise=0.10,
+                      _attach_radius=0.20, _follow_min=0.03,
+                      _gripper_open=0.02, _gripper_close=-0.011,
+                      _carry_backend='teleport')
+        for key, value in values.items():
+            setattr(node, key, value)
+        node.get_logger = lambda: _Logger()
+        node._publish_inject_status = lambda: None
+        node._feedback = lambda *a: None
+        node._log = SimpleNamespace(write=lambda rec: None)
+        node._ee_position = lambda: ([0.22, 0.0, 0.1775], None)
+        gh = _GoalHandle(PickObject.Goal())
+        gh.request.object_name = 'target_box_a'
+        gh.request.motion_profile_id = 'demo_slow'
+        motions = []
+
+        def motion(*args, **kwargs):
+            motions.append(args)
+            failed = len(motions) == 3
+            if failed and cancel:
+                gh.cancel_requested = True
+            return SimpleNamespace(outcome=int(failed), error_code=10 if failed else 0,
+                                   detail='NO_IK_SOLUTION' if failed else 'ok'), None
+
+        node._m2p = SimpleNamespace(call=motion)
+        gripper_calls = []
+
+        def gripper(*args, **kwargs):
+            gripper_calls.append(args)
+            error = 'gripper unavailable' if len(gripper_calls) == 3 and not gripper_ok else None
+            return SimpleNamespace(), error
+
+        node._gripper = SimpleNamespace(command=gripper)
+        stopped = []
+        node._carry_start = SimpleNamespace(publish=lambda msg: None)
+        node._carry_stop = SimpleNamespace(publish=lambda msg: stopped.append(msg))
+        scenes = []
+        node._scene = PlanningSceneOps.__new__(PlanningSceneOps)
+
+        def apply(scene):
+            scenes.append(scene)
+            cleanup = bool(scene.robot_state.attached_collision_objects and
+                           scene.world.collision_objects)
+            return (False, 'apply rejected') if cleanup and not scene_ok else (True, '')
+
+        node._scene._apply_scene = apply
+        with patch.object(pick_server_module, 'sample_gz_pose', return_value=(
+                ((0.22, 0.0, 0.0175), (0.0, 0.0, 0.0, 1.0)), None)), \
+                patch.object(pick_server_module, 'interruptible_sleep', return_value=False):
+            result = node._execute(gh)
+        return result, scenes, stopped
+
+    def test_lift_failure_clears_attachment_and_world_in_one_diff(self):
+        result, scenes, stopped = self.drive()
+        self.assertEqual(result.error_code, 30)
+        self.assertEqual(len(stopped), 1)
+        cleanup = scenes[-1]
+        self.assertTrue(cleanup.robot_state.is_diff)
+        attached = cleanup.robot_state.attached_collision_objects[0]
+        world = cleanup.world.collision_objects[0]
+        self.assertEqual(attached.object.id, 'target_box_a')
+        self.assertEqual(world.id, attached.object.id)
+        self.assertEqual(attached.object.operation, CollisionObject.REMOVE)
+        self.assertEqual(world.operation, CollisionObject.REMOVE)
+
+    def test_scene_cleanup_failure_is_not_a_recoverable_motion_failure(self):
+        result, _, _ = self.drive(scene_ok=False)
+        self.assertEqual(result.error_code, PickObject.Result.ERR_INTERNAL)
+        self.assertIn('NO_IK_SOLUTION', result.detail)
+        self.assertIn('planning-scene cleanup: apply rejected', result.detail)
+
+    def test_gripper_cleanup_failure_is_not_a_recoverable_motion_failure(self):
+        result, _, _ = self.drive(gripper_ok=False)
+        self.assertEqual(result.error_code, PickObject.Result.ERR_INTERNAL)
+        self.assertIn('gripper unavailable', result.detail)
+
+    def test_cancel_during_lift_keeps_carry_and_attachment(self):
+        result, scenes, stopped = self.drive(cancel=True)
+        self.assertEqual(result.error_code, PickObject.Result.ERR_CANCELED)
+        self.assertEqual(stopped, [])
+        self.assertEqual(len(scenes), 2)  # world ADD, attachment ADD; no cleanup
 
 
 if __name__ == '__main__':

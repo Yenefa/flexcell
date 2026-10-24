@@ -1,0 +1,28 @@
+=== 61_A_happy | 2026-10-21T10:22:39+08:00 | scenario=week1_demo_v1 ===
+SENDING action=demo object=target_box pose=[0.12, -0.15, 0.0175]
+GOAL_UUID e897766886e44fb480b14092cd5361d3
+RESULT {
+  "action": "demo",
+  "goal_uuid": "e897766886e44fb480b14092cd5361d3",
+  "outcome": "OUTCOME_SUCCEEDED",
+  "outcome_val": 0,
+  "error_code": "ERR_NONE",
+  "detail": "task done: all assignments verified",
+  "evidence_id": "week1_demo_v1-789927ae",
+  "wall_seconds": 27.706,
+  "fsm_trace": [
+    "PICK_A(attempt=1):OK",
+    "PLACE_A:OK",
+    "VERIFY_A(attempt=1):OK",
+    "PICK_B(attempt=1):OK",
+    "PLACE_B:OK",
+    "VERIFY_B(attempt=1):OK"
+  ],
+  "object_a_at_zone": true,
+  "object_b_at_zone": true,
+  "zone_a_error_m": 0.007314357924723512,
+  "zone_b_error_m": 0.010593920380640207,
+  "run_id": "week1_demo_v1-6a73167d",
+  "scenario_id": "week1_demo_v1"
+}
+RC=0

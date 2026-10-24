@@ -1,0 +1,79 @@
+=== 61_E2_reset_before_exhaust | 2026-10-21T10:23:52+08:00 ===
+== flexcell reset ==
+{
+  "ok": true,
+  "report": {
+    "task_idle": true,
+    "task_state_seen": "IDLE",
+    "task_state_publishers": 1,
+    "carry_stop_sent": true,
+    "carry_state_known": true,
+    "carry_engaged": false,
+    "scene_had_objects": true,
+    "scene_apply_ok": true,
+    "scene_cleared": true,
+    "arm_home": true,
+    "arm_home_detail": "waiting for /move_action and /execute_trajectory ... BEFORE /joint_states: {'joint1': 0.1882, 'joint2': -0.0142, 'joint3': -0.156, 'joint4': -0.558} PLAN error_code = 1 planning_time = 0.0157 PLANNED ",
+    "respawn target_box_a": true,
+    "respawn_details target_box_a": {
+      "attempts": [
+        {
+          "attempt": 1,
+          "worker_rc": 0,
+          "stderr": "",
+          "transport_ok": true,
+          "response_data": true,
+          "elapsed_s": 0.20212791400081187
+        }
+      ]
+    },
+    "respawn target_box_b": true,
+    "respawn_details target_box_b": {
+      "attempts": [
+        {
+          "attempt": 1,
+          "worker_rc": 0,
+          "stderr": "",
+          "transport_ok": true,
+          "response_data": true,
+          "elapsed_s": 0.20111134699982358
+        }
+      ]
+    },
+    "reobserved": true,
+    "canonical_rpc target_box_a": [
+      {
+        "ok": true,
+        "attempts": [
+          {
+            "attempt": 1,
+            "worker_rc": 0,
+            "stderr": "",
+            "transport_ok": true,
+            "response_data": true,
+            "elapsed_s": 0.20195505600077013
+          }
+        ]
+      }
+    ],
+    "canonical target_box_a": "OK ['0.2200', '0.0000', '0.0175']",
+    "canonical_rpc target_box_b": [
+      {
+        "ok": true,
+        "attempts": [
+          {
+            "attempt": 1,
+            "worker_rc": 0,
+            "stderr": "",
+            "transport_ok": true,
+            "response_data": true,
+            "elapsed_s": 0.2023534230002042
+          }
+        ]
+      }
+    ],
+    "canonical target_box_b": "OK ['0.2000', '-0.1800', '0.0175']",
+    "carry_disengaged": true
+  }
+}
+RC=0

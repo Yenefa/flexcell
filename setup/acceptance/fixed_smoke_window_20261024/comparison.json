@@ -1,0 +1,57 @@
+{
+  "scope": "SYNTHETIC_CLI_ADMISSION_ONLY",
+  "base_commit": "071fa1451d07ad2aeb300d176731f2d00d4fa910",
+  "old_runner_sha256": "09016dd473e3e4d096a63c33793fc839e7c37ee23d34ee0e346e69c173a784b1",
+  "source_sha256": {
+    "setup/94_scenario_runner.py": "3b1daef73b9da8b1b6fd79c8d65b529f6ac498a9a5619bf31ba9e68ed358f093",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/smoke_window.py": "a6f2fdebc2963e2f0c59da4bfba35681bd0ccc268eb09923254cf45cc58c9d5b"
+  },
+  "cases": {
+    "pooled_8_success_2_failed": {
+      "old": {
+        "status": "BASELINE_DISPATCH_BOUNDARY_REACHED",
+        "transport_boundary_calls": 1,
+        "robot_calls": 0,
+        "model_calls": 0
+      },
+      "new": {
+        "status": "ARGUMENT_REJECTED",
+        "exit_code": 2,
+        "transport_boundary_calls": 0,
+        "robot_calls": 0,
+        "model_calls": 0
+      }
+    },
+    "duplicate_native": {
+      "old": {
+        "status": "BASELINE_DISPATCH_BOUNDARY_REACHED",
+        "transport_boundary_calls": 1,
+        "robot_calls": 0,
+        "model_calls": 0
+      },
+      "new": {
+        "status": "ARGUMENT_REJECTED",
+        "exit_code": 2,
+        "transport_boundary_calls": 0,
+        "robot_calls": 0,
+        "model_calls": 0
+      }
+    },
+    "complete_window": {
+      "old": {
+        "status": "BASELINE_DISPATCH_BOUNDARY_REACHED",
+        "transport_boundary_calls": 1,
+        "robot_calls": 0,
+        "model_calls": 0
+      },
+      "new": {
+        "status": "BASELINE_DISPATCH_BOUNDARY_REACHED",
+        "transport_boundary_calls": 1,
+        "robot_calls": 0,
+        "model_calls": 0
+      }
+    }
+  },
+  "robot_calls": 0,
+  "model_calls": 0
+}

@@ -1,0 +1,40 @@
+{
+  "tested_revision": "e4a56e9c61d216d44875b7c7b7ff1155491b8da3",
+  "base_pr_head": "be3abe8c4770e2ba71d114ee0581050a0edf2e50",
+  "source_sha256": {
+    "src/flexcell/flexcell_skills/flexcell_skills/common.py": "c34747c8d7016da5e2bec9e6d7f89d080e94d4e696375d86fabcec9f2fd0d1d3",
+    "src/flexcell/flexcell_skills/flexcell_skills/pick_server.py": "eef8cb387260d0c2a8cfbba8b43978b1cea067491b6a1171a1ce968a1c6f7496",
+    "src/flexcell/flexcell_skills/flexcell_skills/task_fsm_server.py": "e0bc5b12526968d3c978e971407a7eac61dda95f3fd88f58431e443212361d2b",
+    "src/flexcell/flexcell_skills/test/test_executor_integration.py": "c85b101a1339e9f51a79c21aaaa1a61267b047944c34b937c9fb00ccd43b2c09"
+  },
+  "build_packages": [
+    "flexcell_interfaces",
+    "flexcell_skills",
+    "flexcell_gazebo"
+  ],
+  "colcon_test": {
+    "tests": 262,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0
+  },
+  "moveit_scene_check": {
+    "library_version": "2.12.4",
+    "input": "cleanup.cdr",
+    "cleared_attached_and_world": true,
+    "retry_start_state_collision": false,
+    "scope": "In-process MoveIt Core; no Gazebo episode"
+  },
+  "home_gpu_run": {
+    "status": "NOT_RUN_SSH_AUTHENTICATION_REQUIRED",
+    "host": "100.87.190.44",
+    "ssh_account": "fuker",
+    "planned_batch": {
+      "S4": 2,
+      "S5": 2,
+      "S1": 1
+    },
+    "gpu_process_started_by_this_run": false,
+    "shutdown_status": "NOT_APPLICABLE_NO_PROCESS_STARTED"
+  }
+}

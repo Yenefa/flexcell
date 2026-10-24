@@ -1,0 +1,32 @@
+=== 61_B_recovery | 2026-10-21T10:23:24+08:00 | scenario=recovery_demo_v1 ===
+SENDING action=demo object=target_box pose=[0.12, -0.15, 0.0175]
+GOAL_UUID 9e6267aabc2a4cedae519b1aab508140
+RESULT {
+  "action": "demo",
+  "goal_uuid": "9e6267aabc2a4cedae519b1aab508140",
+  "outcome": "OUTCOME_SUCCEEDED",
+  "outcome_val": 0,
+  "error_code": "ERR_NONE",
+  "detail": "task done: all assignments verified",
+  "evidence_id": "recovery_demo_v1-5428b288",
+  "wall_seconds": 28.194,
+  "fsm_trace": [
+    "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+    "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+    "PICK_A(attempt=2):OK",
+    "PLACE_A:OK",
+    "VERIFY_A(attempt=1):OK",
+    "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED",
+    "RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1))",
+    "PICK_B(attempt=2):OK",
+    "PLACE_B:OK",
+    "VERIFY_B(attempt=1):OK"
+  ],
+  "object_a_at_zone": true,
+  "object_b_at_zone": true,
+  "zone_a_error_m": 0.00974625239380411,
+  "zone_b_error_m": 0.006922573288032091,
+  "run_id": "recovery_demo_v1-d0cc0f64",
+  "scenario_id": "recovery_demo_v1"
+}
+RC=0

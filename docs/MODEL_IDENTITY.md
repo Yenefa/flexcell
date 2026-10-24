@@ -57,8 +57,23 @@
 
 2026-10-05 新一轮真实加载：后端字节摘要 `b37e71cd…5f4e85b8`，校准文件摘要
 `0af588a8…8ec3fa7`。原始字节与完整摘要见 [Q8 先导记录](Q8_PILOT_20261005.md)。
-服务端 `/v1/models` 实测 `n_ctx=16384`；`102` 旧部署文件的通用
-`server_context_tokens=8192` 是静态默认值，不能当成 Clef 服务实测上下文。
+服务端 `/v1/models` 实测 `n_ctx=16384`。历史 `102` 部署文件的
+`server_context_tokens=8192` 是静态默认值，不能当成 Clef 服务实测上下文；
+封存记录保持原值，2026-10-24 家用五条功能回归的差异仍按其归档说明解释。
+
+新版 `102` 生成 `manifest_version=2`：`server_context_tokens` 改为
+`{"fast": <正整数或 null>, "slow": <正整数或 null>}`，分别记录当前策略使用的
+服务端 `/models` 响应 `data[].meta.n_ctx`。每臂最多一次 2 秒超时的只读 GET，
+不发送推理请求；FSM 不查询模型，配置密钥文件的服务及 TypeSafe SDK 不读取凭据，
+其上下文留空。缺失、歧义、非法值或不可达均保留 `null` 及明确状态，不回填 8192、
+训练上限或请求输出 token 上限，也不因此改变策略/回退/动作。
+
+`server_metadata` 保留响应模型 ID 和选择依据；仅一个模型但请求别名不匹配时，
+明确标 `sole_advertised_model`，不能据此验证请求模型或权重身份。
+原始响应保存为同目录 `fast_models.json` / `slow_models.json`，SHA 与查询时间记录于
+`backend_metadata_observations`。运行指纹包含稳定的上下文与选择状态、部署脚本及采集器
+源码摘要；查询时间、完整响应 SHA 等易变回执在指纹之外。部署时的观测不能保证服务
+之后不被替换，权重与逐决策来源仍须单独核验。
 
 Ollama Windows 构建对 Clef 全后端 500（ollama#18769），故走上游 llama-server。
 Qwen 旧快臂（4/30，LB 0.053）仅存于 `118_local_models.py` 流程；`118 start fast`

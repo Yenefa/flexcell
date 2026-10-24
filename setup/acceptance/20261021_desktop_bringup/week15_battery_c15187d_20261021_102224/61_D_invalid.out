@@ -1,0 +1,21 @@
+=== 61_D_invalid | 2026-10-21T10:24:25+08:00 | EXPECT: typed failure (IK unreachable) ===
+SENDING action=task object=target_box_a pose=[0.42, 0.0, 0.0175]
+GOAL_UUID a04f3b6389ab4f748a159bf60b0da34a
+RESULT {
+  "action": "task",
+  "goal_uuid": "a04f3b6389ab4f748a159bf60b0da34a",
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_SKILL_FAILED",
+  "detail": "policy abort (NON_RECOVERABLE): place failed (ERR_MOTION_FAILED, carried box is not retried) (trace=PICK_A(attempt=1):OK,PLACE_A:FAIL)",
+  "evidence_id": "pick_place_v1-2326e05d",
+  "wall_seconds": 8.488,
+  "fsm_trace": [
+    "PICK_A(attempt=1):OK",
+    "PLACE_A:FAIL"
+  ],
+  "object_at_place": false,
+  "final_position_error_m": NaN,
+  "skip_verify": false
+}
+RC=1
