@@ -20,6 +20,11 @@ audit-compliant way to keep benchmark numbers from mixing with dev-iteration
 runs).  Without it, ALL episodes in the store are reported, grouped by
 scenario id, with dev scenarios labelled as such.
 
+RunPickPlace uses scenario_id=pick_place_v1 for every single-object task.
+S4 therefore gets its cell from --batch metadata, applied to the loaded record
+in memory. Without --batch it remains dev/pick_place_v1, as does an ordinary
+single-object task; neither the episode bytes nor CELL_OF_SCENARIO are changed.
+
 Exit 0 = report PASS for replay integrity only; model replay is INCOMPLETE.
 Sample targets are width warnings, not statistical-power guarantees.
 """
