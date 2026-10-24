@@ -68,6 +68,18 @@ section with `replay integrity 1/1 episodes clean` and ends
 `scenario: S4, outcome: FAILED, expected: FAILED, scenario_exercised: True,
 replay_ok: True, replay_steps: 4, harness_error: None`.
 
+> **Correction 2026-10-24 — the `replay_ok: True` above is a 2026-09-30 fact and
+> no longer reproduces.** Regenerating the report from the same archived bytes on
+> current `main` yields `REPORT: FAIL (2 episodes, 1 replay-dirty)`: step 4 of the
+> S4 episode now diverges on `explanation` alone, because `5462124`
+> (2026-10-23) reworded the PLACE-abort text to embed the typed skill code.
+> `action`, `target`, `reason_code` and `confidence` still match exactly. The
+> cell itself is still emitted, so C3 — the claim that S4 has no cell and is
+> forced to FAIL — stands; what does not stand is any suggestion that the
+> archived episode replays cleanly today. See
+> [`../replay_drift_20261024/`](../replay_drift_20261024/README.md) for the
+> measurement and the corrected invariant.
+
 ### C4 — "the runner runs cells sequentially … interleaving should land before M3 numbers are quoted"
 
 **FALSE (already landed).** `setup/94_scenario_runner.py:230-231` builds the

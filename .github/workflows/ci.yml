@@ -88,3 +88,12 @@ jobs:
         shell: bash
         run: |
           python3 setup/82_undefined_attr_check.py src/flexcell
+
+      # Needs the built package on PYTHONPATH (replay_episode + FSMPolicy), so it
+      # runs after the build rather than with the other archive checkers.
+      - name: replay drift probe (semantic vs textual)
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          source install/setup.bash
+          python3 setup/acceptance/replay_drift_20261024/probe_replay_drift.py
