@@ -16,7 +16,7 @@ spec.loader.exec_module(metadata)
 
 
 @contextmanager
-def models_server(payload, status=200):
+def models_server(payload, status=200, chunked=False):
     requests = []
     body = payload if isinstance(payload, bytes) else json.dumps(payload).encode()
 
@@ -24,6 +24,8 @@ def models_server(payload, status=200):
         def do_GET(self):
             requests.append((self.command, self.path, self.headers.get('Authorization')))
             self.send_response(status)
+            if chunked:
+                self.send_header('Transfer-Encoding', 'chunked')
             self.end_headers()
             self.wfile.write(body)
 
@@ -143,6 +145,13 @@ def test_connection_failure_preserves_unknown_context(tmp_path):
     stable, receipt = metadata.snapshot_contexts('jev', tmp_path, env(endpoint), timeout_s=.1)
     assert stable['fast'] == dict(status='UNAVAILABLE', context_tokens=None)
     assert receipt['fast']['error_type'] == 'URLError'
+
+
+def test_truncated_http_body_does_not_interrupt_deployment(tmp_path):
+    with models_server(b'10\r\n{', chunked=True) as (endpoint, _, _):
+        stable, receipt = metadata.snapshot_contexts('jev', tmp_path, env(endpoint))
+    assert stable['fast'] == dict(status='UNAVAILABLE', context_tokens=None)
+    assert receipt['fast']['error_type'] == 'IncompleteRead'
 
 
 @pytest.mark.parametrize('endpoint', [

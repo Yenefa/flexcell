@@ -5,6 +5,7 @@ request token caps and profile defaults are not substitutes for that value.
 """
 from datetime import datetime, timezone
 import hashlib
+import http.client
 import json
 import os
 from pathlib import Path
@@ -76,7 +77,7 @@ def _observe(endpoint, model, destination, timeout_s):
         evidence.update(response_file=destination.name,
                         response_sha256=hashlib.sha256(raw).hexdigest())
         observation = _select_context(json.loads(raw), model)
-    except (OSError, urllib.error.URLError, ValueError) as error:
+    except (OSError, urllib.error.URLError, ValueError, http.client.HTTPException) as error:
         # Do not persist server error bodies, URLs from exceptions, or credentials.
         evidence['error_type'] = type(error).__name__
         observation = dict(status='UNAVAILABLE', context_tokens=None)
