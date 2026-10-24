@@ -88,6 +88,13 @@ from episode JSON. After merge, qualify the changed source with a new deployment
 fingerprint; old smoke cannot carry that qualification forward. See
 [repair, offline verification and pending online gates](HYBRID_BATCH_GATE_20261007.md).
 
+The E-024 grasp-probe repair requires confirmed action termination, full result
+evidence, canonical reset and sealed injection clear around each trial. A B-box
+pick returns to its measured start; uncertain action state stops the probe.
+Probe output is preserved independently of benchmark qualification and does
+not modify the frozen carry mechanism. See
+[diagnostic verification and the next physical evidence collection](GRASP_PROBE_20261008.md).
+
 **Before coding:**
 
 - Which Issue does this belong to? (none → open one, or extend an existing RFC)
