@@ -43,7 +43,7 @@ and not a closed-loop measurement (`closed_loop_success_measured: false`).
 | real `source=jev`, `fallback=false` on all 20 | met — every response carries the model's own payload, none is an FSM fallback |
 | positive measured tokens | met — 28 688 total, per-row values in `rows[].response_json` |
 | legal actions, finite and normalised probabilities | met — every `next_action.probabilities` sums to 1.0 within 1e-6 |
-| canonical state bytes unchanged | met — `local_weight_sha256` equals the documented Q8 sha |
+| canonical state references match | met — row state hashes match the prescribed source steps; input manifest and source files are independently hashed |
 | local weight is the documented Q8 | met — `8754b06f…b05593d9`, matches `docs/MODEL_IDENTITY.md` |
 
 ## GPU evidence: three independent facts, one missing line
@@ -56,24 +56,23 @@ and not a closed-loop measurement (`closed_loop_success_measured: false`).
 | dedicated memory in use | **9 921 011 712 B = 9.24 GiB** |
 | adapter name / command line | `-ngl 99 -ub 32768 -c 16384`, same Q8 path, port 11435 |
 
-The Vulkan backend was loaded, the system Vulkan loader was loaded, and the
-adapter's dedicated memory holds 9.24 GiB — a figure that only a resident 9.66 GB
-Q8 weight file and its KV cache can explain.
+The snapshot lists Vulkan modules and 9.24 GiB of adapter-wide memory usage.
+This supports GPU use, but does not attribute memory to this process or prove
+the number of resident layers.
 
-**The per-layer offload line is absent.** This llama.cpp build does not emit
-`load_tensors: offloaded N/N layers to GPU` or the `ggml_vulkan: Found …
-devices` header to the server log; `llama-server-instance.log` contains 73 lines,
-all from the server layer, and zero occurrences of `offload`. The log was
-captured from a fresh instance started specifically for this run, with the old
-`llama-server.log` (2026-10-05) archived aside rather than overwritten — and that
-older log has zero Vulkan lines too, so this is the build's behaviour, not a
-capture mistake.
+**The captured instance log has no per-layer offload line.** It contains 73
+lines and zero occurrences of `offload`. This absence cannot establish what
+the build can emit or whether another stream was captured. The separate
+[home regression stderr](../home_gpu_abort_20261024/server_stderr.log) does
+contain `offloaded 33/33 layers to GPU`; that proves a fact about its own
+instance, not this receipt's instance. Preserve both archives and keep this
+receipt's GPU layer residency UNKNOWN.
 
 Therefore:
 
 ```
 model interface        PASS
-GPU layer residency    UNKNOWN  (no per-layer log line in this build)
+GPU layer residency    UNKNOWN  (no per-layer line in this captured log)
 served weight identity PARTIAL  (server reports F:\flexcell-models\Clef-Flash-Q8_0.gguf;
                                 that path's sha is the documented Q8 sha;
                                 the server does not report a sha of its own)
@@ -95,16 +94,29 @@ evidence, and it does not stand in for evidence here.
 ## Verifying this archive
 
 ```
-verify_clef_receipt.py           32 checks  CONFIRMED
-selftest_verify_clef_receipt.py  16/16      tampers rejected as declared
+verify_clef_receipt.py           39 checks  CONFIRMED
+selftest_verify_clef_receipt.py  40/40      cases behave as declared
 ```
 
-Both are pure stdlib, need no ROS and no network. The verifier re-hashes the
-three source episodes from `setup/acceptance/q8_pilot_20261005/`, re-checks the
-weight sha, re-reads the instance log, and refuses to accept a receipt that
-promotes `gpu_execution` or `served_weight_identity` to a passing value — the
-whole point of this archive is that those two stay UNKNOWN/PARTIAL until a log
-line exists.
+Both are pure stdlib, need no ROS and no network. The verifier pins the original
+manifest and hashes its three source episodes, selecting the same first 20
+non-bootstrap inputs in order. Every row must match its prescribed episode,
+step, state SHA and original decision. Source/fallback, identities, finite
+probabilities and positive usage are recomputed per row; token totals, call
+counts, action agreements and latency summaries are reconciled with the rows.
+The log is checked separately. GPU execution and served-weight identity remain
+incomplete; client and archive checks do not inspect the current server.
+
+### Checker hardening (2026-10-25)
+
+At `cf4acd3`, four independent counterexamples passed despite keeping the
+prewritten PASS: a fallback decision, NaN probability, one zero-token row
+hidden by a positive total, and a forged state SHA. All four now exit 1.
+The 40 self-test cases include an unchanged positive control and 39 negative
+cases, covering malformed probabilities, input duplication/reordering, usage,
+identity and summary tampering. The original receipt still passes all 39
+checks, totaling 28,688 tokens. No receipt, log, GPU snapshot, source episode or
+manifest was rewritten; no GPU inference or robot task was rerun for this repair.
 
 The self-test caught a real defect while being written: the first version of the
 verifier de-duplicated episode shas by path, so forging the sha on one row was

@@ -21,6 +21,13 @@ Vulkan GGUF 推理、WSLg 渲染和 PyTorch 张量计算是不同执行路径。
 
 本轮不变更驱动、系统或服务部署。撤回“PR #39 必须拿到 RX 6800 的 SmolVLA PASS”这一交付限制；用户要求的是可执行的 GPU 测试交接，不应被未经验证的软件后端假设阻塞。
 
-当前家用 Agent 执行 [CLEF-RECORDED-001](../setup/model_validation/AGENT_TASK.md)，复用现有 Vulkan 服务，发送已归档真实输入并保存响应、tokens、时延与当前实例的 GPU 日志。它是任务层快模型接口回归，与低层机器人 VLA 的能力分别记录。
+家用 Agent 已执行 [CLEF-RECORDED-001](../setup/acceptance/clef_recorded_001_20261024/README.md)：
+20/20 真实请求、28,688 tokens，中位耗时约 1.93 秒。2026-10-25 云端离线复核逐行核对来源、
+输入身份、概率和用量，并修复回执校验器的四类假绿；原始回执和日志未改，不要求重跑。
+当前实例的逐层 GPU 日志和服务端独立权重证明仍不完整，校准未配置，路由资格为 NOT_TESTED。
+另有已入 main 的 [家用 GPU 功能回归](../setup/acceptance/home_gpu_abort_20261024/README.md)，
+记录另一实例的 33/33 层 Vulkan 卸载和跨机 SSH 转发；两组证据分别保留。
+这是任务层快模型验证，与低层机器人 VLA 能力分别记录。
 
 SmolVLA 保留已有 CPU 检查与 [可移植推理脚本](../setup/learned_policy_validation/README.md)。其 GPU 路径在已有兼容 PyTorch 后端的执行机上另行验证；当前家用软件后端阻塞不通过改系统强行解决。Vulkan/DirectML 移植仍需单独实现与验证，不能直接换个设备名当作支持。
+

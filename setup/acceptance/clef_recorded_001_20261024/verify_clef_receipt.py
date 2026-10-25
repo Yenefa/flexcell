@@ -8,21 +8,20 @@ files committed next to it.
 
 What this script deliberately does NOT claim
 --------------------------------------------
-The llama.cpp build used here does not emit per-layer offload lines to the
-server log.  So "N of N layers resident on the GPU" is not verifiable and is
-never asserted.  What is verifiable is: the process loaded the Vulkan backend,
-the adapter's dedicated memory holds roughly the weight file's size, and the
-server itself reports the same GGUF path that was hashed locally.  Those are
-three independent facts pointing the same way; none of them is the log line
-the task asked for, and the receipt keeps `gpu_execution` at
-REQUIRES_SERVER_LOG_EVIDENCE to say so.
+The captured instance log has no per-layer offload line. This does not establish
+what the build can emit or the GPU residency of this instance. The module list
+and adapter-wide memory snapshot are supporting observations, not per-process
+layer counts. Other instances have separate evidence. This receipt keeps
+`gpu_execution` at REQUIRES_SERVER_LOG_EVIDENCE.
 
 Exit 0 = every check holds.  1 = a check failed.  2 = the archive is unusable.
 """
 
 import hashlib
 import json
+import math
 import re
+import statistics
 import sys
 from pathlib import Path
 
@@ -31,6 +30,9 @@ ROOT = HERE.parents[2]
 REPORT = HERE / 'clef_20261024T131429Z.json'
 LOG = HERE / 'llama-server-instance.log'
 GPU = HERE / 'gpu_evidence.json'
+MANIFEST = ROOT / 'setup/model_validation/clef-inputs.json'
+INPUTS_SHA = 'b507b08e55148b8a2004fd5b8fc74b738997eaa7b3e41906aa7493308d824ca4'
+ACTIONS = {'ABORT', 'OBSERVE', 'PICK', 'PLACE', 'VERIFY', 'WAIT'}
 
 # The identity fixed by docs/MODEL_IDENTITY.md and re-stated by the task.
 Q8_SHA = '8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9'
@@ -84,16 +86,62 @@ def parse_answers(row):
         return None
 
 
+def mapping(value):
+    return value if isinstance(value, dict) else {}
+
+
+def finite_number(value):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    try:
+        return math.isfinite(value)
+    except OverflowError:
+        return False
+
+
+def measured_count(value):
+    return type(value) is int and value >= 0
+
+
+def frozen_inputs():
+    """Read only the pinned input manifest, never a path supplied by a row."""
+    if sha256_file(MANIFEST) != INPUTS_SHA:
+        raise ValueError('input manifest differs from the frozen task')
+    manifest = json.loads(MANIFEST.read_text(encoding='utf-8'))
+    selected = []
+    for source in manifest['episodes']:
+        path = ROOT / source['path']
+        if sha256_file(path) != source['sha256']:
+            raise ValueError('source episode hash mismatch: ' + source['path'])
+        episode = json.loads(path.read_text(encoding='utf-8'))
+        for step in episode['steps']:
+            text = step['policy_input']['world_state_canonical']
+            if text is not None:
+                selected.append({
+                    'episode': source['path'], 'episode_sha256': source['sha256'],
+                    'seq': step['seq'],
+                    'state_sha256': hashlib.sha256(text.encode()).hexdigest(),
+                    'recorded_decision': {key: step['policy_output'][key]
+                                          for key in ('action', 'target', 'reason_code')},
+                })
+    selected = selected[:manifest['model_calls']]
+    if len(selected) != 20:
+        raise ValueError('frozen task must contain 20 non-bootstrap inputs')
+    return selected
+
+
 def check_report(report, ledger):
     ledger.add('status is MODEL_API_PASS', report.get('status') == 'MODEL_API_PASS',
                'status=%r' % report.get('status'))
 
     rows = report.get('rows') or []
     ledger.add('exactly 20 recorded decisions', len(rows) == 20, 'n=%d' % len(rows))
-    ledger.add('every row passed', all(r.get('pass') for r in rows),
-               'failed=%d' % sum(1 for r in rows if not r.get('pass')))
-    ledger.add('no row carries errors', all(not r.get('errors') for r in rows),
-               'with_errors=%d' % sum(1 for r in rows if r.get('errors')))
+    ledger.add('every row passed', all(mapping(r).get('pass') is True for r in rows))
+    ledger.add('no row carries errors', all(mapping(r).get('errors') == [] for r in rows))
+    ledger.add('input manifest digest is the frozen task',
+               report.get('input_manifest_sha256') == INPUTS_SHA)
+    ledger.add('requested model is the task model',
+               report.get('requested_model') == 'clef-flash-q8_0')
 
     ledger.add('task id is CLEF-RECORDED-001',
                report.get('task_id') == 'CLEF-RECORDED-001', report.get('task_id'))
@@ -127,56 +175,81 @@ def check_report(report, ledger):
 
 def check_rows(report, ledger):
     rows = report.get('rows') or []
-    if not rows:
+    try:
+        inputs = frozen_inputs()
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        ledger.add('frozen manifest and source episodes verify', False, str(exc))
         return
+    ledger.add('frozen manifest and source episodes verify', True)
+    # Match every row to its prescribed input, including ordering and state bytes.
+    ledger.add('rows match the fixed 20 inputs in order', len(rows) == len(inputs) and all(
+        all(mapping(row).get(key) == value for key, value in expected.items())
+        for row, expected in zip(rows, inputs)))
 
-    # Every response must be a real model answer: positive measured tokens and
-    # a normalised distribution.  A fallback or a missing token count fails.
-    bad_tokens = bad_sums = bad_model = 0
-    for row in rows:
-        payload = parse_answers(row)
-        if not isinstance(payload, dict):
-            bad_model += 1
-            continue
-        if payload.get('model') != Q8_PATH_WIN:
-            bad_model += 1
-        answers = payload.get('answers') or {}
-        nxt = answers.get('next_action') or {}
-        probs = nxt.get('probabilities') or {}
-        if not probs:
-            bad_sums += 1
-            continue
-        total = sum(probs.values())
-        if abs(total - 1.0) > 1e-6:
-            bad_sums += 1
-        if any(p < 0 or p > 1 for p in probs.values()):
-            bad_sums += 1
+    source_ok = model_ok = probs_ok = tokens_ok = actions_ok = agreement_ok = True
+    token_total = agreements = 0
+    latencies = []
+    for raw_row in rows:
+        row = mapping(raw_row)
+        decision = mapping(row.get('decision'))
+        trace = mapping(decision.get('policy_trace'))
+        source_ok &= trace.get('source') == 'jev' and trace.get('fallback') is False
+        model_ok &= (trace.get('model') == 'clef-flash-q8_0'
+                     and trace.get('model_sha256') == Q8_SHA
+                     and trace.get('calibration_sha256') == report.get('calibration_sha256'))
+        payload = mapping(parse_answers(row))
+        model_ok &= payload.get('model') == Q8_PATH_WIN
+        answer = mapping(mapping(payload.get('answers')).get('next_action'))
+        probs = answer.get('probabilities')
+        valid_probs = (isinstance(probs, dict) and set(probs) == ACTIONS
+                       and all(finite_number(p) and 0 <= p <= 1 for p in probs.values()))
+        probs_ok &= bool(valid_probs and abs(sum(probs.values()) - 1) <= 1e-6)
+        choice = answer.get('choice')
+        actions_ok &= (isinstance(choice, str) and choice in ACTIONS
+                       and decision.get('action') == choice)
+        usage = mapping(payload.get('usage'))
+        counts = [usage.get('input_tokens'), usage.get('output_tokens')]
+        if all(measured_count(n) for n in counts):
+            measured = sum(counts)
+            token_total += measured
+            tokens_ok &= (measured > 0 and measured_count(trace.get('tokens'))
+                          and trace.get('tokens') == measured)
+        else:
+            tokens_ok = False
+        expected = mapping(row.get('recorded_decision'))
+        agrees = expected == {key: decision.get(key)
+                              for key in ('action', 'target', 'reason_code')}
+        agreement_ok &= row.get('recorded_action_agreement') is agrees
+        agreements += agrees
+        latency = row.get('latency_ms')
+        if finite_number(latency) and latency >= 0:
+            latencies.append(latency)
 
-    ledger.add('every response names the same Q8 GGUF', bad_model == 0,
-               'mismatched=%d' % bad_model)
-    ledger.add('every distribution is finite and normalised', bad_sums == 0,
-               'bad=%d' % bad_sums)
-
-    tokens = ((report.get('summary') or {}).get('tokens') or 0)
-    ledger.add('measured token total is positive', tokens > 0, 'tokens=%d' % tokens)
-
-    # The three source episodes must still be byte-identical in this checkout.
-    # Checked per (episode, sha) pair, not per episode: several decisions share
-    # one episode, and de-duplicating by path lets a forged sha on an early row
-    # be overwritten by a correct one on a later row of the same episode.
-    claimed = {(row['episode'], row.get('episode_sha256')) for row in rows}
-    missing = sorted({p for p, _ in claimed if not (ROOT / p).is_file()})
-    ledger.add('all three source episodes are present', not missing,
-               'missing=%d' % len(missing))
-    if not missing:
-        mismatched = sorted({(p, want) for p, want in claimed
-                             if sha256_file(ROOT / p) != want})
-        ledger.add('source episode bytes still match the receipt',
-                   not mismatched, 'mismatched=%d' % len(mismatched))
-    ledger.add('every decision row cites an episode sha',
-               all(want for _, want in claimed),
-               'distinct episodes=%d, distinct claims=%d'
-               % (len({p for p, _ in claimed}), len(claimed)))
+    ledger.add('every decision is a real Jev proposal without fallback', source_ok)
+    ledger.add('response and trace model identities agree with the task', model_ok)
+    ledger.add('every distribution has finite normalised action probabilities', probs_ok)
+    ledger.add('every decision matches a legal response action', actions_ok)
+    ledger.add('each decision has positive measured usage matching trace tokens', tokens_ok)
+    summary = mapping(report.get('summary'))
+    ledger.add('summary tokens equal recomputed response usage',
+               measured_count(summary.get('tokens')) and summary.get('tokens') == token_total
+               and token_total > 0, 'recomputed=%d' % token_total)
+    ledger.add('summary and attempted call counts match the rows',
+               type(summary.get('model_calls')) is int
+               and summary.get('model_calls') == len(rows)
+               and type(report.get('model_calls_attempted')) is int
+               and report.get('model_calls_attempted') == len(rows))
+    ledger.add('action agreement flags and summary are recomputed', agreement_ok
+               and type(summary.get('recorded_action_agreements')) is int
+               and summary.get('recorded_action_agreements') == agreements)
+    latency_ok = bool(rows) and len(latencies) == len(rows)
+    if latency_ok:
+        latencies.sort()
+        for key, value in [('p50_ms', statistics.median(latencies)),
+                           ('p95_ms_nearest_rank', latencies[math.ceil(.95 * len(rows)) - 1])]:
+            got = summary.get(key)
+            latency_ok &= finite_number(got) and math.isclose(got, value, abs_tol=1e-6)
+    ledger.add('latency summary matches finite recorded latencies', latency_ok)
 
 
 def check_log(log, ledger):
@@ -189,9 +262,9 @@ def check_log(log, ledger):
     ledger.add('instance log records 20 completed slots', releases >= 20,
                'releases=%d' % releases)
 
-    # Stated as a fact about this build, not as an absence of GPU use.
+    # This is a property of the captured file, not of every run of this build.
     offload_lines = re.findall(r'offload', log, re.IGNORECASE)
-    ledger.add('this build emits no per-layer offload line (hence UNKNOWN)',
+    ledger.add('captured instance log has no offload line (instance evidence incomplete)',
                len(offload_lines) == 0,
                'offload_mentions=%d' % len(offload_lines))
 
@@ -200,7 +273,7 @@ def check_gpu(gpu, ledger):
     proc = gpu.get('process') or {}
     cmd = proc.get('command_line') or ''
 
-    ledger.add('evidence names a live pid', isinstance(proc.get('pid'), int)
+    ledger.add('snapshot names a pid', isinstance(proc.get('pid'), int)
                and proc['pid'] > 0, str(proc.get('pid')))
     ledger.add('evidence names the server executable',
                (proc.get('executable_path') or '').endswith('llama-server.exe'),
@@ -217,8 +290,8 @@ def check_gpu(gpu, ledger):
 
     adapter = (gpu.get('gpu') or {})
     used = adapter.get('dedicated_usage_bytes') or 0
-    # 9.6 GB Q8 weights cannot fit in a few hundred MB of dedicated memory.
-    ledger.add('adapter dedicated memory holds the weights (>8 GiB)',
+    # Adapter-wide memory does not identify per-process layer residency.
+    ledger.add('snapshot records adapter-wide usage above 8 GiB',
                used > 8 * GIB, 'dedicated=%.2f GiB' % (used / GIB))
     ledger.add('adapter is a discrete Radeon',
                'Radeon' in (adapter.get('adapter_name') or ''),

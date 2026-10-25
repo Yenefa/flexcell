@@ -1,9 +1,10 @@
-# Tailscale endpoint reachability — the proxy, not the network
+# Tailscale endpoint: Windows client proxy comparison
 
 `#33` has carried an open question since 2026-10-17: a `GET /health` against the
-Tailscale endpoint returned HTTP503 and the result was recorded as "path
-unreachable". That reading was wrong. The service was never unreachable; the
-client was routing the Tailscale address through the Windows system proxy.
+Tailscale endpoint returned HTTP503 through the cloud environment's proxy.
+That observation did not establish that the home machine was offline. The
+comparisons below diagnose a later Windows-client proxy failure on the service
+host; they do not establish the cause of the earlier cloud response.
 
 ## Three runs, one variable
 
@@ -35,12 +36,16 @@ The bypass list covers `127.*` and the RFC1918 ranges, but **not
 typed request goes to the local proxy, which answers **502 Bad Gateway** because
 it has no route for a private overlay address.
 
-`curl` succeeded on the same URL at the same time because it does not read the
-Windows registry proxy. That asymmetry is what made this look like a machine or
-network fault for three weeks.
+`curl` succeeded on the same URL at the same time while Python used the Windows
+registry proxy. The process-local exception comparison supports this diagnosis
+for this Windows client.
 
-This is the same failure mode as the 2026-10-17 `HTTP503` note in `#33`: "对端
-不可达" and "客户端把对端塞进了代理" produce identical symptoms from the outside.
+The cloud HTTP503 and this Windows HTTP502 came from different clients and
+proxies. No same-environment comparison or proxy log ties them together; the
+cloud root cause remains unestablished. This Windows process-local setting is
+not an instruction to bypass the managed cloud environment's proxy.
+The original `same_root_cause_as` field in `proxy_evidence.json` is preserved
+as received; it records the earlier interpretation, not a verified attribution.
 
 ## What this does and does not establish
 
@@ -49,23 +54,25 @@ This is the same failure mode as the 2026-10-17 `HTTP503` note in `#33`: "对端
 and a real 20-call typed workload completes through `100.87.190.44` once the proxy
 is bypassed. The endpoint works.
 
-**Does not establish:** cross-machine reachability. These requests were issued
-from the same node that hosts the service, so they exercise the Tailscale listen
-path and local routing, not a second machine's route. `#33`'s first acceptance
-item still needs a request from another Tailscale peer.
+**Does not establish:** direct cross-machine HTTP access to port 11435. These
+requests were issued from the service host. The earlier
+[home functional regressions](../../home_gpu_abort_20261024/README.md) already
+record cross-machine inference through an SSH forward over Tailscale. That
+separate route need not be rerun; this local comparison does not prove direct
+HTTP access from another peer or qualify competition deployment.
 
 ## Fix, for whoever configures the client
 
-Either add `100.64.0.0/10` to the bypass list, or set `no_proxy` for the endpoint
-in whatever process calls it:
+For this Windows Python client, set an exact endpoint exception in the calling
+process and verify with that client:
 
 ```
-no_proxy=100.87.190.44     # or the whole 100.64.0.0/10 range
+no_proxy=100.87.190.44
 ```
 
-Do not "fix" this by switching the client to `127.0.0.1`. That would hide the
-proxy problem rather than solve it, and it is not a channel — it is the same
-machine talking to itself.
+CIDR matching is client-specific; do not assume Python/Windows accepts
+`100.64.0.0/10` as a bypass. Local loopback and an explicitly configured SSH
+forward are also different paths; label which was tested.
 
 ## Files
 

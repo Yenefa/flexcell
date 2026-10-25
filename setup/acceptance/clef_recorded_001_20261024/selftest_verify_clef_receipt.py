@@ -39,6 +39,9 @@ def build_tree(tmp):
     (tmp / PILOT).mkdir(parents=True)
     for raw in (ROOT / PILOT).glob('*.raw'):
         shutil.copy2(raw, tmp / PILOT / raw.name)
+    manifest = tmp / 'setup/model_validation/clef-inputs.json'
+    manifest.parent.mkdir(parents=True)
+    shutil.copy2(ROOT / 'setup/model_validation/clef-inputs.json', manifest)
     return dest
 
 
@@ -152,6 +155,39 @@ def case_no_ngl_flag(archive):
     edit_json(archive / 'gpu_evidence.json', mutate)
 
 
+def report_case(mutate):
+    def tamper(archive):
+        edit_json(archive / 'clef_20261024T131429Z.json', mutate)
+    return tamper
+
+
+def probability_case(value):
+    def mutate(d):
+        row = d['rows'][0]
+        payload = json.loads(row['response_json'])
+        payload['answers']['next_action']['probabilities']['PICK'] = value
+        row['response_json'] = json.dumps(payload)
+    return report_case(mutate)
+
+
+def case_zero_token_row(archive):
+    def mutate(d):
+        row = d['rows'][0]
+        # Keep the forged total consistent: a positive total must not hide
+        # one zero-usage decision.
+        d['summary']['tokens'] -= row['decision']['policy_trace']['tokens']
+        row['decision']['policy_trace']['tokens'] = 0
+        payload = json.loads(row['response_json'])
+        payload['usage'] = {'input_tokens': 0, 'output_tokens': 0}
+        row['response_json'] = json.dumps(payload)
+    report_case(mutate)(archive)
+
+
+def case_manifest_changed(archive):
+    path = archive.parents[2] / 'setup/model_validation/clef-inputs.json'
+    edit_json(path, lambda d: d['episodes'].reverse())
+
+
 CASES = [
     ('A clean archive verifies', None, 0),
     ('B status downgraded', case_report_status, 1),
@@ -169,6 +205,46 @@ CASES = [
     ('N Vulkan module dropped from evidence', case_no_vulkan_module, 1),
     ('O dedicated memory shrunk to 512 MiB', case_small_dedicated_memory, 1),
     ('P -ngl 99 replaced on the command line', case_no_ngl_flag, 1),
+    ('Q fallback flag forged despite PASS', report_case(
+        lambda d: d['rows'][0]['decision']['policy_trace'].__setitem__('fallback', True)), 1),
+    ('R FSM source forged despite PASS', report_case(
+        lambda d: d['rows'][0]['decision']['policy_trace'].__setitem__('source', 'fsm')), 1),
+    ('S NaN probability', probability_case(float('nan')), 1),
+    ('T positive infinite probability', probability_case(float('inf')), 1),
+    ('U negative infinite probability', probability_case(-float('inf')), 1),
+    ('V boolean probability', probability_case(True), 1),
+    ('W string probability', probability_case('0.9'), 1),
+    ('X one zero-token row, total still positive', case_zero_token_row, 1),
+    ('Y trace tokens disagree with response', report_case(
+        lambda d: d['rows'][0]['decision']['policy_trace'].__setitem__('tokens', 1)), 1),
+    ('Z token total forged', report_case(
+        lambda d: d['summary'].__setitem__('tokens', 1)), 1),
+    ('AA canonical state hash forged', report_case(
+        lambda d: d['rows'][0].__setitem__('state_sha256', '0' * 64)), 1),
+    ('AB step sequence forged', report_case(
+        lambda d: d['rows'][0].__setitem__('seq', 999)), 1),
+    ('AC one input duplicated over another', report_case(
+        lambda d: d['rows'].__setitem__(1, d['rows'][0])), 1),
+    ('AD input order reversed', report_case(lambda d: d['rows'].reverse()), 1),
+    ('AE original decision forged', report_case(
+        lambda d: d['rows'][0]['recorded_decision'].__setitem__('action', 'ABORT')), 1),
+    ('AF input manifest reordered', case_manifest_changed, 1),
+    ('AG manifest digest forged in receipt', report_case(
+        lambda d: d.__setitem__('input_manifest_sha256', '0' * 64)), 1),
+    ('AH boolean token count', report_case(
+        lambda d: d['rows'][0]['decision']['policy_trace'].__setitem__('tokens', True)), 1),
+    ('AI non-object decision', report_case(
+        lambda d: d['rows'][0].__setitem__('decision', [])), 1),
+    ('AJ non-object response', report_case(
+        lambda d: d['rows'][0].__setitem__('response_json', '[]')), 1),
+    ('AK agreement count forged', report_case(
+        lambda d: d['summary'].__setitem__('recorded_action_agreements', 20)), 1),
+    ('AL attempted count forged', report_case(
+        lambda d: d.__setitem__('model_calls_attempted', 19)), 1),
+    ('AM latency summary forged', report_case(
+        lambda d: d['summary'].__setitem__('p50_ms', 0)), 1),
+    ('AN trace weight identity forged', report_case(
+        lambda d: d['rows'][0]['decision']['policy_trace'].__setitem__('model_sha256', '0' * 64)), 1),
 ]
 
 
