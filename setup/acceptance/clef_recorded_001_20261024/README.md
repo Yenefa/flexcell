@@ -63,7 +63,7 @@ the number of resident layers.
 **The captured instance log has no per-layer offload line.** It contains 73
 lines and zero occurrences of `offload`. This absence cannot establish what
 the build can emit or whether another stream was captured. The separate
-[home regression stderr](../home_gpu_abort_20261024/server_stderr.log) does
+[home regression stderr](https://github.com/Yenefa/flexcell/blob/36486780f5bf46add81124aa334400c71be4ae72/setup/acceptance/home_gpu_abort_20261024/server_stderr.log) does
 contain `offloaded 33/33 layers to GPU`; that proves a fact about its own
 instance, not this receipt's instance. Preserve both archives and keep this
 receipt's GPU layer residency UNKNOWN.

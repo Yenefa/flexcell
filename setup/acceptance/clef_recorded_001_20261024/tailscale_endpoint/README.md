@@ -56,7 +56,7 @@ is bypassed. The endpoint works.
 
 **Does not establish:** direct cross-machine HTTP access to port 11435. These
 requests were issued from the service host. The earlier
-[home functional regressions](../../home_gpu_abort_20261024/README.md) already
+[home functional regressions](https://github.com/Yenefa/flexcell/blob/36486780f5bf46add81124aa334400c71be4ae72/setup/acceptance/home_gpu_abort_20261024/README.md) already
 record cross-machine inference through an SSH forward over Tailscale. That
 separate route need not be rerun; this local comparison does not prove direct
 HTTP access from another peer or qualify competition deployment.

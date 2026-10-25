@@ -25,7 +25,7 @@ Vulkan GGUF 推理、WSLg 渲染和 PyTorch 张量计算是不同执行路径。
 20/20 真实请求、28,688 tokens，中位耗时约 1.93 秒。2026-10-25 云端离线复核逐行核对来源、
 输入身份、概率和用量，并修复回执校验器的四类假绿；原始回执和日志未改，不要求重跑。
 当前实例的逐层 GPU 日志和服务端独立权重证明仍不完整，校准未配置，路由资格为 NOT_TESTED。
-另有已入 main 的 [家用 GPU 功能回归](../setup/acceptance/home_gpu_abort_20261024/README.md)，
+另有已入 main 的 [家用 GPU 功能回归](https://github.com/Yenefa/flexcell/blob/36486780f5bf46add81124aa334400c71be4ae72/setup/acceptance/home_gpu_abort_20261024/README.md)，
 记录另一实例的 33/33 层 Vulkan 卸载和跨机 SSH 转发；两组证据分别保留。
 这是任务层快模型验证，与低层机器人 VLA 能力分别记录。
 
