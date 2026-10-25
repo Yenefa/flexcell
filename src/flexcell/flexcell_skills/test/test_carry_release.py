@@ -11,7 +11,7 @@ def backend(thread, event):
     node = SimpleNamespace(_thread=thread, _stop_evt=event, _offset=[0, 0, 0],
                            _object_id='a', _log=Mock(), get_logger=Mock())
     node._publish_state = Mock()
-    node._on_stop = lambda msg: CarryServer._on_stop(node, msg)
+    node._on_stop = lambda msg, **kw: CarryServer._on_stop(node, msg, **kw)
     return node
 
 
