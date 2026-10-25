@@ -1,12 +1,12 @@
 # 执行计划与任务追踪
 
-截至2026-10-24，复核 main=`a7cd3cb`。本表是执行计划，复选框只按实际证据完成，不把计划当成果。
+截至2026-10-25，复核 main=`3648678`。本表是执行计划，复选框只按实际证据完成，不把计划当成果。
 
 | 优先级 | 任务                                                                          | 当前状态                                      |
 | ------ | ----------------------------------------------------------------------------- | --------------------------------------------- |
-| P0     | [#30 主线/PR/TransferBench收敛](https://github.com/Yenefa/flexcell/issues/30) | #28/#29/#40/#41/#42/#44 已合并；TransferBench 未合，比赛版本未固定 |
+| P0     | [#30 主线/PR/TransferBench收敛](https://github.com/Yenefa/flexcell/issues/30) | #28/#29/#40/#41/#42/#44/#45/#46 已合并；TransferBench 未合，比赛版本未固定 |
 | P0     | [#31 E-021便携证据与smoke口径](https://github.com/Yenefa/flexcell/issues/31)  | 已关闭；60/60 回收、来源审计及完整窗口工具已入 main；不追认历史资格 |
-| P0     | [#32 GRASP-B-001](https://github.com/Yenefa/flexcell/issues/32)               | #29 探针已合并；匹配阶段日志的诊断待执行，根因 UNKNOWN |
+| P0     | [#32 GRASP-B-001](https://github.com/Yenefa/flexcell/issues/32)               | 6 个历史失败任务的 12 次 PICK 均报告低 rise（B8/A4）；[固定 A5/B5 任务](tasks/GRASP-B-001.md)已准备，执行/阶段日志待回传，根因 UNKNOWN |
 | P0     | [#33 比赛机器与快模型连接](https://github.com/Yenefa/flexcell/issues/33)      | 家用 RX 6800 五项功能回归已归档并停服；比赛机器与现场部署仍未冻结 |
 | P0     | [#34 报名与材料](https://github.com/Yenefa/flexcell/issues/34)                | 初稿已建；人员/赛项细则待确认                 |
 | P1     | [#35 公平小样本方案](https://github.com/Yenefa/flexcell/issues/35)            | 待预登记，不执行资格采样                      |
@@ -16,8 +16,9 @@
 当前工作分工：云端写代码、做可运行的离线检查并给出提示词；用户手动转发给电脑 Agent，
 由电脑 Agent 执行需要 ROS/Gazebo/GPU 的已定任务，再返回原始产物。无需为这条交接链路另配云端 VPN。
 [#22 重新核定](../../setup/acceptance/issue22_readjudication_20261024/README.md)已入 main；
-[#45 修正复核记录](https://github.com/Yenefa/flexcell/pull/45)待审，指出既有单物体测试和有效内存标签生产者。
-不另建“零 task 回归覆盖”issue；#22 的关闭由维护者决定。
+[#45 修正复核记录](https://github.com/Yenefa/flexcell/pull/45)已合并，指出既有单物体测试和有效内存标签生产者。
+#46 区分语义重放与文本差异；#22 已显式关闭。#39 的模型接口回执与加固审计已转待审，
+20 条请求不重复执行。抓取诊断使用直接 Skill，无需依赖 #39 的模型服务或先合并它。
 
 ## 日历
 
@@ -42,3 +43,4 @@
 
 不为比赛推进MTC替换、Isaac/VLA迁移、新视觉栈、接触抓取重构、多机械臂或大规模UI。
 真机仅在已有硬件、时间和独立验收条件具备时列P2。
+

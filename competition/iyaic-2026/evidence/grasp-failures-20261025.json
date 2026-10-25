@@ -1,0 +1,251 @@
+{
+  "kind": "SELECTED_HISTORICAL_FAILURE_REVIEW",
+  "review_date": "2026-10-25 Asia/Shanghai",
+  "source_commit": "36486780f5bf46add81124aa334400c71be4ae72",
+  "selection": "All FAILED task rows from the three E-021 n=20 baseline files; not all failed PICK attempts among the 60 tasks",
+  "physical_root_cause": "UNKNOWN",
+  "raw_pick_carry_motion_logs": "NOT_INCLUDED_IN_THIS_REVIEW",
+  "inputs": [
+    {
+      "path": "setup/acceptance/e021_native_recovery_20261024/recovery_manifest.json",
+      "sha256": "91ebc38d74104bb358f2638e2793d3e4f803e2e7c2e79ad7575a3c42949b59de",
+      "size_bytes": 51363
+    },
+    {
+      "path": "setup/acceptance/tau_sweep_desktop_20261005/batch_20261005_161922.jsonl",
+      "sha256": "6a549de712e05c166578e48360214ae039368ca9908e74bf12d2a9bb9676d942",
+      "size_bytes": 83143
+    },
+    {
+      "path": "setup/acceptance/e021_native_recovery_20261024/episodes/week1_demo_v1_week1_demo_v1-8fa8e637.json",
+      "sha256": "d353975b13dce3194e75cc46bb3e81fdd61791b580046d69be493c83353991fc",
+      "size_bytes": 34296
+    },
+    {
+      "path": "setup/acceptance/e021_native_recovery_20261024/episodes/week1_demo_v1_week1_demo_v1-5ecb035a.json",
+      "sha256": "be6c7c3e8e05d4143eb1bf9120cfc49561ea409779e856e0d7adaee67057bde6",
+      "size_bytes": 34291
+    },
+    {
+      "path": "setup/acceptance/tau_sweep_desktop_20261005/batch_20261005_185833.jsonl",
+      "sha256": "41afe4003fd21ca8af046fff666a9a0bc933c84538551817af7392211ed65642",
+      "size_bytes": 77980
+    },
+    {
+      "path": "setup/acceptance/e021_native_recovery_20261024/episodes/week1_demo_v1_week1_demo_v1-749d8acf.json",
+      "sha256": "104f173480e4802a1c64c9f1b4c4563f0e8010d606f515702f780c4102faf01f",
+      "size_bytes": 30203
+    },
+    {
+      "path": "setup/acceptance/tau_sweep_desktop_20261005/batch_20261005_192253.jsonl",
+      "sha256": "7fbba098b9a9fc47f8a7df193fae8cd9aaf3b80d49843d91dd3d21782fd95774",
+      "size_bytes": 82611
+    },
+    {
+      "path": "setup/acceptance/e021_native_recovery_20261024/episodes/week1_demo_v1_week1_demo_v1-776be369.json",
+      "sha256": "e061d2600e5edc3f85b2bc3c65c24b74873f1729bfe5a0eb0adff46f5efc2228",
+      "size_bytes": 40389
+    },
+    {
+      "path": "setup/acceptance/e021_native_recovery_20261024/episodes/week1_demo_v1_week1_demo_v1-afe1a382.json",
+      "sha256": "7bb9fb15af619956c9d3afc11832eebed694b985ca0c5ae300352251e6570399",
+      "size_bytes": 20323
+    },
+    {
+      "path": "setup/acceptance/e021_native_recovery_20261024/episodes/week1_demo_v1_week1_demo_v1-55aa60e6.json",
+      "sha256": "78787504e47552bdd18f7d83389c6d4926cc3faefec223e7c50a7f9617621e52",
+      "size_bytes": 20361
+    }
+  ],
+  "episodes": [
+    {
+      "batch": "batch_20261005_161922.jsonl",
+      "run": 5,
+      "policy": "hybrid",
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "archive": "setup/acceptance/e021_native_recovery_20261024/episodes/week1_demo_v1_week1_demo_v1-8fa8e637.json",
+      "episode_sha256": "d353975b13dce3194e75cc46bb3e81fdd61791b580046d69be493c83353991fc",
+      "task_error_code": 51,
+      "failed_picks": [
+        {
+          "seq": 5,
+          "target": "target_box_b",
+          "evidence_id": "target_box_b-8ede22c0",
+          "error_code": 23,
+          "detail": "box did not follow the lift (rise=0.030m < 0.030m); released for safety",
+          "classification": "REPORTED_POST_LIFT_LOW_RISE",
+          "rise_precision": "rounded display only; exact rise is unavailable in this native step"
+        },
+        {
+          "seq": 7,
+          "target": "target_box_b",
+          "evidence_id": "target_box_b-219f0ce8",
+          "error_code": 23,
+          "detail": "box did not follow the lift (rise=-0.007m < 0.030m); released for safety",
+          "classification": "REPORTED_POST_LIFT_LOW_RISE",
+          "rise_precision": "rounded display only; exact rise is unavailable in this native step"
+        }
+      ]
+    },
+    {
+      "batch": "batch_20261005_161922.jsonl",
+      "run": 9,
+      "policy": "hybrid",
+      "runtime_fingerprint": "f95e3017c0a2dccbe96b95410bd88cd932927e0a9939fdcbba81d09860cde12a",
+      "archive": "setup/acceptance/e021_native_recovery_20261024/episodes/week1_demo_v1_week1_demo_v1-5ecb035a.json",
+      "episode_sha256": "be6c7c3e8e05d4143eb1bf9120cfc49561ea409779e856e0d7adaee67057bde6",
+      "task_error_code": 51,
+      "failed_picks": [
+        {
+          "seq": 5,
+          "target": "target_box_b",
+          "evidence_id": "target_box_b-6238efa6",
+          "error_code": 23,
+          "detail": "box did not follow the lift (rise=-0.000m < 0.030m); released for safety",
+          "classification": "REPORTED_POST_LIFT_LOW_RISE",
+          "rise_precision": "rounded display only; exact rise is unavailable in this native step"
+        },
+        {
+          "seq": 7,
+          "target": "target_box_b",
+          "evidence_id": "target_box_b-ab9d3c7b",
+          "error_code": 23,
+          "detail": "box did not follow the lift (rise=-0.007m < 0.030m); released for safety",
+          "classification": "REPORTED_POST_LIFT_LOW_RISE",
+          "rise_precision": "rounded display only; exact rise is unavailable in this native step"
+        }
+      ]
+    },
+    {
+      "batch": "batch_20261005_185833.jsonl",
+      "run": 20,
+      "policy": "fsm",
+      "runtime_fingerprint": "f20963c8628ca8399e5d258b5f679976f7800c70b314e6987774104cc1b47e19",
+      "archive": "setup/acceptance/e021_native_recovery_20261024/episodes/week1_demo_v1_week1_demo_v1-749d8acf.json",
+      "episode_sha256": "104f173480e4802a1c64c9f1b4c4563f0e8010d606f515702f780c4102faf01f",
+      "task_error_code": 51,
+      "failed_picks": [
+        {
+          "seq": 6,
+          "target": "target_box_b",
+          "evidence_id": "target_box_b-1e9ada41",
+          "error_code": 23,
+          "detail": "box did not follow the lift (rise=0.023m < 0.030m); released for safety",
+          "classification": "REPORTED_POST_LIFT_LOW_RISE",
+          "rise_precision": "rounded display only; exact rise is unavailable in this native step"
+        },
+        {
+          "seq": 8,
+          "target": "target_box_b",
+          "evidence_id": "target_box_b-7130f1b2",
+          "error_code": 23,
+          "detail": "box did not follow the lift (rise=-0.006m < 0.030m); released for safety",
+          "classification": "REPORTED_POST_LIFT_LOW_RISE",
+          "rise_precision": "rounded display only; exact rise is unavailable in this native step"
+        }
+      ]
+    },
+    {
+      "batch": "batch_20261005_192253.jsonl",
+      "run": 3,
+      "policy": "hybrid",
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "archive": "setup/acceptance/e021_native_recovery_20261024/episodes/week1_demo_v1_week1_demo_v1-776be369.json",
+      "episode_sha256": "e061d2600e5edc3f85b2bc3c65c24b74873f1729bfe5a0eb0adff46f5efc2228",
+      "task_error_code": 51,
+      "failed_picks": [
+        {
+          "seq": 6,
+          "target": "target_box_b",
+          "evidence_id": "target_box_b-2f4d1909",
+          "error_code": 23,
+          "detail": "box did not follow the lift (rise=0.014m < 0.030m); released for safety",
+          "classification": "REPORTED_POST_LIFT_LOW_RISE",
+          "rise_precision": "rounded display only; exact rise is unavailable in this native step"
+        },
+        {
+          "seq": 8,
+          "target": "target_box_b",
+          "evidence_id": "target_box_b-e07f6179",
+          "error_code": 23,
+          "detail": "box did not follow the lift (rise=-0.003m < 0.030m); released for safety",
+          "classification": "REPORTED_POST_LIFT_LOW_RISE",
+          "rise_precision": "rounded display only; exact rise is unavailable in this native step"
+        }
+      ]
+    },
+    {
+      "batch": "batch_20261005_192253.jsonl",
+      "run": 10,
+      "policy": "hybrid",
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "archive": "setup/acceptance/e021_native_recovery_20261024/episodes/week1_demo_v1_week1_demo_v1-afe1a382.json",
+      "episode_sha256": "7bb9fb15af619956c9d3afc11832eebed694b985ca0c5ae300352251e6570399",
+      "task_error_code": 51,
+      "failed_picks": [
+        {
+          "seq": 2,
+          "target": "target_box_a",
+          "evidence_id": "target_box_a-58946988",
+          "error_code": 23,
+          "detail": "box did not follow the lift (rise=-0.007m < 0.030m); released for safety",
+          "classification": "REPORTED_POST_LIFT_LOW_RISE",
+          "rise_precision": "rounded display only; exact rise is unavailable in this native step"
+        },
+        {
+          "seq": 4,
+          "target": "target_box_a",
+          "evidence_id": "target_box_a-e9257f99",
+          "error_code": 23,
+          "detail": "box did not follow the lift (rise=-0.005m < 0.030m); released for safety",
+          "classification": "REPORTED_POST_LIFT_LOW_RISE",
+          "rise_precision": "rounded display only; exact rise is unavailable in this native step"
+        }
+      ]
+    },
+    {
+      "batch": "batch_20261005_192253.jsonl",
+      "run": 13,
+      "policy": "hybrid",
+      "runtime_fingerprint": "4045108de1efc4be844f6601ae1ebc72c55c28b54fe00fd609591d6981e2c79b",
+      "archive": "setup/acceptance/e021_native_recovery_20261024/episodes/week1_demo_v1_week1_demo_v1-55aa60e6.json",
+      "episode_sha256": "78787504e47552bdd18f7d83389c6d4926cc3faefec223e7c50a7f9617621e52",
+      "task_error_code": 51,
+      "failed_picks": [
+        {
+          "seq": 2,
+          "target": "target_box_a",
+          "evidence_id": "target_box_a-081508ad",
+          "error_code": 23,
+          "detail": "box did not follow the lift (rise=0.028m < 0.030m); released for safety",
+          "classification": "REPORTED_POST_LIFT_LOW_RISE",
+          "rise_precision": "rounded display only; exact rise is unavailable in this native step"
+        },
+        {
+          "seq": 4,
+          "target": "target_box_a",
+          "evidence_id": "target_box_a-2d6775e0",
+          "error_code": 23,
+          "detail": "box did not follow the lift (rise=0.005m < 0.030m); released for safety",
+          "classification": "REPORTED_POST_LIFT_LOW_RISE",
+          "rise_precision": "rounded display only; exact rise is unavailable in this native step"
+        }
+      ]
+    }
+  ],
+  "counts": {
+    "failed_task_episodes": 6,
+    "failed_pick_attempts": 12,
+    "by_target": {
+      "target_box_b": 8,
+      "target_box_a": 4
+    },
+    "episode_outcomes_are_not_independent_pick_trials": true
+  },
+  "limits": [
+    "Failure-only selection; not a failure rate or a comparison between policy arms.",
+    "Reported low rise does not independently confirm lift controller success, carry following, or sample freshness.",
+    "The displayed 0.030m < 0.030m case is rounded text, not evidence of an incorrect comparison.",
+    "Historical attempts and a future canonical-reset probe must not be pooled."
+  ]
+}

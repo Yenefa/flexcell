@@ -4,7 +4,7 @@
 本目录收敛比赛场景、材料、演示与只读证据；通用能力留在 `src/flexcell/`，原始实验留在 `setup/acceptance/`。
 
 **交付状态：PREPARATION / NOT_READY。** 尚无比赛部署 tag，未完成现场或实体硬件验收。
-2026-10-24 状态复核基线为 `a7cd3cbf5bac747d72d4df002e5a3f743dfb2802`；
+2026-10-25 状态复核基线为 `36486780f5bf46add81124aa334400c71be4ae72`；
 此前 2026-10-17 审阅基线为 `a9b6a6255d91a568e44eea555ecb33f7e0d7d49f`。
 
 ## 入口
@@ -14,6 +14,8 @@
 - [项目创意计划书初稿](materials/project-plan.md)
 - [PPT、视频与答辩提纲](materials/presentation.md)
 - [家用快模型连接与交付检查](RUNBOOK.md)
+- [可转给仿真电脑 Agent 的固定 A5/B5 抓取诊断任务](tasks/GRASP-B-001.md)
+- [本轮历史失败复核：6 个任务、12 次低 rise PICK](evidence/grasp-failures-20261025.json)
 - [E-021 只读归档审计（2026-10-17 快照，`MISSING: 60`）](evidence/e021-audit.json)
 - [同一工具在原生 episode 回收后的复检（2026-10-24，`FOUND_NOT_REPLAYED: 60`）](evidence/e021-audit-recheck-20261024.json)
 
@@ -63,3 +65,4 @@ E-021 为双物体 S1 描述性先导：FSM 19/20、Hybrid 0.03 18/20、Hybrid 0
 2026-10-24 家用 RX 6800 已完成另一个固定五项功能回归：S4 两次预期失败、S5 两次预期失败、
 S1 一次成功，20 次真实 Jev 决策；[证据与关机回执](../../setup/acceptance/home_gpu_abort_20261024/README.md)。
 它不等于五次任务成功，也不解锁 baseline 或比赛部署；服务在回执中已停止。
+
