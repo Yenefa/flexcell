@@ -100,7 +100,7 @@ class CarryServer(Node):
         self.create_subscription(
             StringMsg, gp('start_topic').value, self._on_start, 10)
         self.create_subscription(
-            EmptyMsg, gp('stop_topic').value, self._on_stop, 10)
+            EmptyMsg, gp('stop_topic').value, self._on_stop_topic, 10)
         self.create_service(Trigger, gp('release_service').value, self._on_release)
         self.create_service(EngageCarry, gp('engage_service').value, self._on_engage)
         self.create_service(QueryCarry, gp('query_service').value, self._on_query)
@@ -200,7 +200,7 @@ class CarryServer(Node):
         return response
 
     def _engage(self, object_id, offset, session):
-        if not self._on_stop(None):
+        if not self._on_stop(None, cause='replace'):
             self.get_logger().error('cannot replace an unconfirmed carry session')
             return False
         if self._backend == 'velocity_servo':
@@ -232,7 +232,12 @@ class CarryServer(Node):
         self._publish_state()
         return True
 
-    def _on_stop(self, _msg):
+    def _on_stop(self, _msg, cause='unspecified'):
+        # Capture identity BEFORE the state is cleared: a stop record that
+        # cannot name its own session is useless for correlating carry ticks
+        # with a PICK (measured: 1432 stops, 0 attributable).
+        session = getattr(self, '_session', '') or ''
+        object_id = getattr(self, '_object_id', '') or ''
         self._stop_evt.set()
         if self._thread is not None:
             self._thread.join(timeout=2.0)
@@ -241,30 +246,42 @@ class CarryServer(Node):
             return False
         if getattr(self, '_backend', 'teleport') == 'velocity_servo':
             if not self._guard_release(''):
-                self._log.write({'event': 'release_unconfirmed', 'backend': self._backend})
+                self._log.write({'event': 'release_unconfirmed',
+                                 'backend': self._backend,
+                                 'session': session, 'object': object_id,
+                                 'cause': cause})
                 return False
-        if getattr(self, '_session', ''):
-            self._retired_sessions.add(self._session)
+        if session:
+            self._retired_sessions.add(session)
         self._object_id = ''
         self._offset = None
         self._session = ''
         self.get_logger().info('carry RELEASED')
-        self._log.write({'event': 'stop', 'backend': getattr(self, '_backend', 'teleport')})
+        self._log.write({'event': 'stop',
+                         'backend': getattr(self, '_backend', 'teleport'),
+                         'session': session, 'object': object_id,
+                         'engaged': bool(session), 'cause': cause})
         self._publish_state()
         return stopped
+
+    def _on_stop_topic(self, msg):
+        """Stop topic keeps its own entry point so the log can tell a remote
+        stop from the releases the server issues to itself."""
+        self._on_stop(msg, cause='topic')
 
     def _on_release(self, _request, response):
         # Idempotent acknowledgement: no release success while a pin request
         # can still be in flight. The legacy stop topic remains for reset.
-        response.success = self._on_stop(None)
+        response.success = self._on_stop(None, cause='release')
         response.message = ('servo stopped and backend release confirmed' if response.success else
                             'servo thread or physics release was not confirmed')
         return response
 
     def _check_worker(self):
         if self._offset is not None and self._thread is not None and not self._thread.is_alive():
-            self._log.write({'event': 'worker_ended', 'object': self._object_id})
-            self._on_stop(None)
+            self._log.write({'event': 'worker_ended', 'object': self._object_id,
+                             'session': getattr(self, '_session', '')})
+            self._on_stop(None, cause='worker_ended')
 
     def _guard_request(self, operation, request):
         try:
@@ -350,11 +367,19 @@ class CarryServer(Node):
                                      'target': [req.position.x, req.position.y, req.position.z],
                                      'request_mono_ns': before, 'reply_mono_ns': time.monotonic_ns(),
                                      'confirmed': consecutive_fail == 0})
-                    if consecutive_fail >= 3: stop_evt.set()
+                    if consecutive_fail >= 3:
+                        # self-abort used to be invisible: the thread simply
+                        # stopped and the only trace was a later worker_ended
+                        self._log.write({'event': 'servo_abort',
+                                         'object': object_id,
+                                         'session': session,
+                                         'consecutive': consecutive_fail})
+                        stop_evt.set()
                 if consecutive_fail > 0 and (consecutive_fail <= 3
                                              or consecutive_fail % 20 == 0):
                     self._log.write({'event': 'set_pose_fail',
                                      'object': object_id,
+                                     'session': session,
                                      'consecutive': consecutive_fail})
             stop_evt.wait(self._period)
 
@@ -369,7 +394,7 @@ def main(args=None):
     except KeyboardInterrupt:
         pass
     finally:
-        node._on_stop(None)
+        node._on_stop(None, cause='shutdown')
         node.destroy_node()
         if rclpy.ok():
             rclpy.shutdown()
