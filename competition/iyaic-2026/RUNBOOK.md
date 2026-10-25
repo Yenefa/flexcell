@@ -4,8 +4,9 @@
 历史模型为 `clef-flash-q8_0`，权重与校准身份见 [MODEL_IDENTITY](../../docs/MODEL_IDENTITY.md)。
 历史记录不是当前机器在线状态或服务端权重证明。
 
-## 工作分工与交接
+## 工具链分工与交接（不是队员分工）
 
+本项目为单人独立完成，「分工」指的是人与工具的交接，不涉及第二名学生：
 云端负责写代码、运行具备依赖的离线检查、准备给电脑 Agent 的提示词。
 用户手动转发给电脑 Agent，后者在指定电脑执行 ROS/Gazebo/GPU 任务并返回完整产物。
 公用电脑无需为此登录 GitHub；可通过带 commit、SHA-256 和版本说明的包交接。
@@ -27,6 +28,15 @@ Vulkan 日志确认 33/33 层卸载。固定批次为 S4:2、S5:2、S1:1，四�
 2026-10-17本云环境的policy snapshot为 `vpn_configured=false`；经继承HTTP代理访问health返回503。
 [真实请求回执](evidence/home-fast-connectivity.json)。没有得到服务响应，没有发推理、SSH或机器人请求。
 这不证明家用电脑离线，也不是上述后续回归失败的记录。当前手动转发流程不依赖云端直连。
+
+**2026-10-24 根因更正**：那次 503 和 502 的来源已在同一台机器上定位到系统代理，而不是端点不可达。
+`ProxyEnable=1`、`ProxyServer=127.0.0.1:7890`，bypass 列表含 `127.*` 与 RFC1918 段，
+但**不含 `100.64.0.0/10`**；`urllib.request.getproxies()` 在 Windows 读注册表，因此把
+`100.87.190.44:11435` 交给本地代理，代理对该 overlay 私网地址回 502。三组对照只改地址与代理覆盖：
+`100.87.190.44` 无 `no_proxy` → 502 / 7 652 ms / FSM 回退；加 `no_proxy=100.87.190.44` → 20/20 PASS；
+`127.0.0.1` 无 `no_proxy` → 20/20 PASS。`curl` 不读注册表，所以同一时刻同一 URL 是通的。
+证据与对照表见 [`setup/acceptance/clef_recorded_001_20261024/tailscale_endpoint/`](../../../setup/acceptance/clef_recorded_001_20261024/tailscale_endpoint/README.md)。
+仍未证明的是跨机可达——三次请求都发自托管服务的机器。
 
 运行规范要求使用环境自带sidecar VPN与代理，不在executor另装Tailscale或改路由绕过配置。
 HTTP请求保留继承代理和TLS校验；SSH/raw TCP另外需要匹配grant及应用身份，不把HTTP权限当SSH权限。
