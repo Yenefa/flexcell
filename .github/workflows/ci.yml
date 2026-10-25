@@ -74,6 +74,12 @@ jobs:
           python3 setup/acceptance/grasp_b001_20261025/verify_grasp_b001.py
           python3 setup/acceptance/grasp_b001_20261025/selftest_verify_grasp_b001.py
 
+      - name: GRASP-B-001 sequence analysis (#32)
+        shell: bash
+        run: |
+          python3 setup/acceptance/grasp_sequence_20261025/analyse.py
+          python3 setup/acceptance/grasp_sequence_20261025/selftest_analyse.py
+
       - name: build (first-party packages)
         shell: bash
         run: |
