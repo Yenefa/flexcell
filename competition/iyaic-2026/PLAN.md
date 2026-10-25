@@ -10,7 +10,7 @@
 | ------ | ----------------------------------------------------------------------------- | --------------------------------------------- |
 | P0     | [#30 主线/PR/TransferBench收敛](https://github.com/Yenefa/flexcell/issues/30) | #28/#29/#40/#41/#42/#44/#45/#46 已合并；TransferBench 未合，比赛版本未固定 |
 | P0     | [#31 E-021便携证据与smoke口径](https://github.com/Yenefa/flexcell/issues/31)  | 已关闭；60/60 回收、来源审计及完整窗口工具已入 main；不追认历史资格 |
-| P0     | [#32 GRASP-B-001](https://github.com/Yenefa/flexcell/issues/32)               | 6 个历史失败任务的 12 次 PICK 均报告低 rise（B8/A4）；[固定 A5/B5 任务](tasks/GRASP-B-001.md)已准备，执行/阶段日志待回传，根因 UNKNOWN |
+| P0 | [#32 GRASP-B-001](https://github.com/Yenefa/flexcell/issues/32) | #47 A5/B5 已完成未复现；#49 会话身份已合并；先审查 [#50 TF/pin 观测](https://github.com/Yenefa/flexcell/pull/50)，再执行新 Phase-3，根因 UNKNOWN |
 | P0     | [#33 比赛机器与快模型连接](https://github.com/Yenefa/flexcell/issues/33)      | 家用 RX 6800 五项功能回归已归档并停服；端点 502 根因已定位为系统代理（非离线）；跨机可达与比赛机器部署仍未冻结 |
 | P0     | [#34 报名与材料](https://github.com/Yenefa/flexcell/issues/34)                | 初稿已建；单人可否报名、团队协作计分口径、赛项细则待确认 |
 | P1     | [#35 公平小样本方案](https://github.com/Yenefa/flexcell/issues/35)            | 待预登记，不执行资格采样                      |

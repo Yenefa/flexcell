@@ -1,5 +1,9 @@
 # GRASP-B-001-PHASE-1：给仿真电脑 Agent 的执行任务
 
+**状态：历史窗口已完成，以下方案仅留档，不再次执行。** #47 已归档 A5/B5，结果为该窗口未复现。
+下一步先部署 [PR #50](https://github.com/Yenefa/flexcell/pull/50) 的 teleport 查询观测；
+后续使用其中的新版本/新指纹 Phase-3 任务，第一轮即检查计数是否实际可用。
+
 在已有 ROS 2 / MoveIt / Gazebo 仿真电脑上执行（当前指定的 RTX 5060 Ti 16GB 电脑）。
 这轮直接诊断 Pick/Place Skill，不调用 Clef、付费模型或 PyTorch，不需要家用 GPU 服务。
 云端准备代码和任务，用户手动转发本文件，电脑 Agent 返回原始产物。
@@ -10,7 +14,7 @@
 - 复用 main 的 `setup/111_grasp_probe.py`（#29 已合并）；issue 中提到的 `136_grasp_diagnostic.py` 是另一分支的工具，不是本轮入口。
 - [云端历史复核](../evidence/grasp-failures-20261025.json)：三份 E-021 baseline 的 6 个失败任务中，有 12 次 PICK 返回 23，全部报告 `box did not follow the lift`；B 8 次、A 4 次，任务最后均为 51。
 - 这是失败任务子集，不是 60 回合里所有 PICK 失败的清单，也不是失败率。原始三份 batch、六份 episode 与 SHA 均保留。
-- 原生记录缺少匹配的 attach gap、carry 和 motion 阶段日志，物理根因仍 UNKNOWN。显示成 `0.030m < 0.030m` 的一条是舍入文本，不能据此改阈值。
+- 这份初稿只看了 native 切片；#47 后续已回收本机阶段日志，并匹配上述 12 个 PICK。当前缺口是 teleport 的 TF 查询缺失与 pin 请求分母观测，物理根因仍 UNKNOWN。显示成 `0.030m < 0.030m` 的一条是舍入文本，不能据此改阈值。
 
 ## 先回收已有证据
 
