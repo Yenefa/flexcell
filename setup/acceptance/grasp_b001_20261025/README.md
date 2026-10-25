@@ -199,5 +199,7 @@ FSM/Hybrid comparison. It reproduces neither the dual-object A→B context of
 E-021 nor its policy decisions. `n ≥ 50`, AC@90 and formal qualification remain
 frozen and are not touched by this archive.
 
-The host stack was cold-started for this run and **left running** afterwards;
-it is owned by this session, not by a pre-existing deployment.
+The host stack was cold-started for this run and **stopped afterwards**; see
+[`stack_stop.json`](stack_stop.json). All four processes (fleet, move_to_pose,
+moveit, gazebo) were launched by this task, so nothing pre-existing was touched.
+The residue check found no surviving skill servers, `move_group` or `gz`.

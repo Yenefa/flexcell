@@ -1,0 +1,29 @@
+{
+  "task_id": "GRASP-B-001-PHASE-1",
+  "stopped_at_local": "2026-10-25T15:48:06",
+  "owned_processes": [
+    {
+      "name": "fleet",
+      "pid": 1759,
+      "outcome": "stopped group"
+    },
+    {
+      "name": "move_to_pose",
+      "pid": 1749,
+      "outcome": "stopped group"
+    },
+    {
+      "name": "moveit",
+      "pid": 1748,
+      "outcome": "stopped group"
+    },
+    {
+      "name": "gazebo",
+      "pid": 1601,
+      "outcome": "stopped group"
+    }
+  ],
+  "stop_method": "SIGTERM to each process group from /tmp/flexcell_lifecycle/pids, 6 s grace, SIGKILL fallback not needed",
+  "residue_check": "pgrep over gz/gzserver/move_group and all flexcell skill servers returned nothing",
+  "scope_note": "All four were launched by this task via setup/102_mainline_runtime.sh cold. No pre-existing deployment was touched."
+}
