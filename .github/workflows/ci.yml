@@ -68,6 +68,12 @@ jobs:
           python3 setup/acceptance/issue22_readjudication_20261024/verify_issue22_claims.py
           python3 setup/acceptance/issue22_readjudication_20261024/selftest_verify_issue22.py
 
+      - name: GRASP-B-001 window verification (#32)
+        shell: bash
+        run: |
+          python3 setup/acceptance/grasp_b001_20261025/verify_grasp_b001.py
+          python3 setup/acceptance/grasp_b001_20261025/selftest_verify_grasp_b001.py
+
       - name: build (first-party packages)
         shell: bash
         run: |
