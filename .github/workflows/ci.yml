@@ -80,6 +80,12 @@ jobs:
           python3 setup/acceptance/grasp_sequence_20261025/analyse.py
           python3 setup/acceptance/grasp_sequence_20261025/selftest_analyse.py
 
+      - name: GRASP-B-001 Phase-3 window verification (#32)
+        shell: bash
+        run: |
+          python3 setup/acceptance/grasp_phase3_window_20261026/verify_phase3_window.py
+          python3 setup/acceptance/grasp_phase3_window_20261026/selftest_verify_phase3_window.py
+
       - name: build (first-party packages)
         shell: bash
         run: |
