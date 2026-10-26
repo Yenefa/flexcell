@@ -70,6 +70,13 @@ After coding — update the Issue, record evidence in EXPERIMENTS.md, link the c
 
 ## Status
 
+2026-10-26 GRASP-B-001 follow-up (#32): an opt-in per-trial evidence gate and
+read-only replay checker are prepared for the fixed A1 → A4 → B5 diagnostic
+window. The gate requires PR #50's teleport observations, stops dispatch after
+missing/inconsistent evidence, and keeps typed physical failures. No new live
+window has run; the physical root cause remains UNKNOWN. See
+[verification and simulation-host handoff](docs/GRASP_PHASE3_GATE_20261026.md).
+
 2026-10-02 mainline hardening (E-016): lifecycle paths and typed controller
 readiness are fixed; Observe now reads confirmed carry authority instead of a
 stale topic cache. Cold FSM dual-object S1 passed, and a real stale-A injection
