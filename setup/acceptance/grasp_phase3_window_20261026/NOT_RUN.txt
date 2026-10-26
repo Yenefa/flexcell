@@ -1,0 +1,10 @@
+Nothing was NOT_RUN in this window.
+
+This file exists because the A4 gate failure wrote a NOT_RUN marker here and
+stopped before B5. That stop was a gate-rule error, not missing telemetry: the
+v1 rule demanded one carry session per segment, while four trials legitimately
+produce four sessions. The rule was corrected (gate.py), A4 was re-gated on its
+existing data and passed, and B5 then ran and passed. A4.gate keeps the v1
+failure; A4.gate_v2 keeps the corrected verdict.
+
+All ten declared trials were run: A1 (1), A4 (4), B5 (5).
