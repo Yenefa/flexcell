@@ -1,0 +1,47 @@
+def _loop(self, object_id, offset, stop_evt, session):
+        consecutive_fail = 0
+        while not stop_evt.is_set():
+            ee = self._ee()
+            if ee is not None and offset is not None:
+                req = self._pose(object_id, offset, ee, session)
+                before = time.monotonic_ns()
+                try:
+                    # short timeout: a blocking 300ms wait on a failing
+                    # service silently stretched the servo from 10Hz to ~2Hz
+                    # and the box crept to its pinned pose over seconds
+                    rep = self._gz_node.request(self._service, req, self._Pose,
+                                                self._Boolean, 1000 if self._backend == 'velocity_servo' else 100)
+                except Exception as exc:  # noqa: BLE001 - servo must not die
+                    consecutive_fail += 1
+                    if consecutive_fail <= 3 or consecutive_fail % 20 == 0:
+                        self.get_logger().warn(
+                            'set_pose failed (%d consecutive): %s'
+                            % (consecutive_fail, exc))
+                else:
+                    if self._request_ok(rep):
+                        consecutive_fail = 0
+                    else:
+                        consecutive_fail += 1
+                        if consecutive_fail <= 3 or consecutive_fail % 20 == 0:
+                            self.get_logger().warn(
+                                'set_pose rejected (%d consecutive)' % consecutive_fail)
+                if self._backend == 'velocity_servo':
+                    self._log.write({'event': 'pin', 'object': object_id, 'session': session,
+                                     'target': [req.position.x, req.position.y, req.position.z],
+                                     'request_mono_ns': before, 'reply_mono_ns': time.monotonic_ns(),
+                                     'confirmed': consecutive_fail == 0})
+                    if consecutive_fail >= 3:
+                        # self-abort used to be invisible: the thread simply
+                        # stopped and the only trace was a later worker_ended
+                        self._log.write({'event': 'servo_abort',
+                                         'object': object_id,
+                                         'session': session,
+                                         'consecutive': consecutive_fail})
+                        stop_evt.set()
+                if consecutive_fail > 0 and (consecutive_fail <= 3
+                                             or consecutive_fail % 20 == 0):
+                    self._log.write({'event': 'set_pose_fail',
+                                     'object': object_id,
+                                     'session': session,
+                                     'consecutive': consecutive_fail})
+            stop_evt.wait(self._period)

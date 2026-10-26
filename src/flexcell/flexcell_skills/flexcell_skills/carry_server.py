@@ -337,51 +337,109 @@ class CarryServer(Node):
 
     def _loop(self, object_id, offset, stop_evt, session):
         consecutive_fail = 0
-        while not stop_evt.is_set():
-            ee = self._ee()
-            if ee is not None and offset is not None:
-                req = self._pose(object_id, offset, ee, session)
-                before = time.monotonic_ns()
+        # Thread-local observations: replacement cannot give the old worker
+        # the new session's identity. No TF/carry success is inferred from them.
+        metrics = None
+        started_ns = last_summary_ns = 0
+        if self._backend == 'teleport':
+            started_ns = last_summary_ns = time.monotonic_ns()
+            metrics = dict(ee_lookup_count=0, ee_missing_count=0,
+                           ee_missing_streak=0, ee_missing_streak_max=0,
+                           ee_lookup_ns_total=0, ee_lookup_ns_max=0,
+                           pin_requests=0, pin_confirmed=0, pin_failed=0,
+                           pin_skipped_no_offset=0)
+
+        def summarize(final=False):
+            nonlocal last_summary_ns
+            if metrics is None:
+                return
+            now = time.monotonic_ns()
+            if not final and now - last_summary_ns < 1_000_000_000:
+                return
+            last_summary_ns = now
+            try:
+                self._log.write(dict(metrics, event='teleport_loop_summary',
+                                     schema_version=1, object=object_id,
+                                     session=session, backend='teleport',
+                                     started_mono_ns=started_ns, sample_mono_ns=now,
+                                     period_s=self._period, final=final))
+            except Exception as exc:  # diagnostic failure must not stop pinning
                 try:
-                    # short timeout: a blocking 300ms wait on a failing
-                    # service silently stretched the servo from 10Hz to ~2Hz
-                    # and the box crept to its pinned pose over seconds
-                    rep = self._gz_node.request(self._service, req, self._Pose,
-                                                self._Boolean, 1000 if self._backend == 'velocity_servo' else 100)
-                except Exception as exc:  # noqa: BLE001 - servo must not die
-                    consecutive_fail += 1
-                    if consecutive_fail <= 3 or consecutive_fail % 20 == 0:
-                        self.get_logger().warn(
-                            'set_pose failed (%d consecutive): %s'
-                            % (consecutive_fail, exc))
-                else:
-                    if self._request_ok(rep):
-                        consecutive_fail = 0
+                    self.get_logger().error('carry observation write failed: %s'
+                                            % type(exc).__name__)
+                except Exception:
+                    # A torn-down logger cannot report its own failure. Missing
+                    # summaries mean missing evidence, never a healthy servo.
+                    pass
+
+        try:
+            while not stop_evt.is_set():
+                lookup_started = time.monotonic_ns() if metrics is not None else 0
+                ee = self._ee()
+                if metrics is not None:
+                    lookup_ns = time.monotonic_ns() - lookup_started
+                    metrics['ee_lookup_count'] += 1
+                    metrics['ee_lookup_ns_total'] += lookup_ns
+                    metrics['ee_lookup_ns_max'] = max(metrics['ee_lookup_ns_max'], lookup_ns)
+                    if ee is None:
+                        metrics['ee_missing_count'] += 1
+                        metrics['ee_missing_streak'] += 1
+                        metrics['ee_missing_streak_max'] = max(
+                            metrics['ee_missing_streak_max'], metrics['ee_missing_streak'])
                     else:
+                        metrics['ee_missing_streak'] = 0
+                if ee is not None and offset is not None:
+                    req = self._pose(object_id, offset, ee, session)
+                    before = time.monotonic_ns()
+                    if metrics is not None:
+                        metrics['pin_requests'] += 1
+                    try:
+                        # short timeout: a blocking 300ms wait on a failing
+                        # service silently stretched the servo from 10Hz to ~2Hz
+                        # and the box crept to its pinned pose over seconds
+                        rep = self._gz_node.request(self._service, req, self._Pose,
+                                                    self._Boolean, 1000 if self._backend == 'velocity_servo' else 100)
+                    except Exception as exc:  # noqa: BLE001 - servo must not die
                         consecutive_fail += 1
                         if consecutive_fail <= 3 or consecutive_fail % 20 == 0:
                             self.get_logger().warn(
-                                'set_pose rejected (%d consecutive)' % consecutive_fail)
-                if self._backend == 'velocity_servo':
-                    self._log.write({'event': 'pin', 'object': object_id, 'session': session,
-                                     'target': [req.position.x, req.position.y, req.position.z],
-                                     'request_mono_ns': before, 'reply_mono_ns': time.monotonic_ns(),
-                                     'confirmed': consecutive_fail == 0})
-                    if consecutive_fail >= 3:
-                        # self-abort used to be invisible: the thread simply
-                        # stopped and the only trace was a later worker_ended
-                        self._log.write({'event': 'servo_abort',
+                                'set_pose failed (%d consecutive): %s'
+                                % (consecutive_fail, exc))
+                    else:
+                        if self._request_ok(rep):
+                            consecutive_fail = 0
+                        else:
+                            consecutive_fail += 1
+                            if consecutive_fail <= 3 or consecutive_fail % 20 == 0:
+                                self.get_logger().warn(
+                                    'set_pose rejected (%d consecutive)' % consecutive_fail)
+                    if metrics is not None:
+                        metrics['pin_confirmed' if consecutive_fail == 0 else 'pin_failed'] += 1
+                    if self._backend == 'velocity_servo':
+                        self._log.write({'event': 'pin', 'object': object_id, 'session': session,
+                                         'target': [req.position.x, req.position.y, req.position.z],
+                                         'request_mono_ns': before, 'reply_mono_ns': time.monotonic_ns(),
+                                         'confirmed': consecutive_fail == 0})
+                        if consecutive_fail >= 3:
+                            # self-abort used to be invisible: the thread simply
+                            # stopped and the only trace was a later worker_ended
+                            self._log.write({'event': 'servo_abort',
+                                             'object': object_id,
+                                             'session': session,
+                                             'consecutive': consecutive_fail})
+                            stop_evt.set()
+                    if consecutive_fail > 0 and (consecutive_fail <= 3
+                                                 or consecutive_fail % 20 == 0):
+                        self._log.write({'event': 'set_pose_fail',
                                          'object': object_id,
                                          'session': session,
                                          'consecutive': consecutive_fail})
-                        stop_evt.set()
-                if consecutive_fail > 0 and (consecutive_fail <= 3
-                                             or consecutive_fail % 20 == 0):
-                    self._log.write({'event': 'set_pose_fail',
-                                     'object': object_id,
-                                     'session': session,
-                                     'consecutive': consecutive_fail})
-            stop_evt.wait(self._period)
+                elif metrics is not None and ee is not None:
+                    metrics['pin_skipped_no_offset'] += 1
+                summarize()
+                stop_evt.wait(self._period)
+        finally:
+            summarize(final=True)
 
 
 def main(args=None):
