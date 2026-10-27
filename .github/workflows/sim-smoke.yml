@@ -1,0 +1,130 @@
+# Stage 1 of issue-03 / issue-10: prove the hosted container can boot a headless
+# Gazebo world and run the DetachableJoint admission spike.
+#
+# 未在 GitHub 首跑：第一次红了先看下面 install 步骤里的 apt 包名，再怀疑探针。
+# NOT YET RUN ON GITHUB. The apt list below is verified against the jazzy index
+# (ros-jazzy-ros-gz-sim -> gz-sim-vendor 8.15.0 -> gz-tools-vendor -> the `gz` CLI),
+# but the container's own state is not. Treat a red first run as the start of the
+# work, not as a broken workflow.
+#
+# Scope: no rendering, no GPU, no MoveIt, no cameras. `gz sim -s` is server-only
+# and worlds/detachable_probe.sdf has no sensors, so a stock 4-core runner is
+# enough. Why the full PICK loop is stage 2: see CI_NOTES.md.
+
+name: sim-smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'setup/113_carry_backend_spike.py'
+      - 'worlds/detachable_probe.sdf'
+      - '.github/workflows/sim-smoke.yml'
+
+permissions:
+  contents: read
+
+# Two runs on the same branch would share the runner's CPU and both would see a
+# sagging real-time factor; the probe asserts on timing, so serialise them.
+concurrency:
+  group: sim-smoke-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-admission:
+    runs-on: ubuntu-24.04          # ros:jazzy is noble; the index above is noble
+    container: ros:jazzy
+    timeout-minutes: 20
+    steps:
+      - name: checkout
+        uses: actions/checkout@v4
+
+      - name: install Gazebo (vendor packages, no GUI)
+        shell: bash
+        run: |
+          set -euo pipefail
+          apt-get update -qq
+
+          # Package tree (noble index, 2026-10-27): ros-gz-sim Depends on
+          # gz-sim-vendor (gz-sim8 8.15.0) which Depends on gz-tools-vendor
+          # (the `gz` CLI). So these two lines are one tree, not two alternatives.
+          # gz-tools-vendor is named explicitly so a change in that transitive
+          # edge fails here, loudly, instead of later as "gz not on PATH".
+          #
+          # Not the ros-jazzy-ros-gz metapackage: it also pulls ros-gz-sim-demos,
+          # which Depends on rviz2 + rqt_* + image-transport-plugins. Nothing
+          # headless needs those, and they add minutes to a cold apt.
+          # If this narrow set ever fails to resolve, the fallback is plain
+          # `ros-jazzy-ros-gz` -- same gz underneath, bigger install.
+          apt-get install -y -qq --no-install-recommends \
+            ros-jazzy-ros-gz-sim \
+            ros-jazzy-gz-tools-vendor \
+            python3 > /dev/null
+
+          source /opt/ros/jazzy/setup.bash
+
+          # The CLI ships under the vendor prefix. The ament env hook is expected
+          # to put it on PATH; if it does not, add it here and persist it for the
+          # probe step.
+          if ! command -v gz > /dev/null 2>&1; then
+            echo "/opt/ros/jazzy/opt/gz_tools_vendor/bin" >> "$GITHUB_PATH"
+            export PATH="/opt/ros/jazzy/opt/gz_tools_vendor/bin:$PATH"
+          fi
+
+          if ! versions="$(gz sim --versions 2>&1)"; then
+            printf '%s\n' "$versions"
+            echo "::error::'gz sim --versions' failed: Gazebo is installed but not runnable"
+            exit 1
+          fi
+          printf '%s\n' "$versions" | tee gz-versions.txt
+
+          gz_version="$(printf '%s\n' "$versions" | grep -m1 -oE '[0-9]+\.[0-9]+\.[0-9]+' || true)"
+          if [ -z "$gz_version" ]; then
+            echo "::error::no x.y.z version in 'gz sim --versions' output"
+            exit 1
+          fi
+          major="${gz_version%%.*}"
+          if [ "$major" != "8" ]; then
+            echo "::error::expected Gazebo Sim 8.x (Harmonic) on ros:jazzy, got ${gz_version}"
+            echo "::error::recheck the apt package list above before touching the probe"
+            exit 1
+          fi
+          echo "Gazebo Sim ${gz_version} (major 8: OK)"
+
+      - name: backend admission spike (headless, gz sim -s)
+        shell: bash
+        run: |
+          # pipefail keeps the probe's exit code (0 GO / 1 check failed / 2 world
+          # failed) after the tee; --keep-log preserves the Gazebo log for the
+          # summary step, since "world never came up" is only diagnosable there.
+          set -o pipefail
+          source /opt/ros/jazzy/setup.bash
+          python3 setup/113_carry_backend_spike.py \
+            --out spike.json \
+            --keep-log \
+            2>&1 | tee spike.log
+
+      - name: summary
+        if: always()
+        shell: bash
+        run: |
+          set +e
+          cp -f /tmp/spike_*.log gz-sim.log 2>/dev/null
+          {
+            echo '### backend admission'
+            echo
+            echo '```text'
+            tail -n 200 spike.log 2>/dev/null || echo '(no spike.log: the probe never started)'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: keep evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-admission-${{ github.run_id }}
+          path: |
+            spike.json
+            spike.log
+            gz-sim.log
+          if-no-files-found: warn
