@@ -45,6 +45,7 @@ class DetachableCarryGuard final : public System, public ISystemConfigure,
   gz::transport::Node::Publisher attach[2], detach[2];
   bool present[2]{false, false}, seenInitial[2]{false, false};
   bool ready{false}, releasing{false};
+  bool channelsConnected{false};
   unsigned detachedFrames{0};
   unsigned attachedFrames{0};
   int active{-1};
@@ -118,7 +119,11 @@ class DetachableCarryGuard final : public System, public ISystemConfigure,
          << ",\"parent_link\":\"link5\",\"relative_pose\":["
          << relative.Pos().X() << ',' << relative.Pos().Y() << ',' << relative.Pos().Z() << ','
          << relative.Rot().X() << ',' << relative.Rot().Y() << ',' << relative.Rot().Z() << ','
-         << relative.Rot().W() << "]}";
+         << relative.Rot().W() << "],\"channels_connected\":" << (channelsConnected ? "true" : "false")
+         << ",\"initial_joint_observed\":[" << (seenInitial[0] ? "true" : "false") << ','
+         << (seenInitial[1] ? "true" : "false") << "],\"component_present\":["
+         << (present[0] ? "true" : "false") << ',' << (present[1] ? "true" : "false")
+         << "],\"detached_frames\":" << detachedFrames << '}';
     reply.set_data(text.str());
     return true;
   }
@@ -145,6 +150,8 @@ class DetachableCarryGuard final : public System, public ISystemConfigure,
   void PreUpdate(const UpdateInfo &info, EntityComponentManager &ecm) override {
     std::lock_guard<std::mutex> lock(mutex);
     Inspect(ecm);
+    channelsConnected = attach[0].HasConnections() && attach[1].HasConnections() &&
+                        detach[0].HasConnections() && detach[1].HasConnections();
     for (int i = 0; i < 2; ++i) seenInitial[i] = seenInitial[i] || present[i];
     if ((active < 0 && (present[0] || present[1])) || (active >= 0 && present[1-active])) {
       ready = false; releasing = true; DetachAll();
@@ -184,11 +191,14 @@ class DetachableCarryGuard final : public System, public ISystemConfigure,
     simNs = currentNs;
     if (advanced && active >= 0 && present[active] && !present[1-active]) ++attachedFrames;
     else if (active < 0 || !present[active] || present[1-active]) attachedFrames = 0;
-    if (parent == kNullEntity || children[0] == kNullEntity || children[1] == kNullEntity) {
+    if (!channelsConnected || parent == kNullEntity || children[0] == kNullEntity || children[1] == kNullEntity) {
       ready = false; detachedFrames = 0;
     } else if (!present[0] && !present[1]) {
       if (advanced) ++detachedFrames;
-      if (seenInitial[0] && seenInitial[1] && detachedFrames >= 2) ready = true;
+      // Initial joints can be detached before this observer ever sees them.
+      // Readiness depends on current reconciled physics and connected official
+      // command channels, not on observing a transient startup attachment.
+      if (detachedFrames >= 2) ready = true;
       if (releasing && detachedFrames >= 2) {
         if (!session.empty()) retired.insert(session);
         session.clear(); active = -1; releasing = false;

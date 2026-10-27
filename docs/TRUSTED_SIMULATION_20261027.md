@@ -105,5 +105,15 @@ force checks are incomplete. The backend is an experimental spike, not an admitt
 The five-task acceptance declaration is now executed by CI from the committed revision;
 the earlier local STOPPED window remains a development record.
 
+Subsequent CI retained two failures rather than retrying them: run 40539227821 stopped
+at native startup health before any backend cycle; run 40537157656 completed its five
+camera tasks but the data export rejected camera timestamp gaps. The latter produced no
+new learning dataset. Their receipts are archived. Code review identified a bootstrap
+dependency on ever observing the transient initial joint; readiness now requires current
+detached physics over advancing steps and connected official command channels instead.
+Additional native startup diagnostics are saved on failure. This candidate change passed
+the local lifecycle fixture; the exact cause of the old CI failure was not directly
+observed in its limited native-status logging. Admission remains NO_GO.
+
 Decision: [ADR-004](ADR/ADR-004-trusted-simulation-plane.md).
 Portable commands: [REPRODUCE.md](../REPRODUCE.md).

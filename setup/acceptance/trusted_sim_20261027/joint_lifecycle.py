@@ -155,7 +155,17 @@ def main():
                 doc = json.loads(path.with_suffix('.stdout').read_text())
                 if doc['ok'] and doc['hard_fail'] == [] and doc['checks']['task_state'] == 'IDLE' and not doc['checks']['carry_engaged']:
                     ready = True; break
-        assert ready, 'startup health failed; no backend cycle dispatched'
+        if not ready:
+            import xml.etree.ElementTree as ET
+            name = ET.parse(world).getroot().find('world').get('name')
+            command(['gz', 'sim', '--versions'], out / 'gz_version', timeout=10)
+            command(['gz', 'service', '-s', '/world/%s/flexcell/carry/status' % name,
+                     '--reqtype', 'gz.msgs.Empty', '--reptype', 'gz.msgs.StringMsg',
+                     '--timeout', '1000', '--req', ''], out / 'native_startup_status', timeout=10)
+            (out / 'plugin_environment.json').write_text(json.dumps(dict(
+                plugin_path=os.environ.get('GZ_SIM_SYSTEM_PLUGIN_PATH'),
+                install=os.environ.get('FLEXCELL_INSTALL')), indent=2) + '\n')
+            raise RuntimeError('startup health failed; no backend cycle dispatched; native diagnostics saved')
         assert command([sys.executable, str(ROOT / 'setup/flexcell_admin.py'), 'reset'], out / 'reset_before') == 0
         import xml.etree.ElementTree as ET
         name = ET.parse(world).getroot().find('world').get('name')
