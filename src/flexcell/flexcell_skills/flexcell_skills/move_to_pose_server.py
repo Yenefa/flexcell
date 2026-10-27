@@ -51,7 +51,7 @@ from tf2_ros import Buffer, TransformListener
 
 from flexcell_interfaces.action import MoveToPose
 from flexcell_skills.common import crash_detail
-from flexcell_skills.contracts.trajectory import trajectory_summary
+from flexcell_skills.contracts.trajectory import trajectory_summary, validate_arm_trajectory
 
 R = MoveToPose.Result
 F = MoveToPose.Feedback
@@ -150,6 +150,7 @@ class MoveToPoseServer(Node):
 
         # Day 2 fixed-scene mode: the WorldState revision gate is NOT enabled.
         self.declare_parameter('world_revision_gate_enabled', False)
+        self.declare_parameter('enable_mtc_handoff', False)
 
         gp = self.get_parameter
         self._group = gp('planning_group').value
@@ -198,6 +199,7 @@ class MoveToPoseServer(Node):
         self._log_path = os.path.join(log_dir, gp('log_file').value)
 
         self._world_gate = bool(gp('world_revision_gate_enabled').value)
+        self._require_fresh_tf = bool(gp('enable_mtc_handoff').value)
 
         # ---------------- state ----------------
         self._js = None
@@ -205,6 +207,8 @@ class MoveToPoseServer(Node):
         self._admission = threading.Lock()
         self._motion_blocked = False
         self._motion_blocked_reason = ''
+        self._terminal_uncertain = False
+        self._registered_mtc = None
         self._seq = 0
         self._current_phases = []
 
@@ -225,6 +229,10 @@ class MoveToPoseServer(Node):
             self, ExecuteTrajectory, self._exec_act, callback_group=self._cbg)
         self._fjt_client = ActionClient(
             self, FollowJointTrajectory, self._fjt_action, callback_group=self._cbg)
+        if gp('enable_mtc_handoff').value:
+            from flexcell_interfaces.srv import RegisterMtcTrajectory
+            self.create_service(RegisterMtcTrajectory, '/flexcell/mtc/register_trajectory',
+                                self._register_mtc, callback_group=self._cbg)
 
         self._server = ActionServer(
             self,
@@ -247,6 +255,54 @@ class MoveToPoseServer(Node):
         self.get_logger().info('structured log: %s' % self._log_path)
 
     # ------------------------------------------------------------- callbacks
+    def _register_mtc(self, request, response):
+        # Registration has no physical effect and shares the same admission lock
+        # as EVERY MoveToPose goal, including legacy/reset motions.
+        if not self._admission.acquire(blocking=False):
+            response.detail = 'motion executor busy'
+            return response
+        try:
+            if self._motion_blocked or self._terminal_uncertain:
+                raise ValueError('motion executor latched; reconcile and restart')
+            if not request.request_id.startswith('mtc-') or len(request.request_id) != 36:
+                raise ValueError('invalid private handoff token')
+            candidate = MoveToPose.Goal(target=request.target, motion_profile_id=request.motion_profile_id)
+            error, detail, _ = self._validate(candidate)
+            if error is not None:
+                raise ValueError(detail)
+            if request.target.header.frame_id != self._base:
+                raise ValueError('MTC target must already use the base frame')
+            validate_arm_trajectory(request.trajectory.joint_trajectory)
+            self._registered_mtc = (request, time.monotonic() + 5.)
+            response.success = True
+            response.detail = 'one-use MTC trajectory registered; no motion dispatched'
+        except (ValueError, TypeError) as exc:
+            response.detail = str(exc)
+        finally:
+            self._admission.release()
+        return response
+
+    def _consume_mtc(self, goal):
+        if not goal.request_id.startswith('mtc-'):
+            return None
+        item = self._registered_mtc
+        self._registered_mtc = None  # one use, including mismatched/expired attempts
+        if item is None or time.monotonic() > item[1]:
+            raise ValueError('missing or expired MTC trajectory handoff')
+        request = item[0]
+        if (request.request_id != goal.request_id or request.target != goal.target
+                or request.motion_profile_id != goal.motion_profile_id):
+            raise ValueError('MTC handoff target/profile/token mismatch')
+        trajectory = request.trajectory
+        validate_arm_trajectory(trajectory.joint_trajectory)
+        joints, age = self._joint_state()
+        positions = dict(zip(joints.name, joints.position)) if joints is not None else {}
+        if joints is None or age is None or age > .5 or any(
+                name not in positions or abs(positions[name] - trajectory.joint_trajectory.points[0].positions[i]) > .03
+                for i, name in enumerate(trajectory.joint_trajectory.joint_names)):
+            raise ValueError('measured start state differs from MTC trajectory')
+        return trajectory
+
     def _on_js(self, msg):
         self._js = msg
         self._js_wall = time.monotonic()
@@ -337,6 +393,8 @@ class MoveToPoseServer(Node):
         for j in ARM_JOINTS:
             if j not in idx:
                 return False, 'joint %s missing from /joint_states' % j
+            if idx[j] >= len(js.velocity) or not math.isfinite(js.velocity[idx[j]]):
+                return False, 'joint %s has missing/nonfinite velocity' % j
             if abs(js.velocity[idx[j]]) > self._stop_eps:
                 return False, 'joint %s still moving (v=%.4f)' % (j, js.velocity[idx[j]])
         return True, 'at rest'
@@ -384,6 +442,11 @@ class MoveToPoseServer(Node):
         ps = PoseStamped()
         ps.header.frame_id = self._base
         ps.header.stamp = self.get_clock().now().to_msg()
+        if getattr(self, '_require_fresh_tf', False):
+            source_ns = tr.header.stamp.sec * 10**9 + tr.header.stamp.nanosec
+            if abs(self.get_clock().now().nanoseconds - source_ns) > 500_000_000:
+                return None, 'end-effector TF source stamp is stale or from another clock'
+            ps.header.stamp = tr.header.stamp
         ps.pose.position.x = tr.transform.translation.x
         ps.pose.position.y = tr.transform.translation.y
         ps.pose.position.z = tr.transform.translation.z
@@ -433,7 +496,7 @@ class MoveToPoseServer(Node):
             self._feedback(goal_handle, F.PHASE_VALIDATING, t_start)
 
             if self._motion_blocked:
-                if self._reconfirm_state():
+                if not getattr(self, '_terminal_uncertain', False) and self._reconfirm_state():
                     self._motion_blocked = False
                     self._motion_blocked_reason = ''
                     self.get_logger().info('state reconfirmed, motion unblocked')
@@ -478,75 +541,87 @@ class MoveToPoseServer(Node):
             rec['planning_start'] = time.time()
             plan_t0 = time.monotonic()
 
-            ik_ok, ik_detail = self._ik_feasible(target_base)
-            rec['ik_precheck'] = {'ok': ik_ok, 'detail': ik_detail}
-            if not ik_ok:
-                res = self._result(R.OUTCOME_FAILED, R.ERR_IK_UNREACHABLE,
-                                   detail='IK pre-check failed: %s' % ik_detail)
-                res.evidence_id = evidence
-                rec.update(outcome='FAILED', error_code=R.ERR_IK_UNREACHABLE,
-                           planning_latency_ms=int((time.monotonic() - plan_t0) * 1000))
-                self._log(rec)
-                goal_handle.abort()
-                return res
+            preplanned = self._consume_mtc(goal) if goal.request_id.startswith('mtc-') else None
+            if preplanned is not None:
+                traj, mcode = preplanned, MoveItErrorCodes.SUCCESS
+                rec['motion_backend'] = 'mtc'
+                rec['planning_latency_ms'] = 0
+                rec['planning_end'] = time.time()
+                if goal_handle.is_cancel_requested:
+                    res = self._result(R.OUTCOME_CANCELED, R.ERR_CANCELED,
+                                       detail='canceled before MTC execution')
+                    goal_handle.canceled()
+                    return res
+            else:
+                ik_ok, ik_detail = self._ik_feasible(target_base)
+                rec['ik_precheck'] = {'ok': ik_ok, 'detail': ik_detail}
+                if not ik_ok:
+                    res = self._result(R.OUTCOME_FAILED, R.ERR_IK_UNREACHABLE,
+                                       detail='IK pre-check failed: %s' % ik_detail)
+                    res.evidence_id = evidence
+                    rec.update(outcome='FAILED', error_code=R.ERR_IK_UNREACHABLE,
+                               planning_latency_ms=int((time.monotonic() - plan_t0) * 1000))
+                    self._log(rec)
+                    goal_handle.abort()
+                    return res
 
-            if not self._plan_client.wait_for_service(timeout_sec=2.0):
-                res = self._result(R.OUTCOME_FAILED, R.ERR_STATE_UNAVAILABLE,
-                                   detail='planning service %s unavailable' % self._plan_srv)
-                res.evidence_id = evidence
-                rec.update(outcome='FAILED', error_code=R.ERR_STATE_UNAVAILABLE)
-                self._log(rec)
-                goal_handle.abort()
-                return res
+                if not self._plan_client.wait_for_service(timeout_sec=2.0):
+                    res = self._result(R.OUTCOME_FAILED, R.ERR_STATE_UNAVAILABLE,
+                                       detail='planning service %s unavailable' % self._plan_srv)
+                    res.evidence_id = evidence
+                    rec.update(outcome='FAILED', error_code=R.ERR_STATE_UNAVAILABLE)
+                    self._log(rec)
+                    goal_handle.abort()
+                    return res
 
-            allowed = min(self._plan_timeout, max(0.5, deadline_t - time.monotonic()))
-            srv_req = GetMotionPlan.Request()
-            srv_req.motion_plan_request = self._build_request(target_base, vel, acc, allowed)
-            fut = self._plan_client.call_async(srv_req)
-            # Wait strictly longer than MoveIt's own allowed time so MoveIt's error
-            # code wins the race instead of our client-side timeout.
-            st = self._wait(fut, goal_handle,
-                            min(deadline_t, time.monotonic() + allowed + 2.0))
-            rec['planning_latency_ms'] = int((time.monotonic() - plan_t0) * 1000)
-            rec['planning_end'] = time.time()
+                allowed = min(self._plan_timeout, max(0.5, deadline_t - time.monotonic()))
+                srv_req = GetMotionPlan.Request()
+                srv_req.motion_plan_request = self._build_request(target_base, vel, acc, allowed)
+                fut = self._plan_client.call_async(srv_req)
+                # Wait strictly longer than MoveIt's own allowed time so MoveIt's error
+                # code wins the race instead of our client-side timeout.
+                st = self._wait(fut, goal_handle,
+                                min(deadline_t, time.monotonic() + allowed + 2.0))
+                rec['planning_latency_ms'] = int((time.monotonic() - plan_t0) * 1000)
+                rec['planning_end'] = time.time()
 
-            if st == 'cancel':
-                res = self._result(R.OUTCOME_CANCELED, R.ERR_CANCELED,
-                                   detail='canceled during planning; no motion commanded')
-                res.evidence_id = evidence
-                rec.update(outcome='CANCELED', error_code=R.ERR_CANCELED,
-                           planning_latency_ms=rec['planning_latency_ms'])
-                self._log(rec)
-                goal_handle.canceled()
-                return res
-            if st == 'timeout':
-                res = self._result(R.OUTCOME_FAILED, R.ERR_PLANNING_TIMEOUT,
-                                   detail='planning exceeded %.1fs' % self._plan_timeout)
-                res.evidence_id = evidence
-                rec.update(outcome='FAILED', error_code=R.ERR_PLANNING_TIMEOUT)
-                self._log(rec)
-                goal_handle.abort()
-                return res
+                if st == 'cancel':
+                    res = self._result(R.OUTCOME_CANCELED, R.ERR_CANCELED,
+                                       detail='canceled during planning; no motion commanded')
+                    res.evidence_id = evidence
+                    rec.update(outcome='CANCELED', error_code=R.ERR_CANCELED,
+                               planning_latency_ms=rec['planning_latency_ms'])
+                    self._log(rec)
+                    goal_handle.canceled()
+                    return res
+                if st == 'timeout':
+                    res = self._result(R.OUTCOME_FAILED, R.ERR_PLANNING_TIMEOUT,
+                                       detail='planning exceeded %.1fs' % self._plan_timeout)
+                    res.evidence_id = evidence
+                    rec.update(outcome='FAILED', error_code=R.ERR_PLANNING_TIMEOUT)
+                    self._log(rec)
+                    goal_handle.abort()
+                    return res
 
-            mpr = fut.result().motion_plan_response
-            mcode = int(mpr.error_code.val)
-            rec['moveit_planning_error_code'] = mcode
-            rec['moveit_planning_message'] = mpr.error_code.message
-            rec['moveit_planning_time_s'] = float(mpr.planning_time)
+                mpr = fut.result().motion_plan_response
+                mcode = int(mpr.error_code.val)
+                rec['moveit_planning_error_code'] = mcode
+                rec['moveit_planning_message'] = mpr.error_code.message
+                rec['moveit_planning_time_s'] = float(mpr.planning_time)
 
-            if mcode != MoveItErrorCodes.SUCCESS:
-                err = self._map_plan_error(mcode)
-                res = self._result(R.OUTCOME_FAILED, err, mcode,
-                                   detail='MoveIt planning failed: %s (%s)'
-                                          % (mpr.error_code.message or 'no message',
-                                             self._err_name(err)))
-                res.evidence_id = evidence
-                rec.update(outcome='FAILED', error_code=err, moveit_error_code=mcode)
-                self._log(rec)
-                goal_handle.abort()
-                return res
+                if mcode != MoveItErrorCodes.SUCCESS:
+                    err = self._map_plan_error(mcode)
+                    res = self._result(R.OUTCOME_FAILED, err, mcode,
+                                       detail='MoveIt planning failed: %s (%s)'
+                                              % (mpr.error_code.message or 'no message',
+                                                 self._err_name(err)))
+                    res.evidence_id = evidence
+                    rec.update(outcome='FAILED', error_code=err, moveit_error_code=mcode)
+                    self._log(rec)
+                    goal_handle.abort()
+                    return res
 
-            traj = mpr.trajectory
+                traj = mpr.trajectory
             traj_joint_names = list(traj.joint_trajectory.joint_names)
             # audit P0-1: summarize the trajectory WITHOUT indexing it, then
             # refuse unusable trajectories.  The old code evaluated
@@ -579,10 +654,16 @@ class MoveToPoseServer(Node):
                        else R.ERR_STATE_UNAVAILABLE if send_status == 'unavailable'
                        else R.ERR_EXECUTION_TIMEOUT)
                 res = self._result(R.OUTCOME_FAILED, err, detail=why)
+                if preplanned is not None and send_status == 'send_timeout':
+                    self._motion_blocked = self._terminal_uncertain = True
+                    self._motion_blocked_reason = 'MTC controller acceptance unknown'
+                    res.outcome, res.error_code = R.OUTCOME_STATE_UNKNOWN, R.ERR_STATE_UNKNOWN
                 res.execution_started = execution_started
                 res.evidence_id = evidence
                 rec.update(outcome='FAILED', error_code=err,
                            execution_send_status=send_status)
+                if res.outcome == R.OUTCOME_STATE_UNKNOWN:
+                    rec.update(outcome='STATE_UNKNOWN', error_code=res.error_code)
                 self._log(rec)
                 goal_handle.abort()
                 return res
@@ -598,6 +679,15 @@ class MoveToPoseServer(Node):
                     traj_joint_names=traj_joint_names)
 
             ecode = self._backend_result_code(res_fut.result().result)
+            if preplanned is not None and res_fut.result().status not in (4, 5, 6):
+                self._motion_blocked = self._terminal_uncertain = True
+                self._motion_blocked_reason = 'MTC controller terminal status unknown'
+                res = self._result(R.OUTCOME_STATE_UNKNOWN, R.ERR_STATE_UNKNOWN,
+                                   detail=self._motion_blocked_reason)
+                res.execution_started = True
+                res.evidence_id = evidence
+                rec.update(outcome='STATE_UNKNOWN', error_code=res.error_code)
+                self._log(rec); goal_handle.abort(); return res
             rec['execution_end'] = time.time()
             rec['execution_error_code'] = ecode
             if not self._backend_code_is_success(ecode):
@@ -612,18 +702,39 @@ class MoveToPoseServer(Node):
                 else:
                     res.moveit_error_code = ecode
                 res.execution_started = execution_started
+                if preplanned is not None and not rest:
+                    self._motion_blocked = self._terminal_uncertain = True
+                    self._motion_blocked_reason = 'failed MTC execution without measured stop'
+                    res.outcome, res.error_code = R.OUTCOME_STATE_UNKNOWN, R.ERR_STATE_UNKNOWN
                 res.evidence_id = evidence
                 rec.update(outcome='FAILED', error_code=err, arm_at_rest=rest)
+                if res.outcome == R.OUTCOME_STATE_UNKNOWN:
+                    rec.update(outcome='STATE_UNKNOWN', error_code=res.error_code)
                 self._log(rec)
                 goal_handle.abort()
                 return res
 
             # ================= CHECKING =================
             self._feedback(goal_handle, F.PHASE_CHECKING, t_start)
+            if preplanned is not None:
+                stop_deadline = time.monotonic() + self._stop_timeout
+                while time.monotonic() < stop_deadline and not self._arm_at_rest()[0]:
+                    time.sleep(.02)
+                if not self._arm_at_rest()[0]:
+                    self._motion_blocked = self._terminal_uncertain = True
+                    self._motion_blocked_reason = 'MTC terminal received but measured stop unavailable'
+                    res = self._result(R.OUTCOME_STATE_UNKNOWN, R.ERR_STATE_UNKNOWN,
+                                       detail=self._motion_blocked_reason)
+                    res.execution_started = True
+                    res.evidence_id = evidence
+                    rec.update(outcome='STATE_UNKNOWN', error_code=res.error_code)
+                    self._log(rec); goal_handle.abort(); return res
             reached, rerr = self._ee_pose_now()
             if reached is None:
                 self._motion_blocked = True
                 self._motion_blocked_reason = 'end-effector pose unavailable: %s' % rerr
+                if preplanned is not None:
+                    self._terminal_uncertain = True
                 res = self._result(R.OUTCOME_STATE_UNKNOWN, R.ERR_STATE_UNAVAILABLE,
                                    ecode, detail=rerr)
                 res.execution_started = execution_started
@@ -687,11 +798,16 @@ class MoveToPoseServer(Node):
             # the one server still missing it - rclpy's fallback for a raising
             # execute callback is a default Result whose outcome=0 reads as
             # OUTCOME_SUCCEEDED
-            rec.update(outcome='FAILED', error_code=R.ERR_INTERNAL,
+            error = R.ERR_STATE_UNKNOWN if execution_started else R.ERR_INVALID_GOAL
+            outcome = R.OUTCOME_STATE_UNKNOWN if execution_started else R.OUTCOME_FAILED
+            if execution_started:
+                self._motion_blocked = self._terminal_uncertain = True
+                self._motion_blocked_reason = crash_detail(exc)
+            rec.update(outcome='STATE_UNKNOWN' if execution_started else 'FAILED', error_code=error,
                        detail=crash_detail(exc),
                        elapsed_ms=int((time.monotonic() - t_start) * 1000))
             self._log(rec)
-            res = self._result(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+            res = self._result(outcome, error,
                                detail=crash_detail(exc))
             res.evidence_id = evidence
             goal_handle.abort()
@@ -834,6 +950,8 @@ class MoveToPoseServer(Node):
         preempted = stop_accepted and avoided
         stop_confirmed = (stop_request_sent and stop_accepted and at_rest
                           and avoided and state_readable)
+        if rec.get('motion_backend') == 'mtc':
+            stop_confirmed = stop_confirmed and terminated
         rec['preempted'] = preempted
         rec['stop_confirmed'] = stop_confirmed
 
@@ -843,10 +961,14 @@ class MoveToPoseServer(Node):
             rec['stop_mode'] = 'already_completed'
         else:
             rec['stop_mode'] = 'unconfirmed'
+        if rec.get('motion_backend') == 'mtc' and not terminated:
+            rec['stop_mode'] = 'unconfirmed'
 
         if rec['stop_mode'] == 'unconfirmed':
             # Cannot prove what happened -> STATE_UNKNOWN and close the motion gate.
             self._motion_blocked = True
+            if rec.get('motion_backend') == 'mtc':
+                self._terminal_uncertain = True
             self._motion_blocked_reason = '%s with unconfirmed stop' % reason
             res = self._result(
                 R.OUTCOME_STATE_UNKNOWN, R.ERR_STATE_UNKNOWN,

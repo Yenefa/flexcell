@@ -1,0 +1,107 @@
+"""Plan with MTC, hand trajectories to the existing single-arm executor.
+
+Only MoveToPose owns actuator goals, admission, cancellation and stop checks.
+An unknown terminal state prevents task recovery or subsequent cleanup motion.
+"""
+import uuid
+import hashlib
+from rclpy.serialization import serialize_message
+from geometry_msgs.msg import PoseStamped
+from rclpy.callback_groups import ReentrantCallbackGroup
+from flexcell_interfaces.action import MoveToPose
+from flexcell_interfaces.srv import PlanManipulation, RegisterMtcTrajectory
+from flexcell_skills.common import MoveToPoseClient, dist3, pose_msg, wait_future
+from flexcell_skills.contracts.trajectory import validate_arm_trajectory as validate_trajectory
+
+
+class MotionTerminalUnknown(RuntimeError):
+    pass
+
+
+def stamped(position):
+    value = PoseStamped()
+    value.header.frame_id = 'world'
+    value.pose = pose_msg(position, [0., 0., 0., 1.])
+    return value
+
+
+class MtcMotionClient:
+    def __init__(self, node):
+        group = ReentrantCallbackGroup()
+        self.planner = node.create_client(PlanManipulation, '/flexcell/mtc/plan', callback_group=group)
+        self.registration = node.create_client(RegisterMtcTrajectory,
+            '/flexcell/mtc/register_trajectory', callback_group=group)
+        self.executor = MoveToPoseClient(node, '/move_to_pose')
+        self.blocked = False
+        self.plans = []
+        self.audit = []
+
+    def _unknown(self, detail):
+        self.blocked = True
+        raise MotionTerminalUnknown(detail + '; task must stop; reconcile before further motion')
+
+    def prepare(self, operation, object_name, object_position, targets, profile, deadline_ms):
+        if self.blocked:
+            self._unknown('prior motion terminal state is unknown')
+        self.plans = []
+        self.audit = []
+        if not self.planner.wait_for_service(timeout_sec=3.):
+            return False, 'MTC planner unavailable'
+        request = PlanManipulation.Request()
+        request.operation, request.object_name = operation, object_name
+        request.object_pose = stamped(object_position)
+        request.targets = [stamped(position) for position in targets]
+        request.motion_profile_id = profile
+        request.deadline_ms = min(60000, max(1000, int(deadline_ms)))
+        future = self.planner.call_async(request)
+        if wait_future(future, request.deadline_ms / 1000 + 8) != 'done':
+            self.planner.remove_pending_request(future)
+            return False, 'MTC planning reply timed out; no motion dispatched'
+        response = future.result()
+        if not response.success:
+            return False, response.detail
+        if len(response.trajectories) != len(targets):
+            return False, 'wrong MTC stage count'
+        for item in response.trajectories:
+            validate_trajectory(item.joint_trajectory)
+        self.plans = list(zip(targets, response.trajectories))
+        return True, response.detail
+
+    def call(self, position, *, profile, deadline_ms, request_id, cancel_check=None):
+        if self.blocked:
+            self._unknown('prior motion terminal state is unknown')
+        if not self.plans or dist3(position, self.plans[0][0]) > 1e-6:
+            raise ValueError('unplanned or out-of-order MTC stage ' + request_id)
+        target, trajectory = self.plans.pop(0)
+        validate_trajectory(trajectory.joint_trajectory)
+        if cancel_check and cancel_check():
+            return None, 'canceled before MTC handoff'
+        if not self.registration.wait_for_service(timeout_sec=3.):
+            return None, 'MTC handoff is not enabled on the motion executor'
+        request = RegisterMtcTrajectory.Request()
+        request.request_id = 'mtc-' + uuid.uuid4().hex
+        request.target = stamped(target)
+        request.motion_profile_id = profile
+        request.trajectory = trajectory
+        self.audit.append(dict(stage=request_id, request_id=request.request_id,
+            target=list(position), profile=profile,
+            trajectory_sha256=hashlib.sha256(serialize_message(trajectory)).hexdigest()))
+        future = self.registration.call_async(request)
+        if wait_future(future, 3.) != 'done':
+            self.registration.remove_pending_request(future)
+            return None, 'trajectory registration reply lost; no motion dispatched'
+        response = future.result()
+        if not response.success:
+            return None, response.detail
+        result, error = self.executor.call(position, profile=profile, deadline_ms=deadline_ms,
+            request_id=request.request_id, cancel_check=cancel_check)
+        self.audit[-1].update(terminal_reply_received=result is not None, transport_error=error,
+            evidence_id=result.evidence_id if result is not None else None,
+            outcome=int(result.outcome) if result is not None else None,
+            error_code=int(result.error_code) if result is not None else None)
+        if error is not None or result is None:
+            self._unknown('motion executor terminal reply unavailable: ' + str(error))
+        if (result.outcome == MoveToPose.Result.OUTCOME_STATE_UNKNOWN
+                or result.error_code == MoveToPose.Result.ERR_STATE_UNKNOWN):
+            self._unknown(result.detail)
+        return result, None

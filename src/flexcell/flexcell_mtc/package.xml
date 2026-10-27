@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>flexcell_mtc</name><version>0.1.0</version>
+  <description>Planning-only MTC adapter below the skill contracts.</description>
+  <maintainer email="sca331613@gmail.com">Yenefa</maintainer>
+  <license>Apache-2.0</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>rclcpp</depend><depend>flexcell_interfaces</depend>
+  <depend>moveit_task_constructor_core</depend><depend>moveit_task_constructor_msgs</depend>
+  <depend>moveit_ros_planning</depend><depend>moveit_msgs</depend><depend>shape_msgs</depend>
+  <export><build_type>ament_cmake</build_type></export>
+</package>

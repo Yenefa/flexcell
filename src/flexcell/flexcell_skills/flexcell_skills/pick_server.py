@@ -24,6 +24,7 @@ from rclpy.node import Node
 from geometry_msgs.msg import PoseStamped, Vector3
 from std_msgs.msg import Empty as EmptyMsg
 from std_msgs.msg import String as StringMsg
+from std_srvs.srv import Trigger
 import json
 from tf2_ros import Buffer, TransformListener
 from rclpy.duration import Duration
@@ -67,7 +68,10 @@ class PickServer(Node):
         self.declare_parameter('carry_start_topic', '/flexcell/carry_start')
         self.declare_parameter('carry_stop_topic', '/flexcell/carry_stop')
         self.declare_parameter('carry_backend', 'teleport')
+        self.declare_parameter('skill_backend', 'legacy')
+        self.declare_parameter('record_execution_commands', False)
         self.declare_parameter('carry_engage_service', '/flexcell/carry_engage')
+        self.declare_parameter('carry_release_service', '/flexcell/carry_release')
         self.declare_parameter('inject_topic', '/flexcell/inject')
         self.declare_parameter('box_follow_min_m', 0.03)
         self.declare_parameter('object_size', [0.035, 0.035, 0.035])
@@ -80,8 +84,16 @@ class PickServer(Node):
         self.declare_parameter('log_file', 'pick.jsonl')
 
         gp = self.get_parameter
+        self._mtc = None
+        skill_backend = gp('skill_backend').value
+        if skill_backend not in ('legacy', 'mtc'):
+            raise ValueError('unsupported skill_backend %r' % skill_backend)
+        if skill_backend == 'mtc':
+            from flexcell_skills.mtc_motion import MtcMotionClient
+            self._mtc = MtcMotionClient(self)
         self._m2p = MoveToPoseClient(self, gp('move_to_pose_action').value)
-        self._gripper = GripperClient(self, gp('gripper_action').value)
+        self._gripper = GripperClient(self, gp('gripper_action').value,
+                                      telemetry=gp('record_execution_commands').value)
         self._scene = PlanningSceneOps(self)
         self._gripper_open = float(gp('gripper_open_position').value)
         self._gripper_close = float(gp('gripper_close_position').value)
@@ -96,6 +108,9 @@ class PickServer(Node):
         self._carry_backend = gp('carry_backend').value
         self._carry_engage = self.create_client(
             EngageCarry, gp('carry_engage_service').value,
+            callback_group=ReentrantCallbackGroup())
+        self._carry_release = self.create_client(
+            Trigger, gp('carry_release_service').value,
             callback_group=ReentrantCallbackGroup())
 
         # ---- deterministic failure injection (Week-1.5; lifecycle T6) ----
@@ -155,7 +170,8 @@ class PickServer(Node):
         gh.publish_feedback(fb)
 
     def _motion(self, position, profile, request_id, cancel_check=None):
-        res, err = self._m2p.call(position, profile=profile,
+        client = getattr(self, '_mtc', None) or self._m2p
+        res, err = client.call(position, profile=profile,
                                   deadline_ms=self._deadline, request_id=request_id,
                                   cancel_check=cancel_check)
         if err is not None:
@@ -210,7 +226,14 @@ class PickServer(Node):
 
     def _release_everything(self, name):
         """Request physical release and require scene/gripper cleanup responses."""
-        self._carry_stop.publish(EmptyMsg())
+        if getattr(self, '_carry_backend', 'teleport') in ('velocity_servo', 'detachable_joint'):
+            if not self._carry_release.wait_for_service(timeout_sec=2.0):
+                return False, 'carry release dependency unavailable; no cleanup motion sent'
+            future = self._carry_release.call_async(Trigger.Request())
+            if wait_future(future, 5.0) != 'done' or not future.result().success:
+                return False, 'physical release not confirmed; no cleanup motion sent'
+        else:
+            self._carry_stop.publish(EmptyMsg())
         _, gripper_error = self._gripper.command(self._gripper_open)
         removed, scene_error = self._scene.remove(name, detach_attached=True)
         errors = []
@@ -251,6 +274,8 @@ class PickServer(Node):
         }
 
         def finish(outcome, error, detail, motion_err=0):
+            if getattr(self, '_mtc', None) is not None:
+                rec['mtc_stages'] = list(self._mtc.audit)
             res.outcome = outcome
             res.status = derive_status('PICK', outcome)
             res.error_code = error
@@ -305,6 +330,17 @@ class PickServer(Node):
             res.object_pose_before = pose_msg(box_pos, box_quat)
             rec['box_before'] = box_pos
 
+            mtc = getattr(self, '_mtc', None)
+            if mtc is not None:
+                targets = [[box_pos[0], box_pos[1], box_pos[2] + dz]
+                           for dz in (self._hover, self._grasp_dz, self._grasp_dz + self._raise)]
+                planned, message = mtc.prepare('PICK', goal.object_name, box_pos,
+                                               targets, profile, self._deadline)
+                rec.update(skill_backend='mtc', planning_detail=message)
+                if not planned:
+                    return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
+                                  'MTC planning failed before execution: ' + message)
+
             # pre-open the gripper so fingers never close on air by accident
             gres, gerr = self._gripper.command(self._gripper_open)
             if gerr is not None:
@@ -334,7 +370,7 @@ class PickServer(Node):
 
             mres, merr_code, detail = try_approach()
             if (mres is None or int(mres.outcome) != R.OUTCOME_SUCCEEDED) \
-                    and scene_added and not goal_handle.is_cancel_requested:
+                    and scene_added and not goal_handle.is_cancel_requested and mtc is None:
                 # fallback: drop scene awareness and retry once (knock risk
                 # accepted, reported in detail)
                 self._scene.remove(goal.object_name)
@@ -371,7 +407,7 @@ class PickServer(Node):
             # engage the carry servo at the MEASURED gripper-to-object offset
             offset = [box_pos[i] - ee_pos[i] for i in range(3)]
             rec['carry_offset'] = offset
-            if self._carry_backend == 'velocity_servo':
+            if self._carry_backend in ('velocity_servo', 'detachable_joint'):
                 confirmed, message = self._engage_carry(goal.object_name, offset)
                 rec['carry_engage_confirmed'] = confirmed
                 if not confirmed:

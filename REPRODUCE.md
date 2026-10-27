@@ -1,5 +1,45 @@
 # REPRODUCE — fresh-machine bring-up (GitHub-only)
 
+## Portable CPU simulation plane (2026-10-27)
+
+This opt-in route uses pinned upstream commits and a first-party headless launch.
+Docker is required; an F: staging directory and host ROS installation are not.
+The older WSL instructions below remain for their archived delivery cohort.
+
+```bash
+docker build -f infra/Dockerfile.sim --build-arg SOURCE_REV="$(git rev-parse HEAD)" -t flexcell-sim:local .
+mkdir -p artifacts
+docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:local
+docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:local \
+  python3 /opt/flexcell/repo/scripts/sim_smoke.py --out /artifacts \
+  --backend velocity_servo --skill-backend mtc
+```
+
+For the declared camera/data window, use a new output directory:
+
+```bash
+docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:local \
+  python3 /opt/flexcell/repo/scripts/sim_window.py \
+  --manifest /opt/flexcell/repo/infra/data-window.json --out /artifacts/data-window \
+  --backend velocity_servo --skill-backend mtc
+scripts/create_data_env.sh "$PWD/.venv-data"
+```
+
+Copy the resulting `artifacts/data-window/window.json` to an export manifest and replace
+each episode's `/artifacts/...` run path with its absolute host path. Keep the original
+receipt. Export without models, network Hub access or hardware replay:
+
+```bash
+HF_HUB_OFFLINE=1 .venv-data/bin/python scripts/export_lerobot.py \
+  --manifest artifacts/export-manifest.json --out artifacts/lerobot
+```
+
+The separate manual `trusted-simulation` camera/data job performs both stages and uploads
+raw evidence and the dataset. Its Python 3.12/NumPy 2/CPU Torch venv must stay separate from
+ROS Python. Camera images do not replace ground-truth Observe. DetachableJoint remains
+an explicit oracle profile, selected with `--backend detachable_joint`.
+See [status and limits](docs/TRUSTED_SIMULATION_20261027.md).
+
 > Authoritative portability doc. Everything needed to take a bare Windows
 > laptop to a fully verified FlexCell workcell comes from this repository.
 > Written for the 2026-09-28 machine switch: RTX 4060 laptop, Core i5-13500H,

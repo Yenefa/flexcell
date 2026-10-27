@@ -63,7 +63,7 @@ class CarryServer(Node):
         self._world = gp('world').value
         self._period = float(gp('carry_period_s').value)
         self._backend = gp('carry_backend').value
-        if self._backend not in ('teleport', 'velocity_servo'):
+        if self._backend not in ('teleport', 'velocity_servo', 'detachable_joint'):
             raise ValueError('unknown carry backend')
         self._base = gp('base_frame').value
         self._ee_link = gp('end_effector_link').value
@@ -78,7 +78,7 @@ class CarryServer(Node):
         self._Empty = empty_pb2.Empty
         self._service = '/world/%s/set_pose' % self._world
         self._guard = '/world/%s/flexcell/carry/' % self._world
-        if self._backend == 'velocity_servo': self._service = self._guard + 'pin'
+        if self._backend in ('velocity_servo', 'detachable_joint'): self._service = self._guard + 'pin'
 
         self._object_id = ''
         self._offset = None
@@ -131,7 +131,7 @@ class CarryServer(Node):
 
     def _on_query(self, _request, response):
         response.success = False
-        if self._backend == 'velocity_servo':
+        if self._backend in ('velocity_servo', 'detachable_joint'):
             try:
                 # Status is read-only. Retry transport discovery/reply loss,
                 # keeping the total native wait below the ROS client's 2 s.
@@ -143,6 +143,8 @@ class CarryServer(Node):
                 if not transport_ok:
                     raise RuntimeError('native carry status timed out after 3 attempts')
                 native = json.loads(reply.data)
+                if self._backend == 'detachable_joint' and native.get('ready') is not True:
+                    raise RuntimeError('detachable bootstrap has not confirmed both objects released')
                 if (bool(native['engaged']) != (self._offset is not None)
                         or native['session'] != self._session
                         or native['object'] != self._object_id):
@@ -155,7 +157,7 @@ class CarryServer(Node):
         response.session = self._session
         response.success = True
         response.detail = ('current carry backend state confirmed; native attempts=%d' % (attempt+1)
-                           if self._backend == 'velocity_servo' else 'current carry backend state confirmed')
+                           if self._backend in ('velocity_servo', 'detachable_joint') else 'current carry backend state confirmed')
         return response
 
     # ------------------------------------------------------------ commands
@@ -203,7 +205,7 @@ class CarryServer(Node):
         if not self._on_stop(None, cause='replace'):
             self.get_logger().error('cannot replace an unconfirmed carry session')
             return False
-        if self._backend == 'velocity_servo':
+        if self._backend in ('velocity_servo', 'detachable_joint'):
             ee = self._ee()
             if ee is None or not self._guard_request('engage', self._pose(object_id, offset, ee, session)):
                 # An ambiguous engage timeout must be followed by force release.
@@ -244,7 +246,7 @@ class CarryServer(Node):
         stopped = self._thread is None or not self._thread.is_alive()
         if not stopped:
             return False
-        if getattr(self, '_backend', 'teleport') == 'velocity_servo':
+        if getattr(self, '_backend', 'teleport') in ('velocity_servo', 'detachable_joint'):
             if not self._guard_release(''):
                 self._log.write({'event': 'release_unconfirmed',
                                  'backend': self._backend,
@@ -306,7 +308,7 @@ class CarryServer(Node):
         request.name = object_id
         request.position.x, request.position.y, request.position.z = [ee[i] + offset[i] for i in range(3)]
         request.orientation.w = 1.0
-        if self._backend == 'velocity_servo':
+        if self._backend in ('velocity_servo', 'detachable_joint'):
             item = request.header.data.add()
             item.key = 'carry_session'
             item.value.append(session)
@@ -398,7 +400,7 @@ class CarryServer(Node):
                         # service silently stretched the servo from 10Hz to ~2Hz
                         # and the box crept to its pinned pose over seconds
                         rep = self._gz_node.request(self._service, req, self._Pose,
-                                                    self._Boolean, 1000 if self._backend == 'velocity_servo' else 100)
+                                                    self._Boolean, 1000 if self._backend in ('velocity_servo', 'detachable_joint') else 100)
                     except Exception as exc:  # noqa: BLE001 - servo must not die
                         consecutive_fail += 1
                         if consecutive_fail <= 3 or consecutive_fail % 20 == 0:
@@ -415,7 +417,7 @@ class CarryServer(Node):
                                     'set_pose rejected (%d consecutive)' % consecutive_fail)
                     if metrics is not None:
                         metrics['pin_confirmed' if consecutive_fail == 0 else 'pin_failed'] += 1
-                    if self._backend == 'velocity_servo':
+                    if self._backend in ('velocity_servo', 'detachable_joint'):
                         self._log.write({'event': 'pin', 'object': object_id, 'session': session,
                                          'target': [req.position.x, req.position.y, req.position.z],
                                          'request_mono_ns': before, 'reply_mono_ns': time.monotonic_ns(),

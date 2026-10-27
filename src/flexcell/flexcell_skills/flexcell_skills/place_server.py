@@ -44,6 +44,8 @@ class PlaceServer(Node):
         super().__init__('place_server')
 
         self.declare_parameter('move_to_pose_action', '/move_to_pose')
+        self.declare_parameter('skill_backend', 'legacy')
+        self.declare_parameter('record_execution_commands', False)
         self.declare_parameter('gripper_action', '/gripper_controller/gripper_cmd')
         self.declare_parameter('gripper_open_position', 0.02)
         self.declare_parameter('release_hover_m', 0.10)
@@ -62,8 +64,16 @@ class PlaceServer(Node):
         self.declare_parameter('log_file', 'place.jsonl')
 
         gp = self.get_parameter
+        self._mtc = None
+        skill_backend = gp('skill_backend').value
+        if skill_backend not in ('legacy', 'mtc'):
+            raise ValueError('unsupported skill_backend %r' % skill_backend)
+        if skill_backend == 'mtc':
+            from flexcell_skills.mtc_motion import MtcMotionClient
+            self._mtc = MtcMotionClient(self)
         self._m2p = MoveToPoseClient(self, gp('move_to_pose_action').value)
-        self._gripper = GripperClient(self, gp('gripper_action').value)
+        self._gripper = GripperClient(self, gp('gripper_action').value,
+                                      telemetry=gp('record_execution_commands').value)
         self._scene = PlanningSceneOps(self)
         self._gripper_open = float(gp('gripper_open_position').value)
         self._hover = float(gp('release_hover_m').value)
@@ -103,7 +113,8 @@ class PlaceServer(Node):
         gh.publish_feedback(fb)
 
     def _motion(self, position, profile, request_id, cancel_check=None):
-        res, err = self._m2p.call(position, profile=profile,
+        client = getattr(self, '_mtc', None) or self._m2p
+        res, err = client.call(position, profile=profile,
                                   deadline_ms=self._deadline, request_id=request_id,
                                   cancel_check=cancel_check)
         if err is not None:
@@ -131,6 +142,8 @@ class PlaceServer(Node):
         }
 
         def finish(outcome, error, detail, motion_err=0):
+            if getattr(self, '_mtc', None) is not None:
+                rec['mtc_stages'] = list(self._mtc.audit)
             res.outcome = outcome
             res.status = derive_status('PLACE', outcome)
             res.error_code = error
@@ -189,6 +202,15 @@ class PlaceServer(Node):
             box_target_z = place_pos[2] + self._clearance
             ee_z = box_target_z + self._carry
             hover = [pp.x, pp.y, ee_z + self._hover]
+            mtc = getattr(self, '_mtc', None)
+            if mtc is not None:
+                planned, message = mtc.prepare('PLACE', goal.object_name, place_pos,
+                    [hover, [pp.x, pp.y, ee_z], [pp.x, pp.y, ee_z + self._retreat]],
+                    profile, self._deadline)
+                rec.update(skill_backend='mtc', planning_detail=message)
+                if not planned:
+                    return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
+                                  'MTC planning failed before execution: ' + message)
             mres, merr_code, detail = self._motion(hover, profile, rid + '-hover',
                                                    cancel_check=cancel_requested)
             if mres is None or int(mres.outcome) != R.OUTCOME_SUCCEEDED:

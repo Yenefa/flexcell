@@ -1,0 +1,113 @@
+name: trusted-simulation
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+    paths: ['src/**', 'infra/**', 'scripts/**', 'setup/**', 'worlds/**', '.github/workflows/sim.yml']
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      carry_backend:
+        type: choice
+        options: [velocity_servo, detachable_joint, teleport]
+        default: velocity_servo
+      skill_backend:
+        type: choice
+        options: [legacy, mtc]
+        default: legacy
+      camera:
+        type: boolean
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: sim-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  sim-smoke:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/Dockerfile.sim
+          load: true
+          tags: flexcell-sim:ci
+          build-args: SOURCE_REV=${{ github.sha }}
+          cache-from: type=gha,scope=flexcell-sim
+          cache-to: type=gha,mode=max,scope=flexcell-sim
+      - name: All first-party packages, including native Gazebo code
+        run: |
+          mkdir -p artifacts
+          docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci bash -c \
+            'colcon test --merge-install --test-result-base /artifacts/test-results && colcon test-result --test-result-base /artifacts/test-results --verbose && python3 /opt/flexcell/repo/setup/82_undefined_attr_check.py /opt/flexcell/repo/src/flexcell'
+      - name: One bounded task, no replacement attempts
+        env:
+          CARRY_BACKEND: ${{ inputs.carry_backend || 'velocity_servo' }}
+          SKILL_BACKEND: ${{ inputs.skill_backend || 'legacy' }}
+        run: |
+          docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
+            python3 /opt/flexcell/repo/scripts/sim_smoke.py --out /artifacts \
+            --backend "$CARRY_BACKEND" --skill-backend "$SKILL_BACKEND"
+      - name: MTC uses the same single-arm executor and independent verification
+        if: inputs.skill_backend != 'mtc'
+        run: |
+          docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
+            python3 /opt/flexcell/repo/scripts/sim_smoke.py --out /artifacts \
+            --backend velocity_servo --skill-backend mtc
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: sim-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/
+          retention-days: 14
+          if-no-files-found: warn
+  camera-data:
+    if: (github.event_name == 'workflow_dispatch' && inputs.camera) || contains(github.event.pull_request.labels.*.name, 'data-smoke')
+    needs: sim-smoke
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/Dockerfile.sim
+          load: true
+          tags: flexcell-sim:ci
+          build-args: SOURCE_REV=${{ github.sha }}
+          cache-from: type=gha,scope=flexcell-sim
+      - name: Five declared camera episodes, including failed tasks
+        run: |
+          mkdir -p artifacts
+          docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
+            python3 /opt/flexcell/repo/scripts/sim_window.py \
+            --manifest /opt/flexcell/repo/infra/data-window.json --out /artifacts/data-window \
+            --backend velocity_servo --skill-backend mtc
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: CPU-only isolated LeRobot writer and official loader roundtrip
+        run: |
+          scripts/create_data_env.sh "$RUNNER_TEMP/flexcell-data-env"
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p = Path('artifacts/data-window/window.json')
+          doc = json.loads(p.read_text())
+          for item in doc['episodes']:
+              item['run'] = str(Path(item['run'].replace('/artifacts/', 'artifacts/', 1)).resolve())
+          Path('artifacts/export-manifest.json').write_text(json.dumps(doc, indent=2))
+          PY
+          HF_HUB_OFFLINE=1 "$RUNNER_TEMP/flexcell-data-env/bin/python" scripts/export_lerobot.py \
+            --manifest artifacts/export-manifest.json --out artifacts/lerobot
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: camera-data-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/
+          retention-days: 14

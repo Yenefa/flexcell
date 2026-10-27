@@ -1,0 +1,11 @@
+# Private planner adapter. This service never executes a trajectory or attaches physics.
+string operation
+string object_name
+geometry_msgs/PoseStamped object_pose
+geometry_msgs/PoseStamped[] targets
+string motion_profile_id
+uint32 deadline_ms
+---
+bool success
+string detail
+moveit_msgs/RobotTrajectory[] trajectories

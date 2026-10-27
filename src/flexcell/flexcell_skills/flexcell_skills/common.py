@@ -430,9 +430,16 @@ class MoveToPoseClient:
 
 
 class GripperClient:
-    def __init__(self, node, action):
+    def __init__(self, node, action, telemetry=False):
         self._cli = ActionClient(node, GripperCommand, action,
                                  callback_group=ReentrantCallbackGroup())
+        self._commands = None
+        self._node = node
+        if telemetry:
+            from rclpy.qos import QoSProfile, DurabilityPolicy
+            from std_msgs.msg import String
+            self._commands = node.create_publisher(String, '/flexcell/execution_command',
+                QoSProfile(depth=10, durability=DurabilityPolicy.TRANSIENT_LOCAL))
 
     def command(self, position, max_effort=10.0, timeout_s=10.0):
         if not self._cli.wait_for_server(timeout_sec=5.0):
@@ -446,6 +453,13 @@ class GripperClient:
         gh = send.result()
         if gh is None or not gh.accepted:
             return None, 'gripper goal rejected'
+        if self._commands is not None:
+            from std_msgs.msg import String
+            self._commands.publish(String(data=json.dumps(dict(
+                schema_version=1, kind='gripper_position_target', accepted=True,
+                sim_ns=self._node.get_clock().now().nanoseconds,
+                monotonic_ns=time.monotonic_ns(), goal_uuid=bytes(gh.goal_id.uuid).hex(),
+                joint='gripper_left_joint', position=float(position), max_effort=float(max_effort)))))
         rf = AcceptedGoalResult(gh)
         if wait_future(rf, timeout_s) != 'done':
             return None, 'gripper result timeout'
