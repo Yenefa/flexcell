@@ -33,3 +33,11 @@ a small oracle fixture, not a statistical/contact-grasp claim.
 python3 setup/acceptance/trusted_sim_20261027/verify_dataset.py
 python3 setup/acceptance/trusted_sim_20261027/verify_joint_trace.py
 ```
+
+`ci-05937ad.json` records the later exact-revision remote CI result, including its
+committed five-task declaration, native lifecycle and measured MTC cancel/deadline
+receipts. Both offline and core simulation passed; the optional camera job was skipped.
+The original `core-v1/` remains STOPPED. The receipt also links the retained native-startup
+and camera-timestamp-gap failures. GitHub artifacts have a 14-day retention period;
+the archive digest permits checking an exported copy. This does not grant joint default
+admission or turn the camera failure into a pass.

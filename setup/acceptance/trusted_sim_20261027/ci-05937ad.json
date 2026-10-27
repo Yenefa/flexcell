@@ -1,0 +1,409 @@
+{
+  "schema_version": 1,
+  "kind": "REMOTE_CI_FUNCTIONAL_RECEIPT_NOT_DEFAULT_ADMISSION",
+  "tested_head_sha": "05937ade15aacf5b8d4d7e35e16f022fddf1ebee",
+  "base_main_sha": "05c145df5786aa1f211668c41b635773d1d6b598",
+  "offline_ci": {
+    "run_id": 40542302649,
+    "conclusion": "success"
+  },
+  "fullstack_ci": {
+    "run_id": 40542302631,
+    "conclusion": "success",
+    "elapsed_s": 806,
+    "tests": 550,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "camera_job": "skipped"
+  },
+  "artifact": {
+    "id": 12751573060,
+    "name": "sim-40542302631-1",
+    "size_bytes": 10467868,
+    "sha256": "f27cb4f065f16c41946cf973123b4d1ae0ce528c4d1fe7fb7babfd5590509800",
+    "retention_days": 14
+  },
+  "core_window": {
+    "schema_version": 1,
+    "status": "FUNCTIONAL_WINDOW_PASS",
+    "episodes": [
+      {
+        "case": "normal",
+        "object": "target_box_a",
+        "task": "A normal pick and place",
+        "run": "/artifacts/core-window/trial-01/run-dfd37de6c0a4",
+        "result": {
+          "schema_version": 1,
+          "status": "PASS",
+          "backend": "velocity_servo",
+          "skill_backend": "mtc",
+          "physical_tasks_dispatched": 1,
+          "qualification": "FUNCTIONAL_SMOKE_ONLY",
+          "case": "normal",
+          "object": "target_box_a",
+          "out": "/artifacts/core-window/trial-01/run-dfd37de6c0a4",
+          "runtime_fingerprint": "d423f22f120a84d4451256367326a178df7ea04d4fb87d8bff5386e29fc7f0bd",
+          "task_start_monotonic_ns": 455065047717,
+          "goal_pose": [
+            0.12,
+            -0.15,
+            0.0175
+          ],
+          "task_end_monotonic_ns": 472610867860,
+          "task": {
+            "action": "task",
+            "goal_uuid": "8288b36e312f4fdfac6a8fbe0fee1231",
+            "outcome": "OUTCOME_SUCCEEDED",
+            "outcome_val": 0,
+            "error_code": "ERR_NONE",
+            "detail": "task done: all assignments verified",
+            "evidence_id": "pick_place_v1-b01fe619",
+            "wall_seconds": 16.789,
+            "fsm_trace": [
+              "PICK_A(attempt=1):OK",
+              "PLACE_A:OK",
+              "VERIFY_A(attempt=1):OK"
+            ],
+            "object_at_place": true,
+            "final_position_error_m": 9.19227808600467e-05,
+            "skip_verify": false
+          },
+          "expectation_met": true,
+          "recorder_exit": 0,
+          "owned_launch_exit": 0,
+          "unavailable_numeric_fields": {}
+        }
+      },
+      {
+        "case": "normal",
+        "object": "target_box_b",
+        "task": "B normal pick and place",
+        "run": "/artifacts/core-window/trial-02/run-47573dfd5369",
+        "result": {
+          "schema_version": 1,
+          "status": "PASS",
+          "backend": "velocity_servo",
+          "skill_backend": "mtc",
+          "physical_tasks_dispatched": 1,
+          "qualification": "FUNCTIONAL_SMOKE_ONLY",
+          "case": "normal",
+          "object": "target_box_b",
+          "out": "/artifacts/core-window/trial-02/run-47573dfd5369",
+          "runtime_fingerprint": "d423f22f120a84d4451256367326a178df7ea04d4fb87d8bff5386e29fc7f0bd",
+          "task_start_monotonic_ns": 529795572083,
+          "goal_pose": [
+            0.12,
+            -0.15,
+            0.0175
+          ],
+          "task_end_monotonic_ns": 548443678402,
+          "task": {
+            "action": "task",
+            "goal_uuid": "adb60a7a81b94be1960d821e94835128",
+            "outcome": "OUTCOME_SUCCEEDED",
+            "outcome_val": 0,
+            "error_code": "ERR_NONE",
+            "detail": "task done: all assignments verified",
+            "evidence_id": "pick_place_v1-5ff3f67d",
+            "wall_seconds": 17.837,
+            "fsm_trace": [
+              "PICK_A(attempt=1):OK",
+              "PLACE_A:OK",
+              "VERIFY_A(attempt=1):OK"
+            ],
+            "object_at_place": true,
+            "final_position_error_m": 2.7015582225142472e-05,
+            "skip_verify": false
+          },
+          "expectation_met": true,
+          "recorder_exit": 0,
+          "owned_launch_exit": 0,
+          "unavailable_numeric_fields": {}
+        }
+      },
+      {
+        "case": "dual_object",
+        "object": "target_box_a",
+        "task": "Dual-object demo",
+        "run": "/artifacts/core-window/trial-03/run-ba02d41dd93f",
+        "result": {
+          "schema_version": 1,
+          "status": "PASS",
+          "backend": "velocity_servo",
+          "skill_backend": "mtc",
+          "physical_tasks_dispatched": 1,
+          "qualification": "FUNCTIONAL_SMOKE_ONLY",
+          "case": "dual_object",
+          "object": "target_box_a",
+          "out": "/artifacts/core-window/trial-03/run-ba02d41dd93f",
+          "runtime_fingerprint": "d423f22f120a84d4451256367326a178df7ea04d4fb87d8bff5386e29fc7f0bd",
+          "task_start_monotonic_ns": 605511082559,
+          "goal_pose": [
+            0.12,
+            -0.15,
+            0.0175
+          ],
+          "task_end_monotonic_ns": 640679492723,
+          "task": {
+            "action": "demo",
+            "goal_uuid": "78a48530a3ae4f47ad976715ea2262a2",
+            "outcome": "OUTCOME_SUCCEEDED",
+            "outcome_val": 0,
+            "error_code": "ERR_NONE",
+            "detail": "task done: all assignments verified",
+            "evidence_id": "week1_demo_v1-3e47d496",
+            "wall_seconds": 34.406,
+            "fsm_trace": [
+              "PICK_A(attempt=1):OK",
+              "PLACE_A:OK",
+              "VERIFY_A(attempt=1):OK",
+              "PICK_B(attempt=1):OK",
+              "PLACE_B:OK",
+              "VERIFY_B(attempt=1):OK"
+            ],
+            "object_a_at_zone": true,
+            "object_b_at_zone": true,
+            "zone_a_error_m": 9.006727065745766e-05,
+            "zone_b_error_m": 8.881039506826007e-05,
+            "run_id": "week1_demo_v1-bfb70e01",
+            "scenario_id": "week1_demo_v1"
+          },
+          "expectation_met": true,
+          "recorder_exit": 0,
+          "owned_launch_exit": 0,
+          "unavailable_numeric_fields": {}
+        }
+      },
+      {
+        "case": "recovery_once",
+        "object": "target_box_a",
+        "task": "One injected failure with one bounded retry",
+        "run": "/artifacts/core-window/trial-04/run-de97341c3709",
+        "result": {
+          "schema_version": 1,
+          "status": "PASS",
+          "backend": "velocity_servo",
+          "skill_backend": "mtc",
+          "physical_tasks_dispatched": 1,
+          "qualification": "FUNCTIONAL_SMOKE_ONLY",
+          "case": "recovery_once",
+          "object": "target_box_a",
+          "out": "/artifacts/core-window/trial-04/run-de97341c3709",
+          "runtime_fingerprint": "d423f22f120a84d4451256367326a178df7ea04d4fb87d8bff5386e29fc7f0bd",
+          "task_start_monotonic_ns": 698958927134,
+          "goal_pose": [
+            0.12,
+            -0.15,
+            0.0175
+          ],
+          "task_end_monotonic_ns": 716655958392,
+          "task": {
+            "action": "task",
+            "goal_uuid": "b62ffa8ea97248269794ded84d3b3403",
+            "outcome": "OUTCOME_SUCCEEDED",
+            "outcome_val": 0,
+            "error_code": "ERR_NONE",
+            "detail": "task done: all assignments verified",
+            "evidence_id": "pick_place_v1-96c87518",
+            "wall_seconds": 16.928,
+            "fsm_trace": [
+              "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+              "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+              "PICK_A(attempt=2):OK",
+              "PLACE_A:OK",
+              "VERIFY_A(attempt=1):OK"
+            ],
+            "object_at_place": true,
+            "final_position_error_m": 5.645849256542364e-05,
+            "skip_verify": false
+          },
+          "expectation_met": true,
+          "recorder_exit": 0,
+          "owned_launch_exit": 0,
+          "unavailable_numeric_fields": {}
+        }
+      },
+      {
+        "case": "budget_exhaustion",
+        "object": "target_box_a",
+        "task": "Persistent injected failure must exhaust the budget",
+        "run": "/artifacts/core-window/trial-05/run-9f8be2f6920a",
+        "result": {
+          "schema_version": 1,
+          "status": "EXPECTED_FAILURE",
+          "backend": "velocity_servo",
+          "skill_backend": "mtc",
+          "physical_tasks_dispatched": 1,
+          "qualification": "FUNCTIONAL_SMOKE_ONLY",
+          "case": "budget_exhaustion",
+          "object": "target_box_a",
+          "out": "/artifacts/core-window/trial-05/run-9f8be2f6920a",
+          "runtime_fingerprint": "d423f22f120a84d4451256367326a178df7ea04d4fb87d8bff5386e29fc7f0bd",
+          "task_start_monotonic_ns": 777494310422,
+          "goal_pose": [
+            0.12,
+            -0.15,
+            0.0175
+          ],
+          "task_end_monotonic_ns": 778768598951,
+          "task": {
+            "action": "task",
+            "goal_uuid": "d36134476461496da2ad49e11d6c7248",
+            "outcome": "OUTCOME_FAILED",
+            "outcome_val": 1,
+            "error_code": "ERR_RECOVERY_EXHAUSTED",
+            "detail": "policy abort (BUDGET_EXHAUSTED): pick attempt 2 failed (error 23) (trace=PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED,RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1)),PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED); previous_skill=PICK cause=ERR_GRASP_FAILED legacy_error_code=23",
+            "evidence_id": "pick_place_v1-3b1b5a34",
+            "wall_seconds": 0.492,
+            "fsm_trace": [
+              "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+              "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+              "PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED"
+            ],
+            "object_at_place": false,
+            "final_position_error_m": null,
+            "skip_verify": false
+          },
+          "expectation_met": true,
+          "recorder_exit": 0,
+          "owned_launch_exit": 0,
+          "unavailable_numeric_fields": {
+            "task.final_position_error_m": "nan"
+          }
+        }
+      }
+    ],
+    "declaration_sha256": "49443988066401df875a36046c6308196d03cb8404bd61237b48ce6b557af0eb",
+    "backend": "velocity_servo",
+    "skill_backend": "mtc",
+    "window_id": "879aba4321e04a09a1535a22fdf407e0",
+    "no_replacements": true,
+    "runtime_fingerprint": "d423f22f120a84d4451256367326a178df7ea04d4fb87d8bff5386e29fc7f0bd"
+  },
+  "native_lifecycle": {
+    "schema_version": 1,
+    "status": "PASS",
+    "fixture": "three native attachment cycles",
+    "logical_robot_tasks": 0,
+    "source_sha256": "4ab4c0779e7d7594a8e3fb2701492eaa0640a10a9a2e752e448c782fc422f34b",
+    "lease_expiry_observed_s": 0.49512954599998693,
+    "final": {
+      "backend": "detachable_joint_v1",
+      "ready": true,
+      "engaged": false,
+      "object": "",
+      "session": "",
+      "lease_ms": 500,
+      "sim_ns": 26635000000,
+      "parent_link": "link5",
+      "relative_pose": [
+        0.0377215,
+        -0.180945,
+        -0.172424,
+        -1.7469e-05,
+        0.00693512,
+        -0.00251885,
+        0.999973
+      ],
+      "channels_connected": true,
+      "initial_joint_observed": [
+        true,
+        true
+      ],
+      "component_present": [
+        false,
+        false
+      ],
+      "detached_frames": 2
+    },
+    "heartbeat_errors": []
+  },
+  "motion_lifecycle": {
+    "schema_version": 1,
+    "status": "PASS",
+    "cases": [
+      {
+        "case": "cancel",
+        "outcome": 2,
+        "error_code": 32,
+        "execution_started": true,
+        "preempted": true,
+        "stop_confirmed": true,
+        "evidence_id": "mtc-9007087fa233416ca8f33d17ca9eab8f-5bd24eb2",
+        "observed_motion": true,
+        "handoff": [
+          {
+            "stage": "fixture-cancel",
+            "request_id": "mtc-9007087fa233416ca8f33d17ca9eab8f",
+            "target": [
+              0.22,
+              0.0,
+              0.2375
+            ],
+            "profile": "demo_veryslow",
+            "trajectory_sha256": "50b898e55ea9ea46240897506afedc72ff7394908de4843c9cc95d9e7e8ceef8",
+            "terminal_reply_received": true,
+            "transport_error": null,
+            "evidence_id": "mtc-9007087fa233416ca8f33d17ca9eab8f-5bd24eb2",
+            "outcome": 2,
+            "error_code": 32
+          }
+        ]
+      },
+      {
+        "case": "timeout",
+        "outcome": 1,
+        "error_code": 22,
+        "execution_started": true,
+        "preempted": true,
+        "stop_confirmed": true,
+        "evidence_id": "mtc-7b0cc974ccfe4eda9e5e4094d2db424a-a22792d8",
+        "observed_motion": true,
+        "handoff": [
+          {
+            "stage": "fixture-timeout",
+            "request_id": "mtc-7b0cc974ccfe4eda9e5e4094d2db424a",
+            "target": [
+              0.22,
+              0.0,
+              0.2375
+            ],
+            "profile": "demo_veryslow",
+            "trajectory_sha256": "027db8ce04ab3b2c7a70db68d1948c4e04fd9bf2833f720d93fe6464b52be833",
+            "terminal_reply_received": true,
+            "transport_error": null,
+            "evidence_id": "mtc-7b0cc974ccfe4eda9e5e4094d2db424a-a22792d8",
+            "outcome": 1,
+            "error_code": 22
+          }
+        ]
+      }
+    ],
+    "logical_robot_tasks": 0,
+    "source_sha256": "6e9a71d09394705fed33f9b29fc059d21edbd0838c852ae2ece4af78427c537c"
+  },
+  "native_expiry_time_reference": "monotonic timestamp recorded after stop_heartbeat joins; not the exact last heartbeat reply",
+  "joint_default_admission": "NO_GO_FOR_DEFAULT_ADMISSION",
+  "retained_prior_failures": [
+    {
+      "run_id": 40539227821,
+      "kind": "native startup health failed before any backend cycle",
+      "artifact_id": 12750206169,
+      "cause": "not established; bootstrap candidate fix tested in this later revision"
+    },
+    {
+      "run_id": 40537157656,
+      "kind": "camera export rejected source timestamp gaps after five declared tasks",
+      "artifact_id": 12750996664,
+      "new_learning_dataset_published": false
+    }
+  ],
+  "limits": [
+    "Functional smoke only; no success-rate estimate",
+    "Current default remains unchanged",
+    "No contact-grasp or hardware qualification",
+    "Earlier local core-v1 remains STOPPED",
+    "Latest camera job was skipped, not passed"
+  ]
+}

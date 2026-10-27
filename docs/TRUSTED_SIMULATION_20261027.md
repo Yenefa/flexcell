@@ -77,7 +77,8 @@ The completed receipts are in [the evidence archive](../setup/acceptance/trusted
   is committed. A one-second recorded context surrounds each task; unmeasured result
   distances become null with explicit unavailable-field metadata, never zero.
 - Three native attachment cycles passed release/reattach, cross-object ownership, rejection
-  of retired releases/re-engage, and heartbeat expiry (observed about 0.471 s after the
+  of retired releases/re-engage, and heartbeat expiry (observed about 0.471 s from the
+  timestamp recorded after stopping/joining the heartbeat worker, not from the exact
   final heartbeat reply). The isolated worker exited 0 and final health was clean.
 - Two actual MTC motion fixtures passed mid-motion cancellation and deadline expiry.
   Both confirmed controller termination, measured stop and preemption before the planned
@@ -114,6 +115,17 @@ detached physics over advancing steps and connected official command channels in
 Additional native startup diagnostics are saved on failure. This candidate change passed
 the local lifecycle fixture; the exact cause of the old CI failure was not directly
 observed in its limited native-status logging. Admission remains NO_GO.
+
+The implementation revision `05937ad` passed both [offline CI](https://github.com/Yenefa/flexcell/actions/runs/40542302649)
+and [full-stack CI](https://github.com/Yenefa/flexcell/actions/runs/40542302631), with
+550 tests and no errors, failures or skips. The latter completed in about 13 minutes
+26 seconds, including the committed five-task velocity/MTC window: A, B, dual-object,
+once recovery succeeded, and budget exhaustion failed as declared. The five tasks
+shared one runtime fingerprint and all cleaned up. The native lifecycle and measured
+MTC cancel/deadline fixtures passed too. The [receipt](../setup/acceptance/trusted_sim_20261027/ci-05937ad.json)
+records exact declarations, results, artifact digest and retained prior failures.
+The optional camera job was skipped on this revision; its earlier failed export remains
+unresolved. This record changes neither joint admission nor the earlier STOPPED window.
 
 Decision: [ADR-004](ADR/ADR-004-trusted-simulation-plane.md).
 Portable commands: [REPRODUCE.md](../REPRODUCE.md).
