@@ -30,6 +30,10 @@ Existing launches and baseline worlds are unchanged. Select carry and skill back
 explicitly. If joint integration is NO_GO, retain it and qualify velocity separately.
 Each configuration has a separate fingerprint; never pool it with historical cohorts.
 
+Current [D3 decision](../DETACHABLE_ADMISSION_20261027.md) is NO_GO for default joint
+admission. The implemented adapter remains a spike pending all task-book criteria;
+implementation direction does not waive backend qualification dependencies.
+
 This supersedes the earlier route restrictions only for these new profiles. MTC does not
 choose tasks or recovery. BehaviorTree.CPP, cuMotion, Isaac, Tesseract, visual Observe,
 hardware and learned policies remain later, evidence-triggered work.

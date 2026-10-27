@@ -98,5 +98,12 @@ sample; RGB is a data-only stream. The optional 30-minute camera job is separate
 required core smoke. Required branch protection still needs repository administration
 access; workflow files alone cannot enforce merge rules.
 
+Against the stricter task-book criteria, current joint admission is explicitly
+[NO_GO_FOR_DEFAULT_ADMISSION](DETACHABLE_ADMISSION_20261027.md): five non-contact cycles,
+ten-second stability, contact/pre-positioning cases, elevated free fall and 500 Hz/contact
+force checks are incomplete. The backend is an experimental spike, not an admitted default.
+The five-task acceptance declaration is now executed by CI from the committed revision;
+the earlier local STOPPED window remains a development record.
+
 Decision: [ADR-004](ADR/ADR-004-trusted-simulation-plane.md).
 Portable commands: [REPRODUCE.md](../REPRODUCE.md).

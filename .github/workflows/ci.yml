@@ -84,6 +84,8 @@ jobs:
         shell: bash
         run: |
           python3 setup/verify_phase3_facts.py --out /tmp/phase3-facts.json
+          python3 setup/acceptance/grasp_phase3_window_20261026/verify_phase3_window_v2.py
+          python3 setup/acceptance/grasp_phase3_window_20261026/selftest_verify_phase3_window_v2.py
 
       - name: build (first-party packages)
         shell: bash

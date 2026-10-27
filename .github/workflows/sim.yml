@@ -59,11 +59,11 @@ jobs:
           docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
             python3 /opt/flexcell/repo/scripts/sim_smoke.py --out /artifacts \
             --backend "$CARRY_BACKEND" --skill-backend "$SKILL_BACKEND"
-      - name: MTC uses the same single-arm executor and independent verification
-        if: inputs.skill_backend != 'mtc'
+      - name: Committed five-task MTC acceptance window, no replacement trials
         run: |
           docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
-            python3 /opt/flexcell/repo/scripts/sim_smoke.py --out /artifacts \
+            python3 /opt/flexcell/repo/scripts/sim_window.py \
+            --manifest /opt/flexcell/repo/infra/core-window.json --out /artifacts/core-window \
             --backend velocity_servo --skill-backend mtc
       - uses: actions/upload-artifact@v4
         if: always()
