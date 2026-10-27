@@ -1,0 +1,108 @@
+<sdf version='1.10'>
+  <world name='detachable_probe'>
+    <physics name='5ms' type='ignored'>
+      <max_step_size>0.005</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>500</real_time_update_rate>
+    </physics>
+
+    <plugin filename='gz-sim-physics-system' name='gz::sim::systems::Physics'/>
+    <plugin filename='gz-sim-user-commands-system' name='gz::sim::systems::UserCommands'/>
+    <plugin filename='gz-sim-scene-broadcaster-system' name='gz::sim::systems::SceneBroadcaster'/>
+    <plugin filename='gz-sim-contact-system' name='gz::sim::systems::Contact'/>
+
+    <gravity>0 0 -9.8</gravity>
+
+    <model name='ground_plane'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='collision'>
+          <geometry><plane><normal>0 0 1</normal><size>10 10</size></plane></geometry>
+        </collision>
+        <visual name='visual'>
+          <geometry><plane><normal>0 0 1</normal><size>10 10</size></plane></geometry>
+        </visual>
+      </link>
+    </model>
+
+    <!-- Stand-in for the gripper: static, teleported by the probe script. It is
+         the parent model, so both DetachableJoint plugins live here. -->
+    <model name='probe_box_a'>
+      <pose>0 0 0.30 0 0 0</pose>
+      <link name='link'>
+        <inertial>
+          <mass>0.05</mass>
+          <inertia>
+            <ixx>1.02e-05</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>1.02e-05</iyy><iyz>0</iyz>
+            <izz>1.02e-05</izz>
+          </inertia>
+        </inertial>
+        <collision name='collision'>
+          <geometry><box><size>0.035 0.035 0.035</size></box></geometry>
+        </collision>
+        <visual name='visual'>
+          <geometry><box><size>0.035 0.035 0.035</size></box></geometry>
+          <material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name='probe_box_b'>
+      <pose>0.3 0 0.30 0 0 0</pose>
+      <link name='link'>
+        <inertial>
+          <mass>0.05</mass>
+          <inertia>
+            <ixx>1.02e-05</ixx><ixy>0</ixy><ixz>0</ixz>
+            <iyy>1.02e-05</iyy><iyz>0</iyz>
+            <izz>1.02e-05</izz>
+          </inertia>
+        </inertial>
+        <collision name='collision'>
+          <geometry><box><size>0.035 0.035 0.035</size></box></geometry>
+        </collision>
+        <visual name='visual'>
+          <geometry><box><size>0.035 0.035 0.035</size></box></geometry>
+          <material><ambient>0.2 0.4 0.8 1</ambient><diffuse>0.2 0.4 0.8 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name='probe_parent'>
+      <static>true</static>
+      <pose>0 0 0.5 0 0 0</pose>
+      <link name='parent_link'>
+        <collision name='collision'>
+          <geometry><box><size>0.06 0.06 0.06</size></box></geometry>
+        </collision>
+        <visual name='visual'>
+          <geometry><box><size>0.06 0.06 0.06</size></box></geometry>
+        </visual>
+        <inertial>
+          <mass>1.0</mass>
+        </inertial>
+      </link>
+
+      <plugin filename='gz-sim-detachable-joint-system' name='gz::sim::systems::DetachableJoint'>
+        <parent_link>parent_link</parent_link>
+        <child_model>probe_box_a</child_model>
+        <child_link>link</child_link><!-- 8.15 requires child_link; docs say child_model_link -->
+        <detach_topic>/probe/a/detach</detach_topic>
+        <attach_topic>/probe/a/attach</attach_topic>
+        <output_topic>/probe/a/state</output_topic>
+      </plugin>
+
+      <plugin filename='gz-sim-detachable-joint-system' name='gz::sim::systems::DetachableJoint'>
+        <parent_link>parent_link</parent_link>
+        <child_model>probe_box_b</child_model>
+        <child_link>link</child_link><!-- 8.15 requires child_link; docs say child_model_link -->
+        <detach_topic>/probe/b/detach</detach_topic>
+        <attach_topic>/probe/b/attach</attach_topic>
+        <output_topic>/probe/b/state</output_topic>
+      </plugin>
+    </model>
+
+    <!-- Same geometry and mass as the training boxes in flexcell_world.sdf:
+         35 mm cube, 50 g. -->
+  </world>
+</sdf>
