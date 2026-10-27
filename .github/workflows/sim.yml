@@ -19,11 +19,11 @@ on:
         default: false
 permissions:
   contents: read
-concurrency:
-  group: sim-${{ github.ref }}
-  cancel-in-progress: false
 jobs:
   sim-smoke:
+    concurrency:
+      group: core-sim-${{ github.ref }}
+      cancel-in-progress: false
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
@@ -75,6 +75,9 @@ jobs:
   camera-data:
     if: (github.event_name == 'workflow_dispatch' && inputs.camera) || contains(github.event.pull_request.labels.*.name, 'data-smoke')
     needs: sim-smoke
+    concurrency:
+      group: camera-data-${{ github.ref }}
+      cancel-in-progress: false
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
