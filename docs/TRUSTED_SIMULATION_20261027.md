@@ -19,7 +19,7 @@ The following components are developed in the subsequent implementation branch.
 | LeRobot | Official v0.6.1 writer/loader, isolated CPU venv | Initial 142-frame roundtrip passed; no training or hardware replay |
 | CI | Offline tests and headless legacy/MTC smoke, separate camera/data job | GitHub full-stack run and required-check administration tracked separately |
 
-The initial implementation check passed **545 tests, no errors/failures/skips**.
+The implementation check passed **550 tests, no errors/failures/skips**.
 Development smokes completed one velocity/legacy, one velocity/MTC and one joint/legacy
 task, with independent verification and clean post-reset health. These are development
 checks, not a reliability sample. Code/config changes receive new fingerprints.
@@ -65,13 +65,38 @@ stamps, numeric state/actions, frame/episode counts and decoded video shape.
 
 ## Remaining gates
 
-1. Finish declared windows and publish exact receipts, including NO_GO outcomes.
-2. Qualify repeated joint attachment, release, ownership, expiry and relative-transform
-   stability; resolve rigid-attachment placement geometry.
-3. Confirm GitHub-hosted runtime, duration and failure artifacts. Required branch protection
-   needs repository administration access; workflow files alone cannot enforce merge rules.
-4. Qualify MTC cancel/timeout/recovery parity before making it default.
-5. Keep perception, hardware and model comparisons outside this window.
+The completed receipts are in [the evidence archive](../setup/acceptance/trusted_sim_20261027/README.md):
+
+- The first five-case core window retains STOPPED because strict JSON reporting rejected
+  the expected budget failure's NaN distance after cleanup. A separate raw fact audit
+  verifies A, B, dual-object, once recovery and the expected budget failure with clean
+  health. Six adversarial mutations are rejected. No replacement trials were run.
+- The corrected, declared data window passed with three successful tasks and two retained
+  failed tasks. The official LeRobot writer/loader verified **5 episodes / 574 frames**,
+  including all four source timestamps. The [complete sample](../data/examples/trusted_sim_20261027/README.md)
+  is committed. A one-second recorded context surrounds each task; unmeasured result
+  distances become null with explicit unavailable-field metadata, never zero.
+- Three native attachment cycles passed release/reattach, cross-object ownership, rejection
+  of retired releases/re-engage, and heartbeat expiry (observed about 0.471 s after the
+  final heartbeat reply). The isolated worker exited 0 and final health was clean.
+- Two actual MTC motion fixtures passed mid-motion cancellation and deadline expiry.
+  Both confirmed controller termination, measured stop and preemption before the planned
+  endpoint. These fixtures and the native lifecycle fixture now run in PR simulation CI.
+- A separately declared two-task joint/MTC window passed A and B. All **462 / 429**
+  attached synchronous samples were checked, with no transition samples removed: relative
+  translation drift stayed below **0.8 micrometres**, orientation drift below **3.3 microradians**.
+  Final placement errors were **24.7 / 19.9 mm**, within the existing 60 mm contract.
+  This verifies these oracle fixtures; it does not establish contact-grasp reliability.
+- The first GitHub-hosted full-stack [run](https://github.com/Yenefa/flexcell/actions/runs/40502091503)
+  built from scratch, tested all four packages, ran legacy/MTC tasks and uploaded artifacts
+  successfully in about 11 minutes. Later commits additionally include lifecycle fixtures.
+
+Remaining work is tighter object-frame placement geometry, longer qualification only after
+a new declaration, camera calibration/visual Observe, hardware and model comparisons.
+Defaults stay unchanged pending that qualification. CameraInfo was not qualified in the
+sample; RGB is a data-only stream. The optional 30-minute camera job is separate from
+required core smoke. Required branch protection still needs repository administration
+access; workflow files alone cannot enforce merge rules.
 
 Decision: [ADR-004](ADR/ADR-004-trusted-simulation-plane.md).
 Portable commands: [REPRODUCE.md](../REPRODUCE.md).

@@ -1,8 +1,8 @@
 # FlexCell CI (audit P3): the offline test ladder runs on every push/PR.
 #
-# Scope: build + test the TWO first-party packages offline (no simulator).
-# The runtime/acceptance batteries stay on the delivery machines (they need
-# Gazebo + the world; see REPRODUCE.md).  Steps mirror the proven local
+# Scope: interfaces + skills offline; sim.yml separately builds all four
+# first-party packages and runs headless native/MoveIt/MTC runtime fixtures.
+# Historical delivery batteries remain available in REPRODUCE.md. Steps mirror
 # ladder: colcon build -> colcon test (all suites, 0 failures required) ->
 # static ghost-attribute scan.
 name: ci
@@ -91,6 +91,14 @@ jobs:
           source /opt/ros/jazzy/setup.bash
           colcon build --symlink-install \
             --packages-select flexcell_interfaces flexcell_skills
+
+      - name: trusted-simulation evidence and failed-example audits
+        shell: bash
+        run: |
+          python3 setup/acceptance/trusted_sim_20261027/verify_core_v1.py --out /tmp/core-v1-facts.json
+          python3 setup/acceptance/trusted_sim_20261027/selftest_core_v1.py
+          python3 setup/acceptance/trusted_sim_20261027/verify_dataset.py
+          python3 setup/acceptance/trusted_sim_20261027/verify_joint_trace.py
 
       - name: colcon test (all suites, 0 failures required)
         shell: bash

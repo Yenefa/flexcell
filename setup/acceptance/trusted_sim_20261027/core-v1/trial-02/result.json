@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "backend": "velocity_servo",
+  "skill_backend": "mtc",
+  "physical_tasks_dispatched": 1,
+  "qualification": "FUNCTIONAL_SMOKE_ONLY",
+  "case": "normal",
+  "object": "target_box_b",
+  "out": "/artifacts/core-window-velocity-mtc-v1/trial-02/run-089f34381f2c",
+  "runtime_fingerprint": "1c39387f0361bb414f21321936faa970f28a6484bdb7f27a431b335aa1dfe3ec",
+  "task_start_monotonic_ns": 11852191316497,
+  "goal_pose": [
+    0.12,
+    -0.15,
+    0.0175
+  ],
+  "task_end_monotonic_ns": 11874377893324,
+  "task": {
+    "action": "task",
+    "goal_uuid": "40ea3bf8315c4cdb92d46cd6578d0554",
+    "outcome": "OUTCOME_SUCCEEDED",
+    "outcome_val": 0,
+    "error_code": "ERR_NONE",
+    "detail": "task done: all assignments verified",
+    "evidence_id": "pick_place_v1-b478a749",
+    "wall_seconds": 20.786,
+    "fsm_trace": [
+      "PICK_A(attempt=1):OK",
+      "PLACE_A:OK",
+      "VERIFY_A(attempt=1):OK"
+    ],
+    "object_at_place": true,
+    "final_position_error_m": 8.00737576361073e-05,
+    "skip_verify": false
+  },
+  "expectation_met": true,
+  "recorder_exit": 0,
+  "owned_launch_exit": 0
+}

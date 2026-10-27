@@ -1,0 +1,47 @@
+{
+  "schema_version": 1,
+  "status": "RAW_FUNCTIONAL_FACTS_VERIFIED",
+  "original_window_status": "STOPPED",
+  "original_failure": "NaN report serialization after cleanup",
+  "reporting_qualification": "NOT_GRANTED_BY_ORIGINAL_WINDOW",
+  "trials": [
+    {
+      "trial": 1,
+      "goal_uuid": "989d043fc7a9428f950d00b7b5f013d9",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error_code": "ERR_NONE",
+      "cleanup_health": "PASS"
+    },
+    {
+      "trial": 2,
+      "goal_uuid": "40ea3bf8315c4cdb92d46cd6578d0554",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error_code": "ERR_NONE",
+      "cleanup_health": "PASS"
+    },
+    {
+      "trial": 3,
+      "goal_uuid": "dcf3f06fb1164343bf83c6638109f9af",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error_code": "ERR_NONE",
+      "cleanup_health": "PASS"
+    },
+    {
+      "trial": 4,
+      "goal_uuid": "6942f1fef1b84e3c8c2dc98d2838de5f",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error_code": "ERR_NONE",
+      "cleanup_health": "PASS"
+    },
+    {
+      "trial": 5,
+      "goal_uuid": "dcee3ff9d3d447cf98c0f151ca88aef1",
+      "outcome": "OUTCOME_FAILED",
+      "error_code": "ERR_RECOVERY_EXHAUSTED",
+      "cleanup_health": "PASS"
+    }
+  ],
+  "new_robot_runs": 0,
+  "source_tree_sha256": "8a61296d0101b447fbb19ce25e2c587d4b75547bfc74f56ba02782e90f2efe70",
+  "scope": "Five functional tasks; not a reliability estimate or grasp-cause inference"
+}

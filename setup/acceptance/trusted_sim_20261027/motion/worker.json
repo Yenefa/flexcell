@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "cases": [
+    {
+      "case": "cancel",
+      "outcome": 2,
+      "error_code": 32,
+      "execution_started": true,
+      "preempted": true,
+      "stop_confirmed": true,
+      "evidence_id": "mtc-d64d9210153d41d29917f9768a16eb71-f7448158",
+      "observed_motion": true,
+      "handoff": [
+        {
+          "stage": "fixture-cancel",
+          "request_id": "mtc-d64d9210153d41d29917f9768a16eb71",
+          "target": [
+            0.22,
+            0.0,
+            0.2375
+          ],
+          "profile": "demo_veryslow",
+          "trajectory_sha256": "1ba5b31839f7ef3925856d4a809b62d9b52ed1648290e22019d86932aec5e2fc",
+          "terminal_reply_received": true,
+          "transport_error": null,
+          "evidence_id": "mtc-d64d9210153d41d29917f9768a16eb71-f7448158",
+          "outcome": 2,
+          "error_code": 32
+        }
+      ]
+    },
+    {
+      "case": "timeout",
+      "outcome": 1,
+      "error_code": 22,
+      "execution_started": true,
+      "preempted": true,
+      "stop_confirmed": true,
+      "evidence_id": "mtc-9dfbc29d2ba24f49a564faadb8dfbe4b-33a560e6",
+      "observed_motion": true,
+      "handoff": [
+        {
+          "stage": "fixture-timeout",
+          "request_id": "mtc-9dfbc29d2ba24f49a564faadb8dfbe4b",
+          "target": [
+            0.22,
+            0.0,
+            0.2375
+          ],
+          "profile": "demo_veryslow",
+          "trajectory_sha256": "450aa282fbdbdf2690b0cefc2aea43f370dad6bb62a3b1b679eef0ad6a1f7e45",
+          "terminal_reply_received": true,
+          "transport_error": null,
+          "evidence_id": "mtc-9dfbc29d2ba24f49a564faadb8dfbe4b-33a560e6",
+          "outcome": 1,
+          "error_code": 22
+        }
+      ]
+    }
+  ],
+  "logical_robot_tasks": 0,
+  "source_sha256": "6e9a71d09394705fed33f9b29fc059d21edbd0838c852ae2ece4af78427c537c"
+}

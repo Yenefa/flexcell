@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "backend": "velocity_servo",
+  "skill_backend": "mtc",
+  "physical_tasks_dispatched": 1,
+  "qualification": "FUNCTIONAL_SMOKE_ONLY",
+  "case": "recovery_once",
+  "object": "target_box_a",
+  "out": "/artifacts/core-window-velocity-mtc-v1/trial-04/run-039f4a4f29c3",
+  "runtime_fingerprint": "1c39387f0361bb414f21321936faa970f28a6484bdb7f27a431b335aa1dfe3ec",
+  "task_start_monotonic_ns": 12038484121276,
+  "goal_pose": [
+    0.12,
+    -0.15,
+    0.0175
+  ],
+  "task_end_monotonic_ns": 12058677090684,
+  "task": {
+    "action": "task",
+    "goal_uuid": "6942f1fef1b84e3c8c2dc98d2838de5f",
+    "outcome": "OUTCOME_SUCCEEDED",
+    "outcome_val": 0,
+    "error_code": "ERR_NONE",
+    "detail": "task done: all assignments verified",
+    "evidence_id": "pick_place_v1-761d909b",
+    "wall_seconds": 19.25,
+    "fsm_trace": [
+      "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+      "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+      "PICK_A(attempt=2):OK",
+      "PLACE_A:OK",
+      "VERIFY_A(attempt=1):OK"
+    ],
+    "object_at_place": true,
+    "final_position_error_m": 9.911486515672146e-05,
+    "skip_verify": false
+  },
+  "expectation_met": true,
+  "recorder_exit": 0,
+  "owned_launch_exit": 0
+}

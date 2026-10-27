@@ -2,7 +2,6 @@ name: trusted-simulation
 on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
-    paths: ['src/**', 'infra/**', 'scripts/**', 'setup/**', 'worlds/**', '.github/workflows/sim.yml']
   push:
     branches: [main]
   workflow_dispatch:
@@ -44,6 +43,14 @@ jobs:
           mkdir -p artifacts
           docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci bash -c \
             'colcon test --merge-install --test-result-base /artifacts/test-results && colcon test-result --test-result-base /artifacts/test-results --verbose && python3 /opt/flexcell/repo/setup/82_undefined_attr_check.py /opt/flexcell/repo/src/flexcell'
+      - name: Native joint ownership, reattachment and lease expiry
+        run: |
+          docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
+            python3 /opt/flexcell/repo/setup/acceptance/trusted_sim_20261027/joint_lifecycle.py --out /artifacts
+      - name: MTC measured mid-motion cancel and deadline stop
+        run: |
+          docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
+            python3 /opt/flexcell/repo/setup/acceptance/trusted_sim_20261027/motion_lifecycle.py --out /artifacts
       - name: One bounded task, no replacement attempts
         env:
           CARRY_BACKEND: ${{ inputs.carry_backend || 'velocity_servo' }}

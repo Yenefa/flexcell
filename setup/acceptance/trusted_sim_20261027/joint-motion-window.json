@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "max_logical_tasks": 5,
+  "camera": false,
+  "purpose": "Two declared current joint/MTC integration tasks, stop without replacements",
+  "episodes": [
+    {
+      "case": "normal",
+      "object": "target_box_a",
+      "task": "A joint/MTC integration"
+    },
+    {
+      "case": "normal",
+      "object": "target_box_b",
+      "task": "B joint/MTC integration"
+    }
+  ]
+}

@@ -1,0 +1,265 @@
+{
+  "schema_version": 1,
+  "status": "FUNCTIONAL_WINDOW_PASS",
+  "episodes": [
+    {
+      "case": "normal",
+      "object": "target_box_a",
+      "task": "Place target_box_a at the requested table position",
+      "run": "/artifacts/data-window-velocity-mtc-v1/trial-01/run-16a563584f2a",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "velocity_servo",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "normal",
+        "object": "target_box_a",
+        "out": "/artifacts/data-window-velocity-mtc-v1/trial-01/run-16a563584f2a",
+        "runtime_fingerprint": "89ab0d42f94316d22ba45e40aa965695df5079c140b7d32e4132015c80eabf20",
+        "recording_start_monotonic_ns": 12574684744207,
+        "recording_context_s": 1.0,
+        "task_start_monotonic_ns": 12575686988078,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 12605974400029,
+        "recording_end_monotonic_ns": 12606974768045,
+        "task": {
+          "action": "task",
+          "goal_uuid": "f478b345eae0413fa5e817461feaeb78",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-517a6d57",
+          "wall_seconds": 29.197,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 6.354992541330551e-05,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "normal",
+      "object": "target_box_b",
+      "task": "Place target_box_b at the requested table position",
+      "run": "/artifacts/data-window-velocity-mtc-v1/trial-02/run-574558053de9",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "velocity_servo",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "normal",
+        "object": "target_box_b",
+        "out": "/artifacts/data-window-velocity-mtc-v1/trial-02/run-574558053de9",
+        "runtime_fingerprint": "89ab0d42f94316d22ba45e40aa965695df5079c140b7d32e4132015c80eabf20",
+        "recording_start_monotonic_ns": 12681129650637,
+        "recording_context_s": 1.0,
+        "task_start_monotonic_ns": 12682130148796,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 12713381489911,
+        "recording_end_monotonic_ns": 12714381654800,
+        "task": {
+          "action": "task",
+          "goal_uuid": "01d2489d43144c969f0c60b4ea6a5a44",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-16194c73",
+          "wall_seconds": 30.034,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 2.5587671875915158e-05,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "normal",
+      "object": "target_box_a",
+      "task": "Place target_box_a at the requested table position",
+      "run": "/artifacts/data-window-velocity-mtc-v1/trial-03/run-12e7dd739d02",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "velocity_servo",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "normal",
+        "object": "target_box_a",
+        "out": "/artifacts/data-window-velocity-mtc-v1/trial-03/run-12e7dd739d02",
+        "runtime_fingerprint": "89ab0d42f94316d22ba45e40aa965695df5079c140b7d32e4132015c80eabf20",
+        "recording_start_monotonic_ns": 12789328776352,
+        "recording_context_s": 1.0,
+        "task_start_monotonic_ns": 12790329845765,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 12818979204412,
+        "recording_end_monotonic_ns": 12819979306181,
+        "task": {
+          "action": "task",
+          "goal_uuid": "802c3ee15e394d27807e712e94de7192",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-8ae566b1",
+          "wall_seconds": 27.244,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 4.6094864154945304e-05,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "unreachable_place",
+      "object": "target_box_a",
+      "task": "Attempt the declared unreachable place and preserve the failure",
+      "run": "/artifacts/data-window-velocity-mtc-v1/trial-04/run-202d226f2e0c",
+      "result": {
+        "schema_version": 1,
+        "status": "EXPECTED_FAILURE",
+        "backend": "velocity_servo",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "unreachable_place",
+        "object": "target_box_a",
+        "out": "/artifacts/data-window-velocity-mtc-v1/trial-04/run-202d226f2e0c",
+        "runtime_fingerprint": "89ab0d42f94316d22ba45e40aa965695df5079c140b7d32e4132015c80eabf20",
+        "recording_start_monotonic_ns": 12893776283852,
+        "recording_context_s": 1.0,
+        "task_start_monotonic_ns": 12894776384110,
+        "goal_pose": [
+          0.44,
+          0.4,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 12912140336914,
+        "recording_end_monotonic_ns": 12913140510806,
+        "task": {
+          "action": "task",
+          "goal_uuid": "fcd289d2739a470ab112d1d79063ecaa",
+          "outcome": "OUTCOME_FAILED",
+          "outcome_val": 1,
+          "error_code": "ERR_SKILL_FAILED",
+          "detail": "policy abort (NON_RECOVERABLE): place failed (ERR_MOTION_FAILED, carried box is not retried) (trace=PICK_A(attempt=1):OK,PLACE_A:FAIL); previous_skill=PLACE cause=ERR_MOTION_FAILED legacy_error_code=30",
+          "evidence_id": "pick_place_v1-16ae21bd",
+          "wall_seconds": 16.203,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:FAIL"
+          ],
+          "object_at_place": false,
+          "final_position_error_m": null,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {
+          "task.final_position_error_m": "nan"
+        }
+      }
+    },
+    {
+      "case": "budget_exhaustion",
+      "object": "target_box_a",
+      "task": "Abort after the declared grasp recovery budget is exhausted",
+      "run": "/artifacts/data-window-velocity-mtc-v1/trial-05/run-406baebb5c3f",
+      "result": {
+        "schema_version": 1,
+        "status": "EXPECTED_FAILURE",
+        "backend": "velocity_servo",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "budget_exhaustion",
+        "object": "target_box_a",
+        "out": "/artifacts/data-window-velocity-mtc-v1/trial-05/run-406baebb5c3f",
+        "runtime_fingerprint": "89ab0d42f94316d22ba45e40aa965695df5079c140b7d32e4132015c80eabf20",
+        "recording_start_monotonic_ns": 12985923510423,
+        "recording_context_s": 1.0,
+        "task_start_monotonic_ns": 12986925219552,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 12988333462233,
+        "recording_end_monotonic_ns": 12989333556434,
+        "task": {
+          "action": "task",
+          "goal_uuid": "179e7f3c040e4d88bed8c3672e986f60",
+          "outcome": "OUTCOME_FAILED",
+          "outcome_val": 1,
+          "error_code": "ERR_RECOVERY_EXHAUSTED",
+          "detail": "policy abort (BUDGET_EXHAUSTED): pick attempt 2 failed (error 23) (trace=PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED,RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1)),PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED); previous_skill=PICK cause=ERR_GRASP_FAILED legacy_error_code=23",
+          "evidence_id": "pick_place_v1-7de11bdc",
+          "wall_seconds": 0.401,
+          "fsm_trace": [
+            "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+            "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+            "PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED"
+          ],
+          "object_at_place": false,
+          "final_position_error_m": null,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {
+          "task.final_position_error_m": "nan"
+        }
+      }
+    }
+  ],
+  "declaration_sha256": "e03a868f1f752f92acd1a1259926def72a3ab588c10dd8068200607e0dec81f9",
+  "backend": "velocity_servo",
+  "skill_backend": "mtc",
+  "window_id": "0467dad310ef4b96bfe98103df670f5e",
+  "no_replacements": true,
+  "runtime_fingerprint": "89ab0d42f94316d22ba45e40aa965695df5079c140b7d32e4132015c80eabf20"
+}
