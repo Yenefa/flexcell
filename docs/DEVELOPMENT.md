@@ -95,6 +95,13 @@ Probe output is preserved independently of benchmark qualification and does
 not modify the frozen carry mechanism. See
 [diagnostic verification and the next physical evidence collection](GRASP_PROBE_20261008.md).
 
+For #32's Phase-3 window, use the opt-in per-trial observation gate only after
+deploying reviewed PR #50 telemetry. Missing or ambiguous evidence stops the
+next trial, including within A4/B5; replay checks the exported log prefixes and
+segment counts. Physical failures remain observations, not replacement trials.
+See [the fixed window and manual host handoff](GRASP_PHASE3_GATE_20261026.md).
+No new live run or benchmark qualification is claimed by this cloud change.
+
 **Before coding:**
 
 - Which Issue does this belong to? (none → open one, or extend an existing RFC)

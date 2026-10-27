@@ -11,6 +11,7 @@ Usage (ROS environment sourced, stack running):
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 import math
 from pathlib import Path
@@ -133,7 +134,7 @@ def capture_pick(result, meta):
     return row
 
 
-def run_probe(args, transport, sleep=time.sleep):
+def run_probe(args, transport, sleep=time.sleep, evidence_gate=None):
     """Offline tests drive the real trial loop through a fake transport."""
     rows = []
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
@@ -180,6 +181,15 @@ def run_probe(args, transport, sleep=time.sleep):
                         row['harness_error'] = row['harness_error'] or 'cleanup reset failed'
                 else:
                     row['cleanup'] = dict(ok=False, not_run='action termination unknown')
+            if evidence_gate is not None and not row.get('harness_error'):
+                try:
+                    row['carry_observation'] = evidence_gate(row)
+                except Exception as exc:
+                    # Cleanup is already confirmed. Persist this observation,
+                    # then stop before the next prepare/PICK, including when
+                    # the read-only checker itself fails unexpectedly.
+                    row['harness_error'] = 'carry observation gate failed: %s: %s' % (
+                        type(exc).__name__, exc)
             row['elapsed_s'] = round(time.monotonic() - t0, 3)
             rows.append(row)
             stream.write(json.dumps(row, allow_nan=False) + '\n')
@@ -278,6 +288,10 @@ def main():
     ap.add_argument('--release-s', type=float, default=1.5)
     ap.add_argument('--stop-timeout-s', type=float, default=5.0)
     ap.add_argument('--reset-timeout-s', type=float, default=300.0)
+    ap.add_argument('--require-carry-observation', action='store_true',
+                    help='Phase-3: stop before another trial if #50 session evidence is incomplete')
+    ap.add_argument('--pick-log', type=Path, default=Path.home() / '.ros/flexcell/pick.jsonl')
+    ap.add_argument('--carry-log', type=Path, default=Path.home() / '.ros/flexcell/carry.jsonl')
     args = ap.parse_args()
     if Path(args.out).exists():
         ap.error('output already exists; use a new evidence path')
@@ -289,12 +303,23 @@ def main():
     if any(not math.isfinite(getattr(args, key)) or getattr(args, key) < 0
            for key in ('settle_s', 'release_s')):
         ap.error('settle/release waits must be finite and nonnegative')
+    evidence_gate = None
+    if args.require_carry_observation:
+        try:
+            path = Path(__file__).with_name('112_carry_observation_gate.py')
+            spec = importlib.util.spec_from_file_location('carry_observation_gate', path)
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+            evidence_gate = module.LiveObservationGate(args.pick_log, args.carry_log)
+        except Exception as exc:
+            print('HARNESS_ERROR: carry observation gate setup failed: %s' % exc, file=sys.stderr)
+            return 2
     probe = RosProbe(args)
     try:
         if not probe.ready():
             print('HARNESS_ERROR: pick/place action servers unavailable', file=sys.stderr)
             return 2
-        rows = run_probe(args, probe)
+        rows = run_probe(args, probe, evidence_gate=evidence_gate)
         valid = [r for r in rows if 'outcome' in r and not r.get('harness_error')]
         good = [r for r in valid if r['pick_ok']]
         grasp_fail = [r for r in valid if r['error_code'] == 23]

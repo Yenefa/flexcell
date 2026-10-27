@@ -78,6 +78,7 @@
 | E-022 | Class-scoped static attribute scan and effective CI failure exit (#24) | LOCAL 172 PASS (20 NEW); ROS CI 246 PASS; SCAN 35/0; GAZEBO NOT_RUN | [STATIC_SCAN_20261007.md](STATIC_SCAN_20261007.md) |
 | E-023 | Hybrid batch fast-arm gate + smoke qualification (#8/#12)              | LOCAL 194 PASS (22 NEW); SCAN 35/0; ROBOT/MODEL NOT_RUN | [HYBRID_BATCH_GATE_20261007.md](HYBRID_BATCH_GATE_20261007.md) |
 | E-024 | Grasp-probe action/result boundaries and trial evidence                 | LOCAL 227 PASS (33 NEW); THREE SYNTHETIC CLI REPRODUCTIONS PASS; LIVE NOT_RUN | [GRASP_PROBE_20261008.md](GRASP_PROBE_20261008.md) |
+| E-025 | GRASP-B-001 per-trial observation gate and source-log replay (#32)       | LOCAL 112 PASS; #50 COMPAT 137 PASS; SCAN 37/0; LIVE NOT_RUN | [GRASP_PHASE3_GATE_20261026.md](GRASP_PHASE3_GATE_20261026.md) |
 | M3-*  | Hybrid Agent Benchmark (cells A-D × S1-S7)                              | NOT RUN                                                                                      | — (RFC #15; harness #7/#8/#9)                                         |
 
 ## Entries
@@ -836,6 +837,35 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
   before/after reproduction, raw reports, archived failure inventory with
   source fingerprints, exact commands/hashes, pytest JUnit and logs.
   [Repair and online evidence instructions](GRASP_PROBE_20261008.md).
+
+### E-025 — GRASP-B-001 Phase-3 evidence gate (2026-10-26, cloud)
+
+- **Purpose:** make the next diagnostic window stop before another trial when
+  #50 telemetry is missing or inconsistent, rather than discovering missing
+  evidence only after A4/B5 finish. Ref #32; source base `main@86bb4bd`.
+- **Change:** opt-in `--require-carry-observation` in the existing 111 probe,
+  after confirmed cleanup and before another prepare/PICK; read-only 112
+  checker verifies typed terminal results, measured PICK evidence, unique
+  object/time session association, summary/final/stop and cumulative counters.
+  No carry mechanism, skill contract, thresholds or physical command added.
+- **Evidence interpretation:** recorded failures remain failures. PICK-prefix
+  counters and full-session counters have separate scopes because successful
+  sessions also include PLACE. No TF-age or physical-following claim is made
+  from missing-call counts or acknowledged pin requests.
+- **Replay:** whole original log snapshots and their captured prefixes are
+  SHA-256 checked. Pre-existing bytes are retained, new malformed rows stop
+  the probe, derived totals are recomputed, and reports never overwrite files.
+- **Verification:** 112 related local tests pass (79 new); 137 pass in the
+  combined #50 worktree, including its 25 loop observation/differential tests;
+  static scan 37 files/0 problems. Test logs, JUnit and scan are preserved in
+  `setup/acceptance/grasp_phase3_gate_20261026/`. Inputs are synthetic; live
+  Gazebo, GPU, model calls and physical hardware actions are NOT_RUN. Full
+  ROS CI is reported separately from these local Python checks.
+- **Next:** reviewed #50 plus this gate on the simulation host, fixed
+  A1 → A4 → B5 with all stdout/stderr/exits, health, raw stage logs, code/config/
+  world identity and a new runtime fingerprint. No refill or expanded sample.
+  Root cause UNKNOWN; n≥50/AC@90 and benchmark qualifications stay frozen.
+  [Manual handoff](GRASP_PHASE3_GATE_20261026.md).
 
 ## Evidence locations
 

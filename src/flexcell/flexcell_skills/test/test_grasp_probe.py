@@ -218,6 +218,45 @@ def test_existing_evidence_is_never_truncated(probe, tmp_path):
     assert not transport.calls
 
 
+@pytest.mark.parametrize('exception', [ValueError('missing final'), RuntimeError('checker failed')])
+def test_observation_gate_failure_is_persisted_before_another_physical_trial(probe, tmp_path, exception):
+    transport = Transport()
+    def gate(row):
+        assert transport.calls[-1] == 'cleanup'
+        raise exception
+    config = args(tmp_path)
+    rows = probe.run_probe(config, transport, sleep=lambda _: None, evidence_gate=gate)
+    saved = [json.loads(line) for line in Path(config.out).read_text().splitlines()]
+    assert len(rows) == len(saved) == 1
+    assert saved[0]['pick_ok'] is True  # measured result survives evidence failure
+    assert 'carry observation gate failed' in saved[0]['harness_error']
+    assert transport.calls.count('prepare') == 1
+
+
+def test_complete_observation_gate_preserves_physical_failures_and_existing_cleanup(probe, tmp_path):
+    transport = Transport('physical_failure')
+    observed = []
+    def gate(row):
+        assert transport.calls[-1] == 'cleanup'
+        observed.append(row['trial'])
+        return dict(session='synthetic-%d' % row['trial'])
+    rows = probe.run_probe(args(tmp_path), transport, sleep=lambda _: None, evidence_gate=gate)
+    assert observed == [1, 2]
+    assert all(r['error_code'] == 23 and not r['harness_error'] for r in rows)
+    assert all('carry_observation' in r for r in rows)
+    assert not any(isinstance(c, tuple) and c[0] == 'place' for c in transport.calls)
+
+
+def test_observation_gate_setup_failure_happens_before_ros_or_physical_dispatch(probe, tmp_path, monkeypatch):
+    monkeypatch.setattr(probe.sys, 'argv', ['probe', '--require-carry-observation',
+                        '--pick-log', str(tmp_path / 'missing-pick.jsonl'),
+                        '--carry-log', str(tmp_path / 'missing-carry.jsonl'),
+                        '--out', str(tmp_path / 'A1.jsonl')])
+    monkeypatch.setattr(probe, 'RosProbe', lambda _: pytest.fail('must not initialize ROS'))
+    assert probe.main() == 2
+    assert not (tmp_path / 'A1.jsonl').exists()
+
+
 def test_failed_injection_clear_prevents_pick(probe, monkeypatch):
     transport = probe.RosProbe.__new__(probe.RosProbe)
     monkeypatch.setattr(transport, 'reset', lambda: dict(ok=True))

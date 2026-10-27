@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "date_utc": "2026-10-26",
+  "issue": 32,
+  "base_commit": "86bb4bded897fc90233896acfa629fb5a6623552",
+  "telemetry_dependency": "be6684b30da1eafe80a585f84981a76a511ef48a",
+  "checks": {
+    "pytest": {
+      "returncode": 0,
+      "working_tree": "/workspace/flexcell",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-m",
+        "pytest",
+        "-q",
+        "-o",
+        "addopts=",
+        "--junitxml=/workspace/flexcell/setup/acceptance/grasp_phase3_gate_20261026/pytest.xml",
+        "src/flexcell/flexcell_skills/test/test_carry_observation_gate.py",
+        "src/flexcell/flexcell_skills/test/test_grasp_probe.py"
+      ]
+    },
+    "compat_pytest": {
+      "returncode": 0,
+      "working_tree": "/workspace/flexcell-observation-compat",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "-m",
+        "pytest",
+        "-q",
+        "-o",
+        "addopts=",
+        "--junitxml=/workspace/flexcell/setup/acceptance/grasp_phase3_gate_20261026/compat_pytest.xml",
+        "src/flexcell/flexcell_skills/test/test_carry_observation_gate.py",
+        "src/flexcell/flexcell_skills/test/test_grasp_probe.py",
+        "src/flexcell/flexcell_skills/test/test_carry_loop_observation.py"
+      ]
+    },
+    "static_scan": {
+      "returncode": 0,
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "setup/82_undefined_attr_check.py",
+        "src/flexcell"
+      ]
+    }
+  },
+  "source_sha256": {
+    "setup/111_grasp_probe.py": "c1d5d86fbd8223516e760f135f7b7fe9ae10d80ab3accbe25a199c474371610e",
+    "setup/112_carry_observation_gate.py": "842b197fe2bbd6688cdd86a6d49d099df234b646ac2c73eb2da2cd2050b14c71",
+    "src/flexcell/flexcell_skills/test/test_carry_observation_gate.py": "b911d11ced9479707d32d2a572363eac479b75e2810acd09f75ec0d345680f8b",
+    "src/flexcell/flexcell_skills/test/test_grasp_probe.py": "e0b75f19296aa52a11c1dee9c5785017ae593ce4adac3a9e4b15411e4394c203"
+  },
+  "evidence_kind": "SYNTHETIC_OFFLINE_ONLY",
+  "root_cause": "UNKNOWN",
+  "gazebo": "NOT_RUN",
+  "model_calls": "NOT_RUN",
+  "physical_hardware": "NOT_RUN",
+  "ros_build_local": "NOT_RUN",
+  "qualification": "NOT_GRANTED"
+}
