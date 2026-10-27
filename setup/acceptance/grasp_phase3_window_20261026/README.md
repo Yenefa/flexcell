@@ -2,8 +2,20 @@
 
 **Verdict: `NOT_REPRODUCED_IN_THIS_WINDOW`** — the historical failure population
 was not reproduced. What *was* found is a different, narrower thing: **the box
-never really follows the gripper.** It trails its pinned pose by 3–72 mm, and the
-window's single failure is simply the worst case of that trailing.
+trails the pose it is pinned to.** It trails by 0.7–72 mm, and the window's
+single failure is the largest lag in the sample. The archive does not say the
+lag caused it; that sentence read "simply the worst case of that trailing" until
+the 2026-10-27 corrigendum, and the difference is the whole point.
+
+> **Corrigendum 2026-10-27.** Two claims in this document are withdrawn. The
+> +17.4 mm "lower bound" is a ten-trial envelope, not a physical bound, and it
+> cannot be computed on the historical archive at all (that archive records no
+> arm travel). This failure is **not** separable from the historical population
+> by this archive: +0.0234 m sits inside the historical support
+> −0.0103…+0.0298 m, with 7 of 92 failures at or above it. See
+> [CORRIGENDUM.md](CORRIGENDUM.md). No raw file changed; `verify_phase3_window.py`
+> is kept byte for byte as the historical version, and
+> `verify_phase3_window_v2.py` is the corrected one.
 
 Ten declared trials on a cold-started stack on the WSL execution host:
 `A1` → `A4` → `B5`, one object each, run at source `c37af8d` (includes #49
@@ -78,21 +90,28 @@ cycle the sample happens to land.
 archive measures the box *between* pins; there is one sample per trial. The
 number is consistent with free fall over one period and that is all.
 
-## The boundary that keeps this honest
+## The envelope, and what it is not
 
-If the box merely trails, it cannot end below its starting height. The shortest
-arm travel in the window was 89.1 mm and the worst lag 71.7 mm, so **the lowest
-rise this mechanism can produce is +17.4 mm** — positive.
+If the box merely trails a gripper it stays in contact with, it cannot end below
+its starting height. In this window the shortest arm travel was 89.1 mm and the
+worst observed lag 71.7 mm, so **within these ten trials the lowest rise the
+arithmetic allows is +17.4 mm**.
 
-The historical population does not live there: of the 92 natural code-23 failures
-in [`grasp_b001_20261025`](../grasp_b001_20261025), the median rise is
-**−0.0003 m** and **54 of them are below zero**. This window's failure rose
-+0.0234 m.
+That is an envelope over ten trials, not a physical bound. Nothing here
+constrains lag from above: one period of free fall is 49 mm and the observed
+worst is 71.7 mm, so the mechanism offered for the lag already exceeds the
+figure that would cap it. Nor can the envelope travel: the historical archive
+records box endpoints, not arm travel, so the same arithmetic cannot be run on
+the 92 historical failures at all.
 
-So the failure seen here is **not** the historical failure. #48's bimodal reading
-stands, and the historical population was not reproduced in ten trials — at the
-historical 20.4 % rate the chance of seeing none in ten is about 11 %, so this is
-also weak evidence of anything.
+What the historical population does say is narrower, and more awkward for the
+story above: the window's failure (+0.0234 m) sits inside the historical support
+(−0.0103 … +0.0298 m), and 7 of the 92 rose at least as far. So the failure seen
+here is **not** the historical median, and it is **not** separable from the
+historical population by this archive. #48's bimodal reading is not overturned;
+it is also not confirmed. The historical failure was not reproduced in ten
+trials, and at the 20.4 % historical rate a clean ten-trial window happens about
+10 % of the time either way.
 
 ## The gate failed once, and it was my rule, not the data
 
