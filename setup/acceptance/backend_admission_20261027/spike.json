@@ -1,0 +1,76 @@
+{
+  "world": "detachable_probe.sdf",
+  "partition": "probe_519839",
+  "started": "2026-10-27T18:32:12",
+  "findings": [
+    {
+      "topic": "parameter name",
+      "observed": "the 8.15 plugin requires <child_link>",
+      "documented": "the sim 8 docs list <child_model_link>",
+      "failure_mode": "one Err line at load, plugin never initialises, no joint created"
+    },
+    {
+      "topic": "model ordering",
+      "observed": "child models must be declared before the parent model",
+      "documented": "not stated",
+      "failure_mode": "\"Child Model X could not be found\" warning, no joint created"
+    },
+    {
+      "topic": "attach while in contact",
+      "observed": "measured below, recorded not asserted",
+      "documented": "reattachment while parent and child touch is not supported",
+      "failure_mode": "attach silently does nothing"
+    }
+  ],
+  "checks": [
+    {
+      "check": "initial_attachment_holds",
+      "passed": true,
+      "detail": "z 0.3000 -> 0.3000 over 2 s"
+    },
+    {
+      "check": "detach_allows_freefall",
+      "passed": true,
+      "detail": "fitted a=-9.80 m/s^2 from 25 airborne frames over 0.48 s",
+      "accel": -9.802115802537417,
+      "frames": 25,
+      "top": 3.999759997548499
+    },
+    {
+      "check": "reattach_5_cycles",
+      "passed": true,
+      "detail": "5/5 followed after re-attach; deltas ['+0.0500', '+0.0500', '+0.0500', '+0.0500', '+0.0500']",
+      "deltas": [
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05
+      ]
+    },
+    {
+      "check": "rigidity_under_teleport",
+      "passed": true,
+      "detail": "max tracking error 0.0000 m over 10 steps",
+      "max_error": 0.0
+    },
+    {
+      "check": "independent_channels",
+      "passed": true,
+      "detail": "detached A moved 0.0000 m, attached B moved +0.0500 m",
+      "a_moved": 0.0,
+      "b_moved": 0.04999999999999999
+    },
+    {
+      "check": "attach_while_in_contact[recorded]",
+      "passed": true,
+      "detail": "resting z=0.5474, attached=True, jump 0.0001 m, moved +0.0500 m",
+      "resting_z": 0.547431,
+      "attached": true,
+      "jump": 5.8000000000002494e-05,
+      "moved": 0.05
+    }
+  ],
+  "status": "GO_CANDIDATE",
+  "note": "attach_while_in_contact is recorded, not asserted: the docs say it is unsupported. What this spike measures is what the installed build does, not what the documentation says."
+}

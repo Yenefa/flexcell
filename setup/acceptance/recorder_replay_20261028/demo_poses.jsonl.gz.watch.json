@@ -1,0 +1,69 @@
+{
+  "source": {
+    "mode": "poses",
+    "topic": "/world/empty/dynamic_pose/info",
+    "desc": "setup/acceptance/local_run_20261027/demo_poses.jsonl.gz",
+    "path": "setup/acceptance/local_run_20261027/demo_poses.jsonl.gz",
+    "lines": 1815,
+    "bad_lines": 0,
+    "seen_box": true,
+    "seen_grip": true
+  },
+  "models": {
+    "box": "target_box_a",
+    "grippers": [
+      "gripper_left_link",
+      "gripper_right_link"
+    ]
+  },
+  "frames_total": 1815,
+  "rest_box_z": 0.01749964238418575,
+  "lift_segments": [
+    {
+      "start_index": 353,
+      "end_index": 667,
+      "frames": 314,
+      "t0": 19.075,
+      "t1": 25.335,
+      "duration_s": 6.260000000000002,
+      "primary": true
+    }
+  ],
+  "context": {
+    "rest": 0.01749964238418575,
+    "box_max": 0.12846532191087326,
+    "grip_max": 0.27377668246501713,
+    "box_rise": 0.11096567952668751
+  },
+  "analysis": {
+    "window_kind": "hold",
+    "start_index": 381,
+    "end_index": 618,
+    "t0": 19.635,
+    "t1": 24.355,
+    "duration_s": 4.719999999999999,
+    "frames": 237,
+    "sample_rate_hz": 50.000000000000014,
+    "delta_min_m": 0.1452658491281715,
+    "delta_max_m": 0.2625314340319983,
+    "delta_mean_m": 0.1883591019462456,
+    "delta_pp_m": 0.1172655849038268,
+    "local_minima": 47,
+    "local_maxima": 47,
+    "mean_period_s": 0.10086956521739132,
+    "cycle_pp_m": 0.06762138844717701,
+    "cycle_pp_n": 46
+  },
+  "thresholds": {
+    "grip_thr_m": 0.15,
+    "lift_margin_m": 0.005,
+    "period_s": 0.1,
+    "period_tol_s": 0.03,
+    "pp_thr_m": 0.03,
+    "offset_tol_m": 0.005,
+    "min_cycles": 3,
+    "hold_speed_mps": 0.05
+  },
+  "verdict": "SAWTOOTH",
+  "reason": "delta 有 47 个局部极小，平均周期 0.1009 s（pin 周期 0.100 s ±0.030），单周期峰峰 67.6 mm > 30.0 mm：与 0.100 s pin 周期相符的垂直振荡；机制未确认。"
+}
