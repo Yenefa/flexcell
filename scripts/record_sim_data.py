@@ -18,11 +18,12 @@ import zlib
 import numpy as np
 import rclpy
 from rclpy.node import Node
-from rclpy.qos import QoSProfile, DurabilityPolicy, qos_profile_sensor_data
+from rclpy.qos import QoSProfile, DurabilityPolicy, ReliabilityPolicy, qos_profile_sensor_data
 from rclpy.signals import SignalHandlerOptions
 from sensor_msgs.msg import Image, JointState
 from control_msgs.msg import JointTrajectoryControllerState
 from std_msgs.msg import String
+from frame_writer import FrameWriter
 
 JOINTS = ['joint1', 'joint2', 'joint3', 'joint4', 'gripper_left_joint']
 TOPICS = ['/clock', '/tf', '/tf_static', '/joint_states', '/arm_controller/controller_state',
@@ -64,17 +65,18 @@ class Recorder(Node):
         super().__init__('flexcell_data_recorder', parameter_overrides=[
             rclpy.parameter.Parameter('use_sim_time', value=True)])
         self.out, self.states, self.references, self.gripper = out, deque(maxlen=500), deque(maxlen=500), deque(maxlen=100)
-        self.frames = (out / 'frames.jsonl').open('x')
         self.physics = (out / 'physics.jsonl').open('x')
-        self.index, self.valid, self.last, self.errors = 0, 0, -1, []
+        self.index, self.last, self.errors = 0, -1, []
         (out / 'images').mkdir()
+        self.writer = FrameWriter(out, write_png)
         self.create_subscription(JointState, '/joint_states', self.state, qos_profile_sensor_data)
         self.create_subscription(JointTrajectoryControllerState, '/arm_controller/controller_state',
                                  self.reference, qos_profile_sensor_data)
         self.create_subscription(String, '/flexcell/execution_command', self.command,
             QoSProfile(depth=10, durability=DurabilityPolicy.TRANSIENT_LOCAL))
         self.create_subscription(String, '/flexcell/physics_trace', self.trace, 100)
-        self.create_subscription(Image, '/flexcell/camera/rgb', self.frame, qos_profile_sensor_data)
+        self.create_subscription(Image, '/flexcell/camera/rgb', self.frame,
+                                 QoSProfile(depth=32, reliability=ReliabilityPolicy.BEST_EFFORT))
 
     def state(self, msg):
         self.states.append(dict(sim_ns=stamp_ns(msg.header), positions=dict(zip(msg.name, msg.position))))
@@ -107,7 +109,6 @@ class Recorder(Node):
                    image='images/%06d.png' % self.index, valid=False, reasons=[])
         self.index += 1
         try:
-            write_png(self.out / row['image'], msg)
             if stamp <= self.last:
                 row['reasons'].append('nonmonotonic_camera_stamp')
             self.last = stamp
@@ -124,12 +125,11 @@ class Recorder(Node):
                 row['action'] = [reference['positions'].get(n) for n in JOINTS[:4]] + [gripper['position']]
                 if any(v is None or not np.isfinite(v) for v in row['observation.state'] + row['action']):
                     row['reasons'].append('incomplete_or_nonfinite_joints')
-            row['valid'] = not row['reasons']
-            self.valid += int(row['valid'])
         except (ValueError, OSError, KeyError) as exc:
             row['reasons'].append(str(exc))
-        self.frames.write(json.dumps(row, allow_nan=False) + '\n')
-        self.frames.flush()
+        # Preserve callback-time timestamps/alignment before handing the owned message
+        # to the encoder. No compression or image-file I/O blocks ROS subscription work.
+        self.writer.submit(row, msg)
 
 
 def main():
@@ -161,15 +161,19 @@ def main():
             except subprocess.TimeoutExpired:
                 os.killpg(bag.pid, signal.SIGTERM)
                 bag.wait(timeout=5)
-        node.frames.close(); node.physics.close(); log.close()
+        node.writer.close()
+        writer = node.writer.report()
+        node.errors.extend(writer['errors'])
+        node.physics.close(); log.close()
         (args.out / 'collection.json').write_text(json.dumps(dict(
-            schema_version=1, frames=node.index, valid_frames=node.valid, errors=node.errors,
+            schema_version=1, frames=node.index, valid_frames=writer['valid_frames'], errors=node.errors,
+            image_writer=writer,
             rosbag_exit=bag.returncode, joints=JOINTS,
             action_semantics='arm controller reference positions + held accepted gripper position target',
             synchronization='causal source stamps; state/reference age <=50ms; no interpolation',
             observation_source='SIMULATION_GROUND_TRUTH; camera is data-only'), indent=2) + '\n')
         node.destroy_node(); rclpy.shutdown()
-    return 0 if (not args.camera or node.valid > 0) and not node.errors and bag.returncode == 0 else 1
+    return 0 if (not args.camera or writer['valid_frames'] > 0) and not node.errors and bag.returncode == 0 else 1
 
 
 if __name__ == '__main__':

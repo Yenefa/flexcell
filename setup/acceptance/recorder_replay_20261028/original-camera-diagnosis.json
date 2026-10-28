@@ -1,0 +1,89 @@
+{
+  "kind": "OFFLINE_CAMERA_REJECTION_DIAGNOSIS",
+  "run_id": 40537157656,
+  "artifact_id": 12750996664,
+  "archive_sha256": "ddccc76c4e0597e663352cb24faa61c19847344722bd9b5064b37f62b6f2af96",
+  "original_export": "REJECTED_CAMERA_SAMPLING_GAPS",
+  "new_physical_trials": 0,
+  "new_learning_dataset_published": false,
+  "episodes": [
+    {
+      "run": "data-window/trial-01/run-ba57c2413cc0/",
+      "recorder_frames": 175,
+      "raw_frames_in_same_source_interval": 179,
+      "invalid_recorder_rows": 0,
+      "recorder_gaps_ms": [
+        300,
+        300
+      ],
+      "missing_live_recorder_source_stamps_ns": [
+        35300000000,
+        35400000000,
+        35800000000,
+        35900000000
+      ],
+      "raw_interval_histogram_ms": {
+        "100": 178
+      }
+    },
+    {
+      "run": "data-window/trial-02/run-881df0b0623b/",
+      "recorder_frames": 198,
+      "raw_frames_in_same_source_interval": 198,
+      "invalid_recorder_rows": 0,
+      "recorder_gaps_ms": [],
+      "missing_live_recorder_source_stamps_ns": [],
+      "raw_interval_histogram_ms": {
+        "100": 197
+      }
+    },
+    {
+      "run": "data-window/trial-03/run-a709d578a6db/",
+      "recorder_frames": 187,
+      "raw_frames_in_same_source_interval": 189,
+      "invalid_recorder_rows": 0,
+      "recorder_gaps_ms": [
+        300
+      ],
+      "missing_live_recorder_source_stamps_ns": [
+        28300000000,
+        28400000000
+      ],
+      "raw_interval_histogram_ms": {
+        "100": 188
+      }
+    },
+    {
+      "run": "data-window/trial-04/run-500477179b6a/",
+      "recorder_frames": 120,
+      "raw_frames_in_same_source_interval": 124,
+      "invalid_recorder_rows": 0,
+      "recorder_gaps_ms": [
+        300,
+        300
+      ],
+      "missing_live_recorder_source_stamps_ns": [
+        30600000000,
+        30700000000,
+        35600000000,
+        35700000000
+      ],
+      "raw_interval_histogram_ms": {
+        "100": 123
+      }
+    },
+    {
+      "run": "data-window/trial-05/run-ce6fd4a02712/",
+      "recorder_frames": 28,
+      "raw_frames_in_same_source_interval": 28,
+      "invalid_recorder_rows": 0,
+      "recorder_gaps_ms": [],
+      "missing_live_recorder_source_stamps_ns": [],
+      "raw_interval_histogram_ms": {
+        "100": 27
+      }
+    }
+  ],
+  "interpretation": "The raw bag contains every 100 ms source image across each selected interval. Ten frames present in that independent recording are absent from live frames.jsonl, localizing observed loss to the live recorder subscription/processing path. Blocking PNG encoding is a candidate, not a proven cause.",
+  "next_step": "Decouple bounded image encoding from ROS callbacks, add explicit overflow/drain rejection and replay the preserved bag under load before declaring another physical window. Do not relax the exporter or overwrite the rejected cohort."
+}

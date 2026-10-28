@@ -1,0 +1,93 @@
+{
+  "source": {
+    "mode": "poses",
+    "topic": "/world/empty/dynamic_pose/info",
+    "desc": "setup/acceptance/local_run_20261027/poses4.jsonl.gz",
+    "path": "setup/acceptance/local_run_20261027/poses4.jsonl.gz",
+    "lines": 7372,
+    "bad_lines": 0,
+    "seen_box": true,
+    "seen_grip": true
+  },
+  "models": {
+    "box": "target_box_a",
+    "grippers": [
+      "gripper_left_link",
+      "gripper_right_link"
+    ]
+  },
+  "frames_total": 7372,
+  "rest_box_z": 0.01749999751174475,
+  "lift_segments": [
+    {
+      "start_index": 1064,
+      "end_index": 1298,
+      "frames": 234,
+      "t0": 32.205,
+      "t1": 36.855,
+      "duration_s": 4.649999999999999
+    },
+    {
+      "start_index": 3241,
+      "end_index": 3389,
+      "frames": 148,
+      "t0": 75.63,
+      "t1": 78.57,
+      "duration_s": 2.9399999999999977
+    },
+    {
+      "start_index": 5168,
+      "end_index": 5406,
+      "frames": 238,
+      "t0": 114.1,
+      "t1": 118.835,
+      "duration_s": 4.734999999999999,
+      "primary": true
+    },
+    {
+      "start_index": 7340,
+      "end_index": 7372,
+      "frames": 32,
+      "t0": 157.465,
+      "t1": 158.085,
+      "duration_s": 0.6200000000000045
+    }
+  ],
+  "context": {
+    "rest": 0.01749999751174475,
+    "box_max": 0.1225734982450606,
+    "grip_max": 0.27309347488630076,
+    "box_rise": 0.10507350073331585
+  },
+  "analysis": {
+    "window_kind": "hold",
+    "start_index": 5200,
+    "end_index": 5359,
+    "t0": 114.74,
+    "t1": 117.895,
+    "duration_s": 3.155000000000001,
+    "frames": 159,
+    "sample_rate_hz": 50.07923930269412,
+    "delta_min_m": 0.14262132119681475,
+    "delta_max_m": 0.2527796209622501,
+    "delta_mean_m": 0.18473549590489233,
+    "delta_pp_m": 0.11015829976543534,
+    "local_minima": 31,
+    "local_maxima": 31,
+    "mean_period_s": 0.10050000000000002,
+    "cycle_pp_m": 0.07056534326670072,
+    "cycle_pp_n": 30
+  },
+  "thresholds": {
+    "grip_thr_m": 0.15,
+    "lift_margin_m": 0.005,
+    "period_s": 0.1,
+    "period_tol_s": 0.03,
+    "pp_thr_m": 0.03,
+    "offset_tol_m": 0.005,
+    "min_cycles": 3,
+    "hold_speed_mps": 0.05
+  },
+  "verdict": "SAWTOOTH",
+  "reason": "delta 有 31 个局部极小，平均周期 0.1005 s（pin 周期 0.100 s ±0.030），单周期峰峰 70.6 mm > 30.0 mm：与 0.100 s pin 周期相符的垂直振荡；机制未确认。"
+}

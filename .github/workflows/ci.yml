@@ -101,6 +101,7 @@ jobs:
           python3 setup/acceptance/trusted_sim_20261027/selftest_core_v1.py
           python3 setup/acceptance/trusted_sim_20261027/verify_dataset.py
           python3 setup/acceptance/trusted_sim_20261027/verify_joint_trace.py
+          python3 setup/acceptance/recorder_replay_20261028/verify.py
 
       - name: colcon test (all suites, 0 failures required)
         shell: bash
