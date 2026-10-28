@@ -1,0 +1,17 @@
+cmake_minimum_required(VERSION 3.16)
+project(flexcell_mtc)
+find_package(ament_cmake REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(flexcell_interfaces REQUIRED)
+find_package(moveit_task_constructor_core REQUIRED)
+find_package(moveit_task_constructor_msgs REQUIRED)
+find_package(moveit_ros_planning REQUIRED)
+find_package(moveit_msgs REQUIRED)
+find_package(shape_msgs REQUIRED)
+add_executable(mtc_planner src/mtc_planner.cpp)
+target_compile_features(mtc_planner PUBLIC cxx_std_17)
+ament_target_dependencies(mtc_planner rclcpp flexcell_interfaces
+  moveit_task_constructor_core moveit_task_constructor_msgs
+  moveit_ros_planning moveit_msgs shape_msgs)
+install(TARGETS mtc_planner DESTINATION lib/${PROJECT_NAME})
+ament_package()

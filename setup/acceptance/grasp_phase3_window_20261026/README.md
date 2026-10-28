@@ -1,6 +1,12 @@
+> Correction: endpoint residuals do not establish a physical bound or separate historical population. Raw logs and v1 are unchanged; v2 is the current verifier.
+
 # GRASP-B-001-PHASE-3 — first window with carry telemetry, 2026-10-26
 
-**Verdict: `NOT_REPRODUCED_IN_THIS_WINDOW`** — the historical failure population
+**Current verdict: `FACTS_AND_SUPPORT_VERIFIED; CAUSE_UNKNOWN`**
+
+The original population-separation verdict is withdrawn; see the correction below.
+
+**Historical verdict (superseded): `NOT_REPRODUCED_IN_THIS_WINDOW`** — the historical failure population
 was not reproduced. What *was* found is a different, narrower thing: **the box
 never really follows the gripper.** It trails its pinned pose by 3–72 mm, and the
 window's single failure is simply the worst case of that trailing.
@@ -78,21 +84,23 @@ cycle the sample happens to land.
 archive measures the box *between* pins; there is one sample per trial. The
 number is consistent with free fall over one period and that is all.
 
-## The boundary that keeps this honest
+## Corrected evidence boundary (2026-10-27)
 
-If the box merely trails, it cannot end below its starting height. The shortest
-arm travel in the window was 89.1 mm and the worst lag 71.7 mm, so **the lowest
-rise this mechanism can produce is +17.4 mm** — positive.
+The +17.4 mm value is arithmetic over ten endpoint observations. It is not a
+physical lower bound. Those endpoints are not simultaneous samples, and no
+continuous velocity or sampling-phase trace was recorded in this archive.
 
-The historical population does not live there: of the 92 natural code-23 failures
-in [`grasp_b001_20261025`](../grasp_b001_20261025), the median rise is
-**−0.0003 m** and **54 of them are below zero**. This window's failure rose
-+0.0234 m.
+The failed trial's +0.023416 m rise is **inside** the historical natural code-23
+support [−0.010278, +0.029835] m; seven of the 92 historical failures are at or
+above it. There are 54 negative rises, but that does not establish a disjoint
+population or a different cause. Both causal attribution and common mechanism
+remain UNKNOWN. The former separation/lower-bound assertions are withdrawn.
 
-So the failure seen here is **not** the historical failure. #48's bimodal reading
-stands, and the historical population was not reproduced in ten trials — at the
-historical 20.4 % rate the chance of seeing none in ten is about 11 %, so this is
-also weak evidence of anything.
+`verify_phase3_window.py` is preserved unchanged as v1. Current verification is
+`verify_phase3_window_v2.py`, with ten self-test cases including an upper-tail
+mutation accepted by v1 and rejected by v2. A negative-only mutation is also
+rejected; contrary to the task-note shorthand, unchanged v1 itself rejects an
+all-negative set because it requires exactly 54/92 negatives.
 
 ## The gate failed once, and it was my rule, not the data
 

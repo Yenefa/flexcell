@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "frames": 0,
+  "valid_frames": 0,
+  "errors": [],
+  "rosbag_exit": 0,
+  "joints": [
+    "joint1",
+    "joint2",
+    "joint3",
+    "joint4",
+    "gripper_left_joint"
+  ],
+  "action_semantics": "arm controller reference positions + held accepted gripper position target",
+  "synchronization": "causal source stamps; state/reference age <=50ms; no interpolation",
+  "observation_source": "SIMULATION_GROUND_TRUTH; camera is data-only"
+}

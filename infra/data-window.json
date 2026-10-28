@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "purpose": "Five declared data examples; retain failed task outcomes, no replacement runs",
+  "max_logical_tasks": 5,
+  "camera": true,
+  "recording_context_s": 1.0,
+  "episodes": [
+    {"case": "normal", "object": "target_box_a", "task": "Place target_box_a at the requested table position"},
+    {"case": "normal", "object": "target_box_b", "task": "Place target_box_b at the requested table position"},
+    {"case": "normal", "object": "target_box_a", "task": "Place target_box_a at the requested table position"},
+    {"case": "unreachable_place", "object": "target_box_a", "task": "Attempt the declared unreachable place and preserve the failure"},
+    {"case": "budget_exhaustion", "object": "target_box_a", "task": "Abort after the declared grasp recovery budget is exhausted"}
+  ]
+}

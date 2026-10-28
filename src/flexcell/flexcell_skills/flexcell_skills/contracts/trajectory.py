@@ -9,6 +9,27 @@ missed.  This module is pure python (no rclpy) so the guard is offline
 testable.
 """
 
+import math
+
+
+def validate_arm_trajectory(trajectory):
+    """Validate an MTC arm trajectory before its private executor handoff."""
+    names = list(trajectory.joint_names)
+    if set(names) != {'joint1', 'joint2', 'joint3', 'joint4'} or len(names) != 4 or not trajectory.points:
+        raise ValueError('MTC must return exactly four unique arm joints')
+    previous = -1
+    for point in trajectory.points:
+        stamp = point.time_from_start.sec * 10**9 + point.time_from_start.nanosec
+        values = list(point.positions) + list(point.velocities) + list(point.accelerations)
+        if (len(point.positions) != 4 or stamp <= previous or stamp < 0
+                or not all(math.isfinite(v) for v in values)
+                or len(point.velocities) not in (0, 4)
+                or len(point.accelerations) not in (0, 4)):
+            raise ValueError('invalid MTC trajectory point')
+        previous = stamp
+    if previous <= 0:
+        raise ValueError('zero-duration MTC trajectory')
+
 
 def trajectory_summary(traj):
     """(npts, final_positions, duration_s) from a planned trajectory.

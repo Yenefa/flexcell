@@ -1,6 +1,11 @@
 # ROADMAP — FlexCell long-term phases
 
 > Living document. Milestone-based, no fixed dates — update when a phase moves.
+
+The [2026-10-27 trusted simulation plane](TRUSTED_SIMULATION_20261027.md) adds pinned
+CPU reproduction, DetachableJoint oracle, MTC through the shared motion executor,
+headless full-stack CI and an official LeRobot example. [ADR-004](ADR/ADR-004-trusted-simulation-plane.md)
+authorizes these new profiles. Perception, hardware and M3/model qualification remain separate.
 > Execution detail lives in [DEVELOPMENT.md](DEVELOPMENT.md); the ratified Week-2 design of
 > record is [WEEK2_PREPARATION.md](WEEK2_PREPARATION.md) (§0.5).
 

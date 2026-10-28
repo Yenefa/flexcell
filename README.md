@@ -1,5 +1,8 @@
 # Agentic Flexible Robotic Workcell
 
+2026-10-27: [trusted simulation, MTC and data implementation](docs/TRUSTED_SIMULATION_20261027.md)
+and [portable CPU reproduction](REPRODUCE.md#portable-cpu-simulation-plane-2026-10-27).
+
 **Official project name: Agentic Flexible Robotic Workcell**  
 Repository handle: `flexcell`
 

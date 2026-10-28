@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "purpose": "Bounded functional qualification, no success-rate or policy-superiority claim",
+  "max_logical_tasks": 5,
+  "camera": false,
+  "episodes": [
+    {"case": "normal", "object": "target_box_a", "task": "A normal pick and place"},
+    {"case": "normal", "object": "target_box_b", "task": "B normal pick and place"},
+    {"case": "dual_object", "object": "target_box_a", "task": "Dual-object demo"},
+    {"case": "recovery_once", "object": "target_box_a", "task": "One injected failure with one bounded retry"},
+    {"case": "budget_exhaustion", "object": "target_box_a", "task": "Persistent injected failure must exhaust the budget"}
+  ]
+}

@@ -8,6 +8,7 @@ restarting the ROS graph.
 import argparse
 import json
 import os
+from pathlib import Path
 import re
 import subprocess
 import sys
@@ -391,7 +392,8 @@ class Admin(Node):
 
         # 3) arm to joint home via the Day-1 joint tool (lifecycle, not a skill)
         proc = subprocess.run(
-            ['python3', WORKSPACE + '/plan_execute.py', '0.0', '0.0', '0.0', '0.0'],
+            [sys.executable, str(Path(__file__).resolve().parents[1] / 'plan_execute.py'),
+             '0.0', '0.0', '0.0', '0.0'],
             capture_output=True, text=True, timeout=90, cwd=WORKSPACE)
         out = proc.stdout
         report['arm_home'] = ('EXECUTE error_code = 1' in out and

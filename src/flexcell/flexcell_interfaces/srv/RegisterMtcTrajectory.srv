@@ -1,0 +1,8 @@
+# Private, opt-in handoff to the existing single-arm motion executor.
+string request_id
+geometry_msgs/PoseStamped target
+string motion_profile_id
+moveit_msgs/RobotTrajectory trajectory
+---
+bool success
+string detail

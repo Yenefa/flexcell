@@ -1,0 +1,20 @@
+SENDING action=task object=target_box_a pose=[0.12, -0.15, 0.0175]
+GOAL_UUID dcee3ff9d3d447cf98c0f151ca88aef1
+RESULT {
+  "action": "task",
+  "goal_uuid": "dcee3ff9d3d447cf98c0f151ca88aef1",
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_RECOVERY_EXHAUSTED",
+  "detail": "policy abort (BUDGET_EXHAUSTED): pick attempt 2 failed (error 23) (trace=PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED,RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1)),PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED); previous_skill=PICK cause=ERR_GRASP_FAILED legacy_error_code=23",
+  "evidence_id": "pick_place_v1-61af42e0",
+  "wall_seconds": 0.367,
+  "fsm_trace": [
+    "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+    "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+    "PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED"
+  ],
+  "object_at_place": false,
+  "final_position_error_m": NaN,
+  "skip_verify": false
+}

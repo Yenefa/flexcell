@@ -1,0 +1,54 @@
+# syntax=docker/dockerfile:1.7
+FROM ros:jazzy-ros-base@sha256:8eed0a4669bbf43ee331878a4c39bd8ebddea8e3312a58b4fae8edb14526b617 AS dependencies
+SHELL ["/bin/bash", "-c"]
+ENV DEBIAN_FRONTEND=noninteractive
+# The optional combined CA is a build secret for managed development proxies.
+# GitHub-hosted builds use their normal system trust; no session CA enters a layer.
+RUN --mount=type=secret,id=system_ca \
+    set -e; \
+    if [ -s /run/secrets/system_ca ]; then \
+      export CURL_CA_BUNDLE=/run/secrets/system_ca GIT_SSL_CAINFO=/run/secrets/system_ca; \
+    fi; \
+    curl -fsSL https://packages.osrfoundation.org/gazebo.gpg -o /usr/share/keyrings/gazebo.gpg; \
+    echo 'deb [signed-by=/usr/share/keyrings/gazebo.gpg] http://packages.osrfoundation.org/gazebo/ubuntu-stable noble main' > /etc/apt/sources.list.d/gazebo.list; \
+    apt-get update; \
+    apt-get install -y --no-install-recommends \
+      build-essential cmake git curl python3-colcon-common-extensions python3-vcstool \
+      python3-pytest python3-jsonschema python3-yaml python3-numpy python3-venv \
+      python3-gz-transport13 python3-gz-msgs10 gz-harmonic \
+      ros-jazzy-moveit ros-jazzy-ros-gz ros-jazzy-gz-ros2-control \
+      ros-jazzy-ros2-controllers ros-jazzy-rmw-cyclonedds-cpp \
+      ros-jazzy-realsense2-description ros-jazzy-warehouse-ros-sqlite \
+      ros-jazzy-moveit-task-constructor-core=0.1.8-1noble.20260915.205448 \
+      ros-jazzy-moveit-task-constructor-capabilities=0.1.8-1noble.20260915.211634 \
+      libegl1 libgl1-mesa-dri mesa-utils ffmpeg; \
+    dpkg-query -W > /opt/dependency-packages.tsv; \
+    rm -rf /var/lib/apt/lists/*
+
+FROM dependencies AS upstream
+COPY infra/upstream.lock.repos /opt/flexcell/upstream.lock.repos
+COPY infra/import_locked.py /opt/flexcell/import_locked.py
+RUN --mount=type=secret,id=system_ca \
+    set -e; \
+    if [ -s /run/secrets/system_ca ]; then export GIT_SSL_CAINFO=/run/secrets/system_ca; fi; \
+    python3 /opt/flexcell/import_locked.py /opt/flexcell/upstream.lock.repos /opt/flexcell/upstream/src; \
+    source /opt/ros/jazzy/setup.bash; \
+    cd /opt/flexcell/upstream; \
+    colcon build --merge-install --parallel-workers 2 \
+      --packages-up-to open_manipulator_bringup open_manipulator_moveit_config \
+      --cmake-args -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
+
+FROM upstream AS runtime
+ARG SOURCE_REV=WORKTREE
+ENV FLEXCELL_SOURCE_REV=$SOURCE_REV
+COPY . /opt/flexcell/repo
+WORKDIR /opt/flexcell/ws
+RUN mkdir -p src && ln -s /opt/flexcell/repo/src/flexcell src/flexcell && \
+    source /opt/ros/jazzy/setup.bash && source /opt/flexcell/upstream/install/setup.bash && \
+    colcon build --merge-install --parallel-workers 2 --cmake-args -DCMAKE_BUILD_TYPE=Release
+ENV FLEXCELL_REPO=/opt/flexcell/repo FLEXCELL_WS=/opt/flexcell/ws \
+    FLEXCELL_INSTALL=/opt/flexcell/ws/install PYTHONUNBUFFERED=1 \
+    RMW_IMPLEMENTATION=rmw_cyclonedds_cpp ROS_DOMAIN_ID=45 \
+    LIBGL_ALWAYS_SOFTWARE=1
+ENTRYPOINT ["/opt/flexcell/repo/infra/entrypoint.sh"]
+CMD ["python3", "/opt/flexcell/repo/scripts/sim_smoke.py", "--out", "/artifacts"]

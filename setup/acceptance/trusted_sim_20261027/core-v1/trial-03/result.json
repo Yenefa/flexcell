@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "backend": "velocity_servo",
+  "skill_backend": "mtc",
+  "physical_tasks_dispatched": 1,
+  "qualification": "FUNCTIONAL_SMOKE_ONLY",
+  "case": "dual_object",
+  "object": "target_box_a",
+  "out": "/artifacts/core-window-velocity-mtc-v1/trial-03/run-d8e05498dce1",
+  "runtime_fingerprint": "1c39387f0361bb414f21321936faa970f28a6484bdb7f27a431b335aa1dfe3ec",
+  "task_start_monotonic_ns": 11934875478410,
+  "goal_pose": [
+    0.12,
+    -0.15,
+    0.0175
+  ],
+  "task_end_monotonic_ns": 11973280608451,
+  "task": {
+    "action": "demo",
+    "goal_uuid": "dcf3f06fb1164343bf83c6638109f9af",
+    "outcome": "OUTCOME_SUCCEEDED",
+    "outcome_val": 0,
+    "error_code": "ERR_NONE",
+    "detail": "task done: all assignments verified",
+    "evidence_id": "week1_demo_v1-4c3d1083",
+    "wall_seconds": 37.518,
+    "fsm_trace": [
+      "PICK_A(attempt=1):OK",
+      "PLACE_A:OK",
+      "VERIFY_A(attempt=1):OK",
+      "PICK_B(attempt=1):OK",
+      "PLACE_B:OK",
+      "VERIFY_B(attempt=1):OK"
+    ],
+    "object_a_at_zone": true,
+    "object_b_at_zone": true,
+    "zone_a_error_m": 7.466437619335825e-05,
+    "zone_b_error_m": 0.00011652704416969991,
+    "run_id": "week1_demo_v1-8791f730",
+    "scenario_id": "week1_demo_v1"
+  },
+  "expectation_met": true,
+  "recorder_exit": 0,
+  "owned_launch_exit": 0
+}

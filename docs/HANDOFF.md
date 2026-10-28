@@ -1,5 +1,16 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-10-27：#51 已合并（`05c145d`），主线 CI #79 成功。新的技术平面已构建
+> DetachableJoint、MTC、可移植容器、同步物理追踪和 LeRobot 数据桥接；当前
+> 实测、待满足的资格和后续安排见 [实施记录](TRUSTED_SIMULATION_20261027.md)。
+> 以下旧条目保留为历史。Phase-3 当前事实校验不再把端点残差当物理上界；
+> 根因继续 UNKNOWN，模型大样本未解冻。
+
+> 本地四包构建、550 项测试及首个 GitHub 全栈 CI 已通过。已交付 5 Episode /
+> 574 帧 LeRobot 样例、native 重绑定/租约检查和 MTC 实际取消/超时停稳检查。
+> Joint/MTC 的 A/B 两项功能窗口通过；保留原先因 NaN 报告而 STOPPED 的窗口，
+> 不补跑替换。PR #65 汇集代码与证据，默认后端暂不切换。
+
 > 2026-10-26：已接续 #32，基于 `main@86bb4bd` 准备 Phase-3 逐轮观测门禁。
 > 使用 `111_grasp_probe.py --require-carry-observation`，每轮确认 cleanup 后
 > 复核 #50 的会话与累计计数，缺失即保存并停批；112 工具离线重算来源前缀与
