@@ -11,9 +11,13 @@ BACKENDS = ('teleport', 'velocity_servo', 'detachable_joint')
 
 
 def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
-            joint_hold_sim_s=0., physics_step_s=None):
+            joint_hold_sim_s=0., physics_step_s=None, *, contact_trace=False, release_clearance_m=None):
     if backend not in BACKENDS or skill_backend not in ('legacy', 'mtc'):
         raise ValueError('unsupported backend')
+    if contact_trace and (backend != 'detachable_joint' or physics_step_s != .002):
+        raise ValueError('integrated contact trace requires the declared 2 ms joint profile')
+    if release_clearance_m is not None and (not contact_trace or release_clearance_m != .05):
+        raise ValueError('only the explicitly declared 50 mm release fixture is supported')
     out = Path(out)
     config = yaml.safe_load((ROOT / 'src/flexcell/flexcell_skills/config/week1.yaml').read_text())
     config.update(yaml.safe_load((ROOT / 'src/flexcell/flexcell_skills/config/move_to_pose.yaml').read_text()))
@@ -22,6 +26,8 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
             node['ros__parameters']['log_dir'] = str(out / 'skills')
     for name in ('pick_server', 'place_server', 'carry_server'):
         config[name]['ros__parameters']['carry_backend'] = backend
+    if release_clearance_m is not None:
+        config['place_server']['ros__parameters']['release_clearance_m'] = release_clearance_m
     if joint_hold_sim_s:
         if backend != 'detachable_joint' or not 0. < joint_hold_sim_s <= 20.:
             raise ValueError('joint simulation hold is only available for joint qualification')
@@ -43,6 +49,20 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
     if backend == 'detachable_joint':
         ET.SubElement(world, 'plugin', name='flexcell::DetachableCarryGuard',
                       filename='libflexcell_detachable_carry.so')
+    if contact_trace:
+        physics = world.find("plugin[@name='gz::sim::systems::Physics']")
+        ET.SubElement(physics, 'contacts_entity_names').text = 'true'
+        observer = ET.SubElement(world, 'plugin', name='flexcell::ContactTrace', filename='libflexcell_contact_trace.so')
+        for name, collision in [('target_box_a', 'col'), ('target_box_b', 'col'), ('ground_plane', 'collision')]:
+            watch = ET.SubElement(observer, 'watch')
+            for key, value in [('model', name), ('link', 'link'), ('collision', collision)]:
+                ET.SubElement(watch, key).text = value
+            if name.startswith('target_box_'):
+                link = world.find("model[@name='%s']/link[@name='link']" % name)
+                sensor = ET.SubElement(link, 'sensor', name='qualification_contacts', type='contact')
+                ET.SubElement(sensor, 'always_on').text = 'true'
+                ET.SubElement(sensor, 'update_rate').text = '500'
+                ET.SubElement(ET.SubElement(sensor, 'contact'), 'collision').text = collision
     if camera:
         sensors = ET.SubElement(world, 'plugin', name='gz::sim::systems::Sensors',
                                 filename='gz-sim-sensors-system')

@@ -47,6 +47,8 @@ jobs:
         run: |
           docker run --init --rm flexcell-sim:ci \
             python3 /opt/flexcell/repo/setup/acceptance/joint_follow_20261029/verify_follow.py --video
+          docker run --init --rm flexcell-sim:ci \
+            python3 /opt/flexcell/repo/setup/acceptance/integrated_contact_20261030/verify.py --video
       - name: One declared native contact sensor pipeline spike (no arm tasks)
         run: |
           docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
@@ -97,12 +99,12 @@ jobs:
           tags: flexcell-sim:ci
           build-args: SOURCE_REV=${{ github.sha }}
           cache-from: type=gha,scope=flexcell-sim
-      - name: One declared joint-follow task with independent trace gate
+      - name: One declared joint/contact/release task with independent trace gates
         run: |
           mkdir -p artifacts
           docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
             python3 /opt/flexcell/repo/scripts/sim_window.py \
-            --manifest /opt/flexcell/repo/infra/joint-ci-smoke.json --out /artifacts/joint-window \
+            --manifest /opt/flexcell/repo/infra/joint-contact-ci-smoke.json --out /artifacts/joint-window \
             --backend detachable_joint --skill-backend mtc
       - uses: actions/upload-artifact@v4
         if: always()

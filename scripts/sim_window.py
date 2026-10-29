@@ -44,6 +44,10 @@ def main():
                 command.extend(['--joint-hold-sim-s', str(declaration['joint_hold_sim_s'])])
             if declaration.get('physics_step_s') is not None:
                 command.extend(['--physics-step-s', str(declaration['physics_step_s'])])
+            if declaration.get('contact_trace'):
+                command.append('--contact-trace')
+            if declaration.get('release_clearance_m') is not None:
+                command.extend(['--release-clearance-m', str(declaration['release_clearance_m'])])
             if declaration.get('min_preflight_rtf'):
                 command.extend(['--min-preflight-rtf', str(declaration['min_preflight_rtf'])])
             if declaration.get('world_sha256'):
@@ -95,6 +99,9 @@ def main():
                     runs[0], spec['object'], min_duration_s=declaration.get('min_follow_sim_s', 0.),
                     physics_step_ns=int(step * 1e9) if step is not None else None,
                     require_camera=bool(declaration.get('camera')))
+            if declaration.get('required_joint_contacts'):
+                from integrated_contact_gate import verify_run as verify_contacts
+                result['episodes'][-1]['contact_evidence'] = verify_contacts(runs[0], spec['object'], declaration)
             current = outcome.get('runtime_fingerprint')
             if not current or fingerprint is not None and current != fingerprint:
                 raise RuntimeError('runtime fingerprint drift; window stopped')

@@ -75,15 +75,24 @@ def main():
     parser.add_argument('--expected-config-sha256')
     parser.add_argument('--expected-fingerprint')
     parser.add_argument('--expected-egl-vendor-sha256')
+    parser.add_argument('--contact-trace', action='store_true')
+    parser.add_argument('--release-clearance-m', type=float)
     parser.add_argument('--case', choices=['normal', 'dual_object', 'recovery_once', 'budget_exhaustion',
                                            'unreachable_place'], default='normal')
     args = parser.parse_args()
     out = args.out / ('run-' + uuid.uuid4().hex[:12])
     out.mkdir(parents=True, exist_ok=False)
+    options = {}
+    if args.contact_trace: options['contact_trace'] = True
+    if args.release_clearance_m is not None: options['release_clearance_m'] = args.release_clearance_m
     params, world = profile(out, args.backend, args.camera, args.skill_backend,
-                            args.joint_hold_sim_s, args.physics_step_s)
+                            args.joint_hold_sim_s, args.physics_step_s, **options)
     if args.physics_step_s is not None:
         os.environ['FLEXCELL_PHYSICS_STEP_LOG'] = str(out / 'physics_steps.jsonl')
+    if args.contact_trace:
+        os.environ['FLEXCELL_CONTACT_STEP_LOG'] = str(out / 'contact_steps.jsonl')
+    else:
+        os.environ.pop('FLEXCELL_CONTACT_STEP_LOG', None)
     os.environ['FLEXCELL_EPISODE_DIR'] = str(out / 'episodes')
     result = dict(schema_version=1, status='HARNESS_ERROR', backend=args.backend,
                   skill_backend=args.skill_backend, physical_tasks_dispatched=0,

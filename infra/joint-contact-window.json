@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "purpose": "One same-round joint/contact/release integration task; no D3, S2 or contact-grasp admission",
+  "max_logical_tasks": 5,
+  "camera": true,
+  "required_carry_follow": true,
+  "required_joint_contacts": true,
+  "contact_trace": true,
+  "backend": "detachable_joint",
+  "skill_backend": "mtc",
+  "joint_hold_sim_s": 11.0,
+  "min_follow_sim_s": 10.0,
+  "physics_step_s": 0.002,
+  "min_preflight_rtf": 0.3,
+  "release_clearance_m": 0.05,
+  "world_sha256": "d3d653c0c8515be3826b550252d49ed6420c410280146b2fc94c54eaf8fd608c",
+  "semantic_config_sha256": "220e0c0ac6e1ad3dabc64f043fd4a2c8f738b21ef288a42777fa9b820a0e03b4",
+  "contact_gate": {
+    "prebind_ns": 1000000000,
+    "postrelease_ns": 500000000,
+    "freefall_ns": 40000000,
+    "max_clock_skew_ns": 50000000,
+    "min_weight_samples": 476,
+    "force_mean_min_n": 0.392,
+    "force_mean_max_n": 0.588
+  },
+  "episodes": [
+    {
+      "case": "normal",
+      "object": "target_box_a",
+      "task": "Same-round contact and release, A"
+    }
+  ],
+  "camera_egl_vendor_sha256": "cd3881df4227c13ca7f9cfe6c78820f21d5f7a00a41b299214f6f827e63be369"
+}
