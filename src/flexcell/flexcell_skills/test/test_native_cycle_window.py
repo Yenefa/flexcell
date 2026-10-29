@@ -104,3 +104,17 @@ def test_first_unready_native_guard_stops_without_preposition_or_replacement(tmp
     result=json.loads((tmp_path/'worker.json').read_text())
     assert result['status']=='STOPPED' and len(result['cycles'])==1
     assert calls==['/world/empty/flexcell/carry/status']
+
+
+def test_live_consumer_starts_at_new_records_without_erasing_raw_history(tmp_path):
+    from native_cycle_window import Follower
+    history = (json.dumps(dict(sim_ns=1,startup=True))+'\n')*10000
+    for name in ('physics_steps.jsonl','contact_steps.jsonl'): (tmp_path/name).write_text(history)
+    follower = Follower(tmp_path)
+    for name in ('physics_steps.jsonl','contact_steps.jsonl'):
+        with (tmp_path/name).open('a') as stream:
+            for ns in (2,4): stream.write(json.dumps(dict(sim_ns=ns))+'\n')
+    assert follower.collect() == [4]
+    assert list(follower.tables[0]) == list(follower.tables[1]) == [4]
+    for name in ('physics_steps.jsonl','contact_steps.jsonl'):
+        assert (tmp_path/name).read_text().startswith(history)

@@ -25,13 +25,20 @@ class Follower:
     def __init__(self, out):
         self.streams = [(out/name).open() for name in ('physics_steps.jsonl', 'contact_steps.jsonl')]
         self.tables = [{}, {}]
+        # A live subscriber starts at new data. Complete immutable files remain
+        # the offline gate's authority; startup/cycle history is never deleted.
+        for stream in self.streams: stream.seek(0,os.SEEK_END)
+        self.align_new_record = [True,True]
 
     def collect(self):
-        for stream, table in zip(self.streams, self.tables):
+        for index,(stream, table) in enumerate(zip(self.streams, self.tables)):
             while True:
                 position = stream.tell(); line = stream.readline()
                 if not line or not line.endswith('\n'):
                     stream.seek(position); break
+                if self.align_new_record[index]:
+                    self.align_new_record[index] = False
+                    continue  # EOF may have landed inside an in-progress write.
                 row = json.loads(line); table[row['sim_ns']] = row
                 if len(table) > 1024: table.pop(next(iter(table)))
         return sorted(self.tables[0].keys() & self.tables[1].keys())
@@ -44,7 +51,8 @@ class Follower:
                 choices = keys if earliest else keys[-1:]
                 for ns in choices:
                     p, c = self.tables[0][ns], self.tables[1][ns]
-                    require(time.monotonic_ns()-p['monotonic_ns'] < 500_000_000, 'native stream stale')
+                    age = time.monotonic_ns()-p['monotonic_ns']
+                    require(age < 500_000_000, 'native stream stale; age_ns='+str(age))
                     if watch: watch(p,c)
                     if condition(p,c): return p,c
             time.sleep(.002)
@@ -54,7 +62,7 @@ class Follower:
 def worker(out, world, declaration):
     import gz.transport13
     from gz.msgs10 import pose_pb2, empty_pb2, stringmsg_pb2, boolean_pb2
-    node = gz.transport13.Node(); follow = Follower(out)
+    node = gz.transport13.Node(); follow = None
     events = (out/'native-events.jsonl').open('x'); log_lock = threading.Lock()
     stop = threading.Event(); heartbeat = None; heartbeat_errors = []
     result = dict(status='STOPPED', cycles=[], robot_motion_tasks=0, max_cycles=5, no_replacements=True)
@@ -90,6 +98,9 @@ def worker(out, world, declaration):
     try:
         previous = ''
         for index,name in enumerate(declaration['objects']):
+            if follow is not None:
+                for stream in follow.streams: stream.close()
+            follow = Follower(out)  # previous cycle's complete raw files were already gated
             token = uuid.uuid4().hex
             cycle = dict(index=index,object=name,session=token,previous_session=previous)
             result['cycles'].append(cycle)

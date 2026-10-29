@@ -61,3 +61,24 @@ The fixture has no camera and does not satisfy the S2 picture/fault-injection
 requirement. It does not supply moving-arm preposition-reference evidence or
 the legacy x {teleport,joint} matrix. Model n>=50, vision Observe, real hardware
 and default backend changes remain frozen.
+
+## Preserved startup stop and new declaration
+
+Implementation/declaration `6c3d87b` stopped during preflight with native stream
+stale, before any worker or cycle was dispatched. Its complete original files
+are in `setup/acceptance/native_five_20261030/startup_6c3d87b.zip`. The strict
+500 ms gate was not relaxed. Startup contained 7,062 snapshots per stream:
+3.23 MB physics and 24.59 MB contacts. An offline contact JSON parse measured
+0.74 s on this host, already greater than the 0.5 s age allowance. Reading all
+history before selecting a live frame is a buffering design flaw; exact
+in-window parsing latency was not instrumented, so no unique timing claim is made.
+
+The live reader now starts at new complete records for preflight and each new
+detached cycle. It discards only its first possibly partial live record to
+align the reader; no raw file is truncated or deleted. Every complete cycle's
+full raw interval still passes the independent gate before the next begins.
+All final raw records, including startup, remain subject to verification. The
+new declaration is `infra/native-five-cycle-window-after-live-tail.json`,
+linking the preserved startup stop. World/config hashes and all thresholds are
+unchanged. This is a distinct declared startup attempt after a reader fix, not
+a replacement successful sample. The previous attempt had zero cycles.
