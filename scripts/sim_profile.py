@@ -11,13 +11,16 @@ BACKENDS = ('teleport', 'velocity_servo', 'detachable_joint')
 
 
 def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
-            joint_hold_sim_s=0., physics_step_s=None, *, contact_trace=False, release_clearance_m=None):
+            joint_hold_sim_s=0., physics_step_s=None, *, contact_trace=False, release_clearance_m=None,
+            qualification_no_recovery=False):
     if backend not in BACKENDS or skill_backend not in ('legacy', 'mtc'):
         raise ValueError('unsupported backend')
     if contact_trace and (backend != 'detachable_joint' or physics_step_s != .002):
         raise ValueError('integrated contact trace requires the declared 2 ms joint profile')
     if release_clearance_m is not None and (not contact_trace or release_clearance_m != .05):
         raise ValueError('only the explicitly declared 50 mm release fixture is supported')
+    if qualification_no_recovery and not contact_trace:
+        raise ValueError('no-recovery qualification requires the declared contact profile')
     out = Path(out)
     config = yaml.safe_load((ROOT / 'src/flexcell/flexcell_skills/config/week1.yaml').read_text())
     config.update(yaml.safe_load((ROOT / 'src/flexcell/flexcell_skills/config/move_to_pose.yaml').read_text()))
@@ -36,6 +39,8 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
         config[name]['ros__parameters']['skill_backend'] = skill_backend
         config[name]['ros__parameters']['record_execution_commands'] = bool(camera)
     config['task_fsm_server']['ros__parameters']['decision_policy'] = 'fsm'
+    if qualification_no_recovery:
+        config['task_fsm_server']['ros__parameters']['recovery_budget'] = 0
     config['task_fsm_server']['ros__parameters']['episode_dir'] = str(out / 'episodes')
     config['move_to_pose_server']['ros__parameters']['enable_mtc_handoff'] = skill_backend == 'mtc'
     base = 'flexcell_velocity_servo.sdf' if backend == 'velocity_servo' else 'flexcell_world.sdf'

@@ -46,6 +46,8 @@ def main():
                 command.extend(['--physics-step-s', str(declaration['physics_step_s'])])
             if declaration.get('contact_trace'):
                 command.append('--contact-trace')
+            if declaration.get('qualification_no_recovery'):
+                command.append('--qualification-no-recovery')
             if declaration.get('release_clearance_m') is not None:
                 command.extend(['--release-clearance-m', str(declaration['release_clearance_m'])])
             if declaration.get('min_preflight_rtf'):

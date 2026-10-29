@@ -39,13 +39,14 @@ RUN --mount=type=secret,id=system_ca \
       --cmake-args -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF
 
 FROM upstream AS runtime
-ARG SOURCE_REV=WORKTREE
-ENV FLEXCELL_SOURCE_REV=$SOURCE_REV
 COPY . /opt/flexcell/repo
 WORKDIR /opt/flexcell/ws
 RUN mkdir -p src && ln -s /opt/flexcell/repo/src/flexcell src/flexcell && \
     source /opt/ros/jazzy/setup.bash && source /opt/flexcell/upstream/install/setup.bash && \
     colcon build --merge-install --parallel-workers 2 --cmake-args -DCMAKE_BUILD_TYPE=Release
+# Revision is runtime provenance; identical source trees reuse the tested build.
+ARG SOURCE_REV=WORKTREE
+ENV FLEXCELL_SOURCE_REV=$SOURCE_REV
 ENV FLEXCELL_REPO=/opt/flexcell/repo FLEXCELL_WS=/opt/flexcell/ws \
     FLEXCELL_INSTALL=/opt/flexcell/ws/install PYTHONUNBUFFERED=1 \
     RMW_IMPLEMENTATION=rmw_cyclonedds_cpp ROS_DOMAIN_ID=45 \

@@ -11,10 +11,13 @@
 #include <moveit/planning_scene/planning_scene.hpp>
 #include <moveit_task_constructor_msgs/msg/solution.hpp>
 #include <shape_msgs/msg/solid_primitive.hpp>
+#include <geometry_msgs/msg/point_stamped.hpp>
 #include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <mutex>
+#include <sstream>
+#include "position_only_planner.hpp"
 namespace mtc = moveit::task_constructor;
 using Service = flexcell_interfaces::srv::PlanManipulation;
 using namespace std::chrono_literals;
@@ -89,23 +92,20 @@ class Planner : public rclcpp::Node {
     } else if (!state.hasAttachedBody(q.object_name)) {
       throw std::runtime_error("PLACE object not attached in measured scene");
     }
-    auto pipeline = std::make_shared<mtc::solvers::PipelinePlanner>(shared_from_this(), "ompl");
+    auto pipeline = std::make_shared<flexcell::PositionOnlyPlanner>(shared_from_this(), "ompl");
     pipeline->setMaxVelocityScalingFactor(profiles.at(q.motion_profile_id));
     pipeline->setMaxAccelerationScalingFactor(profiles.at(q.motion_profile_id));
     const char* pick_names[] = {"hover", "grasp", "lift"};
     const char* place_names[] = {"hover", "descend", "retreat"};
     for (size_t i = 0; i < 3; ++i) {
-      // The configured four-DOF IK is position-only. Plan collision-checked
-      // joint goals rather than asking a four-DOF arm for a six-DOF pose goal.
-      const auto& p = q.targets[i].pose.position;
-      Eigen::Isometry3d target = state.getGlobalLinkTransform("end_effector_link");
-      target.translation() = Eigen::Vector3d(p.x, p.y, p.z);
-      if (!state.setFromIK(arm, target, "end_effector_link", 1.0))
-        throw std::runtime_error("IK failed at stage " + std::to_string(i));
-      std::map<std::string, double> joints;
-      for (const auto& name : arm->getVariableNames()) joints[name] = state.getVariablePosition(name);
+      // PointStamped is MTC's native position-only goal: keep the four-DOF
+      // contract while letting the planner sample collision-valid IK in each
+      // propagated stage scene. Do not freeze one unchecked IK joint solution.
+      geometry_msgs::msg::PointStamped target;
+      target.header = q.targets[i].header;
+      target.point = q.targets[i].pose.position;
       auto move = std::make_unique<mtc::stages::MoveTo>(pick ? pick_names[i] : place_names[i], pipeline);
-      move->setGroup("arm"); move->setGoal(joints);
+      move->setGroup("arm"); move->setIKFrame("end_effector_link"); move->setGoal(target);
       move->setTimeout(std::min(5.0, q.deadline_ms / 3000.0)); task.add(std::move(move));
       if (i == 1) {
         if (pick) gripper_stage("close gripper", -.011);
@@ -118,7 +118,15 @@ class Planner : public rclcpp::Node {
       }
     }
     task.setTimeout(q.deadline_ms / 1000.0); task.init();
-    if (!task.plan(1) || task.solutions().empty()) throw std::runtime_error("no complete MTC solution");
+    if (!task.plan(1) || task.solutions().empty()) {
+      std::ostringstream detail;
+      detail << "no complete MTC solution; operation=" << q.operation << "; object=" << q.object_name << '\n';
+      task.printState(detail);
+      task.explainFailure(detail);
+      const auto report = detail.str();
+      RCLCPP_ERROR(get_logger(), "%s", report.c_str());
+      throw std::runtime_error(report.substr(0, 8192));
+    }
     moveit_task_constructor_msgs::msg::Solution solution;
     task.solutions().front()->toMsg(solution);
     for (const auto& part : solution.sub_trajectory) {
@@ -127,7 +135,7 @@ class Planner : public rclcpp::Node {
         r.trajectories.push_back(part.trajectory);
     }
     if (r.trajectories.size() != 3) throw std::runtime_error("ambiguous arm stage extraction");
-    r.success = true; r.detail = "MTC planned three stages; execution and physics remain skill-owned";
+    r.success = true; r.detail = "MTC planned three position-only stages; execution and physics remain skill-owned";
   }
   std::mutex mutex_;
   rclcpp::CallbackGroup::SharedPtr group_;
