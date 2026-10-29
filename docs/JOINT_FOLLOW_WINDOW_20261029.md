@@ -51,3 +51,11 @@ OpenGL 探针验证。后续相机启动会先检查无显示渲染上下文，�
 是修复环境后的独立预声明窗口，先于执行提交。它关联前序失败 ID/结果摘要，并固定
 恢复的厂商描述文件 SHA256；其 A/B 顺序、2 ms 轨迹、10 秒跟随、相机质量门槛以及
 首轮不通过即停止的规则与原声明一致。它不替换前序结果，也不增加重试次数。
+
+第二个窗口 `95e8007` 的 EGL 预检通过，但 controller manager 在相机初始化时等待
+broadcaster 激活超过默认 5 秒。strict health 拒收，仍为 0 次任务派发，未运行 B。
+其原始日志与逐步物理轨迹另行归档，不覆盖首个失败。后续修复只调整启动激活请求
+等待上限并阻断失败前置步骤，不调整任务运动超时或任何抓取判据；安装 launch 也纳入
+身份校验。第三个独立声明
+[`infra/joint-follow-window-after-startup.json`](../infra/joint-follow-window-after-startup.json)
+同时关联两份原始 STOPPED 结果，A/B 顺序及所有物理/相机质量门槛保持一致。

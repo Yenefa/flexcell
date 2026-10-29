@@ -26,3 +26,22 @@ python3 setup/acceptance/joint_follow_20261029/verify_startup.py
 修复后的窗口另见 `infra/joint-follow-window-after-egl.json`。它保留前序失败的 ID
 和结果摘要，使用独立输出目录；A/B 任务数和物理/相机门槛不变。任何新结果均不得
 覆盖这里的失败，D3 默认准入仍是 NO_GO。
+
+## 第二个窗口：控制器启动超时
+
+`startup_95e8007/` 是提交 `95e80075dbd182a2c33ce8975b7810f942403345` 的独立
+后续窗口，ID 为 `846db7d03ffb44d584a8b9dfdc02e1a1`。EGL 预检和 Gazebo 渲染启动
+已通过，但相机初始化期间 `joint_state_broadcaster` 的激活请求超过默认 5 秒；
+之后 arm/gripper 已激活，broadcaster 仍未激活，strict health 拒收。此窗口仍为
+**STOPPED，0 次任务派发**，未运行 B，不能作为跟随验证或抓取样本。
+
+该轮的全部原始文件保留；逐 2 ms 轨迹做了无损 gzip 压缩，解压后的 SHA256、字节数
+与 9,764 行记录由 `startup_95e8007_inputs.json` 固定，原始未压缩文件仍留在运行目录。
+启动期包含 DetachableJoint 的短暂初始组件，不能把它拼成主动抓取证据。终止仿真栈时
+MoveIt 进程也记录了退出段错误，原始日志未裁掉。
+
+修复将控制器**启动切换应答**的等待上限设为 30 秒，任一模型创建或 broadcaster
+前置步骤失败则阻断后续启动；任务运动超时、抓取容差及失败码不变。身份校验新增
+源码与实际安装的 launch 文件比对。新独立预声明为
+`infra/joint-follow-window-after-startup.json`，同时关联前两份 STOPPED 记录，A/B 顺序
+与物理/相机质量门槛不变。

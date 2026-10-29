@@ -116,3 +116,27 @@ def test_surfaceless_context_survives_other_platform_exit_errors(tmp_path, monke
     assert report['status'] == 'PASS' and report['returncode'] == 3
     assert (tmp_path / 'camera_preflight.stdout').read_text() == stdout
     assert report['simulator_started'] is False
+
+
+def test_identity_rejects_stale_installed_launch_with_matching_python(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    spec = importlib.util.spec_from_file_location('runtime_identity', ROOT / 'infra/runtime_identity.py')
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    repo, install = tmp_path / 'repo', tmp_path / 'install'
+    package = repo / 'src/flexcell/flexcell_skills'
+    source = package / 'flexcell_skills/__init__.py'
+    imported = install / 'lib/python/flexcell_skills/__init__.py'
+    launch_source = package / 'launch/trusted_sim.launch.py'
+    launch_installed = install / 'share/flexcell_skills/launch/trusted_sim.launch.py'
+    for path in (source, imported, launch_source, launch_installed,
+                 repo / 'setup/flexcell_admin.py', repo / 'plan_execute.py'):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text('# matching fixture\n')
+    monkeypatch.setattr(module.importlib.util, 'find_spec', lambda name: SimpleNamespace(origin=str(imported)))
+    assert module.snapshot(repo, install)['mismatches'] == []
+    launch_installed.write_text('# stale launch still uses the old startup sequence\n')
+    identity = module.snapshot(repo, install)
+    assert identity['mismatches'] == ['launch/trusted_sim.launch.py']
+    assert all(row['source_sha256'] == row['installed_sha256']
+               for row in identity['python_files'].values())

@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "status": "STOPPED",
+  "episodes": [
+    {
+      "case": "normal",
+      "object": "target_box_a",
+      "task": "Joint follow, object A",
+      "run": "/artifacts/joint-follow-window-95e8007/trial-01/run-ba0aac7c5842",
+      "result": {
+        "schema_version": 1,
+        "status": "HARNESS_ERROR",
+        "backend": "detachable_joint",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 0,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "normal",
+        "object": "target_box_a",
+        "out": "/artifacts/joint-follow-window-95e8007/trial-01/run-ba0aac7c5842",
+        "world_sha256": "cbfa8ad2f75f453aeca9498bb11a004d34ab987d95c62f00887c3eeaa39f40d4",
+        "semantic_config_sha256": "8077f2dc08e61d07558ccbab2a041d9ef6351f3021f0b87aae3f90f9443eeaee",
+        "camera_preflight": {
+          "schema_version": 1,
+          "status": "PASS",
+          "simulator_started": false,
+          "method": "eglinfo -B; surfaceless OpenGL core profile >= 3.3",
+          "vendor_files": {
+            "/usr/share/glvnd/egl_vendor.d/50_mesa.json": "cd3881df4227c13ca7f9cfe6c78820f21d5f7a00a41b299214f6f827e63be369"
+          },
+          "returncode": 3,
+          "surfaceless": {
+            "EGL vendor string": "Mesa Project",
+            "OpenGL core profile renderer": "llvmpipe (LLVM 20.1.2, 256 bits)",
+            "OpenGL core profile version": "4.5 (Core Profile) Mesa 25.2.8-0ubuntu0.24.04.4"
+          }
+        },
+        "runtime_fingerprint": "2bc264a028586f765086a7a41a926e478e4c448b6d46a0cadd72bb8f8526f5da",
+        "error": "strict startup health failed; no robot task dispatched",
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    }
+  ],
+  "declaration_sha256": "1567a797ffbf87d5985bc179d76e0b214f13b0f6e26622525e3f7d3501fbd086",
+  "backend": "detachable_joint",
+  "skill_backend": "mtc",
+  "window_id": "846db7d03ffb44d584a8b9dfdc02e1a1",
+  "no_replacements": true,
+  "error": "trial 1 gate failed; window stopped with no replacement"
+}

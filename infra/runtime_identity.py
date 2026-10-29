@@ -23,6 +23,13 @@ def snapshot(repo, install):
                                     installed_sha256=sha(imported) if imported.is_file() else None)
         if files[str(relative)]['source_sha256'] != files[str(relative)]['installed_sha256']:
             mismatches.append(str(relative))
+    launch_files = {}
+    for source in (expected.parent / 'launch').glob('*.launch.py'):
+        installed = install / 'share/flexcell_skills/launch' / source.name
+        launch_files[source.name] = dict(source_sha256=sha(source),
+                                        installed_sha256=sha(installed) if installed.is_file() else None)
+        if launch_files[source.name]['source_sha256'] != launch_files[source.name]['installed_sha256']:
+            mismatches.append('launch/' + source.name)
     libraries = {str(p.relative_to(install)): sha(p) for p in install.glob('lib/libflexcell*.so')}
     planner = install / 'lib/flexcell_mtc/mtc_planner'
     if planner.is_file():
@@ -37,6 +44,7 @@ def snapshot(repo, install):
     source_digest = hashlib.sha256(json.dumps(sources, sort_keys=True).encode()).hexdigest()
     return dict(schema_version=1, source_revision=os.environ.get('FLEXCELL_SOURCE_REV', 'WORKTREE'),
                 imported_package=str(actual), install=str(install), python_files=files,
+                launch_files=launch_files,
                 native_libraries=libraries, mismatches=mismatches,
                 source_files=sources, source_tree_sha256=source_digest,
                 packages_sha256=sha(Path('/opt/dependency-packages.tsv'))
