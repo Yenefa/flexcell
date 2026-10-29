@@ -47,6 +47,7 @@ jobs:
         run: |
           docker run --init --rm flexcell-sim:ci \
             python3 /opt/flexcell/repo/setup/acceptance/joint_follow_20261029/verify_follow.py --video
+          docker run --init --rm flexcell-sim:ci \
             python3 /opt/flexcell/repo/setup/acceptance/integrated_contact_20261030/verify.py --video
       - name: One declared native contact sensor pipeline spike (no arm tasks)
         run: |
