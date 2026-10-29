@@ -69,8 +69,8 @@ def test_all_status_replies_lost_fail_closed_with_a_bounded_wait():
 def test_native_attached_claim_without_physical_follow_is_rejected():
     token = 'a' * 32
     follow = Mock()
-    follow.check.return_value = (False, 'measured relative pose exceeded follow limits')
-    follow.summary.return_value = dict(session=token, object='target_box_a')
+    follow.snapshot.return_value = (False, 'measured relative pose exceeded follow limits',
+                                    dict(session=token, object='target_box_a', fault='bad'))
     node = SimpleNamespace(_backend='detachable_joint', _offset=[0., 0., 0.],
         _session=token, _object_id='target_box_a', _guard='/carry/', _Empty=Mock(),
         _String=Mock(), _gz_node=Mock(), _follow=follow)
@@ -84,8 +84,7 @@ def test_native_attached_claim_without_physical_follow_is_rejected():
 def test_joint_snapshot_requires_the_same_physics_session():
     token = 'a' * 32
     follow = Mock()
-    follow.check.return_value = (True, '')
-    follow.summary.return_value = dict(session='b' * 32, object='target_box_a')
+    follow.snapshot.return_value = (True, '', dict(session='b' * 32, object='target_box_a', fault=''))
     node = SimpleNamespace(_backend='detachable_joint', _offset=[0., 0., 0.],
         _session=token, _object_id='target_box_a', _guard='/carry/', _Empty=Mock(),
         _String=Mock(), _gz_node=Mock(), _follow=follow)

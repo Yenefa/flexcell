@@ -140,6 +140,7 @@ class CarryServer(Node):
 
     def _on_query(self, _request, response):
         response.success = False
+        follow = None
         if self._backend in ('velocity_servo', 'detachable_joint'):
             try:
                 # Status is read-only. Retry transport discovery/reply loss,
@@ -159,8 +160,7 @@ class CarryServer(Node):
                         or native['object'] != self._object_id):
                     raise RuntimeError('native carry ownership differs from ROS state')
                 if self._backend == 'detachable_joint' and self._offset is not None:
-                    ok, reason = self._follow.check()
-                    follow = self._follow.summary()
+                    ok, reason, follow = self._follow.snapshot()
                     if not ok or follow['session'] != self._session or follow['object'] != self._object_id:
                         raise RuntimeError('physical follow unconfirmed: ' + (reason or 'session mismatch'))
             except Exception as exc:
@@ -173,7 +173,7 @@ class CarryServer(Node):
         response.detail = ('current carry backend state confirmed; native attempts=%d' % (attempt+1)
                            if self._backend in ('velocity_servo', 'detachable_joint') else 'current carry backend state confirmed')
         if self._backend == 'detachable_joint' and self._offset is not None:
-            response.detail += '; follow=' + json.dumps(self._follow.summary(), sort_keys=True)
+            response.detail += '; follow=' + json.dumps(follow, sort_keys=True)
         return response
 
     def _on_physics_trace(self, msg):

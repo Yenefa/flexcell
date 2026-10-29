@@ -198,16 +198,25 @@ class JointFollowMonitor:
         with self.cv:
             return self._check_locked()
 
+    def _summary_locked(self):
+        return dict(object=self.object, session=self.session, samples=self.samples,
+            first_relative_pose=(self.reference[0] + self.reference[1]) if self.reference else None,
+            first_sim_ns=self.first_sim_ns, last_sim_ns=self.last_sim_ns,
+            first_source_ns=self.first_source_ns, last_source_ns=self.last_source_ns,
+            max_sample_gap_ns=self.max_gap_ns,
+            max_translation_m=self.max_translation, max_rotation_rad=self.max_rotation,
+            translation_limit_m=self.max_translation_m, rotation_limit_rad=self.max_rotation_rad,
+            active=self.armed, releasing=self.releasing, fault=self.fault)
+
     def summary(self):
         with self.cv:
-            return dict(object=self.object, session=self.session, samples=self.samples,
-                first_relative_pose=(self.reference[0] + self.reference[1]) if self.reference else None,
-                first_sim_ns=self.first_sim_ns, last_sim_ns=self.last_sim_ns,
-                first_source_ns=self.first_source_ns, last_source_ns=self.last_source_ns,
-                max_sample_gap_ns=self.max_gap_ns,
-                max_translation_m=self.max_translation, max_rotation_rad=self.max_rotation,
-                translation_limit_m=self.max_translation_m, rotation_limit_rad=self.max_rotation_rad,
-                active=self.armed, releasing=self.releasing, fault=self.fault)
+            return self._summary_locked()
+
+    def snapshot(self):
+        """Return health and evidence from the same locked observation state."""
+        with self.cv:
+            ok, reason = self._check_locked()
+            return ok, reason, self._summary_locked()
 
     def begin_release(self):
         with self.cv:

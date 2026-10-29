@@ -49,7 +49,8 @@ def test_attached_claim_with_unfollowed_object_latches_failure():
     # the parent rose 10 cm and the claimed joint flag is still true.
     follow.feed(frame(clock, parent=[0., 0., .1, 0., 0., 0., 1.],
                       child=[.1, 0., .03, 0., 0., 0., 1.], attached=True))
-    assert not follow.check()[0]
+    healthy, reason, evidence = follow.snapshot()
+    assert not healthy and evidence['fault'] == reason and 'relative pose' in reason
     assert follow.summary()['max_translation_m'] == pytest.approx(.07)
     clock.tick(); follow.feed(frame(clock))
     assert not follow.check()[0]  # later good observations cannot erase it
