@@ -507,6 +507,9 @@ class PickServer(Node):
 
             sok, serr = self._scene.attach(goal.object_name)
             if not sok:
+                if follow is not None:
+                    return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                                  'planning-scene attach failed: %s; carry held for reconciliation' % serr)
                 self._carry_stop.publish(EmptyMsg())
                 return finish(R.OUTCOME_FAILED, R.ERR_GRASP_FAILED,
                               'planning-scene attach failed: %s' % serr)

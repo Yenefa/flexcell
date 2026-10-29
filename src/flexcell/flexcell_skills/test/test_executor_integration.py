@@ -613,6 +613,32 @@ class TestJointFollowStop(unittest.TestCase):
         node._scene.detach_to_world.assert_not_called()
         node._gripper.command.assert_not_called()
 
+    def test_joint_scene_attach_failure_keeps_physical_carry_even_if_follow_fault_arrives(self):
+        for concurrent_fault in (False, True):
+            with self.subTest(concurrent_fault=concurrent_fault):
+                watch = self.Watch()
+                node = self.pick_node(watch, True)
+                node._carry_stop = unittest.mock.Mock()
+                def fail_attach(*args):
+                    if concurrent_fault:
+                        watch.fault = 'measured relative pose exceeded follow limits'
+                    return False, 'scene unavailable'
+                node._scene.attach = fail_attach
+                goal = PickObject.Goal(); goal.object_name = 'target_box_a'; goal.motion_profile_id = 'demo_slow'
+                handle = _GoalHandle(goal)
+                sample = (((.22, 0., .0175), (0., 0., 0., 1.)), None)
+                with patch.object(pick_server_module, 'SnapshotWatch', return_value=watch), \
+                     patch.object(pick_server_module, 'sample_gz_pose', return_value=sample), \
+                     patch.object(pick_server_module, 'interruptible_sleep', return_value=False):
+                    result = node._execute(handle)
+                self.assertEqual(result.error_code, PickObject.Result.ERR_INTERNAL)
+                self.assertIn('planning-scene attach failed', result.detail)
+                self.assertIn('carry held for reconciliation', result.detail)
+                self.assertEqual(handle.terminal, 'abort')
+                node._carry_stop.publish.assert_not_called()
+                node._release_everything.assert_not_called()
+                self.assertEqual(node._gripper.command.call_count, 2)
+
     def test_fault_detected_while_waiting_for_motion_server_sends_no_goal(self):
         client = MoveToPoseClient.__new__(MoveToPoseClient)
         client._cli = unittest.mock.Mock()
