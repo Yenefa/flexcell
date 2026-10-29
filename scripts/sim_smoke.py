@@ -77,6 +77,7 @@ def main():
     parser.add_argument('--expected-egl-vendor-sha256')
     parser.add_argument('--contact-trace', action='store_true')
     parser.add_argument('--release-clearance-m', type=float)
+    parser.add_argument('--qualification-no-recovery', action='store_true')
     parser.add_argument('--case', choices=['normal', 'dual_object', 'recovery_once', 'budget_exhaustion',
                                            'unreachable_place'], default='normal')
     args = parser.parse_args()
@@ -85,6 +86,7 @@ def main():
     options = {}
     if args.contact_trace: options['contact_trace'] = True
     if args.release_clearance_m is not None: options['release_clearance_m'] = args.release_clearance_m
+    if args.qualification_no_recovery: options['qualification_no_recovery'] = True
     params, world = profile(out, args.backend, args.camera, args.skill_backend,
                             args.joint_hold_sim_s, args.physics_step_s, **options)
     if args.physics_step_s is not None:

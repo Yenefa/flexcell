@@ -106,6 +106,8 @@ jobs:
           python3 setup/acceptance/joint_follow_20261029/verify_follow.py
           python3 setup/acceptance/contact_pipeline_20261029/verify.py
           python3 setup/acceptance/integrated_contact_20261030/verify.py
+          python3 setup/acceptance/mtc_main_failure_20261030/verify.py
+          python3 setup/acceptance/mtc_first_attempt_20261030/verify.py
 
       - name: colcon test (all suites, 0 failures required)
         shell: bash
