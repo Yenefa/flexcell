@@ -10,7 +10,8 @@ ROOT = Path(__file__).resolve().parents[1]
 BACKENDS = ('teleport', 'velocity_servo', 'detachable_joint')
 
 
-def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy'):
+def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
+            joint_hold_sim_s=0., physics_step_s=None):
     if backend not in BACKENDS or skill_backend not in ('legacy', 'mtc'):
         raise ValueError('unsupported backend')
     out = Path(out)
@@ -19,8 +20,12 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy')
     for node in config.values():
         if 'ros__parameters' in node:
             node['ros__parameters']['log_dir'] = str(out / 'skills')
-    for name in ('pick_server', 'carry_server'):
+    for name in ('pick_server', 'place_server', 'carry_server'):
         config[name]['ros__parameters']['carry_backend'] = backend
+    if joint_hold_sim_s:
+        if backend != 'detachable_joint' or not 0. < joint_hold_sim_s <= 20.:
+            raise ValueError('joint simulation hold is only available for joint qualification')
+        config['pick_server']['ros__parameters']['joint_follow_hold_sim_s'] = float(joint_hold_sim_s)
     for name in ('pick_server', 'place_server'):
         config[name]['ros__parameters']['skill_backend'] = skill_backend
         config[name]['ros__parameters']['record_execution_commands'] = bool(camera)
@@ -30,6 +35,10 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy')
     base = 'flexcell_velocity_servo.sdf' if backend == 'velocity_servo' else 'flexcell_world.sdf'
     tree = ET.parse(ROOT / 'worlds' / base)
     world = tree.getroot().find('world')
+    if physics_step_s is not None:
+        if backend != 'detachable_joint' or physics_step_s != .002:
+            raise ValueError('only the declared 2 ms joint qualification step is supported')
+        world.find('physics/max_step_size').text = '0.002'
     ET.SubElement(world, 'plugin', name='flexcell::PhysicsTrace', filename='libflexcell_physics_trace.so')
     if backend == 'detachable_joint':
         ET.SubElement(world, 'plugin', name='flexcell::DetachableCarryGuard',

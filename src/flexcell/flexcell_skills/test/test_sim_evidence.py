@@ -1,6 +1,7 @@
 """Failed examples and missing data must survive without successful defaults."""
 import importlib.util
 import json
+import sys
 from pathlib import Path
 import pytest
 
@@ -48,3 +49,28 @@ def test_export_refuses_bad_data_without_selecting_good_subset(tmp_path, monkeyp
     with pytest.raises(ValueError):
         module.episode(tmp_path)
     assert path.read_text() == raw
+
+
+@pytest.mark.parametrize('guard', ['world', 'config', 'fingerprint'])
+def test_declared_identity_mismatch_dispatches_no_stack_or_task(tmp_path, monkeypatch, guard):
+    module = script('sim_smoke', monkeypatch)
+    def profile(out, *args):
+        params, world = out / 'params.yaml', out / 'world.sdf'
+        params.write_text('node:\n  ros__parameters:\n    log_dir: /tmp/record\n')
+        world.write_text('<sdf><world name="empty"/></sdf>')
+        return params, world
+    def identity(argv, out, timeout=120):
+        out.with_suffix('.stdout').write_text('{}')
+        return 0
+    launches = []
+    monkeypatch.setattr(module, 'profile', profile)
+    monkeypatch.setattr(module, 'command', identity)
+    monkeypatch.setattr(module.subprocess, 'Popen', lambda *a, **k: launches.append(a))
+    option = {'world': '--expected-world-sha256', 'config': '--expected-config-sha256',
+              'fingerprint': '--expected-fingerprint'}[guard]
+    monkeypatch.setattr(sys, 'argv', ['sim_smoke.py', '--out', str(tmp_path), option, '0' * 64])
+    assert module.main() == 1
+    result = json.loads(next(tmp_path.glob('run-*/result.json')).read_text())
+    assert result['physical_tasks_dispatched'] == 0
+    assert 'no robot task dispatched' in result['error']
+    assert not launches

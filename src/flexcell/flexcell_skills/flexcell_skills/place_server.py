@@ -15,12 +15,16 @@ from rclpy.action import ActionServer, CancelResponse, GoalResponse
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
+from rcl_interfaces.srv import GetParameters
+from rcl_interfaces.msg import ParameterDescriptor
 
 from std_srvs.srv import Trigger
 
 from flexcell_interfaces.action import PlaceObject
+from flexcell_interfaces.srv import QueryCarry
 
 from flexcell_skills.contracts.skill_result import derive_status
+from flexcell_skills.joint_follow import SnapshotWatch, follow_failure_detail, check_backend_parameter
 from flexcell_skills.common import (
     GripperClient, JsonlLog, MoveToPoseClient, PlanningSceneOps,
     crash_detail, dist3, interruptible_sleep, new_evidence, pose_msg,
@@ -56,6 +60,9 @@ class PlaceServer(Node):
         self.declare_parameter('retreat_m', 0.10)
         self.declare_parameter('carry_stop_topic', '/flexcell/carry_stop')
         self.declare_parameter('carry_release_service', '/flexcell/carry_release')
+        self.declare_parameter('carry_backend', 'teleport', ParameterDescriptor(read_only=True))
+        self.declare_parameter('carry_query_service', '/flexcell/carry_snapshot')
+        self.declare_parameter('carry_parameters_service', '/carry_server/get_parameters')
         self.declare_parameter('object_size', [0.035, 0.035, 0.035])
         self.declare_parameter('default_deadline_ms', 30000)
         self.declare_parameter('motion_profile_names', ['demo_veryslow', 'demo_slow', 'demo_default'])
@@ -84,6 +91,13 @@ class PlaceServer(Node):
         self._retreat = float(gp('retreat_m').value)
         self._carry_release = self.create_client(
             Trigger, gp('carry_release_service').value,
+            callback_group=ReentrantCallbackGroup())
+        self._carry_backend = gp('carry_backend').value
+        self._carry_query = self.create_client(
+            QueryCarry, gp('carry_query_service').value,
+            callback_group=ReentrantCallbackGroup())
+        self._carry_parameters = self.create_client(
+            GetParameters, gp('carry_parameters_service').value,
             callback_group=ReentrantCallbackGroup())
         self.create_service(Trigger, '/flexcell/place_ready', self._on_ready)
         self._size = list(gp('object_size').value)
@@ -129,6 +143,9 @@ class PlaceServer(Node):
                             else 'PLACE cannot discover carry release service')
         return response
 
+    def _backend_consistent(self):
+        return check_backend_parameter(self._carry_parameters, GetParameters, self._carry_backend)
+
     def _execute(self, goal_handle):
         t0 = time.monotonic()
         goal = goal_handle.request
@@ -140,8 +157,11 @@ class PlaceServer(Node):
             'object_name': goal.object_name,
             'profile': goal.motion_profile_id or self._default_profile,
         }
+        follow = None
 
         def finish(outcome, error, detail, motion_err=0):
+            if follow is not None:
+                rec['joint_follow_watch'] = follow.summary()
             if getattr(self, '_mtc', None) is not None:
                 rec['mtc_stages'] = list(self._mtc.audit)
             res.outcome = outcome
@@ -179,6 +199,9 @@ class PlaceServer(Node):
                 return finish(R.OUTCOME_FAILED, R.ERR_INVALID_GOAL,
                               'motion_profile_id %r not in whitelist %s'
                               % (profile, self._profiles))
+            consistent, reason = self._backend_consistent()
+            if not consistent:
+                return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL, reason)
             frame = goal.place_pose.header.frame_id or 'world'
             if frame != 'world':
                 return finish(R.OUTCOME_FAILED, R.ERR_INVALID_GOAL,
@@ -192,8 +215,15 @@ class PlaceServer(Node):
                               'object %r is not attached to the arm: %s'
                               % (goal.object_name, err or 'not in attached state'))
 
+            if getattr(self, '_carry_backend', 'teleport') == 'detachable_joint':
+                follow = SnapshotWatch(self._carry_query, QueryCarry, goal.object_name)
+                if not follow.start():
+                    return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                                  follow_failure_detail(follow.problem()))
+
             place_pos = [pp.x, pp.y, pp.z]
-            cancel_requested = lambda: goal_handle.is_cancel_requested  # noqa: E731
+            cancel_requested = lambda: (goal_handle.is_cancel_requested or
+                                        (follow is not None and bool(follow.problem())))  # noqa: E731
 
             # ---------- APPROACHING ----------
             self._feedback(goal_handle, 'APPROACHING', t0)
@@ -208,11 +238,18 @@ class PlaceServer(Node):
                     [hover, [pp.x, pp.y, ee_z], [pp.x, pp.y, ee_z + self._retreat]],
                     profile, self._deadline)
                 rec.update(skill_backend='mtc', planning_detail=message)
+                if follow is not None and follow.problem():
+                    return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                                  follow_failure_detail(follow.problem()))
                 if not planned:
                     return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
                                   'MTC planning failed before execution: ' + message)
             mres, merr_code, detail = self._motion(hover, profile, rid + '-hover',
                                                    cancel_check=cancel_requested)
+            if follow is not None and follow.problem():
+                return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                              follow_failure_detail(follow.problem(), mres, motion_may_be_active=True),
+                              motion_err=merr_code)
             if mres is None or int(mres.outcome) != R.OUTCOME_SUCCEEDED:
                 if goal_handle.is_cancel_requested:
                     return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
@@ -224,6 +261,10 @@ class PlaceServer(Node):
             descend = [pp.x, pp.y, ee_z]
             mres, merr_code, detail = self._motion(descend, profile, rid + '-descend',
                                                    cancel_check=cancel_requested)
+            if follow is not None and follow.problem():
+                return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                              follow_failure_detail(follow.problem(), mres, motion_may_be_active=True),
+                              motion_err=merr_code)
             if mres is None or int(mres.outcome) != R.OUTCOME_SUCCEEDED:
                 if goal_handle.is_cancel_requested:
                     return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
@@ -237,6 +278,15 @@ class PlaceServer(Node):
             if goal_handle.is_cancel_requested:
                 return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
                               'canceled before RELEASING (box still carried)')
+            if follow is not None:
+                if not follow.confirm_now():
+                    return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                                  follow_failure_detail(follow.problem(), mres, motion_may_be_active=True))
+                if not follow.close():
+                    return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                                  follow_failure_detail(follow.problem(), mres, motion_may_be_active=True))
+                rec['joint_follow_watch'] = follow.summary()
+                follow = None  # Release is intentional; no later motion is carrying the box.
             self._feedback(goal_handle, 'RELEASING', t0)
             # release: stop the carry servo first, then free the planning scene
             if not self._carry_release.wait_for_service(timeout_sec=5.0):
@@ -304,6 +354,8 @@ class PlaceServer(Node):
             # Result has outcome=0, which reads as OUTCOME_SUCCEEDED
             return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL, crash_detail(exc))
         finally:
+            if follow is not None:
+                follow.close()
             self._admission.release()
 
 

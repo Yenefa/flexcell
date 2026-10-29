@@ -23,12 +23,14 @@ import uuid
 
 import rclpy
 from rclpy.executors import MultiThreadedExecutor
+from rclpy.callback_groups import MutuallyExclusiveCallbackGroup
 from rclpy.node import Node
 from rclpy.duration import Duration
 from rclpy.time import Time
 from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
 
 from geometry_msgs.msg import Vector3
+from rcl_interfaces.msg import ParameterDescriptor
 from std_msgs.msg import Empty as EmptyMsg
 from std_msgs.msg import String as StringMsg
 from std_srvs.srv import Trigger
@@ -38,6 +40,7 @@ from flexcell_interfaces.msg import CarryState
 from flexcell_interfaces.srv import EngageCarry, QueryCarry
 
 from flexcell_skills.common import JsonlLog
+from flexcell_skills.joint_follow import JointFollowMonitor
 
 
 class CarryServer(Node):
@@ -47,7 +50,7 @@ class CarryServer(Node):
 
         self.declare_parameter('world', 'empty')
         self.declare_parameter('carry_period_s', 0.1)
-        self.declare_parameter('carry_backend', 'teleport')
+        self.declare_parameter('carry_backend', 'teleport', ParameterDescriptor(read_only=True))
         self.declare_parameter('base_frame', 'world')
         self.declare_parameter('end_effector_link', 'end_effector_link')
         self.declare_parameter('start_topic', '/flexcell/carry_start')
@@ -87,6 +90,12 @@ class CarryServer(Node):
         self._session = ''
         self._retired_sessions = set()
         self._state_revision = 0
+        self._follow = None
+        if self._backend == 'detachable_joint':
+            self._follow = JointFollowMonitor()
+            self._follow_group = MutuallyExclusiveCallbackGroup()
+            self.create_subscription(StringMsg, '/flexcell/physics_trace', self._on_physics_trace,
+                                     100, callback_group=self._follow_group)
 
         self._tf_buffer = Buffer()
         self._tf_listener = TransformListener(self._tf_buffer, self, spin_thread=False)
@@ -149,6 +158,11 @@ class CarryServer(Node):
                         or native['session'] != self._session
                         or native['object'] != self._object_id):
                     raise RuntimeError('native carry ownership differs from ROS state')
+                if self._backend == 'detachable_joint' and self._offset is not None:
+                    ok, reason = self._follow.check()
+                    follow = self._follow.summary()
+                    if not ok or follow['session'] != self._session or follow['object'] != self._object_id:
+                        raise RuntimeError('physical follow unconfirmed: ' + (reason or 'session mismatch'))
             except Exception as exc:
                 response.detail = str(exc)
                 return response
@@ -158,7 +172,15 @@ class CarryServer(Node):
         response.success = True
         response.detail = ('current carry backend state confirmed; native attempts=%d' % (attempt+1)
                            if self._backend in ('velocity_servo', 'detachable_joint') else 'current carry backend state confirmed')
+        if self._backend == 'detachable_joint' and self._offset is not None:
+            response.detail += '; follow=' + json.dumps(self._follow.summary(), sort_keys=True)
         return response
+
+    def _on_physics_trace(self, msg):
+        try:
+            self._follow.feed(json.loads(msg.data))
+        except (ValueError, TypeError) as exc:
+            self._follow.reject('malformed physics trace: ' + str(exc))
 
     # ------------------------------------------------------------ commands
     def _on_start(self, msg):
@@ -195,6 +217,8 @@ class CarryServer(Node):
             response.success = (self._object_id == request.object_id
                                 and self._offset == offset
                                 and self._thread is not None and self._thread.is_alive())
+            if response.success and getattr(self, '_backend', 'teleport') == 'detachable_joint':
+                response.success = self._follow.check()[0]
         else:
             response.success = self._engage(request.object_id, offset, token)
         response.message = ('carry engaged and physics acknowledged' if response.success
@@ -202,14 +226,24 @@ class CarryServer(Node):
         return response
 
     def _engage(self, object_id, offset, session):
+        if self._backend == 'detachable_joint' and self._offset is not None:
+            self._log.write({'event': 'engage_rejected_active_session', 'object': object_id,
+                             'session': session, 'active_session': self._session})
+            return False
         if not self._on_stop(None, cause='replace'):
             self.get_logger().error('cannot replace an unconfirmed carry session')
             return False
+        if self._backend == 'detachable_joint':
+            self._follow.arm(object_id, session)
         if self._backend in ('velocity_servo', 'detachable_joint'):
             ee = self._ee()
             if ee is None or not self._guard_request('engage', self._pose(object_id, offset, ee, session)):
                 # An ambiguous engage timeout must be followed by force release.
-                self._guard_release('')
+                if self._follow is not None:
+                    self._follow.begin_release()
+                released = self._guard_release('')
+                if self._follow is not None:
+                    self._follow.end_release(released)
                 self._retired_sessions.add(session)
                 self.get_logger().error('velocity-servo engage was not confirmed')
                 self._log.write({'event': 'engage_failed', 'object': object_id,
@@ -226,6 +260,14 @@ class CarryServer(Node):
                                         args=(object_id, offset, stop_evt, session),
                                         daemon=True)
         self._thread.start()
+        if self._backend == 'detachable_joint':
+            confirmed, reason = self._follow.wait_ready(timeout=2.)
+            if not confirmed:
+                self._log.write({'event': 'follow_engage_failed', 'object': object_id,
+                                 'session': session, 'reason': reason,
+                                 'follow': self._follow.summary()})
+                self._on_stop(None, cause='follow_engage_failed')
+                return False
         self.get_logger().info(
             'carry ENGAGED object=%s offset=[%.3f %.3f %.3f]'
             % (object_id, offset[0], offset[1], offset[2]))
@@ -240,19 +282,31 @@ class CarryServer(Node):
         # with a PICK (measured: 1432 stops, 0 attributable).
         session = getattr(self, '_session', '') or ''
         object_id = getattr(self, '_object_id', '') or ''
+        follow = getattr(self, '_follow', None)
+        if follow is not None:
+            follow.begin_release()
         self._stop_evt.set()
         if self._thread is not None:
             self._thread.join(timeout=2.0)
         stopped = self._thread is None or not self._thread.is_alive()
         if not stopped:
+            if follow is not None:
+                follow.end_release(False)
             return False
         if getattr(self, '_backend', 'teleport') in ('velocity_servo', 'detachable_joint'):
             if not self._guard_release(''):
+                if follow is not None:
+                    follow.end_release(False)
                 self._log.write({'event': 'release_unconfirmed',
                                  'backend': self._backend,
                                  'session': session, 'object': object_id,
                                  'cause': cause})
                 return False
+        if follow is not None:
+            follow.end_release(True)
+            if session:
+                self._log.write({'event': 'follow_final', 'follow': follow.summary(),
+                                 'object': object_id, 'session': session})
         if session:
             self._retired_sessions.add(session)
         self._object_id = ''

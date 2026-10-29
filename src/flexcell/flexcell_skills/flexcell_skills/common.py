@@ -399,8 +399,12 @@ class MoveToPoseClient:
         g.motion_profile_id = profile
         g.deadline_ms = deadline_ms
         g.request_id = request_id
+        if cancel_check is not None and cancel_check():
+            return None, 'move_to_pose canceled before goal dispatch'
         if not self._cli.wait_for_server(timeout_sec=5.0):
             return None, 'move_to_pose action server unavailable'
+        if cancel_check is not None and cancel_check():
+            return None, 'move_to_pose canceled before goal dispatch'
         send = self._cli.send_goal_async(g)
         if wait_future(send, 10.0) != 'done':
             return None, 'move_to_pose goal send timeout'

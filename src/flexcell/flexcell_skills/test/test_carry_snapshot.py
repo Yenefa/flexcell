@@ -64,3 +64,32 @@ def test_all_status_replies_lost_fail_closed_with_a_bounded_wait():
     result = CarryServer._on_query(node, None, SimpleNamespace())
     assert not result.success and '3 attempts' in result.detail
     assert node._gz_node.request.call_count == 3
+
+
+def test_native_attached_claim_without_physical_follow_is_rejected():
+    token = 'a' * 32
+    follow = Mock()
+    follow.check.return_value = (False, 'measured relative pose exceeded follow limits')
+    follow.summary.return_value = dict(session=token, object='target_box_a')
+    node = SimpleNamespace(_backend='detachable_joint', _offset=[0., 0., 0.],
+        _session=token, _object_id='target_box_a', _guard='/carry/', _Empty=Mock(),
+        _String=Mock(), _gz_node=Mock(), _follow=follow)
+    node._gz_node.request.return_value = (True, SimpleNamespace(data=json.dumps(
+        dict(ready=True, engaged=True, session=token, object='target_box_a'))))
+    result = CarryServer._on_query(node, None, SimpleNamespace())
+    assert not result.success
+    assert 'relative pose exceeded' in result.detail
+
+
+def test_joint_snapshot_requires_the_same_physics_session():
+    token = 'a' * 32
+    follow = Mock()
+    follow.check.return_value = (True, '')
+    follow.summary.return_value = dict(session='b' * 32, object='target_box_a')
+    node = SimpleNamespace(_backend='detachable_joint', _offset=[0., 0., 0.],
+        _session=token, _object_id='target_box_a', _guard='/carry/', _Empty=Mock(),
+        _String=Mock(), _gz_node=Mock(), _follow=follow)
+    node._gz_node.request.return_value = (True, SimpleNamespace(data=json.dumps(
+        dict(ready=True, engaged=True, session=token, object='target_box_a'))))
+    result = CarryServer._on_query(node, None, SimpleNamespace())
+    assert not result.success and 'session mismatch' in result.detail

@@ -72,6 +72,37 @@ jobs:
           path: artifacts/
           retention-days: 14
           if-no-files-found: warn
+  joint-follow-smoke:
+    concurrency:
+      group: joint-follow-${{ github.ref }}
+      cancel-in-progress: false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/Dockerfile.sim
+          load: true
+          tags: flexcell-sim:ci
+          build-args: SOURCE_REV=${{ github.sha }}
+          cache-from: type=gha,scope=flexcell-sim
+      - name: One declared joint-follow task with independent trace gate
+        run: |
+          mkdir -p artifacts
+          docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
+            python3 /opt/flexcell/repo/scripts/sim_window.py \
+            --manifest /opt/flexcell/repo/infra/joint-ci-smoke.json --out /artifacts/joint-window \
+            --backend detachable_joint --skill-backend mtc
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: joint-follow-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/
+          retention-days: 14
+          if-no-files-found: warn
   camera-data:
     if: (github.event_name == 'workflow_dispatch' && inputs.camera) || contains(github.event.pull_request.labels.*.name, 'data-smoke')
     needs: sim-smoke

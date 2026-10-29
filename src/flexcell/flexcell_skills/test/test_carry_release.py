@@ -109,3 +109,10 @@ def test_unconfirmed_engage_returns_failure_after_bounded_retries(monkeypatch):
     node = SimpleNamespace(_base='world', _carry_engage=client)
     assert not pick_server.PickServer._engage_carry(node, 'a', [0., 0., 0.])[0]
     assert client.call_async.call_count == 2
+
+
+def test_joint_replacement_cannot_release_an_existing_session():
+    node = SimpleNamespace(_backend='detachable_joint', _offset=[0., 0., 0.],
+        _session='a' * 32, _log=Mock(), _on_stop=Mock())
+    assert not CarryServer._engage(node, 'target_box_b', [0., 0., 0.], 'b' * 32)
+    node._on_stop.assert_not_called()

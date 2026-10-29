@@ -726,6 +726,11 @@ class TaskFsmServer(Node):
                             world.carry.object_id = decision.target
                     else:
                         last_fail_label = label
+                        if (err is None and r is not None and
+                                int(r.error_code) == PickObject.Result.ERR_INTERNAL):
+                            return finish(result_type.OUTCOME_FAILED, result_type.ERR_SKILL_FAILED,
+                                          '%s internal failure; execution stopped: %s'
+                                          % (label, r.detail))
                         if goal_handle.is_cancel_requested:
                             return finish(result_type.OUTCOME_CANCELED,
                                           result_type.ERR_CANCELED,
@@ -796,6 +801,11 @@ class TaskFsmServer(Node):
                                     obj.pose = r.object_pose_after
                                     obj.pose_age_s = 0.0
                     else:
+                        if (err is None and r is not None and
+                                int(r.error_code) == PlaceObject.Result.ERR_INTERNAL):
+                            return finish(result_type.OUTCOME_FAILED, result_type.ERR_SKILL_FAILED,
+                                          '%s internal failure; execution stopped: %s'
+                                          % (label, r.detail))
                         if goal_handle.is_cancel_requested:
                             return finish(result_type.OUTCOME_CANCELED,
                                           result_type.ERR_CANCELED,
