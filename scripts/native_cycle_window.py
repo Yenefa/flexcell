@@ -48,13 +48,20 @@ class Follower:
         while time.monotonic() < deadline:
             keys = self.collect()
             if keys:
+                newest = self.tables[0][keys[-1]]
+                newest_age = time.monotonic_ns()-newest['monotonic_ns']
+                require(newest_age < 500_000_000, 'native stream stale; age_ns='+str(newest_age))
                 choices = keys if earliest else keys[-1:]
                 for ns in choices:
                     p, c = self.tables[0][ns], self.tables[1][ns]
-                    age = time.monotonic_ns()-p['monotonic_ns']
-                    require(age < 500_000_000, 'native stream stale; age_ns='+str(age))
                     if watch: watch(p,c)
-                    if condition(p,c): return p,c
+                    # Pre-trigger history is not a live reference candidate.
+                    # The first eligible candidate still must be fresh; never
+                    # skip an eligible stale reference to find a passing one.
+                    if condition(p,c):
+                        age = time.monotonic_ns()-p['monotonic_ns']
+                        require(age < 500_000_000, 'native candidate stale; age_ns='+str(age))
+                        return p,c
             time.sleep(.002)
         raise RuntimeError('native frame condition timed out; no replacement cycle')
 

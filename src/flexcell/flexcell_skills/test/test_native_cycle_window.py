@@ -118,3 +118,20 @@ def test_live_consumer_starts_at_new_records_without_erasing_raw_history(tmp_pat
     assert list(follower.tables[0]) == list(follower.tables[1]) == [4]
     for name in ('physics_steps.jsonl','contact_steps.jsonl'):
         assert (tmp_path/name).read_text().startswith(history)
+
+
+@pytest.mark.parametrize('case',['pretrigger_history','stale_eligible','stale_producer'])
+def test_reference_epoch_selection_preserves_both_freshness_bounds(tmp_path,monkeypatch,case):
+    import native_cycle_window as module
+    for name in ('physics_steps.jsonl','contact_steps.jsonl'): (tmp_path/name).touch()
+    follower=module.Follower(tmp_path)
+    now=10**12
+    follower.tables=[{1:dict(sim_ns=1,monotonic_ns=now-2_000_000_000),
+                     2:dict(sim_ns=2,monotonic_ns=now-1_000_000)}, {1:{},2:{}}]
+    monkeypatch.setattr(follower,'collect',lambda:[1,2])
+    monkeypatch.setattr(module.time,'monotonic_ns',lambda:now)
+    if case=='stale_producer': follower.tables[0][2]['monotonic_ns']=now-500_000_001
+    condition=(lambda p,c:True) if case=='stale_eligible' else (lambda p,c:p['sim_ns']>=2)
+    if case=='pretrigger_history': assert follower.wait(condition,earliest=True)[0]['sim_ns']==2
+    else:
+        with pytest.raises(ValueError,match='stale'): follower.wait(condition,earliest=True)

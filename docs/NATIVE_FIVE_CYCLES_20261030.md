@@ -82,3 +82,18 @@ new declaration is `infra/native-five-cycle-window-after-live-tail.json`,
 linking the preserved startup stop. World/config hashes and all thresholds are
 unchanged. This is a distinct declared startup attempt after a reader fix, not
 a replacement successful sample. The previous attempt had zero cycles.
+
+The distinct `225a885` window passed preflight but stopped after the first
+detached preposition: no engage was requested. The earliest-reference selector
+checked freshness before checking eligibility and therefore rejected queued
+pre-trigger history (reported age 2,668,183,423 ns). Its complete data and
+worker failure are preserved in `preposition_225a885.zip`; this is one started
+cycle with zero attachment requests, not a completed cycle.
+
+The selector now checks latest-source freshness, then reference eligibility,
+then the freshness of the first eligible reference. It cannot skip a stale
+eligible candidate to select a newer passing one. Native producer and candidate
+age limits both remain 500 ms. Separate adversarial tests cover pre-trigger
+history, a stale eligible candidate and a stale latest source. The new
+`infra/native-five-cycle-window-after-epoch-selection.json` links both retained
+stops without changing physics, poses, count or acceptance thresholds.
