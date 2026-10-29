@@ -48,3 +48,38 @@ reference is the first attached pose, not an explicit detached set_pose
 reference. Five lifecycle cycles, formal preposition reference, S2-host image
 and false-attached fault injection, and legacy parity remain outstanding.
 Issues #56–#59 remain open and D3 remains NO_GO.
+
+## Preserved result
+
+Implementation and declaration commit: `bba0ae3e578db53601adb0c5419ff9292c564a9d`.
+One task was dispatched once and passed. Source/install/launch identity matched
+all 177 relevant tracked files; the actual mapped ContactTrace SHA matched the
+installed binary, with DART 7.8.0 and Gazebo systems 8.15.0 recorded.
+
+The same session `f783cfba89994646b1cd7b63086acbd4` followed for 17.14 sim s
+(858 sampled frames, 8,571 raw steps); maximum SE(3) translation was
+0.577080360 micrometres and rotation 2.040751972 microradians. The new contact
+gate joined 9,332 steps, with maximum native clock skew 41.310539 ms. Passive
+B provided all 500 prebinding force samples, mean 0.48999999999111865 N.
+All 9,332 ground observations remained UNKNOWN; A had 905 contact-with-force
+and 8,427 available empty-contact snapshots. No missing data was filled with zero.
+
+Physical release occurred at sim_ns 31564000000. All 21 fixed 40 ms samples
+were detached and contact-free. Fitted acceleration was -9.800000000000233 m/s^2,
+initial effective vertical velocity -0.03191952739919734 m/s, and maximum
+quadratic residual 8.33e-17 m. This checks consistency with the simulator's
+ballistic integrator; it is not an independent gravity precision measurement.
+The camera near release records the gripper still at -0.011 m before opening;
+the accepted open command appears at sim_ns 31598000000. Joint removal precedes
+opening, so this remains a joint oracle and does not validate physical grasp.
+
+All 377 recorded RGB frames are retained losslessly; 237 lie in the task and
+context interval. Final strict health passed all 19 checks, IDLE and carry
+released. Runtime fingerprint:
+`19bf3720766bc0c687f1af036f2cc0d249aa06817c80d6c1057ae4a5b0d82b3f`.
+
+Compact replay bundle: `setup/acceptance/integrated_contact_20261030/`, with
+independent contact/motion/freefall recomputation and optional full RGB decode.
+Complete original raw ZIP: 423 files, 21,008,656 bytes, SHA256
+`07200d49cd296929aac972fb51d9803650fa96b61890ecaeed6c9bff2792464d`.
+No additional local simulation task was run. D3 remains NO_GO.
