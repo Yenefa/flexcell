@@ -1,0 +1,48 @@
+<sdf version='1.10'>
+  <world name='contact_probe'>
+    <physics name='2ms' type='ignored'>
+      <max_step_size>0.002</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>500</real_time_update_rate>
+    </physics>
+    <gravity>0 0 -9.8</gravity>
+    <plugin filename='gz-sim-physics-system' name='gz::sim::systems::Physics'/>
+    <plugin filename='gz-sim-contact-system' name='gz::sim::systems::Contact'/>
+    <plugin filename='libflexcell_contact_trace.so' name='flexcell::ContactTrace'>
+      <watch><model>target_box_a</model><link>link</link><collision>col</collision></watch>
+      <watch><model>target_box_b</model><link>link</link><collision>col</collision></watch>
+      <watch><model>unsensed_box</model><link>link</link><collision>col</collision></watch>
+    </plugin>
+    <model name='ground_plane'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='col'><geometry><plane><normal>0 0 1</normal><size>10 10</size></plane></geometry></collision>
+      </link>
+    </model>
+    <!-- Weight control: 50 g, 35 mm cube, initially on the floor. -->
+    <model name='target_box_a'>
+      <pose>0.22 0 0.0175 0 0 0</pose>
+      <link name='link'>
+        <inertial><mass>0.05</mass><inertia><ixx>1e-5</ixx><iyy>1e-5</iyy><izz>1e-5</izz></inertia></inertial>
+        <collision name='col'><geometry><box><size>0.035 0.035 0.035</size></box></geometry></collision>
+        <sensor name='contacts' type='contact'><always_on>true</always_on><update_rate>500</update_rate><contact><collision>col</collision></contact></sensor>
+      </link>
+    </model>
+    <!-- Empty reported-contact set control. Static so it never falls. -->
+    <model name='target_box_b'>
+      <static>true</static><pose>0.5 0 0.5 0 0 0</pose>
+      <link name='link'>
+        <collision name='col'><geometry><box><size>0.035 0.035 0.035</size></box></geometry></collision>
+        <sensor name='contacts' type='contact'><always_on>true</always_on><update_rate>500</update_rate><contact><collision>col</collision></contact></sensor>
+      </link>
+    </model>
+    <!-- Missing-component control: physical collision, no contact sensor. -->
+    <model name='unsensed_box'>
+      <pose>-0.2 0 0.0175 0 0 0</pose>
+      <link name='link'>
+        <inertial><mass>0.05</mass><inertia><ixx>1e-5</ixx><iyy>1e-5</iyy><izz>1e-5</izz></inertia></inertial>
+        <collision name='col'><geometry><box><size>0.035 0.035 0.035</size></box></geometry></collision>
+      </link>
+    </model>
+  </world>
+</sdf>

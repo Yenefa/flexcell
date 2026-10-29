@@ -68,3 +68,7 @@ python3 scripts/contact_probe.py --out /artifacts/contact-probe-UNIQUE
 即便通过，只能说明本固定场景的 contact/force 数据链路可用。没有执行无接触
 预定位参考、绑定时十秒 contact trace、五轮整机 attach、整机自由落体、S2 同轮
 故障注入或 legacy 矩阵。D3 继续 **NO_GO**，默认运行后端、旧数据与模型冻结不变。
+
+首次执行结果：`3d9e9b4` 的原声明窗口通过，稳定501步实测均值0.4900000000667622 N，
+三个控制的全部1,200帧分别为有力、未报告接触、UNKNOWN。完整原始记录及独立重算见
+[归档](../setup/acceptance/contact_pipeline_20261029/README.md)。这不改变以上边界。
