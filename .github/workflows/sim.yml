@@ -47,6 +47,10 @@ jobs:
         run: |
           docker run --init --rm flexcell-sim:ci \
             python3 /opt/flexcell/repo/setup/acceptance/joint_follow_20261029/verify_follow.py --video
+      - name: One declared native contact sensor pipeline spike (no arm tasks)
+        run: |
+          docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
+            python3 /opt/flexcell/repo/scripts/contact_probe.py --out /artifacts/contact-probe
       - name: Native joint ownership, reattachment and lease expiry
         run: |
           docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \

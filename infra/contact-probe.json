@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "kind": "CONTACT_SENSOR_PIPELINE_SPIKE_ONLY",
+  "logical_robot_tasks": 0,
+  "no_replacements": true,
+  "world": "worlds/contact_probe.sdf",
+  "world_sha256": "c3325093739d0156690251cae9811d96c247c1f28ef6fcff1529a4eebec1b81c",
+  "engine_required": "dartsim",
+  "upstream_reference": "gazebosim/gz-sim@446a44335a45b704b4d36dabcc5508ee34eeb3d8 (gz-sim8_8.15.0)",
+  "samples": 1200,
+  "step_ns": 2000000,
+  "availability_from_ns": 200000000,
+  "settle_from_ns": 1000000000,
+  "settle_to_ns": 2000000000,
+  "min_force_samples": 476,
+  "mass_kg": 0.05,
+  "gravity_m_s2": 9.8,
+  "force_mean_min_n": 0.392,
+  "force_mean_max_n": 0.588,
+  "targets": {
+    "positive": "target_box_a",
+    "empty": "target_box_b",
+    "missing": "unsensed_box"
+  },
+  "force_interpretation": "Magnitude of summed raw body_1 forces; target-body sign not calibrated. Empty contacts and absent force data have null force, never inferred zero.",
+  "scope": "One standalone sensor spike, not arm/carry admission, contact-grasp, free-fall or a success-rate experiment. Preserve failure; D3 remains NO_GO."
+}
