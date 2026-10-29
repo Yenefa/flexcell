@@ -28,18 +28,20 @@ from geometry_msgs.msg import Point, Pose
 from moveit_msgs.msg import CollisionObject
 from std_msgs.msg import Header as StdHeader
 
-from flexcell_interfaces.action import PickObject, RunDemo, RunPickPlace
+from flexcell_interfaces.action import PickObject, PlaceObject, RunDemo, RunPickPlace
 from flexcell_interfaces.msg import (
     CarryState, RobotStateSummary, WorldObject, WorldState, ZoneState)
 
 from flexcell_skills.contracts.episode import EpisodeStore, replay_episode
 from flexcell_skills.contracts.injection import InjectionLifecycle
-from flexcell_skills.common import JsonlLog, PlanningSceneOps
+from flexcell_skills.common import JsonlLog, MoveToPoseClient, PlanningSceneOps
 from flexcell_skills.decision_policy import FSMPolicy
 from flexcell_skills.jev_policy import JevBackend, JevPolicy, JevResponse
 from flexcell_skills.task_fsm_server import TaskFsmServer
 from flexcell_skills import pick_server as pick_server_module
+from flexcell_skills import place_server as place_server_module
 from flexcell_skills.pick_server import PickServer
+from flexcell_skills.place_server import PlaceServer
 
 
 class _Logger:
@@ -225,6 +227,32 @@ class TestDemoAbortPath(unittest.TestCase):
                          RunDemo.Result.ERR_RECOVERY_EXHAUSTED)
         self.assertGreaterEqual(
             episode['final_state']['safety']['evaluated'], 4)
+
+    def test_internal_pick_failure_stops_even_if_policy_would_retry(self):
+        calls = []
+        script = {'OBSERVE': [(_skill_result(world_state=_world_state()), None)],
+                  'PICK': [(_skill_result(outcome=1, error_code=2,
+                            detail='physical follow unconfirmed'), None)],
+                  'PLACE': [], 'VERIFY': []}
+        node = _make_fsm(self.tmp, _make_demo_call(script, calls))
+        node._policy = JevPolicy(_ScriptedJevBackend(['PICK', 'PICK', 'PICK']))
+        result = node._execute_demo(_GoalHandle(RunDemo.Goal()))
+        self.assertEqual(result.error_code, RunDemo.Result.ERR_SKILL_FAILED)
+        self.assertIn('internal failure; execution stopped', result.detail)
+        self.assertEqual(sum(c.startswith('PICK') for c in calls), 1)
+
+    def test_internal_place_failure_stops_even_if_policy_would_retry(self):
+        calls = []
+        script = {'OBSERVE': [(_skill_result(world_state=_world_state()), None)],
+                  'PICK': [(_skill_result(), None)],
+                  'PLACE': [(_skill_result(outcome=1, error_code=2,
+                             detail='physical follow unconfirmed'), None)], 'VERIFY': []}
+        node = _make_fsm(self.tmp, _make_demo_call(script, calls))
+        node._policy = JevPolicy(_ScriptedJevBackend(['PICK', 'PLACE', 'PLACE']))
+        result = node._execute_demo(_GoalHandle(RunDemo.Goal()))
+        self.assertEqual(result.error_code, RunDemo.Result.ERR_SKILL_FAILED)
+        self.assertIn('internal failure; execution stopped', result.detail)
+        self.assertEqual(sum(c.startswith('PLACE') for c in calls), 1)
 
     def test_second_concurrent_task_gets_resource_busy(self):
         node = _make_fsm(self.tmp, _make_demo_call(
@@ -432,6 +460,7 @@ class TestPickEngageFailure(unittest.TestCase):
 
     def test_planning_scene_attach_failure_is_typed_and_releases(self):
         node = PickServer.__new__(PickServer)
+        node._backend_consistent = lambda: (True, '')
         node._seq = 0
         node._admission = threading.Lock()
         node.get_logger = lambda: _Logger()
@@ -492,11 +521,141 @@ class TestPickEngageFailure(unittest.TestCase):
         self.assertEqual(gh.terminal, 'abort')
 
 
+class TestJointFollowStop(unittest.TestCase):
+    class Watch:
+        def __init__(self, *args):
+            self.fault = ''
+        def start(self): return True
+        def problem(self): return self.fault
+        def summary(self): return {'fault': self.fault}
+        def close(self): return True
+        def confirm_now(self): return not self.fault
+
+    def pick_node(self, watch, stop_confirmed):
+        node = PickServer.__new__(PickServer)
+        node._backend_consistent = lambda: (True, '')
+        for name, value in dict(_seq=0, _admission=threading.Lock(),
+            _profiles=['demo_slow'], _default_profile='demo_slow', _deadline=30000,
+            _inject=InjectionLifecycle(), _base='world', _size=[.035] * 3,
+            _hover=.22, _grasp_dz=.16, _raise=.1, _attach_radius=.20,
+            _follow_min=.03, _gripper_open=.02, _gripper_close=-.011,
+            _carry_backend='detachable_joint', _carry_query=object()).items():
+            setattr(node, name, value)
+        node._publish_inject_status = lambda: None
+        node._feedback = lambda *args: None
+        node._log = SimpleNamespace(write=lambda row: None)
+        node._joint_carry_released = lambda: (True, '')
+        node._ee_position = lambda: ([.22, 0., .1775], None)
+        node._engaged_carry_session = 'a' * 32
+        node._engage_carry = lambda *args: (True, 'confirmed')
+        node._release_everything = unittest.mock.Mock(return_value=(True, ''))
+        node._gripper = SimpleNamespace(command=unittest.mock.Mock(return_value=(None, None)))
+        node._scene = SimpleNamespace(add_box=lambda *args: (True, ''),
+                                      attach=lambda *args: (True, ''),
+                                      remove=unittest.mock.Mock())
+        def motion(position, profile, rid, cancel_check=None):
+            if rid.endswith('-lift'):
+                watch.fault = 'measured relative pose exceeded follow limits'
+                assert cancel_check()
+                return (SimpleNamespace(outcome=2, error_code=32, execution_started=True,
+                                        stop_confirmed=stop_confirmed), 32, 'stopped')
+            return SimpleNamespace(outcome=0, error_code=0), 0, 'ok'
+        node._motion = motion
+        return node
+
+    def test_pick_follow_fault_stops_and_never_releases_before_reconciliation(self):
+        for stop_confirmed in (True, False):
+            with self.subTest(stop_confirmed=stop_confirmed):
+                watch = self.Watch()
+                node = self.pick_node(watch, stop_confirmed)
+                goal = PickObject.Goal(); goal.object_name = 'target_box_a'; goal.motion_profile_id = 'demo_slow'
+                handle = _GoalHandle(goal)
+                sample = (((.22, 0., .0175), (0., 0., 0., 1.)), None)
+                with patch.object(pick_server_module, 'SnapshotWatch', return_value=watch), \
+                     patch.object(pick_server_module, 'sample_gz_pose', return_value=sample), \
+                     patch.object(pick_server_module, 'interruptible_sleep', return_value=False):
+                    result = node._execute(handle)
+                self.assertEqual(result.error_code, PickObject.Result.ERR_INTERNAL)
+                self.assertFalse(result.grasp_attached)
+                self.assertEqual(handle.terminal, 'abort')
+                self.assertEqual('MotionTerminalUnknown' in result.detail, not stop_confirmed)
+                node._release_everything.assert_not_called()
+                self.assertEqual(node._gripper.command.call_count, 2)  # pre-open, then close; no cleanup open
+
+    def test_place_follow_fault_blocks_release_and_cleanup(self):
+        watch = self.Watch()
+        node = PlaceServer.__new__(PlaceServer)
+        node._backend_consistent = lambda: (True, '')
+        for name, value in dict(_seq=0, _admission=threading.Lock(),
+            _profiles=['demo_slow'], _default_profile='demo_slow', _deadline=30000,
+            _carry_backend='detachable_joint', _carry_query=object(),
+            _hover=.10, _clearance=.012, _carry=.16, _retreat=.10).items():
+            setattr(node, name, value)
+        node._feedback = lambda *args: None
+        node._log = SimpleNamespace(write=lambda row: None)
+        node._scene = SimpleNamespace(is_attached=lambda *args: (True, ''),
+                                      detach_to_world=unittest.mock.Mock())
+        node._gripper = SimpleNamespace(command=unittest.mock.Mock())
+        node._carry_release = unittest.mock.Mock()
+        def motion(position, profile, rid, cancel_check=None):
+            watch.fault = 'attached state does not match object motion'
+            assert cancel_check()
+            return (SimpleNamespace(outcome=2, error_code=32, execution_started=True,
+                                    stop_confirmed=True), 32, 'stopped')
+        node._motion = motion
+        goal = PlaceObject.Goal(); goal.object_name = 'target_box_a'; goal.motion_profile_id = 'demo_slow'
+        handle = _GoalHandle(goal)
+        with patch.object(place_server_module, 'SnapshotWatch', return_value=watch):
+            result = node._execute(handle)
+        self.assertEqual(result.error_code, PlaceObject.Result.ERR_INTERNAL)
+        self.assertFalse(result.released)
+        node._carry_release.call_async.assert_not_called()
+        node._scene.detach_to_world.assert_not_called()
+        node._gripper.command.assert_not_called()
+
+    def test_joint_scene_attach_failure_keeps_physical_carry_even_if_follow_fault_arrives(self):
+        for concurrent_fault in (False, True):
+            with self.subTest(concurrent_fault=concurrent_fault):
+                watch = self.Watch()
+                node = self.pick_node(watch, True)
+                node._carry_stop = unittest.mock.Mock()
+                def fail_attach(*args):
+                    if concurrent_fault:
+                        watch.fault = 'measured relative pose exceeded follow limits'
+                    return False, 'scene unavailable'
+                node._scene.attach = fail_attach
+                goal = PickObject.Goal(); goal.object_name = 'target_box_a'; goal.motion_profile_id = 'demo_slow'
+                handle = _GoalHandle(goal)
+                sample = (((.22, 0., .0175), (0., 0., 0., 1.)), None)
+                with patch.object(pick_server_module, 'SnapshotWatch', return_value=watch), \
+                     patch.object(pick_server_module, 'sample_gz_pose', return_value=sample), \
+                     patch.object(pick_server_module, 'interruptible_sleep', return_value=False):
+                    result = node._execute(handle)
+                self.assertEqual(result.error_code, PickObject.Result.ERR_INTERNAL)
+                self.assertIn('planning-scene attach failed', result.detail)
+                self.assertIn('carry held for reconciliation', result.detail)
+                self.assertEqual(handle.terminal, 'abort')
+                node._carry_stop.publish.assert_not_called()
+                node._release_everything.assert_not_called()
+                self.assertEqual(node._gripper.command.call_count, 2)
+
+    def test_fault_detected_while_waiting_for_motion_server_sends_no_goal(self):
+        client = MoveToPoseClient.__new__(MoveToPoseClient)
+        client._cli = unittest.mock.Mock()
+        client._cli.wait_for_server.return_value = True
+        checks = iter([False, True])
+        result, error = client.call([.1, .2, .3], cancel_check=lambda: next(checks))
+        self.assertIsNone(result)
+        self.assertIn('before goal dispatch', error)
+        client._cli.send_goal_async.assert_not_called()
+
+
 class TestPickLiftCleanup(unittest.TestCase):
     """Drive the real lift failure branch and real planning-scene messages."""
 
     def drive(self, scene_ok=True, gripper_ok=True, cancel=False):
         node = PickServer.__new__(PickServer)
+        node._backend_consistent = lambda: (True, '')
         values = dict(_seq=0, _admission=threading.Lock(),
                       _profiles=['demo_slow'], _default_profile='demo_slow',
                       _deadline=30000, _inject=InjectionLifecycle(), _base='world',

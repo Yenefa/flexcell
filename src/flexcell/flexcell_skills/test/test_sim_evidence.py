@@ -1,6 +1,7 @@
 """Failed examples and missing data must survive without successful defaults."""
 import importlib.util
 import json
+import sys
 from pathlib import Path
 import pytest
 
@@ -48,3 +49,94 @@ def test_export_refuses_bad_data_without_selecting_good_subset(tmp_path, monkeyp
     with pytest.raises(ValueError):
         module.episode(tmp_path)
     assert path.read_text() == raw
+
+
+@pytest.mark.parametrize('guard', ['world', 'config', 'fingerprint', 'rendering', 'egl_vendor'])
+def test_declared_identity_mismatch_dispatches_no_stack_or_task(tmp_path, monkeypatch, guard):
+    module = script('sim_smoke', monkeypatch)
+    def profile(out, *args):
+        params, world = out / 'params.yaml', out / 'world.sdf'
+        params.write_text('node:\n  ros__parameters:\n    log_dir: /tmp/record\n')
+        world.write_text('<sdf><world name="empty"/></sdf>')
+        return params, world
+    def identity(argv, out, timeout=120):
+        out.with_suffix('.stdout').write_text('{}')
+        return 0
+    launches = []
+    monkeypatch.setattr(module, 'profile', profile)
+    monkeypatch.setattr(module, 'command', identity)
+    monkeypatch.setattr(module.subprocess, 'Popen', lambda *a, **k: launches.append(a))
+    if guard == 'rendering':
+        def reject(out):
+            raise RuntimeError('camera EGL preflight failed; no robot task dispatched')
+        monkeypatch.setattr(module, 'preflight_rendering', reject)
+        options = ['--camera']
+    elif guard == 'egl_vendor':
+        monkeypatch.setattr(module, 'preflight_rendering', lambda out: dict(status='PASS', vendor_files={}))
+        options = ['--camera', '--expected-egl-vendor-sha256', '0' * 64]
+    else:
+        option = {'world': '--expected-world-sha256', 'config': '--expected-config-sha256',
+                  'fingerprint': '--expected-fingerprint'}[guard]
+        options = [option, '0' * 64]
+    monkeypatch.setattr(sys, 'argv', ['sim_smoke.py', '--out', str(tmp_path), *options])
+    assert module.main() == 1
+    result = json.loads(next(tmp_path.glob('run-*/result.json')).read_text())
+    assert result['physical_tasks_dispatched'] == 0
+    assert 'no robot task dispatched' in result['error']
+    assert not launches
+
+
+@pytest.mark.parametrize('defect', ['no_surfaceless', 'only_device', 'old_gl', 'missing_renderer'])
+def test_camera_preflight_rejects_other_platform_success(monkeypatch, defect):
+    module = script('camera_preflight', monkeypatch)
+    good = ('Surfaceless platform:\nEGL vendor string: Mesa Project\n'
+            'OpenGL core profile renderer: llvmpipe\n'
+            'OpenGL core profile version: 4.5 (Core Profile) Mesa\n')
+    assert module.parse_surfaceless(good)['OpenGL core profile renderer'] == 'llvmpipe'
+    bad = {
+        'no_surfaceless': good.replace('Surfaceless', 'X11'),
+        'only_device': 'Surfaceless platform:\neglinfo: eglInitialize failed\n\n' +
+                       good.replace('Surfaceless', 'Device'),
+        'old_gl': good.replace('4.5 (Core Profile)', '3.2 (Core Profile)'),
+        'missing_renderer': good.replace('OpenGL core profile renderer: llvmpipe\n', ''),
+    }[defect]
+    with pytest.raises(ValueError):
+        module.parse_surfaceless(bad)
+
+
+def test_surfaceless_context_survives_other_platform_exit_errors(tmp_path, monkeypatch):
+    module = script('camera_preflight', monkeypatch)
+    stdout = ('X11 platform:\neglinfo: eglInitialize failed\n\n'
+              'Surfaceless platform:\nEGL vendor string: Mesa Project\n'
+              'OpenGL core profile renderer: llvmpipe\n'
+              'OpenGL core profile version: 4.5 (Core Profile) Mesa\n')
+    probe = module.subprocess.CompletedProcess(['eglinfo', '-B'], 3, stdout, '')
+    monkeypatch.setattr(module.subprocess, 'run', lambda *a, **k: probe)
+    report = module.preflight_rendering(tmp_path)
+    assert report['status'] == 'PASS' and report['returncode'] == 3
+    assert (tmp_path / 'camera_preflight.stdout').read_text() == stdout
+    assert report['simulator_started'] is False
+
+
+def test_identity_rejects_stale_installed_launch_with_matching_python(tmp_path, monkeypatch):
+    from types import SimpleNamespace
+    spec = importlib.util.spec_from_file_location('runtime_identity', ROOT / 'infra/runtime_identity.py')
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    repo, install = tmp_path / 'repo', tmp_path / 'install'
+    package = repo / 'src/flexcell/flexcell_skills'
+    source = package / 'flexcell_skills/__init__.py'
+    imported = install / 'lib/python/flexcell_skills/__init__.py'
+    launch_source = package / 'launch/trusted_sim.launch.py'
+    launch_installed = install / 'share/flexcell_skills/launch/trusted_sim.launch.py'
+    for path in (source, imported, launch_source, launch_installed,
+                 repo / 'setup/flexcell_admin.py', repo / 'plan_execute.py'):
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text('# matching fixture\n')
+    monkeypatch.setattr(module.importlib.util, 'find_spec', lambda name: SimpleNamespace(origin=str(imported)))
+    assert module.snapshot(repo, install)['mismatches'] == []
+    launch_installed.write_text('# stale launch still uses the old startup sequence\n')
+    identity = module.snapshot(repo, install)
+    assert identity['mismatches'] == ['launch/trusted_sim.launch.py']
+    assert all(row['source_sha256'] == row['installed_sha256']
+               for row in identity['python_files'].values())

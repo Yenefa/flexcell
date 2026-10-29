@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "purpose": "Separate post-EGL-repair functional window; prior startup failure remains STOPPED with zero tasks; not a replacement result or D3 admission",
+  "max_logical_tasks": 5,
+  "camera": true,
+  "required_carry_follow": true,
+  "backend": "detachable_joint",
+  "skill_backend": "mtc",
+  "joint_hold_sim_s": 11.0,
+  "min_follow_sim_s": 10.0,
+  "physics_step_s": 0.002,
+  "min_preflight_rtf": 0.3,
+  "world_sha256": "cbfa8ad2f75f453aeca9498bb11a004d34ab987d95c62f00887c3eeaa39f40d4",
+  "semantic_config_sha256": "8077f2dc08e61d07558ccbab2a041d9ef6351f3021f0b87aae3f90f9443eeaee",
+  "episodes": [
+    {
+      "case": "normal",
+      "object": "target_box_a",
+      "task": "Joint follow, object A"
+    },
+    {
+      "case": "normal",
+      "object": "target_box_b",
+      "task": "Joint follow, object B"
+    }
+  ],
+  "prior_window": {
+    "id": "6ca0ee15b85243c98b39fdb11e9e271f",
+    "status": "STOPPED",
+    "physical_tasks_dispatched": 0,
+    "result_sha256": "bd81583662027c5af834a833feeead1e2024ed554184501a5057da0bcb58f3f0",
+    "archive": "setup/acceptance/joint_follow_20261029/startup_629e496"
+  },
+  "camera_egl_vendor_sha256": "cd3881df4227c13ca7f9cfe6c78820f21d5f7a00a41b299214f6f827e63be369"
+}

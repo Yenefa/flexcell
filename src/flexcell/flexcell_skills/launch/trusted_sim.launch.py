@@ -4,9 +4,10 @@ from pathlib import Path
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, ExecuteProcess, IncludeLaunchDescription
+from launch.actions import DeclareLaunchArgument, EmitEvent, ExecuteProcess, IncludeLaunchDescription
 from launch.actions import OpaqueFunction, RegisterEventHandler, SetEnvironmentVariable
 from launch.event_handlers import OnProcessExit
+from launch.events import Shutdown
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
@@ -14,6 +15,14 @@ import xacro
 import xml.etree.ElementTree as ET
 import yaml
 from moveit_configs_utils import MoveItConfigsBuilder
+
+
+def successful_exit(actions, label):
+    def on_exit(event, _context):
+        if event.returncode == 0:
+            return actions
+        return [EmitEvent(event=Shutdown(reason=label + ' failed; downstream startup blocked'))]
+    return on_exit
 
 
 def launch_stack(context):
@@ -42,9 +51,10 @@ def launch_stack(context):
                  arguments=['-string', robot, '-name', 'open_manipulator_x',
                             '-allow_renaming', 'false', '-z', '0.0'])
     broadcaster = Node(package='controller_manager', executable='spawner', output='screen',
-                       arguments=['joint_state_broadcaster', '--controller-manager-timeout', '90'])
+                       arguments=['joint_state_broadcaster', '--controller-manager-timeout', '90',
+                                  '--switch-timeout', '30'])
     controllers = [Node(package='controller_manager', executable='spawner', output='screen',
-                        arguments=[name, '--controller-manager-timeout', '90'])
+                        arguments=[name, '--controller-manager-timeout', '90', '--switch-timeout', '30'])
                    for name in ('arm_controller', 'gripper_controller')]
     bridges = ['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
                '/flexcell/physics_trace@std_msgs/msg/String[gz.msgs.StringMsg']
@@ -63,8 +73,10 @@ def launch_stack(context):
              parameters=[{'robot_description': robot, 'use_sim_time': True}], output='screen'),
         Node(package='ros_gz_bridge', executable='parameter_bridge', arguments=bridges,
              parameters=[{'use_sim_time': True}], output='screen'),
-        RegisterEventHandler(OnProcessExit(target_action=spawn, on_exit=[broadcaster])),
-        RegisterEventHandler(OnProcessExit(target_action=broadcaster, on_exit=controllers)),
+        RegisterEventHandler(OnProcessExit(target_action=spawn,
+            on_exit=successful_exit([broadcaster], 'robot model spawn'))),
+        RegisterEventHandler(OnProcessExit(target_action=broadcaster,
+            on_exit=successful_exit(controllers, 'joint state broadcaster activation'))),
         spawn,
         IncludeLaunchDescription(PythonLaunchDescriptionSource(str(
             Path(get_package_share_directory('open_manipulator_moveit_config')) /

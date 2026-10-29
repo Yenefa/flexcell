@@ -23,6 +23,8 @@ def main():
     declaration = json.loads(args.manifest.read_text())
     if declaration['max_logical_tasks'] != 5 or not 1 <= len(declaration['episodes']) <= 5:
         raise ValueError('window must declare at most five logical tasks')
+    if declaration.get('backend', args.backend) != args.backend or declaration.get('skill_backend', args.skill_backend) != args.skill_backend:
+        raise ValueError('requested backend differs from declared window')
     args.out.mkdir(parents=True, exist_ok=False)
     (args.out / 'declaration.json').write_bytes(args.manifest.read_bytes())
     result = dict(schema_version=1, status='INCOMPLETE', episodes=[],
@@ -38,6 +40,20 @@ def main():
                        '--case', spec['case'], '--object', spec['object']]
             if declaration.get('camera'):
                 command.append('--camera')
+            if declaration.get('joint_hold_sim_s'):
+                command.extend(['--joint-hold-sim-s', str(declaration['joint_hold_sim_s'])])
+            if declaration.get('physics_step_s') is not None:
+                command.extend(['--physics-step-s', str(declaration['physics_step_s'])])
+            if declaration.get('min_preflight_rtf'):
+                command.extend(['--min-preflight-rtf', str(declaration['min_preflight_rtf'])])
+            if declaration.get('world_sha256'):
+                command.extend(['--expected-world-sha256', declaration['world_sha256']])
+            if declaration.get('semantic_config_sha256'):
+                command.extend(['--expected-config-sha256', declaration['semantic_config_sha256']])
+            if declaration.get('camera_egl_vendor_sha256'):
+                command.extend(['--expected-egl-vendor-sha256', declaration['camera_egl_vendor_sha256']])
+            if fingerprint is not None:
+                command.extend(['--expected-fingerprint', fingerprint])
             with (args.out / ('trial-%02d.log' % (index + 1))).open('x') as log:
                 proc = subprocess.Popen(command, stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
                 try:
@@ -70,12 +86,21 @@ def main():
             result['episodes'].append(dict(spec, run=str(runs[0]), result=outcome))
             if proc.returncode != 0 or outcome.get('expectation_met') is not True:
                 raise RuntimeError('trial %d gate failed; window stopped with no replacement' % (index + 1))
+            if declaration.get('required_carry_follow'):
+                if args.backend != 'detachable_joint':
+                    raise ValueError('follow window requires the explicitly selected joint backend')
+                from joint_follow_gate import verify_run
+                step = declaration.get('physics_step_s')
+                result['episodes'][-1]['follow_evidence'] = verify_run(
+                    runs[0], spec['object'], min_duration_s=declaration.get('min_follow_sim_s', 0.),
+                    physics_step_ns=int(step * 1e9) if step is not None else None,
+                    require_camera=bool(declaration.get('camera')))
             current = outcome.get('runtime_fingerprint')
             if not current or fingerprint is not None and current != fingerprint:
                 raise RuntimeError('runtime fingerprint drift; window stopped')
             fingerprint = current
         result.update(status='FUNCTIONAL_WINDOW_PASS', runtime_fingerprint=fingerprint)
-    except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired) as exc:
+    except (RuntimeError, OSError, ValueError, TypeError, KeyError, subprocess.TimeoutExpired) as exc:
         result.update(status='STOPPED', error=str(exc))
     finally:
         (args.out / 'window.json').write_text(json.dumps(result, indent=2, allow_nan=False) + '\n')

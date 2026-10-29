@@ -1,6 +1,6 @@
 # D3 attachment admission: NO_GO for default qualification
 
-Decision for the current evidence set: **NO_GO_FOR_DEFAULT_ADMISSION**. Keep
+Decision recorded on 2026-10-27: **NO_GO_FOR_DEFAULT_ADMISSION**. Keep
 DetachableJoint as an explicitly selected experimental oracle; continue the existing
 velocity_servo control. This is a qualification decision, not a finding that the
 official Gazebo system cannot work. Issues #56–#59 remain open.
@@ -30,3 +30,22 @@ Next joint admission work must declare the five missing cases before execution, 
 contact/free-fall observations and satisfy every #57 criterion. It then needs a new
 decision record before any default change. Current evidence is in
 [the archive](../setup/acceptance/trusted_sim_20261027/README.md).
+
+## 2026-10-29 addendum: functional follow evidence, admission unchanged
+
+The table and implementation observations above retain the 2026-10-27 record.
+At `ef959c6`, a separately declared A/B window passed 17.18/16.70 simulation seconds
+of attachment, with 8,591/8,351 raw 2 ms physics samples. Independent full-trace
+checks found peak relative translation 0.608/1.158 µm and rotation 2.057/2.791 µrad.
+Both runs passed strict final health. The runtime now enforces sampled 50 Hz follow
+health and asks the motion owner to cancel on faults; the false-attached rejection
+was tested through synthetic ROS/DDS telemetry, not a live full-stack injection.
+
+This extends the duration and 500 Hz pose evidence, but the reference was the first
+observed attachment, not the required contact-free pre-positioning transform.
+Contact forces, integrated free fall, S2 live fault injection and the complete legacy
+matrix remain absent. **NO_GO_FOR_DEFAULT_ADMISSION remains in effect.** No
+reliability estimate, contact-grasp claim or historical teleport-cause conclusion
+follows from these two tasks. Both earlier startup-only failures remain STOPPED;
+they dispatched no tasks and were not replaced in the record. See the
+[new archive and replay instructions](../setup/acceptance/joint_follow_20261029/README.md).

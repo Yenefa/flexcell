@@ -14,6 +14,7 @@ still requires an observed physical rise, otherwise GRASP_FAILED.
 import threading
 import time
 import uuid
+import math
 
 import rclpy
 from rclpy.action import ActionServer, CancelResponse, GoalResponse
@@ -29,12 +30,15 @@ import json
 from tf2_ros import Buffer, TransformListener
 from rclpy.duration import Duration
 from rclpy.time import Time
+from rcl_interfaces.srv import GetParameters
+from rcl_interfaces.msg import ParameterDescriptor
 
 from flexcell_interfaces.action import PickObject
-from flexcell_interfaces.srv import EngageCarry
+from flexcell_interfaces.srv import EngageCarry, QueryCarry
 
 from flexcell_skills.contracts.injection import InjectionLifecycle
 from flexcell_skills.contracts.skill_result import derive_status
+from flexcell_skills.joint_follow import SnapshotWatch, follow_failure_detail, check_backend_parameter
 from flexcell_skills.common import (
     GripperClient, JsonlLog, MoveToPoseClient, PlanningSceneOps,
     crash_detail, dist3, interruptible_sleep, new_evidence, pose_msg,
@@ -67,13 +71,16 @@ class PickServer(Node):
         self.declare_parameter('attach_radius_m', 0.20)
         self.declare_parameter('carry_start_topic', '/flexcell/carry_start')
         self.declare_parameter('carry_stop_topic', '/flexcell/carry_stop')
-        self.declare_parameter('carry_backend', 'teleport')
+        self.declare_parameter('carry_backend', 'teleport', ParameterDescriptor(read_only=True))
         self.declare_parameter('skill_backend', 'legacy')
         self.declare_parameter('record_execution_commands', False)
         self.declare_parameter('carry_engage_service', '/flexcell/carry_engage')
         self.declare_parameter('carry_release_service', '/flexcell/carry_release')
+        self.declare_parameter('carry_query_service', '/flexcell/carry_snapshot')
+        self.declare_parameter('carry_parameters_service', '/carry_server/get_parameters')
         self.declare_parameter('inject_topic', '/flexcell/inject')
         self.declare_parameter('box_follow_min_m', 0.03)
+        self.declare_parameter('joint_follow_hold_sim_s', 0.0, ParameterDescriptor(read_only=True))
         self.declare_parameter('object_size', [0.035, 0.035, 0.035])
         self.declare_parameter('base_frame', 'world')
         self.declare_parameter('end_effector_link', 'end_effector_link')
@@ -112,6 +119,12 @@ class PickServer(Node):
         self._carry_release = self.create_client(
             Trigger, gp('carry_release_service').value,
             callback_group=ReentrantCallbackGroup())
+        self._carry_query = self.create_client(
+            QueryCarry, gp('carry_query_service').value,
+            callback_group=ReentrantCallbackGroup())
+        self._carry_parameters = self.create_client(
+            GetParameters, gp('carry_parameters_service').value,
+            callback_group=ReentrantCallbackGroup())
 
         # ---- deterministic failure injection (Week-1.5; lifecycle T6) ----
         # payload "<scenario_id>:<once|always>[#request_id]" arms, "" clears.
@@ -128,6 +141,9 @@ class PickServer(Node):
             StringMsg, gp('inject_status_topic').value, self._status_qos())
         self._publish_inject_status()
         self._follow_min = float(gp('box_follow_min_m').value)
+        self._joint_hold_sim_s = float(gp('joint_follow_hold_sim_s').value)
+        if not math.isfinite(self._joint_hold_sim_s) or not 0. <= self._joint_hold_sim_s <= 20.:
+            raise ValueError('joint follow hold must be finite and between 0 and 20 simulation seconds')
         self._size = list(gp('object_size').value)
         self._base = gp('base_frame').value
         self._ee = gp('end_effector_link').value
@@ -257,9 +273,43 @@ class PickServer(Node):
             future = self._carry_engage.call_async(request)
             if wait_future(future, 2.0) == 'done':
                 result = future.result()
+                if result.success and result.session == request.request_id:
+                    self._engaged_carry_session = result.session
                 return bool(result.success and result.session == request.request_id), result.message
             self._carry_engage.remove_pending_request(future)
         return False, 'carry engage acknowledgement timed out; lift was not started'
+
+    def _joint_carry_released(self):
+        if not self._carry_query.wait_for_service(timeout_sec=2.):
+            return False, 'carry snapshot unavailable before approach'
+        future = self._carry_query.call_async(QueryCarry.Request())
+        if wait_future(future, 2.) != 'done':
+            self._carry_query.remove_pending_request(future)
+            return False, 'carry snapshot timed out before approach'
+        response = future.result()
+        if response is None or not response.success or response.state.engaged or response.session:
+            return False, 'carry is engaged or its state is unknown before approach'
+        return True, ''
+
+    def _backend_consistent(self):
+        return check_backend_parameter(self._carry_parameters, GetParameters, self._carry_backend)
+
+    def _hold_joint_sim_time(self, seconds, cancel_check, timeout_s=60.):
+        """Bounded hold with advancing simulation clock and an active follow check."""
+        start_sim = self.get_clock().now().nanoseconds
+        deadline = time.monotonic() + timeout_s
+        last_sim = start_sim
+        while time.monotonic() < deadline:
+            if cancel_check():
+                return False, 'interrupted'
+            current_sim = self.get_clock().now().nanoseconds
+            if current_sim < last_sim:
+                return False, 'simulation clock moved backwards during follow hold'
+            if current_sim - start_sim >= int(seconds * 1e9):
+                return True, ''
+            last_sim = current_sim
+            time.sleep(.05)
+        return False, 'simulation clock did not complete the declared hold within the wall deadline'
 
     def _execute(self, goal_handle):
         t0 = time.monotonic()
@@ -272,8 +322,11 @@ class PickServer(Node):
             'object_name': goal.object_name,
             'profile': goal.motion_profile_id or self._default_profile,
         }
+        follow = None
 
         def finish(outcome, error, detail, motion_err=0):
+            if follow is not None:
+                rec['joint_follow_watch'] = follow.summary()
             if getattr(self, '_mtc', None) is not None:
                 rec['mtc_stages'] = list(self._mtc.audit)
             res.outcome = outcome
@@ -310,6 +363,15 @@ class PickServer(Node):
                 return finish(R.OUTCOME_FAILED, R.ERR_INVALID_GOAL,
                               'motion_profile_id %r not in whitelist %s'
                               % (profile, self._profiles))
+
+            consistent, reason = self._backend_consistent()
+            if not consistent:
+                return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL, reason)
+
+            if self._carry_backend == 'detachable_joint':
+                released, reason = self._joint_carry_released()
+                if not released:
+                    return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL, reason)
 
             # deterministic failure injection happens BEFORE any motion, so a
             # recoverable injected failure leaves the world untouched
@@ -416,11 +478,21 @@ class PickServer(Node):
                                   R.ERR_GRASP_FAILED if cleaned else R.ERR_INTERNAL,
                                   message if cleaned else
                                   message + '; cleanup failed: ' + cleanup_error)
+                if self._carry_backend == 'detachable_joint':
+                    follow = SnapshotWatch(self._carry_query, QueryCarry, goal.object_name,
+                                           self._engaged_carry_session)
+                    if not follow.start():
+                        return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                                      follow_failure_detail(follow.problem()))
+                    cancel_requested = lambda: goal_handle.is_cancel_requested or bool(follow.problem())
             else:
                 self._carry_start.publish(StringMsg(data=json.dumps({
                     'object': goal.object_name, 'offset': offset, 'frame': self._base,
                 })))
             if interruptible_sleep(0.5, cancel_requested):
+                if follow is not None and follow.problem():
+                    return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                                  follow_failure_detail(follow.problem()))
                 # cancel while the carry servo pins the object: leave the
                 # servo engaged (the box hangs from the EE) - releasing here
                 # would drop it uncontrolled
@@ -429,12 +501,22 @@ class PickServer(Node):
                               'EE; servo left engaged)')
             # time.sleep replaced by interruptible_sleep (audit P0-3)
 
+            if follow is not None and follow.problem():
+                return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                              follow_failure_detail(follow.problem()))
+
             sok, serr = self._scene.attach(goal.object_name)
             if not sok:
+                if follow is not None:
+                    return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                                  'planning-scene attach failed: %s; carry held for reconciliation' % serr)
                 self._carry_stop.publish(EmptyMsg())
                 return finish(R.OUTCOME_FAILED, R.ERR_GRASP_FAILED,
                               'planning-scene attach failed: %s' % serr)
             if interruptible_sleep(0.5, cancel_requested):
+                if follow is not None and follow.problem():
+                    return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                                  follow_failure_detail(follow.problem()))
                 return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
                               'canceled after attach (box attached and '
                               'carried; not released)')
@@ -444,6 +526,10 @@ class PickServer(Node):
             lift = [grasp[0], grasp[1], grasp[2] + self._raise]
             mres, merr_code, detail = self._motion(lift, profile, rid + '-lift',
                                                    cancel_check=cancel_requested)
+            if follow is not None and follow.problem():
+                return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                              follow_failure_detail(follow.problem(), mres, motion_may_be_active=True),
+                              motion_err=merr_code)
             if mres is None or int(mres.outcome) != R.OUTCOME_SUCCEEDED:
                 if goal_handle.is_cancel_requested:
                     return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
@@ -466,6 +552,9 @@ class PickServer(Node):
 
             sampled, err = sample_gz_pose(goal.object_name)
             if sampled is None:
+                if follow is not None:
+                    return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                                  'post-lift observation unavailable; carry held: %s' % err)
                 return finish(R.OUTCOME_FAILED, R.ERR_GRASP_FAILED,
                               'post-lift observe failed: %s' % err)
             # sample AFTER a settle: at motion end the carry servo (10Hz
@@ -474,9 +563,27 @@ class PickServer(Node):
             # referee finding: rise 4.9cm reported vs 9.6cm true plateau;
             # 0.5s still undershot at 5.7cm - the servo pulls the box up in
             # steps, ~2s reaches the plateau)
-            interruptible_sleep(2.0, cancel_requested)
+            if follow is not None and self._joint_hold_sim_s > 0:
+                held, hold_error = self._hold_joint_sim_time(self._joint_hold_sim_s, cancel_requested)
+                rec['joint_follow_hold_sim_s'] = self._joint_hold_sim_s
+                if not held:
+                    if goal_handle.is_cancel_requested and not follow.problem():
+                        return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
+                                      'canceled during simulation hold (box still carried)')
+                    return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                                  follow_failure_detail(follow.problem() or hold_error, mres,
+                                                        motion_may_be_active=True))
+            elif interruptible_sleep(2.0, cancel_requested):
+                if follow is not None and follow.problem():
+                    return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                                  follow_failure_detail(follow.problem(), mres, motion_may_be_active=True))
+                return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
+                              'canceled during lift settle (box still carried)')
             sampled, err = sample_gz_pose(goal.object_name)
             if sampled is None:
+                if follow is not None:
+                    return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                                  'post-settle observation unavailable; carry held: %s' % err)
                 return finish(R.OUTCOME_FAILED, R.ERR_GRASP_FAILED,
                               'post-settle observe failed: %s' % err)
             box_after, box_quat = sampled
@@ -484,6 +591,9 @@ class PickServer(Node):
             rec['box_after'] = box_after
             rise = box_after[2] - box_pos[2]
             rec['box_rise_m'] = rise
+            if follow is not None and follow.problem():
+                return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                              follow_failure_detail(follow.problem(), mres, motion_may_be_active=True))
             if rise < self._follow_min:
                 # measured dishonesty guard: the box did not come along
                 cleaned, cleanup_error = self._release_everything(goal.object_name)
@@ -493,6 +603,10 @@ class PickServer(Node):
                               '%s' % (rise, self._follow_min,
                                       'carry release requested' if cleaned else
                                       'cleanup failed: ' + cleanup_error))
+
+            if follow is not None and not follow.confirm_now():
+                return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                              follow_failure_detail(follow.problem(), mres, motion_may_be_active=True))
 
             res.grasp_attached = True
             return finish(R.OUTCOME_SUCCEEDED, R.ERR_NONE,
@@ -504,6 +618,8 @@ class PickServer(Node):
             # Result has outcome=0, which reads as OUTCOME_SUCCEEDED
             return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL, crash_detail(exc))
         finally:
+            if follow is not None:
+                follow.close()
             self._admission.release()
 
 

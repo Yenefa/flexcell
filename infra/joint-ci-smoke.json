@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "purpose": "One bounded joint/MTC integration smoke; no qualification or success-rate claim",
+  "max_logical_tasks": 5,
+  "camera": false,
+  "required_carry_follow": true,
+  "backend": "detachable_joint",
+  "skill_backend": "mtc",
+  "world_sha256": "1e345b3a4c985045d14e5c38124b4fc73a749c52efcf09d5a53b19148fe696ca",
+  "semantic_config_sha256": "40c0ff6f42998524f541a213e98961cea66cdc4c88f040de45fe4ff471270a2c",
+  "episodes": [
+    {"case": "normal", "object": "target_box_a", "task": "Joint follow, one CI smoke"}
+  ]
+}

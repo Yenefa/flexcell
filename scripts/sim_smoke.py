@@ -15,6 +15,7 @@ import yaml
 import math
 
 from sim_profile import profile, ROOT
+from camera_preflight import preflight_rendering
 
 
 def json_result(value):
@@ -67,12 +68,22 @@ def main():
     parser.add_argument('--skill-backend', choices=['legacy', 'mtc'], default='legacy')
     parser.add_argument('--object', choices=['target_box_a', 'target_box_b'], default='target_box_a')
     parser.add_argument('--camera', action='store_true')
+    parser.add_argument('--joint-hold-sim-s', type=float, default=0.)
+    parser.add_argument('--physics-step-s', type=float)
+    parser.add_argument('--min-preflight-rtf', type=float, default=0.)
+    parser.add_argument('--expected-world-sha256')
+    parser.add_argument('--expected-config-sha256')
+    parser.add_argument('--expected-fingerprint')
+    parser.add_argument('--expected-egl-vendor-sha256')
     parser.add_argument('--case', choices=['normal', 'dual_object', 'recovery_once', 'budget_exhaustion',
                                            'unreachable_place'], default='normal')
     args = parser.parse_args()
     out = args.out / ('run-' + uuid.uuid4().hex[:12])
     out.mkdir(parents=True, exist_ok=False)
-    params, world = profile(out, args.backend, args.camera, args.skill_backend)
+    params, world = profile(out, args.backend, args.camera, args.skill_backend,
+                            args.joint_hold_sim_s, args.physics_step_s)
+    if args.physics_step_s is not None:
+        os.environ['FLEXCELL_PHYSICS_STEP_LOG'] = str(out / 'physics_steps.jsonl')
     os.environ['FLEXCELL_EPISODE_DIR'] = str(out / 'episodes')
     result = dict(schema_version=1, status='HARNESS_ERROR', backend=args.backend,
                   skill_backend=args.skill_backend, physical_tasks_dispatched=0,
@@ -94,9 +105,27 @@ def main():
             for key, value in list(node.get('ros__parameters', {}).items()):
                 if key in ('log_dir', 'episode_dir'):
                     node['ros__parameters'][key] = '$RUN/' + key
-        fingerprint = __import__('hashlib').sha256(json.dumps(dict(
-            identity=identity, config=semantic_config), sort_keys=True).encode() + world.read_bytes()).hexdigest()
+        config_digest = __import__('hashlib').sha256(json.dumps(semantic_config, sort_keys=True).encode()).hexdigest()
+        world_digest = __import__('hashlib').sha256(world.read_bytes()).hexdigest()
+        result['world_sha256'] = world_digest
+        result['semantic_config_sha256'] = config_digest
+        if args.expected_world_sha256 and world_digest != args.expected_world_sha256:
+            raise RuntimeError('world differs from declaration; no robot task dispatched')
+        if args.expected_config_sha256 and config_digest != args.expected_config_sha256:
+            raise RuntimeError('configuration differs from declaration; no robot task dispatched')
+        provenance = dict(identity=identity, config=semantic_config)
+        if args.camera:
+            result['camera_preflight'] = preflight_rendering(out)
+            provenance['camera_preflight'] = result['camera_preflight']
+        if args.expected_egl_vendor_sha256 and (
+                not args.camera or result['camera_preflight']['vendor_files'].get(
+                    '/usr/share/glvnd/egl_vendor.d/50_mesa.json') != args.expected_egl_vendor_sha256):
+            raise RuntimeError('camera EGL vendor differs from declaration; no robot task dispatched')
+        fingerprint = __import__('hashlib').sha256(json.dumps(
+            provenance, sort_keys=True).encode() + world.read_bytes()).hexdigest()
         result['runtime_fingerprint'] = fingerprint
+        if args.expected_fingerprint and fingerprint != args.expected_fingerprint:
+            raise RuntimeError('runtime fingerprint changed; no robot task dispatched')
         os.environ['FLEXCELL_RUNTIME_FINGERPRINT'] = fingerprint
         stack = subprocess.Popen(['ros2', 'launch', 'flexcell_skills', 'trusted_sim.launch.py',
                                   'world:=' + str(world), 'params_file:=' + str(params),
@@ -118,6 +147,35 @@ def main():
                     break
         if not ready:
             raise RuntimeError('strict startup health failed; no robot task dispatched')
+        if args.physics_step_s is not None:
+            step_path = out / 'physics_steps.jsonl'
+            step_ready = False
+            for _ in range(25):
+                if step_path.exists():
+                    with step_path.open('rb') as stream:
+                        offset = max(0, step_path.stat().st_size - 512_000)
+                        stream.seek(offset)
+                        data = stream.read()
+                        if offset:
+                            data = data.split(b'\n', 1)[-1]
+                        complete = data.rsplit(b'\n', 1)[0].splitlines()
+                    if len(complete) >= 2:
+                        last = [json.loads(line) for line in complete[-2:]]
+                        step_ready = (last[1]['sim_ns'] - last[0]['sim_ns'] == 2_000_000 and
+                                      last[1]['step_ns'] == 2_000_000)
+                        if args.min_preflight_rtf:
+                            step_ready = step_ready and len(complete) >= 251
+                            if step_ready:
+                                first = json.loads(complete[-251])
+                                wall = last[-1]['monotonic_ns'] - first['monotonic_ns']
+                                sim = last[-1]['sim_ns'] - first['sim_ns']
+                                measured = sim / wall if wall > 0 else 0.
+                                result['preflight_rtf'] = measured
+                                step_ready = measured >= args.min_preflight_rtf
+                        if step_ready: break
+                time.sleep(.2)
+            if not step_ready:
+                raise RuntimeError('per-step physics trace unavailable; no robot task dispatched')
         recorder_log = (out / 'recorder.log').open('x')
         recorder = subprocess.Popen([sys.executable, str(ROOT / 'scripts/record_sim_data.py'),
             '--out', str(out / 'data'), *(['--camera'] if args.camera else [])],
