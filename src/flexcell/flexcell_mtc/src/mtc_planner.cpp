@@ -5,6 +5,7 @@
 #include <moveit/task_constructor/task.h>
 #include <moveit/task_constructor/stages/fixed_state.h>
 #include <moveit/task_constructor/stages/move_to.h>
+#include <moveit/task_constructor/stages/move_relative.h>
 #include <moveit/task_constructor/stages/modify_planning_scene.h>
 #include <moveit/task_constructor/solvers/pipeline_planner.h>
 #include <moveit/task_constructor/solvers/joint_interpolation.h>
@@ -12,12 +13,15 @@
 #include <moveit_task_constructor_msgs/msg/solution.hpp>
 #include <shape_msgs/msg/solid_primitive.hpp>
 #include <geometry_msgs/msg/point_stamped.hpp>
+#include <geometry_msgs/msg/vector3_stamped.hpp>
+#include <moveit/robot_state/attached_body.hpp>
 #include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <mutex>
 #include <sstream>
 #include "position_only_planner.hpp"
+#include "attached_object_goal.hpp"
 namespace mtc = moveit::task_constructor;
 using Service = flexcell_interfaces::srv::PlanManipulation;
 using namespace std::chrono_literals;
@@ -44,7 +48,8 @@ class Planner : public rclcpp::Node {
                                                {"demo_slow", .2}, {"demo_default", .5}};
     if ((!pick && q.operation != "PLACE") || q.targets.size() != 3 ||
         (q.object_name != "target_box_a" && q.object_name != "target_box_b") ||
-        !profiles.count(q.motion_profile_id) || q.deadline_ms < 1000 || q.deadline_ms > 60000)
+        !profiles.count(q.motion_profile_id) || q.deadline_ms < 1000 || q.deadline_ms > 60000 ||
+        (q.attached_object_targets && pick))
       throw std::runtime_error("invalid operation, object, profile or stage count");
     for (const auto& t : q.targets) {
       const auto& p = t.pose.position;
@@ -92,12 +97,37 @@ class Planner : public rclcpp::Node {
     } else if (!state.hasAttachedBody(q.object_name)) {
       throw std::runtime_error("PLACE object not attached in measured scene");
     }
+    Eigen::Isometry3d shape_frame = Eigen::Isometry3d::Identity();
+    if (q.attached_object_targets) {
+      const auto* body = state.getAttachedBody(q.object_name);
+      if (body->getAttachedLinkName() != "end_effector_link" || body->getShapes().size() != 1 ||
+          body->getShapePosesInLinkFrame().size() != 1)
+        throw std::runtime_error("joint PLACE requires one measured end-effector-attached shape");
+      shape_frame = body->getShapePosesInLinkFrame().front();
+      flexcell::checkAttachedObjectPose(state.getGlobalLinkTransform("end_effector_link"), shape_frame, q.object_pose);
+    }
     auto pipeline = std::make_shared<flexcell::PositionOnlyPlanner>(shared_from_this(), "ompl");
     pipeline->setMaxVelocityScalingFactor(profiles.at(q.motion_profile_id));
     pipeline->setMaxAccelerationScalingFactor(profiles.at(q.motion_profile_id));
     const char* pick_names[] = {"hover", "grasp", "lift"};
     const char* place_names[] = {"hover", "descend", "retreat"};
     for (size_t i = 0; i < 3; ++i) {
+      if (q.attached_object_targets && i == 2) {
+        // Once detached, retreat the EE from its propagated descend endpoint.
+        // Reuse MTC's relative stage with the same position-only planner.
+        geometry_msgs::msg::Vector3Stamped direction;
+        direction.header.frame_id = "world";
+        direction.vector.x = q.targets[2].pose.position.x - q.targets[1].pose.position.x;
+        direction.vector.y = q.targets[2].pose.position.y - q.targets[1].pose.position.y;
+        direction.vector.z = q.targets[2].pose.position.z - q.targets[1].pose.position.z;
+        if (std::abs(direction.vector.x) > 1e-9 || std::abs(direction.vector.y) > 1e-9 ||
+            direction.vector.z <= 0. || direction.vector.z > .3)
+          throw std::runtime_error("joint PLACE retreat must be a positive world-vertical displacement");
+        auto retreat = std::make_unique<mtc::stages::MoveRelative>("retreat", pipeline);
+        retreat->setGroup("arm"); retreat->setIKFrame("end_effector_link"); retreat->setDirection(direction);
+        retreat->setTimeout(std::min(5.0, q.deadline_ms / 3000.0)); task.add(std::move(retreat));
+        continue;
+      }
       // PointStamped is MTC's native position-only goal: keep the four-DOF
       // contract while letting the planner sample collision-valid IK in each
       // propagated stage scene. Do not freeze one unchecked IK joint solution.
@@ -105,7 +135,9 @@ class Planner : public rclcpp::Node {
       target.header = q.targets[i].header;
       target.point = q.targets[i].pose.position;
       auto move = std::make_unique<mtc::stages::MoveTo>(pick ? pick_names[i] : place_names[i], pipeline);
-      move->setGroup("arm"); move->setIKFrame("end_effector_link"); move->setGoal(target);
+      move->setGroup("arm");
+      move->setIKFrame(q.attached_object_targets ? shape_frame : Eigen::Isometry3d::Identity(), "end_effector_link");
+      move->setGoal(target);
       move->setTimeout(std::min(5.0, q.deadline_ms / 3000.0)); task.add(std::move(move));
       if (i == 1) {
         if (pick) gripper_stage("close gripper", -.011);
@@ -131,11 +163,29 @@ class Planner : public rclcpp::Node {
     task.solutions().front()->toMsg(solution);
     for (const auto& part : solution.sub_trajectory) {
       const auto& names = part.trajectory.joint_trajectory.joint_names;
-      if (names.size() == 4 && std::find(names.begin(), names.end(), "joint1") != names.end())
+      if (names.size() == 4 && std::find(names.begin(), names.end(), "joint1") != names.end()) {
+        if (part.trajectory.joint_trajectory.points.empty()) throw std::runtime_error("empty arm stage");
+        const auto& endpoint = part.trajectory.joint_trajectory.points.back().positions;
+        if (endpoint.size() != names.size()) throw std::runtime_error("invalid arm endpoint");
+        state.setVariablePositions(names, endpoint); state.update();
+        const auto& transform = state.getGlobalLinkTransform("end_effector_link");
+        geometry_msgs::msg::PoseStamped target;
+        target.header.frame_id = "world";
+        target.pose.position.x = transform.translation().x();
+        target.pose.position.y = transform.translation().y();
+        target.pose.position.z = transform.translation().z();
+        const Eigen::Quaterniond rotation(transform.linear());
+        target.pose.orientation.x = rotation.x(); target.pose.orientation.y = rotation.y();
+        target.pose.orientation.z = rotation.z(); target.pose.orientation.w = rotation.w();
+        r.executor_targets.push_back(target);
         r.trajectories.push_back(part.trajectory);
+      }
     }
     if (r.trajectories.size() != 3) throw std::runtime_error("ambiguous arm stage extraction");
-    r.success = true; r.detail = "MTC planned three position-only stages; execution and physics remain skill-owned";
+    r.success = true;
+    r.detail = q.attached_object_targets ?
+        "MTC planned attached shape-center hover/descend and relative EE retreat; explicit EE endpoints; execution remains skill-owned" :
+        "MTC planned three position-only stages; execution and physics remain skill-owned";
   }
   std::mutex mutex_;
   rclcpp::CallbackGroup::SharedPtr group_;

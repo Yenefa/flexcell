@@ -158,6 +158,21 @@ def main():
                     break
         if not ready:
             raise RuntimeError('strict startup health failed; no robot task dispatched')
+        if args.contact_trace:
+            from contact_probe import mapped_libraries
+            names = ('flexcell_physics_trace', 'flexcell_contact_trace', 'flexcell_detachable_carry',
+                     'mtc_planner', 'libdart')
+            loaded = mapped_libraries(stack.pid, names)
+            (out / 'runtime_native_mapping.json').write_text(json.dumps(loaded, indent=2) + '\n')
+            required = ['lib/libflexcell_physics_trace.so', 'lib/libflexcell_contact_trace.so',
+                        'lib/libflexcell_detachable_carry.so']
+            if args.skill_backend == 'mtc': required.append('lib/flexcell_mtc/mtc_planner')
+            for relative in required:
+                actual = [digest for path, digest in loaded.items() if Path(path).name == Path(relative).name]
+                expected = identity['native_libraries'].get(relative)
+                if expected is None or actual != [expected]:
+                    raise RuntimeError('actually mapped native identity mismatch: ' + relative)
+            result['native_identity_verified_before_dispatch'] = True
         if args.physics_step_s is not None:
             step_path = out / 'physics_steps.jsonl'
             step_ready = False
