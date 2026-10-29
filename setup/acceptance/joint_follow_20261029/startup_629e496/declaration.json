@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "purpose": "Two object functional follow checks; not D3 default admission or a success-rate estimate",
+  "max_logical_tasks": 5,
+  "camera": true,
+  "required_carry_follow": true,
+  "backend": "detachable_joint",
+  "skill_backend": "mtc",
+  "joint_hold_sim_s": 11.0,
+  "min_follow_sim_s": 10.0,
+  "physics_step_s": 0.002,
+  "min_preflight_rtf": 0.3,
+  "world_sha256": "cbfa8ad2f75f453aeca9498bb11a004d34ab987d95c62f00887c3eeaa39f40d4",
+  "semantic_config_sha256": "8077f2dc08e61d07558ccbab2a041d9ef6351f3021f0b87aae3f90f9443eeaee",
+  "episodes": [
+    {"case": "normal", "object": "target_box_a", "task": "Joint follow, object A"},
+    {"case": "normal", "object": "target_box_b", "task": "Joint follow, object B"}
+  ]
+}

@@ -15,6 +15,7 @@ import yaml
 import math
 
 from sim_profile import profile, ROOT
+from camera_preflight import preflight_rendering
 
 
 def json_result(value):
@@ -73,6 +74,7 @@ def main():
     parser.add_argument('--expected-world-sha256')
     parser.add_argument('--expected-config-sha256')
     parser.add_argument('--expected-fingerprint')
+    parser.add_argument('--expected-egl-vendor-sha256')
     parser.add_argument('--case', choices=['normal', 'dual_object', 'recovery_once', 'budget_exhaustion',
                                            'unreachable_place'], default='normal')
     args = parser.parse_args()
@@ -111,8 +113,16 @@ def main():
             raise RuntimeError('world differs from declaration; no robot task dispatched')
         if args.expected_config_sha256 and config_digest != args.expected_config_sha256:
             raise RuntimeError('configuration differs from declaration; no robot task dispatched')
-        fingerprint = __import__('hashlib').sha256(json.dumps(dict(
-            identity=identity, config=semantic_config), sort_keys=True).encode() + world.read_bytes()).hexdigest()
+        provenance = dict(identity=identity, config=semantic_config)
+        if args.camera:
+            result['camera_preflight'] = preflight_rendering(out)
+            provenance['camera_preflight'] = result['camera_preflight']
+        if args.expected_egl_vendor_sha256 and (
+                not args.camera or result['camera_preflight']['vendor_files'].get(
+                    '/usr/share/glvnd/egl_vendor.d/50_mesa.json') != args.expected_egl_vendor_sha256):
+            raise RuntimeError('camera EGL vendor differs from declaration; no robot task dispatched')
+        fingerprint = __import__('hashlib').sha256(json.dumps(
+            provenance, sort_keys=True).encode() + world.read_bytes()).hexdigest()
         result['runtime_fingerprint'] = fingerprint
         if args.expected_fingerprint and fingerprint != args.expected_fingerprint:
             raise RuntimeError('runtime fingerprint changed; no robot task dispatched')

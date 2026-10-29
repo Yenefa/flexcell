@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "status": "STOPPED",
+  "episodes": [
+    {
+      "case": "normal",
+      "object": "target_box_a",
+      "task": "Joint follow, object A",
+      "run": "/artifacts/joint-follow-window-629e496/trial-01/run-0a508918fb78",
+      "result": {
+        "schema_version": 1,
+        "status": "HARNESS_ERROR",
+        "backend": "detachable_joint",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 0,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "normal",
+        "object": "target_box_a",
+        "out": "/artifacts/joint-follow-window-629e496/trial-01/run-0a508918fb78",
+        "world_sha256": "cbfa8ad2f75f453aeca9498bb11a004d34ab987d95c62f00887c3eeaa39f40d4",
+        "semantic_config_sha256": "8077f2dc08e61d07558ccbab2a041d9ef6351f3021f0b87aae3f90f9443eeaee",
+        "runtime_fingerprint": "451f0cecdb10150ec72e86904ba37fa28e5540fa99e69dbe5f66bed870562fdb",
+        "error": "Command '['/usr/bin/python3', '/opt/flexcell/repo/setup/flexcell_admin.py', 'health']' timed out after 39.99998009000001 seconds",
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    }
+  ],
+  "declaration_sha256": "193082cda6f27d25b0a5392088a6f2ae2a99b5b6dc2a5656f3db96761d59728c",
+  "backend": "detachable_joint",
+  "skill_backend": "mtc",
+  "window_id": "6ca0ee15b85243c98b39fdb11e9e271f",
+  "no_replacements": true,
+  "error": "trial 1 gate failed; window stopped with no replacement"
+}

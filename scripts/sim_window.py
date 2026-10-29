@@ -50,6 +50,8 @@ def main():
                 command.extend(['--expected-world-sha256', declaration['world_sha256']])
             if declaration.get('semantic_config_sha256'):
                 command.extend(['--expected-config-sha256', declaration['semantic_config_sha256']])
+            if declaration.get('camera_egl_vendor_sha256'):
+                command.extend(['--expected-egl-vendor-sha256', declaration['camera_egl_vendor_sha256']])
             if fingerprint is not None:
                 command.extend(['--expected-fingerprint', fingerprint])
             with (args.out / ('trial-%02d.log' % (index + 1))).open('x') as log:
