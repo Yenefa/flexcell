@@ -22,7 +22,7 @@ def digest(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def mapped_libraries(pid):
+def mapped_libraries(pid, native_names=('flexcell_contact_trace',)):
     """Read only this run's process tree; no process-name-wide operations."""
     parents = {}
     for path in Path('/proc').glob('[0-9]*/stat'):
@@ -43,7 +43,7 @@ def mapped_libraries(pid):
                 value = line.split(maxsplit=5)[-1]
                 name = Path(value).name
                 if (value.startswith('/') and
-                        ('flexcell_contact_trace' in name or
+                        (any(part in name for part in native_names) or
                          name.startswith('libgz') and ('physics' in name or 'contact' in name))):
                     paths.add(value)
         except OSError:

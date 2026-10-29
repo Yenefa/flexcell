@@ -12,7 +12,7 @@ BACKENDS = ('teleport', 'velocity_servo', 'detachable_joint')
 
 def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
             joint_hold_sim_s=0., physics_step_s=None, *, contact_trace=False, release_clearance_m=None,
-            qualification_no_recovery=False):
+            qualification_no_recovery=False, synchronous_step_logs=False):
     if backend not in BACKENDS or skill_backend not in ('legacy', 'mtc'):
         raise ValueError('unsupported backend')
     if contact_trace and (backend != 'detachable_joint' or physics_step_s != .002):
@@ -21,6 +21,8 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
         raise ValueError('only the explicitly declared 50 mm release fixture is supported')
     if qualification_no_recovery and not contact_trace:
         raise ValueError('no-recovery qualification requires the declared contact profile')
+    if synchronous_step_logs and not contact_trace:
+        raise ValueError('synchronous step logs require the declared contact profile')
     out = Path(out)
     config = yaml.safe_load((ROOT / 'src/flexcell/flexcell_skills/config/week1.yaml').read_text())
     config.update(yaml.safe_load((ROOT / 'src/flexcell/flexcell_skills/config/move_to_pose.yaml').read_text()))
@@ -88,6 +90,9 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
         clip = ET.SubElement(rgb, 'clip')
         ET.SubElement(clip, 'near').text = '0.02'
         ET.SubElement(clip, 'far').text = '3.0'
+    if synchronous_step_logs:
+        for name in ('flexcell::PhysicsTrace', 'flexcell::ContactTrace'):
+            ET.SubElement(world.find("plugin[@name='%s']" % name), 'flush_each_step').text = 'true'
     out.mkdir(parents=True, exist_ok=True)
     params_path, world_path = out / 'params.yaml', out / 'world.sdf'
     with params_path.open('x') as stream:

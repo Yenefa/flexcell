@@ -31,6 +31,7 @@ class ContactTrace final : public gz::sim::System, public gz::sim::ISystemConfig
   gz::sim::Entity world{gz::sim::kNullEntity};
   std::ofstream log;
   uint64_t samples{0};
+  bool flushEachStep{false};
   static void Number(std::ostream& out, double value) {
     if (std::isfinite(value)) out << value;
     else out << std::quoted(std::isnan(value) ? "NaN" : value > 0 ? "Infinity" : "-Infinity");
@@ -46,6 +47,7 @@ class ContactTrace final : public gz::sim::System, public gz::sim::ISystemConfig
     world = entity;
     std::set<std::string> names;
     const auto config = sdf->Clone();
+    flushEachStep = config->HasElement("flush_each_step") && config->Get<bool>("flush_each_step");
     if (config->HasElement("watch")) {
       auto item = config->GetElement("watch");
       for (; item; item = item->GetNextElement("watch")) {
@@ -111,7 +113,7 @@ class ContactTrace final : public gz::sim::System, public gz::sim::ISystemConfig
       log << '}';
     }
     log << "}}\n";
-    if (++samples % 10 == 0) log.flush();
+    if (++samples % 10 == 0 || flushEachStep) log.flush();
     if (!log) throw std::runtime_error("contact step log write failed");
   }
 };
