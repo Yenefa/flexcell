@@ -43,6 +43,10 @@ jobs:
           mkdir -p artifacts
           docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci bash -c \
             'colcon test --merge-install --test-result-base /artifacts/test-results && colcon test-result --test-result-base /artifacts/test-results --verbose && python3 /opt/flexcell/repo/setup/82_undefined_attr_check.py /opt/flexcell/repo/src/flexcell'
+      - name: Archived physics and lossless RGB evidence (no simulation)
+        run: |
+          docker run --init --rm flexcell-sim:ci \
+            python3 /opt/flexcell/repo/setup/acceptance/joint_follow_20261029/verify_follow.py --video
       - name: Native joint ownership, reattachment and lease expiry
         run: |
           docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
