@@ -51,6 +51,8 @@ jobs:
             python3 /opt/flexcell/repo/setup/acceptance/integrated_contact_20261030/verify.py --video
           docker run --init --rm flexcell-sim:ci \
             python3 /opt/flexcell/repo/setup/acceptance/mtc_main_failure_20261030/verify.py
+          docker run --init --rm flexcell-sim:ci \
+            python3 /opt/flexcell/repo/setup/acceptance/mtc_first_attempt_20261030/verify.py
       - name: One declared native contact sensor pipeline spike (no arm tasks)
         run: |
           docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \

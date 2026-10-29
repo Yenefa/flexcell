@@ -47,3 +47,23 @@ For CI, SOURCE_REV now enters the Docker image after colcon build. Revision
 metadata remains fresh runtime provenance; identical source trees can reuse
 the tested build after a merge. Source/install/import checks still run before
 dispatch. A new source tree still invalidates COPY/build cache normally.
+
+## Retained new window
+
+Implementation/declaration commit `8df23906b6868fd7f488733491966697d102a987`
+was committed before this one local task. Runtime source/install identities
+matched all 181 relevant tracked files. The running MTC executable SHA256
+matched the installed build (`bc0809e2566d7cc11456d500e6918fa5e36ef7341f3f1eee7ca979619b7f3f98`),
+and the loaded observer/physics engine mappings were captured in the same round.
+
+The first PICK, PLACE and VERIFY all succeeded, with no recovery. The contact
+gate joined 9,321 raw 2 ms frames; passive B measured 500/500 prebinding force
+samples with mean 0.4899999999957504 N. Ground observations remained UNKNOWN.
+All 21 fixed 40 ms release samples were detached/contact-free, acceleration
+-9.799999999999867 m/s² and maximum quadratic residual 6.94e-17 m. Final strict
+health passed all 19 checks, IDLE and carry released. No camera or model data
+collection was requested for this bounded window. Complete original files are
+archived in `setup/acceptance/mtc_first_attempt_20261030/`, independently replayed
+in offline/native CI. This one success is not a success-rate estimate and does
+not identify the historical invalid stage. D3 remains NO_GO; five-cycle and S2
+qualification were not run.
