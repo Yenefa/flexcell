@@ -108,6 +108,9 @@ jobs:
           python3 setup/acceptance/integrated_contact_20261030/verify.py
           python3 setup/acceptance/mtc_main_failure_20261030/verify.py
           python3 setup/acceptance/mtc_first_attempt_20261030/verify.py
+          python3 setup/acceptance/native_five_20261030/verify_startup.py
+          python3 setup/acceptance/native_five_20261030/verify_preposition_stop.py
+          python3 setup/acceptance/native_five_20261030/verify_cycles.py
 
       - name: colcon test (all suites, 0 failures required)
         shell: bash

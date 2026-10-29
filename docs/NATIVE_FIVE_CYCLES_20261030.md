@@ -97,3 +97,38 @@ age limits both remain 500 ms. Separate adversarial tests cover pre-trigger
 history, a stale eligible candidate and a stale latest source. The new
 `infra/native-five-cycle-window-after-epoch-selection.json` links both retained
 stops without changing physics, poses, count or acceptance thresholds.
+
+## Complete five-cycle result
+
+Implementation and final declaration commit `858f01a352ca503dd2540102887e33cbd7d089f6`
+was verified before dispatch (187 tracked relevant files plus install/import
+identity). All three actually mapped first-party observer/guard binaries and
+DART/Gazebo libraries matched the recorded installed hashes.
+
+All five cycles completed in the declared A/A/B/B/A order. Actual component
+attachment durations were 10.122, 10.120, 10.118, 10.122 and 10.124 sim s.
+Reference-to-first-attachment gaps were 10, 6, 6, 6 and 10 sim ms. Maximum
+translation errors from each detached preposition reference were respectively
+0.5096, 0.156413, 0.2744, 0.1568 and 0.5096 mm (limit 2 mm). The binding
+transition is included in those errors. Every cycle passed its independent
+full-raw gate before the next started.
+
+Parent translation was exactly unchanged in the retained precision; this is
+stationary-arm evidence, not a replacement for moving-arm follow qualification.
+All positive controls, physical release/freefall checks, A/B isolation, and
+retired-session rejection checks passed. Strict 19-check health passed both
+before cleanup and after the final detached reset, IDLE/carry released. Original
+joint states, physics, contacts, RPCs and results are retained without filtering.
+
+The complete raw archive and receipt live alongside independently executable
+startup-stop, preposition-stop and five-cycle verifiers. Offline/native CI
+recomputes each classification; a separate bounded native-five-cycle-smoke job
+runs a fresh five-cycle window on PR/main. The previous two stops remain
+preserved with zero completed cycles. D3 and the remaining qualifications are
+unchanged: moving-arm reference, S2-host picture/fault injection and legacy
+backend matrix are still outstanding.
+
+This fixture owns the backend through native RPCs directly, without engaging
+the ROS CarryServer adapter. Task/arm motion actions stay idle; ROS/native
+ownership consistency is checked only once released. These component cycles
+do not qualify the skill adapter or the S2 false-attached intervention.

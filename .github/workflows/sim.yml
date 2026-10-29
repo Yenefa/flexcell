@@ -53,6 +53,12 @@ jobs:
             python3 /opt/flexcell/repo/setup/acceptance/mtc_main_failure_20261030/verify.py
           docker run --init --rm flexcell-sim:ci \
             python3 /opt/flexcell/repo/setup/acceptance/mtc_first_attempt_20261030/verify.py
+          docker run --init --rm flexcell-sim:ci \
+            python3 /opt/flexcell/repo/setup/acceptance/native_five_20261030/verify_startup.py
+          docker run --init --rm flexcell-sim:ci \
+            python3 /opt/flexcell/repo/setup/acceptance/native_five_20261030/verify_preposition_stop.py
+          docker run --init --rm flexcell-sim:ci \
+            python3 /opt/flexcell/repo/setup/acceptance/native_five_20261030/verify_cycles.py
       - name: One declared native contact sensor pipeline spike (no arm tasks)
         run: |
           docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
@@ -114,6 +120,37 @@ jobs:
         if: always()
         with:
           name: joint-follow-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/
+          retention-days: 14
+          if-no-files-found: warn
+  native-five-cycle-smoke:
+    concurrency:
+      group: native-five-${{ github.ref }}
+      cancel-in-progress: false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/Dockerfile.sim
+          load: true
+          tags: flexcell-sim:ci
+          build-args: SOURCE_REV=${{ github.sha }}
+          cache-from: type=gha,scope=flexcell-sim
+      - name: Five declared stationary-arm native cycles, stop on first rejection
+        run: |
+          mkdir -p artifacts
+          docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
+            python3 /opt/flexcell/repo/scripts/native_cycle_window.py \
+            --manifest /opt/flexcell/repo/infra/native-five-cycle-window-after-epoch-selection.json \
+            --out /artifacts/native-five-window
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-five-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/
           retention-days: 14
           if-no-files-found: warn
