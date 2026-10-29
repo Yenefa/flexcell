@@ -49,3 +49,12 @@ reliability estimate, contact-grasp claim or historical teleport-cause conclusio
 follows from these two tasks. Both earlier startup-only failures remain STOPPED;
 they dispatched no tasks and were not replaced in the record. See the
 [new archive and replay instructions](../setup/acceptance/joint_follow_20261029/README.md).
+
+The subsequent standalone contact pipeline at `3d9e9b4` recorded 1,200 complete
+2 ms snapshots, including a 50 g weight control (settled mean force magnitude
+0.4900000000667622 N), an available empty contact component, and a missing-sensor
+UNKNOWN control. It establishes a native contact-data path, not attachment-time
+force coverage: it contained no arm or binding and cannot be spliced with the
+earlier pose cohort to satisfy criterion 4. Signed target-body force is not yet
+calibrated. See [the separate sensor archive](../setup/acceptance/contact_pipeline_20261029/README.md).
+The admission decision remains **NO_GO_FOR_DEFAULT_ADMISSION**.

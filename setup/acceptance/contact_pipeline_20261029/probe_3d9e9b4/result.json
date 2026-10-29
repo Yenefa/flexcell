@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "status": "CONTACT_PIPELINE_PASS",
+  "logical_robot_tasks": 0,
+  "declaration_sha256": "1fb5298494c40bb5265ac675fe7bb49b0b0b3a78760b8a424794ae6de37dbf81",
+  "source_world_sha256": "c3325093739d0156690251cae9811d96c247c1f28ef6fcff1529a4eebec1b81c",
+  "no_replacements": true,
+  "default_admission": "NO_GO",
+  "partition": "flexcell-contact-8635897cad824499bc792d456b7770b2",
+  "command": [
+    "gz",
+    "sim",
+    "-s",
+    "-r",
+    "-v",
+    "4",
+    "--iterations",
+    "1200",
+    "/artifacts/contact-probe-3d9e9b4/world.sdf"
+  ],
+  "runtime_fingerprint": "2516110b1b6addb0ce7f6f248cb264dac84499516b7abbeec864de8034342eec",
+  "simulator_exit": 0,
+  "evidence": {
+    "status": "CONTACT_PIPELINE_PASS",
+    "samples": 1200,
+    "physics_step_ns": 2000000,
+    "first_sim_ns": 2000000,
+    "last_sim_ns": 2400000000,
+    "settled_samples": 501,
+    "settled_force_samples": 501,
+    "measured_force_samples": 1200,
+    "mean_force_magnitude_n": 0.4900000000667622,
+    "signed_target_force_calibrated": false,
+    "states": {
+      "unsensed_box": {
+        "UNKNOWN": 1200
+      },
+      "target_box_a": {
+        "CONTACTS_WITH_FORCE": 1200
+      },
+      "target_box_b": {
+        "NO_REPORTED_CONTACTS": 1200
+      }
+    },
+    "logical_robot_tasks": 0,
+    "default_admission": "NO_GO",
+    "interpretation": "Standalone sensor pipeline only; no integrated arm, attachment or contact-grasp qualification"
+  },
+  "raw_sha256": "d6506d244120a233425cd3dfa08ecd48bd7a0c309f038942fe84945a93b718bc",
+  "owned_exit": 0
+}
