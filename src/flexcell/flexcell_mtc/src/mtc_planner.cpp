@@ -23,6 +23,7 @@
 #include "position_only_planner.hpp"
 #include "attached_object_goal.hpp"
 #include "attached_point_model.hpp"
+#include "planning_snapshot.hpp"
 namespace mtc = moveit::task_constructor;
 using Service = flexcell_interfaces::srv::PlanManipulation;
 using namespace std::chrono_literals;
@@ -38,12 +39,24 @@ class Planner : public rclcpp::Node {
       [this](Service::Request::SharedPtr q, Service::Response::SharedPtr r) {
         std::unique_lock<std::mutex> lock(mutex_, std::try_to_lock);
         if (!lock.owns_lock()) { r->detail = "planner busy"; return; }
-        try { plan(*q, *r); }
-        catch (const std::exception& e) { r->success = false; r->detail = e.what(); }
+        std::unique_ptr<flexcell::PlanningSnapshot> snapshot;
+        auto fail = [&](const std::exception& e) {
+          r->success = false; r->detail = e.what();
+          r->trajectories.clear(); r->executor_targets.clear();
+        };
+        try {
+          snapshot = std::make_unique<flexcell::PlanningSnapshot>(*this, *q, snapshot_sequence_);
+          plan(*q, *r, *snapshot);
+        } catch (const std::exception& e) { fail(e); }
+        try { if (snapshot) snapshot->write("response", *r); }
+        catch (const std::exception& e) {
+          fail(e);
+          RCLCPP_ERROR(get_logger(), "planner snapshot failed: %s", e.what());
+        }
       }, rmw_qos_profile_services_default, group_);
   }
  private:
-  void plan(const Service::Request& q, Service::Response& r) {
+  void plan(const Service::Request& q, Service::Response& r, const flexcell::PlanningSnapshot& snapshot) {
     const bool pick = q.operation == "PICK";
     const std::map<std::string, double> profiles{{"demo_veryslow", .05},
                                                {"demo_slow", .2}, {"demo_default", .5}};
@@ -73,6 +86,7 @@ class Planner : public rclcpp::Node {
     task.loadRobotModel(shared_from_this());
     auto scene = std::make_shared<planning_scene::PlanningScene>(task.getRobotModel());
     const auto measured = future.get();
+    snapshot.write("scene", measured->scene);
     scene->setPlanningSceneMsg(measured->scene);
     const auto* arm = task.getRobotModel()->getJointModelGroup("arm");
     if (!arm) throw std::runtime_error("arm group missing");
@@ -201,6 +215,7 @@ class Planner : public rclcpp::Node {
         "MTC planned three position-only stages; execution and physics remain skill-owned";
   }
   std::mutex mutex_;
+  uint64_t snapshot_sequence_{0};
   rclcpp::CallbackGroup::SharedPtr group_;
   rclcpp::Client<moveit_msgs::srv::GetPlanningScene>::SharedPtr scene_;
   rclcpp::Service<Service>::SharedPtr service_;
