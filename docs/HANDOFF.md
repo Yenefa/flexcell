@@ -1,5 +1,34 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-10-31 Joint PLACE 修复完成并实际通过本机 Gazebo：本地分支
+> `fix/joint-point-ik`，实现/测试终点 `aae8487`；实际运行 `e30bd8b`，
+> 运行后仅补测试依赖，规划器二进制字节相同。五例基线全部符合预期（376 秒）；
+> Joint 首次 PICK/PLACE/VERIFY 成功（93 秒），原始落点误差 5.259 mm，
+> 连续跟随 18.32 秒、接触/自由落体原门禁通过。全套 662 tests 零失败，40 文件扫描通过；
+> 实际 CDR 场景/轨迹独立 FK 六端点均小于 0.1 mm。358 成员完整包逐字节核验，
+> 旧失败证据保留、无替换窗口；进程零残留。尚未 push/merge，D3 仍 NO_GO。
+> [修复、运行和验收边界](JOINT_POINT_IK_20261031.md)。下方为历史快照。
+
+> 2026-10-31 已实际跑本机 Gazebo：PR #75 c2583ae，锁定上游隔离构建。
+> velocity_servo/MTC 五用例窗口全部符合预期（含一次恢复和预算耗尽负例），
+> 共五次成功放置，原始物理记录重算误差 0.074–0.216 mm；每例复位及 19 项健康通过。
+> 随后 Joint/MTC 单任务 PICK 成功、上升 119.767 mm；PLACE hover 仍报
+> GOAL_STATE_INVALID，未派 PLACE 轨迹、未主动释放，失败完整保留。
+> 两窗口各跑一次，墙钟 389/64 秒；25,325 条 2 ms 原始步记录无断帧。
+> 首次审计误拼启动/任务附着已纠正，全部原始帧保留。当前无运行栈或录包残留。
+> 生产 adapter 未修，D3 仍 NO_GO；[实际运行和交付记录](LOCAL_GAZEBO_RUN_20261031.md)。
+
+> 2026-10-30 本机接续：用户确认以最新 PR #75 `c2583ae` 为准。Windows 与 WSL
+> 已同步；131 个旧 WSL 未跟踪证据文件保留。四个本地包在独立 build/install 前缀
+> 构建完成，661 checks / 0 failures，40 文件静态扫描清零，历史证据回放通过。
+> 最新 CI 的 Joint PLACE hover 仍报 GOAL_STATE_INVALID，未派发 PLACE、未主动释放。
+> 已从原始 CI 包重建点几何，实际调用上游 sampler/KDL：零偏移 16/16 有效；
+> 已知可达的非零偏移点有 10 个 IK 解、0 个满足点约束。兼容性反例 VERIFIED；
+> 对完整历史失败的归因 STRONG INFERENCE，精确场景未保存、唯一根因 UNKNOWN。
+> 下一步为实际 TCP 点求解 adapter 与完整场景记录；本轮未修改生产求解器、未运行
+> 新 Gazebo/硬件窗口、未 push/merge，D3 仍 NO_GO。
+> [本机状态、证据及下一步验收](PR75_LOCAL_CONTINUATION_20261030.md)。以下为历史。
+
 > 2026-10-28：#65 已合入 `619e132`，主线两层 CI 均通过。后续 recorder 有界后台
 > 编码修复通过五份原始包的离线阻塞回放：2445/2445 帧、718 帧有效对齐。
 > #66–69 的证据和解释正在整合；默认 Joint 准入保持 NO_GO，旧相机拒收不改判。

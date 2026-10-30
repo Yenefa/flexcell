@@ -1,0 +1,25 @@
+Starting >>> flexcell_interfaces
+Starting >>> flexcell_gazebo
+Finished <<< flexcell_gazebo [0.34s]
+Finished <<< flexcell_interfaces [0.67s]
+Starting >>> flexcell_skills
+Starting >>> flexcell_mtc
+[1.458s] WARNING:colcon.colcon_core.shell:The following packages are in the workspace but haven't been built:
+- open_manipulator_description
+- open_manipulator_moveit_config
+They are being used from the following locations instead:
+- /home/ros/agentic_workcell_ws/install/pr75-locked-upstream
+- /home/ros/agentic_workcell_ws/install/pr75-locked-upstream
+To suppress this warning ignore these packages in the workspace:
+--packages-ignore open_manipulator_description open_manipulator_moveit_config
+--- stderr: flexcell_skills
+warning: build_py: byte-compiling is disabled, skipping.
+
+warning: install_lib: byte-compiling is disabled, skipping.
+
+---
+Finished <<< flexcell_skills [1.52s]
+Finished <<< flexcell_mtc [2.36s]
+
+Summary: 4 packages finished [3.57s]
+  1 package had stderr output: flexcell_skills

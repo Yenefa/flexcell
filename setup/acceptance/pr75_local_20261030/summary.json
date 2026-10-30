@@ -1,0 +1,51 @@
+{
+  "records": 56,
+  "geometry": {
+    "kind": "geometry",
+    "base": "link1",
+    "tip": "end_effector_link",
+    "offset": [
+      0.020250332460526987,
+      -2.4760779584400385e-05,
+      -0.15882943165525898
+    ]
+  },
+  "cases": {
+    "zero_offset_control": {
+      "attempts": 16,
+      "ik_solutions": 16,
+      "constraint_satisfied": 16,
+      "point_error_mm_range": [
+        0.025247605503109914,
+        0.09759852190115093
+      ],
+      "max_link_error_m": 2.960951612017097e-08,
+      "reference_satisfied": true,
+      "upstream_sampler_success": true
+    },
+    "known_reachable_offset": {
+      "attempts": 16,
+      "ik_solutions": 10,
+      "constraint_satisfied": 0,
+      "point_error_mm_range": [
+        135.243993835881,
+        319.3606219082628
+      ],
+      "max_link_error_m": 4.88734359117585e-06,
+      "reference_satisfied": true,
+      "upstream_sampler_success": false
+    },
+    "place_hover_offset": {
+      "attempts": 16,
+      "ik_solutions": 16,
+      "constraint_satisfied": 0,
+      "point_error_mm_range": [
+        154.24851509138605,
+        314.13841932200154
+      ],
+      "max_link_error_m": 5.666589513463836e-06,
+      "reference_satisfied": false,
+      "upstream_sampler_success": false
+    }
+  }
+}
