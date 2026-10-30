@@ -78,6 +78,7 @@ def main():
     parser.add_argument('--contact-trace', action='store_true')
     parser.add_argument('--release-clearance-m', type=float)
     parser.add_argument('--qualification-no-recovery', action='store_true')
+    parser.add_argument('--planner-diagnostics', action='store_true')
     parser.add_argument('--case', choices=['normal', 'dual_object', 'recovery_once', 'budget_exhaustion',
                                            'unreachable_place'], default='normal')
     args = parser.parse_args()
@@ -96,6 +97,10 @@ def main():
     else:
         os.environ.pop('FLEXCELL_CONTACT_STEP_LOG', None)
     os.environ['FLEXCELL_EPISODE_DIR'] = str(out / 'episodes')
+    if args.planner_diagnostics:
+        os.environ['FLEXCELL_MTC_DIAGNOSTIC_DIR'] = str(out / 'planner')
+    else:
+        os.environ.pop('FLEXCELL_MTC_DIAGNOSTIC_DIR', None)
     result = dict(schema_version=1, status='HARNESS_ERROR', backend=args.backend,
                   skill_backend=args.skill_backend, physical_tasks_dispatched=0,
                   qualification='FUNCTIONAL_SMOKE_ONLY', case=args.case, object=args.object, out=str(out))

@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "purpose": "One first-attempt local Joint PLACE after private fixed-tip IK repair; preserve prior failure; exact planner snapshots; no recovery or replacements",
+  "max_logical_tasks": 5,
+  "camera": false,
+  "required_carry_follow": true,
+  "required_joint_contacts": true,
+  "required_planner_diagnostics": true,
+  "contact_trace": true,
+  "backend": "detachable_joint",
+  "skill_backend": "mtc",
+  "joint_hold_sim_s": 11.0,
+  "min_follow_sim_s": 10.0,
+  "physics_step_s": 0.002,
+  "min_preflight_rtf": 0.3,
+  "release_clearance_m": 0.05,
+  "world_sha256": "82e74a45f6e149724853d9fe840620c536c1d25163b385a4faa8274952ebc63c",
+  "semantic_config_sha256": "17ff20504032ec399dbf0ba53243690299511163361487c76386b29fb4eea09a",
+  "contact_gate": {
+    "prebind_ns": 1000000000,
+    "postrelease_ns": 500000000,
+    "freefall_ns": 40000000,
+    "max_clock_skew_ns": 50000000,
+    "min_weight_samples": 476,
+    "force_mean_min_n": 0.392,
+    "force_mean_max_n": 0.588
+  },
+  "episodes": [
+    {
+      "case": "normal",
+      "object": "target_box_a",
+      "task": "Private fixed-tip attached-point Joint PLACE, A"
+    }
+  ],
+  "qualification_no_recovery": true,
+  "previous_local_failure_window": "0e4c366c236a4bc480dbb91fb8dee2bd",
+  "previous_local_failure_zip_sha256": "717a5ee6884abaeb01f4bd2c7065fef3784cfadd035038296a9c44bc6452c929",
+  "previous_failure_run": 40956689816,
+  "previous_failure_zip_sha256": "402775c6b03f1780ceb660cb50da6c584c20ebac56a9e275f256e0f0b4c761e5"
+}

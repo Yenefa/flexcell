@@ -48,6 +48,8 @@ def main():
                 command.append('--contact-trace')
             if declaration.get('qualification_no_recovery'):
                 command.append('--qualification-no-recovery')
+            if declaration.get('required_planner_diagnostics'):
+                command.append('--planner-diagnostics')
             if declaration.get('release_clearance_m') is not None:
                 command.extend(['--release-clearance-m', str(declaration['release_clearance_m'])])
             if declaration.get('min_preflight_rtf'):
@@ -92,6 +94,11 @@ def main():
             result['episodes'].append(dict(spec, run=str(runs[0]), result=outcome))
             if proc.returncode != 0 or outcome.get('expectation_met') is not True:
                 raise RuntimeError('trial %d gate failed; window stopped with no replacement' % (index + 1))
+            if declaration.get('required_planner_diagnostics'):
+                if spec['case'] != 'normal' or args.skill_backend != 'mtc':
+                    raise ValueError('planner snapshot gate requires one normal MTC task')
+                from planner_snapshot_gate import verify_run as verify_planner
+                result['episodes'][-1]['planner_evidence'] = verify_planner(runs[0], spec['object'])
             if declaration.get('required_carry_follow'):
                 if args.backend != 'detachable_joint':
                     raise ValueError('follow window requires the explicitly selected joint backend')
