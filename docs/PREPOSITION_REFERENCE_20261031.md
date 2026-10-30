@@ -1,6 +1,7 @@
 # Pre-attach SE(3) reference: measured before binding, enforced during carry
 
-Status: implemented and unit-tested; the declared CI joint window now runs it.
+Status: implemented, unit-tested and exercised by declared CI joint windows on this
+branch (two passing windows quoted below).
 This closes the "reference is the first observed attachment" gap recorded in
 [DETACHABLE_ADMISSION_20261027.md](DETACHABLE_ADMISSION_20261027.md) and
 [INTEGRATED_CONTACT_WINDOW_20261030.md](INTEGRATED_CONTACT_WINDOW_20261030.md).
@@ -64,6 +65,34 @@ in `scripts/sim_window.py`):
 The gate refuses the window if these constants differ from the code
 (`preposition thresholds changed or undeclared`), so a threshold cannot be
 tuned after seeing a result.
+
+## Windows on this branch (declared CI window, one task each)
+
+`infra/joint-contact-attached-center.json` now carries `required_preposition_reference`
+and the frozen `preposition_gate` block, so every joint window on this branch runs the
+gate. Three consecutive commits produced a passing window
+(`435f108`, `51f4db2`, `386c7b4`); two of them are quoted here.
+
+| quantity | `435f108` | `386c7b4` |
+| --- | --- | --- |
+| pre-attach hold | 50 steps, 21.196–21.294 s | 50 steps, 21.082–21.180 s |
+| hold spread | 0.253 mm / 0.915 mrad | 0.175 mm / 0.632 mrad |
+| contacted counterpart | ground only | ground only |
+| runtime hold (5 × 50 Hz) | 0.210 mm / 0.759 mrad | 0.155 mm / 0.559 mrad |
+| runtime vs raw reference | 7.4 µm | 16.5 µm |
+| attach jump | 0.105 mm / 381 µrad | 0.073 mm / 264 µrad |
+| carry drift, whole interval | 0.1055 mm / 382 µrad (8,683 steps) | 0.0731 mm / 264 µrad (8,741 steps) |
+| follow-gate peak | – | 0.0896 mm / 324 µrad |
+
+In both windows the maximum drift over the *entire* carry equals the jump measured at
+binding, i.e. nothing grew after the joint appeared. The runtime's independent 50 Hz
+reference agrees with the 2 ms re-derivation to 7–17 µm, which is what the
+cross-instrument check exists to catch.
+
+This is two functional windows of one task each. It is not a success rate, and the
+other native-cycle window (`native-five-cycle-smoke`) failed on these branches **and**
+on the base branch without these changes, so it is not evidence against this gate —
+see the pull request discussion for the control run.
 
 ## Re-analysis of the archived window (not a new run)
 
