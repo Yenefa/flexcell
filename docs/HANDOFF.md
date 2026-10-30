@@ -1,5 +1,16 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-10-31 预定位基准落地（分支 `feat/preposition-reference`，堆叠在
+> `fix/joint-point-ik` 上）：Joint 会话不再以第一帧附着位姿作基准，改为在绑定前
+> 100 ms / 50 步的脱开静止窗口测量基准，并要求目标箱自接触传感器在该窗口内逐帧可用
+> 且无机械臂接触。运行时 `PrepositionLatch` 拒绝无基准的 engage（可关）；
+> 离线 `scripts/preposition_gate.py` 由 `infra/joint-contact-attached-center.json`
+> 声明，进入 CI 窗口。用归档窗口（run 40916246921）原始 2 ms 数据复算：hold 散布
+> 0.132 mm / 0.477 mrad，绑定跳变 0.055 mm / 199 µrad，9,182 步全程最大
+> 0.0553 mm / 200 µrad，门限仍为 2 mm / 1°（未放宽）。这是对既有数据的再推导，
+> 不是新仿真窗口；D3 仍 NO_GO，n≥50 冻结。
+> [方法与边界](PREPOSITION_REFERENCE_20261031.md)。下方为历史快照。
+
 > 2026-10-31 Joint PLACE 修复完成并实际通过本机 Gazebo：本地分支
 > `fix/joint-point-ik`，实现/测试终点 `aae8487`；实际运行 `e30bd8b`，
 > 运行后仅补测试依赖，规划器二进制字节相同。五例基线全部符合预期（376 秒）；

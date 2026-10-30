@@ -40,7 +40,7 @@ from flexcell_interfaces.msg import CarryState
 from flexcell_interfaces.srv import EngageCarry, QueryCarry
 
 from flexcell_skills.common import JsonlLog
-from flexcell_skills.joint_follow import JointFollowMonitor
+from flexcell_skills.joint_follow import JointFollowMonitor, PrepositionLatch
 
 
 class CarryServer(Node):
@@ -61,6 +61,11 @@ class CarryServer(Node):
         self.declare_parameter('query_service', '/flexcell/carry_snapshot')
         self.declare_parameter('log_dir', '~/.ros/flexcell')
         self.declare_parameter('log_file', 'carry.jsonl')
+        # A joint session is anchored on a measured pre-attach reference: the
+        # body must be detached and the arm at rest before the joint appears.
+        self.declare_parameter('require_preposition_reference', True,
+                               ParameterDescriptor(description='refuse a joint session without a measured pre-attach reference'))
+        self.declare_parameter('preposition_timeout_s', 3.0)
 
         gp = self.get_parameter
         self._world = gp('world').value
@@ -91,8 +96,11 @@ class CarryServer(Node):
         self._retired_sessions = set()
         self._state_revision = 0
         self._follow = None
+        self._preposition = None
+        self._preposition_timeout = float(gp('preposition_timeout_s').value)
         if self._backend == 'detachable_joint':
             self._follow = JointFollowMonitor()
+            self._preposition = PrepositionLatch()
             self._follow_group = MutuallyExclusiveCallbackGroup()
             self.create_subscription(StringMsg, '/flexcell/physics_trace', self._on_physics_trace,
                                      100, callback_group=self._follow_group)
@@ -178,7 +186,14 @@ class CarryServer(Node):
 
     def _on_physics_trace(self, msg):
         try:
-            self._follow.feed(json.loads(msg.data))
+            data = json.loads(msg.data)
+        except (ValueError, TypeError) as exc:
+            self._follow.reject('malformed physics trace: ' + str(exc))
+            return
+        if self._preposition is not None:
+            self._preposition.feed(data)  # detached history only; never an observation claim
+        try:
+            self._follow.feed(data)
         except (ValueError, TypeError) as exc:
             self._follow.reject('malformed physics trace: ' + str(exc))
 
@@ -222,10 +237,12 @@ class CarryServer(Node):
         else:
             response.success = self._engage(request.object_id, offset, token)
         response.message = ('carry engaged and physics acknowledged' if response.success
-                            else 'carry engage was not confirmed')
+                            else getattr(self, '_engage_message', '') or 'carry engage was not confirmed')
         return response
 
     def _engage(self, object_id, offset, session):
+        preposition = None
+        self._engage_message = ''
         if self._backend == 'detachable_joint' and self._offset is not None:
             self._log.write({'event': 'engage_rejected_active_session', 'object': object_id,
                              'session': session, 'active_session': self._session})
@@ -234,7 +251,18 @@ class CarryServer(Node):
             self.get_logger().error('cannot replace an unconfirmed carry session')
             return False
         if self._backend == 'detachable_joint':
-            self._follow.arm(object_id, session)
+            reference = None
+            if bool(self.get_parameter('require_preposition_reference').value):
+                ok, reference, evidence = self._preposition.take(
+                    object_id, timeout=self._preposition_timeout)
+                if not ok:
+                    self._log.write({'event': 'preposition_reference_rejected', 'object': object_id,
+                                     'session': session, 'reason': evidence})
+                    self.get_logger().error('pre-attach reference rejected: %s' % evidence)
+                    self._engage_message = 'no measured pre-attach reference: ' + evidence
+                    return False
+                preposition = dict(evidence, reference=list(reference))
+            self._follow.arm(object_id, session, reference, preposition)
         if self._backend in ('velocity_servo', 'detachable_joint'):
             ee = self._ee()
             if ee is None or not self._guard_request('engage', self._pose(object_id, offset, ee, session)):
@@ -272,7 +300,8 @@ class CarryServer(Node):
             'carry ENGAGED object=%s offset=[%.3f %.3f %.3f]'
             % (object_id, offset[0], offset[1], offset[2]))
         self._log.write({'event': 'start', 'object': object_id, 'offset': offset,
-                         'backend': self._backend, 'session': session})
+                         'backend': self._backend, 'session': session,
+                         'preposition': preposition if self._backend == 'detachable_joint' else None})
         self._publish_state()
         return True
 

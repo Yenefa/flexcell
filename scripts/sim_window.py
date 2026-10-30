@@ -111,6 +111,12 @@ def main():
             if declaration.get('required_joint_contacts'):
                 from integrated_contact_gate import verify_run as verify_contacts
                 result['episodes'][-1]['contact_evidence'] = verify_contacts(runs[0], spec['object'], declaration)
+            if declaration.get('required_preposition_reference'):
+                if args.backend != 'detachable_joint':
+                    raise ValueError('a pre-attach reference requires the explicitly selected joint backend')
+                from preposition_gate import verify_run as verify_preposition
+                result['episodes'][-1]['preposition_evidence'] = verify_preposition(
+                    runs[0], spec['object'], declaration)
             current = outcome.get('runtime_fingerprint')
             if not current or fingerprint is not None and current != fingerprint:
                 raise RuntimeError('runtime fingerprint drift; window stopped')

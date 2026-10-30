@@ -24,7 +24,25 @@
     "force_mean_min_n": 0.392,
     "force_mean_max_n": 0.588
   },
-  "episodes": [{"case": "normal", "object": "target_box_a", "task": "Attached shape-center joint PLACE, A"}],
+  "required_preposition_reference": true,
+  "preposition_gate": {
+    "hold_ns": 100000000,
+    "parent_model": "open_manipulator_x",
+    "spread_translation_m": 0.001,
+    "spread_rotation_rad": 0.0015,
+    "jump_translation_m": 0.002,
+    "jump_rotation_rad": 0.017453292519943295,
+    "follow_translation_m": 0.002,
+    "follow_rotation_rad": 0.017453292519943295,
+    "runtime_reference_agreement_m": 0.0005
+  },
+  "episodes": [
+    {
+      "case": "normal",
+      "object": "target_box_a",
+      "task": "Attached shape-center joint PLACE, A"
+    }
+  ],
   "qualification_no_recovery": true,
   "previous_failure_run": 40953343176,
   "previous_failure_zip_sha256": "a13c191acce9b3774c30a7c094bca71d4262a78b86ad8efdd1bfd82f08ea0d8c"
