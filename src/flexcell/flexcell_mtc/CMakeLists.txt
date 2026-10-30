@@ -10,8 +10,11 @@ find_package(moveit_msgs REQUIRED)
 find_package(shape_msgs REQUIRED)
 find_package(moveit_core REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(tinyxml2_vendor REQUIRED)
+find_package(TinyXML2 REQUIRED)
 add_executable(mtc_planner src/mtc_planner.cpp)
 target_compile_features(mtc_planner PUBLIC cxx_std_17)
+target_link_libraries(mtc_planner tinyxml2::tinyxml2)
 ament_target_dependencies(mtc_planner rclcpp flexcell_interfaces
   moveit_task_constructor_core moveit_task_constructor_msgs
   moveit_ros_planning moveit_msgs shape_msgs moveit_core geometry_msgs)
