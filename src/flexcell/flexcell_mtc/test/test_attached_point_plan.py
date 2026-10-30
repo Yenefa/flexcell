@@ -16,9 +16,10 @@ from geometry_msgs.msg import PoseStamped
 from moveit.core.robot_model import RobotModel
 from moveit.core.robot_state import RobotState
 from moveit_configs_utils import MoveItConfigsBuilder
-from moveit_msgs.msg import AllowedCollisionEntry, AttachedCollisionObject, PlanningScene
+from moveit_msgs.msg import AllowedCollisionEntry, AttachedCollisionObject, CollisionObject, PlanningScene
 from moveit_msgs.srv import GetPlanningScene
 from rosidl_runtime_py.convert import message_to_ordereddict
+from rclpy.serialization import deserialize_message
 from shape_msgs.msg import SolidPrimitive
 
 from flexcell_interfaces.srv import PlanManipulation
@@ -96,10 +97,13 @@ def test_attached_point_place_service_has_fk_valid_endpoints(tmp_path):
     request.motion_profile_id, request.deadline_ms = 'demo_slow', 15000
     (tmp_path/'scene.json').write_text(json.dumps(message_to_ordereddict(scene),indent=2))
     (tmp_path/'request.json').write_text(json.dumps(message_to_ordereddict(request),indent=2))
-    environment = dict(os.environ, ROS_DOMAIN_ID='73', ROS_AUTOMATIC_DISCOVERY_RANGE='LOCALHOST')
+    environment = dict(os.environ, ROS_DOMAIN_ID='73', ROS_AUTOMATIC_DISCOVERY_RANGE='LOCALHOST',
+                       FLEXCELL_MTC_DIAGNOSTIC_DIR=str(tmp_path/'snapshots'))
     os.environ['ROS_DOMAIN_ID'] = '73'
     log = (tmp_path/'planner.log').open('w')
-    process = subprocess.Popen(['ros2','run','flexcell_mtc','mtc_planner','--ros-args','--params-file',str(params)],
+    executable = ([os.environ['FLEXCELL_MTC_TEST_EXECUTABLE']] if 'FLEXCELL_MTC_TEST_EXECUTABLE' in os.environ
+                  else ['ros2','run','flexcell_mtc','mtc_planner'])
+    process = subprocess.Popen(executable+['--ros-args','--params-file',str(params)],
                                env=environment,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
     rclpy.init()
     node = rclpy.create_node('frozen_scene')
@@ -135,6 +139,31 @@ def test_attached_point_place_service_has_fk_valid_endpoints(tmp_path):
                 actual_point = np.asarray(transform)[:3,:3] @ point_offset + np.asarray(transform)[:3,3]
                 assert math.dist(actual_point,components(request.targets[index].pose)[:3]) <= 1.0001e-4
         assert math.dist(ee_endpoints[2],np.asarray(ee_endpoints[1])+[0.,0.,.1]) <= 1.0001e-4
+        snapshots = sorted((tmp_path/'snapshots').glob('request-*'))
+        assert len(snapshots) == 1, 'complete planner snapshots were not retained'
+        for name, cls, original in [('request',PlanManipulation.Request,request),
+                                    ('scene',PlanningScene,scene),('response',PlanManipulation.Response,response)]:
+            restored = deserialize_message((snapshots[0]/(name+'.cdr')).read_bytes(),cls)
+            assert message_to_ordereddict(restored) == message_to_ordereddict(original)
+        blocker = CollisionObject()
+        blocker.id, blocker.header.frame_id = 'goal_blocker', 'world'
+        blocker.primitives = [SolidPrimitive(type=SolidPrimitive.BOX,dimensions=[.08,.08,.08])]
+        blocker.primitive_poses = [request.targets[0].pose]
+        blocker.operation = CollisionObject.ADD
+        scene.world.collision_objects.append(blocker)
+        (tmp_path/'blocked-scene.json').write_text(json.dumps(message_to_ordereddict(scene),indent=2))
+        rejected = client.call_async(request)
+        end = time.monotonic()+35
+        while not rejected.done() and time.monotonic()<end:
+            rclpy.spin_once(node,timeout_sec=.05)
+        assert rejected.done()
+        denied = rejected.result()
+        assert not denied.success and not denied.trajectories and not denied.executor_targets
+        assert 'hover' in denied.detail
+        snapshots = sorted((tmp_path/'snapshots').glob('request-*'))
+        assert len(snapshots)==2
+        restored = deserialize_message((snapshots[1]/'scene.cdr').read_bytes(),PlanningScene)
+        assert message_to_ordereddict(restored) == message_to_ordereddict(scene)
     finally:
         node.destroy_service(server)
         node.destroy_node()
