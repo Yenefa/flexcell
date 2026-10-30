@@ -18,6 +18,9 @@ ament_target_dependencies(mtc_planner rclcpp flexcell_interfaces
 install(TARGETS mtc_planner DESTINATION lib/${PROJECT_NAME})
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
+  find_package(ament_cmake_pytest REQUIRED)
+  ament_add_pytest_test(attached_point_plan_test test/test_attached_point_plan.py TIMEOUT 90
+    APPEND_ENV "PYTEST_ADDOPTS=-p no:cacheprovider" "PYTHONDONTWRITEBYTECODE=1")
   ament_add_gtest(position_goal_test test/position_goal_test.cpp)
   target_include_directories(position_goal_test PRIVATE src)
   ament_target_dependencies(position_goal_test moveit_task_constructor_core moveit_core geometry_msgs)
