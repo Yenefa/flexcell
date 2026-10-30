@@ -6,6 +6,7 @@ from pathlib import Path
 import signal
 import subprocess
 import time
+import xml.etree.ElementTree as ET
 
 import numpy as np
 import rclpy
@@ -15,7 +16,7 @@ from geometry_msgs.msg import PoseStamped
 from moveit.core.robot_model import RobotModel
 from moveit.core.robot_state import RobotState
 from moveit_configs_utils import MoveItConfigsBuilder
-from moveit_msgs.msg import AttachedCollisionObject, PlanningScene
+from moveit_msgs.msg import AllowedCollisionEntry, AttachedCollisionObject, PlanningScene
 from moveit_msgs.srv import GetPlanningScene
 from rosidl_runtime_py.convert import message_to_ordereddict
 from shape_msgs.msg import SolidPrimitive
@@ -63,6 +64,16 @@ def test_attached_point_place_service_has_fk_valid_endpoints(tmp_path):
     scene.robot_model_name = 'open_manipulator_x'
     scene.robot_state.joint_state.name = fixture['names']
     scene.robot_state.joint_state.position = fixture['positions']
+    # A full GetPlanningScene reply includes the SRDF's existing adjacent-link
+    # permissions. An empty full-scene matrix would erase them and fail before
+    # this regression ever reaches the point-goal sampler.
+    disabled = [(e.attrib['link1'],e.attrib['link2']) for e in
+                ET.fromstring(config['robot_description_semantic']).findall('disable_collisions')]
+    names = sorted({name for pair in disabled for name in pair})
+    permitted = set(disabled) | {(b,a) for a,b in disabled}
+    scene.allowed_collision_matrix.entry_names = names
+    scene.allowed_collision_matrix.entry_values = [
+        AllowedCollisionEntry(enabled=[(a,b) in permitted for b in names]) for a in names]
     attached = AttachedCollisionObject()
     attached.link_name = 'end_effector_link'
     attached.object.header.frame_id = 'end_effector_link'
