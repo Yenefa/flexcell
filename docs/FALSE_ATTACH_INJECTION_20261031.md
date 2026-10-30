@@ -33,7 +33,7 @@ Frozen values (`infra/joint-false-attach-window.json`, `scripts/false_attach_gat
 | object | `target_box_a` |
 | offset | 0.03 m, world +x |
 | injection length | 0.2 s = 10 consecutive 50 Hz frames |
-| first injected frame | ≥ 30 following samples (0.6 s) after attachment |
+| first injected frame | ≥ 90 following samples (1.8 s) after attachment |
 | boundary | `guard_input_pose` (the pose the guard is told, not the physics engine) |
 
 `carry_server` displaces the reported pose of the target for exactly those frames,
@@ -52,6 +52,8 @@ audit trail keeps the injected frames separate from the physics record.
   relative pose* reason, monitor no longer active;
 - the displacement actually reached the sampled drift (≥ 20 mm), otherwise the
   guard was never lied to and the window proves nothing;
+- the fault was not raised before the declared injection point (> 1.8 s of
+  following), so the window cannot pass by failing early for another reason;
 - the PICK failed **typed** (`error_code == 2`), its detail names the follow fault
   and a **confirmed** motion terminal, and never says `MotionTerminalUnknown`;
 - no PLACE was dispatched after the refusal, and no success was claimed.
@@ -59,6 +61,16 @@ audit trail keeps the injected frames separate from the physics record.
 The evidence record states `boundary: guard_input_pose` next to
 `interpretation: ... the fixed-joint oracle cannot slip physically, so this
 qualifies the response chain only`.
+
+## First window (local WSL, not CI)
+
+`setup/acceptance/false_attach_20261031/` holds the receipt of one declared run
+taken on the local WSL stack while GitHub Actions was refusing to start jobs:
+window `FUNCTIONAL_WINDOW_PASS`, task `ERR_SKILL_FAILED` with
+`PICK_A(attempt=1):FAIL:ERR_INTERNAL`, injection 10 frames at 32.882–33.062 s sim,
+peak sampled drift 30.05 mm, `motion_error_code 32` with a confirmed terminal, no
+PLACE dispatched, carry held for reconciliation. The same window and gate run in
+CI (`false-attach-smoke`) once runners are available again.
 
 ## Boundaries
 

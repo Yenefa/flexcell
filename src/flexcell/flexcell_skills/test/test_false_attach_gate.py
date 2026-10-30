@@ -21,7 +21,7 @@ def build(root, *, frames=FROZEN['frames'], offset=FROZEN['offset_m'],
           places=0, drift=.031):
     skills = root / 'skills'
     skills.mkdir(parents=True)
-    follow = dict(object='target_box_a', session=SESSION, samples=FROZEN['after_samples'] + frames,
+    follow = dict(object='target_box_a', session=SESSION, samples=FROZEN['after_samples'] + 1,
                   max_translation_m=drift, max_rotation_rad=1e-4, fault=fault, active=False,
                   first_sim_ns=FIRST, last_sim_ns=first + frames * STEP,
                   reference_source='preposition')

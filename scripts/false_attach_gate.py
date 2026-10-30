@@ -14,7 +14,7 @@ from contact_gate import require
 
 #: Frozen fixture. Change these only together with the declaration and the code.
 FROZEN = dict(object='target_box_a', offset_m=.03, hold_s=.2, frames=10,
-              axis='world_x', boundary='guard_input_pose', after_samples=30)
+              axis='world_x', boundary='guard_input_pose', after_samples=90)
 ERR_INTERNAL = 2
 
 #: The injected displacement must be visible as sampled drift, or the guard was
@@ -68,8 +68,8 @@ def verify_run(run, object_id, declaration):
     require(str(follow.get('fault') or '') != '', 'the guard did not latch a fault')
     require('relative pose' in follow['fault'], 'the fault is not the measured pose mismatch')
     require(follow.get('active') is False, 'follow monitor still active after the fault')
-    require(follow.get('samples', 0) >= FROZEN['after_samples'] + FROZEN['frames'],
-            'too few following samples to cover the injection')
+    require(follow.get('samples', 0) >= FROZEN['after_samples'],
+            'the session faulted before the declared injection point')
     require(math.isfinite(follow.get('max_translation_m', -1)) and
             follow['max_translation_m'] >= MIN_VISIBLE_DRIFT_M,
             'the injected displacement never reached the sampled drift')

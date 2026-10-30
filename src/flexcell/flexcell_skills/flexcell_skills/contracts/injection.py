@@ -199,7 +199,8 @@ def parse_false_attach(text, backend):
     frames = int(round(hold_s * 50))
     if frames < 2:
         raise ValueError('false-attach hold must cover at least two 50 Hz frames')
-    #: fire only after the session has been following for 0.6 s (30 x 50 Hz), so
-    #: the injection lands inside the LIFT motion instead of the settle pause.
+    #: fire only after the session has been following for 1.8 s (90 x 50 Hz): the
+    #: two declared 0.5 s settle pauses plus the LIFT planning put the first
+    #: injected frame inside the lift motion, not in a pause.
     return dict(object=object_id, offset_m=offset_m, hold_s=hold_s, frames=frames,
-                after_samples=30, axis='world_x', spec=text)
+                after_samples=90, axis='world_x', spec=text)

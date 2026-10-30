@@ -143,7 +143,7 @@ class FalseAttachSpecification(unittest.TestCase):
         self.assertEqual(spec['object'], 'target_box_a')
         self.assertEqual(spec['offset_m'], .03)
         self.assertEqual(spec['frames'], 10)
-        self.assertEqual(spec['after_samples'], 30)
+        self.assertEqual(spec['after_samples'], 90)
         self.assertEqual(spec['axis'], 'world_x')
 
     def test_default_hold_is_used_when_omitted(self):
