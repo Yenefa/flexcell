@@ -73,12 +73,12 @@ def _attachment_bounds(by_time, object_id, first_sample_ns, last_sample_ns):
     start = first_sample_ns
     while start - STEP in by_time and attached(start - STEP):
         start -= STEP
-    require(first_sample_ns - start < 20_000_000,
+    require(first_sample_ns - start <= 20_000_000,
             'the attachment boundary is not within one sampled period')
     end = last_sample_ns
     while end + STEP in by_time and attached(end + STEP):
         end += STEP
-    require(end - last_sample_ns < 20_000_000,
+    require(end - last_sample_ns <= 20_000_000,
             'the release boundary is not within one sampled period')
     require(attached(start) and attached(end), 'the sampled interval is not attached')
     return start, end
