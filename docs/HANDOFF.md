@@ -10,6 +10,7 @@
 > （ERR_INTERNAL）、detail 含“motion terminal confirmed”且无 `MotionTerminalUnknown`、
 > 事后未派 PLACE、未声称成功。三处阈值与口径冻结在代码里，改动需同时改声明。
 > D3 仍 NO_GO，n≥50 冻结；接触力方向校准与旧后端对照仍未做。
+> 本机 WSL 已执行该窗口一次（CI 停摆期间）：FUNCTIONAL_WINDOW_PASS、ERR_SKILL_FAILED / PICK_A:ERR_INTERNAL、注入 10 帧 32.882–33.062 s、峰值漂移 30.05 mm、motion_error_code 32 且终端已确认、未派 PLACE；证据在 `setup/acceptance/false_attach_20261031/`。本地离线层同款：7 包 merge-install、684 tests 0 失败、40 文件扫描零问题（提交 f414cbc）。
 > [注入边界与判据](FALSE_ATTACH_INJECTION_20261031.md)。下方为历史快照。
 
 > 2026-10-31 预定位基准落地（分支 `feat/preposition-reference`，堆叠在
