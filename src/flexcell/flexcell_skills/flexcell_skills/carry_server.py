@@ -65,7 +65,7 @@ class CarryServer(Node):
         # body must be detached and the arm at rest before the joint appears.
         self.declare_parameter('require_preposition_reference', True,
                                ParameterDescriptor(description='refuse a joint session without a measured pre-attach reference'))
-        self.declare_parameter('preposition_timeout_s', 3.0)
+        self.declare_parameter('preposition_timeout_s', 1.0)
 
         gp = self.get_parameter
         self._world = gp('world').value

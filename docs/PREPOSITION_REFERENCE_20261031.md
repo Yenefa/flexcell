@@ -27,7 +27,7 @@ Runtime (`flexcell_skills/joint_follow.py`, `carry_server.py`):
   detached and hands out the **mean** of a declared at-rest hold. Any attached
   sample clears that body's history.
 - `carry_server` requires that hold before the joint is requested
-  (`require_preposition_reference`, default true; `preposition_timeout_s` = 3 s)
+  (`require_preposition_reference`, default true; `preposition_timeout_s` = 1 s)
   and refuses the session with a typed log record
   (`preposition_reference_rejected`) plus a message on the engage reply when it
   is missing.
