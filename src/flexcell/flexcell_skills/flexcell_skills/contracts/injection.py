@@ -162,3 +162,44 @@ class InjectionLifecycle:
             'error': self.error,
             'live': self.state in LIVE_STATES,
         }
+
+
+# ------------------------------------------------ live false-attach injection
+FALSE_ATTACH_ENV = 'FLEXCELL_FALSE_ATTACH'
+
+
+def parse_false_attach(text, backend):
+    """Parse a declared live false-attach injection.
+
+    Grammar: ``<box>:<offset_m>[:<hold_s>]``, applied once to the world +x axis
+    while the joint session is following. Absent/empty means "no injection";
+    anything else is refused so a typo cannot silently downgrade a declared
+    fault-injection window into an ordinary one.
+    """
+    text = (text or '').strip()
+    if not text:
+        return None
+    parts = text.split(':')
+    if len(parts) not in (2, 3):
+        raise ValueError('false-attach spec must be object:offset_m[:hold_s]')
+    object_id = parts[0].strip()
+    if object_id not in ('target_box_a', 'target_box_b'):
+        raise ValueError('unknown false-attach object %r' % (object_id,))
+    if backend != 'detachable_joint':
+        raise ValueError('false-attach injection requires the detachable_joint backend')
+    try:
+        offset_m = float(parts[1])
+        hold_s = float(parts[2]) if len(parts) == 3 else .2
+    except ValueError:
+        raise ValueError('false-attach offset and hold must be numeric')
+    if not 0 < offset_m <= .1:
+        raise ValueError('false-attach offset must be within (0, 0.1] m')
+    if not 0 < hold_s <= 1.:
+        raise ValueError('false-attach hold must be within (0, 1] s')
+    frames = int(round(hold_s * 50))
+    if frames < 2:
+        raise ValueError('false-attach hold must cover at least two 50 Hz frames')
+    #: fire only after the session has been following for 0.6 s (30 x 50 Hz), so
+    #: the injection lands inside the LIFT motion instead of the settle pause.
+    return dict(object=object_id, offset_m=offset_m, hold_s=hold_s, frames=frames,
+                after_samples=30, axis='world_x', spec=text)

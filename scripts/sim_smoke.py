@@ -80,7 +80,9 @@ def main():
     parser.add_argument('--qualification-no-recovery', action='store_true')
     parser.add_argument('--planner-diagnostics', action='store_true')
     parser.add_argument('--case', choices=['normal', 'dual_object', 'recovery_once', 'budget_exhaustion',
-                                           'unreachable_place'], default='normal')
+                                           'unreachable_place', 'false_attach'], default='normal')
+    parser.add_argument('--false-attach', default='',
+                        help='declared live false-attach spec, object:offset_m[:hold_s]')
     args = parser.parse_args()
     out = args.out / ('run-' + uuid.uuid4().hex[:12])
     out.mkdir(parents=True, exist_ok=False)
@@ -97,6 +99,12 @@ def main():
     else:
         os.environ.pop('FLEXCELL_CONTACT_STEP_LOG', None)
     os.environ['FLEXCELL_EPISODE_DIR'] = str(out / 'episodes')
+    if args.false_attach:
+        if args.case != 'false_attach':
+            raise ValueError('the false-attach spec belongs to the false_attach case only')
+        os.environ['FLEXCELL_FALSE_ATTACH'] = args.false_attach
+    else:
+        os.environ.pop('FLEXCELL_FALSE_ATTACH', None)
     if args.planner_diagnostics:
         os.environ['FLEXCELL_MTC_DIAGNOSTIC_DIR'] = str(out / 'planner')
     else:
@@ -273,6 +281,13 @@ def main():
             args.case == 'budget_exhaustion' and task.get('outcome_val') == 1
             and task.get('error_code') == 'ERR_RECOVERY_EXHAUSTED'
             and sum(row.get('injected') is True for row in skill_records) == 2)
+        carry_records = []
+        if (out / 'skills/carry.jsonl').exists():
+            carry_records = [json.loads(line) for line
+                             in (out / 'skills/carry.jsonl').read_text().splitlines() if line.strip()]
+        expected_failure = expected_failure or (
+            args.case == 'false_attach' and task.get('outcome_val') == 1
+            and sum(row.get('event') == 'false_attach_injected' for row in carry_records) == 1)
         expected_failure = expected_failure or (
             args.case == 'unreachable_place' and task.get('outcome_val') == 1
             and task.get('error_code') == 'ERR_SKILL_FAILED'

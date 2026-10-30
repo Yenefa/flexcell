@@ -1,5 +1,17 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-10-31 第 3 项之「假附着」落地（分支 `feat/live-false-attach`，堆叠在
+> `feat/preposition-reference` 上）：刚性固定关节不可能打滑，因此不宣称在物理里造出假附着；
+> 注入点定在**守卫输入**——箱子仍报 `joint_component:true`，但上报位姿在附着后 30 帧
+> （0.6 s）起连续 10 帧被推移 30 mm，原始 2 ms 步进日志不动，被改的帧在 `carry.jsonl`
+> 逐帧记录。新窗口 `infra/joint-false-attach-window.json` + 新 CI 任务
+> `false-attach-smoke`；门禁 `scripts/false_attach_gate.py` 要求：注入恰好一次、
+> 故障为“实测相对位姿超限”、位移确实进入采样漂移（≥20 mm）、PICK 类型化失败
+> （ERR_INTERNAL）、detail 含“motion terminal confirmed”且无 `MotionTerminalUnknown`、
+> 事后未派 PLACE、未声称成功。三处阈值与口径冻结在代码里，改动需同时改声明。
+> D3 仍 NO_GO，n≥50 冻结；接触力方向校准与旧后端对照仍未做。
+> [注入边界与判据](FALSE_ATTACH_INJECTION_20261031.md)。下方为历史快照。
+
 > 2026-10-31 预定位基准落地（分支 `feat/preposition-reference`，堆叠在
 > `fix/joint-point-ik` 上）：Joint 会话不再以第一帧附着位姿作基准，改为在绑定前
 > 100 ms / 50 步的脱开静止窗口测量基准，并要求目标箱自接触传感器在该窗口内逐帧可用

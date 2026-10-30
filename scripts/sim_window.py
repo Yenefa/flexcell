@@ -40,6 +40,10 @@ def main():
                        '--case', spec['case'], '--object', spec['object']]
             if declaration.get('camera'):
                 command.append('--camera')
+            if declaration.get('false_attach'):
+                injection = declaration['false_attach']
+                command.extend(['--false-attach', '%s:%s:%s'
+                                % (injection['object'], injection['offset_m'], injection['hold_s'])])
             if declaration.get('joint_hold_sim_s'):
                 command.extend(['--joint-hold-sim-s', str(declaration['joint_hold_sim_s'])])
             if declaration.get('physics_step_s') is not None:
@@ -116,6 +120,10 @@ def main():
                     raise ValueError('a pre-attach reference requires the explicitly selected joint backend')
                 from preposition_gate import verify_run as verify_preposition
                 result['episodes'][-1]['preposition_evidence'] = verify_preposition(
+                    runs[0], spec['object'], declaration)
+            if declaration.get('required_false_attach'):
+                from false_attach_gate import verify_run as verify_false_attach
+                result['episodes'][-1]['false_attach_evidence'] = verify_false_attach(
                     runs[0], spec['object'], declaration)
             current = outcome.get('runtime_fingerprint')
             if not current or fingerprint is not None and current != fingerprint:

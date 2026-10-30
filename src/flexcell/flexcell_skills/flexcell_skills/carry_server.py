@@ -17,6 +17,7 @@ v2 changes:
 
 import json
 import math
+import os
 import threading
 import time
 import uuid
@@ -40,6 +41,7 @@ from flexcell_interfaces.msg import CarryState
 from flexcell_interfaces.srv import EngageCarry, QueryCarry
 
 from flexcell_skills.common import JsonlLog
+from flexcell_skills.contracts.injection import FALSE_ATTACH_ENV, parse_false_attach
 from flexcell_skills.joint_follow import JointFollowMonitor, PrepositionLatch
 
 
@@ -98,6 +100,12 @@ class CarryServer(Node):
         self._follow = None
         self._preposition = None
         self._preposition_timeout = float(gp('preposition_timeout_s').value)
+        # Declared live fault injection: the reported child pose is displaced for a
+        # bounded number of frames so the sampled guard must catch a real mismatch.
+        self._false_attach = parse_false_attach(os.environ.get(FALSE_ATTACH_ENV), self._backend)
+        if self._false_attach is not None:
+            self._false_attach.update(remaining=self._false_attach['frames'], started=False,
+                                      frames_done=0, logged=False, first_sim_ns=0, last_sim_ns=0)
         if self._backend == 'detachable_joint':
             self._follow = JointFollowMonitor()
             self._preposition = PrepositionLatch()
@@ -192,10 +200,53 @@ class CarryServer(Node):
             return
         if self._preposition is not None:
             self._preposition.feed(data)  # detached history only; never an observation claim
+        injected = self._apply_false_attach(data)
         try:
             self._follow.feed(data)
         except (ValueError, TypeError) as exc:
             self._follow.reject('malformed physics trace: ' + str(exc))
+        if injected and self._false_attach['remaining'] == 0:
+            self._close_false_attach()
+
+    def _apply_false_attach(self, data):
+        """Displace the reported child pose for a declared number of frames.
+
+        A fixed joint cannot physically slip, so a false attachment is injected at
+        the guard's input boundary: the body keeps reporting ``joint_component``
+        true while its reported pose stops following its parent. The raw per-step
+        log stays untouched; the altered frames are recorded in carry.jsonl.
+        """
+        spec = self._false_attach
+        if spec is None or spec['remaining'] == 0:
+            return False
+        summary = self._follow.summary()
+        if summary.get('object') != spec['object'] or summary.get('samples', 0) < spec['after_samples']:
+            return False
+        if not spec['started']:
+            spec['started'] = True
+            spec['first_sim_ns'] = data['sim_ns']
+            self.get_logger().error('false-attach injection armed at sim_ns=%d' % data['sim_ns'])
+        body = data['objects'][spec['object']]
+        body['pose'][0] = body['pose'][0] + spec['offset_m']
+        spec['remaining'] -= 1
+        spec['frames_done'] += 1
+        spec['last_sim_ns'] = data['sim_ns']
+        return True
+
+    def _close_false_attach(self):
+        spec = self._false_attach
+        if spec is None or not spec['started'] or spec['logged']:
+            return
+        spec['logged'] = True
+        summary = self._follow.summary()
+        self._log.write({'event': 'false_attach_injected', 'object': spec['object'],
+                         'session': summary.get('session', ''),
+                         'offset_m': spec['offset_m'], 'frames': spec['frames_done'],
+                         'axis': spec['axis'], 'boundary': 'guard_input_pose',
+                         'first_sim_ns': spec['first_sim_ns'], 'last_sim_ns': spec['last_sim_ns'],
+                         'follow_fault': summary.get('fault')})
+        self.get_logger().error('false-attach injection applied to %d frames (offset %.3f m)'
+                                % (spec['frames_done'], spec['offset_m']))
 
     # ------------------------------------------------------------ commands
     def _on_start(self, msg):
