@@ -107,6 +107,8 @@ def main():
         result['simulator_exit'] = proc.returncode
         require(proc.returncode == 0, 'simulator failed; preserve data without replacement')
         result['evidence'] = verify_file(capture, spec)
+        from signed_force_gate import verify_file as verify_signed
+        result['signed_force_evidence'] = verify_signed(capture, spec)
         result.update(status='CONTACT_PIPELINE_PASS', raw_sha256=digest(capture))
     except (Exception, KeyboardInterrupt) as exc:
         result['error'] = repr(exc)

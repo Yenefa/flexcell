@@ -22,6 +22,15 @@
     "empty": "target_box_b",
     "missing": "unsensed_box"
   },
-  "force_interpretation": "Magnitude of summed raw body_1 forces; target-body sign not calibrated. Empty contacts and absent force data have null force, never inferred zero.",
-  "scope": "One standalone sensor spike, not arm/carry admission, contact-grasp, free-fall or a success-rate experiment. Preserve failure; D3 remains NO_GO."
+  "force_interpretation": "Magnitude of summed raw body_1 forces, plus the declared support direction: every settled sample must push the target up along +z within m*g and carry no lateral component. One known direction only; a known lateral/oblique load and torque are still uncalibrated. Empty contacts and absent force data have null force, never inferred zero.",
+  "scope": "One standalone sensor spike, not arm/carry admission, contact-grasp, free-fall or a success-rate experiment. Preserve failure; D3 remains NO_GO.",
+  "signed_force": {
+    "target": "target_box_a",
+    "partner": "ground_plane",
+    "direction": [0.0, 0.0, 1.0],
+    "magnitude_min_n": 0.392,
+    "magnitude_max_n": 0.588,
+    "max_lateral_n": 1e-6,
+    "min_signed_samples": 476
+  }
 }

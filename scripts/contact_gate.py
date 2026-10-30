@@ -77,7 +77,10 @@ def observation(target):
         return dict(state='CONTACTS_FORCE_UNKNOWN', force_magnitude_n=None, contacts=len(contacts))
     total = [math.fsum(v[axis] for v in force_vectors) for axis in range(3)]
     return dict(state='CONTACTS_WITH_FORCE', force_magnitude_n=math.hypot(*total), contacts=len(contacts),
-                raw_body_1_force_sum_n=total)
+                raw_body_1_force_sum_n=total,
+                # body_1 is the collision this sensor belongs to, so these are the
+                # forces applied TO the watched body by each contact partner.
+                body_1_point_forces_n=[list(v) for v in force_vectors])
 
 
 def verify_rows(rows, declaration):

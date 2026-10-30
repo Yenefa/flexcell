@@ -1,5 +1,16 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-10-31 第 3 项之「有符号接触力」落地（分支 `feat/signed-contact-force`，堆叠在
+> #78 上）：原先只比 `|Σ body_1 force|` 与 m·g，量值看不出支撑 vs 吸附、垂直 vs 侧向、
+> 也看不出单点反向。新门禁 `scripts/signed_force_gate.py` 用已声明的已知方向（重力）
+> 校验：每个接触点的 body_1 z 必须为正、合力方向余弦 ≥ 0.999、侧向 ≤ 1e-6 N、合力 z 仍在
+> m·g 带内、对端必须是 ground_plane（符号不能靠碰撞顺序碰巧正确）。本机跑一次探针：
+> 501 个 settled 样本，z∈[0.48999999999, 0.49000000035] N，方向余弦 1.0，侧向 3.6e-16 N，
+> 四点全部向上；证据 `setup/acceptance/signed_force_20261031/`（含 501 行 settled 原始数据，
+> 可用 gate 复算）。**只校准了一个已知方向**：侧向/斜向已知载荷与力矩仍未校准，无传感器
+> 碰撞仍为 UNKNOWN。D3 仍 NO_GO。
+> [方法、判据与边界](SIGNED_CONTACT_FORCE_20261031.md)。下方为历史快照。
+
 > 2026-10-31 第 3 项之「假附着」落地（分支 `feat/live-false-attach`，堆叠在
 > `feat/preposition-reference` 上）：刚性固定关节不可能打滑，因此不宣称在物理里造出假附着；
 > 注入点定在**守卫输入**——箱子仍报 `joint_component:true`，但上报位姿在附着后 30 帧
