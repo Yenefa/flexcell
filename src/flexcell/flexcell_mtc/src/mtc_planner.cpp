@@ -76,22 +76,22 @@ class Planner : public rclcpp::Node {
     scene->setPlanningSceneMsg(measured->scene);
     const auto* arm = task.getRobotModel()->getJointModelGroup("arm");
     if (!arm) throw std::runtime_error("arm group missing");
-    auto state = scene->getCurrentState();
-    if (!pick && !state.hasAttachedBody(q.object_name))
+    const auto measured_state = scene->getCurrentState();
+    if (!pick && !measured_state.hasAttachedBody(q.object_name))
       throw std::runtime_error("PLACE object not attached in measured scene");
     if (q.attached_object_targets) {
-      const auto* body = state.getAttachedBody(q.object_name);
+      const auto* body = measured_state.getAttachedBody(q.object_name);
       if (body->getAttachedLinkName() != "end_effector_link" || body->getShapes().size() != 1 ||
           body->getShapePosesInLinkFrame().size() != 1)
         throw std::runtime_error("joint PLACE requires one measured end-effector-attached shape");
       const auto shape_frame = body->getShapePosesInLinkFrame().front();
-      flexcell::checkAttachedObjectPose(state.getGlobalLinkTransform("end_effector_link"), shape_frame, q.object_pose);
+      flexcell::checkAttachedObjectPose(measured_state.getGlobalLinkTransform("end_effector_link"), shape_frame, q.object_pose);
       point_model = flexcell::attachedPointModel(shared_from_this(), shape_frame.translation());
       task.setRobotModel(point_model->getModel());
       scene = std::make_shared<planning_scene::PlanningScene>(task.getRobotModel());
       scene->setPlanningSceneMsg(measured->scene);
-      state = scene->getCurrentState();
     }
+    auto state = scene->getCurrentState();
     task.add(std::make_unique<mtc::stages::FixedState>("measured scene", scene));
     auto gripper = std::make_shared<mtc::solvers::JointInterpolationPlanner>();
     gripper->setMaxVelocityScalingFactor(profiles.at(q.motion_profile_id));

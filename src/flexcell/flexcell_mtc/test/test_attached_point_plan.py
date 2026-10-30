@@ -56,14 +56,19 @@ def test_attached_point_place_service_has_fk_valid_endpoints(tmp_path):
     srdf.write_text(config['robot_description_semantic'])
     model = RobotModel(str(urdf), str(srdf))
     state = RobotState(model)
-    state.joint_positions = dict(zip(fixture['names'], fixture['positions']))
+    positions = list(fixture['positions'])
+    # Keep raw measurements in the fixture. The finger sample is 1.7e-18 below
+    # the URDF bound; use its commanded setpoint/mimic for this reconstructed
+    # planner input. All measured arm joints and the point geometry are retained.
+    positions[0] = positions[1] = -.011
+    state.joint_positions = dict(zip(fixture['names'], positions))
     state.update()
     ee = components(state.get_pose('end_effector_link'))
     point_offset, orientation_offset = relative_pose(ee, fixture['box_pose'])
     scene = PlanningScene()
     scene.robot_model_name = 'open_manipulator_x'
     scene.robot_state.joint_state.name = fixture['names']
-    scene.robot_state.joint_state.position = fixture['positions']
+    scene.robot_state.joint_state.position = positions
     # A full GetPlanningScene reply includes the SRDF's existing adjacent-link
     # permissions. An empty full-scene matrix would erase them and fail before
     # this regression ever reaches the point-goal sampler.
@@ -120,7 +125,7 @@ def test_attached_point_place_service_has_fk_valid_endpoints(tmp_path):
             joints = trajectory.joint_trajectory
             assert set(joints.joint_names) == {'joint1','joint2','joint3','joint4'}
             positions = dict(zip(joints.joint_names,joints.points[-1].positions))
-            state.joint_positions = dict(zip(fixture['names'],fixture['positions'])) | positions
+            state.joint_positions = dict(zip(fixture['names'],scene.robot_state.joint_state.position)) | positions
             state.update()
             actual = components(state.get_pose('end_effector_link'))
             ee_endpoints.append(actual[:3])
