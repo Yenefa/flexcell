@@ -117,7 +117,6 @@ class PrepositionLatch:
         self.max_age_ns = max_age_ns
         self.cv = threading.Condition()
         self.buffer = {name: [] for name in PREPOSITION_OBJECTS}
-        self.bad = ''
 
     def feed(self, data):
         """Buffer one detached observation; malformed data leaves the buffer untouched."""
@@ -149,7 +148,7 @@ class PrepositionLatch:
         if len(history) < self.samples:
             return False, None, 'no detached pre-attach hold of %d samples' % self.samples
         sims = [entry[0] for entry in history]
-        if sims != sorted(set(sims)) or len(set(sims)) != len(sims):
+        if any(b <= a for a, b in zip(sims, sims[1:])):
             return False, None, 'pre-attach hold did not advance monotonically'
         if any(b - a != self.sample_gap_ns for a, b in zip(sims, sims[1:])):
             return False, None, 'pre-attach hold is not an unbroken 50 Hz interval'
@@ -193,12 +192,6 @@ class PrepositionLatch:
                 if remaining <= 0:
                     return False, None, detail
                 self.cv.wait(min(.02, remaining))
-
-    def reset(self):
-        with self.cv:
-            for history in self.buffer.values():
-                history.clear()
-            self.bad = ''
 
 
 class JointFollowMonitor:
