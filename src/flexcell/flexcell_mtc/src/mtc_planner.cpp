@@ -163,6 +163,11 @@ class Planner : public rclcpp::Node {
       detail << "no complete MTC solution; operation=" << q.operation << "; object=" << q.object_name << '\n';
       task.printState(detail);
       task.explainFailure(detail);
+      task.stages()->traverseRecursively([&](const mtc::Stage& stage, unsigned int) {
+        for (const auto& failure : stage.failures())
+          detail << stage.name() << ": " << failure->comment() << '\n';
+        return true;
+      });
       const auto report = detail.str();
       RCLCPP_ERROR(get_logger(), "%s", report.c_str());
       throw std::runtime_error(report.substr(0, 8192));
