@@ -26,22 +26,31 @@ The existing sealed runtime map supplies the canonical content identity offline.
 
 ## Implementation and checks
 
-- [ ] Add behavior tests against the actual verifier before changing it: all 16
+- [x] Add behavior tests against the actual verifier before changing it: all 16
   per-file LF/CRLF combinations and within-file mixtures must reach raw extraction;
   non-EOL changes, missing/extra identities and a corrupted historical digest must
   fail before extraction. Mock only the expensive raw extraction boundary.
-- [ ] Save the expected red result plus the unmodified CLI LF failure.
-- [ ] Implement a small `verify_sources(repo, receipt, binding)` helper and call it
+- [x] Save the expected red result plus the unmodified CLI LF failure.
+- [x] Implement a small `verify_sources(repo, receipt, binding)` helper and call it
   before loading gate modules. Return exact observed/canonical digest observations.
-- [ ] Run the new tests and existing native-window tests, then the complete offline
+- [x] Run the new tests and existing native-window tests, then the complete offline
   Python suite and existing static scan. Gate/controller/physics code stays unchanged.
-- [ ] Export a new immutable Git LF snapshot. Replay all original raw gates from
+- [x] Export a new immutable Git LF snapshot. Replay all original raw gates from
   that snapshot on Windows and Linux, using isolated stdlib-only interpreters.
-- [ ] Independently review source identity boundaries. Preserve old receipts and
+- [x] Independently review source identity boundaries. Preserve old receipts and
   both historical defects, update #85 and notify #87/#84 with exact commands/results.
-- [ ] Archive reproducible tests, source bindings, old failure and new replay
+- [x] Archive reproducible tests, source bindings, old failure and new replay
   results; refresh HANDOFF/diary and provide a portable delivery bundle.
 
 The 500 ms/native physical thresholds, first eligible candidate, admission and
 historical CI STOPPED verdict remain unchanged. Robot/simulator dispatches: zero.
 #59 still lacks CI execution; #86 local measurements do not close that criterion.
+
+## Completion
+
+Published on PR #85; exact source correction 009b5af and complete proof d6f15db.
+Review threads #85/#86 and PR #87 have executable evidence links; junior #82/#83/#84
+were refreshed without implementing their scoped tasks. The 57-member standalone
+Git-LF bundle passed both its old-failure counterexample and full stdlib-only replay.
+Windows/Linux LF replay passes preserve historical STOPPED, INVALID_TRAILING_CR and
+D3 NO_GO. Actions on delivery head d6f15db did not execute any steps: account gate.
