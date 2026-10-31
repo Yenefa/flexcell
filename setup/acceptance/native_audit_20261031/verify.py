@@ -13,6 +13,32 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+GATE_SOURCES = ('scripts/native_cycle_gate.py','scripts/integrated_contact_gate.py',
+    'scripts/contact_gate.py','src/flexcell/flexcell_skills/flexcell_skills/joint_follow.py')
+
+
+def verify_sources(repo, receipt, binding):
+    """Bind Python text to sealed runtime bytes; retain checkout observations."""
+    recorded = receipt['verification_sources']
+    assert set(recorded) == set(GATE_SOURCES), 'verification source set differs'
+    assert binding['canonical_source_revision'] == receipt['patched_source_revision']
+    digest = lambda data: hashlib.sha256(data).hexdigest()
+    observations = {}
+    for name in GATE_SOURCES:
+        data = (repo/name).read_bytes()
+        # Python text transport only: preserve BOM, lone CR and every other byte.
+        canonical = data.replace(b'\r\n',b'\n')
+        expected = binding['source_files'][name]
+        assert digest(canonical) == expected, 'gate changed; use the recorded source revision: '+name
+        crlf = canonical.replace(b'\n',b'\r\n')
+        assert recorded[name] in (expected,digest(crlf)), 'recorded checkout digest invalid: '+name
+        form = 'LF' if data == canonical else 'CRLF' if data == crlf else 'MIXED_LF_CRLF'
+        observations[name] = dict(canonical_sha256=expected,observed_sha256=digest(data),
+            recorded_checkout_sha256=recorded[name],observed_line_endings=form)
+    return dict(policy='CRLF_PAIRS_TO_LF_ONLY',canonical_source_revision=binding['canonical_source_revision'],
+                files=observations)
+
+
 def extract(archive, root, expected=None):
     with zipfile.ZipFile(archive) as bundle:
         assert bundle.testzip() is None
@@ -149,8 +175,7 @@ def verify(capsule, repo):
     receipt = json.loads((capsule/'receipt.json').read_text())
     assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
     binding = json.loads((capsule/'source-binding.json').read_text())
-    for name,digest in receipt['verification_sources'].items():
-        assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+    source_observations = verify_sources(repo,receipt,binding)
     assert sha(capsule/'raw-evidence.zip') == receipt['archive_sha256']
     with tempfile.TemporaryDirectory(prefix='flexcell-native-audit-') as temporary:
         root = Path(temporary)
@@ -168,7 +193,8 @@ def verify(capsule, repo):
         assert old_identity['launch_files'] == new_identity['launch_files']
         historical = historical_window(root,receipt['historical_archive_sha256'])
         assert receipt['remaining_runtime_processes'] == 0 and receipt['old_wsl_dirty_patch_unchanged'] is True
-        return dict(status='NATIVE_AUDIT_LIFETIME_REPLAY_PASS',baseline=baseline,patched=patched,
+        return dict(status='NATIVE_AUDIT_LIFETIME_REPLAY_PASS',verification_sources=source_observations,
+            baseline=baseline,patched=patched,
             historical=historical,old_wsl_dirty_patch_unchanged=True,remaining_runtime_processes=0,
             moving_parent_follow_qualified=False,default_admission='NO_GO')
 
