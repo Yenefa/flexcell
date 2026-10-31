@@ -1,5 +1,6 @@
 """The pre-attach reference must be measured, contact-free and then held by the carry."""
 import json
+import math
 from pathlib import Path
 import sys
 
@@ -90,6 +91,42 @@ def test_moving_arm_cannot_pose_a_reference(tmp_path):
     declaration = build(tmp_path, parent_drift=.00004)
     with pytest.raises(ValueError, match='not at rest'):
         verify_run(tmp_path, 'target_box_a', declaration)
+
+
+@pytest.mark.parametrize('motion', ['translation', 'rotation'])
+def test_common_world_motion_is_not_a_stationary_raw_hold(tmp_path, motion):
+    declaration = build(tmp_path)
+    path = tmp_path / 'physics_steps.jsonl'
+    frames = [json.loads(line) for line in path.read_text().splitlines()]
+    for row in frames:
+        elapsed = (row['sim_ns'] - ATTACH) / 1e9
+        for value in [row['parent_pose']] + [o['pose'] for o in row['objects'].values()]:
+            if motion == 'translation':
+                value[0] += .5 * elapsed
+            else:
+                angle = .05 * elapsed
+                x, y = value[:2]
+                value[:2] = [math.cos(angle)*x-math.sin(angle)*y,
+                             math.sin(angle)*x+math.cos(angle)*y]
+                value[3:] = [0., 0., math.sin(angle/2), math.cos(angle/2)]
+    path.write_text(''.join(json.dumps(row)+'\n' for row in frames))
+    with pytest.raises(ValueError, match='not at rest'):
+        verify_run(tmp_path, 'target_box_a', declaration)
+
+
+def test_stationary_raw_hold_accepts_equivalent_quaternion_signs(tmp_path):
+    declaration = build(tmp_path)
+    path = tmp_path / 'physics_steps.jsonl'
+    frames = [json.loads(line) for line in path.read_text().splitlines()]
+    for index, row in enumerate(frames):
+        if index % 2:
+            child = row['objects']['target_box_a']['pose']
+            child[3:] = [-v for v in child[3:]]
+    path.write_text(''.join(json.dumps(row)+'\n' for row in frames))
+    report = verify_run(tmp_path, 'target_box_a', declaration)
+    assert report['status'] == 'PREPOSITION_REFERENCE_PASS'
+    assert report['preposition_reference'][:3] == pytest.approx([.125, 0., -.1725])
+    assert abs(report['preposition_reference'][-1]) == pytest.approx(1.)
 
 
 def test_binding_jump_breaks_the_pre_attach_constraint(tmp_path):

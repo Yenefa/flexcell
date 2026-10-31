@@ -50,6 +50,40 @@ def test_moving_arm_is_not_a_positioned_reference():
     assert not ok and reference is None and 'not at rest' in detail
 
 
+@pytest.mark.parametrize('motion', ['translation', 'rotation'])
+def test_common_world_motion_cannot_hide_behind_a_constant_relative_pose(motion):
+    clock = Clock()
+    latch = PrepositionLatch(clock=clock)
+    for step in range(5):
+        clock.tick()
+        if motion == 'translation':
+            parent = [.01 * step, 0., 0., 0., 0., 0., 1.]
+            child = [.1 + .01 * step, 0., 0., 0., 0., 0., 1.]
+        else:
+            angle = .01 * step
+            q = [0., 0., math.sin(angle / 2), math.cos(angle / 2)]
+            parent = [0., 0., 0.] + q
+            child = [.1 * math.cos(angle), .1 * math.sin(angle), 0.] + q
+        latch.feed(frame(clock, parent=parent, child=child))
+    ok, reference, detail = latch.take('target_box_a', timeout=.001)
+    assert not ok and reference is None and 'not at rest' in detail
+
+
+def test_stationary_antipodal_quaternions_have_the_same_reference():
+    clock = Clock()
+    latch = PrepositionLatch(clock=clock)
+    q = [0., math.sin(.2), 0., math.cos(.2)]
+    for step in range(5):
+        clock.tick()
+        child = [.1, 0., 0.] + [v * (-1 if step % 2 else 1) for v in q]
+        latch.feed(frame(clock, child=child))
+    ok, reference, evidence = latch.take('target_box_a', timeout=.001)
+    assert ok, evidence
+    assert reference[:3] == pytest.approx([.1, 0., 0.])
+    assert abs(sum(a*b for a,b in zip(reference[3:],q))) == pytest.approx(1.)
+    assert evidence['spread_rad'] < 1e-7
+
+
 def test_attachment_discards_the_detached_history():
     clock = Clock()
     latch = PrepositionLatch(clock=clock)
