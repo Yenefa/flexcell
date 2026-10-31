@@ -1,0 +1,116 @@
+{
+  "scope": "skill_backend=legacy x carry_backend=detachable_joint, two declared windows, same manifest and same 60 mm tolerance",
+  "windows": [
+    {
+      "window_id": "4055f0e0b181421b95358737aab905f5",
+      "status": "FUNCTIONAL_WINDOW_PASS",
+      "declaration_sha256": "6e815d4fee4d1b9dfebc56975bee5f78aa5caf60b75e637823c1acd064b9059d",
+      "runtime_fingerprint": "9e475a54ab44ae4672abd8867a886b13ac5f3c31eaf7de43820bbe9ee7be9689",
+      "cases": [
+        {
+          "case": "normal",
+          "status": "PASS",
+          "error_code": "ERR_NONE",
+          "pick_attempts": 1,
+          "verify_errors_mm": [
+            19.808
+          ]
+        },
+        {
+          "case": "normal",
+          "status": "PASS",
+          "error_code": "ERR_NONE",
+          "pick_attempts": 1,
+          "verify_errors_mm": [
+            21.894
+          ]
+        },
+        {
+          "case": "dual_object",
+          "status": "PASS",
+          "error_code": "ERR_NONE",
+          "pick_attempts": 2,
+          "verify_errors_mm": [
+            27.596,
+            45.007
+          ]
+        },
+        {
+          "case": "recovery_once",
+          "status": "PASS",
+          "error_code": "ERR_NONE",
+          "pick_attempts": 2,
+          "verify_errors_mm": [
+            18.376
+          ]
+        },
+        {
+          "case": "budget_exhaustion",
+          "status": "EXPECTED_FAILURE",
+          "error_code": "ERR_RECOVERY_EXHAUSTED",
+          "pick_attempts": 2,
+          "verify_errors_mm": []
+        }
+      ]
+    },
+    {
+      "window_id": "9661c1bac13f4fcea8512ff2f92a21d6",
+      "status": "FUNCTIONAL_WINDOW_PASS",
+      "declaration_sha256": "6e815d4fee4d1b9dfebc56975bee5f78aa5caf60b75e637823c1acd064b9059d",
+      "runtime_fingerprint": "6713528968521a9b953873812153fa8b3f19572d8d58bf5429cc0b6955218bd0",
+      "cases": [
+        {
+          "case": "normal",
+          "status": "PASS",
+          "error_code": "ERR_NONE",
+          "pick_attempts": 1,
+          "verify_errors_mm": [
+            34.829
+          ]
+        },
+        {
+          "case": "normal",
+          "status": "PASS",
+          "error_code": "ERR_NONE",
+          "pick_attempts": 1,
+          "verify_errors_mm": [
+            22.816
+          ]
+        },
+        {
+          "case": "dual_object",
+          "status": "PASS",
+          "error_code": "ERR_NONE",
+          "pick_attempts": 2,
+          "verify_errors_mm": [
+            24.851,
+            33.915
+          ]
+        },
+        {
+          "case": "recovery_once",
+          "status": "PASS",
+          "error_code": "ERR_NONE",
+          "pick_attempts": 2,
+          "verify_errors_mm": [
+            27.625
+          ]
+        },
+        {
+          "case": "budget_exhaustion",
+          "status": "EXPECTED_FAILURE",
+          "error_code": "ERR_RECOVERY_EXHAUSTED",
+          "pick_attempts": 2,
+          "verify_errors_mm": []
+        }
+      ]
+    }
+  ],
+  "placements": 10,
+  "min_mm": 18.376,
+  "max_mm": 45.007,
+  "mean_mm": 27.672,
+  "tolerance_mm": 60.0,
+  "worst_fraction_of_tolerance": 0.7501,
+  "interpretation": "Repeatable pass with a wide spread (18-45 mm). Not a stable margin: the worst landing used 75% of the declared tolerance, and any tolerance below ~46 mm would have failed this combination."
+}

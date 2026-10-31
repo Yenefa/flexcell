@@ -64,6 +64,29 @@ project.
 That is precisely the situation #59 exists to catch: not a moved threshold, but a
 combination whose margin is thin enough that a bad landing would flip it.
 
+## Repeat window: the 45 mm is repeatable, not a fluke
+
+The first joint × legacy window used 75 % of the tolerance on one landing, so it was
+repeated with the same manifest and the same declaration:
+
+| case | run 1 (mm) | run 2 (mm) |
+| --- | --- | --- |
+| normal / A | 19.808 | 34.829 |
+| normal / B | 21.894 | 22.816 |
+| dual_object | 27.596 / 45.007 | 24.851 / 33.915 |
+| recovery_once | 18.376 | 27.625 |
+| budget_exhaustion | expected failure | expected failure |
+
+Across the two windows, ten placements: **18.4–45.0 mm, mean 27.7 mm**, worst landing at
+**75 % of the declared tolerance**. Both windows pass, and both are a long way from the
+0.17–0.23 mm the same tasks reach on MTC × teleport.
+
+So the combination is not a lucky pass — it is a *repeatably thin* pass. Any tolerance
+below roughly 46 mm would have failed it, and the spread (18 → 45 mm) is wide enough that
+a third window could plausibly land outside. That is worth knowing before this combination
+is quoted as "passing": it passes **this** criterion, at a margin nothing else in the
+project comes close to using.
+
 ## Why this is not a regression
 
 Nothing in this branch changes the legacy skill path: `place_server` / `move_to_pose` are
@@ -75,7 +98,8 @@ behaviour — but it also means the legacy path was never held to this measureme
 
 ## Boundaries and what it does not establish
 
-- One window per combination, one task each: a matrix of verdicts, not a rate.
+- Two windows for joint × legacy (the thinnest cell), one for the others: still a verdict
+  matrix, not a rate.
 - The `45.007 mm` is one landing away from the 60 mm line. Nothing here says whether it
   would pass on a second window; a repeat would be cheap and should happen before anyone
   quotes the joint × legacy combination as "passing".
