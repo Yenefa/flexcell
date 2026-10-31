@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "purpose": "One first-attempt Joint task verifying world-stationary pre-attach geometry and sign-invariant reference means; preserve all earlier windows",
+  "max_logical_tasks": 5,
+  "camera": false,
+  "required_carry_follow": true,
+  "required_joint_contacts": true,
+  "required_planner_diagnostics": true,
+  "required_preposition_reference": true,
+  "contact_trace": true,
+  "backend": "detachable_joint",
+  "skill_backend": "mtc",
+  "joint_hold_sim_s": 11.0,
+  "min_follow_sim_s": 10.0,
+  "physics_step_s": 0.002,
+  "min_preflight_rtf": 0.3,
+  "release_clearance_m": 0.05,
+  "world_sha256": "82e74a45f6e149724853d9fe840620c536c1d25163b385a4faa8274952ebc63c",
+  "semantic_config_sha256": "17ff20504032ec399dbf0ba53243690299511163361487c76386b29fb4eea09a",
+  "contact_gate": {
+    "prebind_ns": 1000000000,
+    "postrelease_ns": 500000000,
+    "freefall_ns": 40000000,
+    "max_clock_skew_ns": 50000000,
+    "min_weight_samples": 476,
+    "force_mean_min_n": 0.392,
+    "force_mean_max_n": 0.588
+  },
+  "preposition_gate": {
+    "hold_ns": 100000000,
+    "parent_model": "open_manipulator_x",
+    "spread_translation_m": 0.001,
+    "spread_rotation_rad": 0.0015,
+    "jump_translation_m": 0.002,
+    "jump_rotation_rad": 0.017453292519943295,
+    "follow_translation_m": 0.002,
+    "follow_rotation_rad": 0.017453292519943295,
+    "runtime_reference_agreement_m": 0.0005
+  },
+  "episodes": [
+    {
+      "case": "normal",
+      "object": "target_box_a",
+      "task": "World-stationary pre-attach Joint PLACE, A"
+    }
+  ],
+  "qualification_no_recovery": true,
+  "prior_implementation_revision": "3e1f986e32e4f9706ceeaaee73d844d8d628c7df",
+  "review_reference": "https://github.com/Yenefa/flexcell/pull/77"
+}
