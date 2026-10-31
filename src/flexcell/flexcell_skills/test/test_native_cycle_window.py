@@ -104,6 +104,96 @@ def test_first_unready_native_guard_stops_without_preposition_or_replacement(tmp
     result=json.loads((tmp_path/'worker.json').read_text())
     assert result['status']=='STOPPED' and len(result['cycles'])==1
     assert calls==['/world/empty/flexcell/carry/status']
+    assert result.get('failure_monotonic_ns', 0) > 0
+    assert 'not explicitly detached' in result.get('failure_traceback', '')
+    assert result['live_reader']['latest_rows'] == [None, None]
+
+
+def test_completed_audit_rows_are_released_before_next_live_cycle(tmp_path, monkeypatch):
+    import weakref
+    import native_cycle_window as module
+
+    declaration = json.loads((ROOT/'infra/native-five-cycle-window.json').read_text())
+    references, alive_at_cycle_start = [], []
+    original_loads = json.loads
+
+    class AuditRow(dict):
+        pass
+
+    def loads(value, *args, **kwargs):
+        row = original_loads(value, *args, **kwargs)
+        if isinstance(row, dict) and row.get('audit_payload'):
+            row = AuditRow(row)
+            references.append(weakref.ref(row))
+        return row
+
+    class Data(list):
+        def add(self):
+            item = SimpleNamespace(key='', value=[])
+            self.append(item)
+            return item
+
+    class Pose:
+        def __init__(self):
+            self.name = ''
+            self.position = SimpleNamespace(x=0., y=0., z=0.)
+            self.orientation = SimpleNamespace(x=0., y=0., z=0., w=1.)
+            self.header = SimpleNamespace(data=Data())
+
+    class Node:
+        def __init__(self):
+            self.owner, self.name, self.retired = '', '', set()
+
+        def request(self, path, message, *_):
+            operation = path.rsplit('/', 1)[-1]
+            token = (message.header.data[0].value[0] if isinstance(message, Pose) and message.header.data
+                     else getattr(message, 'data', ''))
+            if operation == 'status':
+                value = json.dumps(dict(ready=True, engaged=bool(self.owner), session=self.owner,
+                    object=self.name, component_present=[bool(self.owner) and self.name==n
+                        for n in declaration['preposition_poses']]))
+            elif operation == 'set_pose':
+                value = True
+            elif operation == 'engage':
+                value = not self.owner and token not in self.retired
+                if value:
+                    self.owner, self.name = token, message.name
+            elif operation == 'release':
+                value = bool(self.owner) and token == self.owner
+                if value:
+                    self.retired.add(token)
+                    self.owner, self.name = '', ''
+            else:
+                value = bool(self.owner) and token == self.owner and message.name == self.name
+            return True, SimpleNamespace(data=value)
+
+    class Follower:
+        def __init__(self, _):
+            self.streams = []
+            alive_at_cycle_start.append(sum(reference() is not None for reference in references))
+
+        def wait(self, *_args, **_kwargs):
+            return dict(sim_ns=1, monotonic_ns=1, parent_pose=[0.,0.,0.,0.,0.,0.,1.],
+                objects={name:dict(pose=pose.copy(), joint_component=False)
+                    for name,pose in declaration['preposition_poses'].items()}), {}
+
+    gz=ModuleType('gz'); transport=ModuleType('gz.transport13'); transport.Node=Node; gz.transport13=transport
+    msgs=ModuleType('gz.msgs10')
+    for name, typ in [('empty_pb2','Empty'), ('stringmsg_pb2','StringMsg'), ('boolean_pb2','Boolean')]:
+        setattr(msgs,name,SimpleNamespace(**{typ:SimpleNamespace}))
+    msgs.pose_pb2=SimpleNamespace(Pose=Pose)
+    for name,value in [('gz',gz),('gz.transport13',transport),('gz.msgs10',msgs)]:
+        monkeypatch.setitem(sys.modules,name,value)
+    monkeypatch.setattr(module,'Follower',Follower)
+    monkeypatch.setattr(module,'verify_cycle',lambda *_args:dict(status='NATIVE_CYCLE_PASS'))
+    monkeypatch.setattr(module.json,'loads',loads)
+    payload = json.dumps(dict(sim_ns=1, targets={}, audit_payload=True))+'\n'
+    for name in ('physics_steps.jsonl','contact_steps.jsonl'):
+        (tmp_path/name).write_text(payload)
+
+    assert module.worker(tmp_path,'empty',declaration) == 0
+    assert len(references) == 10  # both complete raw streams audited in every cycle
+    assert alive_at_cycle_start == [0, 0, 0, 0, 0]
 
 
 def test_live_consumer_starts_at_new_records_without_erasing_raw_history(tmp_path):
