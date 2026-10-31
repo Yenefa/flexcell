@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "purpose": "Same diagnostic dual-object case releasing with the box already at the declared target height (zero clearance): the lower-and-release end of the curve, where the box touches before the joint is released. Not an admission window.",
+  "max_logical_tasks": 5,
+  "camera": false,
+  "contact_trace": true,
+  "release_clearance_m": 0.0,
+  "no_replacements": true,
+  "physics_step_s": 0.002,
+  "episodes": [
+    {
+      "case": "dual_object",
+      "object": "target_box_a",
+      "task": "Diagnostic dual-object demo, zero release clearance"
+    }
+  ]
+}

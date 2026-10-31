@@ -10,6 +10,11 @@ ROOT = Path(__file__).resolve().parents[1]
 BACKENDS = ('teleport', 'velocity_servo', 'detachable_joint')
 
 
+#: Declared release-clearance fixtures. Lowering or raising the drop is a behaviour
+#: change, so it must be one of these values *and* carry the contact instrumentation.
+RELEASE_CLEARANCES = (0.0, 0.004, 0.012, 0.05)
+
+
 def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
             joint_hold_sim_s=0., physics_step_s=None, *, contact_trace=False, release_clearance_m=None,
             qualification_no_recovery=False, synchronous_step_logs=False):
@@ -17,8 +22,10 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
         raise ValueError('unsupported backend')
     if contact_trace and (backend != 'detachable_joint' or physics_step_s != .002):
         raise ValueError('integrated contact trace requires the declared 2 ms joint profile')
-    if release_clearance_m is not None and (not contact_trace or release_clearance_m != .05):
-        raise ValueError('only the explicitly declared 50 mm release fixture is supported')
+    if release_clearance_m is not None and (not contact_trace or
+                                            release_clearance_m not in RELEASE_CLEARANCES):
+        raise ValueError('release clearance must be one of the declared fixtures %r'
+                         % (RELEASE_CLEARANCES,))
     if qualification_no_recovery and not contact_trace:
         raise ValueError('no-recovery qualification requires the declared contact profile')
     if synchronous_step_logs and not contact_trace:

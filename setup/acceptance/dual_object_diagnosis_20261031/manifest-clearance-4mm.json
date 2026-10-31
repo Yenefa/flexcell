@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "purpose": "Same diagnostic dual-object case with a declared 4 mm release clearance: second point of the clearance-versus-landing-error curve. Not an admission window.",
+  "max_logical_tasks": 5,
+  "camera": false,
+  "contact_trace": true,
+  "release_clearance_m": 0.004,
+  "no_replacements": true,
+  "physics_step_s": 0.002,
+  "episodes": [
+    {
+      "case": "dual_object",
+      "object": "target_box_a",
+      "task": "Diagnostic dual-object demo, 4 mm release clearance"
+    }
+  ]
+}

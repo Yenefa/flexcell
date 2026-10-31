@@ -54,6 +54,36 @@ Why the legacy backends do not show it: `teleport` and `velocity_servo` move the
 to the commanded pose every step and release it there, so there is no free fall to land
 from. The joint backend can only move the **arm**, so the release is necessarily a drop.
 
+## The full curve: four declared clearances
+
+The same case was then run at 0 mm and 4 mm as well, so the drop height is swept instead
+of sampled twice. `sim_profile.RELEASE_CLEARANCES` now names the declared fixtures
+(0, 4, 12, 50 mm) and every one of them still requires the contact instrumentation.
+
+| declared clearance | object | release height | lateral at release | landed error (x, y) | \|landed\| |
+| --- | --- | --- | --- | --- | --- |
+| 0 mm | A | +1.24 mm | +0.23 / −0.23 mm | +1.05 / −1.37 mm | 1.73 mm |
+| 0 mm | B | +1.27 mm | +0.17 / +0.06 mm | +0.72 / +0.18 mm | 0.74 mm |
+| 4 mm | A | +4.31 mm | +0.01 / −0.14 mm | +0.91 / −1.40 mm | 1.67 mm |
+| 4 mm | B | +4.25 mm | +0.03 / +0.09 mm | +0.68 / +0.27 mm | 0.73 mm |
+| 12 mm | A | +12.47 mm | +0.11 / −0.04 mm | +1.32 / −1.71 mm | 2.16 mm |
+| 12 mm | B | +12.38 mm | −0.02 / −0.01 mm | +2.67 / +0.41 mm | 2.70 mm |
+| 50 mm | A | +50.03 mm | +0.01 / −0.00 mm | −2.26 / +3.15 mm | 3.88 mm |
+| 50 mm | B | +50.43 mm | +0.03 / +0.02 mm | +9.43 / +1.45 mm | 9.54 mm |
+
+Two components are visible, and they matter for different reasons:
+
+1. **A floor of ~0.7–1.7 mm that exists with no drop at all.** At 0 mm clearance the box
+   is released essentially on the table and still lands 0.74–1.73 mm off, with 0.17–0.23 mm
+   of lateral error already at release. This is a contact/release transient, not a fall.
+2. **A drop-dependent part that grows with the clearance**: 0.7–1.7 mm at 0–4 mm,
+   2.2–2.7 mm at 12 mm, 3.9–9.5 mm at 50 mm.
+
+So lowering the clearance helps, but it cannot bring this backend to legacy accuracy: the
+floor is about ten times the legacy 0.013–0.23 mm even with the drop removed. Reaching
+0.1 mm would need the release transient understood and fixed, which is a different piece of
+work from "release lower".
+
 ## What this changes
 
 - The parity comparison in #80 should be read as: the joint backend is ~10x less
@@ -68,8 +98,11 @@ from. The joint backend can only move the **arm**, so the release is necessarily
 
 ## Still unknown
 
-- Whether a smaller declared clearance (below 12 mm) reduces the error monotonically, or
-  whether contact with the table before release introduces a new failure. Untested.
+- The curve is now measured at four declared clearances, but with **one run per point**
+  (two objects each). It shows the trend; it is not a rate, and the spread between the two
+  objects at 50 mm (3.88 vs 9.54 mm) is a reminder that a single landing is noisy.
+- Why the release transient leaves 0.17–0.23 mm laterally at the moment of release, and
+  why the box still settles ~1 mm away with no drop, is not explained yet.
 - The original 12.252 mm run declared **no** per-step trace (the parity manifest does not
   set `physics_step_s`), so that specific landing cannot be replayed. That is a defect in
   the window declaration, not in the backend: any window whose numbers will be cited
