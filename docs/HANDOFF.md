@@ -1,6 +1,6 @@
 # HANDOFF — project-033-flexcell
 
-> 2026-10-31 高难度运行器修复（`fix/native-audit-lifetime`，堆叠 #81）：
+> 2026-10-31 高难度运行器修复已提交 PR #85（`fix/native-audit-lifetime`，堆叠 #81）：
 > 原 native worker 跨轮持有完整审计 JSON 图，现收束到 audit_cycle 作用域；
 > 弱引用红/绿反例确认前轮对象在下轮开始前释放，新增失败 clock/stack/只读流快照。
 > 本机基线与修复各只跑一次五循环，均通过，分别 83,339 / 83,354 条连续 2 ms 记录；

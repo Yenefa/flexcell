@@ -1,6 +1,6 @@
 # Native 审计对象生命周期修复与本机证据
 
-`fix/native-audit-lifetime` 堆叠在 #81。修复的是已确认的跨轮审计对象滞留，
+[PR #85](https://github.com/Yenefa/flexcell/pull/85)（`fix/native-audit-lifetime`）堆叠在 #81。修复的是已确认的跨轮审计对象滞留，
 历史 CI `native stream stale` 的具体暂停来源仍为 UNKNOWN。
 
 ## 问题与修复
@@ -88,3 +88,8 @@ Windows 与 Linux 纯 Python 回放均通过，输出 `NATIVE_AUDIT_LIFETIME_REP
 D3 仍 NO_GO，默认承载后端不变，n≥50 冻结。静止臂 native 循环不证明运动臂、
 接触抓取或 #59 的真 legacy 技能 × teleport/joint 矩阵。后者仍是高难度待办。
 报告器输入合同、D3 当前台账、归档回放接线继续分别交给 junior #82/#83/#84。
+
+PR 首个交付 head 9a923e7 的 [simulation](https://github.com/Yenefa/flexcell/actions/runs/41202950948)
+及 [offline](https://github.com/Yenefa/flexcell/actions/runs/41202950949) 检查未开始执行。
+相关 job 为 0 steps，两个 check 的原始 annotation 都明确指出账户付款失败或
+消费上限限制。具体是哪一个账户条件无法确定；这不是代码测试失败，也不是 CI PASS。

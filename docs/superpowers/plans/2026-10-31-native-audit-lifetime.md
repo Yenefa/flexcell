@@ -55,4 +55,5 @@ native/install snapshot reused only after source/installed byte identity checks.
   the CI ZIP, and package a complete independently hashed evidence capsule.
 - [x] Independent review completed, source metadata P2 closed, Windows/Linux raw replay passed.
 - [x] Update HANDOFF and diary; preserve metadata defect, historical STOPPED and D3 NO_GO.
-- [ ] Push a stacked PR based on #81 and verify remote checks separately from local results.
+- [x] Published stacked PR #85 based on #81. Remote jobs were refused before any
+  steps by the account payments/spending-limit gate; local verification is separate.
