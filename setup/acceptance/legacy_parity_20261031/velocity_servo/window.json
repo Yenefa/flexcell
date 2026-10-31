@@ -1,0 +1,267 @@
+{
+  "schema_version": 1,
+  "status": "FUNCTIONAL_WINDOW_PASS",
+  "episodes": [
+    {
+      "case": "normal",
+      "object": "target_box_a",
+      "task": "A normal pick and place",
+      "run": "/home/ros/parity-velocity_servo/trial-01/run-7ceaed8f83c6",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "velocity_servo",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "normal",
+        "object": "target_box_a",
+        "out": "/home/ros/parity-velocity_servo/trial-01/run-7ceaed8f83c6",
+        "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+        "semantic_config_sha256": "0270524818f89d87dba178d59bef51cfe5fac160e583163b27c8818f31fc6aaa",
+        "runtime_fingerprint": "eaa0199ba47c22aa38cfe12df357c569376c3164aed811cff7feee19b2c9d52e",
+        "task_start_monotonic_ns": 488959329206,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 505812675922,
+        "task": {
+          "action": "task",
+          "goal_uuid": "6c1fca40e7dc42b89fb2ebf98f72973b",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-8de387fa",
+          "wall_seconds": 16.187,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 0.00011928314594562215,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "normal",
+      "object": "target_box_b",
+      "task": "B normal pick and place",
+      "run": "/home/ros/parity-velocity_servo/trial-02/run-52c1e7c182da",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "velocity_servo",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "normal",
+        "object": "target_box_b",
+        "out": "/home/ros/parity-velocity_servo/trial-02/run-52c1e7c182da",
+        "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+        "semantic_config_sha256": "0270524818f89d87dba178d59bef51cfe5fac160e583163b27c8818f31fc6aaa",
+        "runtime_fingerprint": "eaa0199ba47c22aa38cfe12df357c569376c3164aed811cff7feee19b2c9d52e",
+        "task_start_monotonic_ns": 561207002734,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 579015291524,
+        "task": {
+          "action": "task",
+          "goal_uuid": "0f73cb0ee1e14e7382c50b1023eed569",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-f5e51b59",
+          "wall_seconds": 17.189,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 0.0002301263567866348,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "dual_object",
+      "object": "target_box_a",
+      "task": "Dual-object demo",
+      "run": "/home/ros/parity-velocity_servo/trial-03/run-d5af999fd4fd",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "velocity_servo",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "dual_object",
+        "object": "target_box_a",
+        "out": "/home/ros/parity-velocity_servo/trial-03/run-d5af999fd4fd",
+        "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+        "semantic_config_sha256": "0270524818f89d87dba178d59bef51cfe5fac160e583163b27c8818f31fc6aaa",
+        "runtime_fingerprint": "eaa0199ba47c22aa38cfe12df357c569376c3164aed811cff7feee19b2c9d52e",
+        "task_start_monotonic_ns": 634559850312,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 668307988762,
+        "task": {
+          "action": "demo",
+          "goal_uuid": "3ca2fcb0c3c44e00a6d954f6aa9b804a",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "week1_demo_v1-43ae32b0",
+          "wall_seconds": 33.124,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK",
+            "PICK_B(attempt=1):OK",
+            "PLACE_B:OK",
+            "VERIFY_B(attempt=1):OK"
+          ],
+          "object_a_at_zone": true,
+          "object_b_at_zone": true,
+          "zone_a_error_m": 0.00012141674769652605,
+          "zone_b_error_m": 0.00016036501007529646,
+          "run_id": "week1_demo_v1-6853db5c",
+          "scenario_id": "week1_demo_v1"
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "recovery_once",
+      "object": "target_box_a",
+      "task": "One injected failure with one bounded retry",
+      "run": "/home/ros/parity-velocity_servo/trial-04/run-210e11d64e3a",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "velocity_servo",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "recovery_once",
+        "object": "target_box_a",
+        "out": "/home/ros/parity-velocity_servo/trial-04/run-210e11d64e3a",
+        "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+        "semantic_config_sha256": "0270524818f89d87dba178d59bef51cfe5fac160e583163b27c8818f31fc6aaa",
+        "runtime_fingerprint": "eaa0199ba47c22aa38cfe12df357c569376c3164aed811cff7feee19b2c9d52e",
+        "task_start_monotonic_ns": 725355252652,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 742211682620,
+        "task": {
+          "action": "task",
+          "goal_uuid": "8a40de2aa0fa4b4dbe813ed30706b950",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-6dc1072f",
+          "wall_seconds": 16.232,
+          "fsm_trace": [
+            "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+            "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+            "PICK_A(attempt=2):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 1.2907061789259283e-05,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "budget_exhaustion",
+      "object": "target_box_a",
+      "task": "Persistent injected failure must exhaust the budget",
+      "run": "/home/ros/parity-velocity_servo/trial-05/run-8f1a9540a5ff",
+      "result": {
+        "schema_version": 1,
+        "status": "EXPECTED_FAILURE",
+        "backend": "velocity_servo",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "budget_exhaustion",
+        "object": "target_box_a",
+        "out": "/home/ros/parity-velocity_servo/trial-05/run-8f1a9540a5ff",
+        "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+        "semantic_config_sha256": "0270524818f89d87dba178d59bef51cfe5fac160e583163b27c8818f31fc6aaa",
+        "runtime_fingerprint": "eaa0199ba47c22aa38cfe12df357c569376c3164aed811cff7feee19b2c9d52e",
+        "task_start_monotonic_ns": 802273750658,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 803190237745,
+        "task": {
+          "action": "task",
+          "goal_uuid": "acbcb4c818904ca1a81f9e4906f83466",
+          "outcome": "OUTCOME_FAILED",
+          "outcome_val": 1,
+          "error_code": "ERR_RECOVERY_EXHAUSTED",
+          "detail": "policy abort (BUDGET_EXHAUSTED): pick attempt 2 failed (error 23) (trace=PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED,RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1)),PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED); previous_skill=PICK cause=ERR_GRASP_FAILED legacy_error_code=23",
+          "evidence_id": "pick_place_v1-9fa81b65",
+          "wall_seconds": 0.294,
+          "fsm_trace": [
+            "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+            "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+            "PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED"
+          ],
+          "object_at_place": false,
+          "final_position_error_m": null,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {
+          "task.final_position_error_m": "nan"
+        }
+      }
+    }
+  ],
+  "declaration_sha256": "6e815d4fee4d1b9dfebc56975bee5f78aa5caf60b75e637823c1acd064b9059d",
+  "backend": "velocity_servo",
+  "skill_backend": "mtc",
+  "window_id": "43d6a3fd325d4b09baf13e9ed69f59c1",
+  "no_replacements": true,
+  "runtime_fingerprint": "eaa0199ba47c22aa38cfe12df357c569376c3164aed811cff7feee19b2c9d52e"
+}

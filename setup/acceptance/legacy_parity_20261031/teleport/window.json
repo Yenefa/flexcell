@@ -1,0 +1,271 @@
+{
+  "schema_version": 1,
+  "status": "FUNCTIONAL_WINDOW_PASS",
+  "episodes": [
+    {
+      "case": "normal",
+      "object": "target_box_a",
+      "task": "A normal pick and place",
+      "run": "/home/ros/parity-teleport/trial-01/run-8a62c59a2de9",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "teleport",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "normal",
+        "object": "target_box_a",
+        "out": "/home/ros/parity-teleport/trial-01/run-8a62c59a2de9",
+        "world_sha256": "422f5a6a01abd833c43fbd00d99185581a26ec023ad50a8baeca6ba11fc6a287",
+        "semantic_config_sha256": "4b81702276575d444a7e89a46585ee8ebe6e3150237cabdc32a22e47f429c12e",
+        "runtime_fingerprint": "ebace953412de625cfb3234e9a39c86f53edabd082f90a504dbef05cc8e091c6",
+        "task_start_monotonic_ns": 90398230626,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 118777862621,
+        "task": {
+          "action": "task",
+          "goal_uuid": "84afb3125ff644d7a9e91715698ce647",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-6c23f6e8",
+          "wall_seconds": 27.776,
+          "fsm_trace": [
+            "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+            "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+            "PICK_A(attempt=2):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 0.00017095189309869016,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "normal",
+      "object": "target_box_b",
+      "task": "B normal pick and place",
+      "run": "/home/ros/parity-teleport/trial-02/run-36b6ee470288",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "teleport",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "normal",
+        "object": "target_box_b",
+        "out": "/home/ros/parity-teleport/trial-02/run-36b6ee470288",
+        "world_sha256": "422f5a6a01abd833c43fbd00d99185581a26ec023ad50a8baeca6ba11fc6a287",
+        "semantic_config_sha256": "4b81702276575d444a7e89a46585ee8ebe6e3150237cabdc32a22e47f429c12e",
+        "runtime_fingerprint": "ebace953412de625cfb3234e9a39c86f53edabd082f90a504dbef05cc8e091c6",
+        "task_start_monotonic_ns": 177732714923,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 195954850829,
+        "task": {
+          "action": "task",
+          "goal_uuid": "b05ad75956e24e7f8512801b33283aae",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-99805231",
+          "wall_seconds": 17.346,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 9.315254077660769e-05,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "dual_object",
+      "object": "target_box_a",
+      "task": "Dual-object demo",
+      "run": "/home/ros/parity-teleport/trial-03/run-001cb7c28192",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "teleport",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "dual_object",
+        "object": "target_box_a",
+        "out": "/home/ros/parity-teleport/trial-03/run-001cb7c28192",
+        "world_sha256": "422f5a6a01abd833c43fbd00d99185581a26ec023ad50a8baeca6ba11fc6a287",
+        "semantic_config_sha256": "4b81702276575d444a7e89a46585ee8ebe6e3150237cabdc32a22e47f429c12e",
+        "runtime_fingerprint": "ebace953412de625cfb3234e9a39c86f53edabd082f90a504dbef05cc8e091c6",
+        "task_start_monotonic_ns": 254402007250,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 297624790347,
+        "task": {
+          "action": "demo",
+          "goal_uuid": "9c88d4ac33c6461eb92a3c371d79a57b",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "week1_demo_v1-80904b06",
+          "wall_seconds": 42.6,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK",
+            "PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED",
+            "RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1))",
+            "PICK_B(attempt=2):OK",
+            "PLACE_B:OK",
+            "VERIFY_B(attempt=1):OK"
+          ],
+          "object_a_at_zone": true,
+          "object_b_at_zone": true,
+          "zone_a_error_m": 6.88529436535734e-05,
+          "zone_b_error_m": 9.965255781221444e-05,
+          "run_id": "week1_demo_v1-5fddd067",
+          "scenario_id": "week1_demo_v1"
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "recovery_once",
+      "object": "target_box_a",
+      "task": "One injected failure with one bounded retry",
+      "run": "/home/ros/parity-teleport/trial-04/run-84f49dd4da3d",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "teleport",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "recovery_once",
+        "object": "target_box_a",
+        "out": "/home/ros/parity-teleport/trial-04/run-84f49dd4da3d",
+        "world_sha256": "422f5a6a01abd833c43fbd00d99185581a26ec023ad50a8baeca6ba11fc6a287",
+        "semantic_config_sha256": "4b81702276575d444a7e89a46585ee8ebe6e3150237cabdc32a22e47f429c12e",
+        "runtime_fingerprint": "ebace953412de625cfb3234e9a39c86f53edabd082f90a504dbef05cc8e091c6",
+        "task_start_monotonic_ns": 356184970143,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 373141271349,
+        "task": {
+          "action": "task",
+          "goal_uuid": "6ab6d97a7b4a4ddba6a86f796920e1bd",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-dbc098ee",
+          "wall_seconds": 16.334,
+          "fsm_trace": [
+            "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+            "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+            "PICK_A(attempt=2):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 9.016736742473145e-05,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "budget_exhaustion",
+      "object": "target_box_a",
+      "task": "Persistent injected failure must exhaust the budget",
+      "run": "/home/ros/parity-teleport/trial-05/run-6c666627222d",
+      "result": {
+        "schema_version": 1,
+        "status": "EXPECTED_FAILURE",
+        "backend": "teleport",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "budget_exhaustion",
+        "object": "target_box_a",
+        "out": "/home/ros/parity-teleport/trial-05/run-6c666627222d",
+        "world_sha256": "422f5a6a01abd833c43fbd00d99185581a26ec023ad50a8baeca6ba11fc6a287",
+        "semantic_config_sha256": "4b81702276575d444a7e89a46585ee8ebe6e3150237cabdc32a22e47f429c12e",
+        "runtime_fingerprint": "ebace953412de625cfb3234e9a39c86f53edabd082f90a504dbef05cc8e091c6",
+        "task_start_monotonic_ns": 431539978701,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 432557411621,
+        "task": {
+          "action": "task",
+          "goal_uuid": "febeb6a18b4a4d0594a84f266f98c616",
+          "outcome": "OUTCOME_FAILED",
+          "outcome_val": 1,
+          "error_code": "ERR_RECOVERY_EXHAUSTED",
+          "detail": "policy abort (BUDGET_EXHAUSTED): pick attempt 2 failed (error 23) (trace=PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED,RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1)),PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED); previous_skill=PICK cause=ERR_GRASP_FAILED legacy_error_code=23",
+          "evidence_id": "pick_place_v1-48b5031d",
+          "wall_seconds": 0.297,
+          "fsm_trace": [
+            "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+            "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+            "PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED"
+          ],
+          "object_at_place": false,
+          "final_position_error_m": null,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {
+          "task.final_position_error_m": "nan"
+        }
+      }
+    }
+  ],
+  "declaration_sha256": "6e815d4fee4d1b9dfebc56975bee5f78aa5caf60b75e637823c1acd064b9059d",
+  "backend": "teleport",
+  "skill_backend": "mtc",
+  "window_id": "f7583ccd6c49418e9ff542e40ba8c2de",
+  "no_replacements": true,
+  "runtime_fingerprint": "ebace953412de625cfb3234e9a39c86f53edabd082f90a504dbef05cc8e091c6"
+}

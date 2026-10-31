@@ -1,5 +1,15 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-10-31 第 3 项最后一块「旧后端对照」落地（分支 `feat/legacy-parity`，堆叠在 #79 上）：
+> 同一份 `infra/legacy-parity-window.json`（五例，含预算耗尽负例）在同一 skill 后端下各跑一次，
+> 三个后端全部 `FUNCTIONAL_WINDOW_PASS`（4 PASS + 1 EXPECTED_FAILURE，负例均为
+> ERR_RECOVERY_EXHAUSTED）。新 `scripts/parity_report.py` 拒绝不同声明、缺例或超差的比较。
+> **关键发现：joint 落点误差约 2.16–2.25 mm，teleport 0.09–0.17 mm、velocity_servo
+> 0.013–0.23 mm —— 判定一致但精度差约 10 倍**，这是不把 joint 提为默认后端的实证理由。
+> 证据 `setup/acceptance/legacy_parity_20261031/`（三份 window.json + parity-report.json）。
+> 该窗口未带接触/跟随门禁，属 carry 行为对照，不能当作第二份 D3 证据。D3 仍 NO_GO。
+> [读数与边界](LEGACY_PARITY_20261031.md)。下方为历史快照。
+
 > 2026-10-31 第 3 项之「有符号接触力」落地（分支 `feat/signed-contact-force`，堆叠在
 > #78 上）：原先只比 `|Σ body_1 force|` 与 m·g，量值看不出支撑 vs 吸附、垂直 vs 侧向、
 > 也看不出单点反向。新门禁 `scripts/signed_force_gate.py` 用已声明的已知方向（重力）
