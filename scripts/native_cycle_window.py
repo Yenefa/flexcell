@@ -10,6 +10,7 @@ import subprocess
 import sys
 import threading
 import time
+import traceback
 import uuid
 import yaml
 
@@ -29,6 +30,22 @@ class Follower:
         # the offline gate's authority; startup/cycle history is never deleted.
         for stream in self.streams: stream.seek(0,os.SEEK_END)
         self.align_new_record = [True,True]
+
+    def diagnostic(self):
+        """Preserve the failed reader position without consuming newer data."""
+        try:
+            now = time.monotonic_ns()
+            common = self.tables[0].keys() & self.tables[1].keys()
+            newest = max(common) if common else None
+            return dict(observed_monotonic_ns=now, latest_common_sim_ns=newest,
+                common_age_ns=now-self.tables[0][newest]['monotonic_ns'] if newest is not None else None,
+                latest_rows=[dict(sim_ns=max(table),monotonic_ns=table[max(table)]['monotonic_ns'])
+                             if table else None for table in self.tables],
+                table_sizes=[len(table) for table in self.tables],
+                file_offsets=[stream.tell() for stream in self.streams],
+                file_sizes=[os.fstat(stream.fileno()).st_size for stream in self.streams])
+        except Exception as exc:
+            return dict(diagnostic_error=repr(exc))
 
     def collect(self):
         for index,(stream, table) in enumerate(zip(self.streams, self.tables)):
@@ -64,6 +81,19 @@ class Follower:
                         return p,c
             time.sleep(.002)
         raise RuntimeError('native frame condition timed out; no replacement cycle')
+
+
+def audit_cycle(out, cycle, declaration):
+    """Release whole-prefix JSON graphs before the next live cycle begins."""
+    def complete(path):
+        return [json.loads(line) for line in path.read_bytes().rsplit(b'\n',1)[0].splitlines()]
+    p_rows, c_rows = complete(out/'physics_steps.jsonl'), complete(out/'contact_steps.jsonl')
+    require(len({p['sim_ns'] for p in p_rows}) == len(p_rows) and
+            len({c['sim_ns'] for c in c_rows}) == len(c_rows), 'duplicate native step')
+    for c in c_rows:
+        for target in c['targets'].values(): observation(target)
+    return verify_cycle({p['sim_ns']:p for p in p_rows},{c['sim_ns']:c for c in c_rows},
+        cycle,complete(out/'native-events.jsonl'),declaration)
 
 
 def worker(out, world, declaration):
@@ -175,20 +205,14 @@ def worker(out, world, declaration):
                             values=settled['objects'][name]['pose'])[0], 'retired session re-engaged')
             final,_ = rpc('status','final_status',index)
             require(not final['engaged'] and not final['session'], 'retired probe changed ownership')
-            def complete(path):
-                return [json.loads(line) for line in path.read_bytes().rsplit(b'\n',1)[0].splitlines()]
-            p_rows, c_rows = complete(out/'physics_steps.jsonl'), complete(out/'contact_steps.jsonl')
-            require(len({p['sim_ns'] for p in p_rows}) == len(p_rows) and
-                    len({c['sim_ns'] for c in c_rows}) == len(c_rows), 'duplicate native step')
-            for c in c_rows:
-                for target in c['targets'].values(): observation(target)
-            cycle['evidence'] = verify_cycle({p['sim_ns']:p for p in p_rows},{c['sim_ns']:c for c in c_rows},
-                cycle,complete(out/'native-events.jsonl'),declaration)
+            cycle['evidence'] = audit_cycle(out,cycle,declaration)
             previous = token
         require(not heartbeat_errors, str(heartbeat_errors))
         result['status'] = 'PASS'
     except Exception as exc:
-        result['error'] = repr(exc)
+        result.update(error=repr(exc),failure_monotonic_ns=time.monotonic_ns(),
+                      failure_traceback=traceback.format_exc())
+        result['live_reader'] = follow.diagnostic() if follow is not None else None
     finally:
         try: stop_heartbeat()
         except Exception as exc: result.update(status='STOPPED',error=repr(exc))
