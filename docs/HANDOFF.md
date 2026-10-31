@@ -1,5 +1,18 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-10-31 高难度运行器修复（`fix/native-audit-lifetime`，堆叠 #81）：
+> 原 native worker 跨轮持有完整审计 JSON 图，现收束到 audit_cycle 作用域；
+> 弱引用红/绿反例确认前轮对象在下轮开始前释放，新增失败 clock/stack/只读流快照。
+> 本机基线与修复各只跑一次五循环，均通过，分别 83,339 / 83,354 条连续 2 ms 记录；
+> 最大 live collect 385→104 ms，live GC 363→99 ms，500 ms 及所有物理门限不变。
+> 707 Python + 4 C++ cases 通过，40 文件扫描零问题；完整 114 成员证据可纯 Python 回放。
+> 修复窗口的版本号旁车 CRLF 瑕疵原样保留并标注 INVALID_TRAILING_CR；
+> 209 个运行源码 SHA 与原 Git tar/3328693 blobs 全同，来源补证独立核验。
+> 历史 CI stale 的具体暂停原因仍 UNKNOWN，旧失败仍 STOPPED。D3 仍 NO_GO。
+> 运行进程零残留；本轮旧 WSL 补丁字节不变。下一高难项是真 legacy 技能矩阵 #59；
+> junior #82/#83/#84 分别负责报告器、当前台账和离线 CI 回放接线。
+> [修复、实跑、来源瑕疵与回放](NATIVE_AUDIT_LIFETIME_20261031.md)。下方为历史快照。
+
 > 2026-10-31 高价值几何修复（`fix/preposition-world-frame`，堆叠 #80）：
 > 关闭“父子共同运动仍被判为静止”的预定位漏洞，并让等价 q/-q 样本得到相同基准。
 > 在线与离线分别检查 parent/body 世界位姿，继续使用相对 SE(3) 作为搬运基准；
