@@ -1,0 +1,482 @@
+{
+  "status": "CARRY_BACKEND_PARITY_PASS",
+  "declaration_sha256": "6e815d4fee4d1b9dfebc56975bee5f78aa5caf60b75e637823c1acd064b9059d",
+  "backends": {
+    "parity-teleport": "teleport",
+    "parity-velocity_servo": "velocity_servo",
+    "parity-detachable_joint": "detachable_joint",
+    "legacy-skill-teleport": "teleport",
+    "legacy-skill-detachable_joint": "detachable_joint"
+  },
+  "cases": [
+    {
+      "case": "normal",
+      "object": "target_box_a"
+    },
+    {
+      "case": "normal",
+      "object": "target_box_b"
+    },
+    {
+      "case": "dual_object",
+      "object": "target_box_a"
+    },
+    {
+      "case": "recovery_once",
+      "object": "target_box_a"
+    },
+    {
+      "case": "budget_exhaustion",
+      "object": "target_box_a"
+    }
+  ],
+  "table": {
+    "parity-teleport": {
+      "status": "FUNCTIONAL_WINDOW_PASS",
+      "backend": "teleport",
+      "cases": [
+        {
+          "case": "normal",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": 0.00017095189309869016,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 0.00017095189309869016,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "normal",
+          "object": "target_box_b",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": 9.315254077660769e-05,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 1,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 9.315254077660769e-05,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "dual_object",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": null,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 3,
+          "place_attempts": 2,
+          "verify_count": 2,
+          "verify_error_m": 9.965255781221444e-05,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "recovery_once",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": 9.016736742473145e-05,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 9.016736742473145e-05,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "budget_exhaustion",
+          "object": "target_box_a",
+          "status": "EXPECTED_FAILURE",
+          "outcome": "OUTCOME_FAILED",
+          "error_code": "ERR_RECOVERY_EXHAUSTED",
+          "task_error_m": null,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 0,
+          "verify_count": 0,
+          "verify_error_m": null,
+          "verify_tolerance_m": null
+        }
+      ]
+    },
+    "parity-velocity_servo": {
+      "status": "FUNCTIONAL_WINDOW_PASS",
+      "backend": "velocity_servo",
+      "cases": [
+        {
+          "case": "normal",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": 0.00011928314594562215,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 1,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 0.00011928314594562215,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "normal",
+          "object": "target_box_b",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": 0.0002301263567866348,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 1,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 0.0002301263567866348,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "dual_object",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": null,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 2,
+          "verify_count": 2,
+          "verify_error_m": 0.00016036501007529646,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "recovery_once",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": 1.2907061789259283e-05,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 1.2907061789259283e-05,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "budget_exhaustion",
+          "object": "target_box_a",
+          "status": "EXPECTED_FAILURE",
+          "outcome": "OUTCOME_FAILED",
+          "error_code": "ERR_RECOVERY_EXHAUSTED",
+          "task_error_m": null,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 0,
+          "verify_count": 0,
+          "verify_error_m": null,
+          "verify_tolerance_m": null
+        }
+      ]
+    },
+    "parity-detachable_joint": {
+      "status": "FUNCTIONAL_WINDOW_PASS",
+      "backend": "detachable_joint",
+      "cases": [
+        {
+          "case": "normal",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": 0.0022017780500175072,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 1,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 0.0022017780500175072,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "normal",
+          "object": "target_box_b",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": 0.002254049161861907,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 1,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 0.002254049161861907,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "dual_object",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": null,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 2,
+          "verify_count": 2,
+          "verify_error_m": 0.012252028927226412,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "recovery_once",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": 0.0021596430326930754,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 0.0021596430326930754,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "budget_exhaustion",
+          "object": "target_box_a",
+          "status": "EXPECTED_FAILURE",
+          "outcome": "OUTCOME_FAILED",
+          "error_code": "ERR_RECOVERY_EXHAUSTED",
+          "task_error_m": null,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 0,
+          "verify_count": 0,
+          "verify_error_m": null,
+          "verify_tolerance_m": null
+        }
+      ]
+    },
+    "legacy-skill-teleport": {
+      "status": "FUNCTIONAL_WINDOW_PASS",
+      "backend": "teleport",
+      "cases": [
+        {
+          "case": "normal",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": 0.0038633882529338116,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 0.0038633882529338116,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "normal",
+          "object": "target_box_b",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": 0.012182466740398749,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 1,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 0.012182466740398749,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "dual_object",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": null,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 2,
+          "verify_count": 2,
+          "verify_error_m": 0.008199662171352077,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "recovery_once",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": 0.012206466829384638,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 0.012206466829384638,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "budget_exhaustion",
+          "object": "target_box_a",
+          "status": "EXPECTED_FAILURE",
+          "outcome": "OUTCOME_FAILED",
+          "error_code": "ERR_RECOVERY_EXHAUSTED",
+          "task_error_m": null,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 0,
+          "verify_count": 0,
+          "verify_error_m": null,
+          "verify_tolerance_m": null
+        }
+      ]
+    },
+    "legacy-skill-detachable_joint": {
+      "status": "FUNCTIONAL_WINDOW_PASS",
+      "backend": "detachable_joint",
+      "cases": [
+        {
+          "case": "normal",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": 0.01980789836001547,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 1,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 0.01980789836001547,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "normal",
+          "object": "target_box_b",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": 0.021894412126422312,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 1,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 0.021894412126422312,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "dual_object",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": null,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 2,
+          "verify_count": 2,
+          "verify_error_m": 0.045006971698401906,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "recovery_once",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "task_error_m": 0.018376163891701422,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 0.018376163891701422,
+          "verify_tolerance_m": 0.06
+        },
+        {
+          "case": "budget_exhaustion",
+          "object": "target_box_a",
+          "status": "EXPECTED_FAILURE",
+          "outcome": "OUTCOME_FAILED",
+          "error_code": "ERR_RECOVERY_EXHAUSTED",
+          "task_error_m": null,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 0,
+          "verify_count": 0,
+          "verify_error_m": null,
+          "verify_tolerance_m": null
+        }
+      ]
+    }
+  },
+  "declared_tolerance_m": 0.06,
+  "max_verified_error_m": {
+    "parity-teleport": 0.00017095189309869016,
+    "parity-velocity_servo": 0.0002301263567866348,
+    "parity-detachable_joint": 0.012252028927226412,
+    "legacy-skill-teleport": 0.012206466829384638,
+    "legacy-skill-detachable_joint": 0.045006971698401906
+  },
+  "attempts": {
+    "parity-teleport": {
+      "normal": 1,
+      "dual_object": 3,
+      "recovery_once": 2,
+      "budget_exhaustion": 2
+    },
+    "parity-velocity_servo": {
+      "normal": 1,
+      "dual_object": 2,
+      "recovery_once": 2,
+      "budget_exhaustion": 2
+    },
+    "parity-detachable_joint": {
+      "normal": 1,
+      "dual_object": 2,
+      "recovery_once": 2,
+      "budget_exhaustion": 2
+    },
+    "legacy-skill-teleport": {
+      "normal": 1,
+      "dual_object": 2,
+      "recovery_once": 2,
+      "budget_exhaustion": 2
+    },
+    "legacy-skill-detachable_joint": {
+      "normal": 1,
+      "dual_object": 2,
+      "recovery_once": 2,
+      "budget_exhaustion": 2
+    }
+  },
+  "tolerance_moved": false,
+  "interpretation": "Same manifest, same declared tolerance and the same criterion on every backend; the per-backend error spread is reported, not flattened into the verdict. One bounded window per backend, not a success rate"
+}

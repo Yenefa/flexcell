@@ -153,6 +153,44 @@ jobs:
           path: artifacts/
           retention-days: 14
           if-no-files-found: warn
+  legacy-skill-matrix-smoke:
+    concurrency:
+      group: legacy-skill-matrix-${{ github.ref }}
+      cancel-in-progress: false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/Dockerfile.sim
+          load: true
+          tags: flexcell-sim:ci
+          build-args: SOURCE_REV=${{ github.sha }}
+          cache-from: type=gha,scope=flexcell-sim
+      - name: legacy skill backend on both carry backends, same five tasks
+        run: |
+          mkdir -p artifacts
+          for backend in teleport detachable_joint; do
+            docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci               python3 /opt/flexcell/repo/scripts/sim_window.py               --manifest /opt/flexcell/repo/infra/legacy-parity-window.json               --out "/artifacts/legacy-skill-$backend"               --backend "$backend" --skill-backend legacy
+          done
+      - name: compare the two legacy-skill windows without moving a threshold
+        env:
+          PYTHONPATH: scripts
+        run: |
+          python3 scripts/parity_report.py             artifacts/legacy-skill-teleport/window.json             artifacts/legacy-skill-detachable_joint/window.json             --out artifacts/legacy-skill-parity.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: legacy-skill-matrix-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/
+          retention-days: 14
+          if-no-files-found: warn
   native-five-cycle-smoke:
     concurrency:
       group: native-five-${{ github.ref }}

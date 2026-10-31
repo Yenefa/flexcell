@@ -1,0 +1,269 @@
+{
+  "schema_version": 1,
+  "status": "FUNCTIONAL_WINDOW_PASS",
+  "episodes": [
+    {
+      "case": "normal",
+      "object": "target_box_a",
+      "task": "A normal pick and place",
+      "run": "/home/ros/legacy-skill-teleport/trial-01/run-0dc33ef4a031",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "teleport",
+        "skill_backend": "legacy",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "normal",
+        "object": "target_box_a",
+        "out": "/home/ros/legacy-skill-teleport/trial-01/run-0dc33ef4a031",
+        "world_sha256": "422f5a6a01abd833c43fbd00d99185581a26ec023ad50a8baeca6ba11fc6a287",
+        "semantic_config_sha256": "3852606fdddc7725120a721fdd569c7468d92530531de489967b89e85090e196",
+        "runtime_fingerprint": "7f60a977bd36fa3e4ffa8f711d544737aba8f08afa1f7f0f7ae2da60d1c49c9c",
+        "task_start_monotonic_ns": 30603250297329,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 30627024959194,
+        "task": {
+          "action": "task",
+          "goal_uuid": "3645f15c07f44282a2de4cbaac2aa72f",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-1b241db0",
+          "wall_seconds": 22.951,
+          "fsm_trace": [
+            "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+            "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+            "PICK_A(attempt=2):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 0.0038633882529338116,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "normal",
+      "object": "target_box_b",
+      "task": "B normal pick and place",
+      "run": "/home/ros/legacy-skill-teleport/trial-02/run-63f2b5a8993c",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "teleport",
+        "skill_backend": "legacy",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "normal",
+        "object": "target_box_b",
+        "out": "/home/ros/legacy-skill-teleport/trial-02/run-63f2b5a8993c",
+        "world_sha256": "422f5a6a01abd833c43fbd00d99185581a26ec023ad50a8baeca6ba11fc6a287",
+        "semantic_config_sha256": "3852606fdddc7725120a721fdd569c7468d92530531de489967b89e85090e196",
+        "runtime_fingerprint": "7f60a977bd36fa3e4ffa8f711d544737aba8f08afa1f7f0f7ae2da60d1c49c9c",
+        "task_start_monotonic_ns": 30684785550483,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 30700191512420,
+        "task": {
+          "action": "task",
+          "goal_uuid": "b23cd439be034203bb37741d44a46bdd",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-8029323f",
+          "wall_seconds": 14.644,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 0.012182466740398749,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "dual_object",
+      "object": "target_box_a",
+      "task": "Dual-object demo",
+      "run": "/home/ros/legacy-skill-teleport/trial-03/run-4fad56a30378",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "teleport",
+        "skill_backend": "legacy",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "dual_object",
+        "object": "target_box_a",
+        "out": "/home/ros/legacy-skill-teleport/trial-03/run-4fad56a30378",
+        "world_sha256": "422f5a6a01abd833c43fbd00d99185581a26ec023ad50a8baeca6ba11fc6a287",
+        "semantic_config_sha256": "3852606fdddc7725120a721fdd569c7468d92530531de489967b89e85090e196",
+        "runtime_fingerprint": "7f60a977bd36fa3e4ffa8f711d544737aba8f08afa1f7f0f7ae2da60d1c49c9c",
+        "task_start_monotonic_ns": 30756999363421,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 30786239596532,
+        "task": {
+          "action": "demo",
+          "goal_uuid": "096d363aa52843308e24fb5017a74660",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "week1_demo_v1-723b492f",
+          "wall_seconds": 28.557,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK",
+            "PICK_B(attempt=1):OK",
+            "PLACE_B:OK",
+            "VERIFY_B(attempt=1):OK"
+          ],
+          "object_a_at_zone": true,
+          "object_b_at_zone": true,
+          "zone_a_error_m": 0.004403003236584267,
+          "zone_b_error_m": 0.008199662171352077,
+          "run_id": "week1_demo_v1-cd9898d1",
+          "scenario_id": "week1_demo_v1"
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "recovery_once",
+      "object": "target_box_a",
+      "task": "One injected failure with one bounded retry",
+      "run": "/home/ros/legacy-skill-teleport/trial-04/run-895f18c21f22",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "teleport",
+        "skill_backend": "legacy",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "recovery_once",
+        "object": "target_box_a",
+        "out": "/home/ros/legacy-skill-teleport/trial-04/run-895f18c21f22",
+        "world_sha256": "422f5a6a01abd833c43fbd00d99185581a26ec023ad50a8baeca6ba11fc6a287",
+        "semantic_config_sha256": "3852606fdddc7725120a721fdd569c7468d92530531de489967b89e85090e196",
+        "runtime_fingerprint": "7f60a977bd36fa3e4ffa8f711d544737aba8f08afa1f7f0f7ae2da60d1c49c9c",
+        "task_start_monotonic_ns": 30843571322808,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 30858175797107,
+        "task": {
+          "action": "task",
+          "goal_uuid": "466645eaf7dc4d5cba17e077b8366b16",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-e33548a1",
+          "wall_seconds": 13.979,
+          "fsm_trace": [
+            "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+            "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+            "PICK_A(attempt=2):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 0.012206466829384638,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "budget_exhaustion",
+      "object": "target_box_a",
+      "task": "Persistent injected failure must exhaust the budget",
+      "run": "/home/ros/legacy-skill-teleport/trial-05/run-ba3ee68a9f26",
+      "result": {
+        "schema_version": 1,
+        "status": "EXPECTED_FAILURE",
+        "backend": "teleport",
+        "skill_backend": "legacy",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "budget_exhaustion",
+        "object": "target_box_a",
+        "out": "/home/ros/legacy-skill-teleport/trial-05/run-ba3ee68a9f26",
+        "world_sha256": "422f5a6a01abd833c43fbd00d99185581a26ec023ad50a8baeca6ba11fc6a287",
+        "semantic_config_sha256": "3852606fdddc7725120a721fdd569c7468d92530531de489967b89e85090e196",
+        "runtime_fingerprint": "7f60a977bd36fa3e4ffa8f711d544737aba8f08afa1f7f0f7ae2da60d1c49c9c",
+        "task_start_monotonic_ns": 30918363162255,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 30919379622586,
+        "task": {
+          "action": "task",
+          "goal_uuid": "e520b0d45206427198874b010cfa635e",
+          "outcome": "OUTCOME_FAILED",
+          "outcome_val": 1,
+          "error_code": "ERR_RECOVERY_EXHAUSTED",
+          "detail": "policy abort (BUDGET_EXHAUSTED): pick attempt 2 failed (error 23) (trace=PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED,RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1)),PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED); previous_skill=PICK cause=ERR_GRASP_FAILED legacy_error_code=23",
+          "evidence_id": "pick_place_v1-95e93fb9",
+          "wall_seconds": 0.291,
+          "fsm_trace": [
+            "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+            "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+            "PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED"
+          ],
+          "object_at_place": false,
+          "final_position_error_m": null,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {
+          "task.final_position_error_m": "nan"
+        }
+      }
+    }
+  ],
+  "declaration_sha256": "6e815d4fee4d1b9dfebc56975bee5f78aa5caf60b75e637823c1acd064b9059d",
+  "backend": "teleport",
+  "skill_backend": "legacy",
+  "window_id": "953023c3bce84b7fa40f944f3f65f9ff",
+  "no_replacements": true,
+  "runtime_fingerprint": "7f60a977bd36fa3e4ffa8f711d544737aba8f08afa1f7f0f7ae2da60d1c49c9c"
+}

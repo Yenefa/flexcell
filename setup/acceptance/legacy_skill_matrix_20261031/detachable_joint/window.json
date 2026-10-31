@@ -1,0 +1,267 @@
+{
+  "schema_version": 1,
+  "status": "FUNCTIONAL_WINDOW_PASS",
+  "episodes": [
+    {
+      "case": "normal",
+      "object": "target_box_a",
+      "task": "A normal pick and place",
+      "run": "/home/ros/legacy-skill-detachable_joint/trial-01/run-e0f6dc986f30",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "detachable_joint",
+        "skill_backend": "legacy",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "normal",
+        "object": "target_box_a",
+        "out": "/home/ros/legacy-skill-detachable_joint/trial-01/run-e0f6dc986f30",
+        "world_sha256": "1e345b3a4c985045d14e5c38124b4fc73a749c52efcf09d5a53b19148fe696ca",
+        "semantic_config_sha256": "96ff7ff577404a1b1a42b76d646ba89948d2b19f427a57b86f31af21b90cbbb1",
+        "runtime_fingerprint": "9e475a54ab44ae4672abd8867a886b13ac5f3c31eaf7de43820bbe9ee7be9689",
+        "task_start_monotonic_ns": 30975862106363,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 30990814363234,
+        "task": {
+          "action": "task",
+          "goal_uuid": "64615c24507149c98fe2e26b34e8e7da",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-de115146",
+          "wall_seconds": 14.283,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 0.01980789836001547,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "normal",
+      "object": "target_box_b",
+      "task": "B normal pick and place",
+      "run": "/home/ros/legacy-skill-detachable_joint/trial-02/run-7bd3e11331c4",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "detachable_joint",
+        "skill_backend": "legacy",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "normal",
+        "object": "target_box_b",
+        "out": "/home/ros/legacy-skill-detachable_joint/trial-02/run-7bd3e11331c4",
+        "world_sha256": "1e345b3a4c985045d14e5c38124b4fc73a749c52efcf09d5a53b19148fe696ca",
+        "semantic_config_sha256": "96ff7ff577404a1b1a42b76d646ba89948d2b19f427a57b86f31af21b90cbbb1",
+        "runtime_fingerprint": "9e475a54ab44ae4672abd8867a886b13ac5f3c31eaf7de43820bbe9ee7be9689",
+        "task_start_monotonic_ns": 31047867886236,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 31062519879026,
+        "task": {
+          "action": "task",
+          "goal_uuid": "4f7e2d13698147f0850e5e6446cc0115",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-cb8e6678",
+          "wall_seconds": 14.035,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 0.021894412126422312,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "dual_object",
+      "object": "target_box_a",
+      "task": "Dual-object demo",
+      "run": "/home/ros/legacy-skill-detachable_joint/trial-03/run-2f664749575a",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "detachable_joint",
+        "skill_backend": "legacy",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "dual_object",
+        "object": "target_box_a",
+        "out": "/home/ros/legacy-skill-detachable_joint/trial-03/run-2f664749575a",
+        "world_sha256": "1e345b3a4c985045d14e5c38124b4fc73a749c52efcf09d5a53b19148fe696ca",
+        "semantic_config_sha256": "96ff7ff577404a1b1a42b76d646ba89948d2b19f427a57b86f31af21b90cbbb1",
+        "runtime_fingerprint": "9e475a54ab44ae4672abd8867a886b13ac5f3c31eaf7de43820bbe9ee7be9689",
+        "task_start_monotonic_ns": 31120685081105,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 31150853625312,
+        "task": {
+          "action": "demo",
+          "goal_uuid": "451ebf1ae2d44f5baa6b260f6cc2b6c2",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "week1_demo_v1-21c875db",
+          "wall_seconds": 29.473,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK",
+            "PICK_B(attempt=1):OK",
+            "PLACE_B:OK",
+            "VERIFY_B(attempt=1):OK"
+          ],
+          "object_a_at_zone": true,
+          "object_b_at_zone": true,
+          "zone_a_error_m": 0.027595771706989302,
+          "zone_b_error_m": 0.045006971698401906,
+          "run_id": "week1_demo_v1-82780f0c",
+          "scenario_id": "week1_demo_v1"
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "recovery_once",
+      "object": "target_box_a",
+      "task": "One injected failure with one bounded retry",
+      "run": "/home/ros/legacy-skill-detachable_joint/trial-04/run-f633f81f9468",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "detachable_joint",
+        "skill_backend": "legacy",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "recovery_once",
+        "object": "target_box_a",
+        "out": "/home/ros/legacy-skill-detachable_joint/trial-04/run-f633f81f9468",
+        "world_sha256": "1e345b3a4c985045d14e5c38124b4fc73a749c52efcf09d5a53b19148fe696ca",
+        "semantic_config_sha256": "96ff7ff577404a1b1a42b76d646ba89948d2b19f427a57b86f31af21b90cbbb1",
+        "runtime_fingerprint": "9e475a54ab44ae4672abd8867a886b13ac5f3c31eaf7de43820bbe9ee7be9689",
+        "task_start_monotonic_ns": 31215282598580,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 31230184803793,
+        "task": {
+          "action": "task",
+          "goal_uuid": "20dbb89180d8454b8fb20c672ff54d8e",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-118940b1",
+          "wall_seconds": 14.275,
+          "fsm_trace": [
+            "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+            "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+            "PICK_A(attempt=2):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 0.018376163891701422,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "budget_exhaustion",
+      "object": "target_box_a",
+      "task": "Persistent injected failure must exhaust the budget",
+      "run": "/home/ros/legacy-skill-detachable_joint/trial-05/run-9a04da1e159f",
+      "result": {
+        "schema_version": 1,
+        "status": "EXPECTED_FAILURE",
+        "backend": "detachable_joint",
+        "skill_backend": "legacy",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "budget_exhaustion",
+        "object": "target_box_a",
+        "out": "/home/ros/legacy-skill-detachable_joint/trial-05/run-9a04da1e159f",
+        "world_sha256": "1e345b3a4c985045d14e5c38124b4fc73a749c52efcf09d5a53b19148fe696ca",
+        "semantic_config_sha256": "96ff7ff577404a1b1a42b76d646ba89948d2b19f427a57b86f31af21b90cbbb1",
+        "runtime_fingerprint": "9e475a54ab44ae4672abd8867a886b13ac5f3c31eaf7de43820bbe9ee7be9689",
+        "task_start_monotonic_ns": 31290825399084,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 31291792778927,
+        "task": {
+          "action": "task",
+          "goal_uuid": "26f0c37d88c84daca289fe8125340c33",
+          "outcome": "OUTCOME_FAILED",
+          "outcome_val": 1,
+          "error_code": "ERR_RECOVERY_EXHAUSTED",
+          "detail": "policy abort (BUDGET_EXHAUSTED): pick attempt 2 failed (error 23) (trace=PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED,RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1)),PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED); previous_skill=PICK cause=ERR_GRASP_FAILED legacy_error_code=23",
+          "evidence_id": "pick_place_v1-117b796a",
+          "wall_seconds": 0.299,
+          "fsm_trace": [
+            "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+            "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+            "PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED"
+          ],
+          "object_at_place": false,
+          "final_position_error_m": null,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {
+          "task.final_position_error_m": "nan"
+        }
+      }
+    }
+  ],
+  "declaration_sha256": "6e815d4fee4d1b9dfebc56975bee5f78aa5caf60b75e637823c1acd064b9059d",
+  "backend": "detachable_joint",
+  "skill_backend": "legacy",
+  "window_id": "4055f0e0b181421b95358737aab905f5",
+  "no_replacements": true,
+  "runtime_fingerprint": "9e475a54ab44ae4672abd8867a886b13ac5f3c31eaf7de43820bbe9ee7be9689"
+}

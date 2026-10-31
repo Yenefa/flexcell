@@ -1,5 +1,16 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-10-31 #59「真 legacy 技能矩阵」已测量（分支 `test/legacy-skill-matrix`，堆叠在
+> `feat/legacy-parity` 上）：同一份五例清单、同一 60 mm 校验容差，`skill_backend=legacy`
+> 在 teleport 与 detachable_joint 各跑一次，两窗均 `FUNCTIONAL_WINDOW_PASS`
+> （4 PASS + 预算耗尽负例 `ERR_RECOVERY_EXHAUSTED`），**容差零改动、失败码语义未变**。
+> 关键读数：legacy × teleport 最差 **12.206 mm**、legacy × joint 最差 **45.007 mm**
+> （容差 60 mm，只剩 15 mm 余量），而 MTC × teleport 是 0.171 mm。→ **主导误差的是技能后端，
+> 不是 carry 后端**；#80/#81 里「joint 差 ~10×」须限定为“在 skill_backend=mtc 下”。
+> 该组合是首次被这套口径测量（历史基线是速度伺服/MTC），非回归。CI 任务
+> `legacy-skill-matrix-smoke` 已接，#59 要求的“运行位置：CI”待 Actions 恢复后执行。
+> [矩阵与边界](LEGACY_SKILL_MATRIX_20261031.md)。下方为历史快照。
+
 > 2026-10-31 第 3 项最后一块「旧后端对照」落地（分支 `feat/legacy-parity`，堆叠在 #79 上）：
 > 同一份 `infra/legacy-parity-window.json`（五例，含预算耗尽负例）在同一 skill 后端下各跑一次，
 > 三个后端全部 `FUNCTIONAL_WINDOW_PASS`（4 PASS + 1 EXPECTED_FAILURE，负例均为
