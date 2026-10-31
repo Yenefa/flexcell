@@ -37,6 +37,9 @@ def test_at_rest_hold_yields_the_averaged_pre_attach_reference():
     assert reference[:3] == pytest.approx([.1, 0., 0.]) and reference[3:] == pytest.approx([0., 0., 0., 1.])
     assert evidence['samples'] == 5 and evidence['window_ns'] == 80_000_000
     assert evidence['spread_m'] < 1e-12
+    assert set(evidence['world_at_rest']) == {'parent', 'body'}
+    assert all(value['spread_translation_m'] == value['spread_rotation_rad'] == 0.
+               for value in evidence['world_at_rest'].values())
     assert evidence['contact_freedom'] == 'NOT_OBSERVABLE_ON_POSE_TOPIC'
 
 

@@ -17,7 +17,7 @@ from pathlib import Path
 
 from contact_gate import observation, require
 
-from flexcell_skills.joint_follow import relative_pose, rotation_angle
+from flexcell_skills.joint_follow import mean_transform, relative_pose, rotation_angle, transform_spread
 
 STEP = 2_000_000
 
@@ -40,20 +40,11 @@ FROZEN = dict(
 
 
 def _mean_transform(transforms):
-    positions = [item[0] for item in transforms]
-    quaternions = [item[1] for item in transforms]
-    mean = [math.fsum(p[i] for p in positions) / len(positions) for i in range(3)]
-    q = [math.fsum(v[i] for v in quaternions) / len(quaternions) for i in range(4)]
-    norm = math.sqrt(sum(x * x for x in q))
-    require(.999 <= norm <= 1.001, 'averaged pre-attach quaternion is not normalized')
-    return mean + [x / norm for x in q]
+    return mean_transform(transforms)
 
 
 def _spread(transforms):
-    positions = [item[0] for item in transforms]
-    quaternions = [item[1] for item in transforms]
-    return (max(math.dist(a, b) for a in positions for b in positions),
-            max(rotation_angle(a, b) for a in quaternions for b in quaternions))
+    return transform_spread(transforms)
 
 
 def _steps(physics):
@@ -119,9 +110,17 @@ def _pre_attach_hold(physics, contacts, object_id, attach_ns, limits):
     spread_m, spread_rad = _spread(transforms)
     require(spread_m <= limits['spread_translation_m'] and spread_rad <= limits['spread_rotation_rad'],
             'the pre-attach hold is not at rest within the declared spread')
+    world = {}
+    origin = [0., 0., 0., 0., 0., 0., 1.]
+    for name in ('parent', 'body'):
+        poses = [row['parent_pose'] if name == 'parent' else row['objects'][object_id]['pose'] for row in hold]
+        position, angle = _spread([relative_pose(origin, pose) for pose in poses])
+        require(position <= limits['spread_translation_m'] and angle <= limits['spread_rotation_rad'],
+                'the world-frame %s pre-attach hold is not at rest' % name)
+        world[name] = dict(spread_translation_m=position, spread_rotation_rad=angle)
     return dict(first_sim_ns=lower, last_sim_ns=attach_ns - STEP, samples=len(hold),
                 spread_translation_m=spread_m, spread_rotation_rad=spread_rad,
-                counterparts=sorted(counterparts)), _mean_transform(transforms)
+                world_at_rest=world, counterparts=sorted(counterparts)), _mean_transform(transforms)
 
 
 def _attached_enforcement(physics, object_id, attach_ns, last_ns, reference, limits):
@@ -165,9 +164,22 @@ def _runtime_reference(follow, reference, limits):
     require(follow.get('attach_jump_translation_m') is not None and
             follow.get('attach_jump_rotation_rad') is not None,
             'the runtime did not measure the attach jump')
+    world = evidence.get('world_at_rest')
+    if world is not None:
+        require(isinstance(world, dict) and set(world) == {'parent', 'body'},
+                'runtime world-frame hold evidence is incomplete')
+        for measured in world.values():
+            require(isinstance(measured, dict), 'invalid runtime world-frame hold evidence')
+            for field, upper in [('spread_translation_m', limits['spread_translation_m']),
+                                 ('spread_rotation_rad', limits['spread_rotation_rad'])]:
+                value = measured.get(field)
+                require(type(value) in (int, float) and math.isfinite(value) and 0 <= value <= upper,
+                        'the runtime world-frame pre-attach hold was not at rest')
     return dict(samples=evidence['samples'], window_ns=evidence['window_ns'],
                 spread_translation_m=evidence['spread_m'], spread_rotation_rad=evidence['spread_rad'],
-                agreement_m=agreement, contact_freedom=evidence.get('contact_freedom', 'UNRECORDED'))
+                agreement_m=agreement, world_at_rest=world,
+                world_motion_observation='RECORDED' if world is not None else 'UNRECORDED',
+                contact_freedom=evidence.get('contact_freedom', 'UNRECORDED'))
 
 
 def verify_run(run, object_id, declaration):

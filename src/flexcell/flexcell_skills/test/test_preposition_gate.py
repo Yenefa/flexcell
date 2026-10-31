@@ -73,6 +73,23 @@ def test_contact_free_at_rest_reference_is_enforced_over_the_whole_carry(tmp_pat
     assert result['runtime']['agreement_m'] < 1e-9
     assert result['contact_freedom'] == 'RAW_CONTACT_SENSOR_PRE_ATTACH_ONLY'
     assert result['default_admission'] == 'NO_GO'
+    assert result['runtime']['world_at_rest'] is None
+    assert result['runtime']['world_motion_observation'] == 'UNRECORDED'
+    assert all(value['spread_translation_m'] == value['spread_rotation_rad'] == 0.
+               for value in result['hold']['world_at_rest'].values())
+
+
+@pytest.mark.parametrize('invalid', [None, float('nan'), -.0001, .0011])
+def test_runtime_world_motion_metadata_cannot_claim_a_stationary_hold(tmp_path, invalid):
+    declaration = build(tmp_path)
+    path = tmp_path / 'skills/carry.jsonl'
+    record = json.loads(path.read_text())
+    record['follow']['preposition']['world_at_rest'] = {
+        name: dict(spread_translation_m=0., spread_rotation_rad=0.) for name in ('parent','body')}
+    record['follow']['preposition']['world_at_rest']['parent']['spread_translation_m'] = invalid
+    path.write_text(json.dumps(record)+'\n')
+    with pytest.raises(ValueError, match='world-frame'):
+        verify_run(tmp_path, 'target_box_a', declaration)
 
 
 def test_arm_contact_before_attachment_stops_the_window(tmp_path):

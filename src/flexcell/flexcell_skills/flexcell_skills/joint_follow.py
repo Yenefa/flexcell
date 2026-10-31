@@ -60,6 +60,28 @@ def rotation_angle(a, b):
     return 2 * math.acos(min(1., abs(sum(x*y for x, y in zip(a, b)))))
 
 
+def mean_transform(transforms):
+    """Mean of a bounded hold; equivalent quaternion signs are interchangeable."""
+    positions = [item[0] for item in transforms]
+    quaternions = [item[1] for item in transforms]
+    anchor = quaternions[0]
+    aligned = [q if sum(a*b for a,b in zip(anchor,q)) >= 0 else [-v for v in q]
+               for q in quaternions]
+    mean = [math.fsum(p[i] for p in positions) / len(positions) for i in range(3)]
+    q = [math.fsum(v[i] for v in aligned) / len(aligned) for i in range(4)]
+    norm = math.sqrt(sum(x*x for x in q))
+    if not .999 <= norm <= 1.001:
+        raise ValueError('averaged pre-attach quaternion is not normalized')
+    return mean + [x/norm for x in q]
+
+
+def transform_spread(transforms):
+    positions = [item[0] for item in transforms]
+    quaternions = [item[1] for item in transforms]
+    return (max(math.dist(a,b) for a in positions for b in positions),
+            max(rotation_angle(a,b) for a in quaternions for b in quaternions))
+
+
 def follow_failure_detail(reason, result=None, *, motion_may_be_active=False):
     """An unknown motion terminal must prevent reset/recovery/cleanup motion."""
     if not motion_may_be_active:
@@ -135,7 +157,8 @@ class PrepositionLatch:
                     if obj['joint_component'] is not False:
                         self.buffer[name].clear()  # an attachment ends the detached history
                         continue
-                    entry = (sim, source, relative_pose(data['parent_pose'], obj['pose']))
+                    entry = (sim, source, relative_pose(data['parent_pose'], obj['pose']),
+                             _pose(data['parent_pose']), _pose(obj['pose']))
                     history = self.buffer[name]
                     history.append(entry)
                     del history[:-3 * self.samples]
@@ -157,26 +180,30 @@ class PrepositionLatch:
         age = self.clock() - history[-1][1]
         if age > self.max_age_ns:
             return False, None, 'pre-attach hold is stale at engage time'
-        positions = [entry[2][0] for entry in history]
-        quaternions = [entry[2][1] for entry in history]
-        spread_m = max(math.dist(a, b) for a in positions for b in positions)
-        spread_rad = max(rotation_angle(a, b) for a in quaternions for b in quaternions)
+        transforms = [entry[2] for entry in history]
+        spread_m, spread_rad = transform_spread(transforms)
         if not (math.isfinite(spread_m) and math.isfinite(spread_rad)):
             return False, None, 'pre-attach hold is nonfinite'
         if spread_m > self.max_spread_m or spread_rad > self.max_spread_rad:
             return False, None, ('pre-attach hold is not at rest: %.3g mm / %.3g urad'
                                  % (spread_m * 1e3, spread_rad * 1e6))
-        mean = [math.fsum(p[i] for p in positions) / len(positions) for i in range(3)]
-        q = [math.fsum(v[i] for v in quaternions) / len(quaternions) for i in range(4)]
-        norm = math.sqrt(sum(x * x for x in q))
-        if not .999 <= norm <= 1.001:
-            return False, None, 'averaged pre-attach quaternion is not normalized'
-        return True, mean + [x / norm for x in q], dict(
+        world = {}
+        for name, index in (('parent', 3), ('body', 4)):
+            position, angle = transform_spread([entry[index] for entry in history])
+            if position > self.max_spread_m or angle > self.max_spread_rad:
+                return False, None, ('world-frame %s pre-attach hold is not at rest: %.3g mm / %.3g urad'
+                                     % (name, position*1e3, angle*1e6))
+            world[name] = dict(spread_translation_m=position, spread_rotation_rad=angle)
+        try:
+            reference = mean_transform(transforms)
+        except ValueError as exc:
+            return False, None, str(exc)
+        return True, reference, dict(
             samples=len(history), window_ns=sims[-1] - sims[0], first_sim_ns=sims[0],
             last_sim_ns=sims[-1], age_ns=age, spread_m=spread_m, spread_rad=spread_rad,
             limits=dict(samples=self.samples, window_ns=self.window_ns, spread_m=self.max_spread_m,
                         spread_rad=self.max_spread_rad, age_ns=self.max_age_ns),
-            contact_freedom='NOT_OBSERVABLE_ON_POSE_TOPIC')
+            world_at_rest=world, contact_freedom='NOT_OBSERVABLE_ON_POSE_TOPIC')
 
     def take(self, object_id, timeout=3.):
         """Wait for a declared pre-attach hold; returns (ok, reference, detail)."""
