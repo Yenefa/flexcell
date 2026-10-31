@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "purpose": "Diagnostic re-run of the one case where the joint backend missed by 12.252 mm, with the 2 ms physics trace enabled so the trajectory can be inspected. Not an admission window: no gate, no tolerance claim, one declared task.",
+  "max_logical_tasks": 5,
+  "camera": false,
+  "contact_trace": false,
+  "no_replacements": true,
+  "physics_step_s": 0.002,
+  "episodes": [
+    {
+      "case": "dual_object",
+      "object": "target_box_a",
+      "task": "Diagnostic dual-object demo on the joint backend"
+    }
+  ]
+}

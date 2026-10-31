@@ -58,9 +58,14 @@ error of the legacy backends on the single-object tasks (2.16–2.25 mm vs
 
 Parity of verdict is not parity of accuracy. Nothing was relaxed to make the joint
 window pass, and this is a concrete reason to keep the joint backend explicitly
-selected rather than default. It is also the first measurement in this project that
-shows the fixed-joint carry degrading outside the single-object case — that is worth
-understanding before any admission decision, not after.
+selected rather than default.
+
+The 12.252 mm has since been explained, and it is **not** a dual-object-specific
+degradation: [the diagnosis](JOINT_PLACEMENT_DIAGNOSIS_20261031.md) shows the box is
+released within 0.11 mm of the target and the error is created by the landing after the
+declared 12 mm drop — 1.3–2.7 mm at 12 mm clearance, 2.3–9.4 mm at 50 mm. The joint
+backend cannot move the box onto the table, only the arm, so its release is a drop while
+the legacy backends servo the box down and release it in place. That is the whole gap.
 
 ## Boundaries
 

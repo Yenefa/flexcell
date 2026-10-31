@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "backend": "detachable_joint",
+  "skill_backend": "mtc",
+  "physical_tasks_dispatched": 1,
+  "qualification": "FUNCTIONAL_SMOKE_ONLY",
+  "case": "dual_object",
+  "object": "target_box_a",
+  "out": "/home/ros/dual-50/trial-01/run-48492cbd0622",
+  "world_sha256": "82e74a45f6e149724853d9fe840620c536c1d25163b385a4faa8274952ebc63c",
+  "semantic_config_sha256": "f84afe67a11c5fb2b3ebc3e220c1b2a18cb8a193e005f65f69dab06201ec9855",
+  "runtime_fingerprint": "3a7dc2a9c3090d052ec68e5c96d7e3e67a77ce4fc924a4c7aba8ab66ce6c63b6",
+  "native_identity_verified_before_dispatch": true,
+  "task_start_monotonic_ns": 2264930468970,
+  "goal_pose": [
+    0.12,
+    -0.15,
+    0.0175
+  ],
+  "task_end_monotonic_ns": 2308627807008,
+  "task": {
+    "action": "demo",
+    "goal_uuid": "91bfa469ff2943f395d37128401b1fe3",
+    "outcome": "OUTCOME_SUCCEEDED",
+    "outcome_val": 0,
+    "error_code": "ERR_NONE",
+    "detail": "task done: all assignments verified",
+    "evidence_id": "week1_demo_v1-b8e755ab",
+    "wall_seconds": 42.789,
+    "fsm_trace": [
+      "PICK_A(attempt=1):OK",
+      "PLACE_A:OK",
+      "VERIFY_A(attempt=1):OK",
+      "PICK_B(attempt=1):OK",
+      "PLACE_B:OK",
+      "VERIFY_B(attempt=1):OK"
+    ],
+    "object_a_at_zone": true,
+    "object_b_at_zone": true,
+    "zone_a_error_m": 0.003865603328663332,
+    "zone_b_error_m": 0.009535551737644131,
+    "run_id": "week1_demo_v1-a1cbf2bc",
+    "scenario_id": "week1_demo_v1"
+  },
+  "expectation_met": true,
+  "recorder_exit": 0,
+  "owned_launch_exit": 0,
+  "unavailable_numeric_fields": {}
+}

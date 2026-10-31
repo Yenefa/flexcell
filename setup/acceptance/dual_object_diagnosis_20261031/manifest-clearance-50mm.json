@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "purpose": "Same diagnostic dual-object case with the declared 50 mm release clearance instead of the default 12 mm: if the placement error is created by the drop after release, it must grow with the drop height. Not an admission window.",
+  "max_logical_tasks": 5,
+  "camera": false,
+  "contact_trace": true,
+  "release_clearance_m": 0.05,
+  "no_replacements": true,
+  "physics_step_s": 0.002,
+  "episodes": [
+    {
+      "case": "dual_object",
+      "object": "target_box_a",
+      "task": "Diagnostic dual-object demo, 50 mm release clearance"
+    }
+  ]
+}
