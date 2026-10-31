@@ -1,5 +1,14 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-11-01 #84「归档回放接入现有离线检查」：已把预定位回放
+> `python3 setup/acceptance/preposition_world_20261031/verify.py` 接进 `ci.yml` 现有归类证据步骤
+> （只读、无 ROS、无机器人动作、失败保留非零退出）。**native 那一半有意未接**：
+> `setup/acceptance/native_audit_20261031/receipt.json` 的 `verification_sources` 里
+> 4 个条目中有 2 个（contact_gate.py、joint_follow.py）记录的是 **CRLF 内容**的哈希，
+> 而 git 存的是 LF，因此该回放在 LF 检出（=CI/Linux）上必然 `AssertionError: gate changed`。
+> 按 #84「不得为接线改写来源」的要求，未改任何哈希/验证器/ZIP，等 #85 侧把来源绑定改成
+> 对提交内容（或 LF 归一）计算后再接第二条命令。
+
 > 2026-10-31 高难度运行器修复已提交 PR #85（`fix/native-audit-lifetime`，堆叠 #81）：
 > 原 native worker 跨轮持有完整审计 JSON 图，现收束到 audit_cycle 作用域；
 > 弱引用红/绿反例确认前轮对象在下轮开始前释放，新增失败 clock/stack/只读流快照。
