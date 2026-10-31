@@ -39,8 +39,14 @@
           "status": "PASS",
           "outcome": "OUTCOME_SUCCEEDED",
           "error_code": "ERR_NONE",
-          "placement_error_m": 0.00017095189309869016,
-          "expectation_met": true
+          "task_error_m": 0.00017095189309869016,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 0.00017095189309869016,
+          "verify_tolerance_m": 0.06
         },
         {
           "case": "normal",
@@ -48,8 +54,14 @@
           "status": "PASS",
           "outcome": "OUTCOME_SUCCEEDED",
           "error_code": "ERR_NONE",
-          "placement_error_m": 9.315254077660769e-05,
-          "expectation_met": true
+          "task_error_m": 9.315254077660769e-05,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 1,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 9.315254077660769e-05,
+          "verify_tolerance_m": 0.06
         },
         {
           "case": "dual_object",
@@ -57,8 +69,14 @@
           "status": "PASS",
           "outcome": "OUTCOME_SUCCEEDED",
           "error_code": "ERR_NONE",
-          "placement_error_m": null,
-          "expectation_met": true
+          "task_error_m": null,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 3,
+          "place_attempts": 2,
+          "verify_count": 2,
+          "verify_error_m": 9.965255781221444e-05,
+          "verify_tolerance_m": 0.06
         },
         {
           "case": "recovery_once",
@@ -66,8 +84,14 @@
           "status": "PASS",
           "outcome": "OUTCOME_SUCCEEDED",
           "error_code": "ERR_NONE",
-          "placement_error_m": 9.016736742473145e-05,
-          "expectation_met": true
+          "task_error_m": 9.016736742473145e-05,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 9.016736742473145e-05,
+          "verify_tolerance_m": 0.06
         },
         {
           "case": "budget_exhaustion",
@@ -75,8 +99,14 @@
           "status": "EXPECTED_FAILURE",
           "outcome": "OUTCOME_FAILED",
           "error_code": "ERR_RECOVERY_EXHAUSTED",
-          "placement_error_m": null,
-          "expectation_met": true
+          "task_error_m": null,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 0,
+          "verify_count": 0,
+          "verify_error_m": null,
+          "verify_tolerance_m": null
         }
       ]
     },
@@ -90,8 +120,14 @@
           "status": "PASS",
           "outcome": "OUTCOME_SUCCEEDED",
           "error_code": "ERR_NONE",
-          "placement_error_m": 0.00011928314594562215,
-          "expectation_met": true
+          "task_error_m": 0.00011928314594562215,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 1,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 0.00011928314594562215,
+          "verify_tolerance_m": 0.06
         },
         {
           "case": "normal",
@@ -99,8 +135,14 @@
           "status": "PASS",
           "outcome": "OUTCOME_SUCCEEDED",
           "error_code": "ERR_NONE",
-          "placement_error_m": 0.0002301263567866348,
-          "expectation_met": true
+          "task_error_m": 0.0002301263567866348,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 1,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 0.0002301263567866348,
+          "verify_tolerance_m": 0.06
         },
         {
           "case": "dual_object",
@@ -108,8 +150,14 @@
           "status": "PASS",
           "outcome": "OUTCOME_SUCCEEDED",
           "error_code": "ERR_NONE",
-          "placement_error_m": null,
-          "expectation_met": true
+          "task_error_m": null,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 2,
+          "verify_count": 2,
+          "verify_error_m": 0.00016036501007529646,
+          "verify_tolerance_m": 0.06
         },
         {
           "case": "recovery_once",
@@ -117,8 +165,14 @@
           "status": "PASS",
           "outcome": "OUTCOME_SUCCEEDED",
           "error_code": "ERR_NONE",
-          "placement_error_m": 1.2907061789259283e-05,
-          "expectation_met": true
+          "task_error_m": 1.2907061789259283e-05,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 1.2907061789259283e-05,
+          "verify_tolerance_m": 0.06
         },
         {
           "case": "budget_exhaustion",
@@ -126,8 +180,14 @@
           "status": "EXPECTED_FAILURE",
           "outcome": "OUTCOME_FAILED",
           "error_code": "ERR_RECOVERY_EXHAUSTED",
-          "placement_error_m": null,
-          "expectation_met": true
+          "task_error_m": null,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 0,
+          "verify_count": 0,
+          "verify_error_m": null,
+          "verify_tolerance_m": null
         }
       ]
     },
@@ -141,8 +201,14 @@
           "status": "PASS",
           "outcome": "OUTCOME_SUCCEEDED",
           "error_code": "ERR_NONE",
-          "placement_error_m": 0.0022017780500175072,
-          "expectation_met": true
+          "task_error_m": 0.0022017780500175072,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 1,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 0.0022017780500175072,
+          "verify_tolerance_m": 0.06
         },
         {
           "case": "normal",
@@ -150,8 +216,14 @@
           "status": "PASS",
           "outcome": "OUTCOME_SUCCEEDED",
           "error_code": "ERR_NONE",
-          "placement_error_m": 0.002254049161861907,
-          "expectation_met": true
+          "task_error_m": 0.002254049161861907,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 1,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 0.002254049161861907,
+          "verify_tolerance_m": 0.06
         },
         {
           "case": "dual_object",
@@ -159,8 +231,14 @@
           "status": "PASS",
           "outcome": "OUTCOME_SUCCEEDED",
           "error_code": "ERR_NONE",
-          "placement_error_m": null,
-          "expectation_met": true
+          "task_error_m": null,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 2,
+          "verify_count": 2,
+          "verify_error_m": 0.012252028927226412,
+          "verify_tolerance_m": 0.06
         },
         {
           "case": "recovery_once",
@@ -168,8 +246,14 @@
           "status": "PASS",
           "outcome": "OUTCOME_SUCCEEDED",
           "error_code": "ERR_NONE",
-          "placement_error_m": 0.0021596430326930754,
-          "expectation_met": true
+          "task_error_m": 0.0021596430326930754,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 1,
+          "verify_count": 1,
+          "verify_error_m": 0.0021596430326930754,
+          "verify_tolerance_m": 0.06
         },
         {
           "case": "budget_exhaustion",
@@ -177,13 +261,44 @@
           "status": "EXPECTED_FAILURE",
           "outcome": "OUTCOME_FAILED",
           "error_code": "ERR_RECOVERY_EXHAUSTED",
-          "placement_error_m": null,
-          "expectation_met": true
+          "task_error_m": null,
+          "expectation_met": true,
+          "receipt": true,
+          "pick_attempts": 2,
+          "place_attempts": 0,
+          "verify_count": 0,
+          "verify_error_m": null,
+          "verify_tolerance_m": null
         }
       ]
     }
   },
-  "max_placement_error_m": 0.012,
+  "declared_tolerance_m": 0.06,
+  "max_verified_error_m": {
+    "parity-teleport": 0.00017095189309869016,
+    "parity-velocity_servo": 0.0002301263567866348,
+    "parity-detachable_joint": 0.012252028927226412
+  },
+  "attempts": {
+    "parity-teleport": {
+      "normal": 1,
+      "dual_object": 3,
+      "recovery_once": 2,
+      "budget_exhaustion": 2
+    },
+    "parity-velocity_servo": {
+      "normal": 1,
+      "dual_object": 2,
+      "recovery_once": 2,
+      "budget_exhaustion": 2
+    },
+    "parity-detachable_joint": {
+      "normal": 1,
+      "dual_object": 2,
+      "recovery_once": 2,
+      "budget_exhaustion": 2
+    }
+  },
   "tolerance_moved": false,
-  "interpretation": "Same manifest, same tolerance and the same criterion on every backend; one bounded window per backend, not a success rate"
+  "interpretation": "Same manifest, same declared tolerance and the same criterion on every backend; the per-backend error spread is reported, not flattened into the verdict. One bounded window per backend, not a success rate"
 }
