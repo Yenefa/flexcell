@@ -1,0 +1,32 @@
+[
+  {
+    "case": "duplicate_backend",
+    "change": "second window claims teleport too",
+    "expected": "REJECT",
+    "actual": "CARRY_BACKEND_PARITY_PASS"
+  },
+  {
+    "case": "mixed_skill_backend",
+    "change": "second window claims legacy while first is mtc",
+    "expected": "REJECT",
+    "actual": "CARRY_BACKEND_PARITY_PASS"
+  },
+  {
+    "case": "stopped_window",
+    "change": "second top-level status is STOPPED despite stored passing episodes",
+    "expected": "REJECT",
+    "actual": "CARRY_BACKEND_PARITY_PASS"
+  },
+  {
+    "case": "missing_success_metric",
+    "change": "normal PASS has no final_position_error_m",
+    "expected": "REJECT",
+    "actual": "CARRY_BACKEND_PARITY_PASS"
+  },
+  {
+    "case": "unexpected_normal_failure",
+    "change": "normal case falsely labelled EXPECTED_FAILURE",
+    "expected": "REJECT",
+    "actual": "CARRY_BACKEND_PARITY_PASS"
+  }
+]

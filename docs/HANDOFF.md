@@ -1,5 +1,14 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-10-31 高价值几何修复（`fix/preposition-world-frame`，堆叠 #80）：
+> 关闭“父子共同运动仍被判为静止”的预定位漏洞，并让等价 q/-q 样本得到相同基准。
+> 在线与离线分别检查 parent/body 世界位姿，继续使用相对 SE(3) 作为搬运基准；
+> 所有既有阈值保持。708 tests 零错误/失败/跳过；新声明的一次 Joint 抓放首次成功，
+> 原始落点误差 5.146469 mm，28,197 条 2 ms 记录连续，17.30 sim s 跟随及接触/释放门通过。
+> 完整 60 文件原始 ZIP 已入仓，可直接离线回放；旧 WSL 修改完整保留，运行进程零残留。
+> D3 仍 NO_GO；#59 要求的真 legacy 技能矩阵与 native 循环时效问题仍未解决。
+> [几何修复与完整证据](PREPOSITION_WORLD_FRAME_20261031.md)。下方为历史快照。
+
 > 2026-10-31 第 3 项最后一块「旧后端对照」落地（分支 `feat/legacy-parity`，堆叠在 #79 上）：
 > 同一份 `infra/legacy-parity-window.json`（五例，含预算耗尽负例）在同一 skill 后端下各跑一次，
 > 三个后端全部 `FUNCTIONAL_WINDOW_PASS`（4 PASS + 1 EXPECTED_FAILURE，负例均为

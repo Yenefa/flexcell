@@ -1,0 +1,155 @@
+{
+  "status": "WORLD_HOLD_WINDOW_REPLAY_PASS",
+  "source_revision": "19caa0199660c6a0d9d95af14620695dde0eedcf",
+  "window_id": "56693027e5444c3ca559acd3a4f6b1ad",
+  "raw_steps": 28197,
+  "raw_step_gaps": 0,
+  "raw_final_error_mm": 5.1464688214221574,
+  "latest_physics_age_ms": 8.596782,
+  "post_health_checks": 19,
+  "preposition": {
+    "status": "PREPOSITION_REFERENCE_PASS",
+    "object": "target_box_a",
+    "session": "093bb05baeb1427e837f0f62bbcf2869",
+    "preposition_reference": [
+      0.14600117313088096,
+      -5.0051479929714696e-05,
+      -0.158912784379578,
+      7.5136423910036275e-06,
+      -0.06244913848562871,
+      -0.00012008121870456346,
+      0.9980481404353444
+    ],
+    "hold": {
+      "first_sim_ns": 22132000000,
+      "last_sim_ns": 22230000000,
+      "samples": 50,
+      "spread_translation_m": 0.00019583098310639504,
+      "spread_rotation_rad": 0.0007071843441759782,
+      "world_at_rest": {
+        "parent": {
+          "spread_translation_m": 5.7469352588219494e-05,
+          "spread_rotation_rad": 0.0007071843441759782
+        },
+        "body": {
+          "spread_translation_m": 0.0,
+          "spread_rotation_rad": 0.0
+        }
+      },
+      "counterparts": [
+        "ground_plane::link::collision"
+      ]
+    },
+    "attached": {
+      "steps": 8665,
+      "attach_jump_translation_m": 8.175494500213674e-05,
+      "attach_jump_rotation_rad": 0.00029523498283017,
+      "max_translation_m": 8.179616585730252e-05,
+      "max_rotation_rad": 0.0002954865144663278
+    },
+    "runtime": {
+      "samples": 5,
+      "window_ns": 80000000,
+      "spread_translation_m": 0.00015581791416373732,
+      "spread_rotation_rad": 0.0005626901777350607,
+      "agreement_m": 2.339361749349784e-06,
+      "world_at_rest": {
+        "parent": {
+          "spread_translation_m": 4.5727263773177506e-05,
+          "spread_rotation_rad": 0.0005626901777350607
+        },
+        "body": {
+          "spread_translation_m": 0.0,
+          "spread_rotation_rad": 0.0
+        }
+      },
+      "world_motion_observation": "RECORDED",
+      "contact_freedom": "NOT_OBSERVABLE_ON_POSE_TOPIC"
+    },
+    "signed_target_force_calibrated": false,
+    "contact_freedom": "RAW_CONTACT_SENSOR_PRE_ATTACH_ONLY",
+    "default_admission": "NO_GO",
+    "interpretation": "Pre-attach, contact-free SE(3) reference enforced over the carry; not a success rate, contact-grasp or D3 admission"
+  },
+  "follow": {
+    "status": "FOLLOW_TRACE_PASS",
+    "object": "target_box_a",
+    "session": "093bb05baeb1427e837f0f62bbcf2869",
+    "attached_samples": 866,
+    "attached_duration_s": 17.3,
+    "physics_step_samples": 8651,
+    "max_translation_m": 7.945680414146784e-05,
+    "max_rotation_rad": 0.00028703865750145176,
+    "physics_step_ns": 2000000,
+    "camera_frames": null,
+    "contact_force_observed": false,
+    "interpretation": "50 Hz sampled functional evidence; not D3 or contact-grasp admission"
+  },
+  "contact": {
+    "status": "INTEGRATED_CONTACT_RELEASE_PASS",
+    "object": "target_box_a",
+    "joined_steps": 9411,
+    "first_sim_ns": 21242000000,
+    "last_sim_ns": 40062000000,
+    "release_sim_ns": 39562000000,
+    "max_clock_skew_ns": 34679829,
+    "passive_control": "target_box_b",
+    "weight_samples": 500,
+    "mean_weight_force_n": 0.4899999999951524,
+    "freefall": {
+      "samples": 21,
+      "duration_s": 0.04,
+      "acceleration_m_s2": -9.800000000001145,
+      "fitted_initial_velocity_m_s": -0.0352682109765163,
+      "max_residual_m": 3.608224830031759e-16,
+      "initial_z_m": 0.067873260852814
+    },
+    "states": {
+      "ground_plane": {
+        "UNKNOWN": 9411
+      },
+      "target_box_b": {
+        "CONTACTS_WITH_FORCE": 9411
+      },
+      "target_box_a": {
+        "CONTACTS_WITH_FORCE": 964,
+        "NO_REPORTED_CONTACTS": 8447
+      }
+    },
+    "signed_target_force_calibrated": false,
+    "preposition_reference_qualified": false,
+    "default_admission": "NO_GO",
+    "interpretation": "Same-round joint/motion/contact integration; not contact-grasp or D3 admission",
+    "session": "093bb05baeb1427e837f0f62bbcf2869"
+  },
+  "planner": {
+    "status": "PASS",
+    "requests": [
+      {
+        "operation": "PICK",
+        "directory": "planner/request-00000001",
+        "sha256": {
+          "request.cdr": "fd88571763494cfdb99fac70241ad1179e2280f066224881b846ca4c2548d080",
+          "response.cdr": "f72289e9c8e124af9b59bfaa4e40f2a68470bf8edbd5fca39c787f82e2a3b442",
+          "robot_description.xml": "c6b87ce8135845d6ab59e0d1d609a6e0986906dfb1fb93f8b43950f7c7c41473",
+          "robot_description_semantic.xml": "49159110e6f87ccce03f9c649fad4c762d30595357e4c3ba23bfb0512e87c000",
+          "scene.cdr": "d81e9eab41adc784e1c3f917b385bced80cf0368a6117d9e069e5c325b2eac61",
+          "source_revision.txt": "63960d1a99993027592976a2350617e8eb9472b0ca1d0585d1d996e02261c8cb"
+        }
+      },
+      {
+        "operation": "PLACE",
+        "directory": "planner/request-00000002",
+        "sha256": {
+          "request.cdr": "3ec9e602270b5493d70d9fed56dda4f99735e2a853641f561f0ca632bdb70aac",
+          "response.cdr": "fe49cf0dd490049d2a79d893d3fa1dd3c7e49afa3a935376b178db5e163022cd",
+          "robot_description.xml": "c6b87ce8135845d6ab59e0d1d609a6e0986906dfb1fb93f8b43950f7c7c41473",
+          "robot_description_semantic.xml": "49159110e6f87ccce03f9c649fad4c762d30595357e4c3ba23bfb0512e87c000",
+          "scene.cdr": "f721420754fe3fc48299fb8410ee5ec51897cf14bac14c1457c22c358b4fc825",
+          "source_revision.txt": "63960d1a99993027592976a2350617e8eb9472b0ca1d0585d1d996e02261c8cb"
+        }
+      }
+    ]
+  },
+  "default_admission": "NO_GO"
+}

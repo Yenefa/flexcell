@@ -1,0 +1,158 @@
+..FFF.........FFF..                                                      [100%]
+=================================== FAILURES ===================================
+_ test_common_world_motion_cannot_hide_behind_a_constant_relative_pose[translation] _
+
+motion = 'translation'
+
+    @pytest.mark.parametrize('motion', ['translation', 'rotation'])
+    def test_common_world_motion_cannot_hide_behind_a_constant_relative_pose(motion):
+        clock = Clock()
+        latch = PrepositionLatch(clock=clock)
+        for step in range(5):
+            clock.tick()
+            if motion == 'translation':
+                parent = [.01 * step, 0., 0., 0., 0., 0., 1.]
+                child = [.1 + .01 * step, 0., 0., 0., 0., 0., 1.]
+            else:
+                angle = .01 * step
+                q = [0., 0., math.sin(angle / 2), math.cos(angle / 2)]
+                parent = [0., 0., 0.] + q
+                child = [.1 * math.cos(angle), .1 * math.sin(angle), 0.] + q
+            latch.feed(frame(clock, parent=parent, child=child))
+        ok, reference, detail = latch.take('target_box_a', timeout=.001)
+>       assert not ok and reference is None and 'not at rest' in detail
+E       assert (not True)
+
+src/flexcell/flexcell_skills/test/test_preposition_reference.py:69: AssertionError
+_ test_common_world_motion_cannot_hide_behind_a_constant_relative_pose[rotation] _
+
+motion = 'rotation'
+
+    @pytest.mark.parametrize('motion', ['translation', 'rotation'])
+    def test_common_world_motion_cannot_hide_behind_a_constant_relative_pose(motion):
+        clock = Clock()
+        latch = PrepositionLatch(clock=clock)
+        for step in range(5):
+            clock.tick()
+            if motion == 'translation':
+                parent = [.01 * step, 0., 0., 0., 0., 0., 1.]
+                child = [.1 + .01 * step, 0., 0., 0., 0., 0., 1.]
+            else:
+                angle = .01 * step
+                q = [0., 0., math.sin(angle / 2), math.cos(angle / 2)]
+                parent = [0., 0., 0.] + q
+                child = [.1 * math.cos(angle), .1 * math.sin(angle), 0.] + q
+            latch.feed(frame(clock, parent=parent, child=child))
+        ok, reference, detail = latch.take('target_box_a', timeout=.001)
+>       assert not ok and reference is None and 'not at rest' in detail
+E       assert (not True)
+
+src/flexcell/flexcell_skills/test/test_preposition_reference.py:69: AssertionError
+________ test_stationary_antipodal_quaternions_have_the_same_reference _________
+
+    def test_stationary_antipodal_quaternions_have_the_same_reference():
+        clock = Clock()
+        latch = PrepositionLatch(clock=clock)
+        q = [0., math.sin(.2), 0., math.cos(.2)]
+        for step in range(5):
+            clock.tick()
+            child = [.1, 0., 0.] + [v * (-1 if step % 2 else 1) for v in q]
+            latch.feed(frame(clock, child=child))
+        ok, reference, evidence = latch.take('target_box_a', timeout=.001)
+>       assert ok, evidence
+E       AssertionError: averaged pre-attach quaternion is not normalized
+E       assert False
+
+src/flexcell/flexcell_skills/test/test_preposition_reference.py:81: AssertionError
+______ test_common_world_motion_is_not_a_stationary_raw_hold[translation] ______
+
+tmp_path = PosixPath('/home/ros/agentic_workcell_ws/artifacts/preposition-world-20261031/red-pytest/test_common_world_motion_is_no0')
+motion = 'translation'
+
+    @pytest.mark.parametrize('motion', ['translation', 'rotation'])
+    def test_common_world_motion_is_not_a_stationary_raw_hold(tmp_path, motion):
+        declaration = build(tmp_path)
+        path = tmp_path / 'physics_steps.jsonl'
+        frames = [json.loads(line) for line in path.read_text().splitlines()]
+        for row in frames:
+            elapsed = (row['sim_ns'] - ATTACH) / 1e9
+            for value in [row['parent_pose']] + [o['pose'] for o in row['objects'].values()]:
+                if motion == 'translation':
+                    value[0] += .5 * elapsed
+                else:
+                    angle = .05 * elapsed
+                    x, y = value[:2]
+                    value[:2] = [math.cos(angle)*x-math.sin(angle)*y,
+                                 math.sin(angle)*x+math.cos(angle)*y]
+                    value[3:] = [0., 0., math.sin(angle/2), math.cos(angle/2)]
+        path.write_text(''.join(json.dumps(row)+'\n' for row in frames))
+>       with pytest.raises(ValueError, match='not at rest'):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+src/flexcell/flexcell_skills/test/test_preposition_gate.py:113: Failed
+_______ test_common_world_motion_is_not_a_stationary_raw_hold[rotation] ________
+
+tmp_path = PosixPath('/home/ros/agentic_workcell_ws/artifacts/preposition-world-20261031/red-pytest/test_common_world_motion_is_no1')
+motion = 'rotation'
+
+    @pytest.mark.parametrize('motion', ['translation', 'rotation'])
+    def test_common_world_motion_is_not_a_stationary_raw_hold(tmp_path, motion):
+        declaration = build(tmp_path)
+        path = tmp_path / 'physics_steps.jsonl'
+        frames = [json.loads(line) for line in path.read_text().splitlines()]
+        for row in frames:
+            elapsed = (row['sim_ns'] - ATTACH) / 1e9
+            for value in [row['parent_pose']] + [o['pose'] for o in row['objects'].values()]:
+                if motion == 'translation':
+                    value[0] += .5 * elapsed
+                else:
+                    angle = .05 * elapsed
+                    x, y = value[:2]
+                    value[:2] = [math.cos(angle)*x-math.sin(angle)*y,
+                                 math.sin(angle)*x+math.cos(angle)*y]
+                    value[3:] = [0., 0., math.sin(angle/2), math.cos(angle/2)]
+        path.write_text(''.join(json.dumps(row)+'\n' for row in frames))
+>       with pytest.raises(ValueError, match='not at rest'):
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+src/flexcell/flexcell_skills/test/test_preposition_gate.py:113: Failed
+_________ test_stationary_raw_hold_accepts_equivalent_quaternion_signs _________
+
+tmp_path = PosixPath('/home/ros/agentic_workcell_ws/artifacts/preposition-world-20261031/red-pytest/test_stationary_raw_hold_accep0')
+
+    def test_stationary_raw_hold_accepts_equivalent_quaternion_signs(tmp_path):
+        declaration = build(tmp_path)
+        path = tmp_path / 'physics_steps.jsonl'
+        frames = [json.loads(line) for line in path.read_text().splitlines()]
+        for index, row in enumerate(frames):
+            if index % 2:
+                child = row['objects']['target_box_a']['pose']
+                child[3:] = [-v for v in child[3:]]
+        path.write_text(''.join(json.dumps(row)+'\n' for row in frames))
+>       report = verify_run(tmp_path, 'target_box_a', declaration)
+
+src/flexcell/flexcell_skills/test/test_preposition_gate.py:126: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+scripts/preposition_gate.py:191: in verify_run
+    hold, reference = _pre_attach_hold(physics, contacts, object_id, attach_ns, limits)
+scripts/preposition_gate.py:124: in _pre_attach_hold
+    counterparts=sorted(counterparts)), _mean_transform(transforms)
+scripts/preposition_gate.py:48: in _mean_transform
+    require(.999 <= norm <= 1.001, 'averaged pre-attach quaternion is not normalized')
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+value = False, message = 'averaged pre-attach quaternion is not normalized'
+
+    def require(value, message):
+        if not value:
+>           raise ValueError('contact evidence: ' + message)
+E           ValueError: contact evidence: averaged pre-attach quaternion is not normalized
+
+scripts/contact_gate.py:11: ValueError
+=========================== short test summary info ============================
+FAILED src/flexcell/flexcell_skills/test/test_preposition_reference.py::test_common_world_motion_cannot_hide_behind_a_constant_relative_pose[translation]
+FAILED src/flexcell/flexcell_skills/test/test_preposition_reference.py::test_common_world_motion_cannot_hide_behind_a_constant_relative_pose[rotation]
+FAILED src/flexcell/flexcell_skills/test/test_preposition_reference.py::test_stationary_antipodal_quaternions_have_the_same_reference
+FAILED src/flexcell/flexcell_skills/test/test_preposition_gate.py::test_common_world_motion_is_not_a_stationary_raw_hold[translation]
+FAILED src/flexcell/flexcell_skills/test/test_preposition_gate.py::test_common_world_motion_is_not_a_stationary_raw_hold[rotation]
+FAILED src/flexcell/flexcell_skills/test/test_preposition_gate.py::test_stationary_raw_hold_accepts_equivalent_quaternion_signs
