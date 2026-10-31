@@ -82,8 +82,10 @@ source-file SHA；209 个均与 Git blobs 和原 tar 字节一致。校验器仅
 python3 setup/acceptance/native_audit_20261031/verify.py
 ```
 
-Windows 与 Linux 纯 Python 回放均通过，输出 `NATIVE_AUDIT_LIFETIME_REPLAY_PASS`，同时保留
-历史 STOPPED、来源元数据瑕疵和 D3 NO_GO。只读独立审查无剩余 P1/P2。
+当时 Windows 与 Linux 解释器均对 Windows 工作树字节回放通过，输出
+`NATIVE_AUDIT_LIFETIME_REPLAY_PASS`，但未覆盖独立 Git LF 检出。2026-11-01 已确认
+此处的可移植来源绑定缺口并修复，详见[更正与两端 Git LF 验证](NATIVE_PORTABLE_BINDING_20261101.md)。
+历史 STOPPED、来源元数据瑕疵和 D3 NO_GO 全部保留，原回放 JSON 不改写。
 
 D3 仍 NO_GO，默认承载后端不变，n≥50 冻结。静止臂 native 循环不证明运动臂、
 接触抓取或 #59 的真 legacy 技能 × teleport/joint 矩阵。后者仍是高难度待办。

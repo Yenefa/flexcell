@@ -1,5 +1,17 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-11-01 当前修正（更新 PR #85）：已独立复现并修复 native 原始回放在 Git LF 检出中的误拒。
+> 历史 receipt 的两份 CRLF 工作树 SHA 不再被当作唯一源码形式；仅对四个明确 Python gate
+> 文件做 CRLF→LF，再对已经封存的 Git/运行源码 SHA，原 checkout SHA 仍独立校验。
+> 原 receipt/source-binding/ZIP 字节全保留，INVALID_TRAILING_CR、旧 CI STOPPED 与 D3 NO_GO 保持。
+> 新增 35 项来源传输/篡改反例，50 targeted、742 全套 Python tests 通过，40 文件扫描零问题。
+> Windows 与 Linux 各自解出同一 Git LF archive，在无 site-packages 的独立模式完整回放通过；
+> 更正此前 Linux 仅用 Windows 挂载工作树、未覆盖干净 LF 检出的验证缺口。本轮机器人 0 次。
+> 远端新增 #86 已有 legacy 本机矩阵，但 CI 条件未完成；“skill 主导误差”的因果归因不成立。
+> 另已复现 #86 主机/容器路径搬运导致十份回执全缺失仍 PASS，留在 junior #82 修报告器。
+> #84/#87 继续做两条现成回放接线，#83 更新当前台账；不重复跑物理窗口替代 CI。
+> [来源修正、两端 LF 回放与矩阵审查](NATIVE_PORTABLE_BINDING_20261101.md)。下方为历史快照。
+
 > 2026-10-31 高难度运行器修复已提交 PR #85（`fix/native-audit-lifetime`，堆叠 #81）：
 > 原 native worker 跨轮持有完整审计 JSON 图，现收束到 audit_cycle 作用域；
 > 弱引用红/绿反例确认前轮对象在下轮开始前释放，新增失败 clock/stack/只读流快照。
