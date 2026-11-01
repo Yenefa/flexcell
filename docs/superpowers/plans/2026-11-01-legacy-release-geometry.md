@@ -13,10 +13,12 @@
 **Tech stack:** ROS 2 Jazzy, Gazebo Harmonic, existing pinned install, Python stdlib offline math, existing ROS bag deserialization only when extracting TF.
 
 - [x] Read current handoffs, remote #86, skill/motion code and raw-evidence rules; preflight confirms no running simulation and preserves old WSL patch.
-- [ ] Commit this plan and `infra/legacy-release-diagnostic.json`; export exact Git LF runtime sources to a new WSL stage.
-- [ ] Verify every imported first-party Python/launch byte against the frozen source and reuse native binaries only with their recorded SHA. Materialize and hash the diagnostic world/config before dispatch.
-- [ ] Run the declared A task once with the owned harness. Save nonzero exit, raw steps/contact/bag, source revision and all health/reset receipts. No replacement task.
-- [ ] Extract exact task-session and release boundaries. Calculate EE target/tracking error, measured rigid offset, box error before release, and post-release displacement separately.
-- [ ] Add meaningful positive/negative offline tests for the decomposition and incomplete/ambiguous sources; execute them and independently replay the complete raw window.
-- [ ] Review conclusions against the raw records. Fix production behavior only if a separate supported, bounded design is available; otherwise keep mechanism limitations explicit.
+- [x] Commit this plan and `infra/legacy-release-diagnostic.json`; export exact Git LF runtime sources to a new WSL stage.
+- [x] Verify every imported first-party Python/launch byte against the frozen source and reuse native binaries only with their recorded SHA. Materialize and hash the diagnostic world/config before dispatch.
+- [x] Run the declared A task once with the owned harness. Save nonzero exit, raw steps/contact/bag, source revision and all health/reset receipts. No replacement task.
+- [x] Extract exact task-session and release boundaries. Calculate EE target/tracking error, measured rigid offset, box error before release, and post-release displacement separately.
+- [x] Add meaningful positive/negative offline tests for the decomposition and incomplete/ambiguous sources; execute them and independently replay the complete raw window.
+- [x] Review conclusions against the raw records. Fix production behavior only if a separate supported, bounded design is available; otherwise keep mechanism limitations explicit.
 - [ ] Publish evidence/conclusions as a new stacked PR, leave bounded low-difficulty followups in existing issues, update handoffs and local delivery. Do not merge, change billing, thresholds, default backend or D3 NO_GO.
+
+**Outcome:** The original hypothesis is supported for this session by the measured rigid geometry, not generalized to #86. Both physical qualification rejections remain; production changes require a separate supported design. All physical evidence is immutable.

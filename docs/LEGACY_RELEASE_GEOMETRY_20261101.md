@@ -117,3 +117,21 @@ A static 160 mm tweak or only a nonzero `target_point_offset` is insufficient;
 and release coverage also need supported fixes with counterexamples and a new
 frozen declaration. Keep all existing stopped records and unchanged gates.
 The bounded reporter, ledger and CI tasks remain in #82/#83/#84/#87.
+
+## Independent Git LF replay and review
+
+Committed analysis `8c23352a4f59570bdad3918959e609e63593452b` was exported as a
+5,130,240-byte Git LF tar, SHA-256
+`c7590cfa7cbe242e58845bd73e849aefe11b315b83690752a2c8889c20dd431e`.
+Windows Python 3.12.14 and Linux Python 3.12.3 independently extracted that same
+archive into separate directories and ran the complete replay with `-I -S -B`.
+Both exit 0, preserve STOPPED/NO_GO and agree on the reported component vectors
+to 1e-12 m. No ROS or site packages are used. The proof folder retains both raw
+outputs and receipts. These are actual independent LF inputs, rather than a
+Linux interpreter reading the Windows checkout.
+
+The independent read-only review found no P1/P2 issues. It separately ran the
+24 unit cases and complete stdlib replay, checked 100 matrix/quaternion-sign
+cases, and matched all 211 runtime source and 14 native input hashes to Git and
+the frozen archive. The scope and Python 3.12+ requirement are recorded in
+`proof/independent-review.md`. Proof file hashes are in `proof-hashes.json`.

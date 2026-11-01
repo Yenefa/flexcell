@@ -8,7 +8,7 @@
 > 完整 69 成员原始 ZIP 可无 ROS 回放；766 Python tests 通过、40 文件静态零问题。
 > 生产行为未修改，旧 WSL 补丁不变、进程零残留，D3 NO_GO。#86 历史 45 mm 唯一原因仍 UNKNOWN。
 > 下一高难项为 legacy 真附着点求解与预绑定/释放监控覆盖修复；junior #82/#83/#84/#87 继续。
-> 详见 code-clone/docs/LEGACY_RELEASE_GEOMETRY_20261101.md（代码仓内为同目录文档）。下方为历史快照。
+> [诊断与完整证据](LEGACY_RELEASE_GEOMETRY_20261101.md)。Windows/Linux 独立 Git LF 回放通过；只读审查无 P1/P2。下方为历史快照。
 
 > 2026-11-01 当前修正（更新 PR #85）：已独立复现并修复 native 原始回放在 Git LF 检出中的误拒。
 > 历史 receipt 的两份 CRLF 工作树 SHA 不再被当作唯一源码形式；仅对四个明确 Python gate
