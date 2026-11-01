@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "purpose": "One diagnostic legacy/joint A task: separate EE error, rigid-offset geometry and post-release displacement; this is not the #59 CI matrix or D3 admission",
+  "max_logical_tasks": 5,
+  "camera": false,
+  "backend": "detachable_joint",
+  "skill_backend": "legacy",
+  "contact_trace": true,
+  "physics_step_s": 0.002,
+  "min_preflight_rtf": 0.3,
+  "qualification_no_recovery": true,
+  "required_carry_follow": true,
+  "min_follow_sim_s": 0.0,
+  "required_preposition_reference": true,
+  "preposition_gate": {
+    "hold_ns": 100000000,
+    "parent_model": "open_manipulator_x",
+    "spread_translation_m": 0.001,
+    "spread_rotation_rad": 0.0015,
+    "jump_translation_m": 0.002,
+    "jump_rotation_rad": 0.017453292519943295,
+    "follow_translation_m": 0.002,
+    "follow_rotation_rad": 0.017453292519943295,
+    "runtime_reference_agreement_m": 0.0005
+  },
+  "no_replacements": true,
+  "episodes": [
+    {
+      "case": "normal",
+      "object": "target_box_a",
+      "task": "One legacy/joint A release-geometry diagnostic, original 12 mm clearance and 60 mm tolerance"
+    }
+  ],
+  "comparison_reference": "https://github.com/Yenefa/flexcell/pull/86",
+  "prior_implementation_revision": "8a644c23ccd9bc83a003aa7df1799a029f0a3fc0"
+}
