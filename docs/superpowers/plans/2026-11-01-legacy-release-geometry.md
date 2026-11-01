@@ -19,6 +19,6 @@
 - [x] Extract exact task-session and release boundaries. Calculate EE target/tracking error, measured rigid offset, box error before release, and post-release displacement separately.
 - [x] Add meaningful positive/negative offline tests for the decomposition and incomplete/ambiguous sources; execute them and independently replay the complete raw window.
 - [x] Review conclusions against the raw records. Fix production behavior only if a separate supported, bounded design is available; otherwise keep mechanism limitations explicit.
-- [ ] Publish evidence/conclusions as a new stacked PR, leave bounded low-difficulty followups in existing issues, update handoffs and local delivery. Do not merge, change billing, thresholds, default backend or D3 NO_GO.
+- [x] Publish evidence/conclusions as a new stacked PR, leave bounded low-difficulty followups in existing issues, update handoffs and local delivery. Do not merge, change billing, thresholds, default backend or D3 NO_GO.
 
 **Outcome:** The original hypothesis is supported for this session by the measured rigid geometry, not generalized to #86. Both physical qualification rejections remain; production changes require a separate supported design. All physical evidence is immutable.

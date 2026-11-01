@@ -1,6 +1,6 @@
 # HANDOFF — project-033-flexcell
 
-> 2026-11-01 本机新诊断：legacy/joint A 仅跑一次，源码 66cff2e、86 秒。
+> 2026-11-01 本机新诊断已发 [PR #88](https://github.com/Yenefa/flexcell/pull/88)：legacy/joint A 仅跑一次，源码 66cff2e、86 秒。
 > 任务完成且原容差下误差 35.553473 mm；外层窗口 STOPPED，不补跑、不改判。
 > 原始 2 ms 步重算：释放前水平偏差 33.294197 mm，其中刚体偏移目标几何分量
 > 29.663225 mm、末端跟踪分量 3.648824 mm，释放后再横移 2.263584 mm；按向量对账。
