@@ -281,13 +281,15 @@ def main():
             args.case == 'budget_exhaustion' and task.get('outcome_val') == 1
             and task.get('error_code') == 'ERR_RECOVERY_EXHAUSTED'
             and sum(row.get('injected') is True for row in skill_records) == 2)
-        carry_records = []
-        if (out / 'skills/carry.jsonl').exists():
-            carry_records = [json.loads(line) for line
-                             in (out / 'skills/carry.jsonl').read_text().splitlines() if line.strip()]
+        # The injection record is written after the last injected frame, which can be
+        # later than the moment the skill notices the fault, so reading carry.jsonl here
+        # races the writer (it did in CI while passing locally). The trial therefore
+        # decides on the typed reason, and `false_attach_gate` asserts afterwards that the
+        # injection happened exactly once on the declared frames.
         expected_failure = expected_failure or (
             args.case == 'false_attach' and task.get('outcome_val') == 1
-            and sum(row.get('event') == 'false_attach_injected' for row in carry_records) == 1)
+            and task.get('error_code') == 'ERR_SKILL_FAILED'
+            and 'physical follow unconfirmed' in str(task.get('detail', '')))
         expected_failure = expected_failure or (
             args.case == 'unreachable_place' and task.get('outcome_val') == 1
             and task.get('error_code') == 'ERR_SKILL_FAILED'
