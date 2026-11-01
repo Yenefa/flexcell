@@ -1,5 +1,15 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-11-01 本机新诊断：legacy/joint A 仅跑一次，源码 66cff2e、86 秒。
+> 任务完成且原容差下误差 35.553473 mm；外层窗口 STOPPED，不补跑、不改判。
+> 原始 2 ms 步重算：释放前水平偏差 33.294197 mm，其中刚体偏移目标几何分量
+> 29.663225 mm、末端跟踪分量 3.648824 mm，释放后再横移 2.263584 mm；按向量对账。
+> 同时保留两道拒收：sampled release tail 24 ms > 20 ms；raw 100 ms hold 1.640896 mrad > 1.5。
+> 完整 69 成员原始 ZIP 可无 ROS 回放；766 Python tests 通过、40 文件静态零问题。
+> 生产行为未修改，旧 WSL 补丁不变、进程零残留，D3 NO_GO。#86 历史 45 mm 唯一原因仍 UNKNOWN。
+> 下一高难项为 legacy 真附着点求解与预绑定/释放监控覆盖修复；junior #82/#83/#84/#87 继续。
+> 详见 code-clone/docs/LEGACY_RELEASE_GEOMETRY_20261101.md（代码仓内为同目录文档）。下方为历史快照。
+
 > 2026-11-01 当前修正（更新 PR #85）：已独立复现并修复 native 原始回放在 Git LF 检出中的误拒。
 > 历史 receipt 的两份 CRLF 工作树 SHA 不再被当作唯一源码形式；仅对四个明确 Python gate
 > 文件做 CRLF→LF，再对已经封存的 Git/运行源码 SHA，原 checkout SHA 仍独立校验。

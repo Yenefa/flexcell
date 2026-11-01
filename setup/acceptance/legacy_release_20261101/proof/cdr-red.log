@@ -1,0 +1,76 @@
+...................FFFFF                                                 [100%]
+=================================== FAILURES ===================================
+_____ test_real_cdr_matches_the_independently_ros_decoded_fixed_transforms _____
+
+    def test_real_cdr_matches_the_independently_ros_decoded_fixed_transforms():
+        module = api()
+>       assert callable(getattr(module, 'decode_tf_static', None)), 'offline CDR decoder is absent'
+E       AssertionError: offline CDR decoder is absent
+E       assert False
+E        +  where False = callable(None)
+E        +    where None = getattr(<module 'release_geometry_under_test' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py'>, 'decode_tf_static', None)
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:109: AssertionError
+__________ test_corrupt_static_cdr_is_rejected[unsupported_encoding] ___________
+
+kind = 'unsupported_encoding'
+
+    @pytest.mark.parametrize('kind', ['unsupported_encoding','truncated','trailing_bytes','invalid_quaternion'])
+    def test_corrupt_static_cdr_is_rejected(kind):
+        module=api()
+>       assert callable(getattr(module, 'decode_tf_static', None)), 'offline CDR decoder is absent'
+E       AssertionError: offline CDR decoder is absent
+E       assert False
+E        +  where False = callable(None)
+E        +    where None = getattr(<module 'release_geometry_under_test' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py'>, 'decode_tf_static', None)
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:120: AssertionError
+________________ test_corrupt_static_cdr_is_rejected[truncated] ________________
+
+kind = 'truncated'
+
+    @pytest.mark.parametrize('kind', ['unsupported_encoding','truncated','trailing_bytes','invalid_quaternion'])
+    def test_corrupt_static_cdr_is_rejected(kind):
+        module=api()
+>       assert callable(getattr(module, 'decode_tf_static', None)), 'offline CDR decoder is absent'
+E       AssertionError: offline CDR decoder is absent
+E       assert False
+E        +  where False = callable(None)
+E        +    where None = getattr(<module 'release_geometry_under_test' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py'>, 'decode_tf_static', None)
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:120: AssertionError
+_____________ test_corrupt_static_cdr_is_rejected[trailing_bytes] ______________
+
+kind = 'trailing_bytes'
+
+    @pytest.mark.parametrize('kind', ['unsupported_encoding','truncated','trailing_bytes','invalid_quaternion'])
+    def test_corrupt_static_cdr_is_rejected(kind):
+        module=api()
+>       assert callable(getattr(module, 'decode_tf_static', None)), 'offline CDR decoder is absent'
+E       AssertionError: offline CDR decoder is absent
+E       assert False
+E        +  where False = callable(None)
+E        +    where None = getattr(<module 'release_geometry_under_test' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py'>, 'decode_tf_static', None)
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:120: AssertionError
+___________ test_corrupt_static_cdr_is_rejected[invalid_quaternion] ____________
+
+kind = 'invalid_quaternion'
+
+    @pytest.mark.parametrize('kind', ['unsupported_encoding','truncated','trailing_bytes','invalid_quaternion'])
+    def test_corrupt_static_cdr_is_rejected(kind):
+        module=api()
+>       assert callable(getattr(module, 'decode_tf_static', None)), 'offline CDR decoder is absent'
+E       AssertionError: offline CDR decoder is absent
+E       assert False
+E        +  where False = callable(None)
+E        +    where None = getattr(<module 'release_geometry_under_test' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py'>, 'decode_tf_static', None)
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:120: AssertionError
+- generated xml file: /mnt/c/Users/fuker/Documents/Codex/2026-10-30/https-github-com-yenefa-flexcell-https/work/legacy-release-20261101/tests/green.xml -
+=========================== short test summary info ============================
+FAILED src/flexcell/flexcell_skills/test/test_release_geometry.py::test_real_cdr_matches_the_independently_ros_decoded_fixed_transforms
+FAILED src/flexcell/flexcell_skills/test/test_release_geometry.py::test_corrupt_static_cdr_is_rejected[unsupported_encoding]
+FAILED src/flexcell/flexcell_skills/test/test_release_geometry.py::test_corrupt_static_cdr_is_rejected[truncated]
+FAILED src/flexcell/flexcell_skills/test/test_release_geometry.py::test_corrupt_static_cdr_is_rejected[trailing_bytes]
+FAILED src/flexcell/flexcell_skills/test/test_release_geometry.py::test_corrupt_static_cdr_is_rejected[invalid_quaternion]

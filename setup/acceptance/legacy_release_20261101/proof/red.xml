@@ -1,0 +1,370 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="19" skipped="0" tests="19" time="1.051" timestamp="2026-11-01T17:15:51.076648" hostname="localhost"><testcase classname="test.test_release_geometry" name="test_vertical_control_has_no_tracking_or_geometry_error" time="0.002"><failure message="AssertionError: release geometry analysis has not been implemented&#10;assert False&#10; +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()&#10; +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file">def test_vertical_control_has_no_tracking_or_geometry_error():
+&gt;       result = api().decompose(**inputs())
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def api():
+&gt;       assert SCRIPT.is_file(), 'release geometry analysis has not been implemented'
+E       AssertionError: release geometry analysis has not been implemented
+E       assert False
+E        +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()
+E        +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:12: AssertionError</failure></testcase><testcase classname="test.test_release_geometry" name="test_rotating_carried_offset_is_not_a_world_vertical_offset" time="0.002"><failure message="AssertionError: release geometry analysis has not been implemented&#10;assert False&#10; +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()&#10; +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file">def test_rotating_carried_offset_is_not_a_world_vertical_offset():
+        data = inputs()
+        data['parent'][3:] = [0., math.sqrt(.5), 0., math.sqrt(.5)]
+        data['box'][:3] = [-.16, 0., -.126]
+        data['settled'] = [-.16, 0., -.138]
+&gt;       result = api().decompose(**data)
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:41: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def api():
+&gt;       assert SCRIPT.is_file(), 'release geometry analysis has not been implemented'
+E       AssertionError: release geometry analysis has not been implemented
+E       assert False
+E        +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()
+E        +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:12: AssertionError</failure></testcase><testcase classname="test.test_release_geometry" name="test_nonzero_components_can_cancel_and_norms_must_not_be_added" time="0.002"><failure message="AssertionError: release geometry analysis has not been implemented&#10;assert False&#10; +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()&#10; +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file">def test_nonzero_components_can_cancel_and_norms_must_not_be_added():
+        data = inputs()
+        data['parent'][0] = .01
+        data['parent_box_reference'][0] -= .01
+&gt;       result = api().decompose(**data)
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:52: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def api():
+&gt;       assert SCRIPT.is_file(), 'release geometry analysis has not been implemented'
+E       AssertionError: release geometry analysis has not been implemented
+E       assert False
+E        +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()
+E        +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:12: AssertionError</failure></testcase><testcase classname="test.test_release_geometry" name="test_bad_geometry_is_rejected[parent-value0]" time="0.002"><failure message="AssertionError: release geometry analysis has not been implemented&#10;assert False&#10; +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()&#10; +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file">field = 'parent', value = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, ...]
+
+    @pytest.mark.parametrize('field,value', [('parent',[0.]*7), ('box',[0.,0.,0.,0.,0.,0.,2.]),
+        ('ee_target',[0.,0.,float('nan')]), ('box_goal',[True,0.,0.]),
+        ('settled',[0.,0.]), ('clearance_m',float('inf'))])
+    def test_bad_geometry_is_rejected(field, value):
+        data = inputs()
+        data[field] = value
+        with pytest.raises(ValueError):
+&gt;           api().decompose(**data)
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def api():
+&gt;       assert SCRIPT.is_file(), 'release geometry analysis has not been implemented'
+E       AssertionError: release geometry analysis has not been implemented
+E       assert False
+E        +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()
+E        +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:12: AssertionError</failure></testcase><testcase classname="test.test_release_geometry" name="test_bad_geometry_is_rejected[box-value1]" time="0.002"><failure message="AssertionError: release geometry analysis has not been implemented&#10;assert False&#10; +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()&#10; +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file">field = 'box', value = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, ...]
+
+    @pytest.mark.parametrize('field,value', [('parent',[0.]*7), ('box',[0.,0.,0.,0.,0.,0.,2.]),
+        ('ee_target',[0.,0.,float('nan')]), ('box_goal',[True,0.,0.]),
+        ('settled',[0.,0.]), ('clearance_m',float('inf'))])
+    def test_bad_geometry_is_rejected(field, value):
+        data = inputs()
+        data[field] = value
+        with pytest.raises(ValueError):
+&gt;           api().decompose(**data)
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def api():
+&gt;       assert SCRIPT.is_file(), 'release geometry analysis has not been implemented'
+E       AssertionError: release geometry analysis has not been implemented
+E       assert False
+E        +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()
+E        +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:12: AssertionError</failure></testcase><testcase classname="test.test_release_geometry" name="test_bad_geometry_is_rejected[ee_target-value2]" time="0.002"><failure message="AssertionError: release geometry analysis has not been implemented&#10;assert False&#10; +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()&#10; +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file">field = 'ee_target', value = [0.0, 0.0, nan]
+
+    @pytest.mark.parametrize('field,value', [('parent',[0.]*7), ('box',[0.,0.,0.,0.,0.,0.,2.]),
+        ('ee_target',[0.,0.,float('nan')]), ('box_goal',[True,0.,0.]),
+        ('settled',[0.,0.]), ('clearance_m',float('inf'))])
+    def test_bad_geometry_is_rejected(field, value):
+        data = inputs()
+        data[field] = value
+        with pytest.raises(ValueError):
+&gt;           api().decompose(**data)
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def api():
+&gt;       assert SCRIPT.is_file(), 'release geometry analysis has not been implemented'
+E       AssertionError: release geometry analysis has not been implemented
+E       assert False
+E        +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()
+E        +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:12: AssertionError</failure></testcase><testcase classname="test.test_release_geometry" name="test_bad_geometry_is_rejected[box_goal-value3]" time="0.002"><failure message="AssertionError: release geometry analysis has not been implemented&#10;assert False&#10; +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()&#10; +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file">field = 'box_goal', value = [True, 0.0, 0.0]
+
+    @pytest.mark.parametrize('field,value', [('parent',[0.]*7), ('box',[0.,0.,0.,0.,0.,0.,2.]),
+        ('ee_target',[0.,0.,float('nan')]), ('box_goal',[True,0.,0.]),
+        ('settled',[0.,0.]), ('clearance_m',float('inf'))])
+    def test_bad_geometry_is_rejected(field, value):
+        data = inputs()
+        data[field] = value
+        with pytest.raises(ValueError):
+&gt;           api().decompose(**data)
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def api():
+&gt;       assert SCRIPT.is_file(), 'release geometry analysis has not been implemented'
+E       AssertionError: release geometry analysis has not been implemented
+E       assert False
+E        +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()
+E        +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:12: AssertionError</failure></testcase><testcase classname="test.test_release_geometry" name="test_bad_geometry_is_rejected[settled-value4]" time="0.002"><failure message="AssertionError: release geometry analysis has not been implemented&#10;assert False&#10; +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()&#10; +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file">field = 'settled', value = [0.0, 0.0]
+
+    @pytest.mark.parametrize('field,value', [('parent',[0.]*7), ('box',[0.,0.,0.,0.,0.,0.,2.]),
+        ('ee_target',[0.,0.,float('nan')]), ('box_goal',[True,0.,0.]),
+        ('settled',[0.,0.]), ('clearance_m',float('inf'))])
+    def test_bad_geometry_is_rejected(field, value):
+        data = inputs()
+        data[field] = value
+        with pytest.raises(ValueError):
+&gt;           api().decompose(**data)
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def api():
+&gt;       assert SCRIPT.is_file(), 'release geometry analysis has not been implemented'
+E       AssertionError: release geometry analysis has not been implemented
+E       assert False
+E        +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()
+E        +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:12: AssertionError</failure></testcase><testcase classname="test.test_release_geometry" name="test_bad_geometry_is_rejected[clearance_m-inf]" time="0.002"><failure message="AssertionError: release geometry analysis has not been implemented&#10;assert False&#10; +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()&#10; +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file">field = 'clearance_m', value = inf
+
+    @pytest.mark.parametrize('field,value', [('parent',[0.]*7), ('box',[0.,0.,0.,0.,0.,0.,2.]),
+        ('ee_target',[0.,0.,float('nan')]), ('box_goal',[True,0.,0.]),
+        ('settled',[0.,0.]), ('clearance_m',float('inf'))])
+    def test_bad_geometry_is_rejected(field, value):
+        data = inputs()
+        data[field] = value
+        with pytest.raises(ValueError):
+&gt;           api().decompose(**data)
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:65: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def api():
+&gt;       assert SCRIPT.is_file(), 'release geometry analysis has not been implemented'
+E       AssertionError: release geometry analysis has not been implemented
+E       assert False
+E        +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()
+E        +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:12: AssertionError</failure></testcase><testcase classname="test.test_release_geometry" name="test_selects_only_declared_task_session_and_retains_adjacent_release_steps" time="0.002"><failure message="AssertionError: release geometry analysis has not been implemented&#10;assert False&#10; +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()&#10; +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file">def test_selects_only_declared_task_session_and_retains_adjacent_release_steps():
+        rows = trace([True, True, False, False, True, True, False, False])
+&gt;       result = api().attachment_interval(rows, 'target_box_a', 9_000_000, 24_000_000)
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:78: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def api():
+&gt;       assert SCRIPT.is_file(), 'release geometry analysis has not been implemented'
+E       AssertionError: release geometry analysis has not been implemented
+E       assert False
+E        +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()
+E        +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:12: AssertionError</failure></testcase><testcase classname="test.test_release_geometry" name="test_missing_ambiguous_or_unbounded_session_is_rejected[states0]" time="0.002"><failure message="AssertionError: release geometry analysis has not been implemented&#10;assert False&#10; +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()&#10; +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file">states = [False, False, False]
+
+    @pytest.mark.parametrize('states', [[False,False,False], [False,True,True],
+        [True,True,False], [False,True,False,True,False], [False,1,False]])
+    def test_missing_ambiguous_or_unbounded_session_is_rejected(states):
+        rows=trace(states)
+        with pytest.raises(ValueError):
+&gt;           api().attachment_interval(rows, 'target_box_a', rows[0]['monotonic_ns'], rows[-1]['monotonic_ns'])
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def api():
+&gt;       assert SCRIPT.is_file(), 'release geometry analysis has not been implemented'
+E       AssertionError: release geometry analysis has not been implemented
+E       assert False
+E        +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()
+E        +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:12: AssertionError</failure></testcase><testcase classname="test.test_release_geometry" name="test_missing_ambiguous_or_unbounded_session_is_rejected[states1]" time="0.002"><failure message="AssertionError: release geometry analysis has not been implemented&#10;assert False&#10; +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()&#10; +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file">states = [False, True, True]
+
+    @pytest.mark.parametrize('states', [[False,False,False], [False,True,True],
+        [True,True,False], [False,True,False,True,False], [False,1,False]])
+    def test_missing_ambiguous_or_unbounded_session_is_rejected(states):
+        rows=trace(states)
+        with pytest.raises(ValueError):
+&gt;           api().attachment_interval(rows, 'target_box_a', rows[0]['monotonic_ns'], rows[-1]['monotonic_ns'])
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def api():
+&gt;       assert SCRIPT.is_file(), 'release geometry analysis has not been implemented'
+E       AssertionError: release geometry analysis has not been implemented
+E       assert False
+E        +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()
+E        +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:12: AssertionError</failure></testcase><testcase classname="test.test_release_geometry" name="test_missing_ambiguous_or_unbounded_session_is_rejected[states2]" time="0.001"><failure message="AssertionError: release geometry analysis has not been implemented&#10;assert False&#10; +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()&#10; +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file">states = [True, True, False]
+
+    @pytest.mark.parametrize('states', [[False,False,False], [False,True,True],
+        [True,True,False], [False,True,False,True,False], [False,1,False]])
+    def test_missing_ambiguous_or_unbounded_session_is_rejected(states):
+        rows=trace(states)
+        with pytest.raises(ValueError):
+&gt;           api().attachment_interval(rows, 'target_box_a', rows[0]['monotonic_ns'], rows[-1]['monotonic_ns'])
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def api():
+&gt;       assert SCRIPT.is_file(), 'release geometry analysis has not been implemented'
+E       AssertionError: release geometry analysis has not been implemented
+E       assert False
+E        +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()
+E        +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:12: AssertionError</failure></testcase><testcase classname="test.test_release_geometry" name="test_missing_ambiguous_or_unbounded_session_is_rejected[states3]" time="0.002"><failure message="AssertionError: release geometry analysis has not been implemented&#10;assert False&#10; +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()&#10; +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file">states = [False, True, False, True, False]
+
+    @pytest.mark.parametrize('states', [[False,False,False], [False,True,True],
+        [True,True,False], [False,True,False,True,False], [False,1,False]])
+    def test_missing_ambiguous_or_unbounded_session_is_rejected(states):
+        rows=trace(states)
+        with pytest.raises(ValueError):
+&gt;           api().attachment_interval(rows, 'target_box_a', rows[0]['monotonic_ns'], rows[-1]['monotonic_ns'])
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def api():
+&gt;       assert SCRIPT.is_file(), 'release geometry analysis has not been implemented'
+E       AssertionError: release geometry analysis has not been implemented
+E       assert False
+E        +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()
+E        +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:12: AssertionError</failure></testcase><testcase classname="test.test_release_geometry" name="test_missing_ambiguous_or_unbounded_session_is_rejected[states4]" time="0.002"><failure message="AssertionError: release geometry analysis has not been implemented&#10;assert False&#10; +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()&#10; +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file">states = [False, 1, False]
+
+    @pytest.mark.parametrize('states', [[False,False,False], [False,True,True],
+        [True,True,False], [False,True,False,True,False], [False,1,False]])
+    def test_missing_ambiguous_or_unbounded_session_is_rejected(states):
+        rows=trace(states)
+        with pytest.raises(ValueError):
+&gt;           api().attachment_interval(rows, 'target_box_a', rows[0]['monotonic_ns'], rows[-1]['monotonic_ns'])
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def api():
+&gt;       assert SCRIPT.is_file(), 'release geometry analysis has not been implemented'
+E       AssertionError: release geometry analysis has not been implemented
+E       assert False
+E        +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()
+E        +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:12: AssertionError</failure></testcase><testcase classname="test.test_release_geometry" name="test_bad_physics_timeline_is_rejected[missing_step]" time="0.002"><failure message="AssertionError: release geometry analysis has not been implemented&#10;assert False&#10; +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()&#10; +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file">kind = 'missing_step'
+
+    @pytest.mark.parametrize('kind', ['missing_step','duplicate','monotonic_regression','bad_step'])
+    def test_bad_physics_timeline_is_rejected(kind):
+        rows=trace([False, False, True, True, False, False])
+        if kind == 'missing_step': del rows[2]
+        if kind == 'duplicate': rows.insert(2, rows[2])
+        if kind == 'monotonic_regression': rows[2]['monotonic_ns']=rows[1]['monotonic_ns']
+        if kind == 'bad_step': rows[2]['step_ns']=1
+        with pytest.raises(ValueError):
+&gt;           api().attachment_interval(rows, 'target_box_a', rows[0]['monotonic_ns'], rows[-1]['monotonic_ns'])
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def api():
+&gt;       assert SCRIPT.is_file(), 'release geometry analysis has not been implemented'
+E       AssertionError: release geometry analysis has not been implemented
+E       assert False
+E        +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()
+E        +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:12: AssertionError</failure></testcase><testcase classname="test.test_release_geometry" name="test_bad_physics_timeline_is_rejected[duplicate]" time="0.001"><failure message="AssertionError: release geometry analysis has not been implemented&#10;assert False&#10; +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()&#10; +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file">kind = 'duplicate'
+
+    @pytest.mark.parametrize('kind', ['missing_step','duplicate','monotonic_regression','bad_step'])
+    def test_bad_physics_timeline_is_rejected(kind):
+        rows=trace([False, False, True, True, False, False])
+        if kind == 'missing_step': del rows[2]
+        if kind == 'duplicate': rows.insert(2, rows[2])
+        if kind == 'monotonic_regression': rows[2]['monotonic_ns']=rows[1]['monotonic_ns']
+        if kind == 'bad_step': rows[2]['step_ns']=1
+        with pytest.raises(ValueError):
+&gt;           api().attachment_interval(rows, 'target_box_a', rows[0]['monotonic_ns'], rows[-1]['monotonic_ns'])
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def api():
+&gt;       assert SCRIPT.is_file(), 'release geometry analysis has not been implemented'
+E       AssertionError: release geometry analysis has not been implemented
+E       assert False
+E        +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()
+E        +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:12: AssertionError</failure></testcase><testcase classname="test.test_release_geometry" name="test_bad_physics_timeline_is_rejected[monotonic_regression]" time="0.002"><failure message="AssertionError: release geometry analysis has not been implemented&#10;assert False&#10; +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()&#10; +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file">kind = 'monotonic_regression'
+
+    @pytest.mark.parametrize('kind', ['missing_step','duplicate','monotonic_regression','bad_step'])
+    def test_bad_physics_timeline_is_rejected(kind):
+        rows=trace([False, False, True, True, False, False])
+        if kind == 'missing_step': del rows[2]
+        if kind == 'duplicate': rows.insert(2, rows[2])
+        if kind == 'monotonic_regression': rows[2]['monotonic_ns']=rows[1]['monotonic_ns']
+        if kind == 'bad_step': rows[2]['step_ns']=1
+        with pytest.raises(ValueError):
+&gt;           api().attachment_interval(rows, 'target_box_a', rows[0]['monotonic_ns'], rows[-1]['monotonic_ns'])
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def api():
+&gt;       assert SCRIPT.is_file(), 'release geometry analysis has not been implemented'
+E       AssertionError: release geometry analysis has not been implemented
+E       assert False
+E        +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()
+E        +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:12: AssertionError</failure></testcase><testcase classname="test.test_release_geometry" name="test_bad_physics_timeline_is_rejected[bad_step]" time="0.002"><failure message="AssertionError: release geometry analysis has not been implemented&#10;assert False&#10; +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()&#10; +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file">kind = 'bad_step'
+
+    @pytest.mark.parametrize('kind', ['missing_step','duplicate','monotonic_regression','bad_step'])
+    def test_bad_physics_timeline_is_rejected(kind):
+        rows=trace([False, False, True, True, False, False])
+        if kind == 'missing_step': del rows[2]
+        if kind == 'duplicate': rows.insert(2, rows[2])
+        if kind == 'monotonic_regression': rows[2]['monotonic_ns']=rows[1]['monotonic_ns']
+        if kind == 'bad_step': rows[2]['step_ns']=1
+        with pytest.raises(ValueError):
+&gt;           api().attachment_interval(rows, 'target_box_a', rows[0]['monotonic_ns'], rows[-1]['monotonic_ns'])
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def api():
+&gt;       assert SCRIPT.is_file(), 'release geometry analysis has not been implemented'
+E       AssertionError: release geometry analysis has not been implemented
+E       assert False
+E        +  where False = &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt;()
+E        +    where &lt;bound method Path.is_file of PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py')&gt; = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/scripts/release_geometry.py').is_file
+
+src/flexcell/flexcell_skills/test/test_release_geometry.py:12: AssertionError</failure></testcase></testsuite></testsuites>

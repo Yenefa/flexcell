@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "C:\Users\fuker\Desktop\workspace\project-033-flexcell\code-clone\setup\acceptance\legacy_release_20261101\verify.py", line 186, in <module>
+    print(json.dumps(main(),indent=2,allow_nan=False))
+                     ^^^^^^
+  File "C:\Users\fuker\Desktop\workspace\project-033-flexcell\code-clone\setup\acceptance\legacy_release_20261101\verify.py", line 182, in main
+    return analyze(root,geometry)
+           ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fuker\Desktop\workspace\project-033-flexcell\code-clone\setup\acceptance\legacy_release_20261101\verify.py", line 123, in analyze
+    hold, reference = _pre_attach_hold(physics,hold_contacts,'target_box_a',first['sim_ns'],FROZEN)
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fuker\AppData\Local\Temp\flexcell-legacy-release-1r_5xjyj\frozen-runtime\scripts\preposition_gate.py", line 111, in _pre_attach_hold
+  File "C:\Users\fuker\AppData\Local\Temp\flexcell-legacy-release-1r_5xjyj\frozen-runtime\scripts\contact_gate.py", line 11, in require
+ValueError: contact evidence: the pre-attach hold is not at rest within the declared spread

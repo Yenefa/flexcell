@@ -1,0 +1,233 @@
+{
+  "status": "DIAGNOSTIC_REPLAY_COMPLETE",
+  "original_window_status": "STOPPED",
+  "original_error": "contact evidence: the release boundary is not within one sampled period",
+  "task_status": "PASS",
+  "source_revision": "66cff2e650c7489aa59f8cce4ab8685dad59ae6e",
+  "window_id": "8e2481ef4ed04aeaa2d9519407068c59",
+  "run": "run-3edeaffca614",
+  "total_physics_steps": 27608,
+  "contact_steps": 27608,
+  "follow": {
+    "status": "FOLLOW_TRACE_PASS",
+    "object": "target_box_a",
+    "session": "de49e2a2670149f498de77dc814ca62d",
+    "attached_samples": 370,
+    "attached_duration_s": 7.38,
+    "physics_step_samples": 3691,
+    "max_translation_m": 0.00018250438719895625,
+    "max_rotation_rad": 0.0006016041784429562,
+    "physics_step_ns": 2000000,
+    "camera_frames": null,
+    "contact_force_observed": false,
+    "interpretation": "50 Hz sampled functional evidence; not D3 or contact-grasp admission"
+  },
+  "before_bind": 26606000000,
+  "first_attached": 26608000000,
+  "last_attached": 34026000000,
+  "first_detached": 34028000000,
+  "attached_steps": 3710,
+  "sampled_last_attached": 34002000000,
+  "unmonitored_tail_sim_ns": 24000000,
+  "forensic_only": {
+    "hold": {
+      "status": "REJECTED",
+      "original_error": "contact evidence: the pre-attach hold is not at rest within the declared spread",
+      "samples": 50,
+      "spread_translation_m": 0.0004979176603190229,
+      "spread_rotation_rad": 0.001640896339380304,
+      "translation_limit_m": 0.001,
+      "rotation_limit_rad": 0.0015,
+      "measured_mean": [
+        0.15025187526814046,
+        -0.002446837055661063,
+        -0.16260019761266592,
+        0.00032536094017629133,
+        -0.05531349610330859,
+        -0.005872915969533529,
+        0.9984517114748728
+      ]
+    },
+    "reference_source": "LAST_DETACHED_PHYSICS_STEP_NOT_QUALIFIED_HOLD",
+    "reference_sim_ns": 26606000000,
+    "reference": [
+      0.15038470082428781,
+      -0.002460936254070015,
+      -0.16244122949944567,
+      0.0003292410356562971,
+      -0.05565340316517422,
+      -0.005906646709764622,
+      0.9984326225845793
+    ],
+    "rigid_interval": {
+      "steps": 3710,
+      "attach_jump_translation_m": 3.941451295190069e-08,
+      "attach_jump_rotation_rad": 0.0,
+      "max_translation_m": 6.248977808069985e-07,
+      "max_rotation_rad": 2.0483541819382112e-06
+    },
+    "runtime_reference": {
+      "samples": 5,
+      "window_ns": 80000000,
+      "spread_translation_m": 0.0003800917558526452,
+      "spread_rotation_rad": 0.0012525976008042512,
+      "agreement_m": 0.0001819963389729641,
+      "world_at_rest": {
+        "parent": {
+          "spread_translation_m": 0.00011186203507483894,
+          "spread_rotation_rad": 0.0012525976008042512
+        },
+        "body": {
+          "spread_translation_m": 0.0,
+          "spread_rotation_rad": 0.0
+        }
+      },
+      "world_motion_observation": "RECORDED",
+      "contact_freedom": "NOT_OBSERVABLE_ON_POSE_TOPIC"
+    }
+  },
+  "static_tf": [
+    {
+      "parent": "link5",
+      "child": "end_effector_link",
+      "stamp_ns": 0,
+      "pose": [
+        0.126,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    },
+    {
+      "parent": "world",
+      "child": "link1",
+      "stamp_ns": 0,
+      "pose": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    }
+  ],
+  "descend_reported_ee_error_m": 0.00785090229406713,
+  "verify_error_m": 0.03555347256946612,
+  "physical_final_age_ms": 0.435623,
+  "calculation": {
+    "ee_at_release": [
+      0.12219736721701249,
+      -0.1529129866882485,
+      0.19534723125172962
+    ],
+    "box_at_release": [
+      0.137483796663978,
+      -0.178334086129496,
+      0.0337677504994449
+    ],
+    "box_predicted_from_reference": [
+      0.13748379337276895,
+      -0.17833408156252067,
+      0.033767789509885265
+    ],
+    "actual_world_offset": [
+      0.015286426155756441,
+      -0.025421094874272177,
+      -0.16157944174184435
+    ],
+    "nominal_world_offset": [
+      0.0,
+      0.0,
+      -0.16
+    ],
+    "components": {
+      "ee_tracking": {
+        "xyz_m": [
+          0.002197367217012497,
+          -0.0029129866882484923,
+          0.005847231251729618
+        ],
+        "norm_m": 0.006892316551314056,
+        "horizontal_m": 0.0036488236641846867
+      },
+      "rigid_geometry": {
+        "xyz_m": [
+          0.015286426155756441,
+          -0.025421094874272177,
+          -0.0015794417418443507
+        ],
+        "norm_m": 0.029705244073025595,
+        "horizontal_m": 0.02966322452502664
+      },
+      "rigid_residual": {
+        "xyz_m": [
+          3.291209055289457e-09,
+          -4.566975325692724e-09,
+          -3.901044036414003e-08
+        ],
+        "norm_m": 3.941451227752579e-08,
+        "horizontal_m": 5.629326839961016e-09
+      },
+      "release_to_settled": {
+        "xyz_m": [
+          0.0013090213007569962,
+          -0.0018466925995269945,
+          -0.0162677940240621
+        ],
+        "norm_m": 0.016424522298450386,
+        "horizontal_m": 0.002263583513587097
+      },
+      "clearance": {
+        "xyz_m": [
+          0.0,
+          0.0,
+          0.012
+        ],
+        "norm_m": 0.012,
+        "horizontal_m": 0.0
+      }
+    },
+    "release_error_to_clearance_target": {
+      "xyz_m": [
+        0.017483796663978007,
+        -0.028334086129496006,
+        0.004267750499444899
+      ],
+      "norm_m": 0.03356660955334242,
+      "horizontal_m": 0.03329419743109941
+    },
+    "release_error_to_goal": {
+      "xyz_m": [
+        0.017483796663978007,
+        -0.028334086129496006,
+        0.0162677504994449
+      ],
+      "norm_m": 0.03705594809059966,
+      "horizontal_m": 0.03329419743109941
+    },
+    "final_error": {
+      "xyz_m": [
+        0.018792817964735004,
+        -0.030180778729023,
+        -4.3524617202028715e-08
+      ],
+      "norm_m": 0.03555347256946652,
+      "horizontal_m": 0.03555347256943988
+    },
+    "component_sum_xyz_m": [
+      0.01879281796473499,
+      -0.03018077872902299,
+      -4.352461719855927e-08
+    ],
+    "closure_residual_m": 1.7690777709386487e-17,
+    "interpretation": "Vector accounting for this recorded session; not causal population effects, a success rate, or a changed qualification verdict"
+  },
+  "default_admission": "NO_GO",
+  "controller_changed": false,
+  "interpretation": "The original sampled-boundary rejection remains STOPPED. Full raw-step forensic accounting neither repairs that coverage nor qualifies D3 or the #59 CI matrix."
+}
