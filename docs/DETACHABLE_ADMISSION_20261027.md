@@ -1,5 +1,9 @@
 # D3 attachment admission: NO_GO for default qualification
 
+Current evidence ledger (2026-11-02): [D3_STATUS_CURRENT.md](D3_STATUS_CURRENT.md).
+The decision and dated observations below remain historical records; the current
+ledger does not grant admission or change the default backend.
+
 Decision recorded on 2026-10-27: **NO_GO_FOR_DEFAULT_ADMISSION**. Keep
 DetachableJoint as an explicitly selected experimental oracle; continue the existing
 velocity_servo control. This is a qualification decision, not a finding that the

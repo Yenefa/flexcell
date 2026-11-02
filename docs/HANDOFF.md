@@ -1,5 +1,9 @@
 # HANDOFF — project-033-flexcell
 
+> 当前 D3 导航：[D3_STATUS_CURRENT.md](D3_STATUS_CURRENT.md)（2026-11-02）。
+> 汇总六条准入判据、MTC/legacy 矩阵、#85 来源边界及 #88 的 STOPPED 诊断；
+> D3 仍 NO_GO，以下各日期段落与数字保留为历史快照。
+
 > 2026-11-01 当前修正（更新 PR #85）：已独立复现并修复 native 原始回放在 Git LF 检出中的误拒。
 > 历史 receipt 的两份 CRLF 工作树 SHA 不再被当作唯一源码形式；仅对四个明确 Python gate
 > 文件做 CRLF→LF，再对已经封存的 Git/运行源码 SHA，原 checkout SHA 仍独立校验。
