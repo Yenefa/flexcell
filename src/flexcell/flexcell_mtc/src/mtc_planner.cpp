@@ -24,6 +24,7 @@
 #include "attached_object_goal.hpp"
 #include "attached_point_model.hpp"
 #include "planning_snapshot.hpp"
+#include "planning_limits.hpp"
 namespace mtc = moveit::task_constructor;
 using Service = flexcell_interfaces::srv::PlanManipulation;
 using namespace std::chrono_literals;
@@ -32,6 +33,9 @@ class Planner : public rclcpp::Node {
  public:
   Planner() : Node("flexcell_mtc_planner", rclcpp::NodeOptions()
       .automatically_declare_parameters_from_overrides(true)) {
+    const auto guarded = flexcell::planningDescription(get_parameter("robot_description").as_string());
+    const auto changed = set_parameter(rclcpp::Parameter("robot_description", guarded));
+    if (!changed.successful) throw std::runtime_error("cannot set private planning limits: " + changed.reason);
     group_ = create_callback_group(rclcpp::CallbackGroupType::Reentrant);
     scene_ = create_client<moveit_msgs::srv::GetPlanningScene>(
         "/get_planning_scene", rmw_qos_profile_services_default, group_);

@@ -633,6 +633,8 @@ class MoveToPoseServer(Node):
             npts, planned_final_positions, planned_dur = trajectory_summary(traj)
             rec['planning_waypoints'] = npts
             rec['planned_duration_s'] = planned_dur
+            rec['planned_joint_names'] = traj_joint_names
+            rec['planned_final_positions'] = planned_final_positions
             if npts == 0 or planned_final_positions is None:
                 res = self._result(R.OUTCOME_FAILED, R.ERR_NO_COLLISION_FREE_PLAN, mcode,
                                    detail='planner returned an empty/unreadable trajectory')

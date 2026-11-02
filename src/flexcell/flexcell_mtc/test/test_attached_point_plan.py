@@ -40,6 +40,19 @@ def components(value):
     return [p.x, p.y, p.z, q.x, q.y, q.z, q.w]
 
 
+def require_stop_clearance(trajectories, physical_description):
+    limits = {joint.attrib['name']: (float(joint.find('limit').attrib['lower']),
+                                     float(joint.find('limit').attrib['upper']))
+              for joint in ET.fromstring(physical_description).findall('joint')
+              if joint.attrib.get('name') in ('joint1', 'joint2', 'joint3', 'joint4')}
+    for trajectory in trajectories:
+        joints = trajectory.joint_trajectory
+        for point in joints.points:
+            for name, value in zip(joints.joint_names, point.positions):
+                lower, upper = limits[name]
+                assert lower + .02 - 1e-6 <= value <= upper - .02 + 1e-6, (name, value)
+
+
 def test_attached_point_place_service_has_fk_valid_endpoints(tmp_path):
     fixture = json.loads(Path(__file__).with_name('attached_point_fixture.json').read_text())
     description = Path(get_package_share_directory('open_manipulator_description'))
@@ -124,6 +137,7 @@ def test_attached_point_place_service_has_fk_valid_endpoints(tmp_path):
         (tmp_path/'response.json').write_text(json.dumps(message_to_ordereddict(response),indent=2))
         assert response.success, response.detail
         assert len(response.trajectories) == len(response.executor_targets) == 3
+        require_stop_clearance(response.trajectories, config['robot_description'])
         ee_endpoints = []
         for index, trajectory in enumerate(response.trajectories):
             joints = trajectory.joint_trajectory
@@ -164,6 +178,38 @@ def test_attached_point_place_service_has_fk_valid_endpoints(tmp_path):
         assert len(snapshots)==2
         restored = deserialize_message((snapshots[1]/'scene.cdr').read_bytes(),PlanningScene)
         assert message_to_ordereddict(restored) == message_to_ordereddict(scene)
+
+        # Main CI 41435906803: the recovery PICK lifted onto joint3's -1.5
+        # mechanical stop and the next PLACE could not leave it. Reconstruct
+        # that PICK's measured start and goals, retaining normal IK freedom.
+        # This is a planner regression, not a replay of its full physics scene.
+        scene.world.collision_objects.clear()
+        scene.robot_state.attached_collision_objects.clear()
+        scene.robot_state.joint_state.position = [
+            .02, .02, .006971537196077029, -.005283631182111304,
+            -.00020938688886848613, .0020114101316563095]
+        pick = PlanManipulation.Request()
+        pick.operation, pick.object_name = 'PICK', 'target_box_a'
+        pick.object_pose = pose([.22, 0., .01749999751174475])
+        pick.targets = [pose([.22, 0., z]) for z in
+                        (.23749999751174475, .17749999751174475, .27749999751174476)]
+        pick.motion_profile_id, pick.deadline_ms = 'demo_slow', 15000
+        planned = client.call_async(pick)
+        end = time.monotonic()+35
+        while not planned.done() and time.monotonic()<end:
+            rclpy.spin_once(node,timeout_sec=.05)
+        assert planned.done(), 'reconstructed PICK did not finish within bound'
+        result = planned.result()
+        assert result.success, result.detail
+        assert len(result.trajectories) == 3
+        require_stop_clearance(result.trajectories, config['robot_description'])
+        for trajectory, target in zip(result.trajectories, pick.targets):
+            joints = trajectory.joint_trajectory
+            state.joint_positions = dict(zip(fixture['names'], scene.robot_state.joint_state.position)) | dict(
+                zip(joints.joint_names,joints.points[-1].positions))
+            state.update()
+            assert math.dist(components(state.get_pose('end_effector_link'))[:3],
+                             components(target.pose)[:3]) <= 1.0001e-4
     finally:
         node.destroy_service(server)
         node.destroy_node()
