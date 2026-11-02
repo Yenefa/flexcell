@@ -597,7 +597,7 @@ class TestJointFollowStop(unittest.TestCase):
                                       detach_to_world=unittest.mock.Mock())
         node._gripper = SimpleNamespace(command=unittest.mock.Mock())
         node._carry_release = unittest.mock.Mock()
-        def motion(position, profile, rid, cancel_check=None):
+        def motion(position, profile, rid, cancel_check=None, **kwargs):
             watch.fault = 'attached state does not match object motion'
             assert cancel_check()
             return (SimpleNamespace(outcome=2, error_code=32, execution_started=True,

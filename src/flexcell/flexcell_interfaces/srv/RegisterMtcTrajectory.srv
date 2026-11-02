@@ -1,4 +1,5 @@
-# Private, opt-in handoff to the existing single-arm motion executor.
+# Private one-use handoff to the existing single-arm motion executor.
+# MTC and attached_point endpoints share this schema and the admission lock.
 string request_id
 geometry_msgs/PoseStamped target
 string motion_profile_id

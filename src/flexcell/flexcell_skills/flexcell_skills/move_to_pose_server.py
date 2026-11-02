@@ -229,8 +229,10 @@ class MoveToPoseServer(Node):
             self, ExecuteTrajectory, self._exec_act, callback_group=self._cbg)
         self._fjt_client = ActionClient(
             self, FollowJointTrajectory, self._fjt_action, callback_group=self._cbg)
+        from flexcell_interfaces.srv import RegisterMtcTrajectory
+        self.create_service(RegisterMtcTrajectory, '/flexcell/attached_point/register_trajectory',
+                            self._register_point, callback_group=self._cbg)
         if gp('enable_mtc_handoff').value:
-            from flexcell_interfaces.srv import RegisterMtcTrajectory
             self.create_service(RegisterMtcTrajectory, '/flexcell/mtc/register_trajectory',
                                 self._register_mtc, callback_group=self._cbg)
 
@@ -256,6 +258,12 @@ class MoveToPoseServer(Node):
 
     # ------------------------------------------------------------- callbacks
     def _register_mtc(self, request, response):
+        return self._register_planned(request, response, 'mtc-')
+
+    def _register_point(self, request, response):
+        return self._register_planned(request, response, 'point-')
+
+    def _register_planned(self, request, response, prefix):
         # Registration has no physical effect and shares the same admission lock
         # as EVERY MoveToPose goal, including legacy/reset motions.
         if not self._admission.acquire(blocking=False):
@@ -264,18 +272,18 @@ class MoveToPoseServer(Node):
         try:
             if self._motion_blocked or self._terminal_uncertain:
                 raise ValueError('motion executor latched; reconcile and restart')
-            if not request.request_id.startswith('mtc-') or len(request.request_id) != 36:
+            if not request.request_id.startswith(prefix) or len(request.request_id) != len(prefix)+32:
                 raise ValueError('invalid private handoff token')
             candidate = MoveToPose.Goal(target=request.target, motion_profile_id=request.motion_profile_id)
             error, detail, _ = self._validate(candidate)
             if error is not None:
                 raise ValueError(detail)
             if request.target.header.frame_id != self._base:
-                raise ValueError('MTC target must already use the base frame')
+                raise ValueError('planned target must already use the base frame')
             validate_arm_trajectory(request.trajectory.joint_trajectory)
             self._registered_mtc = (request, time.monotonic() + 5.)
             response.success = True
-            response.detail = 'one-use MTC trajectory registered; no motion dispatched'
+            response.detail = 'one-use trajectory registered; no motion dispatched'
         except (ValueError, TypeError) as exc:
             response.detail = str(exc)
         finally:
@@ -283,16 +291,16 @@ class MoveToPoseServer(Node):
         return response
 
     def _consume_mtc(self, goal):
-        if not goal.request_id.startswith('mtc-'):
+        if not goal.request_id.startswith(('mtc-', 'point-')):
             return None
         item = self._registered_mtc
         self._registered_mtc = None  # one use, including mismatched/expired attempts
         if item is None or time.monotonic() > item[1]:
-            raise ValueError('missing or expired MTC trajectory handoff')
+            raise ValueError('missing or expired trajectory handoff')
         request = item[0]
         if (request.request_id != goal.request_id or request.target != goal.target
                 or request.motion_profile_id != goal.motion_profile_id):
-            raise ValueError('MTC handoff target/profile/token mismatch')
+            raise ValueError('trajectory handoff target/profile/token mismatch')
         trajectory = request.trajectory
         validate_arm_trajectory(trajectory.joint_trajectory)
         joints, age = self._joint_state()
@@ -300,7 +308,7 @@ class MoveToPoseServer(Node):
         if joints is None or age is None or age > .5 or any(
                 name not in positions or abs(positions[name] - trajectory.joint_trajectory.points[0].positions[i]) > .03
                 for i, name in enumerate(trajectory.joint_trajectory.joint_names)):
-            raise ValueError('measured start state differs from MTC trajectory')
+            raise ValueError('measured start state differs from planned trajectory')
         return trajectory
 
     def _on_js(self, msg):
@@ -433,7 +441,7 @@ class MoveToPoseServer(Node):
         out.pose.orientation.w = qw
         return out, None
 
-    def _ee_pose_now(self):
+    def _ee_pose_now(self, require_fresh=False):
         try:
             tr = self._tf_buffer.lookup_transform(
                 self._base, self._ee_link, Time(), Duration(seconds=self._tf_timeout))
@@ -442,7 +450,7 @@ class MoveToPoseServer(Node):
         ps = PoseStamped()
         ps.header.frame_id = self._base
         ps.header.stamp = self.get_clock().now().to_msg()
-        if getattr(self, '_require_fresh_tf', False):
+        if require_fresh or getattr(self, '_require_fresh_tf', False):
             source_ns = tr.header.stamp.sec * 10**9 + tr.header.stamp.nanosec
             if abs(self.get_clock().now().nanoseconds - source_ns) > 500_000_000:
                 return None, 'end-effector TF source stamp is stale or from another clock'
@@ -541,10 +549,10 @@ class MoveToPoseServer(Node):
             rec['planning_start'] = time.time()
             plan_t0 = time.monotonic()
 
-            preplanned = self._consume_mtc(goal) if goal.request_id.startswith('mtc-') else None
+            preplanned = self._consume_mtc(goal) if goal.request_id.startswith(('mtc-', 'point-')) else None
             if preplanned is not None:
                 traj, mcode = preplanned, MoveItErrorCodes.SUCCESS
-                rec['motion_backend'] = 'mtc'
+                rec['motion_backend'] = 'attached_point' if goal.request_id.startswith('point-') else 'mtc'
                 rec['planning_latency_ms'] = 0
                 rec['planning_end'] = time.time()
                 if goal_handle.is_cancel_requested:
@@ -731,7 +739,8 @@ class MoveToPoseServer(Node):
                     res.evidence_id = evidence
                     rec.update(outcome='STATE_UNKNOWN', error_code=res.error_code)
                     self._log(rec); goal_handle.abort(); return res
-            reached, rerr = self._ee_pose_now()
+            reached, rerr = (self._ee_pose_now(require_fresh=True) if goal.request_id.startswith('point-')
+                             else self._ee_pose_now())
             if reached is None:
                 self._motion_blocked = True
                 self._motion_blocked_reason = 'end-effector pose unavailable: %s' % rerr

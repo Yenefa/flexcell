@@ -27,11 +27,16 @@ def stamped(position, orientation=None):
 
 
 class MtcMotionClient:
+    planner_service = '/flexcell/mtc/plan'
+    registration_service = '/flexcell/mtc/register_trajectory'
+    token_prefix = 'mtc-'
+    attached_operations = ('PLACE',)
+
     def __init__(self, node):
         group = ReentrantCallbackGroup()
-        self.planner = node.create_client(PlanManipulation, '/flexcell/mtc/plan', callback_group=group)
+        self.planner = node.create_client(PlanManipulation, self.planner_service, callback_group=group)
         self.registration = node.create_client(RegisterMtcTrajectory,
-            '/flexcell/mtc/register_trajectory', callback_group=group)
+            self.registration_service, callback_group=group)
         self.executor = MoveToPoseClient(node, '/move_to_pose')
         self.blocked = False
         self.plans = []
@@ -48,7 +53,7 @@ class MtcMotionClient:
         self.plans = []
         self.audit = []
         if not self.planner.wait_for_service(timeout_sec=3.):
-            return False, 'MTC planner unavailable'
+            return False, 'planner unavailable: ' + self.planner_service
         request = PlanManipulation.Request()
         request.operation, request.object_name = operation, object_name
         request.object_pose = stamped(object_position, object_orientation)
@@ -59,21 +64,21 @@ class MtcMotionClient:
         future = self.planner.call_async(request)
         if wait_future(future, request.deadline_ms / 1000 + 8) != 'done':
             self.planner.remove_pending_request(future)
-            return False, 'MTC planning reply timed out; no motion dispatched'
+            return False, 'planning reply timed out; no motion dispatched'
         response = future.result()
         if not response.success:
             return False, response.detail
         if len(response.trajectories) != len(targets):
-            return False, 'wrong MTC stage count'
+            return False, 'wrong planned stage count'
         if attached_object_targets:
-            if operation != 'PLACE' or len(response.executor_targets) != len(targets):
-                return False, 'joint PLACE requires explicit end-effector endpoint targets'
+            if operation not in self.attached_operations or len(response.executor_targets) != len(targets):
+                return False, 'attached-point targets require explicit end-effector endpoints'
             executor_targets = []
             for endpoint in response.executor_targets:
                 p = endpoint.pose.position
                 value = [p.x, p.y, p.z]
                 if endpoint.header.frame_id != 'world' or not all(math.isfinite(x) for x in value):
-                    return False, 'invalid MTC end-effector endpoint'
+                    return False, 'invalid planned end-effector endpoint'
                 executor_targets.append(value)
         else:
             executor_targets = targets
@@ -86,15 +91,15 @@ class MtcMotionClient:
         if self.blocked:
             self._unknown('prior motion terminal state is unknown')
         if not self.plans or dist3(position, self.plans[0][0]) > 1e-6:
-            raise ValueError('unplanned or out-of-order MTC stage ' + request_id)
+            raise ValueError('unplanned or out-of-order stage ' + request_id)
         target, trajectory, executor_target = self.plans.pop(0)
         validate_trajectory(trajectory.joint_trajectory)
         if cancel_check and cancel_check():
-            return None, 'canceled before MTC handoff'
+            return None, 'canceled before trajectory handoff'
         if not self.registration.wait_for_service(timeout_sec=3.):
-            return None, 'MTC handoff is not enabled on the motion executor'
+            return None, 'trajectory handoff unavailable: ' + self.registration_service
         request = RegisterMtcTrajectory.Request()
-        request.request_id = 'mtc-' + uuid.uuid4().hex
+        request.request_id = self.token_prefix + uuid.uuid4().hex
         request.target = stamped(executor_target)
         request.motion_profile_id = profile
         request.trajectory = trajectory
@@ -121,3 +126,20 @@ class MtcMotionClient:
                 or result.error_code == MoveToPose.Result.ERR_STATE_UNKNOWN):
             self._unknown(result.detail)
         return result, None
+
+
+class AttachedPointMotionClient(MtcMotionClient):
+    """One OMPL point plan per legacy stage; no MTC task or stage sequence."""
+    planner_service = '/flexcell/attached_point/plan'
+    registration_service = '/flexcell/attached_point/register_trajectory'
+    token_prefix = 'point-'
+    attached_operations = ('POINT',)
+
+    def prepare_point(self, object_name, measured_pose, target, profile, deadline_ms):
+        position, orientation = measured_pose
+        audit = self.audit
+        try:
+            return self.prepare('POINT', object_name, position, [target], profile, deadline_ms,
+                                attached_object_targets=True, object_orientation=orientation)
+        finally:
+            self.audit = audit

@@ -17,10 +17,15 @@ on:
       camera:
         type: boolean
         default: false
+      legacy_parity:
+        description: Run only the existing five-task legacy carry comparison
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
   sim-smoke:
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.legacy_parity) }}
     concurrency:
       group: core-sim-${{ github.ref }}
       cancel-in-progress: false
@@ -97,6 +102,7 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
   joint-follow-smoke:
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.legacy_parity) }}
     concurrency:
       group: joint-follow-${{ github.ref }}
       cancel-in-progress: false
@@ -128,6 +134,7 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
   false-attach-smoke:
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.legacy_parity) }}
     concurrency:
       group: false-attach-${{ github.ref }}
       cancel-in-progress: false
@@ -156,6 +163,7 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
   native-five-cycle-smoke:
+    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.legacy_parity) }}
     concurrency:
       group: native-five-${{ github.ref }}
       cancel-in-progress: false
@@ -184,6 +192,67 @@ jobs:
         with:
           name: native-five-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/
+          retention-days: 14
+          if-no-files-found: warn
+  legacy-skill-matrix:
+    if: github.event_name == 'workflow_dispatch' && inputs.legacy_parity
+    strategy:
+      fail-fast: false
+      matrix:
+        backend: [teleport, detachable_joint]
+    concurrency:
+      group: legacy-${{ matrix.backend }}-${{ github.ref }}
+      cancel-in-progress: false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/Dockerfile.sim
+          load: true
+          tags: flexcell-sim:ci
+          build-args: SOURCE_REV=${{ github.sha }}
+          cache-from: type=gha,scope=flexcell-sim
+      - name: Same five declared legacy tasks, no replacement trials
+        env:
+          CARRY_BACKEND: ${{ matrix.backend }}
+        run: |
+          mkdir -p artifacts
+          docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
+            python3 /opt/flexcell/repo/scripts/sim_window.py \
+            --manifest /opt/flexcell/repo/infra/legacy-parity-window.json \
+            --out "/artifacts/legacy-$CARRY_BACKEND" \
+            --backend "$CARRY_BACKEND" --skill-backend legacy
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: legacy-${{ matrix.backend }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/
+          retention-days: 14
+          if-no-files-found: warn
+  legacy-carry-parity:
+    needs: legacy-skill-matrix
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: legacy-*-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts
+          merge-multiple: true
+      - name: Compare actual verification receipts at the existing tolerance
+        run: |
+          python3 scripts/parity_report.py \
+            artifacts/legacy-teleport/window.json artifacts/legacy-detachable_joint/window.json \
+            --out artifacts/legacy-carry-parity.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: legacy-parity-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/legacy-carry-parity.json
           retention-days: 14
           if-no-files-found: warn
   camera-data:
