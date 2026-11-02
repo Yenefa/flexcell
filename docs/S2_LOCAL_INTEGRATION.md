@@ -4,6 +4,11 @@
 **尚未在 S2 执行**；默认后端、物理门限、D3 NO_GO 和 n≥50 冻结均保持。
 依赖 #78、#81、#85，基于 `fix/native-audit-lifetime`；不需要先合入整个 PR 堆叠链。
 
+接续候选使用 [PR #92](https://github.com/Yenefa/flexcell/pull/92) 的
+`fix/archive-binding-status`，包含释放尾段修复、脱开观察超时拒收及 100 ms 在线采样窗口。
+在线 50 Hz 采样仍不替代离线 500 Hz 原始 hold 检查；原 1.5 mrad 限制不变。
+下列命令已指向这个候选；此处不宣称新增 S2 或有画面窗口已通过。
+
 测试严格串行，共两项逻辑任务，无恢复和替换样本：
 
 | 顺序 | 新声明 | 本地验收 |
@@ -20,8 +25,8 @@
 在 S2 的 Ubuntu/WSL2 shell 使用一个干净工作树。完整 ref 避免同名 tag 歧义：
 
 ```bash
-git fetch origin refs/heads/test/s2-local-integration:refs/remotes/origin/test/s2-local-integration
-git worktree add --detach ../flexcell-s2 refs/remotes/origin/test/s2-local-integration
+git fetch origin refs/heads/fix/archive-binding-status:refs/remotes/origin/fix/archive-binding-status
+git worktree add --detach ../flexcell-s2 refs/remotes/origin/fix/archive-binding-status
 cd ../flexcell-s2
 s2_revision=$(git rev-parse HEAD)
 s2_image="flexcell-s2:$s2_revision"
