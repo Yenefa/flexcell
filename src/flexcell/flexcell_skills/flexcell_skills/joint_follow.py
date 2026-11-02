@@ -276,8 +276,12 @@ class JointFollowMonitor:
 
     def feed(self, data):
         with self.cv:
-            if not self.armed or self.releasing or self.fault:
+            if not self.armed or self.fault:
                 return
+            # A release must not blind the sampler: the attached tail between the last
+            # pre-release publish and the true detach is what the release-boundary gate
+            # measures, so keep recording it while suppressing the fault it would raise.
+            releasing = self.releasing
             try:
                 if (not isinstance(data, dict) or type(data.get('schema_version')) is not int or
                         data['schema_version'] != 1):
@@ -302,11 +306,17 @@ class JointFollowMonitor:
                 if type(attached) is not bool:
                     raise ValueError('attachment component state is unavailable')
                 relative = relative_pose(data['parent_pose'], obj['pose'])
-                self.last_source_ns, self.last_sim_ns = source, sim
                 if not attached:
-                    if self.first_sim_ns:
+                    if self.first_sim_ns and not releasing:
                         raise ValueError('attachment component disappeared')
-                    return  # sampled before the joint appeared; the declared reference stands
+                    if releasing:
+                        # The released boundary is covered and the session is complete.
+                        self.armed = False
+                        self.releasing = False
+                    return
+                # Only an attached frame advances the session bounds: a detached frame must
+                # not extend last_sim_ns past the sampled evidence it is compared with.
+                self.last_source_ns, self.last_sim_ns = source, sim  # sampled before the joint appeared; the declared reference stands
                 if self.reference is None:
                     self.reference = relative[0] + relative[1]
                     self.reference_source = 'first_attached'
@@ -323,7 +333,8 @@ class JointFollowMonitor:
                 self.max_translation = max(self.max_translation, translation)
                 self.max_rotation = max(self.max_rotation, rotation)
                 self.samples += 1
-                if translation >= self.max_translation_m or rotation >= self.max_rotation_rad:
+                if not releasing and (translation >= self.max_translation_m or
+                                      rotation >= self.max_rotation_rad):
                     raise ValueError('measured relative pose exceeded follow limits')
                 self.cv.notify_all()
             except (ValueError, KeyError, TypeError) as exc:
@@ -383,15 +394,34 @@ class JointFollowMonitor:
             if self.armed:
                 self.releasing = True
 
+    def wait_detached(self, timeout=.3):
+        """Wait (bounded) until the trace shows the joint gone.
+
+        A confirmed release only says the guard let go; the last attached publish can
+        still arrive afterwards, and the release-boundary gate measures exactly that tail.
+        """
+        deadline = time.monotonic() + timeout
+        with self.cv:
+            while self.armed and not self.fault:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    break
+                self.cv.wait(remaining)
+            return not self.armed
+
     def end_release(self, confirmed):
         with self.cv:
+            if not confirmed:
+                # The caller says the release was not confirmed: keep that fault even if
+                # the trace already showed the joint gone.
+                self.releasing = False
+                self._fail('physical release unconfirmed')
+                self.armed = False
+                return
             if not self.armed:
                 return
             self.releasing = False
-            if confirmed:
-                self.armed = False
-            else:
-                self._fail('physical release unconfirmed')
+            self.armed = False
 
 
 class SnapshotWatch:

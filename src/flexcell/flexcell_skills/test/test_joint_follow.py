@@ -130,3 +130,50 @@ def test_backend_mismatch_and_unavailable_parameter_are_not_silent_fallbacks():
     assert not check_backend_parameter(client, request_type, 'teleport')[0]
     client.wait_for_service.return_value = False
     assert not check_backend_parameter(client, request_type, 'detachable_joint')[0]
+
+
+def test_release_keeps_sampling_the_attached_tail():
+    """The release boundary gate measures the tail after the last pre-release publish."""
+    follow, clock = monitor()
+    before = follow.summary()
+    follow.begin_release()
+    clock.tick(); follow.feed(frame(clock))
+    clock.tick(); follow.feed(frame(clock))
+    during = follow.summary()
+    assert during['samples'] == before['samples'] + 2
+    assert during['last_sim_ns'] == clock.now
+    assert during['releasing'] is True
+
+
+def test_release_does_not_raise_the_follow_fault_it_would_otherwise_raise():
+    follow, clock = monitor()
+    follow.begin_release()
+    clock.tick(20_000_000)
+    follow.feed(frame(clock, parent=[0., 0., 0.] + [0., 0., 0., 1.],
+                      child=[.1 + .05, 0., 0., 0., 0., 0., 1.]))
+    summary = follow.summary()
+    assert summary['fault'] == ''
+    assert summary['max_translation_m'] >= .05
+
+
+def test_detach_during_release_is_recorded_not_faulted():
+    follow, clock = monitor()
+    follow.begin_release()
+    clock.tick()
+    follow.feed(frame(clock, attached=False))
+    assert follow.summary()['fault'] == ''
+    follow.end_release(True)
+    assert not follow.summary()['active']
+
+
+def test_wait_detached_returns_once_the_trace_shows_the_joint_gone():
+    follow, clock = monitor()
+    follow.begin_release()
+
+    def detach_soon():
+        clock.tick()
+        follow.feed(frame(clock, attached=False))
+
+    threading.Timer(0.02, detach_soon).start()
+    assert follow.wait_detached(1.0) is True
+    assert follow.summary()['active'] is False

@@ -383,6 +383,9 @@ class CarryServer(Node):
                                  'cause': cause})
                 return False
         if follow is not None:
+            # Hold the summary until the trace reports the detach, so the released
+            # boundary keeps its last attached sample.
+            follow.wait_detached(.3)
             follow.end_release(True)
             if session:
                 self._log.write({'event': 'follow_final', 'follow': follow.summary(),
