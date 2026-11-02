@@ -1,0 +1,12 @@
+{
+  "initial_auditor_exit": 1,
+  "initial_auditor": "auditor-v1.py",
+  "finding": "The initial auditor incorrectly joined two startup attached frames at 4/6 sim ms to the later requested carry session.",
+  "resolution": "Audit the complete 25325-step raw timeline for continuity, then use the harness-recorded task-call monotonic interval for task attachment; retain startup and post-task records separately.",
+  "full_raw_step_gaps": 0,
+  "raw_frames_removed": 0,
+  "physical_windows_repeated": 0,
+  "task_attached_steps": 9554,
+  "pre_task_attached_steps": 2,
+  "post_task_attached_steps": 316
+}

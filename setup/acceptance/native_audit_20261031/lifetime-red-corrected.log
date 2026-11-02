@@ -1,0 +1,141 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0 -- /usr/bin/python3
+rootdir: /mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills
+configfile: setup.cfg
+plugins: ament-xmllint-0.17.5, launch-testing-ros-0.26.12, ament-flake8-0.17.5, ament-lint-0.17.5, ament-copyright-0.17.5, launch-testing-3.4.11, ament-pep257-0.17.5, cov-4.1.0, colcon-core-0.21.3, typeguard-4.1.5
+collecting ... collected 15 items / 13 deselected / 2 selected
+
+src/flexcell/flexcell_skills/test/test_native_cycle_window.py::test_first_unready_native_guard_stops_without_preposition_or_replacement FAILED [ 50%]
+src/flexcell/flexcell_skills/test/test_native_cycle_window.py::test_completed_audit_rows_are_released_before_next_live_cycle FAILED [100%]
+
+=================================== FAILURES ===================================
+___ test_first_unready_native_guard_stops_without_preposition_or_replacement ___
+
+tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-5/test_first_unready_native_guar0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e1621836a50>
+evidence = ({1000000000: {'monotonic_ns': 1002000000000, 'objects': {'target_box_a': {'joint_component': False, 'pose': [0.35, 0....}, ...], {'hold_ns': 10100000000, 'max_clock_skew_ns': 50000000, 'max_cycles': 5, 'min_attached_ns': 10000000000, ...})
+
+    def test_first_unready_native_guard_stops_without_preposition_or_replacement(tmp_path,monkeypatch,evidence):
+        import native_cycle_window
+        calls=[]
+        class Node:
+            def request(self,path,*_):
+                calls.append(path)
+                return True,SimpleNamespace(data=json.dumps(dict(ready=False,engaged=False,component_present=[False,False])))
+        gz=ModuleType('gz');transport=ModuleType('gz.transport13');transport.Node=Node;gz.transport13=transport
+        msgs=ModuleType('gz.msgs10')
+        for name,typ in [('empty_pb2','Empty'),('stringmsg_pb2','StringMsg'),('boolean_pb2','Boolean'),('pose_pb2','Pose')]:
+            setattr(msgs,name,SimpleNamespace(**{typ:type(typ,(),{})}))
+        for name,value in [('gz',gz),('gz.transport13',transport),('gz.msgs10',msgs)]: monkeypatch.setitem(sys.modules,name,value)
+        for name in ('physics_steps.jsonl','contact_steps.jsonl'): (tmp_path/name).touch()
+        assert native_cycle_window.worker(tmp_path,'empty',evidence[4]) == 1
+        result=json.loads((tmp_path/'worker.json').read_text())
+        assert result['status']=='STOPPED' and len(result['cycles'])==1
+        assert calls==['/world/empty/flexcell/carry/status']
+>       assert result.get('failure_monotonic_ns', 0) > 0
+E       assert 0 > 0
+E        +  where 0 = <built-in method get of dict object at 0x7e16218d7380>('failure_monotonic_ns', 0)
+E        +    where <built-in method get of dict object at 0x7e16218d7380> = {'cycles': [{'index': 0, 'object': 'target_box_a', 'previous_session': '', 'session': 'e6b0f4f630ed432c8d7f0b0a722f2a12'}], 'error': "ValueError('contact evidence: native guard is not explicitly detached before preposition')", 'heartbeat_errors': [], 'max_cycles': 5, ...}.get
+
+src/flexcell/flexcell_skills/test/test_native_cycle_window.py:107: AssertionError
+________ test_completed_audit_rows_are_released_before_next_live_cycle _________
+
+tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-5/test_completed_audit_rows_are_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x7e1621836c60>
+
+    def test_completed_audit_rows_are_released_before_next_live_cycle(tmp_path, monkeypatch):
+        import weakref
+        import native_cycle_window as module
+    
+        declaration = json.loads((ROOT/'infra/native-five-cycle-window.json').read_text())
+        references, alive_at_cycle_start = [], []
+        original_loads = json.loads
+    
+        class AuditRow(dict):
+            pass
+    
+        def loads(value, *args, **kwargs):
+            row = original_loads(value, *args, **kwargs)
+            if isinstance(row, dict) and row.get('audit_payload'):
+                row = AuditRow(row)
+                references.append(weakref.ref(row))
+            return row
+    
+        class Data(list):
+            def add(self):
+                item = SimpleNamespace(key='', value=[])
+                self.append(item)
+                return item
+    
+        class Pose:
+            def __init__(self):
+                self.name = ''
+                self.position = SimpleNamespace(x=0., y=0., z=0.)
+                self.orientation = SimpleNamespace(x=0., y=0., z=0., w=1.)
+                self.header = SimpleNamespace(data=Data())
+    
+        class Node:
+            def __init__(self):
+                self.owner, self.name, self.retired = '', '', set()
+    
+            def request(self, path, message, *_):
+                operation = path.rsplit('/', 1)[-1]
+                token = (message.header.data[0].value[0] if isinstance(message, Pose) and message.header.data
+                         else getattr(message, 'data', ''))
+                if operation == 'status':
+                    value = json.dumps(dict(ready=True, engaged=bool(self.owner), session=self.owner,
+                        object=self.name, component_present=[bool(self.owner) and self.name==n
+                            for n in declaration['preposition_poses']]))
+                elif operation == 'set_pose':
+                    value = True
+                elif operation == 'engage':
+                    value = not self.owner and token not in self.retired
+                    if value:
+                        self.owner, self.name = token, message.name
+                elif operation == 'release':
+                    value = bool(self.owner) and token == self.owner
+                    if value:
+                        self.retired.add(token)
+                        self.owner, self.name = '', ''
+                else:
+                    value = bool(self.owner) and token == self.owner and message.name == self.name
+                return True, SimpleNamespace(data=value)
+    
+        class Follower:
+            def __init__(self, _):
+                self.streams = []
+                alive_at_cycle_start.append(sum(reference() is not None for reference in references))
+    
+            def wait(self, *_args, **_kwargs):
+                return dict(sim_ns=1, monotonic_ns=1, parent_pose=[0.,0.,0.,0.,0.,0.,1.],
+                    objects={name:dict(pose=pose.copy(), joint_component=False)
+                        for name,pose in declaration['preposition_poses'].items()}), {}
+    
+        gz=ModuleType('gz'); transport=ModuleType('gz.transport13'); transport.Node=Node; gz.transport13=transport
+        msgs=ModuleType('gz.msgs10')
+        for name, typ in [('empty_pb2','Empty'), ('stringmsg_pb2','StringMsg'), ('boolean_pb2','Boolean')]:
+            setattr(msgs,name,SimpleNamespace(**{typ:SimpleNamespace}))
+        msgs.pose_pb2=SimpleNamespace(Pose=Pose)
+        for name,value in [('gz',gz),('gz.transport13',transport),('gz.msgs10',msgs)]:
+            monkeypatch.setitem(sys.modules,name,value)
+        monkeypatch.setattr(module,'Follower',Follower)
+        monkeypatch.setattr(module,'verify_cycle',lambda *_args:dict(status='NATIVE_CYCLE_PASS'))
+        monkeypatch.setattr(module.json,'loads',loads)
+        payload = json.dumps(dict(sim_ns=1, targets={}, audit_payload=True))+'\n'
+        for name in ('physics_steps.jsonl','contact_steps.jsonl'):
+            (tmp_path/name).write_text(payload)
+    
+        assert module.worker(tmp_path,'empty',declaration) == 0
+        assert len(references) == 10  # both complete raw streams audited in every cycle
+>       assert alive_at_cycle_start == [0, 0, 0, 0, 0]
+E       assert [0, 2, 2, 2, 2] == [0, 0, 0, 0, 0]
+E         At index 1 diff: 2 != 0
+E         Full diff:
+E         - [0, 0, 0, 0, 0]
+E         + [0, 2, 2, 2, 2]
+
+src/flexcell/flexcell_skills/test/test_native_cycle_window.py:196: AssertionError
+=========================== short test summary info ============================
+FAILED src/flexcell/flexcell_skills/test/test_native_cycle_window.py::test_first_unready_native_guard_stops_without_preposition_or_replacement
+FAILED src/flexcell/flexcell_skills/test/test_native_cycle_window.py::test_completed_audit_rows_are_released_before_next_live_cycle
+======================= 2 failed, 13 deselected in 0.35s =======================

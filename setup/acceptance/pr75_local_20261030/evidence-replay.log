@@ -1,0 +1,355 @@
+{
+  "status": "PHYSICS_EVIDENCE_REPRODUCED",
+  "source_revision": "ef959c68df597e136387454a9932d19916bfacc5",
+  "window_id": "2529abe07ad648fd9dba062658d780f5",
+  "tasks": 2,
+  "follow": [
+    {
+      "status": "FOLLOW_TRACE_PASS",
+      "object": "target_box_a",
+      "session": "7bb80518e7fd4d44a870c7cdbebf0763",
+      "attached_samples": 860,
+      "attached_duration_s": 17.18,
+      "physics_step_samples": 8591,
+      "max_translation_m": 6.080364492031833e-07,
+      "max_rotation_rad": 2.057008019296903e-06,
+      "physics_step_ns": 2000000,
+      "camera_frames": 241,
+      "contact_force_observed": false,
+      "interpretation": "50 Hz sampled functional evidence; not D3 or contact-grasp admission"
+    },
+    {
+      "status": "FOLLOW_TRACE_PASS",
+      "object": "target_box_b",
+      "session": "ed5b033823a34eeeb571f1cb3ed2fbbc",
+      "attached_samples": 836,
+      "attached_duration_s": 16.7,
+      "physics_step_samples": 8351,
+      "max_translation_m": 1.1577055463950347e-06,
+      "max_rotation_rad": 2.7907770535017058e-06,
+      "physics_step_ns": 2000000,
+      "camera_frames": 238,
+      "contact_force_observed": false,
+      "interpretation": "50 Hz sampled functional evidence; not D3 or contact-grasp admission"
+    }
+  ],
+  "all_rgb_pixels_verified": null,
+  "original_png_and_rosbag_retention": "full raw archive; see receipt for hashes and location",
+  "functional_only": true,
+  "default_admission": "NO_GO"
+}
+{
+  "status": "INTEGRATED_CONTACT_EVIDENCE_REPRODUCED",
+  "source_revision": "bba0ae3e578db53601adb0c5419ff9292c564a9d",
+  "follow": {
+    "status": "FOLLOW_TRACE_PASS",
+    "object": "target_box_a",
+    "session": "f783cfba89994646b1cd7b63086acbd4",
+    "attached_samples": 858,
+    "attached_duration_s": 17.14,
+    "physics_step_samples": 8571,
+    "max_translation_m": 5.770803600662453e-07,
+    "max_rotation_rad": 2.0407519716943184e-06,
+    "physics_step_ns": 2000000,
+    "camera_frames": 237,
+    "contact_force_observed": false,
+    "interpretation": "50 Hz sampled functional evidence; not D3 or contact-grasp admission"
+  },
+  "contact": {
+    "status": "INTEGRATED_CONTACT_RELEASE_PASS",
+    "object": "target_box_a",
+    "joined_steps": 9332,
+    "first_sim_ns": 13402000000,
+    "last_sim_ns": 32064000000,
+    "release_sim_ns": 31564000000,
+    "max_clock_skew_ns": 41310539,
+    "passive_control": "target_box_b",
+    "weight_samples": 500,
+    "mean_weight_force_n": 0.48999999999111865,
+    "freefall": {
+      "samples": 21,
+      "duration_s": 0.04,
+      "acceleration_m_s2": -9.800000000000233,
+      "fitted_initial_velocity_m_s": -0.03191952739919734,
+      "max_residual_m": 8.326672684688674e-17,
+      "initial_z_m": 0.0761510190405664
+    },
+    "states": {
+      "target_box_a": {
+        "CONTACTS_WITH_FORCE": 905,
+        "NO_REPORTED_CONTACTS": 8427
+      },
+      "ground_plane": {
+        "UNKNOWN": 9332
+      },
+      "target_box_b": {
+        "CONTACTS_WITH_FORCE": 9332
+      }
+    },
+    "signed_target_force_calibrated": false,
+    "preposition_reference_qualified": false,
+    "default_admission": "NO_GO",
+    "interpretation": "Same-round joint/motion/contact integration; not contact-grasp or D3 admission",
+    "session": "f783cfba89994646b1cd7b63086acbd4"
+  },
+  "lossless_rgb_frames_checked": 0,
+  "default_admission": "NO_GO"
+}
+{
+  "status": "RECOVERED_TASK_REMAINS_REJECTED",
+  "source_revision": "69ba3d7924cb84784a177ab0efb66eb2d03f6662",
+  "workflow_run": 40919257769,
+  "physical_tasks": 1,
+  "pick_attempts": 2,
+  "first_planning_execution_started": false,
+  "historical_failed_stage": "UNKNOWN",
+  "default_admission": "NO_GO"
+}
+{
+  "status": "FIRST_ATTEMPT_EVIDENCE_REPRODUCED",
+  "source_revision": "8df23906b6868fd7f488733491966697d102a987",
+  "follow": {
+    "status": "FOLLOW_TRACE_PASS",
+    "object": "target_box_a",
+    "session": "69d40239fb304be18ff471d7f3361d14",
+    "attached_samples": 857,
+    "attached_duration_s": 17.12,
+    "physics_step_samples": 8561,
+    "max_translation_m": 5.797764031094103e-07,
+    "max_rotation_rad": 2.0492212102021976e-06,
+    "physics_step_ns": 2000000,
+    "camera_frames": null,
+    "contact_force_observed": false,
+    "interpretation": "50 Hz sampled functional evidence; not D3 or contact-grasp admission"
+  },
+  "contact": {
+    "status": "INTEGRATED_CONTACT_RELEASE_PASS",
+    "object": "target_box_a",
+    "joined_steps": 9321,
+    "first_sim_ns": 14062000000,
+    "last_sim_ns": 32702000000,
+    "release_sim_ns": 32202000000,
+    "max_clock_skew_ns": 33320292,
+    "passive_control": "target_box_b",
+    "weight_samples": 500,
+    "mean_weight_force_n": 0.4899999999957504,
+    "freefall": {
+      "samples": 21,
+      "duration_s": 0.04,
+      "acceleration_m_s2": -9.799999999999867,
+      "fitted_initial_velocity_m_s": -0.032564266671010436,
+      "max_residual_m": 6.938893903907228e-17,
+      "initial_z_m": 0.0762679760958101
+    },
+    "states": {
+      "ground_plane": {
+        "UNKNOWN": 9321
+      },
+      "target_box_b": {
+        "CONTACTS_WITH_FORCE": 9321
+      },
+      "target_box_a": {
+        "CONTACTS_WITH_FORCE": 929,
+        "NO_REPORTED_CONTACTS": 8392
+      }
+    },
+    "signed_target_force_calibrated": false,
+    "preposition_reference_qualified": false,
+    "default_admission": "NO_GO",
+    "interpretation": "Same-round joint/motion/contact integration; not contact-grasp or D3 admission",
+    "session": "69d40239fb304be18ff471d7f3361d14"
+  },
+  "qualification_recovery_budget": 0,
+  "default_admission": "NO_GO"
+}
+{
+  "status": "STARTUP_STOP_RETAINED",
+  "source_revision": "6c3d87b7c3964d7dcd6f6124e8ca0e4e34a42968",
+  "qualification_cycles_dispatched": 0,
+  "raw_samples_per_stream": 7062,
+  "default_admission": "NO_GO"
+}
+{
+  "status": "PREPOSITION_STOP_RETAINED",
+  "cycle_attempts": 1,
+  "prepositions": 1,
+  "engage_requests": 0,
+  "completed_cycles": 0,
+  "default_admission": "NO_GO"
+}
+{
+  "status": "FIVE_NATIVE_CYCLES_REPRODUCED",
+  "source_revision": "858f01a352ca503dd2540102887e33cbd7d089f6",
+  "evidence": {
+    "status": "FIVE_NATIVE_CYCLES_PASS",
+    "cycles": [
+      {
+        "status": "NATIVE_CYCLE_PASS",
+        "index": 0,
+        "object": "target_box_a",
+        "session": "3b845c301bfd4cc190a0e2df5c632eca",
+        "reference_sim_ns": 15828000000,
+        "first_attached_ns": 15838000000,
+        "last_attached_ns": 25960000000,
+        "release_sim_ns": 25962000000,
+        "reference_bind_gap_ns": 10000000,
+        "attached_duration_s": 10.122,
+        "peak_translation_m": 0.0005095999999949936,
+        "peak_rotation_rad": 2.9802322387695312e-08,
+        "parent_max_translation_m": 0.0,
+        "passive_force_samples": 500,
+        "passive_mean_force_n": 0.4899999999927968,
+        "joined_steps": 5818,
+        "states": {
+          "CONTACTS_WITH_FORCE": 649,
+          "NO_REPORTED_CONTACTS": 5169
+        },
+        "freefall": {
+          "samples": 21,
+          "duration_s": 0.04,
+          "acceleration_m_s2": -9.800000000000233,
+          "fitted_initial_velocity_m_s": -0.02939999999999631,
+          "max_residual_m": 2.7755575615628914e-17,
+          "initial_z_m": 0.219412000005844
+        }
+      },
+      {
+        "status": "NATIVE_CYCLE_PASS",
+        "index": 1,
+        "object": "target_box_a",
+        "session": "3a3ad7406ce0450d809fc198424d4ee1",
+        "reference_sim_ns": 30262000000,
+        "first_attached_ns": 30268000000,
+        "last_attached_ns": 40388000000,
+        "release_sim_ns": 40390000000,
+        "reference_bind_gap_ns": 6000000,
+        "attached_duration_s": 10.12,
+        "peak_translation_m": 0.00015641299291499147,
+        "peak_rotation_rad": 2.9802322387695312e-08,
+        "parent_max_translation_m": 0.0,
+        "passive_force_samples": 500,
+        "passive_mean_force_n": 0.4899999999977377,
+        "joined_steps": 5815,
+        "states": {
+          "CONTACTS_WITH_FORCE": 649,
+          "NO_REPORTED_CONTACTS": 5166
+        },
+        "freefall": {
+          "samples": 21,
+          "duration_s": 0.04,
+          "acceleration_m_s2": -9.79999999998672,
+          "fitted_initial_velocity_m_s": -0.02940000000020237,
+          "max_residual_m": 2.525757381022231e-15,
+          "initial_z_m": 0.219765574020024
+        }
+      },
+      {
+        "status": "NATIVE_CYCLE_PASS",
+        "index": 2,
+        "object": "target_box_b",
+        "session": "30b5d6f1610d4401a99a190438409ea5",
+        "reference_sim_ns": 45706000000,
+        "first_attached_ns": 45712000000,
+        "last_attached_ns": 55830000000,
+        "release_sim_ns": 55832000000,
+        "reference_bind_gap_ns": 6000000,
+        "attached_duration_s": 10.118,
+        "peak_translation_m": 0.00027440000000099703,
+        "peak_rotation_rad": 2.9802322387695312e-08,
+        "parent_max_translation_m": 0.0,
+        "passive_force_samples": 500,
+        "passive_mean_force_n": 0.48999782969371647,
+        "joined_steps": 5814,
+        "states": {
+          "CONTACTS_WITH_FORCE": 648,
+          "NO_REPORTED_CONTACTS": 5166
+        },
+        "freefall": {
+          "samples": 21,
+          "duration_s": 0.04,
+          "acceleration_m_s2": -9.799999999999867,
+          "fitted_initial_velocity_m_s": -0.0294000000000021,
+          "max_residual_m": 2.7755575615628914e-17,
+          "initial_z_m": 0.219608000005959
+        }
+      },
+      {
+        "status": "NATIVE_CYCLE_PASS",
+        "index": 3,
+        "object": "target_box_b",
+        "session": "1e418defa8964c8c86bee8d575b12712",
+        "reference_sim_ns": 62818000000,
+        "first_attached_ns": 62824000000,
+        "last_attached_ns": 72946000000,
+        "release_sim_ns": 72948000000,
+        "reference_bind_gap_ns": 6000000,
+        "attached_duration_s": 10.122,
+        "peak_translation_m": 0.00015679999980097554,
+        "peak_rotation_rad": 2.9802322387695312e-08,
+        "parent_max_translation_m": 0.0,
+        "passive_force_samples": 500,
+        "passive_mean_force_n": 0.48999902837534204,
+        "joined_steps": 5816,
+        "states": {
+          "CONTACTS_WITH_FORCE": 649,
+          "NO_REPORTED_CONTACTS": 5167
+        },
+        "freefall": {
+          "samples": 21,
+          "duration_s": 0.04,
+          "acceleration_m_s2": -9.799999999999867,
+          "fitted_initial_velocity_m_s": -0.02940000000000172,
+          "max_residual_m": 2.7755575615628914e-17,
+          "initial_z_m": 0.219764800006366
+        }
+      },
+      {
+        "status": "NATIVE_CYCLE_PASS",
+        "index": 4,
+        "object": "target_box_a",
+        "session": "cb3f2a5892a9442a82bfbf8708b0c6ae",
+        "reference_sim_ns": 81936000000,
+        "first_attached_ns": 81946000000,
+        "last_attached_ns": 92070000000,
+        "release_sim_ns": 92072000000,
+        "reference_bind_gap_ns": 10000000,
+        "attached_duration_s": 10.124,
+        "peak_translation_m": 0.0005096000000010167,
+        "peak_rotation_rad": 2.9802322387695312e-08,
+        "parent_max_translation_m": 0.0,
+        "passive_force_samples": 500,
+        "passive_mean_force_n": 0.4899998625810208,
+        "joined_steps": 5819,
+        "states": {
+          "CONTACTS_WITH_FORCE": 649,
+          "NO_REPORTED_CONTACTS": 5170
+        },
+        "freefall": {
+          "samples": 21,
+          "duration_s": 0.04,
+          "acceleration_m_s2": -9.799999999999867,
+          "fitted_initial_velocity_m_s": -0.029400000000001276,
+          "max_residual_m": 5.551115123125783e-17,
+          "initial_z_m": 0.219412000005835
+        }
+      }
+    ],
+    "robot_motion_tasks": 0,
+    "qualification_cycles": 5,
+    "moving_parent_follow_qualified": false,
+    "default_admission": "NO_GO"
+  },
+  "default_admission": "NO_GO"
+}
+{
+  "status": "PLACE_MISS_REMAINS_REJECTED",
+  "workflow_run": 40953343176,
+  "source_revision": "01f7fc0a3ac9fb7e1f556fe4b64b1e12e35042b6",
+  "physical_tasks": 1,
+  "pick_attempts": 1,
+  "successful_place_motion_stages": 3,
+  "settled_error_m": 0.11261662912107007,
+  "stable_relative_translation_peak_m": 5.796087967726243e-07,
+  "default_admission": "NO_GO",
+  "original_grasp_b001_mechanism": "UNKNOWN"
+}

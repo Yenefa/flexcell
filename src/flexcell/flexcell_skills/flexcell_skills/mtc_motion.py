@@ -5,6 +5,7 @@ An unknown terminal state prevents task recovery or subsequent cleanup motion.
 """
 import uuid
 import hashlib
+import math
 from rclpy.serialization import serialize_message
 from geometry_msgs.msg import PoseStamped
 from rclpy.callback_groups import ReentrantCallbackGroup
@@ -18,10 +19,10 @@ class MotionTerminalUnknown(RuntimeError):
     pass
 
 
-def stamped(position):
+def stamped(position, orientation=None):
     value = PoseStamped()
     value.header.frame_id = 'world'
-    value.pose = pose_msg(position, [0., 0., 0., 1.])
+    value.pose = pose_msg(position, orientation or [0., 0., 0., 1.])
     return value
 
 
@@ -40,7 +41,8 @@ class MtcMotionClient:
         self.blocked = True
         raise MotionTerminalUnknown(detail + '; task must stop; reconcile before further motion')
 
-    def prepare(self, operation, object_name, object_position, targets, profile, deadline_ms):
+    def prepare(self, operation, object_name, object_position, targets, profile, deadline_ms,
+                *, attached_object_targets=False, object_orientation=None):
         if self.blocked:
             self._unknown('prior motion terminal state is unknown')
         self.plans = []
@@ -49,7 +51,8 @@ class MtcMotionClient:
             return False, 'MTC planner unavailable'
         request = PlanManipulation.Request()
         request.operation, request.object_name = operation, object_name
-        request.object_pose = stamped(object_position)
+        request.object_pose = stamped(object_position, object_orientation)
+        request.attached_object_targets = attached_object_targets
         request.targets = [stamped(position) for position in targets]
         request.motion_profile_id = profile
         request.deadline_ms = min(60000, max(1000, int(deadline_ms)))
@@ -62,9 +65,21 @@ class MtcMotionClient:
             return False, response.detail
         if len(response.trajectories) != len(targets):
             return False, 'wrong MTC stage count'
+        if attached_object_targets:
+            if operation != 'PLACE' or len(response.executor_targets) != len(targets):
+                return False, 'joint PLACE requires explicit end-effector endpoint targets'
+            executor_targets = []
+            for endpoint in response.executor_targets:
+                p = endpoint.pose.position
+                value = [p.x, p.y, p.z]
+                if endpoint.header.frame_id != 'world' or not all(math.isfinite(x) for x in value):
+                    return False, 'invalid MTC end-effector endpoint'
+                executor_targets.append(value)
+        else:
+            executor_targets = targets
         for item in response.trajectories:
             validate_trajectory(item.joint_trajectory)
-        self.plans = list(zip(targets, response.trajectories))
+        self.plans = list(zip(targets, response.trajectories, executor_targets))
         return True, response.detail
 
     def call(self, position, *, profile, deadline_ms, request_id, cancel_check=None):
@@ -72,7 +87,7 @@ class MtcMotionClient:
             self._unknown('prior motion terminal state is unknown')
         if not self.plans or dist3(position, self.plans[0][0]) > 1e-6:
             raise ValueError('unplanned or out-of-order MTC stage ' + request_id)
-        target, trajectory = self.plans.pop(0)
+        target, trajectory, executor_target = self.plans.pop(0)
         validate_trajectory(trajectory.joint_trajectory)
         if cancel_check and cancel_check():
             return None, 'canceled before MTC handoff'
@@ -80,11 +95,12 @@ class MtcMotionClient:
             return None, 'MTC handoff is not enabled on the motion executor'
         request = RegisterMtcTrajectory.Request()
         request.request_id = 'mtc-' + uuid.uuid4().hex
-        request.target = stamped(target)
+        request.target = stamped(executor_target)
         request.motion_profile_id = profile
         request.trajectory = trajectory
         self.audit.append(dict(stage=request_id, request_id=request.request_id,
             target=list(position), profile=profile,
+            executor_target=list(executor_target),
             trajectory_sha256=hashlib.sha256(serialize_message(trajectory)).hexdigest()))
         future = self.registration.call_async(request)
         if wait_future(future, 3.) != 'done':
@@ -93,7 +109,7 @@ class MtcMotionClient:
         response = future.result()
         if not response.success:
             return None, response.detail
-        result, error = self.executor.call(position, profile=profile, deadline_ms=deadline_ms,
+        result, error = self.executor.call(executor_target, profile=profile, deadline_ms=deadline_ms,
             request_id=request.request_id, cancel_check=cancel_check)
         self.audit[-1].update(terminal_reply_received=result is not None, transport_error=error,
             evidence_id=result.evidence_id if result is not None else None,

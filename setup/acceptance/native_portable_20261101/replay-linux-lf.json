@@ -1,0 +1,450 @@
+{
+  "status": "NATIVE_AUDIT_LIFETIME_REPLAY_PASS",
+  "verification_sources": {
+    "policy": "CRLF_PAIRS_TO_LF_ONLY",
+    "canonical_source_revision": "3328693107c217d291d3fe6f7d6b52812a6618da",
+    "files": {
+      "scripts/native_cycle_gate.py": {
+        "canonical_sha256": "61e4decd3c9902a6e1711a5652608a11aa7e1d8bddb83307b4a4a3be0bcf920d",
+        "observed_sha256": "61e4decd3c9902a6e1711a5652608a11aa7e1d8bddb83307b4a4a3be0bcf920d",
+        "recorded_checkout_sha256": "61e4decd3c9902a6e1711a5652608a11aa7e1d8bddb83307b4a4a3be0bcf920d",
+        "observed_line_endings": "LF"
+      },
+      "scripts/integrated_contact_gate.py": {
+        "canonical_sha256": "22ba0e044b7ac33f908c729727cac0a5fbf68a05f7ee0fb420dc2f795ad099b4",
+        "observed_sha256": "22ba0e044b7ac33f908c729727cac0a5fbf68a05f7ee0fb420dc2f795ad099b4",
+        "recorded_checkout_sha256": "22ba0e044b7ac33f908c729727cac0a5fbf68a05f7ee0fb420dc2f795ad099b4",
+        "observed_line_endings": "LF"
+      },
+      "scripts/contact_gate.py": {
+        "canonical_sha256": "b0c4f246b9efdd5e6e9fa86b699de74aebb885b116f0803b8eb0fa5474c04ee9",
+        "observed_sha256": "b0c4f246b9efdd5e6e9fa86b699de74aebb885b116f0803b8eb0fa5474c04ee9",
+        "recorded_checkout_sha256": "81cc3354c14c10c11d23f150f04c1cd985c21b492b912f0431fdda1b8eaeda9e",
+        "observed_line_endings": "LF"
+      },
+      "src/flexcell/flexcell_skills/flexcell_skills/joint_follow.py": {
+        "canonical_sha256": "d89c1f2073b4aaf2e80171ac3b38da8717f6ccd339227acf6d9afae1a03190ef",
+        "observed_sha256": "d89c1f2073b4aaf2e80171ac3b38da8717f6ccd339227acf6d9afae1a03190ef",
+        "recorded_checkout_sha256": "a22d41d003d06d19c64f904f21a2bc0ebf2f36153d44083d417c3b4d62e79319",
+        "observed_line_endings": "LF"
+      }
+    }
+  },
+  "baseline": {
+    "source_revision": "19caa0199660c6a0d9d95af14620695dde0eedcf",
+    "source_revision_metadata": "VALID",
+    "partition": "flexcell-native5-76268a66d9ed406e901a39294c11b198",
+    "raw_clocks": {
+      "physics_steps": {
+        "rows": 83339,
+        "raw_step_gaps": 0,
+        "max_producer_gap_ns": 102583651
+      },
+      "contact_steps": {
+        "rows": 83339,
+        "raw_step_gaps": 0,
+        "max_producer_gap_ns": 102776683
+      },
+      "max_clock_skew_ns": 4427080
+    },
+    "gate": {
+      "status": "FIVE_NATIVE_CYCLES_PASS",
+      "cycles": [
+        {
+          "status": "NATIVE_CYCLE_PASS",
+          "index": 0,
+          "object": "target_box_a",
+          "session": "13366a1cccba49d292607cc73f8c2d1e",
+          "reference_sim_ns": 27340000000,
+          "first_attached_ns": 27344000000,
+          "last_attached_ns": 37454000000,
+          "release_sim_ns": 37456000000,
+          "reference_bind_gap_ns": 4000000,
+          "attached_duration_s": 10.11,
+          "peak_translation_m": 3.920000000001207e-05,
+          "peak_rotation_rad": 0.0,
+          "parent_max_translation_m": 0.0,
+          "passive_force_samples": 500,
+          "passive_mean_force_n": 0.48999999998820404,
+          "joined_steps": 5809,
+          "states": {
+            "CONTACTS_WITH_FORCE": 649,
+            "NO_REPORTED_CONTACTS": 5160
+          },
+          "freefall": {
+            "samples": 21,
+            "duration_s": 0.04,
+            "acceleration_m_s2": -9.800000000000233,
+            "fitted_initial_velocity_m_s": -0.029399999999998337,
+            "max_residual_m": 1.1102230246251565e-16,
+            "initial_z_m": 0.219882400006069
+          }
+        },
+        {
+          "status": "NATIVE_CYCLE_PASS",
+          "index": 1,
+          "object": "target_box_a",
+          "session": "244df1c29ec34b3fbe32906631243b5c",
+          "reference_sim_ns": 44880000000,
+          "first_attached_ns": 44888000000,
+          "last_attached_ns": 55006000000,
+          "release_sim_ns": 55008000000,
+          "reference_bind_gap_ns": 8000000,
+          "attached_duration_s": 10.118,
+          "peak_translation_m": 0.00031359999998700235,
+          "peak_rotation_rad": 0.0,
+          "parent_max_translation_m": 0.0,
+          "passive_force_samples": 500,
+          "passive_mean_force_n": 0.4899999999940087,
+          "joined_steps": 5815,
+          "states": {
+            "CONTACTS_WITH_FORCE": 649,
+            "NO_REPORTED_CONTACTS": 5166
+          },
+          "freefall": {
+            "samples": 21,
+            "duration_s": 0.04,
+            "acceleration_m_s2": -9.799999999999867,
+            "fitted_initial_velocity_m_s": -0.029400000000001276,
+            "max_residual_m": 5.551115123125783e-17,
+            "initial_z_m": 0.219608000006077
+          }
+        },
+        {
+          "status": "NATIVE_CYCLE_PASS",
+          "index": 2,
+          "object": "target_box_b",
+          "session": "5ee800c6722a447f9c83083649c513ec",
+          "reference_sim_ns": 64644000000,
+          "first_attached_ns": 64652000000,
+          "last_attached_ns": 74770000000,
+          "release_sim_ns": 74772000000,
+          "reference_bind_gap_ns": 8000000,
+          "attached_duration_s": 10.118,
+          "peak_translation_m": 0.00031359999999699777,
+          "peak_rotation_rad": 0.0,
+          "parent_max_translation_m": 0.0,
+          "passive_force_samples": 500,
+          "passive_mean_force_n": 0.48999951040758316,
+          "joined_steps": 5815,
+          "states": {
+            "CONTACTS_WITH_FORCE": 649,
+            "NO_REPORTED_CONTACTS": 5166
+          },
+          "freefall": {
+            "samples": 21,
+            "duration_s": 0.04,
+            "acceleration_m_s2": -9.800000000000233,
+            "fitted_initial_velocity_m_s": -0.029399999999996596,
+            "max_residual_m": 5.551115123125783e-17,
+            "initial_z_m": 0.219608000005807
+          }
+        },
+        {
+          "status": "NATIVE_CYCLE_PASS",
+          "index": 3,
+          "object": "target_box_b",
+          "session": "1493926152484dd9818d967e1be4adb5",
+          "reference_sim_ns": 87840000000,
+          "first_attached_ns": 87848000000,
+          "last_attached_ns": 97966000000,
+          "release_sim_ns": 97968000000,
+          "reference_bind_gap_ns": 8000000,
+          "attached_duration_s": 10.118,
+          "peak_translation_m": 0.0003136000000010222,
+          "peak_rotation_rad": 0.0,
+          "parent_max_translation_m": 0.0,
+          "passive_force_samples": 500,
+          "passive_mean_force_n": 0.48999951040758316,
+          "joined_steps": 5815,
+          "states": {
+            "CONTACTS_WITH_FORCE": 649,
+            "NO_REPORTED_CONTACTS": 5166
+          },
+          "freefall": {
+            "samples": 21,
+            "duration_s": 0.04,
+            "acceleration_m_s2": -9.799999999999867,
+            "fitted_initial_velocity_m_s": -0.029400000000001276,
+            "max_residual_m": 5.551115123125783e-17,
+            "initial_z_m": 0.2196080000058
+          }
+        },
+        {
+          "status": "NATIVE_CYCLE_PASS",
+          "index": 4,
+          "object": "target_box_a",
+          "session": "5adccb33374545379c06263db5a3920b",
+          "reference_sim_ns": 113224000000,
+          "first_attached_ns": 113228000000,
+          "last_attached_ns": 123344000000,
+          "release_sim_ns": 123346000000,
+          "reference_bind_gap_ns": 4000000,
+          "attached_duration_s": 10.116,
+          "peak_translation_m": 3.920000000001207e-05,
+          "peak_rotation_rad": 0.0,
+          "parent_max_translation_m": 0.0,
+          "passive_force_samples": 500,
+          "passive_mean_force_n": 0.4899995104075831,
+          "joined_steps": 5812,
+          "states": {
+            "CONTACTS_WITH_FORCE": 649,
+            "NO_REPORTED_CONTACTS": 5163
+          },
+          "freefall": {
+            "samples": 21,
+            "duration_s": 0.04,
+            "acceleration_m_s2": -9.800000000000233,
+            "fitted_initial_velocity_m_s": -0.029399999999998337,
+            "max_residual_m": 1.1102230246251565e-16,
+            "initial_z_m": 0.219882400006069
+          }
+        }
+      ],
+      "robot_motion_tasks": 0,
+      "qualification_cycles": 5,
+      "moving_parent_follow_qualified": false,
+      "default_admission": "NO_GO"
+    },
+    "reader_timing": {
+      "max_live_collect_ns": 385436406,
+      "max_recorded_gc_inside_live_wait_ns": 362705794,
+      "max_recorded_gc_any_phase_ns": 1672722995,
+      "live_collect_ns_per_cycle": [
+        21860244,
+        385436406,
+        13628264,
+        22903664,
+        13930748
+      ],
+      "interpretation": "one diagnostic window per version; no latency guarantee or CI root-cause claim"
+    },
+    "health_checks": {
+      "health_after_cycles": 19,
+      "health_after": 19
+    }
+  },
+  "patched": {
+    "source_revision": "3328693107c217d291d3fe6f7d6b52812a6618da",
+    "source_revision_metadata": "INVALID_TRAILING_CR",
+    "partition": "flexcell-native5-c0b352cb8eac4fd19a53081b38c5d67f",
+    "raw_clocks": {
+      "physics_steps": {
+        "rows": 83354,
+        "raw_step_gaps": 0,
+        "max_producer_gap_ns": 102691827
+      },
+      "contact_steps": {
+        "rows": 83354,
+        "raw_step_gaps": 0,
+        "max_producer_gap_ns": 102682162
+      },
+      "max_clock_skew_ns": 3761947
+    },
+    "gate": {
+      "status": "FIVE_NATIVE_CYCLES_PASS",
+      "cycles": [
+        {
+          "status": "NATIVE_CYCLE_PASS",
+          "index": 0,
+          "object": "target_box_a",
+          "session": "2eb86b923dd64f84a1538eb1e2cf97cf",
+          "reference_sim_ns": 27370000000,
+          "first_attached_ns": 27378000000,
+          "last_attached_ns": 37490000000,
+          "release_sim_ns": 37492000000,
+          "reference_bind_gap_ns": 8000000,
+          "attached_duration_s": 10.112,
+          "peak_translation_m": 0.000313600000001022,
+          "peak_rotation_rad": 0.0,
+          "parent_max_translation_m": 0.0,
+          "passive_force_samples": 500,
+          "passive_mean_force_n": 0.4899999999858667,
+          "joined_steps": 5812,
+          "states": {
+            "CONTACTS_WITH_FORCE": 649,
+            "NO_REPORTED_CONTACTS": 5163
+          },
+          "freefall": {
+            "samples": 21,
+            "duration_s": 0.04,
+            "acceleration_m_s2": -9.799999999999867,
+            "fitted_initial_velocity_m_s": -0.0294000000000021,
+            "max_residual_m": 2.7755575615628914e-17,
+            "initial_z_m": 0.219608000006166
+          }
+        },
+        {
+          "status": "NATIVE_CYCLE_PASS",
+          "index": 1,
+          "object": "target_box_a",
+          "session": "efa8f5e80d60453596ac066a6bb3dabc",
+          "reference_sim_ns": 45170000000,
+          "first_attached_ns": 45176000000,
+          "last_attached_ns": 55292000000,
+          "release_sim_ns": 55294000000,
+          "reference_bind_gap_ns": 6000000,
+          "attached_duration_s": 10.116,
+          "peak_translation_m": 0.0001567999999930169,
+          "peak_rotation_rad": 0.0,
+          "parent_max_translation_m": 0.0,
+          "passive_force_samples": 500,
+          "passive_mean_force_n": 0.4899999999978127,
+          "joined_steps": 5813,
+          "states": {
+            "CONTACTS_WITH_FORCE": 649,
+            "NO_REPORTED_CONTACTS": 5164
+          },
+          "freefall": {
+            "samples": 21,
+            "duration_s": 0.04,
+            "acceleration_m_s2": -9.799999999999867,
+            "fitted_initial_velocity_m_s": -0.02940000000000199,
+            "max_residual_m": 2.7755575615628914e-17,
+            "initial_z_m": 0.219764800006187
+          }
+        },
+        {
+          "status": "NATIVE_CYCLE_PASS",
+          "index": 2,
+          "object": "target_box_b",
+          "session": "794996ecebe94d37be3278208b8339a5",
+          "reference_sim_ns": 65476000000,
+          "first_attached_ns": 65482000000,
+          "last_attached_ns": 75600000000,
+          "release_sim_ns": 75602000000,
+          "reference_bind_gap_ns": 6000000,
+          "attached_duration_s": 10.118,
+          "peak_translation_m": 0.0001568000000000186,
+          "peak_rotation_rad": 0.0,
+          "parent_max_translation_m": 0.0,
+          "passive_force_samples": 500,
+          "passive_mean_force_n": 0.4899998625810207,
+          "joined_steps": 5814,
+          "states": {
+            "CONTACTS_WITH_FORCE": 649,
+            "NO_REPORTED_CONTACTS": 5165
+          },
+          "freefall": {
+            "samples": 21,
+            "duration_s": 0.04,
+            "acceleration_m_s2": -9.799999999999867,
+            "fitted_initial_velocity_m_s": -0.029400000000001376,
+            "max_residual_m": 5.551115123125783e-17,
+            "initial_z_m": 0.219764800005987
+          }
+        },
+        {
+          "status": "NATIVE_CYCLE_PASS",
+          "index": 3,
+          "object": "target_box_b",
+          "session": "1e9fa9abf39143e1abf33e7bbf09755f",
+          "reference_sim_ns": 87582000000,
+          "first_attached_ns": 87588000000,
+          "last_attached_ns": 97706000000,
+          "release_sim_ns": 97708000000,
+          "reference_bind_gap_ns": 6000000,
+          "attached_duration_s": 10.118,
+          "peak_translation_m": 0.0001568000000000186,
+          "peak_rotation_rad": 0.0,
+          "parent_max_translation_m": 0.0,
+          "passive_force_samples": 500,
+          "passive_mean_force_n": 0.4899998625810207,
+          "joined_steps": 5814,
+          "states": {
+            "CONTACTS_WITH_FORCE": 649,
+            "NO_REPORTED_CONTACTS": 5165
+          },
+          "freefall": {
+            "samples": 21,
+            "duration_s": 0.04,
+            "acceleration_m_s2": -9.799999999999867,
+            "fitted_initial_velocity_m_s": -0.029400000000001376,
+            "max_residual_m": 5.551115123125783e-17,
+            "initial_z_m": 0.219764800005987
+          }
+        },
+        {
+          "status": "NATIVE_CYCLE_PASS",
+          "index": 4,
+          "object": "target_box_a",
+          "session": "f27881f22b7b44d6b2a7aabc137692e1",
+          "reference_sim_ns": 113772000000,
+          "first_attached_ns": 113780000000,
+          "last_attached_ns": 123902000000,
+          "release_sim_ns": 123904000000,
+          "reference_bind_gap_ns": 8000000,
+          "attached_duration_s": 10.122,
+          "peak_translation_m": 0.000313600000001022,
+          "peak_rotation_rad": 0.0,
+          "parent_max_translation_m": 0.0,
+          "passive_force_samples": 500,
+          "passive_mean_force_n": 0.48999986258102074,
+          "joined_steps": 5817,
+          "states": {
+            "CONTACTS_WITH_FORCE": 649,
+            "NO_REPORTED_CONTACTS": 5168
+          },
+          "freefall": {
+            "samples": 21,
+            "duration_s": 0.04,
+            "acceleration_m_s2": -9.799999999999867,
+            "fitted_initial_velocity_m_s": -0.0294000000000021,
+            "max_residual_m": 2.7755575615628914e-17,
+            "initial_z_m": 0.219608000006166
+          }
+        }
+      ],
+      "robot_motion_tasks": 0,
+      "qualification_cycles": 5,
+      "moving_parent_follow_qualified": false,
+      "default_admission": "NO_GO"
+    },
+    "reader_timing": {
+      "max_live_collect_ns": 104428982,
+      "max_recorded_gc_inside_live_wait_ns": 98861284,
+      "max_recorded_gc_any_phase_ns": 1119493295,
+      "live_collect_ns_per_cycle": [
+        20851917,
+        49846339,
+        13641535,
+        104428982,
+        16254473
+      ],
+      "interpretation": "one diagnostic window per version; no latency guarantee or CI root-cause claim"
+    },
+    "health_checks": {
+      "health_after_cycles": 19,
+      "health_after": 19
+    }
+  },
+  "historical": {
+    "workflow_run": 41116653853,
+    "status": "STOPPED",
+    "completed_cycle_gates": [
+      "NATIVE_CYCLE_PASS",
+      "NATIVE_CYCLE_PASS"
+    ],
+    "incomplete_cycle_index": 2,
+    "raw_clocks": {
+      "physics_steps": {
+        "rows": 30716,
+        "raw_step_gaps": 0,
+        "max_producer_gap_ns": 105194347
+      },
+      "contact_steps": {
+        "rows": 30716,
+        "raw_step_gaps": 0,
+        "max_producer_gap_ns": 105222464
+      },
+      "max_clock_skew_ns": 3525946
+    },
+    "release_rpc_ns": 11953258,
+    "release_sim_ns": 59974000000,
+    "historical_pause_cause": "UNKNOWN"
+  },
+  "old_wsl_dirty_patch_unchanged": true,
+  "remaining_runtime_processes": 0,
+  "moving_parent_follow_qualified": false,
+  "default_admission": "NO_GO"
+}

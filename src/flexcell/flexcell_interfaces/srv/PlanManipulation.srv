@@ -3,9 +3,16 @@ string operation
 string object_name
 geometry_msgs/PoseStamped object_pose
 geometry_msgs/PoseStamped[] targets
+# Joint PLACE only: first two targets are box centers, third defines world
+# retreat displacement from target 2. object_pose is a fresh physical sample.
+# False retains the existing three end-effector position targets.
+bool attached_object_targets
 string motion_profile_id
 uint32 deadline_ms
 ---
 bool success
 string detail
 moveit_msgs/RobotTrajectory[] trajectories
+# Measured-model FK at each trajectory endpoint, always end_effector_link.
+# The adapter must not hand an object-center target to MoveToPose.
+geometry_msgs/PoseStamped[] executor_targets

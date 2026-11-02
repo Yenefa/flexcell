@@ -9,6 +9,7 @@ pose, otherwise PLACE_FAILED - honest either way.
 
 import threading
 import time
+import math
 
 import rclpy
 from rclpy.action import ActionServer, CancelResponse, GoalResponse
@@ -232,11 +233,28 @@ class PlaceServer(Node):
             box_target_z = place_pos[2] + self._clearance
             ee_z = box_target_z + self._carry
             hover = [pp.x, pp.y, ee_z + self._hover]
+            descend = [pp.x, pp.y, ee_z]
+            retreat = [pp.x, pp.y, ee_z + self._retreat]
             mtc = getattr(self, '_mtc', None)
             if mtc is not None:
-                planned, message = mtc.prepare('PLACE', goal.object_name, place_pos,
-                    [hover, [pp.x, pp.y, ee_z], [pp.x, pp.y, ee_z + self._retreat]],
-                    profile, self._deadline)
+                joint_targets = self._carry_backend == 'detachable_joint'
+                planning_object, planning_quat = place_pos, None
+                if joint_targets:
+                    sampled, error = sample_gz_pose(goal.object_name, max_age_s=.5)
+                    if sampled is None:
+                        return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
+                                      'attached object sample unavailable before planning: %s' % error)
+                    planning_object, planning_quat = sampled
+                    # A fixed joint preserves a link-relative SE(3), not a
+                    # world-vertical offset. MTC plans the attached box center.
+                    hover = [pp.x, pp.y, box_target_z + self._hover]
+                    descend = [pp.x, pp.y, box_target_z]
+                    retreat = [pp.x, pp.y, box_target_z + self._retreat]
+                    rec['planning_object_pose'] = list(planning_object) + list(planning_quat)
+                rec['planning_target_reference'] = 'attached_box_center' if joint_targets else 'end_effector_link'
+                planned, message = mtc.prepare('PLACE', goal.object_name, planning_object,
+                    [hover, descend, retreat], profile, self._deadline,
+                    attached_object_targets=joint_targets, object_orientation=planning_quat)
                 rec.update(skill_backend='mtc', planning_detail=message)
                 if follow is not None and follow.problem():
                     return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
@@ -258,7 +276,6 @@ class PlaceServer(Node):
                 return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
                               'hover motion failed: %s' % detail,
                               motion_err=merr_code)
-            descend = [pp.x, pp.y, ee_z]
             mres, merr_code, detail = self._motion(descend, profile, rid + '-descend',
                                                    cancel_check=cancel_requested)
             if follow is not None and follow.problem():
@@ -278,6 +295,16 @@ class PlaceServer(Node):
             if goal_handle.is_cancel_requested:
                 return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
                               'canceled before RELEASING (box still carried)')
+            if mtc is not None and self._carry_backend == 'detachable_joint':
+                sampled, error = sample_gz_pose(goal.object_name, max_age_s=.5)
+                if sampled is None:
+                    return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
+                                  'pre-release physical observation unavailable; carry held: %s' % error)
+                rec['object_before_release'] = list(sampled[0]) + list(sampled[1])
+                rec['release_target_error_m'] = dist3(sampled[0], descend)
+                if not math.isfinite(rec['release_target_error_m']) or rec['release_target_error_m'] > self._tol:
+                    return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
+                                  'attached object outside unchanged place tolerance before release; carry held')
             if follow is not None:
                 if not follow.confirm_now():
                     return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
@@ -329,8 +356,7 @@ class PlaceServer(Node):
 
             # ---------- RETREATING ----------
             self._feedback(goal_handle, 'RETREATING', t0)
-            up = [descend[0], descend[1], descend[2] + self._retreat]
-            mres, merr_code, detail = self._motion(up, profile, rid + '-retreat',
+            mres, merr_code, detail = self._motion(retreat, profile, rid + '-retreat',
                                                    cancel_check=cancel_requested)
             if mres is None or int(mres.outcome) != R.OUTCOME_SUCCEEDED:
                 if goal_handle.is_cancel_requested:

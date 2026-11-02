@@ -78,8 +78,11 @@ def main():
     parser.add_argument('--contact-trace', action='store_true')
     parser.add_argument('--release-clearance-m', type=float)
     parser.add_argument('--qualification-no-recovery', action='store_true')
+    parser.add_argument('--planner-diagnostics', action='store_true')
     parser.add_argument('--case', choices=['normal', 'dual_object', 'recovery_once', 'budget_exhaustion',
-                                           'unreachable_place'], default='normal')
+                                           'unreachable_place', 'false_attach'], default='normal')
+    parser.add_argument('--false-attach', default='',
+                        help='declared live false-attach spec, object:offset_m[:hold_s]')
     args = parser.parse_args()
     out = args.out / ('run-' + uuid.uuid4().hex[:12])
     out.mkdir(parents=True, exist_ok=False)
@@ -96,6 +99,16 @@ def main():
     else:
         os.environ.pop('FLEXCELL_CONTACT_STEP_LOG', None)
     os.environ['FLEXCELL_EPISODE_DIR'] = str(out / 'episodes')
+    if args.false_attach:
+        if args.case != 'false_attach':
+            raise ValueError('the false-attach spec belongs to the false_attach case only')
+        os.environ['FLEXCELL_FALSE_ATTACH'] = args.false_attach
+    else:
+        os.environ.pop('FLEXCELL_FALSE_ATTACH', None)
+    if args.planner_diagnostics:
+        os.environ['FLEXCELL_MTC_DIAGNOSTIC_DIR'] = str(out / 'planner')
+    else:
+        os.environ.pop('FLEXCELL_MTC_DIAGNOSTIC_DIR', None)
     result = dict(schema_version=1, status='HARNESS_ERROR', backend=args.backend,
                   skill_backend=args.skill_backend, physical_tasks_dispatched=0,
                   qualification='FUNCTIONAL_SMOKE_ONLY', case=args.case, object=args.object, out=str(out))
@@ -158,6 +171,21 @@ def main():
                     break
         if not ready:
             raise RuntimeError('strict startup health failed; no robot task dispatched')
+        if args.contact_trace:
+            from contact_probe import mapped_libraries
+            names = ('flexcell_physics_trace', 'flexcell_contact_trace', 'flexcell_detachable_carry',
+                     'mtc_planner', 'libdart')
+            loaded = mapped_libraries(stack.pid, names)
+            (out / 'runtime_native_mapping.json').write_text(json.dumps(loaded, indent=2) + '\n')
+            required = ['lib/libflexcell_physics_trace.so', 'lib/libflexcell_contact_trace.so',
+                        'lib/libflexcell_detachable_carry.so']
+            if args.skill_backend == 'mtc': required.append('lib/flexcell_mtc/mtc_planner')
+            for relative in required:
+                actual = [digest for path, digest in loaded.items() if Path(path).name == Path(relative).name]
+                expected = identity['native_libraries'].get(relative)
+                if expected is None or actual != [expected]:
+                    raise RuntimeError('actually mapped native identity mismatch: ' + relative)
+            result['native_identity_verified_before_dispatch'] = True
         if args.physics_step_s is not None:
             step_path = out / 'physics_steps.jsonl'
             step_ready = False
@@ -253,6 +281,15 @@ def main():
             args.case == 'budget_exhaustion' and task.get('outcome_val') == 1
             and task.get('error_code') == 'ERR_RECOVERY_EXHAUSTED'
             and sum(row.get('injected') is True for row in skill_records) == 2)
+        # The injection record is written after the last injected frame, which can be
+        # later than the moment the skill notices the fault, so reading carry.jsonl here
+        # races the writer (it did in CI while passing locally). The trial therefore
+        # decides on the typed reason, and `false_attach_gate` asserts afterwards that the
+        # injection happened exactly once on the declared frames.
+        expected_failure = expected_failure or (
+            args.case == 'false_attach' and task.get('outcome_val') == 1
+            and task.get('error_code') == 'ERR_SKILL_FAILED'
+            and 'physical follow unconfirmed' in str(task.get('detail', '')))
         expected_failure = expected_failure or (
             args.case == 'unreachable_place' and task.get('outcome_val') == 1
             and task.get('error_code') == 'ERR_SKILL_FAILED'

@@ -1,0 +1,267 @@
+{
+  "schema_version": 1,
+  "status": "FUNCTIONAL_WINDOW_PASS",
+  "episodes": [
+    {
+      "case": "normal",
+      "object": "target_box_a",
+      "task": "A normal pick and place",
+      "run": "/home/ros/parity-detachable_joint/trial-01/run-d37e6c02ce1f",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "detachable_joint",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "normal",
+        "object": "target_box_a",
+        "out": "/home/ros/parity-detachable_joint/trial-01/run-d37e6c02ce1f",
+        "world_sha256": "1e345b3a4c985045d14e5c38124b4fc73a749c52efcf09d5a53b19148fe696ca",
+        "semantic_config_sha256": "40c0ff6f42998524f541a213e98961cea66cdc4c88f040de45fe4ff471270a2c",
+        "runtime_fingerprint": "6414ae2c8e0d671dad38e94b8fbdce05b16a9a2173feee9a56ab7651f308a9ef",
+        "task_start_monotonic_ns": 859922033607,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 877131970271,
+        "task": {
+          "action": "task",
+          "goal_uuid": "2899de70ae9a4a6197e62189bf131d29",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-99fd85e4",
+          "wall_seconds": 16.542,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 0.0022017780500175072,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "normal",
+      "object": "target_box_b",
+      "task": "B normal pick and place",
+      "run": "/home/ros/parity-detachable_joint/trial-02/run-a646ff7d0f9a",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "detachable_joint",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "normal",
+        "object": "target_box_b",
+        "out": "/home/ros/parity-detachable_joint/trial-02/run-a646ff7d0f9a",
+        "world_sha256": "1e345b3a4c985045d14e5c38124b4fc73a749c52efcf09d5a53b19148fe696ca",
+        "semantic_config_sha256": "40c0ff6f42998524f541a213e98961cea66cdc4c88f040de45fe4ff471270a2c",
+        "runtime_fingerprint": "6414ae2c8e0d671dad38e94b8fbdce05b16a9a2173feee9a56ab7651f308a9ef",
+        "task_start_monotonic_ns": 933706052746,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 951964168173,
+        "task": {
+          "action": "task",
+          "goal_uuid": "f858cfae4a8043f19a9fd4b2b5ca35d7",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-ead02b2a",
+          "wall_seconds": 17.687,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 0.002254049161861907,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "dual_object",
+      "object": "target_box_a",
+      "task": "Dual-object demo",
+      "run": "/home/ros/parity-detachable_joint/trial-03/run-8a8ffbea7bfa",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "detachable_joint",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "dual_object",
+        "object": "target_box_a",
+        "out": "/home/ros/parity-detachable_joint/trial-03/run-8a8ffbea7bfa",
+        "world_sha256": "1e345b3a4c985045d14e5c38124b4fc73a749c52efcf09d5a53b19148fe696ca",
+        "semantic_config_sha256": "40c0ff6f42998524f541a213e98961cea66cdc4c88f040de45fe4ff471270a2c",
+        "runtime_fingerprint": "6414ae2c8e0d671dad38e94b8fbdce05b16a9a2173feee9a56ab7651f308a9ef",
+        "task_start_monotonic_ns": 1007706756465,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 1048034744391,
+        "task": {
+          "action": "demo",
+          "goal_uuid": "34f8a4825d6d4661bc8590461f9f4492",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "week1_demo_v1-7d7e4fb8",
+          "wall_seconds": 39.655,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK",
+            "PICK_B(attempt=1):OK",
+            "PLACE_B:OK",
+            "VERIFY_B(attempt=1):OK"
+          ],
+          "object_a_at_zone": true,
+          "object_b_at_zone": true,
+          "zone_a_error_m": 0.012252028927226412,
+          "zone_b_error_m": 4.6563635009050484e-05,
+          "run_id": "week1_demo_v1-d3a9b4d0",
+          "scenario_id": "week1_demo_v1"
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "recovery_once",
+      "object": "target_box_a",
+      "task": "One injected failure with one bounded retry",
+      "run": "/home/ros/parity-detachable_joint/trial-04/run-fdb8ea0c104e",
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "detachable_joint",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "recovery_once",
+        "object": "target_box_a",
+        "out": "/home/ros/parity-detachable_joint/trial-04/run-fdb8ea0c104e",
+        "world_sha256": "1e345b3a4c985045d14e5c38124b4fc73a749c52efcf09d5a53b19148fe696ca",
+        "semantic_config_sha256": "40c0ff6f42998524f541a213e98961cea66cdc4c88f040de45fe4ff471270a2c",
+        "runtime_fingerprint": "6414ae2c8e0d671dad38e94b8fbdce05b16a9a2173feee9a56ab7651f308a9ef",
+        "task_start_monotonic_ns": 1107209708119,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 1125471879539,
+        "task": {
+          "action": "task",
+          "goal_uuid": "37daa0cbad8d46358730b89fb0baa9f4",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-e6ed5f2c",
+          "wall_seconds": 17.595,
+          "fsm_trace": [
+            "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+            "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+            "PICK_A(attempt=2):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 0.0021596430326930754,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "case": "budget_exhaustion",
+      "object": "target_box_a",
+      "task": "Persistent injected failure must exhaust the budget",
+      "run": "/home/ros/parity-detachable_joint/trial-05/run-7b697759f038",
+      "result": {
+        "schema_version": 1,
+        "status": "EXPECTED_FAILURE",
+        "backend": "detachable_joint",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "budget_exhaustion",
+        "object": "target_box_a",
+        "out": "/home/ros/parity-detachable_joint/trial-05/run-7b697759f038",
+        "world_sha256": "1e345b3a4c985045d14e5c38124b4fc73a749c52efcf09d5a53b19148fe696ca",
+        "semantic_config_sha256": "40c0ff6f42998524f541a213e98961cea66cdc4c88f040de45fe4ff471270a2c",
+        "runtime_fingerprint": "6414ae2c8e0d671dad38e94b8fbdce05b16a9a2173feee9a56ab7651f308a9ef",
+        "task_start_monotonic_ns": 1186586634036,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 1187654799938,
+        "task": {
+          "action": "task",
+          "goal_uuid": "3b34646d3aea46d4ae7c0c037428ef08",
+          "outcome": "OUTCOME_FAILED",
+          "outcome_val": 1,
+          "error_code": "ERR_RECOVERY_EXHAUSTED",
+          "detail": "policy abort (BUDGET_EXHAUSTED): pick attempt 2 failed (error 23) (trace=PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED,RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1)),PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED); previous_skill=PICK cause=ERR_GRASP_FAILED legacy_error_code=23",
+          "evidence_id": "pick_place_v1-67ab44c0",
+          "wall_seconds": 0.296,
+          "fsm_trace": [
+            "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+            "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+            "PICK_A(attempt=2):FAIL:ERR_GRASP_FAILED"
+          ],
+          "object_at_place": false,
+          "final_position_error_m": null,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {
+          "task.final_position_error_m": "nan"
+        }
+      }
+    }
+  ],
+  "declaration_sha256": "6e815d4fee4d1b9dfebc56975bee5f78aa5caf60b75e637823c1acd064b9059d",
+  "backend": "detachable_joint",
+  "skill_backend": "mtc",
+  "window_id": "29de419472c3496bab8e01173bf893f0",
+  "no_replacements": true,
+  "runtime_fingerprint": "6414ae2c8e0d671dad38e94b8fbdce05b16a9a2173feee9a56ab7651f308a9ef"
+}

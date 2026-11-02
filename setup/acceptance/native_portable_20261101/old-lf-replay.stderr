@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "C:\Users\fuker\Documents\Codex\2026-10-30\https-github-com-yenefa-flexcell-https\work\portable-native-20261101\lf-source\setup\acceptance\native_audit_20261031\verify.py", line 180, in <module>
+    print(json.dumps(verify(Path(__file__).resolve().parent,args.repo),indent=2,allow_nan=False))
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\fuker\Documents\Codex\2026-10-30\https-github-com-yenefa-flexcell-https\work\portable-native-20261101\lf-source\setup\acceptance\native_audit_20261031\verify.py", line 153, in verify
+    assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: gate changed; use the recorded source revision: scripts/contact_gate.py

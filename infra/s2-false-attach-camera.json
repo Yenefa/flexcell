@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "purpose": "S2 local Gazebo integration: one camera-backed guard-input false-attachment response; not physical slip",
+  "max_logical_tasks": 5,
+  "camera": true,
+  "required_false_attach": true,
+  "false_attach": {
+    "object": "target_box_a",
+    "offset_m": 0.03,
+    "hold_s": 0.2
+  },
+  "contact_trace": true,
+  "backend": "detachable_joint",
+  "skill_backend": "mtc",
+  "physics_step_s": 0.002,
+  "min_preflight_rtf": 0.3,
+  "qualification_no_recovery": true,
+  "episodes": [
+    {
+      "case": "false_attach",
+      "object": "target_box_a",
+      "task": "False attachment during lift, A"
+    }
+  ],
+  "world_sha256": "d3d653c0c8515be3826b550252d49ed6420c410280146b2fc94c54eaf8fd608c",
+  "semantic_config_sha256": "fd3a64ecb4509eaf8abe96257cfeb37a3e469dd5f05acb98bec84d547311a225"
+}

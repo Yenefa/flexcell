@@ -33,6 +33,7 @@ class PhysicsTrace final : public gz::sim::System, public gz::sim::ISystemConfig
   double maxPoseJump{0.};
   std::ofstream stepLog;
   uint64_t stepRecords{0};
+  bool flushEachStep{false};
   static void Pose(std::ostream& out, const gz::math::Pose3d& p) {
     out << '[' << p.Pos().X() << ',' << p.Pos().Y() << ',' << p.Pos().Z() << ','
         << p.Rot().X() << ',' << p.Rot().Y() << ',' << p.Rot().Z() << ',' << p.Rot().W() << ']';
@@ -46,9 +47,11 @@ class PhysicsTrace final : public gz::sim::System, public gz::sim::ISystemConfig
     return ecm.EntityByComponents(components::Link(), components::Name(link), components::ParentEntity(entity));
   }
  public:
-  void Configure(const gz::sim::Entity& entity, const std::shared_ptr<const sdf::Element>&,
+  void Configure(const gz::sim::Entity& entity, const std::shared_ptr<const sdf::Element>& sdf,
                  gz::sim::EntityComponentManager&, gz::sim::EventManager&) override {
     world = entity;
+    const auto config = sdf->Clone();
+    flushEachStep = config->HasElement("flush_each_step") && config->Get<bool>("flush_each_step");
     publisher = node.Advertise<gz::msgs::StringMsg>("/flexcell/physics_trace");
     const char *path = std::getenv("FLEXCELL_PHYSICS_STEP_LOG");
     if (path && *path) {
@@ -109,7 +112,7 @@ class PhysicsTrace final : public gz::sim::System, public gz::sim::ISystemConfig
       stepLog << ",\"joint_component\":" << (attached[1] ? "true" : "false")
               << "}},\"contact_force_observed\":false}\n";
       ++stepRecords;
-      if (stepRecords % 10 == 0) stepLog.flush();
+      if (flushEachStep || stepRecords % 10 == 0) stepLog.flush();
     }
     if (last >= 0 && ns - last < 20000000) return;  // publish at 50 Hz; inspect every step
     std::ostringstream out;

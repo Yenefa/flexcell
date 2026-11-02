@@ -3,10 +3,25 @@
 The detector consumes simultaneous parent/object Gazebo poses, not TF, a
 planning-scene attachment, or the backend's own engagement acknowledgement.
 It is a fail-closed sampled check, not continuous contact-grasp qualification.
+
+A monitored session is now anchored on a *pre-attach* reference: the measured
+parent/object transform while the body was still detached and the arm at rest
+(`PrepositionLatch`). Binding must not move that transform, so the first
+attached sample is recorded as an attach jump instead of silently becoming the
+reference. Contact-freedom is NOT observable on this topic; it is enforced
+offline from raw per-step contact data.
 """
 import math
 import threading
 import time
+
+PREPOSITION_SAMPLES = 6                    # 50 Hz endpoints spanning the full 0.1 s hold
+PREPOSITION_WINDOW_NS = 100_000_000
+PREPOSITION_SAMPLE_GAP_NS = 20_000_000
+PREPOSITION_MAX_SPREAD_M = .001            # half the follow translation limit
+PREPOSITION_MAX_SPREAD_RAD = .0015         # ~1/12 of the follow rotation limit
+PREPOSITION_MAX_AGE_NS = 300_000_000
+PREPOSITION_OBJECTS = ('target_box_a', 'target_box_b')
 
 
 def _pose(value):
@@ -38,6 +53,33 @@ def relative_pose(parent, child):
     if not all(math.isfinite(x) for x in rotated + rotation):
         raise ValueError('relative transform is nonfinite')
     return rotated[:3], rotation
+
+
+def rotation_angle(a, b):
+    """Shortest angle between two unit quaternions, sign-insensitive."""
+    return 2 * math.acos(min(1., abs(sum(x*y for x, y in zip(a, b)))))
+
+
+def mean_transform(transforms):
+    """Mean of a bounded hold; equivalent quaternion signs are interchangeable."""
+    positions = [item[0] for item in transforms]
+    quaternions = [item[1] for item in transforms]
+    anchor = quaternions[0]
+    aligned = [q if sum(a*b for a,b in zip(anchor,q)) >= 0 else [-v for v in q]
+               for q in quaternions]
+    mean = [math.fsum(p[i] for p in positions) / len(positions) for i in range(3)]
+    q = [math.fsum(v[i] for v in aligned) / len(aligned) for i in range(4)]
+    norm = math.sqrt(sum(x*x for x in q))
+    if not .999 <= norm <= 1.001:
+        raise ValueError('averaged pre-attach quaternion is not normalized')
+    return mean + [x/norm for x in q]
+
+
+def transform_spread(transforms):
+    positions = [item[0] for item in transforms]
+    quaternions = [item[1] for item in transforms]
+    return (max(math.dist(a,b) for a in positions for b in positions),
+            max(rotation_angle(a,b) for a in quaternions for b in quaternions))
 
 
 def follow_failure_detail(reason, result=None, *, motion_may_be_active=False):
@@ -79,6 +121,106 @@ def check_backend_parameter(client, request_type, expected):
         return False, 'carry backend parameter query failed: ' + str(exc)
 
 
+class PrepositionLatch:
+    """Buffer detached, at-rest transforms and hand out a pre-attach reference.
+
+    The latch only sees parent/object poses, so it can require "still detached"
+    and "the arm is not moving" but it cannot claim contact-freedom: that is
+    measured offline from raw contact data, never inferred here.
+    """
+    def __init__(self, *, clock=time.monotonic_ns, samples=PREPOSITION_SAMPLES,
+                 window_ns=PREPOSITION_WINDOW_NS, sample_gap_ns=PREPOSITION_SAMPLE_GAP_NS,
+                 max_spread_m=PREPOSITION_MAX_SPREAD_M,
+                 max_spread_rad=PREPOSITION_MAX_SPREAD_RAD, max_age_ns=PREPOSITION_MAX_AGE_NS):
+        if samples < 2:
+            raise ValueError('a preposition reference needs at least two samples')
+        self.clock, self.samples, self.window_ns = clock, samples, window_ns
+        self.sample_gap_ns, self.max_spread_m, self.max_spread_rad = sample_gap_ns, max_spread_m, max_spread_rad
+        self.max_age_ns = max_age_ns
+        self.cv = threading.Condition()
+        self.buffer = {name: [] for name in PREPOSITION_OBJECTS}
+
+    def feed(self, data):
+        """Buffer one detached observation; malformed data leaves the buffer untouched."""
+        with self.cv:
+            try:
+                if not isinstance(data, dict) or type(data.get('schema_version')) is not int \
+                        or data['schema_version'] != 1:
+                    return
+                now, source, sim = self.clock(), data['monotonic_ns'], data['sim_ns']
+                if any(isinstance(x, bool) or not isinstance(x, int) or x < 0 for x in (source, sim)):
+                    return
+                if source > now + 1_000_000 or now - source > self.max_age_ns:
+                    return
+                for name in PREPOSITION_OBJECTS:
+                    obj = data['objects'][name]
+                    if obj['joint_component'] is not False:
+                        self.buffer[name].clear()  # an attachment ends the detached history
+                        continue
+                    entry = (sim, source, relative_pose(data['parent_pose'], obj['pose']),
+                             _pose(data['parent_pose']), _pose(obj['pose']))
+                    history = self.buffer[name]
+                    history.append(entry)
+                    del history[:-3 * self.samples]
+                self.cv.notify_all()
+            except (KeyError, TypeError, ValueError):
+                return
+
+    def _evaluate(self, object_id):
+        history = self.buffer[object_id][-self.samples:]
+        if len(history) < self.samples:
+            return False, None, 'no detached pre-attach hold of %d samples' % self.samples
+        sims = [entry[0] for entry in history]
+        if any(b <= a for a, b in zip(sims, sims[1:])):
+            return False, None, 'pre-attach hold did not advance monotonically'
+        if any(b - a != self.sample_gap_ns for a, b in zip(sims, sims[1:])):
+            return False, None, 'pre-attach hold is not an unbroken 50 Hz interval'
+        if sims[-1] - sims[0] < self.window_ns:
+            return False, None, 'pre-attach hold is shorter than declared'
+        age = self.clock() - history[-1][1]
+        if age > self.max_age_ns:
+            return False, None, 'pre-attach hold is stale at engage time'
+        transforms = [entry[2] for entry in history]
+        spread_m, spread_rad = transform_spread(transforms)
+        if not (math.isfinite(spread_m) and math.isfinite(spread_rad)):
+            return False, None, 'pre-attach hold is nonfinite'
+        if spread_m > self.max_spread_m or spread_rad > self.max_spread_rad:
+            return False, None, ('pre-attach hold is not at rest: %.3g mm / %.3g urad'
+                                 % (spread_m * 1e3, spread_rad * 1e6))
+        world = {}
+        for name, index in (('parent', 3), ('body', 4)):
+            position, angle = transform_spread([entry[index] for entry in history])
+            if position > self.max_spread_m or angle > self.max_spread_rad:
+                return False, None, ('world-frame %s pre-attach hold is not at rest: %.3g mm / %.3g urad'
+                                     % (name, position*1e3, angle*1e6))
+            world[name] = dict(spread_translation_m=position, spread_rotation_rad=angle)
+        try:
+            reference = mean_transform(transforms)
+        except ValueError as exc:
+            return False, None, str(exc)
+        return True, reference, dict(
+            samples=len(history), window_ns=sims[-1] - sims[0], first_sim_ns=sims[0],
+            last_sim_ns=sims[-1], age_ns=age, spread_m=spread_m, spread_rad=spread_rad,
+            limits=dict(samples=self.samples, window_ns=self.window_ns, spread_m=self.max_spread_m,
+                        spread_rad=self.max_spread_rad, age_ns=self.max_age_ns),
+            world_at_rest=world, contact_freedom='NOT_OBSERVABLE_ON_POSE_TOPIC')
+
+    def take(self, object_id, timeout=3.):
+        """Wait for a declared pre-attach hold; returns (ok, reference, detail)."""
+        if object_id not in PREPOSITION_OBJECTS:
+            return False, None, 'unknown preposition object'
+        deadline = time.monotonic() + timeout
+        with self.cv:
+            while True:
+                ok, reference, detail = self._evaluate(object_id)
+                if ok:
+                    return True, reference, detail
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    return False, None, detail
+                self.cv.wait(min(.02, remaining))
+
+
 class JointFollowMonitor:
     """Latch a fault until release; all supplied times are monotonic nanoseconds."""
     def __init__(self, *, clock=time.monotonic_ns, max_age_ns=500_000_000,
@@ -89,27 +231,39 @@ class JointFollowMonitor:
         self.cv = threading.Condition()
         self.armed = False
         self.releasing = False
+        self.detach_observed = False
         self.fault = ''
         self.reference = None
+        self.reference_source = ''
+        self.preposition = None
+        self.attach_jump = None
         self.object = self.session = ''
         self.started_ns = self.first_source_ns = self.first_sim_ns = 0
         self.last_source_ns = self.last_sim_ns = 0
         self.samples = self.max_gap_ns = 0
         self.max_translation = self.max_rotation = 0.
 
-    def arm(self, object_id, session):
+    def arm(self, object_id, session, reference=None, preposition=None):
         if (object_id not in ('target_box_a', 'target_box_b') or len(session) != 32 or
                 any(c not in '0123456789abcdef' for c in session)):
             raise ValueError('invalid follow session')
+        if reference is not None:
+            _pose(reference)
+            if not isinstance(preposition, dict):
+                raise ValueError('a declared reference requires its pre-attach evidence')
         with self.cv:
             if self.armed:
                 raise RuntimeError('follow monitor already armed')
             self.armed, self.releasing, self.fault = True, False, ''
+            self.detach_observed = False
             self.object, self.session = object_id, session
             self.started_ns = self.clock()
             self.first_source_ns = self.first_sim_ns = 0
             self.last_source_ns = self.last_sim_ns = self.samples = self.max_gap_ns = 0
-            self.reference = None
+            self.reference = list(reference) if reference is not None else None
+            self.reference_source = 'preposition' if reference is not None else ''
+            self.preposition = dict(preposition) if preposition is not None else None
+            self.attach_jump = None
             self.max_translation = self.max_rotation = 0.
 
     def _fail(self, reason):
@@ -124,8 +278,12 @@ class JointFollowMonitor:
 
     def feed(self, data):
         with self.cv:
-            if not self.armed or self.releasing or self.fault:
+            if not self.armed or (self.fault and not self.releasing):
                 return
+            # A release must not blind the sampler: the attached tail between the last
+            # pre-release publish and the true detach is what the release-boundary gate
+            # measures, so keep recording it while suppressing the fault it would raise.
+            releasing = self.releasing
             try:
                 if (not isinstance(data, dict) or type(data.get('schema_version')) is not int or
                         data['schema_version'] != 1):
@@ -143,30 +301,46 @@ class JointFollowMonitor:
                 if self.reference is not None and self.last_sim_ns:
                     gap = sim - self.last_sim_ns
                     self.max_gap_ns = max(self.max_gap_ns, gap)
-                    if gap > self.max_sim_gap_ns:
+                    # A latched fault deliberately stopped follow sampling. Cleanup
+                    # may still confirm a fresh detach without erasing that fault.
+                    if gap > self.max_sim_gap_ns and not (releasing and self.fault):
                         raise ValueError('physics trace gap exceeds limit')
                 obj = data['objects'][self.object]
                 attached = obj['joint_component']
                 if type(attached) is not bool:
                     raise ValueError('attachment component state is unavailable')
                 relative = relative_pose(data['parent_pose'], obj['pose'])
-                self.last_source_ns, self.last_sim_ns = source, sim
                 if not attached:
-                    if self.reference is not None:
+                    if self.first_sim_ns and not releasing:
                         raise ValueError('attachment component disappeared')
+                    if releasing:
+                        # The released boundary is covered and the session is complete.
+                        self.detach_observed = True
+                        self.armed = False
+                        self.releasing = False
+                        self.cv.notify_all()
                     return
+                # Only an attached frame advances the session bounds: a detached frame must
+                # not extend last_sim_ns past the sampled evidence it is compared with.
+                self.last_source_ns, self.last_sim_ns = source, sim
                 if self.reference is None:
-                    self.reference = relative
+                    self.reference = relative[0] + relative[1]
+                    self.reference_source = 'first_attached'
+                    self.first_source_ns, self.first_sim_ns = source, sim
+                elif not self.first_sim_ns:
+                    # Binding must not move the measured pre-attach transform.
+                    self.attach_jump = (math.dist(relative[0], self.reference[:3]),
+                                        rotation_angle(relative[1], self.reference[3:]))
                     self.first_source_ns, self.first_sim_ns = source, sim
                 position, orientation = relative
-                initial_pos, initial_rot = self.reference
+                initial_pos, initial_rot = self.reference[:3], self.reference[3:]
                 translation = math.dist(position, initial_pos)
-                dot = min(1., abs(sum(a*b for a, b in zip(orientation, initial_rot))))
-                rotation = 2 * math.acos(dot)
+                rotation = rotation_angle(orientation, initial_rot)
                 self.max_translation = max(self.max_translation, translation)
                 self.max_rotation = max(self.max_rotation, rotation)
                 self.samples += 1
-                if translation >= self.max_translation_m or rotation >= self.max_rotation_rad:
+                if not releasing and (translation >= self.max_translation_m or
+                                      rotation >= self.max_rotation_rad):
                     raise ValueError('measured relative pose exceeded follow limits')
                 self.cv.notify_all()
             except (ValueError, KeyError, TypeError) as exc:
@@ -200,13 +374,17 @@ class JointFollowMonitor:
 
     def _summary_locked(self):
         return dict(object=self.object, session=self.session, samples=self.samples,
-            first_relative_pose=(self.reference[0] + self.reference[1]) if self.reference else None,
+            first_relative_pose=(self.reference[:3] + self.reference[3:]) if self.reference else None,
+            reference_source=self.reference_source, preposition=self.preposition,
+            attach_jump_translation_m=(self.attach_jump[0] if self.attach_jump else None),
+            attach_jump_rotation_rad=(self.attach_jump[1] if self.attach_jump else None),
             first_sim_ns=self.first_sim_ns, last_sim_ns=self.last_sim_ns,
             first_source_ns=self.first_source_ns, last_source_ns=self.last_source_ns,
             max_sample_gap_ns=self.max_gap_ns,
             max_translation_m=self.max_translation, max_rotation_rad=self.max_rotation,
             translation_limit_m=self.max_translation_m, rotation_limit_rad=self.max_rotation_rad,
-            active=self.armed, releasing=self.releasing, fault=self.fault)
+            active=self.armed, releasing=self.releasing, detach_observed=self.detach_observed,
+            fault=self.fault)
 
     def summary(self):
         with self.cv:
@@ -223,15 +401,34 @@ class JointFollowMonitor:
             if self.armed:
                 self.releasing = True
 
+    def wait_detached(self, timeout=.3):
+        """Wait (bounded) until the trace shows the joint gone.
+
+        A confirmed release only says the guard let go; the last attached publish can
+        still arrive afterwards, and the release-boundary gate measures exactly that tail.
+        """
+        deadline = time.monotonic() + timeout
+        with self.cv:
+            while self.armed and not self.detach_observed:
+                remaining = deadline - time.monotonic()
+                if remaining <= 0:
+                    break
+                self.cv.wait(remaining)
+            return self.detach_observed
+
     def end_release(self, confirmed):
         with self.cv:
+            if not confirmed:
+                # The caller says the release was not confirmed: keep that fault even if
+                # the trace already showed the joint gone.
+                self.releasing = False
+                self._fail('physical release unconfirmed')
+                self.armed = False
+                return
             if not self.armed:
                 return
             self.releasing = False
-            if confirmed:
-                self.armed = False
-            else:
-                self._fail('physical release unconfirmed')
+            self.armed = False
 
 
 class SnapshotWatch:

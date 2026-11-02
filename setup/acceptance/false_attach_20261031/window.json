@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "status": "FUNCTIONAL_WINDOW_PASS",
+  "episodes": [
+    {
+      "case": "false_attach",
+      "object": "target_box_a",
+      "task": "False attachment during lift, A",
+      "run": "/home/ros/local-window/trial-01/run-04aaf62376be",
+      "result": {
+        "schema_version": 1,
+        "status": "EXPECTED_FAILURE",
+        "backend": "detachable_joint",
+        "skill_backend": "mtc",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "false_attach",
+        "object": "target_box_a",
+        "out": "/home/ros/local-window/trial-01/run-04aaf62376be",
+        "world_sha256": "82e74a45f6e149724853d9fe840620c536c1d25163b385a4faa8274952ebc63c",
+        "semantic_config_sha256": "d6f516fa026f3b77277bca58ed3daae158c2c04aa905e513d6e9288f675c33f4",
+        "runtime_fingerprint": "79f37ed0d658314345debc7cdf2085e73a027ddf0e065a7f86ec241752919589",
+        "native_identity_verified_before_dispatch": true,
+        "preflight_rtf": 0.9998716884659625,
+        "task_start_monotonic_ns": 526031889293,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "task_end_monotonic_ns": 536799654107,
+        "task": {
+          "action": "task",
+          "goal_uuid": "cb74b3d75bbc44f388c9305eef878a78",
+          "outcome": "OUTCOME_FAILED",
+          "outcome_val": 1,
+          "error_code": "ERR_SKILL_FAILED",
+          "detail": "PICK_A(attempt=1) internal failure; execution stopped: physical follow unconfirmed: carry follow snapshot rejected: physical follow unconfirmed: measured relative pose exceeded follow limits; motion terminal confirmed; carry held for reconciliation",
+          "evidence_id": "pick_place_v1-689c98dd",
+          "wall_seconds": 10.044,
+          "fsm_trace": [
+            "PICK_A(attempt=1):FAIL:ERR_INTERNAL"
+          ],
+          "object_at_place": false,
+          "final_position_error_m": null,
+          "skip_verify": false
+        },
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {
+          "task.final_position_error_m": "nan"
+        }
+      },
+      "false_attach_evidence": {
+        "status": "FALSE_ATTACH_REJECTED",
+        "object": "target_box_a",
+        "session": "3afb84f4de5f4bca954656db6081c323",
+        "injected_frames": 10,
+        "offset_m": 0.03,
+        "injection_first_sim_ns": 32882000000,
+        "injection_last_sim_ns": 33062000000,
+        "follow_fault": "measured relative pose exceeded follow limits",
+        "max_translation_m": 0.030050303059736848,
+        "pick_error_code": 2,
+        "pick_detail": "physical follow unconfirmed: carry follow snapshot rejected: physical follow unconfirmed: measured relative pose exceeded follow limits; motion terminal confirmed; carry held for reconciliation",
+        "motion_error_code": 32,
+        "place_dispatched": false,
+        "boundary": "guard_input_pose",
+        "interpretation": "Guard-input injection of a false attachment; the fixed-joint oracle cannot slip physically, so this qualifies the response chain only"
+      }
+    }
+  ],
+  "declaration_sha256": "b25c53146b51b6b0dc95ec9bcedc2524b4f9f6e46f63b25b566b57fc7a86eaa3",
+  "backend": "detachable_joint",
+  "skill_backend": "mtc",
+  "window_id": "cd9c9468dffd4bbe97206b6dc688f460",
+  "no_replacements": true,
+  "runtime_fingerprint": "79f37ed0d658314345debc7cdf2085e73a027ddf0e065a7f86ec241752919589"
+}

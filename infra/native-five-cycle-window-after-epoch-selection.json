@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "purpose": "Five stationary-arm native cycles; not moving-arm, S2, contact grasp or D3 admission",
+  "max_cycles": 5,
+  "objects": [
+    "target_box_a",
+    "target_box_a",
+    "target_box_b",
+    "target_box_b",
+    "target_box_a"
+  ],
+  "step_ns": 2000000,
+  "hold_ns": 10100000000,
+  "min_attached_ns": 10000000000,
+  "preposition_poses": {
+    "target_box_a": [
+      0.35,
+      0.18,
+      0.22,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ],
+    "target_box_b": [
+      0.35,
+      -0.18,
+      0.22,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  },
+  "reference_bind_max_ns": 20000000,
+  "reference_target_limit_m": 0.005,
+  "translation_limit_m": 0.002,
+  "rotation_limit_rad": 0.017453292519943295,
+  "max_clock_skew_ns": 50000000,
+  "release_interval_ns": 40000000,
+  "settle_ns": 1000000000,
+  "min_preflight_rtf": 0.3,
+  "world_sha256": "2606997b4be2f83957e1f4f7b975affc508254e3a5037a50e65f97776b1bc148",
+  "semantic_config_sha256": "96ff7ff577404a1b1a42b76d646ba89948d2b19f427a57b86f31af21b90cbbb1",
+  "previous_startup_source": "6c3d87b7c3964d7dcd6f6124e8ca0e4e34a42968",
+  "previous_startup_archive_sha256": "ebe3b7f3de0106752bd78799959db30ff9a05706735d0032a1ae2796f63a713a",
+  "live_reader_policy": "start at new records before preflight/each detached cycle; full raw files independently retained and gated",
+  "previous_preposition_source": "225a8851cb320b6a3adff917cfc4c138e2ae46f3",
+  "previous_preposition_archive_sha256": "d837fffeb609f53d127567b4fbd14dae2f2f5947344ea88dbf040c0c03c32aa9",
+  "reference_reader_policy": "require latest source fresh, filter reference eligibility by trigger epoch, require first eligible candidate fresh"
+}

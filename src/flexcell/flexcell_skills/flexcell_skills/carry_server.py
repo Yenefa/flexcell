@@ -17,6 +17,7 @@ v2 changes:
 
 import json
 import math
+import os
 import threading
 import time
 import uuid
@@ -40,7 +41,8 @@ from flexcell_interfaces.msg import CarryState
 from flexcell_interfaces.srv import EngageCarry, QueryCarry
 
 from flexcell_skills.common import JsonlLog
-from flexcell_skills.joint_follow import JointFollowMonitor
+from flexcell_skills.contracts.injection import FALSE_ATTACH_ENV, parse_false_attach
+from flexcell_skills.joint_follow import JointFollowMonitor, PrepositionLatch
 
 
 class CarryServer(Node):
@@ -61,6 +63,11 @@ class CarryServer(Node):
         self.declare_parameter('query_service', '/flexcell/carry_snapshot')
         self.declare_parameter('log_dir', '~/.ros/flexcell')
         self.declare_parameter('log_file', 'carry.jsonl')
+        # A joint session is anchored on a measured pre-attach reference: the
+        # body must be detached and the arm at rest before the joint appears.
+        self.declare_parameter('require_preposition_reference', True,
+                               ParameterDescriptor(description='refuse a joint session without a measured pre-attach reference'))
+        self.declare_parameter('preposition_timeout_s', 1.0)
 
         gp = self.get_parameter
         self._world = gp('world').value
@@ -91,8 +98,17 @@ class CarryServer(Node):
         self._retired_sessions = set()
         self._state_revision = 0
         self._follow = None
+        self._preposition = None
+        self._preposition_timeout = float(gp('preposition_timeout_s').value)
+        # Declared live fault injection: the reported child pose is displaced for a
+        # bounded number of frames so the sampled guard must catch a real mismatch.
+        self._false_attach = parse_false_attach(os.environ.get(FALSE_ATTACH_ENV), self._backend)
+        if self._false_attach is not None:
+            self._false_attach.update(remaining=self._false_attach['frames'], started=False,
+                                      frames_done=0, logged=False, first_sim_ns=0, last_sim_ns=0)
         if self._backend == 'detachable_joint':
             self._follow = JointFollowMonitor()
+            self._preposition = PrepositionLatch()
             self._follow_group = MutuallyExclusiveCallbackGroup()
             self.create_subscription(StringMsg, '/flexcell/physics_trace', self._on_physics_trace,
                                      100, callback_group=self._follow_group)
@@ -178,9 +194,59 @@ class CarryServer(Node):
 
     def _on_physics_trace(self, msg):
         try:
-            self._follow.feed(json.loads(msg.data))
+            data = json.loads(msg.data)
         except (ValueError, TypeError) as exc:
             self._follow.reject('malformed physics trace: ' + str(exc))
+            return
+        if self._preposition is not None:
+            self._preposition.feed(data)  # detached history only; never an observation claim
+        injected = self._apply_false_attach(data)
+        try:
+            self._follow.feed(data)
+        except (ValueError, TypeError) as exc:
+            self._follow.reject('malformed physics trace: ' + str(exc))
+        if injected and self._false_attach['remaining'] == 0:
+            self._close_false_attach()
+
+    def _apply_false_attach(self, data):
+        """Displace the reported child pose for a declared number of frames.
+
+        A fixed joint cannot physically slip, so a false attachment is injected at
+        the guard's input boundary: the body keeps reporting ``joint_component``
+        true while its reported pose stops following its parent. The raw per-step
+        log stays untouched; the altered frames are recorded in carry.jsonl.
+        """
+        spec = self._false_attach
+        if spec is None or spec['remaining'] == 0:
+            return False
+        summary = self._follow.summary()
+        if summary.get('object') != spec['object'] or summary.get('samples', 0) < spec['after_samples']:
+            return False
+        if not spec['started']:
+            spec['started'] = True
+            spec['first_sim_ns'] = data['sim_ns']
+            self.get_logger().error('false-attach injection armed at sim_ns=%d' % data['sim_ns'])
+        body = data['objects'][spec['object']]
+        body['pose'][0] = body['pose'][0] + spec['offset_m']
+        spec['remaining'] -= 1
+        spec['frames_done'] += 1
+        spec['last_sim_ns'] = data['sim_ns']
+        return True
+
+    def _close_false_attach(self):
+        spec = self._false_attach
+        if spec is None or not spec['started'] or spec['logged']:
+            return
+        spec['logged'] = True
+        summary = self._follow.summary()
+        self._log.write({'event': 'false_attach_injected', 'object': spec['object'],
+                         'session': summary.get('session', ''),
+                         'offset_m': spec['offset_m'], 'frames': spec['frames_done'],
+                         'axis': spec['axis'], 'boundary': 'guard_input_pose',
+                         'first_sim_ns': spec['first_sim_ns'], 'last_sim_ns': spec['last_sim_ns'],
+                         'follow_fault': summary.get('fault')})
+        self.get_logger().error('false-attach injection applied to %d frames (offset %.3f m)'
+                                % (spec['frames_done'], spec['offset_m']))
 
     # ------------------------------------------------------------ commands
     def _on_start(self, msg):
@@ -222,10 +288,12 @@ class CarryServer(Node):
         else:
             response.success = self._engage(request.object_id, offset, token)
         response.message = ('carry engaged and physics acknowledged' if response.success
-                            else 'carry engage was not confirmed')
+                            else getattr(self, '_engage_message', '') or 'carry engage was not confirmed')
         return response
 
     def _engage(self, object_id, offset, session):
+        preposition = None
+        self._engage_message = ''
         if self._backend == 'detachable_joint' and self._offset is not None:
             self._log.write({'event': 'engage_rejected_active_session', 'object': object_id,
                              'session': session, 'active_session': self._session})
@@ -234,7 +302,18 @@ class CarryServer(Node):
             self.get_logger().error('cannot replace an unconfirmed carry session')
             return False
         if self._backend == 'detachable_joint':
-            self._follow.arm(object_id, session)
+            reference = None
+            if bool(self.get_parameter('require_preposition_reference').value):
+                ok, reference, evidence = self._preposition.take(
+                    object_id, timeout=self._preposition_timeout)
+                if not ok:
+                    self._log.write({'event': 'preposition_reference_rejected', 'object': object_id,
+                                     'session': session, 'reason': evidence})
+                    self.get_logger().error('pre-attach reference rejected: %s' % evidence)
+                    self._engage_message = 'no measured pre-attach reference: ' + evidence
+                    return False
+                preposition = dict(evidence, reference=list(reference))
+            self._follow.arm(object_id, session, reference, preposition)
         if self._backend in ('velocity_servo', 'detachable_joint'):
             ee = self._ee()
             if ee is None or not self._guard_request('engage', self._pose(object_id, offset, ee, session)):
@@ -272,7 +351,8 @@ class CarryServer(Node):
             'carry ENGAGED object=%s offset=[%.3f %.3f %.3f]'
             % (object_id, offset[0], offset[1], offset[2]))
         self._log.write({'event': 'start', 'object': object_id, 'offset': offset,
-                         'backend': self._backend, 'session': session})
+                         'backend': self._backend, 'session': session,
+                         'preposition': preposition if self._backend == 'detachable_joint' else None})
         self._publish_state()
         return True
 
@@ -303,6 +383,14 @@ class CarryServer(Node):
                                  'cause': cause})
                 return False
         if follow is not None:
+            # Hold the summary until the trace reports the detach, so the released
+            # boundary keeps its last attached sample.
+            if session and not follow.wait_detached(.3):
+                self._log.write({'event': 'release_unconfirmed', 'backend': self._backend,
+                                 'session': session, 'object': object_id, 'cause': cause,
+                                 'reason': 'physics trace did not confirm detach',
+                                 'follow': follow.summary()})
+                return False
             follow.end_release(True)
             if session:
                 self._log.write({'event': 'follow_final', 'follow': follow.summary(),

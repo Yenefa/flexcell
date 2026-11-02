@@ -1,0 +1,204 @@
+{
+  "source_revision": "d9f504cac674fd51933c031c2dbc5a2ca5d45f63",
+  "committed_receipt_recalculation": {
+    "mtc/teleport": {
+      "max_verified_error_m": 0.00017095189309869016,
+      "placements": 5,
+      "tolerance_m": 0.06,
+      "window_status": "FUNCTIONAL_WINDOW_PASS"
+    },
+    "mtc/detachable_joint": {
+      "max_verified_error_m": 0.012252028927226412,
+      "placements": 5,
+      "tolerance_m": 0.06,
+      "window_status": "FUNCTIONAL_WINDOW_PASS"
+    },
+    "legacy/teleport": {
+      "max_verified_error_m": 0.012206466829384638,
+      "placements": 5,
+      "tolerance_m": 0.06,
+      "window_status": "FUNCTIONAL_WINDOW_PASS"
+    },
+    "legacy/detachable_joint": {
+      "max_verified_error_m": 0.045006971698401906,
+      "placements": 5,
+      "tolerance_m": 0.06,
+      "window_status": "FUNCTIONAL_WINDOW_PASS"
+    }
+  },
+  "descriptive_maxima_differences_mm": {
+    "carry_at_mtc": 12.081077034127722,
+    "carry_at_legacy": 32.80050486901727,
+    "skill_at_teleport": 12.035514936285947,
+    "skill_at_joint": 32.75494277117549
+  },
+  "attribution": "These maxima do not identify a dominant causal error source; no statistical inference.",
+  "host_layout_reproduction": {
+    "status": "CARRY_BACKEND_PARITY_PASS",
+    "declaration_sha256": "6e815d4fee4d1b9dfebc56975bee5f78aa5caf60b75e637823c1acd064b9059d",
+    "backends": {
+      "legacy-skill-teleport": "teleport",
+      "legacy-skill-detachable_joint": "detachable_joint"
+    },
+    "cases": [
+      {
+        "case": "normal",
+        "object": "target_box_a"
+      },
+      {
+        "case": "normal",
+        "object": "target_box_b"
+      },
+      {
+        "case": "dual_object",
+        "object": "target_box_a"
+      },
+      {
+        "case": "recovery_once",
+        "object": "target_box_a"
+      },
+      {
+        "case": "budget_exhaustion",
+        "object": "target_box_a"
+      }
+    ],
+    "table": {
+      "legacy-skill-teleport": {
+        "status": "FUNCTIONAL_WINDOW_PASS",
+        "backend": "teleport",
+        "cases": [
+          {
+            "case": "normal",
+            "object": "target_box_a",
+            "status": "PASS",
+            "outcome": "OUTCOME_SUCCEEDED",
+            "error_code": "ERR_NONE",
+            "task_error_m": 0.0038633882529338116,
+            "expectation_met": true,
+            "receipt": false
+          },
+          {
+            "case": "normal",
+            "object": "target_box_b",
+            "status": "PASS",
+            "outcome": "OUTCOME_SUCCEEDED",
+            "error_code": "ERR_NONE",
+            "task_error_m": 0.012182466740398749,
+            "expectation_met": true,
+            "receipt": false
+          },
+          {
+            "case": "dual_object",
+            "object": "target_box_a",
+            "status": "PASS",
+            "outcome": "OUTCOME_SUCCEEDED",
+            "error_code": "ERR_NONE",
+            "task_error_m": null,
+            "expectation_met": true,
+            "receipt": false
+          },
+          {
+            "case": "recovery_once",
+            "object": "target_box_a",
+            "status": "PASS",
+            "outcome": "OUTCOME_SUCCEEDED",
+            "error_code": "ERR_NONE",
+            "task_error_m": 0.012206466829384638,
+            "expectation_met": true,
+            "receipt": false
+          },
+          {
+            "case": "budget_exhaustion",
+            "object": "target_box_a",
+            "status": "EXPECTED_FAILURE",
+            "outcome": "OUTCOME_FAILED",
+            "error_code": "ERR_RECOVERY_EXHAUSTED",
+            "task_error_m": null,
+            "expectation_met": true,
+            "receipt": false
+          }
+        ]
+      },
+      "legacy-skill-detachable_joint": {
+        "status": "FUNCTIONAL_WINDOW_PASS",
+        "backend": "detachable_joint",
+        "cases": [
+          {
+            "case": "normal",
+            "object": "target_box_a",
+            "status": "PASS",
+            "outcome": "OUTCOME_SUCCEEDED",
+            "error_code": "ERR_NONE",
+            "task_error_m": 0.01980789836001547,
+            "expectation_met": true,
+            "receipt": false
+          },
+          {
+            "case": "normal",
+            "object": "target_box_b",
+            "status": "PASS",
+            "outcome": "OUTCOME_SUCCEEDED",
+            "error_code": "ERR_NONE",
+            "task_error_m": 0.021894412126422312,
+            "expectation_met": true,
+            "receipt": false
+          },
+          {
+            "case": "dual_object",
+            "object": "target_box_a",
+            "status": "PASS",
+            "outcome": "OUTCOME_SUCCEEDED",
+            "error_code": "ERR_NONE",
+            "task_error_m": null,
+            "expectation_met": true,
+            "receipt": false
+          },
+          {
+            "case": "recovery_once",
+            "object": "target_box_a",
+            "status": "PASS",
+            "outcome": "OUTCOME_SUCCEEDED",
+            "error_code": "ERR_NONE",
+            "task_error_m": 0.018376163891701422,
+            "expectation_met": true,
+            "receipt": false
+          },
+          {
+            "case": "budget_exhaustion",
+            "object": "target_box_a",
+            "status": "EXPECTED_FAILURE",
+            "outcome": "OUTCOME_FAILED",
+            "error_code": "ERR_RECOVERY_EXHAUSTED",
+            "task_error_m": null,
+            "expectation_met": true,
+            "receipt": false
+          }
+        ]
+      }
+    },
+    "declared_tolerance_m": null,
+    "max_verified_error_m": {
+      "legacy-skill-teleport": null,
+      "legacy-skill-detachable_joint": null
+    },
+    "attempts": {
+      "legacy-skill-teleport": {
+        "normal": null,
+        "dual_object": null,
+        "recovery_once": null,
+        "budget_exhaustion": null
+      },
+      "legacy-skill-detachable_joint": {
+        "normal": null,
+        "dual_object": null,
+        "recovery_once": null,
+        "budget_exhaustion": null
+      }
+    },
+    "tolerance_moved": false,
+    "interpretation": "Same manifest, same declared tolerance and the same criterion on every backend; the per-backend error spread is reported, not flattened into the verdict. One bounded window per backend, not a success rate"
+  },
+  "result": "HOST_RELOCATION_FALSE_PASS_REPRODUCED",
+  "missing_receipts": 10,
+  "robot_actions": 0
+}

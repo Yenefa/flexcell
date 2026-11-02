@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "status": "CONTACT_PIPELINE_PASS",
+  "logical_robot_tasks": 0,
+  "declaration_sha256": "1de1ea408e50e589d06d892ad12a32108eb46309b3997911730640365110cbc8",
+  "source_world_sha256": "c3325093739d0156690251cae9811d96c247c1f28ef6fcff1529a4eebec1b81c",
+  "no_replacements": true,
+  "default_admission": "NO_GO",
+  "partition": "flexcell-contact-6da04694dc154bfab37d96791cb9b534",
+  "command": [
+    "gz",
+    "sim",
+    "-s",
+    "-r",
+    "-v",
+    "4",
+    "--iterations",
+    "1200",
+    "/home/ros/local-contact/world.sdf"
+  ],
+  "runtime_fingerprint": "e741e28989f01303be49a721f3ce952afcb6ee088af8f3a3b96a203d2862db6f",
+  "simulator_exit": 0,
+  "evidence": {
+    "status": "CONTACT_PIPELINE_PASS",
+    "samples": 1200,
+    "physics_step_ns": 2000000,
+    "first_sim_ns": 2000000,
+    "last_sim_ns": 2400000000,
+    "settled_samples": 501,
+    "settled_force_samples": 501,
+    "measured_force_samples": 1200,
+    "mean_force_magnitude_n": 0.4900000000667622,
+    "signed_target_force_calibrated": false,
+    "states": {
+      "unsensed_box": {
+        "UNKNOWN": 1200
+      },
+      "target_box_a": {
+        "CONTACTS_WITH_FORCE": 1200
+      },
+      "target_box_b": {
+        "NO_REPORTED_CONTACTS": 1200
+      }
+    },
+    "logical_robot_tasks": 0,
+    "default_admission": "NO_GO",
+    "interpretation": "Standalone sensor pipeline only; no integrated arm, attachment or contact-grasp qualification"
+  },
+  "signed_force_evidence": {
+    "status": "SIGNED_FORCE_PASS",
+    "target": "target_box_a",
+    "partner": "ground_plane",
+    "samples": 501,
+    "direction": [
+      0.0,
+      0.0,
+      1.0
+    ],
+    "min_z_n": 0.48999999999090493,
+    "max_z_n": 0.49000000035015534,
+    "min_direction_cosine": 1.0,
+    "max_lateral_n": 3.569266502986851e-16,
+    "lateral_limit_n": 1e-06,
+    "known_direction_only": true,
+    "interpretation": "One known support direction (gravity) is signed and calibrated; lateral/oblique known loads and torque remain uncalibrated"
+  },
+  "raw_sha256": "05884e6fcca8c6cdb1929461a796360f9d57a63049105ed91b65b16bbdb82623",
+  "owned_exit": 0
+}

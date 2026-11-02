@@ -36,7 +36,7 @@ def adapter():
     client = module.MtcMotionClient.__new__(module.MtcMotionClient)
     client.blocked = False
     client.audit = []
-    client.plans = [([.2, 0., .2], RobotTrajectory(joint_trajectory=trajectory()))]
+    client.plans = [([.2, 0., .2], RobotTrajectory(joint_trajectory=trajectory()), [.2, 0., .2])]
     client.registration = Mock()
     client.registration.call_async.return_value.result.return_value = NS(success=True)
     client.executor = Mock()
@@ -53,6 +53,93 @@ def test_lost_registration_never_dispatches_motion(monkeypatch):
     result, error = call(client)
     assert result is None and 'no motion dispatched' in error
     client.executor.call.assert_not_called()
+
+
+def test_object_center_plan_hands_explicit_ee_endpoint_to_only_motion_owner(monkeypatch):
+    client = adapter()
+    client.planner = Mock()
+    logical = [[.12, -.15, z] for z in (.1675, .0675, .1675)]
+    endpoints = [[.18, -.21, z] for z in (.28, .18, .28)]
+    client.planner.call_async.return_value.result.return_value = NS(success=True, detail='planned',
+        trajectories=[RobotTrajectory(joint_trajectory=trajectory()) for _ in range(3)],
+        executor_targets=[module.stamped(p) for p in endpoints])
+    client.executor.call.return_value = (module.MoveToPose.Result(), None)
+    monkeypatch.setattr(module, 'wait_future', lambda *_: 'done')
+    assert client.prepare('PLACE', 'target_box_a', [.25, 0., .12], logical, 'demo_slow', 30000,
+        attached_object_targets=True, object_orientation=[0., 0., 0., 1.])[0]
+    assert client.planner.call_async.call_args.args[0].attached_object_targets
+    client.call(logical[0], profile='demo_slow', deadline_ms=30000, request_id='hover')
+    assert client.executor.call.call_args.args[0] == endpoints[0]
+    assert client.registration.call_async.call_args.args[0].target == module.stamped(endpoints[0])
+    assert client.audit[0]['target'] == logical[0]
+    assert client.audit[0]['executor_target'] == endpoints[0]
+
+
+@pytest.mark.parametrize('defect', ['missing', 'frame', 'nonfinite'])
+def test_object_target_cannot_fall_back_to_ee_target_when_endpoint_metadata_is_bad(monkeypatch, defect):
+    client = adapter()
+    client.planner = Mock()
+    endpoints = [module.stamped([.2, 0., .2]) for _ in range(3)]
+    if defect == 'missing': endpoints.pop()
+    elif defect == 'frame': endpoints[0].header.frame_id = 'camera'
+    else: endpoints[0].pose.position.x = float('nan')
+    client.planner.call_async.return_value.result.return_value = NS(success=True, detail='planned',
+        trajectories=[RobotTrajectory(joint_trajectory=trajectory()) for _ in range(3)],
+        executor_targets=endpoints)
+    monkeypatch.setattr(module, 'wait_future', lambda *_: 'done')
+    assert not client.prepare('PLACE', 'target_box_a', [.2, 0., .12],
+        [[.12, -.15, z] for z in (.1675, .0675, .1675)], 'demo_slow', 30000,
+        attached_object_targets=True)[0]
+    assert client.plans == []
+    client.executor.call.assert_not_called()
+    client.registration.call_async.assert_not_called()
+
+
+@pytest.mark.parametrize('observation', ['missing', 'outside', 'nonfinite'])
+def test_joint_place_keeps_attachment_when_pre_release_physical_sample_is_unusable(monkeypatch, observation):
+    import threading
+    from flexcell_skills import place_server as place
+    server = place.PlaceServer.__new__(place.PlaceServer)
+    server._seq = 0
+    server._admission = threading.Lock()
+    server._default_profile = 'demo_slow'
+    server._profiles = ['demo_slow']
+    server._backend_consistent = lambda: (True, '')
+    server._scene = Mock()
+    server._scene.is_attached.return_value = (True, '')
+    server._carry_backend = 'detachable_joint'
+    server._carry_query = Mock()
+    server._carry_release = Mock()
+    server._gripper = Mock()
+    server._clearance, server._hover, server._carry, server._retreat = .05, .1, .16, .1
+    server._tol, server._deadline = .06, 30000
+    server._mtc = Mock(audit=[])
+    server._mtc.prepare.return_value = (True, 'planned')
+    server._feedback = Mock()
+    server._log = Mock()
+    server._motion = Mock(return_value=(NS(outcome=0, error_code=0), 0, 'OK'))
+    watch = Mock()
+    watch.problem.return_value = ''
+    watch.summary.return_value = {}
+    monkeypatch.setattr(place, 'SnapshotWatch', lambda *_: watch)
+    after = (([.25, -.25, .0675], [0., 0., 0., 1.]), None)
+    if observation == 'missing': after = (None, 'stream stale')
+    elif observation == 'nonfinite': after[0][0][0] = float('nan')
+    sampler = Mock(side_effect=[(([.25, 0., .12], [0., 0., 0., 1.]), None), after])
+    monkeypatch.setattr(place, 'sample_gz_pose', sampler)
+    goal = place.PlaceObject.Goal(object_name='target_box_a',
+        place_pose=module.stamped([.12, -.15, .0175]), motion_profile_id='demo_slow')
+    handle = NS(request=goal, is_cancel_requested=False, abort=Mock(), succeed=Mock(), canceled=Mock())
+    result = server._execute(handle)
+    assert result.outcome == result.OUTCOME_FAILED and result.error_code == result.ERR_PLACE_FAILED
+    assert not result.released and 'carry held' in result.detail
+    assert server._motion.call_count == 2
+    assert server._mtc.prepare.call_args.kwargs['attached_object_targets']
+    assert server._mtc.prepare.call_args.args[3][1] == [.12, -.15, .0675]
+    server._carry_release.call_async.assert_not_called()
+    server._scene.detach_to_world.assert_not_called()
+    server._gripper.command.assert_not_called()
+    handle.abort.assert_called_once()
 
 
 def test_unknown_executor_result_latches_adapter(monkeypatch):

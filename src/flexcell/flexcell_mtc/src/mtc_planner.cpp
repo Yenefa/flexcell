@@ -5,6 +5,7 @@
 #include <moveit/task_constructor/task.h>
 #include <moveit/task_constructor/stages/fixed_state.h>
 #include <moveit/task_constructor/stages/move_to.h>
+#include <moveit/task_constructor/stages/move_relative.h>
 #include <moveit/task_constructor/stages/modify_planning_scene.h>
 #include <moveit/task_constructor/solvers/pipeline_planner.h>
 #include <moveit/task_constructor/solvers/joint_interpolation.h>
@@ -12,12 +13,17 @@
 #include <moveit_task_constructor_msgs/msg/solution.hpp>
 #include <shape_msgs/msg/solid_primitive.hpp>
 #include <geometry_msgs/msg/point_stamped.hpp>
+#include <geometry_msgs/msg/vector3_stamped.hpp>
+#include <moveit/robot_state/attached_body.hpp>
 #include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <mutex>
 #include <sstream>
 #include "position_only_planner.hpp"
+#include "attached_object_goal.hpp"
+#include "attached_point_model.hpp"
+#include "planning_snapshot.hpp"
 namespace mtc = moveit::task_constructor;
 using Service = flexcell_interfaces::srv::PlanManipulation;
 using namespace std::chrono_literals;
@@ -33,18 +39,31 @@ class Planner : public rclcpp::Node {
       [this](Service::Request::SharedPtr q, Service::Response::SharedPtr r) {
         std::unique_lock<std::mutex> lock(mutex_, std::try_to_lock);
         if (!lock.owns_lock()) { r->detail = "planner busy"; return; }
-        try { plan(*q, *r); }
-        catch (const std::exception& e) { r->success = false; r->detail = e.what(); }
+        std::unique_ptr<flexcell::PlanningSnapshot> snapshot;
+        auto fail = [&](const std::exception& e) {
+          r->success = false; r->detail = e.what();
+          r->trajectories.clear(); r->executor_targets.clear();
+        };
+        try {
+          snapshot = std::make_unique<flexcell::PlanningSnapshot>(*this, *q, snapshot_sequence_);
+          plan(*q, *r, *snapshot);
+        } catch (const std::exception& e) { fail(e); }
+        try { if (snapshot) snapshot->write("response", *r); }
+        catch (const std::exception& e) {
+          fail(e);
+          RCLCPP_ERROR(get_logger(), "planner snapshot failed: %s", e.what());
+        }
       }, rmw_qos_profile_services_default, group_);
   }
  private:
-  void plan(const Service::Request& q, Service::Response& r) {
+  void plan(const Service::Request& q, Service::Response& r, const flexcell::PlanningSnapshot& snapshot) {
     const bool pick = q.operation == "PICK";
     const std::map<std::string, double> profiles{{"demo_veryslow", .05},
                                                {"demo_slow", .2}, {"demo_default", .5}};
     if ((!pick && q.operation != "PLACE") || q.targets.size() != 3 ||
         (q.object_name != "target_box_a" && q.object_name != "target_box_b") ||
-        !profiles.count(q.motion_profile_id) || q.deadline_ms < 1000 || q.deadline_ms > 60000)
+        !profiles.count(q.motion_profile_id) || q.deadline_ms < 1000 || q.deadline_ms > 60000 ||
+        (q.attached_object_targets && pick))
       throw std::runtime_error("invalid operation, object, profile or stage count");
     for (const auto& t : q.targets) {
       const auto& p = t.pose.position;
@@ -60,13 +79,32 @@ class Planner : public rclcpp::Node {
       scene_->remove_pending_request(future);
       throw std::runtime_error("planning scene timeout");
     }
+    // Keep the private model's plugin loader alive through task destruction.
+    robot_model_loader::RobotModelLoaderPtr point_model;
     mtc::Task task;
     task.setName("FlexCell " + q.operation); task.enableIntrospection(false);
     task.loadRobotModel(shared_from_this());
     auto scene = std::make_shared<planning_scene::PlanningScene>(task.getRobotModel());
-    scene->setPlanningSceneMsg(future.get()->scene);
+    const auto measured = future.get();
+    snapshot.write("scene", measured->scene);
+    scene->setPlanningSceneMsg(measured->scene);
     const auto* arm = task.getRobotModel()->getJointModelGroup("arm");
     if (!arm) throw std::runtime_error("arm group missing");
+    const auto measured_state = scene->getCurrentState();
+    if (!pick && !measured_state.hasAttachedBody(q.object_name))
+      throw std::runtime_error("PLACE object not attached in measured scene");
+    if (q.attached_object_targets) {
+      const auto* body = measured_state.getAttachedBody(q.object_name);
+      if (body->getAttachedLinkName() != "end_effector_link" || body->getShapes().size() != 1 ||
+          body->getShapePosesInLinkFrame().size() != 1)
+        throw std::runtime_error("joint PLACE requires one measured end-effector-attached shape");
+      const auto shape_frame = body->getShapePosesInLinkFrame().front();
+      flexcell::checkAttachedObjectPose(measured_state.getGlobalLinkTransform("end_effector_link"), shape_frame, q.object_pose);
+      point_model = flexcell::attachedPointModel(shared_from_this(), shape_frame.translation());
+      task.setRobotModel(point_model->getModel());
+      scene = std::make_shared<planning_scene::PlanningScene>(task.getRobotModel());
+      scene->setPlanningSceneMsg(measured->scene);
+    }
     auto state = scene->getCurrentState();
     task.add(std::make_unique<mtc::stages::FixedState>("measured scene", scene));
     auto gripper = std::make_shared<mtc::solvers::JointInterpolationPlanner>();
@@ -89,8 +127,6 @@ class Planner : public rclcpp::Node {
       box.primitives.push_back(shape); box.primitive_poses.push_back(q.object_pose.pose);
       add->addObject(box); task.add(std::move(add));
       gripper_stage("open gripper", .02);
-    } else if (!state.hasAttachedBody(q.object_name)) {
-      throw std::runtime_error("PLACE object not attached in measured scene");
     }
     auto pipeline = std::make_shared<flexcell::PositionOnlyPlanner>(shared_from_this(), "ompl");
     pipeline->setMaxVelocityScalingFactor(profiles.at(q.motion_profile_id));
@@ -98,6 +134,22 @@ class Planner : public rclcpp::Node {
     const char* pick_names[] = {"hover", "grasp", "lift"};
     const char* place_names[] = {"hover", "descend", "retreat"};
     for (size_t i = 0; i < 3; ++i) {
+      if (q.attached_object_targets && i == 2) {
+        // Once detached, retreat the EE from its propagated descend endpoint.
+        // Reuse MTC's relative stage with the same position-only planner.
+        geometry_msgs::msg::Vector3Stamped direction;
+        direction.header.frame_id = "world";
+        direction.vector.x = q.targets[2].pose.position.x - q.targets[1].pose.position.x;
+        direction.vector.y = q.targets[2].pose.position.y - q.targets[1].pose.position.y;
+        direction.vector.z = q.targets[2].pose.position.z - q.targets[1].pose.position.z;
+        if (std::abs(direction.vector.x) > 1e-9 || std::abs(direction.vector.y) > 1e-9 ||
+            direction.vector.z <= 0. || direction.vector.z > .3)
+          throw std::runtime_error("joint PLACE retreat must be a positive world-vertical displacement");
+        auto retreat = std::make_unique<mtc::stages::MoveRelative>("retreat", pipeline);
+        retreat->setGroup("arm"); retreat->setIKFrame("end_effector_link"); retreat->setDirection(direction);
+        retreat->setTimeout(std::min(5.0, q.deadline_ms / 3000.0)); task.add(std::move(retreat));
+        continue;
+      }
       // PointStamped is MTC's native position-only goal: keep the four-DOF
       // contract while letting the planner sample collision-valid IK in each
       // propagated stage scene. Do not freeze one unchecked IK joint solution.
@@ -105,7 +157,9 @@ class Planner : public rclcpp::Node {
       target.header = q.targets[i].header;
       target.point = q.targets[i].pose.position;
       auto move = std::make_unique<mtc::stages::MoveTo>(pick ? pick_names[i] : place_names[i], pipeline);
-      move->setGroup("arm"); move->setIKFrame("end_effector_link"); move->setGoal(target);
+      move->setGroup(q.attached_object_targets ? flexcell::pointGroup : "arm");
+      move->setIKFrame(q.attached_object_targets ? flexcell::pointLink : "end_effector_link");
+      move->setGoal(target);
       move->setTimeout(std::min(5.0, q.deadline_ms / 3000.0)); task.add(std::move(move));
       if (i == 1) {
         if (pick) gripper_stage("close gripper", -.011);
@@ -123,6 +177,11 @@ class Planner : public rclcpp::Node {
       detail << "no complete MTC solution; operation=" << q.operation << "; object=" << q.object_name << '\n';
       task.printState(detail);
       task.explainFailure(detail);
+      task.stages()->traverseRecursively([&](const mtc::Stage& stage, unsigned int) {
+        for (const auto& failure : stage.failures())
+          detail << stage.name() << ": " << failure->comment() << '\n';
+        return true;
+      });
       const auto report = detail.str();
       RCLCPP_ERROR(get_logger(), "%s", report.c_str());
       throw std::runtime_error(report.substr(0, 8192));
@@ -131,13 +190,32 @@ class Planner : public rclcpp::Node {
     task.solutions().front()->toMsg(solution);
     for (const auto& part : solution.sub_trajectory) {
       const auto& names = part.trajectory.joint_trajectory.joint_names;
-      if (names.size() == 4 && std::find(names.begin(), names.end(), "joint1") != names.end())
+      if (names.size() == 4 && std::find(names.begin(), names.end(), "joint1") != names.end()) {
+        if (part.trajectory.joint_trajectory.points.empty()) throw std::runtime_error("empty arm stage");
+        const auto& endpoint = part.trajectory.joint_trajectory.points.back().positions;
+        if (endpoint.size() != names.size()) throw std::runtime_error("invalid arm endpoint");
+        state.setVariablePositions(names, endpoint); state.update();
+        const auto& transform = state.getGlobalLinkTransform("end_effector_link");
+        geometry_msgs::msg::PoseStamped target;
+        target.header.frame_id = "world";
+        target.pose.position.x = transform.translation().x();
+        target.pose.position.y = transform.translation().y();
+        target.pose.position.z = transform.translation().z();
+        const Eigen::Quaterniond rotation(transform.linear());
+        target.pose.orientation.x = rotation.x(); target.pose.orientation.y = rotation.y();
+        target.pose.orientation.z = rotation.z(); target.pose.orientation.w = rotation.w();
+        r.executor_targets.push_back(target);
         r.trajectories.push_back(part.trajectory);
+      }
     }
     if (r.trajectories.size() != 3) throw std::runtime_error("ambiguous arm stage extraction");
-    r.success = true; r.detail = "MTC planned three position-only stages; execution and physics remain skill-owned";
+    r.success = true;
+    r.detail = q.attached_object_targets ?
+        "MTC planned attached shape-center hover/descend and relative EE retreat; explicit EE endpoints; execution remains skill-owned" :
+        "MTC planned three position-only stages; execution and physics remain skill-owned";
   }
   std::mutex mutex_;
+  uint64_t snapshot_sequence_{0};
   rclcpp::CallbackGroup::SharedPtr group_;
   rclcpp::Client<moveit_msgs::srv::GetPlanningScene>::SharedPtr scene_;
   rclcpp::Service<Service>::SharedPtr service_;

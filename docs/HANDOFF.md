@@ -1,5 +1,113 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-11-01 当前修正（更新 PR #85）：已独立复现并修复 native 原始回放在 Git LF 检出中的误拒。
+> 历史 receipt 的两份 CRLF 工作树 SHA 不再被当作唯一源码形式；仅对四个明确 Python gate
+> 文件做 CRLF→LF，再对已经封存的 Git/运行源码 SHA，原 checkout SHA 仍独立校验。
+> 原 receipt/source-binding/ZIP 字节全保留，INVALID_TRAILING_CR、旧 CI STOPPED 与 D3 NO_GO 保持。
+> 新增 35 项来源传输/篡改反例，50 targeted、742 全套 Python tests 通过，40 文件扫描零问题。
+> Windows 与 Linux 各自解出同一 Git LF archive，在无 site-packages 的独立模式完整回放通过；
+> 更正此前 Linux 仅用 Windows 挂载工作树、未覆盖干净 LF 检出的验证缺口。本轮机器人 0 次。
+> 远端新增 #86 已有 legacy 本机矩阵，但 CI 条件未完成；“skill 主导误差”的因果归因不成立。
+> 另已复现 #86 主机/容器路径搬运导致十份回执全缺失仍 PASS，留在 junior #82 修报告器。
+> #84/#87 继续做两条现成回放接线，#83 更新当前台账；不重复跑物理窗口替代 CI。
+> [来源修正、两端 LF 回放与矩阵审查](NATIVE_PORTABLE_BINDING_20261101.md)。下方为历史快照。
+
+> 2026-10-31 高难度运行器修复已提交 PR #85（`fix/native-audit-lifetime`，堆叠 #81）：
+> 原 native worker 跨轮持有完整审计 JSON 图，现收束到 audit_cycle 作用域；
+> 弱引用红/绿反例确认前轮对象在下轮开始前释放，新增失败 clock/stack/只读流快照。
+> 本机基线与修复各只跑一次五循环，均通过，分别 83,339 / 83,354 条连续 2 ms 记录；
+> 最大 live collect 385→104 ms，live GC 363→99 ms，500 ms 及所有物理门限不变。
+> 707 Python + 4 C++ cases 通过，40 文件扫描零问题；完整 114 成员证据可纯 Python 回放。
+> 修复窗口的版本号旁车 CRLF 瑕疵原样保留并标注 INVALID_TRAILING_CR；
+> 209 个运行源码 SHA 与原 Git tar/3328693 blobs 全同，来源补证独立核验。
+> 历史 CI stale 的具体暂停原因仍 UNKNOWN，旧失败仍 STOPPED。D3 仍 NO_GO。
+> 运行进程零残留；本轮旧 WSL 补丁字节不变。下一高难项是真 legacy 技能矩阵 #59；
+> junior #82/#83/#84 分别负责报告器、当前台账和离线 CI 回放接线。
+> [修复、实跑、来源瑕疵与回放](NATIVE_AUDIT_LIFETIME_20261031.md)。下方为历史快照。
+
+> 2026-10-31 高价值几何修复（`fix/preposition-world-frame`，堆叠 #80）：
+> 关闭“父子共同运动仍被判为静止”的预定位漏洞，并让等价 q/-q 样本得到相同基准。
+> 在线与离线分别检查 parent/body 世界位姿，继续使用相对 SE(3) 作为搬运基准；
+> 所有既有阈值保持。708 tests 零错误/失败/跳过；新声明的一次 Joint 抓放首次成功，
+> 原始落点误差 5.146469 mm，28,197 条 2 ms 记录连续，17.30 sim s 跟随及接触/释放门通过。
+> 完整 60 文件原始 ZIP 已入仓，可直接离线回放；旧 WSL 修改完整保留，运行进程零残留。
+> D3 仍 NO_GO；#59 要求的真 legacy 技能矩阵与 native 循环时效问题仍未解决。
+> [几何修复与完整证据](PREPOSITION_WORLD_FRAME_20261031.md)。下方为历史快照。
+
+> 2026-10-31 第 3 项最后一块「旧后端对照」落地（分支 `feat/legacy-parity`，堆叠在 #79 上）：
+> 同一份 `infra/legacy-parity-window.json`（五例，含预算耗尽负例）在同一 skill 后端下各跑一次，
+> 三个后端全部 `FUNCTIONAL_WINDOW_PASS`（4 PASS + 1 EXPECTED_FAILURE，负例均为
+> ERR_RECOVERY_EXHAUSTED）。新 `scripts/parity_report.py` 拒绝不同声明、缺例或超差的比较。
+> **关键发现：joint 落点误差约 2.16–2.25 mm，teleport 0.09–0.17 mm、velocity_servo
+> 0.013–0.23 mm —— 判定一致但精度差约 10 倍**，这是不把 joint 提为默认后端的实证理由。
+> 证据 `setup/acceptance/legacy_parity_20261031/`（三份 window.json + parity-report.json）。
+> 该窗口未带接触/跟随门禁，属 carry 行为对照，不能当作第二份 D3 证据。D3 仍 NO_GO。
+> [读数与边界](LEGACY_PARITY_20261031.md)。下方为历史快照。
+
+> 2026-10-31 第 3 项之「有符号接触力」落地（分支 `feat/signed-contact-force`，堆叠在
+> #78 上）：原先只比 `|Σ body_1 force|` 与 m·g，量值看不出支撑 vs 吸附、垂直 vs 侧向、
+> 也看不出单点反向。新门禁 `scripts/signed_force_gate.py` 用已声明的已知方向（重力）
+> 校验：每个接触点的 body_1 z 必须为正、合力方向余弦 ≥ 0.999、侧向 ≤ 1e-6 N、合力 z 仍在
+> m·g 带内、对端必须是 ground_plane（符号不能靠碰撞顺序碰巧正确）。本机跑一次探针：
+> 501 个 settled 样本，z∈[0.48999999999, 0.49000000035] N，方向余弦 1.0，侧向 3.6e-16 N，
+> 四点全部向上；证据 `setup/acceptance/signed_force_20261031/`（含 501 行 settled 原始数据，
+> 可用 gate 复算）。**只校准了一个已知方向**：侧向/斜向已知载荷与力矩仍未校准，无传感器
+> 碰撞仍为 UNKNOWN。D3 仍 NO_GO。
+> [方法、判据与边界](SIGNED_CONTACT_FORCE_20261031.md)。下方为历史快照。
+
+> 2026-10-31 第 3 项之「假附着」落地（分支 `feat/live-false-attach`，堆叠在
+> `feat/preposition-reference` 上）：刚性固定关节不可能打滑，因此不宣称在物理里造出假附着；
+> 注入点定在**守卫输入**——箱子仍报 `joint_component:true`，但上报位姿在附着后 30 帧
+> （0.6 s）起连续 10 帧被推移 30 mm，原始 2 ms 步进日志不动，被改的帧在 `carry.jsonl`
+> 逐帧记录。新窗口 `infra/joint-false-attach-window.json` + 新 CI 任务
+> `false-attach-smoke`；门禁 `scripts/false_attach_gate.py` 要求：注入恰好一次、
+> 故障为“实测相对位姿超限”、位移确实进入采样漂移（≥20 mm）、PICK 类型化失败
+> （ERR_INTERNAL）、detail 含“motion terminal confirmed”且无 `MotionTerminalUnknown`、
+> 事后未派 PLACE、未声称成功。三处阈值与口径冻结在代码里，改动需同时改声明。
+> D3 仍 NO_GO，n≥50 冻结；接触力方向校准与旧后端对照仍未做。
+> 本机 WSL 已执行该窗口一次（CI 停摆期间）：FUNCTIONAL_WINDOW_PASS、ERR_SKILL_FAILED / PICK_A:ERR_INTERNAL、注入 10 帧 32.882–33.062 s、峰值漂移 30.05 mm、motion_error_code 32 且终端已确认、未派 PLACE；证据在 `setup/acceptance/false_attach_20261031/`。本地离线层同款：7 包 merge-install、684 tests 0 失败、40 文件扫描零问题（提交 f414cbc）。
+> [注入边界与判据](FALSE_ATTACH_INJECTION_20261031.md)。下方为历史快照。
+
+> 2026-10-31 预定位基准落地（分支 `feat/preposition-reference`，堆叠在
+> `fix/joint-point-ik` 上）：Joint 会话不再以第一帧附着位姿作基准，改为在绑定前
+> 100 ms / 50 步的脱开静止窗口测量基准，并要求目标箱自接触传感器在该窗口内逐帧可用
+> 且无机械臂接触。运行时 `PrepositionLatch` 拒绝无基准的 engage（可关）；
+> 离线 `scripts/preposition_gate.py` 由 `infra/joint-contact-attached-center.json`
+> 声明，进入 CI 窗口。用归档窗口（run 40916246921）原始 2 ms 数据复算：hold 散布
+> 0.132 mm / 0.477 mrad，绑定跳变 0.055 mm / 199 µrad，9,182 步全程最大
+> 0.0553 mm / 200 µrad，门限仍为 2 mm / 1°（未放宽）。这是对既有数据的再推导，
+> 不是新仿真窗口；D3 仍 NO_GO，n≥50 冻结。
+> [方法与边界](PREPOSITION_REFERENCE_20261031.md)。下方为历史快照。
+
+> 2026-10-31 Joint PLACE 修复完成并实际通过本机 Gazebo：本地分支
+> `fix/joint-point-ik`，实现/测试终点 `aae8487`；实际运行 `e30bd8b`，
+> 运行后仅补测试依赖，规划器二进制字节相同。五例基线全部符合预期（376 秒）；
+> Joint 首次 PICK/PLACE/VERIFY 成功（93 秒），原始落点误差 5.259 mm，
+> 连续跟随 18.32 秒、接触/自由落体原门禁通过。全套 662 tests 零失败，40 文件扫描通过；
+> 实际 CDR 场景/轨迹独立 FK 六端点均小于 0.1 mm。358 成员完整包逐字节核验，
+> 旧失败证据保留、无替换窗口；进程零残留。尚未 push/merge，D3 仍 NO_GO。
+> [修复、运行和验收边界](JOINT_POINT_IK_20261031.md)。下方为历史快照。
+
+> 2026-10-31 已实际跑本机 Gazebo：PR #75 c2583ae，锁定上游隔离构建。
+> velocity_servo/MTC 五用例窗口全部符合预期（含一次恢复和预算耗尽负例），
+> 共五次成功放置，原始物理记录重算误差 0.074–0.216 mm；每例复位及 19 项健康通过。
+> 随后 Joint/MTC 单任务 PICK 成功、上升 119.767 mm；PLACE hover 仍报
+> GOAL_STATE_INVALID，未派 PLACE 轨迹、未主动释放，失败完整保留。
+> 两窗口各跑一次，墙钟 389/64 秒；25,325 条 2 ms 原始步记录无断帧。
+> 首次审计误拼启动/任务附着已纠正，全部原始帧保留。当前无运行栈或录包残留。
+> 生产 adapter 未修，D3 仍 NO_GO；[实际运行和交付记录](LOCAL_GAZEBO_RUN_20261031.md)。
+
+> 2026-10-30 本机接续：用户确认以最新 PR #75 `c2583ae` 为准。Windows 与 WSL
+> 已同步；131 个旧 WSL 未跟踪证据文件保留。四个本地包在独立 build/install 前缀
+> 构建完成，661 checks / 0 failures，40 文件静态扫描清零，历史证据回放通过。
+> 最新 CI 的 Joint PLACE hover 仍报 GOAL_STATE_INVALID，未派发 PLACE、未主动释放。
+> 已从原始 CI 包重建点几何，实际调用上游 sampler/KDL：零偏移 16/16 有效；
+> 已知可达的非零偏移点有 10 个 IK 解、0 个满足点约束。兼容性反例 VERIFIED；
+> 对完整历史失败的归因 STRONG INFERENCE，精确场景未保存、唯一根因 UNKNOWN。
+> 下一步为实际 TCP 点求解 adapter 与完整场景记录；本轮未修改生产求解器、未运行
+> 新 Gazebo/硬件窗口、未 push/merge，D3 仍 NO_GO。
+> [本机状态、证据及下一步验收](PR75_LOCAL_CONTINUATION_20261030.md)。以下为历史。
+
 > 2026-10-28：#65 已合入 `619e132`，主线两层 CI 均通过。后续 recorder 有界后台
 > 编码修复通过五份原始包的离线阻塞回放：2445/2445 帧、718 帧有效对齐。
 > #66–69 的证据和解释正在整合；默认 Joint 准入保持 NO_GO，旧相机拒收不改判。
@@ -199,3 +307,16 @@
 3. **hardening 候选**：接触式夹爪抓取（替代传送伺服）；carry 断链检测（TF 丢失自动释放）；w1_5 电池偶发客户端挂起排查（一次性，39ms 手动复验正常）
 4. **本机例行**：复验 = `50_start_detached.sh`（自带验活重试）→ `47_w1_acceptance.sh`（Week-1 电池）→ `32_day2_acceptance.sh`（Day-2 回归）
 5. **Git 状态**：Week-1/1.5 代码 + Week-2 预备文档均已 push（远端 main=`4fccfb891002478cc72e6011b13e6ff300f36889`：7956d63→5a0d528→4fccfb8）；docs 仓纯本地（bc51e31/100ba08）。M2 正式开工 = 从 Issue #3（WorldState v2 冻结实现）起步，顺序见各 issue 里程碑。
+
+## Archive checks during development
+
+Do not create a new acceptance capsule just because a gate or runtime source changes.
+Native audit verification keeps archive bytes and recorded identities mandatory.
+Current-source replay is separate: at the recorded canonical revision, source hashes
+must match; at another HEAD, the report says `SUPERSEDED_BY_<sha>` and
+`current_code_replay: NOT_RUN`. This is neither a replay pass nor a replay failure.
+CI lists that status separately. New evidence is needed when citing a new runtime
+window, not to renew old source bindings. Historical data and receipts stay unchanged.
+Git history is not required in runtime images: `FLEXCELL_SOURCE_REV` supplies the
+build revision. Unidentified source exports report `SOURCE_REVISION_UNKNOWN`, never
+a replay pass. Receipt, binding and archive hashes remain mandatory in every case.

@@ -15,7 +15,7 @@ import unittest
 
 from flexcell_skills.contracts.injection import (
     APPLIED, ARMED, CLEARED, IDLE, REQUESTED, InjectionLifecycle,
-    parse_request)
+    parse_false_attach, parse_request)
 
 
 class TestParseRequest(unittest.TestCase):
@@ -133,3 +133,34 @@ class TestLifecycle(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+class FalseAttachSpecification(unittest.TestCase):
+    """A declared false-attach injection must be exact or refused at startup."""
+
+    def test_specification_round_trips_into_frames_and_pose_window(self):
+        spec = parse_false_attach('target_box_a:0.03:0.2', 'detachable_joint')
+        self.assertEqual(spec['object'], 'target_box_a')
+        self.assertEqual(spec['offset_m'], .03)
+        self.assertEqual(spec['frames'], 10)
+        self.assertEqual(spec['after_samples'], 90)
+        self.assertEqual(spec['axis'], 'world_x')
+
+    def test_default_hold_is_used_when_omitted(self):
+        spec = parse_false_attach('target_box_a:0.03', 'detachable_joint')
+        self.assertEqual(spec['hold_s'], .2)
+        self.assertEqual(spec['frames'], 10)
+
+    def test_absent_specification_means_no_injection(self):
+        self.assertIsNone(parse_false_attach('', 'detachable_joint'))
+        self.assertIsNone(parse_false_attach('   ', 'detachable_joint'))
+
+    def test_unsupported_backend_or_object_is_refused(self):
+        for spec, backend in (('target_box_a:0.03:0.2', 'teleport'),
+                              ('target_box_c:0.03:0.2', 'detachable_joint'),
+                              ('target_box_a:0.5:0.2', 'detachable_joint'),
+                              ('target_box_a', 'detachable_joint'),
+                              ('target_box_a:0.03:5', 'detachable_joint')):
+            with self.assertRaises(ValueError, msg=spec):
+                parse_false_attach(spec, backend)
+

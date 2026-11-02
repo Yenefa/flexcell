@@ -1,0 +1,189 @@
+{
+  "status": "CARRY_BACKEND_PARITY_PASS",
+  "declaration_sha256": "6e815d4fee4d1b9dfebc56975bee5f78aa5caf60b75e637823c1acd064b9059d",
+  "backends": {
+    "parity-teleport": "teleport",
+    "parity-velocity_servo": "velocity_servo",
+    "parity-detachable_joint": "detachable_joint"
+  },
+  "cases": [
+    {
+      "case": "normal",
+      "object": "target_box_a"
+    },
+    {
+      "case": "normal",
+      "object": "target_box_b"
+    },
+    {
+      "case": "dual_object",
+      "object": "target_box_a"
+    },
+    {
+      "case": "recovery_once",
+      "object": "target_box_a"
+    },
+    {
+      "case": "budget_exhaustion",
+      "object": "target_box_a"
+    }
+  ],
+  "table": {
+    "parity-teleport": {
+      "status": "FUNCTIONAL_WINDOW_PASS",
+      "backend": "teleport",
+      "cases": [
+        {
+          "case": "normal",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "placement_error_m": 0.00017095189309869016,
+          "expectation_met": true
+        },
+        {
+          "case": "normal",
+          "object": "target_box_b",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "placement_error_m": 9.315254077660769e-05,
+          "expectation_met": true
+        },
+        {
+          "case": "dual_object",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "placement_error_m": null,
+          "expectation_met": true
+        },
+        {
+          "case": "recovery_once",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "placement_error_m": 9.016736742473145e-05,
+          "expectation_met": true
+        },
+        {
+          "case": "budget_exhaustion",
+          "object": "target_box_a",
+          "status": "EXPECTED_FAILURE",
+          "outcome": "OUTCOME_FAILED",
+          "error_code": "ERR_RECOVERY_EXHAUSTED",
+          "placement_error_m": null,
+          "expectation_met": true
+        }
+      ]
+    },
+    "parity-velocity_servo": {
+      "status": "FUNCTIONAL_WINDOW_PASS",
+      "backend": "velocity_servo",
+      "cases": [
+        {
+          "case": "normal",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "placement_error_m": 0.00011928314594562215,
+          "expectation_met": true
+        },
+        {
+          "case": "normal",
+          "object": "target_box_b",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "placement_error_m": 0.0002301263567866348,
+          "expectation_met": true
+        },
+        {
+          "case": "dual_object",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "placement_error_m": null,
+          "expectation_met": true
+        },
+        {
+          "case": "recovery_once",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "placement_error_m": 1.2907061789259283e-05,
+          "expectation_met": true
+        },
+        {
+          "case": "budget_exhaustion",
+          "object": "target_box_a",
+          "status": "EXPECTED_FAILURE",
+          "outcome": "OUTCOME_FAILED",
+          "error_code": "ERR_RECOVERY_EXHAUSTED",
+          "placement_error_m": null,
+          "expectation_met": true
+        }
+      ]
+    },
+    "parity-detachable_joint": {
+      "status": "FUNCTIONAL_WINDOW_PASS",
+      "backend": "detachable_joint",
+      "cases": [
+        {
+          "case": "normal",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "placement_error_m": 0.0022017780500175072,
+          "expectation_met": true
+        },
+        {
+          "case": "normal",
+          "object": "target_box_b",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "placement_error_m": 0.002254049161861907,
+          "expectation_met": true
+        },
+        {
+          "case": "dual_object",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "placement_error_m": null,
+          "expectation_met": true
+        },
+        {
+          "case": "recovery_once",
+          "object": "target_box_a",
+          "status": "PASS",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "error_code": "ERR_NONE",
+          "placement_error_m": 0.0021596430326930754,
+          "expectation_met": true
+        },
+        {
+          "case": "budget_exhaustion",
+          "object": "target_box_a",
+          "status": "EXPECTED_FAILURE",
+          "outcome": "OUTCOME_FAILED",
+          "error_code": "ERR_RECOVERY_EXHAUSTED",
+          "placement_error_m": null,
+          "expectation_met": true
+        }
+      ]
+    }
+  },
+  "max_placement_error_m": 0.012,
+  "tolerance_moved": false,
+  "interpretation": "Same manifest, same tolerance and the same criterion on every backend; one bounded window per backend, not a success rate"
+}

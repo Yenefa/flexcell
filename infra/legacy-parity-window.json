@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "purpose": "The same five functional tasks on an explicitly selected carry backend, so the joint qualification can be compared with the legacy backends without relaxing any tolerance",
+  "max_logical_tasks": 5,
+  "camera": false,
+  "contact_trace": false,
+  "no_replacements": true,
+  "episodes": [
+    {
+      "case": "normal",
+      "object": "target_box_a",
+      "task": "A normal pick and place"
+    },
+    {
+      "case": "normal",
+      "object": "target_box_b",
+      "task": "B normal pick and place"
+    },
+    {
+      "case": "dual_object",
+      "object": "target_box_a",
+      "task": "Dual-object demo"
+    },
+    {
+      "case": "recovery_once",
+      "object": "target_box_a",
+      "task": "One injected failure with one bounded retry"
+    },
+    {
+      "case": "budget_exhaustion",
+      "object": "target_box_a",
+      "task": "Persistent injected failure must exhaust the budget"
+    }
+  ]
+}

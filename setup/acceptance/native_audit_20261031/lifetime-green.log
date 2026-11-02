@@ -1,0 +1,24 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-7.4.4, pluggy-1.4.0 -- /usr/bin/python3
+rootdir: /mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/src/flexcell/flexcell_skills
+configfile: setup.cfg
+plugins: ament-xmllint-0.17.5, launch-testing-ros-0.26.12, ament-flake8-0.17.5, ament-lint-0.17.5, ament-copyright-0.17.5, launch-testing-3.4.11, ament-pep257-0.17.5, cov-4.1.0, colcon-core-0.21.3, typeguard-4.1.5
+collecting ... collected 15 items
+
+src/flexcell/flexcell_skills/test/test_native_cycle_window.py::test_detached_preposition_reference_survives_entire_cycle PASSED [  6%]
+src/flexcell/flexcell_skills/test/test_native_cycle_window.py::test_bad_or_ambiguous_cycle_evidence_cannot_pass[attached_reference] PASSED [ 13%]
+src/flexcell/flexcell_skills/test/test_native_cycle_window.py::test_bad_or_ambiguous_cycle_evidence_cannot_pass[missing_step] PASSED [ 20%]
+src/flexcell/flexcell_skills/test/test_native_cycle_window.py::test_bad_or_ambiguous_cycle_evidence_cannot_pass[prebind_drift] PASSED [ 26%]
+src/flexcell/flexcell_skills/test/test_native_cycle_window.py::test_bad_or_ambiguous_cycle_evidence_cannot_pass[unknown_force] PASSED [ 33%]
+src/flexcell/flexcell_skills/test/test_native_cycle_window.py::test_bad_or_ambiguous_cycle_evidence_cannot_pass[retired_accepted] PASSED [ 40%]
+src/flexcell/flexcell_skills/test/test_native_cycle_window.py::test_bad_or_ambiguous_cycle_evidence_cannot_pass[distant_retired_pose] PASSED [ 46%]
+src/flexcell/flexcell_skills/test/test_native_cycle_window.py::test_bad_or_ambiguous_cycle_evidence_cannot_pass[looser_limit] PASSED [ 53%]
+src/flexcell/flexcell_skills/test/test_native_cycle_window.py::test_fewer_than_five_cycles_cannot_be_relabelled_complete PASSED [ 60%]
+src/flexcell/flexcell_skills/test/test_native_cycle_window.py::test_first_unready_native_guard_stops_without_preposition_or_replacement PASSED [ 66%]
+src/flexcell/flexcell_skills/test/test_native_cycle_window.py::test_completed_audit_rows_are_released_before_next_live_cycle PASSED [ 73%]
+src/flexcell/flexcell_skills/test/test_native_cycle_window.py::test_live_consumer_starts_at_new_records_without_erasing_raw_history PASSED [ 80%]
+src/flexcell/flexcell_skills/test/test_native_cycle_window.py::test_reference_epoch_selection_preserves_both_freshness_bounds[pretrigger_history] PASSED [ 86%]
+src/flexcell/flexcell_skills/test/test_native_cycle_window.py::test_reference_epoch_selection_preserves_both_freshness_bounds[stale_eligible] PASSED [ 93%]
+src/flexcell/flexcell_skills/test/test_native_cycle_window.py::test_reference_epoch_selection_preserves_both_freshness_bounds[stale_producer] PASSED [100%]
+
+============================== 15 passed in 3.35s ==============================

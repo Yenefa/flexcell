@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "purpose": "One declared live false-attachment injection during LIFT; the guard must latch the mismatch, the motion must be cancelled with a confirmed stop, and the task must fail typed with no PLACE dispatched",
+  "max_logical_tasks": 5,
+  "camera": false,
+  "required_false_attach": true,
+  "false_attach": {
+    "object": "target_box_a",
+    "offset_m": 0.03,
+    "hold_s": 0.2
+  },
+  "contact_trace": true,
+  "backend": "detachable_joint",
+  "skill_backend": "mtc",
+  "physics_step_s": 0.002,
+  "min_preflight_rtf": 0.3,
+  "qualification_no_recovery": true,
+  "episodes": [
+    {
+      "case": "false_attach",
+      "object": "target_box_a",
+      "task": "False attachment during lift, A"
+    }
+  ]
+}
