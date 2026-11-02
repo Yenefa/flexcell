@@ -1,0 +1,44 @@
+{
+  "schema_version": 1,
+  "classification": "OFFLINE_SOFTWARE_PROBE_ONLY",
+  "tested_executable": "build/flexcell_mtc/tcp_sampler_probe",
+  "native_probe_sha256": "07559ae65a3a28adf57c7ed0a7e766edf77a0e226e0c43f9546314b096c9a31a",
+  "installed_probe_sha256": "33e35cfc1d49a7156176a1d81dd2bd272f70231e5467d6069f907008a0b3b527",
+  "files": {
+    "report.json": "201654b2f67d67daa215e1f710d466fa61213342921697b61137859aa1c8e0a1",
+    "blocked-evidence": "f5a84b2ce8295f665b79509c1e919f742400afdd5c2dca8d8ba8b4ca55498cb1",
+    "params.yaml": "a3b2b1db4a6703b12cad4c0a7f9cc0bf49203113d25495bc4a8fde1da55b37e8",
+    "probe.log": "d4dcf783b52f2407feecda32422657e9684838aab10356bf96c37cf6626f239d",
+    "fixture.json": "d5743679e0321e06435468b4e0ff6d319f5c4aa662bc0e27f6b82919441b7348",
+    "wire-evidence/1793593025385493251-1/parameters.cdr": "57602d6523a836c9c7899edef754af0a92a1a5d3989bd9b76b66f37e730c9f99",
+    "wire-evidence/1793593025385493251-1/scene.cdr": "33a18c059b25dd9e1373bfb6135b86a6720d541d1f830d40e1d7e47c03dfc9e8",
+    "wire-evidence/1793593025385493251-1/request.cdr": "2bcc1717d4e3ed7a3d0aec104a0637939a3bc80d53cf79ea2bcae349b7772cd4",
+    "wire-evidence/1793593025385493251-1/response.cdr": "d593fd71d2273aae9b7f0dfed72c81a22e60d681cf813d66bbbff4f28ce69767",
+    "wire-evidence/1793593025385493251-1/planning_model.srdf": "68d2582c4dff81ffb477e1306999b7a1976ce7a218d48c8d4901b5007cf3e821",
+    "wire-evidence/1793593025385493251-1/planning_model.urdf": "e541426764eca98050ea4e5b0648b6c6c894c841b76e31d49ff120dc8f0da00d",
+    "source/src/flexcell/flexcell_mtc/src/virtual_tcp_model.hpp": "62a824b17886b3d337c935ae0f007b1432489338442f7fd46ec3dccc9d70b097",
+    "source/src/flexcell/flexcell_mtc/src/position_only_planner.hpp": "aae2765f543ca5f54da0f1f4b2dc40cfceb0041318330776cefea529658226a8",
+    "source/src/flexcell/flexcell_mtc/src/planning_evidence.hpp": "79a77b98902ba5ba8e9c01b4945564f829a82990c9f7b76182e77efe7d225c9f",
+    "source/src/flexcell/flexcell_mtc/test/tcp_sampler_probe.cpp": "ddd397a8ad764129bd937dc979e5124e751a4b0898936ac10cd25d4747377adf",
+    "source/scripts/offline_tcp_probe.py": "7627e1d5efb748e9bca74480a192b56d269460ae4975d2beff9b1992becc48fe"
+  },
+  "report": {
+    "status": "OFFLINE_TCP_PASS",
+    "robot_tasks": 0,
+    "sampler_trials": 20,
+    "legacy_valid_samples": 0,
+    "tcp_valid_samples": 20,
+    "tcp_max_error_m": 9.395058238981215e-05,
+    "blocked_valid_samples": 0,
+    "collision_checks": 283,
+    "sampler_seeds": [
+      230342359,
+      230342359,
+      230342359
+    ],
+    "planned_stages": 3,
+    "bad_evidence_path_rejected": true,
+    "default_admission": "NO_GO"
+  },
+  "archive_sha256": "98e181a19febefbc113da1fd7a25aee3cc56c2b9435bbade04c472159601484c"
+}

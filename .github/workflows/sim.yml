@@ -61,6 +61,10 @@ jobs:
             python3 /opt/flexcell/repo/setup/acceptance/native_five_20261030/verify_cycles.py
           docker run --init --rm flexcell-sim:ci \
             python3 /opt/flexcell/repo/setup/acceptance/joint_place_failure_20261030/verify.py
+          docker run --init --rm flexcell-sim:ci \
+            python3 /opt/flexcell/repo/setup/acceptance/attached_center_stop/verify.py
+          docker run --init --rm flexcell-sim:ci \
+            python3 /opt/flexcell/repo/setup/acceptance/virtual_tcp_offline/verify.py
       - name: One declared native contact sensor pipeline spike (no arm tasks)
         run: |
           docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
@@ -116,7 +120,7 @@ jobs:
           mkdir -p artifacts
           docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
             python3 /opt/flexcell/repo/scripts/sim_window.py \
-            --manifest /opt/flexcell/repo/infra/joint-contact-attached-center.json --out /artifacts/joint-window \
+            --manifest /opt/flexcell/repo/infra/joint-contact-virtual-tcp.json --out /artifacts/joint-window \
             --backend detachable_joint --skill-backend mtc
       - uses: actions/upload-artifact@v4
         if: always()

@@ -22,6 +22,8 @@
 #include <sstream>
 #include "position_only_planner.hpp"
 #include "attached_object_goal.hpp"
+#include "virtual_tcp_model.hpp"
+#include "planning_evidence.hpp"
 namespace mtc = moveit::task_constructor;
 using Service = flexcell_interfaces::srv::PlanManipulation;
 using namespace std::chrono_literals;
@@ -65,11 +67,30 @@ class Planner : public rclcpp::Node {
       scene_->remove_pending_request(future);
       throw std::runtime_error("planning scene timeout");
     }
+    const auto measured_scene = future.get()->scene;
+    flexcell::PlanningEvidence evidence(shared_from_this(), q, measured_scene);
+    std::unique_ptr<flexcell::VirtualTcpModel> tcp_model;
     mtc::Task task;
     task.setName("FlexCell " + q.operation); task.enableIntrospection(false);
     task.loadRobotModel(shared_from_this());
     auto scene = std::make_shared<planning_scene::PlanningScene>(task.getRobotModel());
-    scene->setPlanningSceneMsg(future.get()->scene);
+    scene->setPlanningSceneMsg(measured_scene);
+    if (q.attached_object_targets) {
+      const auto& measured_state=scene->getCurrentState();
+      const auto* body=measured_state.getAttachedBody(q.object_name);
+      if (!body || body->getAttachedLinkName() != "end_effector_link" || body->getShapes().size() != 1 ||
+          body->getShapePosesInLinkFrame().size() != 1)
+        throw std::runtime_error("joint PLACE requires one measured end-effector-attached shape");
+      const auto shape_frame=body->getShapePosesInLinkFrame().front();
+      flexcell::checkAttachedObjectPose(measured_state.getGlobalLinkTransform("end_effector_link"), shape_frame, q.object_pose);
+      tcp_model=std::make_unique<flexcell::VirtualTcpModel>(shared_from_this(), shape_frame);
+      task.setRobotModel(tcp_model->model());
+      scene=std::make_shared<planning_scene::PlanningScene>(task.getRobotModel());
+      scene->setPlanningSceneMsg(measured_scene);
+      evidence.model(tcp_model->urdf_xml,tcp_model->srdf_xml);
+    } else {
+      evidence.model(get_parameter("robot_description").as_string(),get_parameter("robot_description_semantic").as_string());
+    }
     const auto* arm = task.getRobotModel()->getJointModelGroup("arm");
     if (!arm) throw std::runtime_error("arm group missing");
     auto state = scene->getCurrentState();
@@ -96,15 +117,6 @@ class Planner : public rclcpp::Node {
       gripper_stage("open gripper", .02);
     } else if (!state.hasAttachedBody(q.object_name)) {
       throw std::runtime_error("PLACE object not attached in measured scene");
-    }
-    Eigen::Isometry3d shape_frame = Eigen::Isometry3d::Identity();
-    if (q.attached_object_targets) {
-      const auto* body = state.getAttachedBody(q.object_name);
-      if (body->getAttachedLinkName() != "end_effector_link" || body->getShapes().size() != 1 ||
-          body->getShapePosesInLinkFrame().size() != 1)
-        throw std::runtime_error("joint PLACE requires one measured end-effector-attached shape");
-      shape_frame = body->getShapePosesInLinkFrame().front();
-      flexcell::checkAttachedObjectPose(state.getGlobalLinkTransform("end_effector_link"), shape_frame, q.object_pose);
     }
     auto pipeline = std::make_shared<flexcell::PositionOnlyPlanner>(shared_from_this(), "ompl");
     pipeline->setMaxVelocityScalingFactor(profiles.at(q.motion_profile_id));
@@ -135,8 +147,8 @@ class Planner : public rclcpp::Node {
       target.header = q.targets[i].header;
       target.point = q.targets[i].pose.position;
       auto move = std::make_unique<mtc::stages::MoveTo>(pick ? pick_names[i] : place_names[i], pipeline);
-      move->setGroup("arm");
-      move->setIKFrame(q.attached_object_targets ? shape_frame : Eigen::Isometry3d::Identity(), "end_effector_link");
+      move->setGroup(q.attached_object_targets ? flexcell::VirtualTcpModel::group : "arm");
+      move->setIKFrame(q.attached_object_targets ? flexcell::VirtualTcpModel::link : "end_effector_link");
       move->setGoal(target);
       move->setTimeout(std::min(5.0, q.deadline_ms / 3000.0)); task.add(std::move(move));
       if (i == 1) {
@@ -184,8 +196,9 @@ class Planner : public rclcpp::Node {
     if (r.trajectories.size() != 3) throw std::runtime_error("ambiguous arm stage extraction");
     r.success = true;
     r.detail = q.attached_object_targets ?
-        "MTC planned attached shape-center hover/descend and relative EE retreat; explicit EE endpoints; execution remains skill-owned" :
+        "MTC planned measured virtual-TCP KDL hover/descend and original-arm EE retreat; explicit EE endpoints; execution remains skill-owned" :
         "MTC planned three position-only stages; execution and physics remain skill-owned";
+    evidence.response(r);
   }
   std::mutex mutex_;
   rclcpp::CallbackGroup::SharedPtr group_;

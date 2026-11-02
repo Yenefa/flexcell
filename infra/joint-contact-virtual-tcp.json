@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "purpose": "One first-attempt contact task after offline recorded-state TCP solver reproduction; fixed virtual TCP in a planning-only model; no recovery or replacements",
+  "max_logical_tasks": 5,
+  "camera": false,
+  "required_carry_follow": true,
+  "required_joint_contacts": true,
+  "contact_trace": true,
+  "backend": "detachable_joint",
+  "skill_backend": "mtc",
+  "joint_hold_sim_s": 11.0,
+  "min_follow_sim_s": 10.0,
+  "physics_step_s": 0.002,
+  "min_preflight_rtf": 0.3,
+  "release_clearance_m": 0.05,
+  "world_sha256": "82e74a45f6e149724853d9fe840620c536c1d25163b385a4faa8274952ebc63c",
+  "semantic_config_sha256": "17ff20504032ec399dbf0ba53243690299511163361487c76386b29fb4eea09a",
+  "contact_gate": {
+    "prebind_ns": 1000000000,
+    "postrelease_ns": 500000000,
+    "freefall_ns": 40000000,
+    "max_clock_skew_ns": 50000000,
+    "min_weight_samples": 476,
+    "force_mean_min_n": 0.392,
+    "force_mean_max_n": 0.588
+  },
+  "episodes": [
+    {
+      "case": "normal",
+      "object": "target_box_a",
+      "task": "Measured virtual-TCP joint PLACE, A"
+    }
+  ],
+  "qualification_no_recovery": true,
+  "previous_failure_run": 40956689816,
+  "previous_failure_zip_sha256": "402775c6b03f1780ceb660cb50da6c584c20ebac56a9e275f256e0f0b4c761e5",
+  "previous_local_stop_archive_sha256": "d39c8dc1eab7bedd35e866d43511c505372bf00258de12a960ebf9a294691006"
+}

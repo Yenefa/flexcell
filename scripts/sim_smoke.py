@@ -96,6 +96,8 @@ def main():
     else:
         os.environ.pop('FLEXCELL_CONTACT_STEP_LOG', None)
     os.environ['FLEXCELL_EPISODE_DIR'] = str(out / 'episodes')
+    if args.skill_backend == 'mtc':
+        os.environ['FLEXCELL_MTC_PLAN_EVIDENCE_DIR'] = str(out / 'mtc_plans')
     result = dict(schema_version=1, status='HARNESS_ERROR', backend=args.backend,
                   skill_backend=args.skill_backend, physical_tasks_dispatched=0,
                   qualification='FUNCTIONAL_SMOKE_ONLY', case=args.case, object=args.object, out=str(out))
