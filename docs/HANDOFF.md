@@ -1,5 +1,12 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-11-02 #84 / PR #87：同步 #85 最新 LF/CRLF 来源绑定修复，现有离线归档步骤
+> 已保留预定位回放并补入 native 审计回放；两条均在 Linux Git LF 源码上以
+> `python3 -I -S -B` 退出 0，分别为 WORLD_HOLD_WINDOW_REPLAY_PASS / NATIVE_AUDIT_LIFETIME_REPLAY_PASS。
+> 无新 job、仿真或依赖，失败保留非零退出，原验证器/ZIP/receipt 字节不变。
+> INVALID_TRAILING_CR、历史 CI STOPPED 和 D3 NO_GO 保留；Actions 实际状态见 PR，
+> 本地回放不等于 CI PASS。下段“native 未接”为 2026-11-01 历史状态。
+
 > 2026-11-01 #84「归档回放接入现有离线检查」：已把预定位回放
 > `python3 setup/acceptance/preposition_world_20261031/verify.py` 接进 `ci.yml` 现有归类证据步骤
 > （只读、无 ROS、无机器人动作、失败保留非零退出）。**native 那一半有意未接**：
@@ -8,6 +15,18 @@
 > 而 git 存的是 LF，因此该回放在 LF 检出（=CI/Linux）上必然 `AssertionError: gate changed`。
 > 按 #84「不得为接线改写来源」的要求，未改任何哈希/验证器/ZIP，等 #85 侧把来源绑定改成
 > 对提交内容（或 LF 归一）计算后再接第二条命令。
+
+> 2026-11-01 当前修正（更新 PR #85）：已独立复现并修复 native 原始回放在 Git LF 检出中的误拒。
+> 历史 receipt 的两份 CRLF 工作树 SHA 不再被当作唯一源码形式；仅对四个明确 Python gate
+> 文件做 CRLF→LF，再对已经封存的 Git/运行源码 SHA，原 checkout SHA 仍独立校验。
+> 原 receipt/source-binding/ZIP 字节全保留，INVALID_TRAILING_CR、旧 CI STOPPED 与 D3 NO_GO 保持。
+> 新增 35 项来源传输/篡改反例，50 targeted、742 全套 Python tests 通过，40 文件扫描零问题。
+> Windows 与 Linux 各自解出同一 Git LF archive，在无 site-packages 的独立模式完整回放通过；
+> 更正此前 Linux 仅用 Windows 挂载工作树、未覆盖干净 LF 检出的验证缺口。本轮机器人 0 次。
+> 远端新增 #86 已有 legacy 本机矩阵，但 CI 条件未完成；“skill 主导误差”的因果归因不成立。
+> 另已复现 #86 主机/容器路径搬运导致十份回执全缺失仍 PASS，留在 junior #82 修报告器。
+> #84/#87 继续做两条现成回放接线，#83 更新当前台账；不重复跑物理窗口替代 CI。
+> [来源修正、两端 LF 回放与矩阵审查](NATIVE_PORTABLE_BINDING_20261101.md)。下方为历史快照。
 
 > 2026-10-31 高难度运行器修复已提交 PR #85（`fix/native-audit-lifetime`，堆叠 #81）：
 > 原 native worker 跨轮持有完整审计 JSON 图，现收束到 audit_cycle 作用域；

@@ -1,0 +1,826 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites><testsuite name="pytest" errors="0" failures="25" skipped="0" tests="35" time="2.395" timestamp="2026-11-01T01:59:19.952899" hostname="localhost"><testcase classname="test.test_native_portable_sources" name="test_every_per_file_lf_crlf_combination_preserves_gate_identity[endings0]" time="0.039"><failure message="AssertionError: gate changed; use the recorded source revision: scripts/contact_gate.py">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co0')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+endings = (False, False, False, False)
+
+    @pytest.mark.parametrize('endings',list(itertools.product((False,True),repeat=4)))
+    def test_every_per_file_lf_crlf_combination_preserves_gate_identity(tmp_path,verifier,endings):
+        tree = source_tree(tmp_path,endings)
+        with pytest.raises(RawBoundaryReached):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co0')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/contact_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_every_per_file_lf_crlf_combination_preserves_gate_identity[endings1]" time="0.034"><failure message="AssertionError: gate changed; use the recorded source revision: scripts/contact_gate.py">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co1')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+endings = (False, False, False, True)
+
+    @pytest.mark.parametrize('endings',list(itertools.product((False,True),repeat=4)))
+    def test_every_per_file_lf_crlf_combination_preserves_gate_identity(tmp_path,verifier,endings):
+        tree = source_tree(tmp_path,endings)
+        with pytest.raises(RawBoundaryReached):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co1')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/contact_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_every_per_file_lf_crlf_combination_preserves_gate_identity[endings2]" time="0.035"><failure message="AssertionError: gate changed; use the recorded source revision: src/flexcell/flexcell_skills/flexcell_skills/joint_follow.py">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co2')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+endings = (False, False, True, False)
+
+    @pytest.mark.parametrize('endings',list(itertools.product((False,True),repeat=4)))
+    def test_every_per_file_lf_crlf_combination_preserves_gate_identity(tmp_path,verifier,endings):
+        tree = source_tree(tmp_path,endings)
+        with pytest.raises(RawBoundaryReached):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co2')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: src/flexcell/flexcell_skills/flexcell_skills/joint_follow.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_every_per_file_lf_crlf_combination_preserves_gate_identity[endings3]" time="0.239" /><testcase classname="test.test_native_portable_sources" name="test_every_per_file_lf_crlf_combination_preserves_gate_identity[endings4]" time="0.033"><failure message="AssertionError: gate changed; use the recorded source revision: scripts/integrated_contact_gate.py">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co4')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+endings = (False, True, False, False)
+
+    @pytest.mark.parametrize('endings',list(itertools.product((False,True),repeat=4)))
+    def test_every_per_file_lf_crlf_combination_preserves_gate_identity(tmp_path,verifier,endings):
+        tree = source_tree(tmp_path,endings)
+        with pytest.raises(RawBoundaryReached):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co4')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/integrated_contact_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_every_per_file_lf_crlf_combination_preserves_gate_identity[endings5]" time="0.033"><failure message="AssertionError: gate changed; use the recorded source revision: scripts/integrated_contact_gate.py">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co5')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+endings = (False, True, False, True)
+
+    @pytest.mark.parametrize('endings',list(itertools.product((False,True),repeat=4)))
+    def test_every_per_file_lf_crlf_combination_preserves_gate_identity(tmp_path,verifier,endings):
+        tree = source_tree(tmp_path,endings)
+        with pytest.raises(RawBoundaryReached):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co5')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/integrated_contact_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_every_per_file_lf_crlf_combination_preserves_gate_identity[endings6]" time="0.033"><failure message="AssertionError: gate changed; use the recorded source revision: scripts/integrated_contact_gate.py">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co6')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+endings = (False, True, True, False)
+
+    @pytest.mark.parametrize('endings',list(itertools.product((False,True),repeat=4)))
+    def test_every_per_file_lf_crlf_combination_preserves_gate_identity(tmp_path,verifier,endings):
+        tree = source_tree(tmp_path,endings)
+        with pytest.raises(RawBoundaryReached):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co6')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/integrated_contact_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_every_per_file_lf_crlf_combination_preserves_gate_identity[endings7]" time="0.035"><failure message="AssertionError: gate changed; use the recorded source revision: scripts/integrated_contact_gate.py">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co7')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+endings = (False, True, True, True)
+
+    @pytest.mark.parametrize('endings',list(itertools.product((False,True),repeat=4)))
+    def test_every_per_file_lf_crlf_combination_preserves_gate_identity(tmp_path,verifier,endings):
+        tree = source_tree(tmp_path,endings)
+        with pytest.raises(RawBoundaryReached):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co7')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/integrated_contact_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_every_per_file_lf_crlf_combination_preserves_gate_identity[endings8]" time="0.034"><failure message="AssertionError: gate changed; use the recorded source revision: scripts/native_cycle_gate.py">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co8')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+endings = (True, False, False, False)
+
+    @pytest.mark.parametrize('endings',list(itertools.product((False,True),repeat=4)))
+    def test_every_per_file_lf_crlf_combination_preserves_gate_identity(tmp_path,verifier,endings):
+        tree = source_tree(tmp_path,endings)
+        with pytest.raises(RawBoundaryReached):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co8')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/native_cycle_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_every_per_file_lf_crlf_combination_preserves_gate_identity[endings9]" time="0.035"><failure message="AssertionError: gate changed; use the recorded source revision: scripts/native_cycle_gate.py">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co9')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+endings = (True, False, False, True)
+
+    @pytest.mark.parametrize('endings',list(itertools.product((False,True),repeat=4)))
+    def test_every_per_file_lf_crlf_combination_preserves_gate_identity(tmp_path,verifier,endings):
+        tree = source_tree(tmp_path,endings)
+        with pytest.raises(RawBoundaryReached):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co9')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/native_cycle_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_every_per_file_lf_crlf_combination_preserves_gate_identity[endings10]" time="0.035"><failure message="AssertionError: gate changed; use the recorded source revision: scripts/native_cycle_gate.py">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co10')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+endings = (True, False, True, False)
+
+    @pytest.mark.parametrize('endings',list(itertools.product((False,True),repeat=4)))
+    def test_every_per_file_lf_crlf_combination_preserves_gate_identity(tmp_path,verifier,endings):
+        tree = source_tree(tmp_path,endings)
+        with pytest.raises(RawBoundaryReached):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co10')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/native_cycle_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_every_per_file_lf_crlf_combination_preserves_gate_identity[endings11]" time="0.035"><failure message="AssertionError: gate changed; use the recorded source revision: scripts/native_cycle_gate.py">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co11')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+endings = (True, False, True, True)
+
+    @pytest.mark.parametrize('endings',list(itertools.product((False,True),repeat=4)))
+    def test_every_per_file_lf_crlf_combination_preserves_gate_identity(tmp_path,verifier,endings):
+        tree = source_tree(tmp_path,endings)
+        with pytest.raises(RawBoundaryReached):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co11')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/native_cycle_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_every_per_file_lf_crlf_combination_preserves_gate_identity[endings12]" time="0.034"><failure message="AssertionError: gate changed; use the recorded source revision: scripts/native_cycle_gate.py">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co12')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+endings = (True, True, False, False)
+
+    @pytest.mark.parametrize('endings',list(itertools.product((False,True),repeat=4)))
+    def test_every_per_file_lf_crlf_combination_preserves_gate_identity(tmp_path,verifier,endings):
+        tree = source_tree(tmp_path,endings)
+        with pytest.raises(RawBoundaryReached):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co12')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/native_cycle_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_every_per_file_lf_crlf_combination_preserves_gate_identity[endings13]" time="0.037"><failure message="AssertionError: gate changed; use the recorded source revision: scripts/native_cycle_gate.py">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co13')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+endings = (True, True, False, True)
+
+    @pytest.mark.parametrize('endings',list(itertools.product((False,True),repeat=4)))
+    def test_every_per_file_lf_crlf_combination_preserves_gate_identity(tmp_path,verifier,endings):
+        tree = source_tree(tmp_path,endings)
+        with pytest.raises(RawBoundaryReached):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co13')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/native_cycle_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_every_per_file_lf_crlf_combination_preserves_gate_identity[endings14]" time="0.036"><failure message="AssertionError: gate changed; use the recorded source revision: scripts/native_cycle_gate.py">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co14')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+endings = (True, True, True, False)
+
+    @pytest.mark.parametrize('endings',list(itertools.product((False,True),repeat=4)))
+    def test_every_per_file_lf_crlf_combination_preserves_gate_identity(tmp_path,verifier,endings):
+        tree = source_tree(tmp_path,endings)
+        with pytest.raises(RawBoundaryReached):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co14')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/native_cycle_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_every_per_file_lf_crlf_combination_preserves_gate_identity[endings15]" time="0.039"><failure message="AssertionError: gate changed; use the recorded source revision: scripts/native_cycle_gate.py">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co15')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+endings = (True, True, True, True)
+
+    @pytest.mark.parametrize('endings',list(itertools.product((False,True),repeat=4)))
+    def test_every_per_file_lf_crlf_combination_preserves_gate_identity(tmp_path,verifier,endings):
+        tree = source_tree(tmp_path,endings)
+        with pytest.raises(RawBoundaryReached):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:51: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_every_per_file_lf_crlf_co15')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/native_cycle_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_mixed_text_line_endings_still_require_exact_canonical_content[scripts/native_cycle_gate.py]" time="0.033"><failure message="AssertionError: gate changed; use the recorded source revision: scripts/native_cycle_gate.py">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_mixed_text_line_endings_s0')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+name = 'scripts/native_cycle_gate.py'
+
+    @pytest.mark.parametrize('name',SOURCES)
+    def test_mixed_text_line_endings_still_require_exact_canonical_content(tmp_path,verifier,name):
+        tree = source_tree(tmp_path,(False,)*4)
+        path = tree/name
+        path.write_bytes(path.read_bytes().replace(b'\n',b'\r\n',1))
+        with pytest.raises(RawBoundaryReached):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_mixed_text_line_endings_s0')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/native_cycle_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_mixed_text_line_endings_still_require_exact_canonical_content[scripts/integrated_contact_gate.py]" time="0.036"><failure message="AssertionError: gate changed; use the recorded source revision: scripts/integrated_contact_gate.py">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_mixed_text_line_endings_s1')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+name = 'scripts/integrated_contact_gate.py'
+
+    @pytest.mark.parametrize('name',SOURCES)
+    def test_mixed_text_line_endings_still_require_exact_canonical_content(tmp_path,verifier,name):
+        tree = source_tree(tmp_path,(False,)*4)
+        path = tree/name
+        path.write_bytes(path.read_bytes().replace(b'\n',b'\r\n',1))
+        with pytest.raises(RawBoundaryReached):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_mixed_text_line_endings_s1')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/integrated_contact_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_mixed_text_line_endings_still_require_exact_canonical_content[scripts/contact_gate.py]" time="0.035"><failure message="AssertionError: gate changed; use the recorded source revision: scripts/contact_gate.py">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_mixed_text_line_endings_s2')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+name = 'scripts/contact_gate.py'
+
+    @pytest.mark.parametrize('name',SOURCES)
+    def test_mixed_text_line_endings_still_require_exact_canonical_content(tmp_path,verifier,name):
+        tree = source_tree(tmp_path,(False,)*4)
+        path = tree/name
+        path.write_bytes(path.read_bytes().replace(b'\n',b'\r\n',1))
+        with pytest.raises(RawBoundaryReached):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_mixed_text_line_endings_s2')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/contact_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_mixed_text_line_endings_still_require_exact_canonical_content[src/flexcell/flexcell_skills/flexcell_skills/joint_follow.py]" time="0.032"><failure message="AssertionError: gate changed; use the recorded source revision: scripts/contact_gate.py">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_mixed_text_line_endings_s3')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+name = 'src/flexcell/flexcell_skills/flexcell_skills/joint_follow.py'
+
+    @pytest.mark.parametrize('name',SOURCES)
+    def test_mixed_text_line_endings_still_require_exact_canonical_content(tmp_path,verifier,name):
+        tree = source_tree(tmp_path,(False,)*4)
+        path = tree/name
+        path.write_bytes(path.read_bytes().replace(b'\n',b'\r\n',1))
+        with pytest.raises(RawBoundaryReached):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:60: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_mixed_text_line_endings_s3')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/contact_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_non_transport_byte_changes_cannot_pass[code-scripts/native_cycle_gate.py]" time="0.034" /><testcase classname="test.test_native_portable_sources" name="test_non_transport_byte_changes_cannot_pass[code-scripts/integrated_contact_gate.py]" time="0.033" /><testcase classname="test.test_native_portable_sources" name="test_non_transport_byte_changes_cannot_pass[code-scripts/contact_gate.py]" time="0.034" /><testcase classname="test.test_native_portable_sources" name="test_non_transport_byte_changes_cannot_pass[code-src/flexcell/flexcell_skills/flexcell_skills/joint_follow.py]" time="0.034"><failure message="AssertionError: Regex pattern did not match.&#10; Regex: 'gate changed.*src/flexcell/flexcell_skills/flexcell_skills/joint_follow\\.py'&#10; Input: 'gate changed; use the recorded source revision: scripts/contact_gate.py'">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_non_transport_byte_change3')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+name = 'src/flexcell/flexcell_skills/flexcell_skills/joint_follow.py'
+change = 'code'
+
+    @pytest.mark.parametrize('name',SOURCES)
+    @pytest.mark.parametrize('change',('code','bom','lone_cr'))
+    def test_non_transport_byte_changes_cannot_pass(tmp_path,verifier,name,change):
+        tree = source_tree(tmp_path,(False,)*4)
+        path = tree/name
+        data = path.read_bytes()
+        if change == 'code': data += b'\n# changed gate bytes\n'
+        elif change == 'bom': data = b'\xef\xbb\xbf'+data
+        else: data = data.replace(b'\n',b'\r',1)
+        path.write_bytes(data)
+        with pytest.raises(AssertionError,match='gate changed.*'+re.escape(name)):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_non_transport_byte_change3')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/contact_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_non_transport_byte_change3')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+name = 'src/flexcell/flexcell_skills/flexcell_skills/joint_follow.py'
+change = 'code'
+
+    @pytest.mark.parametrize('name',SOURCES)
+    @pytest.mark.parametrize('change',('code','bom','lone_cr'))
+    def test_non_transport_byte_changes_cannot_pass(tmp_path,verifier,name,change):
+        tree = source_tree(tmp_path,(False,)*4)
+        path = tree/name
+        data = path.read_bytes()
+        if change == 'code': data += b'\n# changed gate bytes\n'
+        elif change == 'bom': data = b'\xef\xbb\xbf'+data
+        else: data = data.replace(b'\n',b'\r',1)
+        path.write_bytes(data)
+&gt;       with pytest.raises(AssertionError,match='gate changed.*'+re.escape(name)):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'gate changed.*src/flexcell/flexcell_skills/flexcell_skills/joint_follow\\.py'
+E        Input: 'gate changed; use the recorded source revision: scripts/contact_gate.py'
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:73: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_non_transport_byte_changes_cannot_pass[bom-scripts/native_cycle_gate.py]" time="0.036" /><testcase classname="test.test_native_portable_sources" name="test_non_transport_byte_changes_cannot_pass[bom-scripts/integrated_contact_gate.py]" time="0.035" /><testcase classname="test.test_native_portable_sources" name="test_non_transport_byte_changes_cannot_pass[bom-scripts/contact_gate.py]" time="0.034" /><testcase classname="test.test_native_portable_sources" name="test_non_transport_byte_changes_cannot_pass[bom-src/flexcell/flexcell_skills/flexcell_skills/joint_follow.py]" time="0.033"><failure message="AssertionError: Regex pattern did not match.&#10; Regex: 'gate changed.*src/flexcell/flexcell_skills/flexcell_skills/joint_follow\\.py'&#10; Input: 'gate changed; use the recorded source revision: scripts/contact_gate.py'">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_non_transport_byte_change7')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+name = 'src/flexcell/flexcell_skills/flexcell_skills/joint_follow.py'
+change = 'bom'
+
+    @pytest.mark.parametrize('name',SOURCES)
+    @pytest.mark.parametrize('change',('code','bom','lone_cr'))
+    def test_non_transport_byte_changes_cannot_pass(tmp_path,verifier,name,change):
+        tree = source_tree(tmp_path,(False,)*4)
+        path = tree/name
+        data = path.read_bytes()
+        if change == 'code': data += b'\n# changed gate bytes\n'
+        elif change == 'bom': data = b'\xef\xbb\xbf'+data
+        else: data = data.replace(b'\n',b'\r',1)
+        path.write_bytes(data)
+        with pytest.raises(AssertionError,match='gate changed.*'+re.escape(name)):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_non_transport_byte_change7')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/contact_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_non_transport_byte_change7')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+name = 'src/flexcell/flexcell_skills/flexcell_skills/joint_follow.py'
+change = 'bom'
+
+    @pytest.mark.parametrize('name',SOURCES)
+    @pytest.mark.parametrize('change',('code','bom','lone_cr'))
+    def test_non_transport_byte_changes_cannot_pass(tmp_path,verifier,name,change):
+        tree = source_tree(tmp_path,(False,)*4)
+        path = tree/name
+        data = path.read_bytes()
+        if change == 'code': data += b'\n# changed gate bytes\n'
+        elif change == 'bom': data = b'\xef\xbb\xbf'+data
+        else: data = data.replace(b'\n',b'\r',1)
+        path.write_bytes(data)
+&gt;       with pytest.raises(AssertionError,match='gate changed.*'+re.escape(name)):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'gate changed.*src/flexcell/flexcell_skills/flexcell_skills/joint_follow\\.py'
+E        Input: 'gate changed; use the recorded source revision: scripts/contact_gate.py'
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:73: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_non_transport_byte_changes_cannot_pass[lone_cr-scripts/native_cycle_gate.py]" time="0.034" /><testcase classname="test.test_native_portable_sources" name="test_non_transport_byte_changes_cannot_pass[lone_cr-scripts/integrated_contact_gate.py]" time="0.037" /><testcase classname="test.test_native_portable_sources" name="test_non_transport_byte_changes_cannot_pass[lone_cr-scripts/contact_gate.py]" time="0.034" /><testcase classname="test.test_native_portable_sources" name="test_non_transport_byte_changes_cannot_pass[lone_cr-src/flexcell/flexcell_skills/flexcell_skills/joint_follow.py]" time="0.035"><failure message="AssertionError: Regex pattern did not match.&#10; Regex: 'gate changed.*src/flexcell/flexcell_skills/flexcell_skills/joint_follow\\.py'&#10; Input: 'gate changed; use the recorded source revision: scripts/contact_gate.py'">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_non_transport_byte_change11')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+name = 'src/flexcell/flexcell_skills/flexcell_skills/joint_follow.py'
+change = 'lone_cr'
+
+    @pytest.mark.parametrize('name',SOURCES)
+    @pytest.mark.parametrize('change',('code','bom','lone_cr'))
+    def test_non_transport_byte_changes_cannot_pass(tmp_path,verifier,name,change):
+        tree = source_tree(tmp_path,(False,)*4)
+        path = tree/name
+        data = path.read_bytes()
+        if change == 'code': data += b'\n# changed gate bytes\n'
+        elif change == 'bom': data = b'\xef\xbb\xbf'+data
+        else: data = data.replace(b'\n',b'\r',1)
+        path.write_bytes(data)
+        with pytest.raises(AssertionError,match='gate changed.*'+re.escape(name)):
+&gt;           verifier.verify(CAPSULE,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:74: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_non_transport_byte_change11')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/contact_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_non_transport_byte_change11')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+name = 'src/flexcell/flexcell_skills/flexcell_skills/joint_follow.py'
+change = 'lone_cr'
+
+    @pytest.mark.parametrize('name',SOURCES)
+    @pytest.mark.parametrize('change',('code','bom','lone_cr'))
+    def test_non_transport_byte_changes_cannot_pass(tmp_path,verifier,name,change):
+        tree = source_tree(tmp_path,(False,)*4)
+        path = tree/name
+        data = path.read_bytes()
+        if change == 'code': data += b'\n# changed gate bytes\n'
+        elif change == 'bom': data = b'\xef\xbb\xbf'+data
+        else: data = data.replace(b'\n',b'\r',1)
+        path.write_bytes(data)
+&gt;       with pytest.raises(AssertionError,match='gate changed.*'+re.escape(name)):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'gate changed.*src/flexcell/flexcell_skills/flexcell_skills/joint_follow\\.py'
+E        Input: 'gate changed; use the recorded source revision: scripts/contact_gate.py'
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:73: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_historical_source_observations_remain_mandatory[missing]" time="0.028"><failure message="AssertionError: Regex pattern did not match.&#10; Regex: 'verification source set differs'&#10; Input: 'gate changed; use the recorded source revision: scripts/contact_gate.py'">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_historical_source_observa0')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+defect = 'missing'
+
+    @pytest.mark.parametrize('defect',('missing','extra','digest'))
+    def test_historical_source_observations_remain_mandatory(tmp_path,verifier,defect):
+        tree = source_tree(tmp_path/'repo',(False,)*4)
+        capsule = tmp_path/'capsule'; capsule.mkdir()
+        receipt = deepcopy(RECEIPT)
+        if defect == 'missing': receipt['verification_sources'].pop(SOURCES[-1])
+        elif defect == 'extra': receipt['verification_sources']['scripts/other.py'] = '0'*64
+        else: receipt['verification_sources'][SOURCES[0]] = '0'*64
+        (capsule/'receipt.json').write_text(json.dumps(receipt))
+        (capsule/'source-binding.json').write_bytes((CAPSULE/'source-binding.json').read_bytes())
+        message = 'recorded checkout digest invalid' if defect=='digest' else 'verification source set differs'
+        with pytest.raises(AssertionError,match=message):
+&gt;           verifier.verify(capsule,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/tmp/pytest-of-ros/pytest-9/test_historical_source_observa0/capsule')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_historical_source_observa0/repo')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/contact_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_historical_source_observa0')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+defect = 'missing'
+
+    @pytest.mark.parametrize('defect',('missing','extra','digest'))
+    def test_historical_source_observations_remain_mandatory(tmp_path,verifier,defect):
+        tree = source_tree(tmp_path/'repo',(False,)*4)
+        capsule = tmp_path/'capsule'; capsule.mkdir()
+        receipt = deepcopy(RECEIPT)
+        if defect == 'missing': receipt['verification_sources'].pop(SOURCES[-1])
+        elif defect == 'extra': receipt['verification_sources']['scripts/other.py'] = '0'*64
+        else: receipt['verification_sources'][SOURCES[0]] = '0'*64
+        (capsule/'receipt.json').write_text(json.dumps(receipt))
+        (capsule/'source-binding.json').write_bytes((CAPSULE/'source-binding.json').read_bytes())
+        message = 'recorded checkout digest invalid' if defect=='digest' else 'verification source set differs'
+&gt;       with pytest.raises(AssertionError,match=message):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'verification source set differs'
+E        Input: 'gate changed; use the recorded source revision: scripts/contact_gate.py'
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:88: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_historical_source_observations_remain_mandatory[extra]" time="0.029"><failure message="AssertionError: Regex pattern did not match.&#10; Regex: 'verification source set differs'&#10; Input: 'gate changed; use the recorded source revision: scripts/contact_gate.py'">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_historical_source_observa1')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+defect = 'extra'
+
+    @pytest.mark.parametrize('defect',('missing','extra','digest'))
+    def test_historical_source_observations_remain_mandatory(tmp_path,verifier,defect):
+        tree = source_tree(tmp_path/'repo',(False,)*4)
+        capsule = tmp_path/'capsule'; capsule.mkdir()
+        receipt = deepcopy(RECEIPT)
+        if defect == 'missing': receipt['verification_sources'].pop(SOURCES[-1])
+        elif defect == 'extra': receipt['verification_sources']['scripts/other.py'] = '0'*64
+        else: receipt['verification_sources'][SOURCES[0]] = '0'*64
+        (capsule/'receipt.json').write_text(json.dumps(receipt))
+        (capsule/'source-binding.json').write_bytes((CAPSULE/'source-binding.json').read_bytes())
+        message = 'recorded checkout digest invalid' if defect=='digest' else 'verification source set differs'
+        with pytest.raises(AssertionError,match=message):
+&gt;           verifier.verify(capsule,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/tmp/pytest-of-ros/pytest-9/test_historical_source_observa1/capsule')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_historical_source_observa1/repo')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/contact_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_historical_source_observa1')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+defect = 'extra'
+
+    @pytest.mark.parametrize('defect',('missing','extra','digest'))
+    def test_historical_source_observations_remain_mandatory(tmp_path,verifier,defect):
+        tree = source_tree(tmp_path/'repo',(False,)*4)
+        capsule = tmp_path/'capsule'; capsule.mkdir()
+        receipt = deepcopy(RECEIPT)
+        if defect == 'missing': receipt['verification_sources'].pop(SOURCES[-1])
+        elif defect == 'extra': receipt['verification_sources']['scripts/other.py'] = '0'*64
+        else: receipt['verification_sources'][SOURCES[0]] = '0'*64
+        (capsule/'receipt.json').write_text(json.dumps(receipt))
+        (capsule/'source-binding.json').write_bytes((CAPSULE/'source-binding.json').read_bytes())
+        message = 'recorded checkout digest invalid' if defect=='digest' else 'verification source set differs'
+&gt;       with pytest.raises(AssertionError,match=message):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'verification source set differs'
+E        Input: 'gate changed; use the recorded source revision: scripts/contact_gate.py'
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:88: AssertionError</failure></testcase><testcase classname="test.test_native_portable_sources" name="test_historical_source_observations_remain_mandatory[digest]" time="0.030"><failure message="AssertionError: Regex pattern did not match.&#10; Regex: 'recorded checkout digest invalid'&#10; Input: 'gate changed; use the recorded source revision: scripts/native_cycle_gate.py'">tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_historical_source_observa2')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+defect = 'digest'
+
+    @pytest.mark.parametrize('defect',('missing','extra','digest'))
+    def test_historical_source_observations_remain_mandatory(tmp_path,verifier,defect):
+        tree = source_tree(tmp_path/'repo',(False,)*4)
+        capsule = tmp_path/'capsule'; capsule.mkdir()
+        receipt = deepcopy(RECEIPT)
+        if defect == 'missing': receipt['verification_sources'].pop(SOURCES[-1])
+        elif defect == 'extra': receipt['verification_sources']['scripts/other.py'] = '0'*64
+        else: receipt['verification_sources'][SOURCES[0]] = '0'*64
+        (capsule/'receipt.json').write_text(json.dumps(receipt))
+        (capsule/'source-binding.json').write_bytes((CAPSULE/'source-binding.json').read_bytes())
+        message = 'recorded checkout digest invalid' if defect=='digest' else 'verification source set differs'
+        with pytest.raises(AssertionError,match=message):
+&gt;           verifier.verify(capsule,tree)
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:89: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+capsule = PosixPath('/tmp/pytest-of-ros/pytest-9/test_historical_source_observa2/capsule')
+repo = PosixPath('/tmp/pytest-of-ros/pytest-9/test_historical_source_observa2/repo')
+
+    def verify(capsule, repo):
+        sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+        receipt = json.loads((capsule/'receipt.json').read_text())
+        assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
+        binding = json.loads((capsule/'source-binding.json').read_text())
+        for name,digest in receipt['verification_sources'].items():
+&gt;           assert sha(repo/name) == digest, 'gate changed; use the recorded source revision: '+name
+E           AssertionError: gate changed; use the recorded source revision: scripts/native_cycle_gate.py
+
+setup/acceptance/native_audit_20261031/verify.py:153: AssertionError
+
+During handling of the above exception, another exception occurred:
+
+tmp_path = PosixPath('/tmp/pytest-of-ros/pytest-9/test_historical_source_observa2')
+verifier = &lt;module 'native_audit_verify' from '/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/code-clone/setup/acceptance/native_audit_20261031/verify.py'&gt;
+defect = 'digest'
+
+    @pytest.mark.parametrize('defect',('missing','extra','digest'))
+    def test_historical_source_observations_remain_mandatory(tmp_path,verifier,defect):
+        tree = source_tree(tmp_path/'repo',(False,)*4)
+        capsule = tmp_path/'capsule'; capsule.mkdir()
+        receipt = deepcopy(RECEIPT)
+        if defect == 'missing': receipt['verification_sources'].pop(SOURCES[-1])
+        elif defect == 'extra': receipt['verification_sources']['scripts/other.py'] = '0'*64
+        else: receipt['verification_sources'][SOURCES[0]] = '0'*64
+        (capsule/'receipt.json').write_text(json.dumps(receipt))
+        (capsule/'source-binding.json').write_bytes((CAPSULE/'source-binding.json').read_bytes())
+        message = 'recorded checkout digest invalid' if defect=='digest' else 'verification source set differs'
+&gt;       with pytest.raises(AssertionError,match=message):
+E       AssertionError: Regex pattern did not match.
+E        Regex: 'recorded checkout digest invalid'
+E        Input: 'gate changed; use the recorded source revision: scripts/native_cycle_gate.py'
+
+src/flexcell/flexcell_skills/test/test_native_portable_sources.py:88: AssertionError</failure></testcase></testsuite></testsuites>

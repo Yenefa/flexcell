@@ -112,10 +112,10 @@ jobs:
           python3 setup/acceptance/native_five_20261030/verify_preposition_stop.py
           python3 setup/acceptance/native_five_20261030/verify_cycles.py
           python3 setup/acceptance/joint_place_failure_20261030/verify.py
-          # Read-only replay of a committed window: standard library plus repository
-          # source, no ROS services and no robot motion. Prints
-          # WORLD_HOLD_WINDOW_REPLAY_PASS and exits non-zero on any mismatch.
+          # Read-only committed-window replays: standard library plus repository
+          # source, no ROS services or robot motion. Preserve non-zero failures.
           python3 setup/acceptance/preposition_world_20261031/verify.py
+          python3 setup/acceptance/native_audit_20261031/verify.py
 
       - name: colcon test (all suites, 0 failures required)
         shell: bash

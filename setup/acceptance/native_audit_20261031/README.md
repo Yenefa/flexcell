@@ -1,5 +1,13 @@
 # Native audit lifetime capsule
 
+2026-11-01 portability correction: the historical receipt intentionally retains
+its mixed LF/CRLF checkout hashes. The verifier now binds exactly four Python text
+sources to the already sealed canonical runtime map, accepting only CRLF-pair to
+LF transport conversions and independently checking the historical observations.
+The old receipt, source binding and ZIP are unchanged. Fresh Git LF snapshots now
+pass on both Windows and Linux; the earlier Linux result used the Windows mount.
+Proof and counterexample: `setup/acceptance/native_portable_20261101/`.
+
 Two real local five-cycle windows, one per version, and the unchanged historical
 CI failure. No ROS services or simulator are started by the replay:
 
