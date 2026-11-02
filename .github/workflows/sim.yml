@@ -25,7 +25,9 @@ jobs:
       group: core-sim-${{ github.ref }}
       cancel-in-progress: false
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    # Includes image build, offline/RGB audits, native lifecycle probes and six
+    # task episodes. Per-task/physics deadlines remain enforced by the runners.
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
