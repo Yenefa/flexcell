@@ -21,7 +21,7 @@ def frame(clock, parent=None, child=None, attached=False):
                                               joint_component=False)})
 
 
-def steady(latch, clock, count=5):
+def steady(latch, clock, count=6):
     for _ in range(count):
         clock.tick()
         latch.feed(frame(clock))
@@ -35,7 +35,7 @@ def test_at_rest_hold_yields_the_averaged_pre_attach_reference():
     ok, reference, evidence = latch.take('target_box_a', timeout=.1)
     assert ok
     assert reference[:3] == pytest.approx([.1, 0., 0.]) and reference[3:] == pytest.approx([0., 0., 0., 1.])
-    assert evidence['samples'] == 5 and evidence['window_ns'] == 80_000_000
+    assert evidence['samples'] == 6 and evidence['window_ns'] == 100_000_000
     assert evidence['spread_m'] < 1e-12
     assert set(evidence['world_at_rest']) == {'parent', 'body'}
     assert all(value['spread_translation_m'] == value['spread_rotation_rad'] == 0.
@@ -46,7 +46,7 @@ def test_at_rest_hold_yields_the_averaged_pre_attach_reference():
 def test_moving_arm_is_not_a_positioned_reference():
     clock = Clock()
     latch = PrepositionLatch(clock=clock)
-    for step in range(5):
+    for step in range(6):
         clock.tick()
         latch.feed(frame(clock, parent=[0., 0., .002 * step, 0., 0., 0., 1.]))
     ok, reference, detail = latch.take('target_box_a', timeout=.05)
@@ -57,7 +57,7 @@ def test_moving_arm_is_not_a_positioned_reference():
 def test_common_world_motion_cannot_hide_behind_a_constant_relative_pose(motion):
     clock = Clock()
     latch = PrepositionLatch(clock=clock)
-    for step in range(5):
+    for step in range(6):
         clock.tick()
         if motion == 'translation':
             parent = [.01 * step, 0., 0., 0., 0., 0., 1.]
@@ -76,7 +76,7 @@ def test_stationary_antipodal_quaternions_have_the_same_reference():
     clock = Clock()
     latch = PrepositionLatch(clock=clock)
     q = [0., math.sin(.2), 0., math.cos(.2)]
-    for step in range(5):
+    for step in range(6):
         clock.tick()
         child = [.1, 0., 0.] + [v * (-1 if step % 2 else 1) for v in q]
         latch.feed(frame(clock, child=child))
@@ -96,7 +96,7 @@ def test_attachment_discards_the_detached_history():
     clock.tick()
     latch.feed(frame(clock))
     ok, _, detail = latch.take('target_box_a', timeout=.05)
-    assert not ok and 'hold of 5 samples' in detail
+    assert not ok and 'hold of 6 samples' in detail
 
 
 def test_stale_hold_is_refused_at_engage_time():
@@ -142,3 +142,24 @@ def test_legacy_session_without_a_reference_still_latches_the_first_attachment()
     ok, _, evidence = follow.snapshot()
     assert ok and evidence['reference_source'] == 'first_attached'
     assert evidence['attach_jump_translation_m'] is None
+
+
+def test_eighty_ms_cannot_stand_in_for_the_declared_hundred_ms_hold():
+    clock = Clock()
+    latch = PrepositionLatch(clock=clock)
+    steady(latch, clock, 5)
+    ok, _, detail = latch.take('target_box_a', timeout=0.)
+    assert not ok and '6 samples' in detail
+    steady(latch, clock, 1)
+    assert latch.take('target_box_a', timeout=0.)[0]
+
+
+def test_motion_in_the_previously_omitted_twenty_ms_is_not_discarded():
+    clock = Clock()
+    latch = PrepositionLatch(clock=clock)
+    angle = .0017  # exceeds the unchanged 1.5 mrad hold limit
+    clock.tick()
+    latch.feed(frame(clock, parent=[0., 0., 0., 0., math.sin(angle/2), 0., math.cos(angle/2)]))
+    steady(latch, clock, 5)  # the most recent 80 ms alone look perfectly still
+    ok, _, detail = latch.take('target_box_a', timeout=0.)
+    assert not ok and 'not at rest' in detail

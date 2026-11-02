@@ -177,3 +177,23 @@ def test_wait_detached_returns_once_the_trace_shows_the_joint_gone():
     threading.Timer(0.02, detach_soon).start()
     assert follow.wait_detached(1.0) is True
     assert follow.summary()['active'] is False
+
+
+def test_release_observation_timeout_is_not_a_confirmed_detach():
+    follow, clock = monitor()
+    follow.begin_release()
+    assert follow.wait_detached(0.) is False
+    assert follow.summary()['active'] and not follow.summary()['detach_observed']
+    clock.tick(); follow.feed(frame(clock, attached=False))
+    assert follow.wait_detached(0.) is True
+
+
+@pytest.mark.parametrize('delay_ns', [20_000_000, 200_000_000])
+def test_faulted_follow_still_observes_cleanup_detach_without_erasing_fault(delay_ns):
+    follow, clock = monitor()
+    follow.reject('injected follow fault')
+    follow.begin_release()
+    clock.tick(delay_ns); follow.feed(frame(clock, attached=False))
+    assert follow.wait_detached(0.) is True
+    assert follow.summary()['fault'] == 'injected follow fault'
+    assert follow.summary()['detach_observed'] is True

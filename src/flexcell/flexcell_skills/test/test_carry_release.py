@@ -116,3 +116,23 @@ def test_joint_replacement_cannot_release_an_existing_session():
         _session='a' * 32, _log=Mock(), _on_stop=Mock())
     assert not CarryServer._engage(node, 'target_box_b', [0., 0., 0.], 'b' * 32)
     node._on_stop.assert_not_called()
+
+
+def test_joint_release_does_not_publish_off_on_trace_timeout_and_can_reconcile():
+    node = backend(None, threading.Event())
+    node._backend = 'detachable_joint'
+    node._guard_release = Mock(return_value=True)
+    node._session = 'a'*32
+    node._retired_sessions = set()
+    node._follow = Mock()
+    node._follow.wait_detached.side_effect = [False, True]
+    response = CarryServer._on_release(node, None, SimpleNamespace())
+    assert not response.success and node._offset is not None and node._session == 'a'*32
+    node._follow.end_release.assert_not_called()
+    node._publish_state.assert_not_called()
+    assert any(call.args[0].get('reason') == 'physics trace did not confirm detach'
+               for call in node._log.write.call_args_list)
+    assert CarryServer._on_release(node, None, SimpleNamespace()).success
+    assert node._offset is None and node._session == ''
+    node._follow.end_release.assert_called_once_with(True)
+    node._publish_state.assert_called_once()

@@ -15,8 +15,8 @@ import math
 import threading
 import time
 
-PREPOSITION_SAMPLES = 5                    # 50 Hz samples, 0.08 s of declared hold
-PREPOSITION_WINDOW_NS = 80_000_000
+PREPOSITION_SAMPLES = 6                    # 50 Hz endpoints spanning the full 0.1 s hold
+PREPOSITION_WINDOW_NS = 100_000_000
 PREPOSITION_SAMPLE_GAP_NS = 20_000_000
 PREPOSITION_MAX_SPREAD_M = .001            # half the follow translation limit
 PREPOSITION_MAX_SPREAD_RAD = .0015         # ~1/12 of the follow rotation limit
@@ -231,6 +231,7 @@ class JointFollowMonitor:
         self.cv = threading.Condition()
         self.armed = False
         self.releasing = False
+        self.detach_observed = False
         self.fault = ''
         self.reference = None
         self.reference_source = ''
@@ -254,6 +255,7 @@ class JointFollowMonitor:
             if self.armed:
                 raise RuntimeError('follow monitor already armed')
             self.armed, self.releasing, self.fault = True, False, ''
+            self.detach_observed = False
             self.object, self.session = object_id, session
             self.started_ns = self.clock()
             self.first_source_ns = self.first_sim_ns = 0
@@ -276,7 +278,7 @@ class JointFollowMonitor:
 
     def feed(self, data):
         with self.cv:
-            if not self.armed or self.fault:
+            if not self.armed or (self.fault and not self.releasing):
                 return
             # A release must not blind the sampler: the attached tail between the last
             # pre-release publish and the true detach is what the release-boundary gate
@@ -299,7 +301,9 @@ class JointFollowMonitor:
                 if self.reference is not None and self.last_sim_ns:
                     gap = sim - self.last_sim_ns
                     self.max_gap_ns = max(self.max_gap_ns, gap)
-                    if gap > self.max_sim_gap_ns:
+                    # A latched fault deliberately stopped follow sampling. Cleanup
+                    # may still confirm a fresh detach without erasing that fault.
+                    if gap > self.max_sim_gap_ns and not (releasing and self.fault):
                         raise ValueError('physics trace gap exceeds limit')
                 obj = data['objects'][self.object]
                 attached = obj['joint_component']
@@ -311,12 +315,14 @@ class JointFollowMonitor:
                         raise ValueError('attachment component disappeared')
                     if releasing:
                         # The released boundary is covered and the session is complete.
+                        self.detach_observed = True
                         self.armed = False
                         self.releasing = False
+                        self.cv.notify_all()
                     return
                 # Only an attached frame advances the session bounds: a detached frame must
                 # not extend last_sim_ns past the sampled evidence it is compared with.
-                self.last_source_ns, self.last_sim_ns = source, sim  # sampled before the joint appeared; the declared reference stands
+                self.last_source_ns, self.last_sim_ns = source, sim
                 if self.reference is None:
                     self.reference = relative[0] + relative[1]
                     self.reference_source = 'first_attached'
@@ -377,7 +383,8 @@ class JointFollowMonitor:
             max_sample_gap_ns=self.max_gap_ns,
             max_translation_m=self.max_translation, max_rotation_rad=self.max_rotation,
             translation_limit_m=self.max_translation_m, rotation_limit_rad=self.max_rotation_rad,
-            active=self.armed, releasing=self.releasing, fault=self.fault)
+            active=self.armed, releasing=self.releasing, detach_observed=self.detach_observed,
+            fault=self.fault)
 
     def summary(self):
         with self.cv:
@@ -402,12 +409,12 @@ class JointFollowMonitor:
         """
         deadline = time.monotonic() + timeout
         with self.cv:
-            while self.armed and not self.fault:
+            while self.armed and not self.detach_observed:
                 remaining = deadline - time.monotonic()
                 if remaining <= 0:
                     break
                 self.cv.wait(remaining)
-            return not self.armed
+            return self.detach_observed
 
     def end_release(self, confirmed):
         with self.cv:
