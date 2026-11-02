@@ -249,8 +249,12 @@ class JointFollowMonitor:
 
     def feed(self, data):
         with self.cv:
-            if not self.armed or self.releasing or self.fault:
+            if not self.armed or self.fault:
                 return
+            # A release must not blind the sampler: the attached tail between the last
+            # pre-release publish and the true detach is what the release-boundary gate
+            # measures, so keep recording it while suppressing the fault it would raise.
+            releasing = self.releasing
             try:
                 if (not isinstance(data, dict) or type(data.get('schema_version')) is not int or
                         data['schema_version'] != 1):
@@ -277,7 +281,7 @@ class JointFollowMonitor:
                 relative = relative_pose(data['parent_pose'], obj['pose'])
                 self.last_source_ns, self.last_sim_ns = source, sim
                 if not attached:
-                    if self.first_sim_ns:
+                    if self.first_sim_ns and not releasing:
                         raise ValueError('attachment component disappeared')
                     return  # sampled before the joint appeared; the declared reference stands
                 if self.reference is None:
@@ -296,7 +300,8 @@ class JointFollowMonitor:
                 self.max_translation = max(self.max_translation, translation)
                 self.max_rotation = max(self.max_rotation, rotation)
                 self.samples += 1
-                if translation >= self.max_translation_m or rotation >= self.max_rotation_rad:
+                if not releasing and (translation >= self.max_translation_m or
+                                      rotation >= self.max_rotation_rad):
                     raise ValueError('measured relative pose exceeded follow limits')
                 self.cv.notify_all()
             except (ValueError, KeyError, TypeError) as exc:
