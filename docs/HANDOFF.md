@@ -317,4 +317,6 @@ must match; at another HEAD, the report says `SUPERSEDED_BY_<sha>` and
 `current_code_replay: NOT_RUN`. This is neither a replay pass nor a replay failure.
 CI lists that status separately. New evidence is needed when citing a new runtime
 window, not to renew old source bindings. Historical data and receipts stay unchanged.
-The verifier needs Git history containing the recorded revision.
+Git history is not required in runtime images: `FLEXCELL_SOURCE_REV` supplies the
+build revision. Unidentified source exports report `SOURCE_REVISION_UNKNOWN`, never
+a replay pass. Receipt, binding and archive hashes remain mandatory in every case.

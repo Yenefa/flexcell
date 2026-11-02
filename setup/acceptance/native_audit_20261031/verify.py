@@ -3,7 +3,9 @@
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path, PurePosixPath
+import re
 import sys
 import subprocess
 import tempfile
@@ -16,6 +18,22 @@ def sha(path):
 
 GATE_SOURCES = ('scripts/native_cycle_gate.py','scripts/integrated_contact_gate.py',
     'scripts/contact_gate.py','src/flexcell/flexcell_skills/flexcell_skills/joint_follow.py')
+RECEIPT_SHA256 = '73770437f256c28cd8de41532574270a3e2c7d91985ddca5dceb85da075ad886'
+
+
+def source_revision(repo):
+    """Images carry build metadata; a source export need not contain Git history."""
+    revision = os.environ.get('FLEXCELL_SOURCE_REV', '')
+    if re.fullmatch('[0-9a-f]{40}', revision):
+        return revision
+    try:
+        revision = subprocess.check_output(
+            ['git', '-c', 'safe.directory='+str(repo.resolve()), '-C', str(repo),
+             'rev-parse', '--verify', 'HEAD'], text=True, stderr=subprocess.DEVNULL,
+            timeout=5).strip()
+    except (OSError, subprocess.SubprocessError):
+        return None
+    return revision if re.fullmatch('[0-9a-f]{40}', revision) else None
 
 
 def verify_sources(repo, receipt, binding):
@@ -24,7 +42,7 @@ def verify_sources(repo, receipt, binding):
     assert set(recorded) == set(GATE_SOURCES), 'verification source set differs'
     assert binding['canonical_source_revision'] == receipt['patched_source_revision']
     digest = lambda data: hashlib.sha256(data).hexdigest()
-    head = subprocess.check_output(['git', '-C', str(repo), 'rev-parse', 'HEAD'], text=True).strip()
+    head = source_revision(repo)
     current = head == binding['canonical_source_revision']
     observations = {}
     for name in GATE_SOURCES:
@@ -32,17 +50,15 @@ def verify_sources(repo, receipt, binding):
         # Python text transport only: preserve BOM, lone CR and every other byte.
         canonical = data.replace(b'\r\n',b'\n')
         expected = binding['source_files'][name]
-        sealed = subprocess.check_output(['git', '-C', str(repo), 'show',
-            binding['canonical_source_revision']+':'+name])
-        assert digest(sealed) == expected, 'recorded source bytes invalid: '+name
-        crlf = sealed.replace(b'\n',b'\r\n')
-        assert recorded[name] in (expected,digest(crlf)), 'recorded checkout digest invalid: '+name
+        crlf = canonical.replace(b'\n',b'\r\n')
         if current:
             assert digest(canonical) == expected, 'gate changed; use the recorded source revision: '+name
+            assert recorded[name] in (expected,digest(crlf)), 'recorded checkout digest invalid: '+name
         form = 'LF' if data == canonical else 'CRLF' if data == crlf else 'MIXED_LF_CRLF'
         observations[name] = dict(canonical_sha256=digest(canonical),sealed_sha256=expected,observed_sha256=digest(data),
             recorded_checkout_sha256=recorded[name],observed_line_endings=form)
-    return dict(status='CURRENT_SOURCE_MATCH' if current else 'SUPERSEDED_BY_'+head,
+    status = 'CURRENT_SOURCE_MATCH' if current else 'SUPERSEDED_BY_'+head if head else 'SOURCE_REVISION_UNKNOWN'
+    return dict(status=status, current_source_revision=head,
                 policy='CRLF_PAIRS_TO_LF_ONLY',canonical_source_revision=binding['canonical_source_revision'],
                 files=observations)
 
@@ -107,7 +123,6 @@ def reader_timing(run):
 
 
 def local_window(run, revision, source_binding=None, replay=True):
-    from native_cycle_gate import verify_run
     result = json.loads((run/'result.json').read_text())
     declaration = json.loads((run/'declaration.json').read_text())
     assert result['status'] == 'PASS' and result['worker_exit'] == 0
@@ -144,8 +159,10 @@ def local_window(run, revision, source_binding=None, replay=True):
         health_counts[name] = len(health['checks'])
     reset = json.loads((run/'reset_after.stdout').read_text())
     assert reset['ok']
-    gate = verify_run(run,declaration) if replay else None
+    gate = None
     if replay:
+        from native_cycle_gate import verify_run
+        gate = verify_run(run,declaration)
         assert gate['status'] == 'FIVE_NATIVE_CYCLES_PASS' and gate['qualification_cycles'] == 5
     return dict(source_revision=revision,source_revision_metadata=revision_metadata,
         partition=result['partition'],raw_clocks=clocks(run),
@@ -153,7 +170,6 @@ def local_window(run, revision, source_binding=None, replay=True):
 
 
 def historical_window(root, archive_sha, replay=True):
-    from native_cycle_gate import verify_cycle
     archive = root/'historical-ci/native-five-41116653853.zip'
     assert sha(archive) == archive_sha
     extracted = root/'historical-ci/extracted'
@@ -168,7 +184,10 @@ def historical_window(root, archive_sha, replay=True):
     contacts = {r['sim_ns']:r for r in map(json.loads,(run/'contact_steps.jsonl').read_text().splitlines())}
     events = list(map(json.loads,(run/'native-events.jsonl').read_text().splitlines()))
     declaration = json.loads((run/'declaration.json').read_text())
-    gated = [verify_cycle(physics,contacts,cycle,events,declaration)['status'] for cycle in worker['cycles'][:2]] if replay else None
+    gated = None
+    if replay:
+        from native_cycle_gate import verify_cycle
+        gated = [verify_cycle(physics,contacts,cycle,events,declaration)['status'] for cycle in worker['cycles'][:2]]
     release = next(e for e in events if e['cycle']==2 and e['label']=='release')
     physical_release = next(r for ns,r in sorted(physics.items()) if ns>worker['cycles'][2]['reference_sim_ns']
         and release['request_mono_ns'] <= r['monotonic_ns'] <= release['reply_mono_ns']
@@ -181,6 +200,7 @@ def historical_window(root, archive_sha, replay=True):
 
 def verify(capsule, repo):
     sys.path[:0] = [str(repo/'scripts'),str(repo/'src/flexcell/flexcell_skills')]
+    assert sha(capsule/'receipt.json') == RECEIPT_SHA256, 'native audit receipt changed'
     receipt = json.loads((capsule/'receipt.json').read_text())
     assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
     binding = json.loads((capsule/'source-binding.json').read_text())
