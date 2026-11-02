@@ -40,26 +40,99 @@ class Planner : public rclcpp::Node {
     scene_ = create_client<moveit_msgs::srv::GetPlanningScene>(
         "/get_planning_scene", rmw_qos_profile_services_default, group_);
     service_ = create_service<Service>("/flexcell/mtc/plan",
-      [this](Service::Request::SharedPtr q, Service::Response::SharedPtr r) {
-        std::unique_lock<std::mutex> lock(mutex_, std::try_to_lock);
-        if (!lock.owns_lock()) { r->detail = "planner busy"; return; }
-        std::unique_ptr<flexcell::PlanningSnapshot> snapshot;
-        auto fail = [&](const std::exception& e) {
-          r->success = false; r->detail = e.what();
-          r->trajectories.clear(); r->executor_targets.clear();
-        };
-        try {
-          snapshot = std::make_unique<flexcell::PlanningSnapshot>(*this, *q, snapshot_sequence_);
-          plan(*q, *r, *snapshot);
-        } catch (const std::exception& e) { fail(e); }
-        try { if (snapshot) snapshot->write("response", *r); }
-        catch (const std::exception& e) {
-          fail(e);
-          RCLCPP_ERROR(get_logger(), "planner snapshot failed: %s", e.what());
-        }
-      }, rmw_qos_profile_services_default, group_);
+      [this](Service::Request::SharedPtr q, Service::Response::SharedPtr r) { handle(q, r, false); },
+      rmw_qos_profile_services_default, group_);
+    point_service_ = create_service<Service>("/flexcell/attached_point/plan",
+      [this](Service::Request::SharedPtr q, Service::Response::SharedPtr r) { handle(q, r, true); },
+      rmw_qos_profile_services_default, group_);
   }
  private:
+  void handle(Service::Request::SharedPtr q, Service::Response::SharedPtr r, bool point) {
+    std::unique_lock<std::mutex> lock(mutex_, std::try_to_lock);
+    if (!lock.owns_lock()) { r->detail = "planner busy"; return; }
+    std::unique_ptr<flexcell::PlanningSnapshot> snapshot;
+    auto fail = [&](const std::exception& e) {
+      r->success = false; r->detail = e.what();
+      r->trajectories.clear(); r->executor_targets.clear();
+    };
+    try {
+      snapshot = std::make_unique<flexcell::PlanningSnapshot>(*this, *q, snapshot_sequence_);
+      if (point) planPoint(*q, *r, *snapshot);
+      else plan(*q, *r, *snapshot);
+    } catch (const std::exception& e) { fail(e); }
+    try { if (snapshot) snapshot->write("response", *r); }
+    catch (const std::exception& e) {
+      fail(e);
+      RCLCPP_ERROR(get_logger(), "planner snapshot failed: %s", e.what());
+    }
+  }
+
+  // A single upstream OMPL plan for the legacy skill's current stage. There
+  // are no MTC task stages here; the legacy skill owns subsequent stages.
+  void planPoint(const Service::Request& q, Service::Response& r,
+                 const flexcell::PlanningSnapshot& snapshot) {
+    const std::map<std::string, double> profiles{{"demo_veryslow", .05},
+                                               {"demo_slow", .2}, {"demo_default", .5}};
+    if (q.operation != "POINT" || !q.attached_object_targets || q.targets.size() != 1 ||
+        (q.object_name != "target_box_a" && q.object_name != "target_box_b") ||
+        !profiles.count(q.motion_profile_id) || q.deadline_ms < 1000 || q.deadline_ms > 60000)
+      throw std::runtime_error("invalid attached-point request");
+    const auto& target = q.targets.front();
+    const auto& p = target.pose.position;
+    if (target.header.frame_id != "world" || !std::isfinite(p.x) || !std::isfinite(p.y) ||
+        !std::isfinite(p.z) || std::abs(p.x) > .45 || std::abs(p.y) > .45 || p.z < -.15 || p.z > .75)
+      throw std::runtime_error("attached-point target outside fixed workspace");
+    if (!scene_->wait_for_service(2s)) throw std::runtime_error("planning scene unavailable");
+    auto query = std::make_shared<moveit_msgs::srv::GetPlanningScene::Request>();
+    query->components.components = 1023;
+    auto future = scene_->async_send_request(query);
+    if (future.wait_for(3s) != std::future_status::ready) {
+      scene_->remove_pending_request(future);
+      throw std::runtime_error("planning scene timeout");
+    }
+    const auto measured = future.get();
+    snapshot.write("scene", measured->scene);
+    robot_model_loader::RobotModelLoader original(shared_from_this(), "robot_description");
+    auto scene = std::make_shared<planning_scene::PlanningScene>(original.getModel());
+    scene->setPlanningSceneMsg(measured->scene);
+    const auto& state = scene->getCurrentState();
+    const auto* body = state.getAttachedBody(q.object_name);
+    if (!body || body->getAttachedLinkName() != "end_effector_link" || body->getShapes().size() != 1 ||
+        body->getShapePosesInLinkFrame().size() != 1)
+      throw std::runtime_error("one measured end-effector-attached shape required");
+    const auto shape = body->getShapePosesInLinkFrame().front();
+    flexcell::checkAttachedObjectPose(state.getGlobalLinkTransform("end_effector_link"), shape, q.object_pose);
+    auto model = flexcell::attachedPointModel(shared_from_this(), shape.translation());
+    scene = std::make_shared<planning_scene::PlanningScene>(model->getModel());
+    scene->setPlanningSceneMsg(measured->scene);
+    flexcell::PositionOnlyPlanner pipeline(shared_from_this(), "ompl");
+    pipeline.setMaxVelocityScalingFactor(profiles.at(q.motion_profile_id));
+    pipeline.setMaxAccelerationScalingFactor(profiles.at(q.motion_profile_id));
+    pipeline.init(model->getModel());
+    Eigen::Isometry3d destination = Eigen::Isometry3d::Identity();
+    destination.translation() = Eigen::Vector3d(p.x, p.y, p.z);
+    const auto goal = flexcell::positionGoal(scene->getPlanningFrame(), flexcell::pointLink,
+        Eigen::Isometry3d::Identity(), destination, 1e-4);
+    robot_trajectory::RobotTrajectoryPtr trajectory;
+    const auto solved = pipeline.plan(scene, model->getModel()->getJointModelGroup(flexcell::pointGroup),
+        goal, std::min(5., q.deadline_ms / 1000.), trajectory, moveit_msgs::msg::Constraints{});
+    if (!solved || !trajectory || trajectory->getWayPointCount() == 0)
+      throw std::runtime_error("no collision-free attached-point plan");
+    auto endpoint = trajectory->getLastWayPoint(); endpoint.update();
+    if ((endpoint.getGlobalLinkTransform(flexcell::pointLink).translation()-destination.translation()).norm() > 1.0001e-4)
+      throw std::runtime_error("attached-point endpoint differs from requested box center");
+    moveit_msgs::msg::RobotTrajectory message; trajectory->getRobotTrajectoryMsg(message);
+    const auto& transform = endpoint.getGlobalLinkTransform("end_effector_link");
+    geometry_msgs::msg::PoseStamped ee; ee.header.frame_id = "world";
+    ee.pose.position.x = transform.translation().x(); ee.pose.position.y = transform.translation().y();
+    ee.pose.position.z = transform.translation().z();
+    const Eigen::Quaterniond rotation(transform.linear());
+    ee.pose.orientation.x = rotation.x(); ee.pose.orientation.y = rotation.y();
+    ee.pose.orientation.z = rotation.z(); ee.pose.orientation.w = rotation.w();
+    r.trajectories.push_back(message); r.executor_targets.push_back(ee);
+    r.success = true; r.detail = "single measured attached-point OMPL plan; execution remains skill-owned";
+  }
+
   void plan(const Service::Request& q, Service::Response& r, const flexcell::PlanningSnapshot& snapshot) {
     const bool pick = q.operation == "PICK";
     const std::map<std::string, double> profiles{{"demo_veryslow", .05},
@@ -222,7 +295,7 @@ class Planner : public rclcpp::Node {
   uint64_t snapshot_sequence_{0};
   rclcpp::CallbackGroup::SharedPtr group_;
   rclcpp::Client<moveit_msgs::srv::GetPlanningScene>::SharedPtr scene_;
-  rclcpp::Service<Service>::SharedPtr service_;
+  rclcpp::Service<Service>::SharedPtr service_, point_service_;
 };
 int main(int argc, char** argv) {
   rclcpp::init(argc, argv);

@@ -87,7 +87,8 @@ def launch_stack(context):
         IncludeLaunchDescription(PythonLaunchDescriptionSource(str(skills / 'launch/week1.launch.py')),
                                  launch_arguments={'params_file': params}.items()),
     ]
-    if config['pick_server']['ros__parameters'].get('skill_backend') == 'mtc':
+    if (config['pick_server']['ros__parameters'].get('skill_backend') == 'mtc' or
+            config['carry_server']['ros__parameters']['carry_backend'] == 'detachable_joint'):
         moveit_config = (
             MoveItConfigsBuilder('open_manipulator_x', package_name='open_manipulator_moveit_config')
             .robot_description(file_path=str(model), mappings={'use_sim': 'true'})

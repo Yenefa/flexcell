@@ -1,10 +1,13 @@
 # Private planner adapter. This service never executes a trajectory or attaches physics.
+# The attached_point service accepts POINT with one target for a legacy stage;
+# the mtc service accepts PICK/PLACE with three targets for its stage sequence.
 string operation
 string object_name
 geometry_msgs/PoseStamped object_pose
 geometry_msgs/PoseStamped[] targets
-# Joint PLACE only: first two targets are box centers, third defines world
-# retreat displacement from target 2. object_pose is a fresh physical sample.
+# Attached-point POINT uses one box-center target. Joint MTC PLACE uses two
+# box-center targets and a third defining world retreat displacement from 2.
+# object_pose is a fresh physical sample in both cases.
 # False retains the existing three end-effector position targets.
 bool attached_object_targets
 string motion_profile_id

@@ -32,8 +32,8 @@ def test_untrusted_trajectory_rejected(defect):
         module.validate_trajectory(value)
 
 
-def adapter():
-    client = module.MtcMotionClient.__new__(module.MtcMotionClient)
+def adapter(kind=module.MtcMotionClient):
+    client = kind.__new__(kind)
     client.blocked = False
     client.audit = []
     client.plans = [([.2, 0., .2], RobotTrajectory(joint_trajectory=trajectory()), [.2, 0., .2])]
@@ -95,8 +95,7 @@ def test_object_target_cannot_fall_back_to_ee_target_when_endpoint_metadata_is_b
     client.registration.call_async.assert_not_called()
 
 
-@pytest.mark.parametrize('observation', ['missing', 'outside', 'nonfinite'])
-def test_joint_place_keeps_attachment_when_pre_release_physical_sample_is_unusable(monkeypatch, observation):
+def joint_place_server(monkeypatch, skill):
     import threading
     from flexcell_skills import place_server as place
     server = place.PlaceServer.__new__(place.PlaceServer)
@@ -113,37 +112,53 @@ def test_joint_place_keeps_attachment_when_pre_release_physical_sample_is_unusab
     server._gripper = Mock()
     server._clearance, server._hover, server._carry, server._retreat = .05, .1, .16, .1
     server._tol, server._deadline = .06, 30000
-    server._mtc = Mock(audit=[])
-    server._mtc.prepare.return_value = (True, 'planned')
+    server._mtc = Mock(audit=[]) if skill == 'mtc' else None
+    server._point = Mock(audit=[]) if skill == 'legacy' else None
+    if server._mtc is not None:
+        server._mtc.prepare.return_value = (True, 'planned')
     server._feedback = Mock()
     server._log = Mock()
-    server._motion = Mock(return_value=(NS(outcome=0, error_code=0), 0, 'OK'))
+    server._motion = Mock(return_value=(NS(outcome=0, error_code=0, has_reached_pose=True,
+        reached_pose=module.stamped([.18, -.21, .2275])), 0, 'OK'))
     watch = Mock()
     watch.problem.return_value = ''
     watch.summary.return_value = {}
     monkeypatch.setattr(place, 'SnapshotWatch', lambda *_: watch)
-    after = (([.25, -.25, .0675], [0., 0., 0., 1.]), None)
-    if observation == 'missing': after = (None, 'stream stale')
-    elif observation == 'nonfinite': after[0][0][0] = float('nan')
-    sampler = Mock(side_effect=[(([.25, 0., .12], [0., 0., 0., 1.]), None), after])
-    monkeypatch.setattr(place, 'sample_gz_pose', sampler)
     goal = place.PlaceObject.Goal(object_name='target_box_a',
         place_pose=module.stamped([.12, -.15, .0175]), motion_profile_id='demo_slow')
     handle = NS(request=goal, is_cancel_requested=False, abort=Mock(), succeed=Mock(), canceled=Mock())
+    return server, handle
+
+
+@pytest.mark.parametrize('skill', ['mtc', 'legacy'])
+@pytest.mark.parametrize('observation', ['missing', 'outside', 'nonfinite'])
+def test_joint_place_keeps_attachment_when_pre_release_physical_sample_is_unusable(monkeypatch, observation, skill):
+    from flexcell_skills import place_server as place
+    server, handle = joint_place_server(monkeypatch, skill)
+    after = (([.25, -.25, .0675], [0., 0., 0., 1.]), None)
+    if observation == 'missing': after = (None, 'stream stale')
+    elif observation == 'nonfinite': after[0][0][0] = float('nan')
+    sampler = Mock(side_effect=([(([.25, 0., .12], [0., 0., 0., 1.]), None)] if skill == 'mtc' else [])+[after])
+    monkeypatch.setattr(place, 'sample_gz_pose', sampler)
     result = server._execute(handle)
     assert result.outcome == result.OUTCOME_FAILED and result.error_code == result.ERR_PLACE_FAILED
     assert not result.released and 'carry held' in result.detail
     assert server._motion.call_count == 2
-    assert server._mtc.prepare.call_args.kwargs['attached_object_targets']
-    assert server._mtc.prepare.call_args.args[3][1] == [.12, -.15, .0675]
+    if skill == 'mtc':
+        assert server._mtc.prepare.call_args.kwargs['attached_object_targets']
+        assert server._mtc.prepare.call_args.args[3][1] == [.12, -.15, .0675]
+    else:
+        assert server._motion.call_args.kwargs['target_object'] == 'target_box_a'
+        assert server._motion.call_args.args[0] == [.12, -.15, .0675]
     server._carry_release.call_async.assert_not_called()
     server._scene.detach_to_world.assert_not_called()
     server._gripper.command.assert_not_called()
     handle.abort.assert_called_once()
 
 
-def test_unknown_executor_result_latches_adapter(monkeypatch):
-    client = adapter()
+@pytest.mark.parametrize('kind', [module.MtcMotionClient, module.AttachedPointMotionClient])
+def test_unknown_executor_result_latches_adapter(monkeypatch, kind):
+    client = adapter(kind)
     monkeypatch.setattr(module, 'wait_future', lambda *_: 'done')
     result = module.MoveToPose.Result()
     result.outcome = result.OUTCOME_STATE_UNKNOWN
@@ -156,6 +171,50 @@ def test_unknown_executor_result_latches_adapter(monkeypatch):
     with pytest.raises(module.MotionTerminalUnknown):
         call(client)
     assert client.executor.call.call_count == 1
+
+
+def test_legacy_joint_place_replans_each_stage_and_retreats_from_measured_ee(monkeypatch):
+    from flexcell_skills import place_server as place
+    server, handle = joint_place_server(monkeypatch, 'legacy')
+    del server._motion  # Exercise the real stage adapter.
+    server._m2p = Mock()
+    motion = module.MoveToPose.Result(has_reached_pose=True,
+        reached_pose=module.stamped([.18, -.21, .2275]))
+    server._point.prepare_point.return_value = (True, 'one OMPL point')
+    server._point.call.return_value = server._m2p.call.return_value = (motion, None)
+    server._carry_release.call_async.return_value.result.return_value = NS(success=True)
+    server._scene.detach_to_world.return_value = (True, None)
+    server._gripper.command.return_value = (True, None)
+    server._size, server._gripper_open, server._settle = [.035]*3, .02, 0.
+    poses = [[.25, 0., .12], [.12, -.15, .1675], [.12, -.15, .0675], [.12, -.15, .0175]]
+    sampler = Mock(side_effect=[((p, [0., 0., 0., 1.]), None) for p in poses])
+    monkeypatch.setattr(place, 'sample_gz_pose', sampler)
+    monkeypatch.setattr(place, 'wait_future', lambda *_: 'done')
+    monkeypatch.setattr(place, 'interruptible_sleep', lambda *_: False)
+    result = server._execute(handle)
+    assert result.outcome == result.OUTCOME_SUCCEEDED and result.released
+    assert [c.args[2] for c in server._point.prepare_point.call_args_list] == [
+        [.12, -.15, .1675], [.12, -.15, .0675]]
+    assert [c.args[1][0] for c in server._point.prepare_point.call_args_list] == poses[:2]
+    assert sampler.call_count == 4 and server._point.call.call_count == 2
+    assert server._m2p.call.call_count == 1
+    assert server._m2p.call.call_args.args[0] == pytest.approx([.18, -.21, .3275])
+    handle.succeed.assert_called_once()
+
+
+@pytest.mark.parametrize('reason', ['missing_sample', 'planning_failed', 'canceled'])
+def test_legacy_point_failure_never_dispatches_motion(monkeypatch, reason):
+    from flexcell_skills import place_server as place
+    server = place.PlaceServer.__new__(place.PlaceServer)
+    server._mtc, server._m2p, server._point, server._deadline = None, Mock(), Mock(), 30000
+    server._point.prepare_point.return_value = (False, 'blocked goal')
+    sample = (None, 'stale') if reason == 'missing_sample' else (([.25, 0., .12], [0., 0., 0., 1.]), None)
+    monkeypatch.setattr(place, 'sample_gz_pose', lambda *_, **__: sample)
+    result, _, detail = server._motion([.12, -.15, .1675], 'demo_slow', 'hover',
+        cancel_check=lambda: reason == 'canceled', target_object='target_box_a')
+    assert result is None and 'carry held' in detail
+    server._point.call.assert_not_called()
+    server._m2p.call.assert_not_called()
 
 
 def test_handoff_preserves_target_and_whitelisted_profile(monkeypatch):
@@ -225,3 +284,47 @@ def test_executor_exception_before_motion_returns_declared_failure_code():
     assert result.error_code == result.ERR_INVALID_GOAL
     assert result.evidence_id == 'fixture-evidence'
     goal.abort.assert_called_once()
+
+
+def test_legacy_point_plan_keeps_box_target_distinct_from_executor_goal(monkeypatch):
+    client = module.AttachedPointMotionClient.__new__(module.AttachedPointMotionClient)
+    client.blocked, client.audit, client.plans = False, [], []
+    client.planner, client.registration, client.executor = Mock(), Mock(), Mock()
+    logical, ee = [.12, -.15, .0675], [.18, -.21, .2275]
+    client.planner.call_async.return_value.result.return_value = NS(success=True, detail='OMPL point',
+        trajectories=[RobotTrajectory(joint_trajectory=trajectory())], executor_targets=[module.stamped(ee)])
+    client.registration.call_async.return_value.result.return_value = NS(success=True)
+    client.executor.call.return_value = (module.MoveToPose.Result(), None)
+    monkeypatch.setattr(module, 'wait_future', lambda *_: 'done')
+    assert client.prepare_point('target_box_a', ([.25, 0., .12], [0., 0., 0., 1.]), logical, 'demo_slow', 30000)[0]
+    request = client.planner.call_async.call_args.args[0]
+    assert request.operation == 'POINT' and request.attached_object_targets and len(request.targets) == 1
+    client.call(logical, profile='demo_slow', deadline_ms=30000, request_id='legacy-descend')
+    assert client.executor.call.call_args.args[0] == ee
+    assert client.executor.call.call_args.kwargs['request_id'].startswith('point-')
+    assert client.audit[0]['target'] == logical and client.audit[0]['executor_target'] == ee
+
+
+def test_point_handoff_is_single_use_and_shares_motion_admission():
+    from flexcell_skills.move_to_pose_server import MoveToPoseServer
+    from flexcell_interfaces.srv import RegisterMtcTrajectory
+    import threading
+    server = MoveToPoseServer.__new__(MoveToPoseServer)
+    server._admission = threading.Lock()
+    server._motion_blocked = server._terminal_uncertain = False
+    server._base = 'world'
+    server._validate = lambda _: (None, '', None)
+    server._joint_state = lambda: (JointState(name=['joint1','joint2','joint3','joint4'], position=[0.]*4), .01)
+    request = RegisterMtcTrajectory.Request(request_id='point-'+'a'*32,
+        target=module.stamped([.18, -.21, .2275]), motion_profile_id='demo_slow',
+        trajectory=RobotTrajectory(joint_trajectory=trajectory()))
+    assert server._register_point(request,RegisterMtcTrajectory.Response()).success
+    goal = module.MoveToPose.Goal(request_id=request.request_id,target=request.target,motion_profile_id='demo_slow')
+    assert server._consume_mtc(goal) is request.trajectory
+    with pytest.raises(ValueError, match='missing or expired'):
+        server._consume_mtc(goal)
+    server._admission.acquire()
+    assert not server._register_point(request,RegisterMtcTrajectory.Response()).success
+    server._admission.release()
+    request.request_id = 'mtc-'+'a'*32
+    assert not server._register_point(request,RegisterMtcTrajectory.Response()).success

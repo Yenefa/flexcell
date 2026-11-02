@@ -94,6 +94,10 @@ class PlaceServer(Node):
             Trigger, gp('carry_release_service').value,
             callback_group=ReentrantCallbackGroup())
         self._carry_backend = gp('carry_backend').value
+        self._point = None
+        if skill_backend == 'legacy' and self._carry_backend == 'detachable_joint':
+            from flexcell_skills.mtc_motion import AttachedPointMotionClient
+            self._point = AttachedPointMotionClient(self)
         self._carry_query = self.create_client(
             QueryCarry, gp('carry_query_service').value,
             callback_group=ReentrantCallbackGroup())
@@ -127,8 +131,18 @@ class PlaceServer(Node):
         fb.elapsed_ms = int((time.monotonic() - t0) * 1000)
         gh.publish_feedback(fb)
 
-    def _motion(self, position, profile, request_id, cancel_check=None):
+    def _motion(self, position, profile, request_id, cancel_check=None, target_object=None):
         client = getattr(self, '_mtc', None) or self._m2p
+        if target_object is not None:
+            if cancel_check and cancel_check():
+                return None, 0, 'canceled before attached-point planning; carry held'
+            client = self._point
+            measured, error = sample_gz_pose(target_object, max_age_s=.5)
+            if measured is None:
+                return None, 0, 'attached object sample unavailable; carry held: ' + str(error)
+            planned, reason = client.prepare_point(target_object, measured, position, profile, self._deadline)
+            if not planned:
+                return None, 0, 'attached-point planning failed; carry held: ' + reason
         res, err = client.call(position, profile=profile,
                                   deadline_ms=self._deadline, request_id=request_id,
                                   cancel_check=cancel_check)
@@ -159,12 +173,15 @@ class PlaceServer(Node):
             'profile': goal.motion_profile_id or self._default_profile,
         }
         follow = None
+        point = None
 
         def finish(outcome, error, detail, motion_err=0):
             if follow is not None:
                 rec['joint_follow_watch'] = follow.summary()
             if getattr(self, '_mtc', None) is not None:
                 rec['mtc_stages'] = list(self._mtc.audit)
+            if point is not None:
+                rec['point_plans'] = list(point.audit)
             res.outcome = outcome
             res.status = derive_status('PLACE', outcome)
             res.error_code = error
@@ -190,6 +207,9 @@ class PlaceServer(Node):
             return finish(R.OUTCOME_FAILED, R.ERR_RESOURCE_BUSY,
                           'another place goal is active')
         try:
+            point = getattr(self, '_point', None)
+            if point is not None:
+                point.audit = []
             # ---------- VALIDATING ----------
             self._feedback(goal_handle, 'VALIDATING', t0)
             profile = goal.motion_profile_id or self._default_profile
@@ -228,16 +248,23 @@ class PlaceServer(Node):
 
             # ---------- APPROACHING ----------
             self._feedback(goal_handle, 'APPROACHING', t0)
-            # the carried box hangs carry_offset below the EE; place the box
-            # (not the EE) at place_pos + release_clearance
+            # Servo backends keep a world-vertical carry offset. A fixed joint
+            # instead preserves the measured link-relative attachment.
             box_target_z = place_pos[2] + self._clearance
             ee_z = box_target_z + self._carry
             hover = [pp.x, pp.y, ee_z + self._hover]
             descend = [pp.x, pp.y, ee_z]
             retreat = [pp.x, pp.y, ee_z + self._retreat]
             mtc = getattr(self, '_mtc', None)
+            joint_targets = self._carry_backend == 'detachable_joint'
+            legacy_point = joint_targets and mtc is None
+            if joint_targets:
+                hover = [pp.x, pp.y, box_target_z + self._hover]
+                descend = [pp.x, pp.y, box_target_z]
+                retreat = [pp.x, pp.y, box_target_z + self._retreat]
+            rec['skill_backend'] = 'mtc' if mtc is not None else 'legacy'
+            rec['planning_target_reference'] = 'attached_box_center' if joint_targets else 'end_effector_link'
             if mtc is not None:
-                joint_targets = self._carry_backend == 'detachable_joint'
                 planning_object, planning_quat = place_pos, None
                 if joint_targets:
                     sampled, error = sample_gz_pose(goal.object_name, max_age_s=.5)
@@ -245,17 +272,11 @@ class PlaceServer(Node):
                         return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
                                       'attached object sample unavailable before planning: %s' % error)
                     planning_object, planning_quat = sampled
-                    # A fixed joint preserves a link-relative SE(3), not a
-                    # world-vertical offset. MTC plans the attached box center.
-                    hover = [pp.x, pp.y, box_target_z + self._hover]
-                    descend = [pp.x, pp.y, box_target_z]
-                    retreat = [pp.x, pp.y, box_target_z + self._retreat]
                     rec['planning_object_pose'] = list(planning_object) + list(planning_quat)
-                rec['planning_target_reference'] = 'attached_box_center' if joint_targets else 'end_effector_link'
                 planned, message = mtc.prepare('PLACE', goal.object_name, planning_object,
                     [hover, descend, retreat], profile, self._deadline,
                     attached_object_targets=joint_targets, object_orientation=planning_quat)
-                rec.update(skill_backend='mtc', planning_detail=message)
+                rec['planning_detail'] = message
                 if follow is not None and follow.problem():
                     return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
                                   follow_failure_detail(follow.problem()))
@@ -263,7 +284,7 @@ class PlaceServer(Node):
                     return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
                                   'MTC planning failed before execution: ' + message)
             mres, merr_code, detail = self._motion(hover, profile, rid + '-hover',
-                                                   cancel_check=cancel_requested)
+                cancel_check=cancel_requested, **({'target_object': goal.object_name} if legacy_point else {}))
             if follow is not None and follow.problem():
                 return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
                               follow_failure_detail(follow.problem(), mres, motion_may_be_active=True),
@@ -277,7 +298,7 @@ class PlaceServer(Node):
                               'hover motion failed: %s' % detail,
                               motion_err=merr_code)
             mres, merr_code, detail = self._motion(descend, profile, rid + '-descend',
-                                                   cancel_check=cancel_requested)
+                cancel_check=cancel_requested, **({'target_object': goal.object_name} if legacy_point else {}))
             if follow is not None and follow.problem():
                 return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
                               follow_failure_detail(follow.problem(), mres, motion_may_be_active=True),
@@ -295,7 +316,16 @@ class PlaceServer(Node):
             if goal_handle.is_cancel_requested:
                 return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
                               'canceled before RELEASING (box still carried)')
-            if mtc is not None and self._carry_backend == 'detachable_joint':
+            if legacy_point:
+                if not getattr(mres, 'has_reached_pose', False):
+                    return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
+                                  'measured end-effector pose absent before retreat planning; carry held')
+                ee = mres.reached_pose.pose.position
+                retreat = [ee.x, ee.y, ee.z + self._retreat]
+                if not all(math.isfinite(value) for value in retreat):
+                    return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
+                                  'nonfinite measured retreat target; carry held')
+            if joint_targets:
                 sampled, error = sample_gz_pose(goal.object_name, max_age_s=.5)
                 if sampled is None:
                     return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,

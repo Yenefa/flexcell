@@ -1,5 +1,6 @@
 """Actual planner service + locked robot FK; no actuator or Gazebo process."""
 import json
+from copy import deepcopy
 import math
 import os
 from pathlib import Path
@@ -102,6 +103,7 @@ def test_attached_point_place_service_has_fk_valid_endpoints(tmp_path):
     attached.object.primitives = [shape]
     attached.object.primitive_poses = [pose(point_offset, orientation_offset).pose]
     scene.robot_state.attached_collision_objects = [attached]
+    attached_scene = deepcopy(scene)
     request = PlanManipulation.Request()
     request.operation, request.object_name = 'PLACE', 'target_box_a'
     request.object_pose = pose(fixture['box_pose'][:3], fixture['box_pose'][3:])
@@ -210,6 +212,43 @@ def test_attached_point_place_service_has_fk_valid_endpoints(tmp_path):
             state.update()
             assert math.dist(components(state.get_pose('end_effector_link'))[:3],
                              components(target.pose)[:3]) <= 1.0001e-4
+        # The legacy adapter plans exactly one attached-point stage using
+        # upstream OMPL. It must preserve collision and physical-pose checks.
+        scene = deepcopy(attached_scene)
+        point_client = node.create_client(PlanManipulation, '/flexcell/attached_point/plan')
+        assert point_client.wait_for_service(timeout_sec=5)
+        for case in ('valid', 'blocked', 'pose_mismatch', 'wrong_operation'):
+            scene = deepcopy(attached_scene)
+            point = deepcopy(request)
+            point.operation = 'POINT'
+            point.targets = [point.targets[0]]
+            if case == 'blocked':
+                scene.world.collision_objects.append(blocker)
+            elif case == 'pose_mismatch':
+                point.object_pose.pose.position.x += .03
+            elif case == 'wrong_operation':
+                point.operation = 'PLACE'
+            future = point_client.call_async(point)
+            end = time.monotonic()+20
+            while not future.done() and time.monotonic()<end:
+                rclpy.spin_once(node,timeout_sec=.05)
+            assert future.done(), case+' point plan did not finish'
+            response = future.result()
+            if case != 'valid':
+                assert not response.success and not response.trajectories and not response.executor_targets
+                continue
+            assert response.success, response.detail
+            assert len(response.trajectories) == len(response.executor_targets) == 1
+            require_stop_clearance(response.trajectories, config['robot_description'])
+            joints = response.trajectories[0].joint_trajectory
+            state.joint_positions = dict(zip(fixture['names'], scene.robot_state.joint_state.position)) | dict(
+                zip(joints.joint_names,joints.points[-1].positions))
+            state.update()
+            actual = components(state.get_pose('end_effector_link'))
+            assert math.dist(actual[:3],components(response.executor_targets[0].pose)[:3]) < 1e-9
+            transform = np.asarray(state.get_global_link_transform('end_effector_link'))
+            box = transform[:3,:3] @ point_offset + transform[:3,3]
+            assert math.dist(box,components(point.targets[0].pose)[:3]) <= 1.0001e-4
     finally:
         node.destroy_service(server)
         node.destroy_node()
