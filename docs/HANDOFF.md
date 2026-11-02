@@ -307,3 +307,14 @@
 3. **hardening 候选**：接触式夹爪抓取（替代传送伺服）；carry 断链检测（TF 丢失自动释放）；w1_5 电池偶发客户端挂起排查（一次性，39ms 手动复验正常）
 4. **本机例行**：复验 = `50_start_detached.sh`（自带验活重试）→ `47_w1_acceptance.sh`（Week-1 电池）→ `32_day2_acceptance.sh`（Day-2 回归）
 5. **Git 状态**：Week-1/1.5 代码 + Week-2 预备文档均已 push（远端 main=`4fccfb891002478cc72e6011b13e6ff300f36889`：7956d63→5a0d528→4fccfb8）；docs 仓纯本地（bc51e31/100ba08）。M2 正式开工 = 从 Issue #3（WorldState v2 冻结实现）起步，顺序见各 issue 里程碑。
+
+## Archive checks during development
+
+Do not create a new acceptance capsule just because a gate or runtime source changes.
+Native audit verification keeps archive bytes and recorded identities mandatory.
+Current-source replay is separate: at the recorded canonical revision, source hashes
+must match; at another HEAD, the report says `SUPERSEDED_BY_<sha>` and
+`current_code_replay: NOT_RUN`. This is neither a replay pass nor a replay failure.
+CI lists that status separately. New evidence is needed when citing a new runtime
+window, not to renew old source bindings. Historical data and receipts stay unchanged.
+The verifier needs Git history containing the recorded revision.

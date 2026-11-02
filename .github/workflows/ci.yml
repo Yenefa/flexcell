@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: install test deps
         shell: bash
@@ -112,6 +114,25 @@ jobs:
           python3 setup/acceptance/native_five_20261030/verify_preposition_stop.py
           python3 setup/acceptance/native_five_20261030/verify_cycles.py
           python3 setup/acceptance/joint_place_failure_20261030/verify.py
+
+      - name: native archive integrity and revision status
+        shell: bash
+        run: |
+          python3 setup/acceptance/native_audit_20261031/verify.py > /tmp/native-archive-report.json
+          python3 - <<'PY'
+          import json, os
+          report = json.load(open('/tmp/native-archive-report.json'))
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
+              summary.write('Native archive integrity: '+report['archive_integrity']+'\n\n')
+              summary.write('Current-code replay: '+report['status']+' ('+report['current_code_replay']+')\n')
+          PY
+
+      - name: retain native archive status
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-archive-status
+          path: /tmp/native-archive-report.json
 
       - name: colcon test (all suites, 0 failures required)
         shell: bash

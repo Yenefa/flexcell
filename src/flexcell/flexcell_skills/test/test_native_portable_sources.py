@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import re
 import sys
+import subprocess
 
 import pytest
 
@@ -31,12 +32,20 @@ def verifier(monkeypatch):
         raise RawBoundaryReached()
     monkeypatch.setattr(module,'extract',raw_boundary)
     monkeypatch.setattr(sys,'path',sys.path.copy())
+    original = module.subprocess.check_output
+    def git_output(args, **kwargs):
+        if args[-2:] == ['rev-parse', 'HEAD']:
+            return BINDING['canonical_source_revision']+'\n'
+        args = list(args); args[2] = str(ROOT)
+        return original(args, **kwargs)
+    monkeypatch.setattr(module.subprocess, 'check_output', git_output)
     return module
 
 
 def source_tree(directory, endings):
     for name, crlf in zip(SOURCES,endings):
-        canonical = (ROOT/name).read_bytes().replace(b'\r\n',b'\n')
+        canonical = subprocess.check_output(['git', '-C', str(ROOT), 'show',
+            BINDING['canonical_source_revision']+':'+name]).replace(b'\r\n',b'\n')
         assert hashlib.sha256(canonical).hexdigest() == BINDING['source_files'][name]
         path = directory/name
         path.parent.mkdir(parents=True,exist_ok=True)
@@ -87,3 +96,36 @@ def test_historical_source_observations_remain_mandatory(tmp_path,verifier,defec
     message = 'recorded checkout digest invalid' if defect=='digest' else 'verification source set differs'
     with pytest.raises(AssertionError,match=message):
         verifier.verify(capsule,tree)
+
+
+def test_new_revision_reports_superseded_and_still_checks_archive(tmp_path, verifier, monkeypatch):
+    tree = source_tree(tmp_path, (False,)*4)
+    path = tree/SOURCES[0]
+    path.write_bytes(path.read_bytes()+b'\n# new implementation\n')
+    original = verifier.subprocess.check_output
+    def newer(args, **kwargs):
+        if args[-2:] == ['rev-parse', 'HEAD']:
+            return 'a'*40+'\n'
+        return original(args, **kwargs)
+    monkeypatch.setattr(verifier.subprocess, 'check_output', newer)
+    report = verifier.verify_sources(tree, RECEIPT, BINDING)
+    assert report['status'] == 'SUPERSEDED_BY_'+'a'*40
+    with pytest.raises(RawBoundaryReached):
+        verifier.verify(CAPSULE, tree)
+
+
+def test_superseded_revision_does_not_hide_archive_corruption(tmp_path, verifier, monkeypatch):
+    tree = source_tree(tmp_path/'repo', (False,)*4)
+    original = verifier.subprocess.check_output
+    def newer(args, **kwargs):
+        if args[-2:] == ['rev-parse', 'HEAD']:
+            return 'a'*40+'\n'
+        return original(args, **kwargs)
+    monkeypatch.setattr(verifier.subprocess, 'check_output', newer)
+    capsule = tmp_path/'capsule'
+    capsule.mkdir()
+    for name in ('receipt.json', 'source-binding.json'):
+        (capsule/name).write_bytes((CAPSULE/name).read_bytes())
+    (capsule/'raw-evidence.zip').write_bytes(b'corrupt archive')
+    with pytest.raises(AssertionError):
+        verifier.verify(capsule, tree)

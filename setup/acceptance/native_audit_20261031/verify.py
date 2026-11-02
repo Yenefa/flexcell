@@ -5,6 +5,7 @@ import hashlib
 import json
 from pathlib import Path, PurePosixPath
 import sys
+import subprocess
 import tempfile
 import zipfile
 
@@ -18,24 +19,31 @@ GATE_SOURCES = ('scripts/native_cycle_gate.py','scripts/integrated_contact_gate.
 
 
 def verify_sources(repo, receipt, binding):
-    """Bind Python text to sealed runtime bytes; retain checkout observations."""
+    """Check sealed source identity; report current-tree compatibility separately."""
     recorded = receipt['verification_sources']
     assert set(recorded) == set(GATE_SOURCES), 'verification source set differs'
     assert binding['canonical_source_revision'] == receipt['patched_source_revision']
     digest = lambda data: hashlib.sha256(data).hexdigest()
+    head = subprocess.check_output(['git', '-C', str(repo), 'rev-parse', 'HEAD'], text=True).strip()
+    current = head == binding['canonical_source_revision']
     observations = {}
     for name in GATE_SOURCES:
         data = (repo/name).read_bytes()
         # Python text transport only: preserve BOM, lone CR and every other byte.
         canonical = data.replace(b'\r\n',b'\n')
         expected = binding['source_files'][name]
-        assert digest(canonical) == expected, 'gate changed; use the recorded source revision: '+name
-        crlf = canonical.replace(b'\n',b'\r\n')
+        sealed = subprocess.check_output(['git', '-C', str(repo), 'show',
+            binding['canonical_source_revision']+':'+name])
+        assert digest(sealed) == expected, 'recorded source bytes invalid: '+name
+        crlf = sealed.replace(b'\n',b'\r\n')
         assert recorded[name] in (expected,digest(crlf)), 'recorded checkout digest invalid: '+name
+        if current:
+            assert digest(canonical) == expected, 'gate changed; use the recorded source revision: '+name
         form = 'LF' if data == canonical else 'CRLF' if data == crlf else 'MIXED_LF_CRLF'
-        observations[name] = dict(canonical_sha256=expected,observed_sha256=digest(data),
+        observations[name] = dict(canonical_sha256=digest(canonical),sealed_sha256=expected,observed_sha256=digest(data),
             recorded_checkout_sha256=recorded[name],observed_line_endings=form)
-    return dict(policy='CRLF_PAIRS_TO_LF_ONLY',canonical_source_revision=binding['canonical_source_revision'],
+    return dict(status='CURRENT_SOURCE_MATCH' if current else 'SUPERSEDED_BY_'+head,
+                policy='CRLF_PAIRS_TO_LF_ONLY',canonical_source_revision=binding['canonical_source_revision'],
                 files=observations)
 
 
@@ -98,7 +106,7 @@ def reader_timing(run):
         interpretation='one diagnostic window per version; no latency guarantee or CI root-cause claim')
 
 
-def local_window(run, revision, source_binding=None):
+def local_window(run, revision, source_binding=None, replay=True):
     from native_cycle_gate import verify_run
     result = json.loads((run/'result.json').read_text())
     declaration = json.loads((run/'declaration.json').read_text())
@@ -136,14 +144,15 @@ def local_window(run, revision, source_binding=None):
         health_counts[name] = len(health['checks'])
     reset = json.loads((run/'reset_after.stdout').read_text())
     assert reset['ok']
-    gate = verify_run(run,declaration)
-    assert gate['status'] == 'FIVE_NATIVE_CYCLES_PASS' and gate['qualification_cycles'] == 5
+    gate = verify_run(run,declaration) if replay else None
+    if replay:
+        assert gate['status'] == 'FIVE_NATIVE_CYCLES_PASS' and gate['qualification_cycles'] == 5
     return dict(source_revision=revision,source_revision_metadata=revision_metadata,
         partition=result['partition'],raw_clocks=clocks(run),
         gate=gate,reader_timing=reader_timing(run),health_checks=health_counts), identity
 
 
-def historical_window(root, archive_sha):
+def historical_window(root, archive_sha, replay=True):
     from native_cycle_gate import verify_cycle
     archive = root/'historical-ci/native-five-41116653853.zip'
     assert sha(archive) == archive_sha
@@ -159,7 +168,7 @@ def historical_window(root, archive_sha):
     contacts = {r['sim_ns']:r for r in map(json.loads,(run/'contact_steps.jsonl').read_text().splitlines())}
     events = list(map(json.loads,(run/'native-events.jsonl').read_text().splitlines()))
     declaration = json.loads((run/'declaration.json').read_text())
-    gated = [verify_cycle(physics,contacts,cycle,events,declaration)['status'] for cycle in worker['cycles'][:2]]
+    gated = [verify_cycle(physics,contacts,cycle,events,declaration)['status'] for cycle in worker['cycles'][:2]] if replay else None
     release = next(e for e in events if e['cycle']==2 and e['label']=='release')
     physical_release = next(r for ns,r in sorted(physics.items()) if ns>worker['cycles'][2]['reference_sim_ns']
         and release['request_mono_ns'] <= r['monotonic_ns'] <= release['reply_mono_ns']
@@ -176,24 +185,27 @@ def verify(capsule, repo):
     assert sha(capsule/'source-binding.json') == receipt['source_binding_sha256']
     binding = json.loads((capsule/'source-binding.json').read_text())
     source_observations = verify_sources(repo,receipt,binding)
+    replay = source_observations['status'] == 'CURRENT_SOURCE_MATCH'
     assert sha(capsule/'raw-evidence.zip') == receipt['archive_sha256']
     with tempfile.TemporaryDirectory(prefix='flexcell-native-audit-') as temporary:
         root = Path(temporary)
         extract(capsule/'raw-evidence.zip',root,receipt['files'])
-        baseline, old_identity = local_window(root/'baseline/window',receipt['baseline_source_revision'])
+        baseline, old_identity = local_window(root/'baseline/window',receipt['baseline_source_revision'],replay=replay)
         export_receipt = json.loads((root/'preflight/patched-source-receipt.json').read_text())
         assert export_receipt['revision'] == binding['canonical_source_revision']
         assert export_receipt['sha256'] == binding['source_archive_sha256']
         sidecar = root/'preflight/patched-source-revision.txt'
         assert sha(sidecar) == binding['revision_sidecar_sha256']
         assert sidecar.read_bytes() == (binding['canonical_source_revision']+'\r\n').encode('ascii')
-        patched, new_identity = local_window(root/'patched/window',receipt['patched_source_revision'],binding)
+        patched, new_identity = local_window(root/'patched/window',receipt['patched_source_revision'],binding,replay=replay)
         assert old_identity['native_libraries'] == new_identity['native_libraries']
         assert old_identity['python_files'] == new_identity['python_files']
         assert old_identity['launch_files'] == new_identity['launch_files']
-        historical = historical_window(root,receipt['historical_archive_sha256'])
+        historical = historical_window(root,receipt['historical_archive_sha256'],replay=replay)
         assert receipt['remaining_runtime_processes'] == 0 and receipt['old_wsl_dirty_patch_unchanged'] is True
-        return dict(status='NATIVE_AUDIT_LIFETIME_REPLAY_PASS',verification_sources=source_observations,
+        return dict(status='NATIVE_AUDIT_LIFETIME_REPLAY_PASS' if replay else source_observations['status'],
+            archive_integrity='PASS', current_code_replay='REPRODUCED' if replay else 'NOT_RUN',
+            verification_sources=source_observations,
             baseline=baseline,patched=patched,
             historical=historical,old_wsl_dirty_patch_unchanged=True,remaining_runtime_processes=0,
             moving_parent_follow_qualified=False,default_admission='NO_GO')
