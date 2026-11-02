@@ -32,7 +32,10 @@ class Follower:
 
     def collect(self):
         for index,(stream, table) in enumerate(zip(self.streams, self.tables)):
-            while True:
+            position=stream.tell(); stream.seek(0,os.SEEK_END); boundary=stream.tell(); stream.seek(position)
+            # A continuously growing contact file must not keep us draining
+            # one stream while the other stream's cached watermark ages.
+            while stream.tell() < boundary:
                 position = stream.tell(); line = stream.readline()
                 if not line or not line.endswith('\n'):
                     stream.seek(position); break
@@ -43,6 +46,20 @@ class Follower:
                 if len(table) > 1024: table.pop(next(iter(table)))
         return sorted(self.tables[0].keys() & self.tables[1].keys())
 
+    def require_live_producers(self):
+        rows=[]
+        for stream in self.streams:
+            with Path(stream.name).open('rb') as source:
+                source.seek(0,os.SEEK_END); size=source.tell(); start=max(0,size-65536)
+                source.seek(start); data=source.read(size-start)
+            if start: data=data.split(b'\n',1)[-1]
+            complete=data.rsplit(b'\n',1)[0].splitlines()
+            require(complete, 'native source unavailable/stale')
+            rows.append(json.loads(complete[-1]))
+        now=time.monotonic_ns()
+        require(all(0 <= now-row['monotonic_ns'] < 500_000_000 for row in rows),
+                'native producer stale; fresh consumer data unavailable')
+
     def wait(self, condition, timeout=5., *, earliest=False, watch=None):
         deadline = time.monotonic()+timeout
         while time.monotonic() < deadline:
@@ -50,7 +67,14 @@ class Follower:
             if keys:
                 newest = self.tables[0][keys[-1]]
                 newest_age = time.monotonic_ns()-newest['monotonic_ns']
-                require(newest_age < 500_000_000, 'native stream stale; age_ns='+str(newest_age))
+                if newest_age >= 500_000_000:
+                    self.require_live_producers()
+                    require(watch is None, 'native active consumer stale; age_ns='+str(newest_age))
+                    if not earliest:
+                        # Detached/default waits can catch up to a genuinely
+                        # fresh cohort. Never return this old joined frame.
+                        time.sleep(.002)
+                        continue
                 choices = keys if earliest else keys[-1:]
                 for ns in choices:
                     p, c = self.tables[0][ns], self.tables[1][ns]
@@ -107,6 +131,7 @@ def worker(out, world, declaration):
         for index,name in enumerate(declaration['objects']):
             if follow is not None:
                 for stream in follow.streams: stream.close()
+                follow=None  # release old parsed tables before the new EOF subscription
             follow = Follower(out)  # previous cycle's complete raw files were already gated
             token = uuid.uuid4().hex
             cycle = dict(index=index,object=name,session=token,previous_session=previous)
@@ -184,6 +209,7 @@ def worker(out, world, declaration):
                 for target in c['targets'].values(): observation(target)
             cycle['evidence'] = verify_cycle({p['sim_ns']:p for p in p_rows},{c['sim_ns']:c for c in c_rows},
                 cycle,complete(out/'native-events.jsonl'),declaration)
+            del p_rows,c_rows  # full immutable files stay retained and already gated
             previous = token
         require(not heartbeat_errors, str(heartbeat_errors))
         result['status'] = 'PASS'

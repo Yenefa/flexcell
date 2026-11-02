@@ -132,3 +132,27 @@ This fixture owns the backend through native RPCs directly, without engaging
 the ROS CarryServer adapter. Task/arm motion actions stay idle; ROS/native
 ownership consistency is checked only once released. These component cycles
 do not qualify the skill adapter or the S2 false-attached intervention.
+
+## Retained consumer-watermark stop
+
+Trusted run 41387963040 at TCP implementation `5196568` passed its joint task,
+but the independent native window completed only cycle 0, then stopped after
+cycle 1's initial status, before a second preposition or engage. Its cached
+joined-frame age was 1,162,552,992 ns. In the retained raw interval after that
+status, source-record wall-clock gaps were at most 10.783 ms (physics) and
+10.523 ms (contacts). The precise consumer stall was not instrumented; the
+29-file original artifact stays STOPPED in `setup/acceptance/native_consumer_stop/`.
+
+The live reader now bounds each stream drain at a captured EOF and releases
+the previous cycle's parsed verification data before opening the next live
+subscription. A detached/default wait distinguishes raw producer watermarks
+from an old joined consumer cache and can catch up within the original timeout.
+It never returns a candidate aged 500 ms or more. Either stale producer still
+stops the fixture. An eligible stale reference and a stale active-watch cohort
+also still stop immediately, even with healthy producer tails. Raw files are
+never trimmed, and every full cycle remains independently gated before the next.
+Adversarial tests cover all those cases plus a continuously growing input file.
+
+The distinct `infra/native-five-cycle-window-after-source-watermark.json`
+links this retained stop. Counts, order, poses, world/config hashes, both
+500 ms bounds, the 20 ms binding gap and all physical thresholds stay unchanged.

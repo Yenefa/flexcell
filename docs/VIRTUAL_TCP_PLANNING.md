@@ -51,7 +51,19 @@ recovery budget zero, no replacements, and links both preceding stops. World
 and semantic-config hashes, 2 ms physics, 11 s hold, existing contact/freefall
 limits, and the 50 mm release fixture remain unchanged. Implementation and
 declaration must be committed before dispatch; verify imported source and the
-actual mapped planner/plugins. Runtime results are pending at this declaration.
+actual mapped planner/plugins.
+
+Implementation/declaration `5196568` subsequently completed its single local
+task first attempt: PICK, PLACE and VERIFY all succeeded without recovery.
+Pre-release physical error was 0.711 mm; final independent VERIFY error was
+5.126 mm (unchanged 60 mm zone tolerance, not a precision qualification).
+The carry interval was 16.9 sim s, with 8,451 complete 2 ms frames and 9,212
+same-round contact/pose joins. The 500-sample passive load mean was 0.49 N;
+the 40 ms freefall fit gave -9.8 m/s². Strict 19-check health passed, IDLE/carry
+released, and recorder/owned launch exited cleanly. The complete 53-file raw
+window, exact planning inputs/model/responses and independent replay/wire
+handoff verifier are in `setup/acceptance/virtual_tcp_runtime/`. This is one
+bounded task, not a success-rate estimate; the older stops remain rejected.
 
 D3 remains NO_GO. This does not qualify S2 intervention, moving-parent follow
 against a detached reference, the legacy backend matrix or real hardware.

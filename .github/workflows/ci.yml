@@ -114,6 +114,8 @@ jobs:
           python3 setup/acceptance/joint_place_failure_20261030/verify.py
           python3 setup/acceptance/attached_center_stop/verify.py
           python3 setup/acceptance/virtual_tcp_offline/verify.py
+          python3 setup/acceptance/virtual_tcp_runtime/verify.py
+          python3 setup/acceptance/native_consumer_stop/verify.py
 
       - name: colcon test (all suites, 0 failures required)
         shell: bash

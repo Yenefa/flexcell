@@ -65,6 +65,10 @@ jobs:
             python3 /opt/flexcell/repo/setup/acceptance/attached_center_stop/verify.py
           docker run --init --rm flexcell-sim:ci \
             python3 /opt/flexcell/repo/setup/acceptance/virtual_tcp_offline/verify.py
+          docker run --init --rm flexcell-sim:ci \
+            python3 /opt/flexcell/repo/setup/acceptance/virtual_tcp_runtime/verify.py --wire
+          docker run --init --rm flexcell-sim:ci \
+            python3 /opt/flexcell/repo/setup/acceptance/native_consumer_stop/verify.py
       - name: One declared native contact sensor pipeline spike (no arm tasks)
         run: |
           docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
@@ -151,7 +155,7 @@ jobs:
           mkdir -p artifacts
           docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
             python3 /opt/flexcell/repo/scripts/native_cycle_window.py \
-            --manifest /opt/flexcell/repo/infra/native-five-cycle-window-after-epoch-selection.json \
+            --manifest /opt/flexcell/repo/infra/native-five-cycle-window-after-source-watermark.json \
             --out /artifacts/native-five-window
       - uses: actions/upload-artifact@v4
         if: always()

@@ -135,3 +135,51 @@ def test_reference_epoch_selection_preserves_both_freshness_bounds(tmp_path,monk
     if case=='pretrigger_history': assert follower.wait(condition,earliest=True)[0]['sim_ns']==2
     else:
         with pytest.raises(ValueError,match='stale'): follower.wait(condition,earliest=True)
+
+
+@pytest.mark.parametrize('mode',['detached_catchup','stale_reference','active_watch','physics_stale','contact_stale'])
+def test_source_watermark_does_not_excuse_stale_reference_or_active_watch(tmp_path,monkeypatch,mode):
+    import native_cycle_window as module
+    now=10**12
+    for name in ('physics_steps.jsonl','contact_steps.jsonl'):
+        (tmp_path/name).write_text(json.dumps(dict(sim_ns=2,monotonic_ns=now-1_000_000))+'\n')
+    if mode.endswith('_stale'):
+        name='physics_steps.jsonl' if mode=='physics_stale' else 'contact_steps.jsonl'
+        (tmp_path/name).write_text(json.dumps(dict(sim_ns=2,monotonic_ns=now-500_000_001))+'\n')
+    follower=module.Follower(tmp_path)
+    count=0
+    def collect():
+        nonlocal count
+        count+=1
+        rows={1:dict(sim_ns=1,monotonic_ns=now-1_160_000_000)}
+        if count>1: rows[2]=dict(sim_ns=2,monotonic_ns=now-1_000_000)
+        follower.tables=[rows,{ns:{} for ns in rows}]
+        return sorted(rows)
+    monkeypatch.setattr(follower,'collect',collect)
+    monkeypatch.setattr(module.time,'monotonic_ns',lambda:now)
+    if mode=='detached_catchup':
+        assert follower.wait(lambda *_:True)[0]['sim_ns']==2
+    else:
+        with pytest.raises(ValueError,match='stale'):
+            follower.wait(lambda *_:True,earliest=mode=='stale_reference',
+                          watch=(lambda *_:None) if mode=='active_watch' else None)
+
+
+def test_collect_stops_at_captured_end_without_dropping_appended_records(tmp_path):
+    import io
+    from native_cycle_window import Follower
+    for name in ('physics_steps.jsonl','contact_steps.jsonl'): (tmp_path/name).touch()
+    follower=Follower(tmp_path)
+    for stream in follower.streams:stream.close()
+    class Growing(io.StringIO):
+        def __init__(self):
+            super().__init__(json.dumps(dict(sim_ns=2))+'\n');self.appended=False
+        def readline(self,*args):
+            value=super().readline(*args)
+            if not self.appended:
+                position=self.tell();self.seek(0,2);self.write(json.dumps(dict(sim_ns=3))+'\n');self.seek(position)
+                self.appended=True
+            return value
+    follower.streams=[Growing(),Growing()];follower.align_new_record=[False,False]
+    assert follower.collect()==[2]
+    assert follower.collect()==[2,3]
