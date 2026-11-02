@@ -83,10 +83,36 @@ class Follower:
         raise RuntimeError('native frame condition timed out; no replacement cycle')
 
 
-def audit_cycle(out, cycle, declaration):
-    """Release whole-prefix JSON graphs before the next live cycle begins."""
+def audit_cycle(out, cycle, declaration, offsets=None):
+    """Read each raw record once across cycles; gate before dispatching the next.
+
+    The next cycle waits >1 sim s detached before preposition, so all of its
+    required one-second prehistory is newer than the previous audit's EOF.
+    Full files remain untouched and verify_run independently checks them at exit.
+    """
+    if offsets is None:
+        offsets = {}
     def complete(path):
-        return [json.loads(line) for line in path.read_bytes().rsplit(b'\n',1)[0].splitlines()]
+        position, previous = offsets.get(path.name, (0, None))
+        records = []
+        with path.open('rb') as stream:
+            stream.seek(position)
+            end = os.fstat(stream.fileno()).st_size
+            while True:
+                position = stream.tell()
+                if position >= end:
+                    break
+                line = stream.readline()
+                if not line.endswith(b'\n') or stream.tell() > end:
+                    break  # retain a partial append for the next read
+                row = json.loads(line)
+                if 'sim_ns' in row:
+                    require(previous is None or row['sim_ns'] > previous,
+                            'duplicate or reordered native step')
+                    previous = row['sim_ns']
+                records.append(row)
+        offsets[path.name] = position, previous
+        return records
     p_rows, c_rows = complete(out/'physics_steps.jsonl'), complete(out/'contact_steps.jsonl')
     require(len({p['sim_ns'] for p in p_rows}) == len(p_rows) and
             len({c['sim_ns'] for c in c_rows}) == len(c_rows), 'duplicate native step')
@@ -103,6 +129,7 @@ def worker(out, world, declaration):
     events = (out/'native-events.jsonl').open('x'); log_lock = threading.Lock()
     stop = threading.Event(); heartbeat = None; heartbeat_errors = []
     result = dict(status='STOPPED', cycles=[], robot_motion_tasks=0, max_cycles=5, no_replacements=True)
+    audit_offsets = {}
 
     def pose(name, values, session=''):
         message = pose_pb2.Pose(); message.name = name
@@ -205,7 +232,10 @@ def worker(out, world, declaration):
                             values=settled['objects'][name]['pose'])[0], 'retired session re-engaged')
             final,_ = rpc('status','final_status',index)
             require(not final['engaged'] and not final['session'], 'retired probe changed ownership')
-            cycle['evidence'] = audit_cycle(out,cycle,declaration)
+            # A supervisor deadline must still leave the completed operations and
+            # the pending audit visible; an incomplete checkpoint is never PASS.
+            (out/'worker.json').write_text(json.dumps(result,indent=2,allow_nan=False)+'\n')
+            cycle['evidence'] = audit_cycle(out,cycle,declaration,audit_offsets)
             previous = token
         require(not heartbeat_errors, str(heartbeat_errors))
         result['status'] = 'PASS'

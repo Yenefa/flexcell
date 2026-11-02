@@ -192,7 +192,7 @@ def test_completed_audit_rows_are_released_before_next_live_cycle(tmp_path, monk
         (tmp_path/name).write_text(payload)
 
     assert module.worker(tmp_path,'empty',declaration) == 0
-    assert len(references) == 10  # both complete raw streams audited in every cycle
+    assert len(references) == 2  # each raw row is parsed once, never again in later cycles
     assert alive_at_cycle_start == [0, 0, 0, 0, 0]
 
 
@@ -225,3 +225,60 @@ def test_reference_epoch_selection_preserves_both_freshness_bounds(tmp_path,monk
     if case=='pretrigger_history': assert follower.wait(condition,earliest=True)[0]['sim_ns']==2
     else:
         with pytest.raises(ValueError,match='stale'): follower.wait(condition,earliest=True)
+
+
+def test_incremental_audit_preserves_full_cycle_verdicts_and_raw_bytes(tmp_path,evidence):
+    from native_cycle_window import audit_cycle
+    offsets = {}
+    for attempt in range(2):
+        p,c,cycle,events,declaration = deepcopy(evidence)
+        delta = attempt*20_000_000_000
+        for table in (p,c):
+            for row in table.values():
+                row['sim_ns'] += delta
+                row['monotonic_ns'] += 2*delta
+        p,c = ({row['sim_ns']:row for row in table.values()} for table in (p,c))
+        cycle['reference_sim_ns'] += delta
+        cycle['retired_probe_sim_ns'] += delta
+        for event in events:
+            event['request_mono_ns'] += 2*delta
+            event['reply_mono_ns'] += 2*delta
+            if isinstance(event['reply'],dict) and 'sim_ns' in event['reply']:
+                event['reply']['sim_ns'] += delta
+        expected = verify_cycle(p,c,cycle,events,declaration)
+        for name,records in [('physics_steps.jsonl',p.values()),
+                             ('contact_steps.jsonl',c.values()),('native-events.jsonl',events)]:
+            with (tmp_path/name).open('a') as stream:
+                stream.writelines(json.dumps(row)+'\n' for row in records)
+        before = {path.name:path.read_bytes() for path in tmp_path.iterdir()}
+        assert audit_cycle(tmp_path,cycle,declaration,offsets) == expected
+        assert {path.name:path.read_bytes() for path in tmp_path.iterdir()} == before
+
+
+def test_incremental_audit_rejects_duplicates_across_read_boundaries(tmp_path,monkeypatch):
+    import native_cycle_window as module
+    monkeypatch.setattr(module,'verify_cycle',lambda *args: {})
+    offsets = {}
+    for name in ('physics_steps.jsonl','contact_steps.jsonl','native-events.jsonl'):
+        (tmp_path/name).write_text('{"sim_ns":1,"targets":{}}\n')
+    module.audit_cycle(tmp_path,{}, {},offsets)
+    with (tmp_path/'physics_steps.jsonl').open('a') as stream:
+        stream.write('{"sim_ns":1}\n')
+    with pytest.raises(ValueError,match='duplicate or reordered'):
+        module.audit_cycle(tmp_path,{}, {},offsets)
+
+
+def test_incremental_audit_retains_an_incomplete_append(tmp_path,monkeypatch):
+    import native_cycle_window as module
+    seen = []
+    monkeypatch.setattr(module,'verify_cycle',lambda physics,*args: seen.append(list(physics)))
+    offsets = {}
+    for name in ('physics_steps.jsonl','contact_steps.jsonl'):
+        (tmp_path/name).write_text('{"sim_ns":1,"targets":{}}\n{"sim_ns":')
+    (tmp_path/'native-events.jsonl').touch()
+    module.audit_cycle(tmp_path,{}, {},offsets)
+    for name in ('physics_steps.jsonl','contact_steps.jsonl'):
+        with (tmp_path/name).open('a') as stream:
+            stream.write('2,"targets":{}}\n')
+    module.audit_cycle(tmp_path,{}, {},offsets)
+    assert seen == [[1],[2]]
