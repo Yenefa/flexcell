@@ -10,11 +10,22 @@ ROOT = Path(__file__).resolve().parents[1]
 BACKENDS = ('teleport', 'velocity_servo', 'detachable_joint')
 
 
+DECISION_POLICIES = ('fsm', 'jev', 'llm', 'hybrid')
+
+
 def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
             joint_hold_sim_s=0., physics_step_s=None, *, contact_trace=False, release_clearance_m=None,
-            qualification_no_recovery=False, synchronous_step_logs=False, resume_completed_objects=False):
+            qualification_no_recovery=False, synchronous_step_logs=False, resume_completed_objects=False,
+            decision_policy='fsm', hybrid_threshold=None):
     if backend not in BACKENDS or skill_backend not in ('legacy', 'mtc'):
         raise ValueError('unsupported backend')
+    if decision_policy not in DECISION_POLICIES:
+        raise ValueError('unknown decision policy %r %r' % (decision_policy, DECISION_POLICIES))
+    if decision_policy == 'hybrid':
+        if not isinstance(hybrid_threshold, float) or not 0. < hybrid_threshold <= 1.:
+            raise ValueError('the hybrid policy requires a declared threshold in (0, 1]')
+    elif hybrid_threshold is not None:
+        raise ValueError('the hybrid threshold belongs to the hybrid policy only')
     if contact_trace and (backend != 'detachable_joint' or physics_step_s != .002):
         raise ValueError('integrated contact trace requires the declared 2 ms joint profile')
     if release_clearance_m is not None and (not contact_trace or release_clearance_m != .05):
@@ -40,7 +51,9 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
     for name in ('pick_server', 'place_server'):
         config[name]['ros__parameters']['skill_backend'] = skill_backend
         config[name]['ros__parameters']['record_execution_commands'] = bool(camera)
-    config['task_fsm_server']['ros__parameters']['decision_policy'] = 'fsm'
+    config['task_fsm_server']['ros__parameters']['decision_policy'] = decision_policy
+    if decision_policy == 'hybrid':
+        config['task_fsm_server']['ros__parameters']['hybrid_threshold'] = float(hybrid_threshold)
     if resume_completed_objects:
         config['task_fsm_server']['ros__parameters']['resume_completed_objects'] = True
     if qualification_no_recovery:

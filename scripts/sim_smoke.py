@@ -80,6 +80,9 @@ def main():
     parser.add_argument('--qualification-no-recovery', action='store_true')
     parser.add_argument('--planner-diagnostics', action='store_true')
     parser.add_argument('--resume-completed', action='store_true')
+    parser.add_argument('--decision-policy', choices=['fsm', 'jev', 'llm', 'hybrid'], default='fsm')
+    parser.add_argument('--hybrid-threshold', type=float,
+                        help='declared router threshold; required for, and only for, the hybrid policy')
     parser.add_argument('--case', choices=['normal', 'dual_object', 'recovery_once', 'budget_exhaustion',
                                            'unreachable_place', 'false_attach', 'already_placed'], default='normal')
     parser.add_argument('--false-attach', default='',
@@ -92,6 +95,8 @@ def main():
     if args.release_clearance_m is not None: options['release_clearance_m'] = args.release_clearance_m
     if args.qualification_no_recovery: options['qualification_no_recovery'] = True
     if args.resume_completed: options['resume_completed_objects'] = True
+    options['decision_policy'] = args.decision_policy
+    if args.hybrid_threshold is not None: options['hybrid_threshold'] = args.hybrid_threshold
     params, world = profile(out, args.backend, args.camera, args.skill_backend,
                             args.joint_hold_sim_s, args.physics_step_s, **options)
     if args.physics_step_s is not None:
@@ -114,6 +119,16 @@ def main():
     result = dict(schema_version=1, status='HARNESS_ERROR', backend=args.backend,
                   skill_backend=args.skill_backend, physical_tasks_dispatched=0,
                   qualification='FUNCTIONAL_SMOKE_ONLY', case=args.case, object=args.object, out=str(out))
+    # Declared routing, plus the non-secret model configuration the child processes
+    # inherit. The actual routing is summarised from the decision log after the task,
+    # so a silent fallback to the FSM cannot be reported as a model sample.
+    result['decision_policy'] = args.decision_policy
+    result['hybrid_threshold'] = args.hybrid_threshold
+    result['resume_completed'] = bool(args.resume_completed)
+    result['model_env'] = {name: os.environ.get(name) for name in
+                           ('FLEXCELL_LLM_ENDPOINT', 'FLEXCELL_LLM_MODEL',
+                            'FLEXCELL_LLM_BACKEND', 'FLEXCELL_JEV_ENDPOINT',
+                            'FLEXCELL_JEV_MODEL', 'FLEXCELL_JEV_BACKEND')}
     stack = None
     recorder = None
     log = (out / 'stack.log').open('x')
@@ -275,6 +290,27 @@ def main():
             raise RuntimeError('task has no terminal result; subsequent reset is forbidden')
         task = json.loads(task_output.split('RESULT ', 1)[1])
         result['task'] = task
+        # Actual routing for this run, read back from the decision log: the declared
+        # policy alone cannot show whether a model answered or the FSM fell back.
+        decisions = out / 'skills' / 'decisions.jsonl'
+        if decisions.exists():
+            rows = [json.loads(line) for line in decisions.read_text().splitlines() if line.strip()]
+            sources, fallbacks, models, backends = {}, 0, set(), set()
+            for row in rows:
+                trace = row.get('policy_trace') or {}
+                source = trace.get('source') or ('fallback' if trace.get('fallback') else row.get('policy'))
+                sources[str(source)] = sources.get(str(source), 0) + 1
+                if trace.get('fallback'):
+                    fallbacks += 1
+                if trace.get('response_model'):
+                    models.add(str(trace['response_model']))
+                if trace.get('backend'):
+                    backends.add(str(trace['backend']))
+            result['actual_routing'] = dict(
+                decisions=len(rows), sources=sources, fallbacks=fallbacks,
+                models=sorted(models), backends=sorted(backends))
+            result['model_calls'] = sum(count for name, count in sources.items()
+                                        if name not in ('fsm', 'fallback'))
         skill_records = []
         for name in ('pick', 'place'):
             path = out / ('skills/%s.jsonl' % name)
