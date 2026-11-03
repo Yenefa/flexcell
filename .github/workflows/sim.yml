@@ -185,7 +185,7 @@ jobs:
           mkdir -p artifacts
           docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
             python3 /opt/flexcell/repo/scripts/native_cycle_window.py \
-            --manifest /opt/flexcell/repo/infra/native-five-cycle-window-after-audit-lifetime.json \
+            --manifest /opt/flexcell/repo/infra/native-five-cycle-window-after-audit-boundary.json \
             --out /artifacts/native-five-window
       - uses: actions/upload-artifact@v4
         if: always()

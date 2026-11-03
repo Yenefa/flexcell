@@ -282,3 +282,54 @@ def test_incremental_audit_retains_an_incomplete_append(tmp_path,monkeypatch):
             stream.write('2,"targets":{}}\n')
     module.audit_cycle(tmp_path,{}, {},offsets)
     assert seen == [[1],[2]]
+
+
+def test_audit_stops_at_the_cycle_boundary_and_leaves_later_rows_unread(tmp_path, monkeypatch):
+    import native_cycle_window as module
+    seen = []
+    monkeypatch.setattr(module, 'verify_cycle', lambda physics, *args: seen.append(sorted(physics)))
+    offsets = {}
+    for name in ('physics_steps.jsonl', 'contact_steps.jsonl'):
+        (tmp_path/name).write_text(''.join(json.dumps(dict(sim_ns=ns, targets={}))+'\n'
+                                           for ns in (1, 2, 3, 4)))
+    (tmp_path/'native-events.jsonl').touch()
+    module.audit_cycle(tmp_path, dict(index=0, retired_probe_sim_ns=2), {}, offsets)
+    module.audit_cycle(tmp_path, dict(index=1, retired_probe_sim_ns=4), {}, offsets)
+    assert seen == [[1, 2], [3, 4]]
+
+
+def test_audit_records_its_own_cost_without_touching_raw_evidence(tmp_path, monkeypatch):
+    import native_cycle_window as module
+    monkeypatch.setattr(module, 'verify_cycle', lambda *args: dict(status='NATIVE_CYCLE_PASS'))
+    offsets = {}
+    for name in ('physics_steps.jsonl', 'contact_steps.jsonl'):
+        (tmp_path/name).write_text(json.dumps(dict(sim_ns=2, targets={}))+'\n')
+    (tmp_path/'native-events.jsonl').touch()
+    cycle = dict(index=0, retired_probe_sim_ns=2)
+    before = {p.name: p.read_bytes() for p in tmp_path.iterdir()}
+    module.audit_cycle(tmp_path, cycle, {}, offsets)
+    assert {p.name: p.read_bytes() for p in tmp_path.iterdir()} == before
+    assert cycle['audit']['physics_rows'] == cycle['audit']['contact_rows'] == 1
+    assert cycle['audit']['boundary_sim_ns'] == 2 and cycle['audit']['total_ms'] >= 0.
+
+
+def test_worker_deadline_is_never_below_the_declared_floor():
+    from native_cycle_gate import AUDIT_ALLOWANCE_S, worker_deadline_s
+    declaration = json.loads((ROOT/'infra/native-five-cycle-window.json').read_text())
+    cycle_ns = 1_050_000_000 + declaration['hold_ns'] + declaration['settle_ns']
+    floor = declaration['max_cycles'] * cycle_ns / 1e9 / declaration['min_preflight_rtf']
+    deadline = worker_deadline_s(declaration)
+    assert deadline >= floor + declaration['max_cycles'] * AUDIT_ALLOWANCE_S
+    assert worker_deadline_s(dict(declaration, min_preflight_rtf=.2)) > deadline
+
+
+def test_recorded_worker_deadline_cannot_be_below_the_declared_floor(tmp_path, evidence):
+    (tmp_path/'worker.json').write_text(json.dumps(dict(status='PASS', cycles=[evidence[2]], worker_deadline_s=330)))
+    with pytest.raises(ValueError, match='deadline below'):
+        verify_run(tmp_path, evidence[4])
+
+
+def test_receipts_without_a_recorded_deadline_still_report_incomplete_cycles(tmp_path, evidence):
+    (tmp_path/'worker.json').write_text(json.dumps(dict(status='PASS', cycles=[evidence[2]])))
+    with pytest.raises(ValueError, match='five cycles'):
+        verify_run(tmp_path, evidence[4])
