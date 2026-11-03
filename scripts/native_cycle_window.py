@@ -18,7 +18,7 @@ from sim_profile import ROOT, profile
 from sim_smoke import command, remember_owned, terminate_owned
 from contact_probe import mapped_libraries
 from contact_gate import observation, require
-from native_cycle_gate import limits, pose_error, verify_cycle, verify_run
+from native_cycle_gate import limits, pose_error, verify_cycle, verify_run, worker_deadline_s
 from flexcell_skills.joint_follow import relative_pose
 
 
@@ -84,42 +84,62 @@ class Follower:
 
 
 def audit_cycle(out, cycle, declaration, offsets=None):
-    """Read each raw record once across cycles; gate before dispatching the next.
+    """Read one cycle's raw records once, gate them, and leave later rows unread.
 
-    The next cycle waits >1 sim s detached before preposition, so all of its
-    required one-second prehistory is newer than the previous audit's EOF.
-    Full files remain untouched and verify_run independently checks them at exit.
+    The read is bounded by the cycle's last declared frame and by the file size
+    seen at open. Reading to EOF instead also consumed every row the simulation
+    appended while the audit itself was running, so each audit grew with the
+    previous one (CI run 41407787100: 14.4, 21.2, 28.3, 35.5 s, fifth unfinished
+    at the deadline). Full files stay untouched and verify_run re-checks them at
+    exit; rows past the boundary belong to the next cycle.
     """
     if offsets is None:
         offsets = {}
-    def complete(path):
-        position, previous = offsets.get(path.name, (0, None))
-        records = []
+    started = time.monotonic_ns()
+    boundary = cycle.get('retired_probe_sim_ns')
+
+    def complete(path, limit_sim_ns=None):
+        start, previous = offsets.get(path.name, (0, None))
+        records, position = [], start
         with path.open('rb') as stream:
-            stream.seek(position)
+            stream.seek(start)
             end = os.fstat(stream.fileno()).st_size
             while True:
-                position = stream.tell()
-                if position >= end:
-                    break
                 line = stream.readline()
-                if not line.endswith(b'\n') or stream.tell() > end:
+                if not line.endswith(b'\n'):
                     break  # retain a partial append for the next read
+                if stream.tell() > end:
+                    break  # bytes landed after this audit opened; read them next cycle
                 row = json.loads(line)
+                if limit_sim_ns is not None and row.get('sim_ns', 0) > limit_sim_ns:
+                    break  # the next cycle's rows stay unread
                 if 'sim_ns' in row:
                     require(previous is None or row['sim_ns'] > previous,
                             'duplicate or reordered native step')
                     previous = row['sim_ns']
                 records.append(row)
+                position = stream.tell()
         offsets[path.name] = position, previous
         return records
-    p_rows, c_rows = complete(out/'physics_steps.jsonl'), complete(out/'contact_steps.jsonl')
+
+    p_rows = complete(out/'physics_steps.jsonl', boundary)
+    c_rows = complete(out/'contact_steps.jsonl', boundary)
+    parsed_ns = time.monotonic_ns()
     require(len({p['sim_ns'] for p in p_rows}) == len(p_rows) and
             len({c['sim_ns'] for c in c_rows}) == len(c_rows), 'duplicate native step')
     for c in c_rows:
         for target in c['targets'].values(): observation(target)
-    return verify_cycle({p['sim_ns']:p for p in p_rows},{c['sim_ns']:c for c in c_rows},
-        cycle,complete(out/'native-events.jsonl'),declaration)
+    observed_ns = time.monotonic_ns()
+    events = complete(out/'native-events.jsonl')
+    facts = verify_cycle({p['sim_ns']:p for p in p_rows},{c['sim_ns']:c for c in c_rows},
+        cycle,events,declaration)
+    verified_ns = time.monotonic_ns()
+    timing = dict(cycle=cycle.get('index'), boundary_sim_ns=boundary,
+                  physics_rows=len(p_rows), contact_rows=len(c_rows), event_rows=len(events),
+                  parse_ms=(parsed_ns-started)/1e6, observe_ms=(observed_ns-parsed_ns)/1e6,
+                  verify_ms=(verified_ns-observed_ns)/1e6, total_ms=(verified_ns-started)/1e6)
+    cycle['audit'] = timing  # the caller serializes it with the cycle receipt
+    return facts
 
 
 def worker(out, world, declaration):
@@ -128,7 +148,8 @@ def worker(out, world, declaration):
     node = gz.transport13.Node(); follow = None
     events = (out/'native-events.jsonl').open('x'); log_lock = threading.Lock()
     stop = threading.Event(); heartbeat = None; heartbeat_errors = []
-    result = dict(status='STOPPED', cycles=[], robot_motion_tasks=0, max_cycles=5, no_replacements=True)
+    result = dict(status='STOPPED', cycles=[], robot_motion_tasks=0, max_cycles=5, no_replacements=True,
+                  worker_deadline_s=worker_deadline_s(declaration))
     audit_offsets = {}
 
     def pose(name, values, session=''):
@@ -270,8 +291,9 @@ def main():
     sha = lambda p:hashlib.sha256(p.read_bytes()).hexdigest()
     identity_matches = (sha(world) == declaration['world_sha256'] and
         hashlib.sha256(json.dumps(semantic,sort_keys=True).encode()).hexdigest() == declaration['semantic_config_sha256'])
+    deadline = worker_deadline_s(declaration)
     result = dict(status='STOPPED',robot_motion_tasks=0,max_cycles=5,no_replacements=True,default_admission='NO_GO',
-                  declaration_sha256=sha(args.manifest),world_sha256=sha(world))
+                  declaration_sha256=sha(args.manifest),world_sha256=sha(world),worker_deadline_s=deadline)
     os.environ.update(FLEXCELL_PHYSICS_STEP_LOG=str(out/'physics_steps.jsonl'),
                       FLEXCELL_CONTACT_STEP_LOG=str(out/'contact_steps.jsonl'),GZ_PARTITION='flexcell-native5-'+uuid.uuid4().hex)
     result['partition'] = os.environ['GZ_PARTITION']
@@ -315,7 +337,7 @@ def main():
         with (out/'worker.log').open('x') as stream:
             proc = subprocess.run([sys.executable,__file__,'--worker','--out',str(out),
                 '--manifest',str(out/'declaration.json'),'--world',world_name],stdout=stream,stderr=subprocess.STDOUT,
-                env=dict(os.environ,PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION='python'),timeout=330)
+                env=dict(os.environ,PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION='python'),timeout=deadline)
         result['worker_exit'] = proc.returncode
         require(proc.returncode == 0,'native cycle failed; window stopped without reset')
         require(command([sys.executable,str(ROOT/'setup/flexcell_admin.py'),'health'],out/'health_after_cycles') == 0,

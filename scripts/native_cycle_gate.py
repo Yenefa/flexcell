@@ -25,6 +25,25 @@ def limits(declaration):
             'native cycle declaration or thresholds changed')
 
 
+# Supervisor deadline for the per-cycle worker. The deadline is a hang detector,
+# so it can never be tighter than what the declaration itself permits: five
+# cycles of 1.05 s settle-in + hold + 1 s settle at ``min_preflight_rtf`` are
+# already 202.5 s of physics before any gating. Run 41407787100 showed the old
+# fixed 330 s could not cover a conforming run: 196 s of protocol plus five raw
+# audits of 14.4-35.5 s. The audit allowance is therefore declared here, next to
+# the thresholds it must not silently move.
+CYCLE_SETTLE_IN_NS = 1_050_000_000
+AUDIT_ALLOWANCE_S = 25.
+CLIENT_ALLOWANCE_S = 30.
+
+
+def worker_deadline_s(declaration):
+    """Deadline that always covers the declaration's own throughput floor."""
+    cycle_s = (CYCLE_SETTLE_IN_NS + declaration['hold_ns'] + declaration['settle_ns']) / 1e9
+    floor = declaration['max_cycles'] * cycle_s / declaration['min_preflight_rtf']
+    return math.ceil(floor + declaration['max_cycles'] * AUDIT_ALLOWANCE_S + CLIENT_ALLOWANCE_S)
+
+
 def pose_error(parent, child, reference):
     position, rotation = relative_pose(parent, child)
     p, q = reference
@@ -160,6 +179,9 @@ def verify_cycle(physics, contacts, cycle, events, declaration):
 def verify_run(out, declaration):
     out = Path(out); limits(declaration)
     result = json.loads((out/'worker.json').read_text())
+    deadline = result.get('worker_deadline_s')
+    if deadline is not None:
+        require(deadline >= worker_deadline_s(declaration), 'worker deadline below the declaration floor')
     require(result['status'] == 'PASS' and len(result['cycles']) == 5, 'five cycles did not complete')
     events = rows(out/'native-events.jsonl')
     physics_rows, contact_rows = rows(out/'physics_steps.jsonl'), rows(out/'contact_steps.jsonl')

@@ -1,0 +1,175 @@
+{
+  "status": "PASS",
+  "robot_motion_tasks": 0,
+  "max_cycles": 5,
+  "no_replacements": true,
+  "default_admission": "NO_GO",
+  "declaration_sha256": "b4cbee7831e4999b12dca46f64b70699a93fe74984ee041bf5d3293e46209148",
+  "world_sha256": "2606997b4be2f83957e1f4f7b975affc508254e3a5037a50e65f97776b1bc148",
+  "worker_deadline_s": 358,
+  "partition": "flexcell-native5-464ef029fd5d46d8a750010d77f4b37d",
+  "runtime_fingerprint": "00129d713a4bb093616c8246ff9063e8440d91f3fb0a680749efc52349eb2eef",
+  "preflight_rtf": 0.6398539273885983,
+  "worker_exit": 0,
+  "recorder_exit": 0,
+  "owned_exit": 0,
+  "evidence": {
+    "status": "FIVE_NATIVE_CYCLES_PASS",
+    "cycles": [
+      {
+        "status": "NATIVE_CYCLE_PASS",
+        "index": 0,
+        "object": "target_box_a",
+        "session": "5ceabf16c9c0425d8c1fba294f15bc49",
+        "reference_sim_ns": 20104000000,
+        "first_attached_ns": 20108000000,
+        "last_attached_ns": 30222000000,
+        "release_sim_ns": 30224000000,
+        "reference_bind_gap_ns": 4000000,
+        "attached_duration_s": 10.114,
+        "peak_translation_m": 3.920000000001585e-05,
+        "peak_rotation_rad": 0.0,
+        "parent_max_translation_m": 0.0,
+        "passive_force_samples": 500,
+        "passive_mean_force_n": 0.4899999999992361,
+        "joined_steps": 5811,
+        "states": {
+          "CONTACTS_WITH_FORCE": 649,
+          "NO_REPORTED_CONTACTS": 5162
+        },
+        "freefall": {
+          "samples": 21,
+          "duration_s": 0.04,
+          "acceleration_m_s2": -9.799999999999867,
+          "fitted_initial_velocity_m_s": -0.029400000000001276,
+          "max_residual_m": 5.551115123125783e-17,
+          "initial_z_m": 0.219882400005985
+        }
+      },
+      {
+        "status": "NATIVE_CYCLE_PASS",
+        "index": 1,
+        "object": "target_box_a",
+        "session": "27de608b59e14bceb0cc72dcb3c38f37",
+        "reference_sim_ns": 36098000000,
+        "first_attached_ns": 36104000000,
+        "last_attached_ns": 46222000000,
+        "release_sim_ns": 46224000000,
+        "reference_bind_gap_ns": 6000000,
+        "attached_duration_s": 10.118,
+        "peak_translation_m": 0.00015679998664000624,
+        "peak_rotation_rad": 0.0,
+        "parent_max_translation_m": 0.0,
+        "passive_force_samples": 500,
+        "passive_mean_force_n": 0.4899999999903958,
+        "joined_steps": 5814,
+        "states": {
+          "CONTACTS_WITH_FORCE": 649,
+          "NO_REPORTED_CONTACTS": 5165
+        },
+        "freefall": {
+          "samples": 21,
+          "duration_s": 0.04,
+          "acceleration_m_s2": -9.800000000000233,
+          "fitted_initial_velocity_m_s": -0.029399999999996596,
+          "max_residual_m": 5.551115123125783e-17,
+          "initial_z_m": 0.2197648000327
+        }
+      },
+      {
+        "status": "NATIVE_CYCLE_PASS",
+        "index": 2,
+        "object": "target_box_b",
+        "session": "3096b2f48b264d7a9141675a21e2e72e",
+        "reference_sim_ns": 50204000000,
+        "first_attached_ns": 50212000000,
+        "last_attached_ns": 60328000000,
+        "release_sim_ns": 60330000000,
+        "reference_bind_gap_ns": 8000000,
+        "attached_duration_s": 10.116,
+        "peak_translation_m": 0.0003136000000010284,
+        "peak_rotation_rad": 0.0,
+        "parent_max_translation_m": 0.0,
+        "passive_force_samples": 500,
+        "passive_mean_force_n": 0.48995810589555233,
+        "joined_steps": 5814,
+        "states": {
+          "CONTACTS_WITH_FORCE": 649,
+          "NO_REPORTED_CONTACTS": 5165
+        },
+        "freefall": {
+          "samples": 21,
+          "duration_s": 0.04,
+          "acceleration_m_s2": -9.800000000000233,
+          "fitted_initial_velocity_m_s": -0.029399999999995968,
+          "max_residual_m": 5.551115123125783e-17,
+          "initial_z_m": 0.219608000006159
+        }
+      },
+      {
+        "status": "NATIVE_CYCLE_PASS",
+        "index": 3,
+        "object": "target_box_b",
+        "session": "58a315410a8e46e79bc13438d1157f51",
+        "reference_sim_ns": 64132000000,
+        "first_attached_ns": 64136000000,
+        "last_attached_ns": 74256000000,
+        "release_sim_ns": 74258000000,
+        "reference_bind_gap_ns": 4000000,
+        "attached_duration_s": 10.12,
+        "peak_translation_m": 3.9200000000016064e-05,
+        "peak_rotation_rad": 0.0,
+        "parent_max_translation_m": 0.0,
+        "passive_force_samples": 500,
+        "passive_mean_force_n": 0.4899998625810207,
+        "joined_steps": 5814,
+        "states": {
+          "CONTACTS_WITH_FORCE": 649,
+          "NO_REPORTED_CONTACTS": 5165
+        },
+        "freefall": {
+          "samples": 21,
+          "duration_s": 0.04,
+          "acceleration_m_s2": -9.800000000000233,
+          "fitted_initial_velocity_m_s": -0.029399999999998337,
+          "max_residual_m": 1.1102230246251565e-16,
+          "initial_z_m": 0.219884164903752
+        }
+      },
+      {
+        "status": "NATIVE_CYCLE_PASS",
+        "index": 4,
+        "object": "target_box_a",
+        "session": "040da9cbb84443e49a2456bf66aa62c0",
+        "reference_sim_ns": 78780000000,
+        "first_attached_ns": 78794000000,
+        "last_attached_ns": 88914000000,
+        "release_sim_ns": 88916000000,
+        "reference_bind_gap_ns": 14000000,
+        "attached_duration_s": 10.12,
+        "peak_translation_m": 0.0010192000000020212,
+        "peak_rotation_rad": 0.0,
+        "parent_max_translation_m": 0.0,
+        "passive_force_samples": 500,
+        "passive_mean_force_n": 0.4899548242340933,
+        "joined_steps": 5819,
+        "states": {
+          "CONTACTS_WITH_FORCE": 650,
+          "NO_REPORTED_CONTACTS": 5169
+        },
+        "freefall": {
+          "samples": 21,
+          "duration_s": 0.04,
+          "acceleration_m_s2": -9.799999999999867,
+          "fitted_initial_velocity_m_s": -0.029400000000001276,
+          "max_residual_m": 5.551115123125783e-17,
+          "initial_z_m": 0.21890240000594
+        }
+      }
+    ],
+    "robot_motion_tasks": 0,
+    "qualification_cycles": 5,
+    "moving_parent_follow_qualified": false,
+    "default_admission": "NO_GO"
+  }
+}
