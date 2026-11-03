@@ -6,8 +6,9 @@
 > 低于声明允许的 202.5 s 物理下限。现按本轮最后声明帧与打开时文件长度限界读取，越界行
 > 留给下一轮；期限由声明推导（新声明 `b4cbee78…`，358 s），每轮 receipt 记审计耗时。
 > 本机声明窗口一次 `FIVE_NATIVE_CYCLES_PASS`（RTF 0.992，审计 4.1/2.1/1.7/1.8/1.9 s），
-> 包内 843 项测试 0 失败，两个历史 native 回放器仍退出 0。**CI 未重跑、未 push**；
-> D3 仍 NO_GO。
+> 包内 843 项测试 0 失败，两个历史 native 回放器仍退出 0。PR #96 的 CI 已重跑并通过
+> （run 41573126778：`offline-tests` 3m04s、`joint-follow`/`false-attach`/`native-five`
+> 10m07s 全绿；RTF 0.64 下审计 10.5→5.4 s 收敛）；D3 仍 NO_GO。
 > [读数、修复与边界](NATIVE_CYCLE_DEADLINE_20261103.md)。下方为历史快照。
 
 > 2026-11-01 当前修正（更新 PR #85）：已独立复现并修复 native 原始回放在 Git LF 检出中的误拒。

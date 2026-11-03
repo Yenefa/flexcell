@@ -3,7 +3,8 @@
 CI `native-five-cycle-smoke`（run 41407787100）在 `scripts/native_cycle_window.py`
 的固定 `timeout=330` 处被杀。该轮**五轮协议动作全部完成**（`native-events.jsonl`
 记录到第 5 轮 `final_status`，`transport_ok=true`），被杀的是每轮之后的原始证据审计。
-本文件记录原因读数、修复边界与本机验证；**CI 尚未重跑**。
+本文件记录原因读数、修复边界、本机与 CI 验证。CI 重跑已绿（run
+[41573126778](https://github.com/Yenefa/flexcell/actions/runs/41573126778)）。
 
 ## 已确认的读数（原 ZIP 未改一字）
 
@@ -49,6 +50,13 @@ CI `native-five-cycle-smoke`（run 41407787100）在 `scripts/native_cycle_windo
 | 修复前（只加计时） | after-audit-lifetime | `FIVE_NATIVE_CYCLES_PASS` | 0.754 | 5.17 / 2.46 / 1.73 / 1.74 / 1.94 | 17,525 / 7,867 / 6,930 / 6,775 / 6,783 |
 | 修复后（开发版） | after-audit-lifetime | `FIVE_NATIVE_CYCLES_PASS` | 0.898 | 8.56 / 2.78 / 3.16 / 2.23 / 2.01 | 17,863 / 8,252 / 6,947 / 6,797 / 6,828 |
 | **修复后（声明窗口）** | **after-audit-boundary** | **`FIVE_NATIVE_CYCLES_PASS`** | **0.992** | **4.13 / 2.06 / 1.67 / 1.75 / 1.94** | **19,537 / 7,931 / 6,858 / 6,776 / 6,756** |
+| **修复后（CI 2 核 runner）** | **after-audit-boundary** | **`FIVE_NATIVE_CYCLES_PASS`** | **0.64** | **10.49 / 6.03 / 5.47 / 5.07 / 5.42** | **15,613 / 8,002 / 7,052 / 6,963 / 7,330** |
+
+CI 该轮（run [41573126778](https://github.com/Yenefa/flexcell/actions/runs/41573126778)，
+`native-five-cycle-smoke` 10m07s）：`status=PASS`、`worker_deadline_s=358`、
+`preflight_rtf=0.64`、`worker_exit=0`、`recorder_exit=0`、`owned_exit=0`、
+`evidence.status=FIVE_NATIVE_CYCLES_PASS`。审计由失败轮的 14.4→35.5 s 递增
+变为 10.5→5.4 s 收敛，切片停在每轮约 7,000 行（首轮 15.6k 含启动前缀）。
 
 声明窗口一次运行：`worker_exit=0`、`recorder_exit=0`、`owned_exit=0`，
 `worker_deadline_s=358`，第 5 轮审计完成，事后复位与 19 项健康检查通过。
@@ -61,7 +69,8 @@ CI `native-five-cycle-smoke`（run 41407787100）在 `scripts/native_cycle_windo
 
 ## 未完成与边界
 
-- **CI 未重跑**：本机 RTF 0.99–0.75，不代表 2 核 runner 的 0.36。本文件**不声明 CI 已修复**；
-  358 s 的余量（预计修复后 CI 约 196 s 协议 + 5 × 10–20 s 审计）需要一次真实 CI 运行确认。
-- 本机三次窗口是同一台机器、各一次，不是统计基线；不构成成功率或延迟保证。
+- **CI 已重跑并通过**：run 41573126778 的 `offline-tests`（3m04s）、`joint-follow-smoke`、
+  `false-attach-smoke`、`native-five-cycle-smoke`（10m07s）全绿；RTF 0.64 下审计
+  10.5→5.4 s 收敛，358 s 预算余量实测约 300 s（协议约 196 s + 五次审计约 32 s）。
+- 本机三次 + CI 一次，各一次运行，不是统计基线；不构成成功率或延迟保证。
 - 审计仍是串行 CPU 工作；没有并行化、没有改物理门限、没有改 D3 准入与 n≥50 冻结。
