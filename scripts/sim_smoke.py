@@ -79,8 +79,9 @@ def main():
     parser.add_argument('--release-clearance-m', type=float)
     parser.add_argument('--qualification-no-recovery', action='store_true')
     parser.add_argument('--planner-diagnostics', action='store_true')
+    parser.add_argument('--resume-completed', action='store_true')
     parser.add_argument('--case', choices=['normal', 'dual_object', 'recovery_once', 'budget_exhaustion',
-                                           'unreachable_place', 'false_attach'], default='normal')
+                                           'unreachable_place', 'false_attach', 'already_placed'], default='normal')
     parser.add_argument('--false-attach', default='',
                         help='declared live false-attach spec, object:offset_m[:hold_s]')
     args = parser.parse_args()
@@ -90,6 +91,7 @@ def main():
     if args.contact_trace: options['contact_trace'] = True
     if args.release_clearance_m is not None: options['release_clearance_m'] = args.release_clearance_m
     if args.qualification_no_recovery: options['qualification_no_recovery'] = True
+    if args.resume_completed: options['resume_completed_objects'] = True
     params, world = profile(out, args.backend, args.camera, args.skill_backend,
                             args.joint_hold_sim_s, args.physics_step_s, **options)
     if args.physics_step_s is not None:
@@ -254,6 +256,10 @@ def main():
             time.sleep(1.)
         result['task_start_monotonic_ns'] = time.monotonic_ns()
         pose = ['.44', '.40', '.0175'] if args.case == 'unreachable_place' else ['.12', '-.15', '.0175']
+        if args.case == 'already_placed':
+            # The declared task goal equals this object's canonical spawn. No
+            # fixture teleport or changed verifier is needed for this control.
+            pose = (['.22', '0', '.0175'] if args.object == 'target_box_a' else ['.20', '-.18', '.0175'])
         result['goal_pose'] = [float(value) for value in pose]
         rc = command([sys.executable, str(ROOT / 'src/flexcell/flexcell_skills/test/w1_client.py'),
                       '--action', 'demo' if args.case == 'dual_object' else 'task',
@@ -300,6 +306,14 @@ def main():
             if args.case == 'dual_object' else task.get('object_at_place') is True)
         if args.case == 'recovery_once':
             succeeded = succeeded and sum(row.get('injected') is True for row in skill_records) == 1
+        if args.case == 'already_placed':
+            counts = {}
+            for skill in ('pick', 'place', 'verify'):
+                path = out / ('skills/%s.jsonl' % skill)
+                counts[skill] = len(path.read_text().splitlines()) if path.exists() else 0
+            result['completion_check'] = dict(resume_enabled=args.resume_completed, skill_calls=counts)
+            expected = {'pick': 0, 'place': 0, 'verify': 1} if args.resume_completed else {'pick': 1, 'place': 1, 'verify': 1}
+            succeeded = succeeded and counts == expected
         if not succeeded and not expected_failure:
             result['status'] = 'ROBOT_FAILURE'
             raise RuntimeError('typed task failure retained; no replacement task')

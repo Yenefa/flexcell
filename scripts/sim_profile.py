@@ -12,7 +12,7 @@ BACKENDS = ('teleport', 'velocity_servo', 'detachable_joint')
 
 def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
             joint_hold_sim_s=0., physics_step_s=None, *, contact_trace=False, release_clearance_m=None,
-            qualification_no_recovery=False, synchronous_step_logs=False):
+            qualification_no_recovery=False, synchronous_step_logs=False, resume_completed_objects=False):
     if backend not in BACKENDS or skill_backend not in ('legacy', 'mtc'):
         raise ValueError('unsupported backend')
     if contact_trace and (backend != 'detachable_joint' or physics_step_s != .002):
@@ -41,6 +41,8 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
         config[name]['ros__parameters']['skill_backend'] = skill_backend
         config[name]['ros__parameters']['record_execution_commands'] = bool(camera)
     config['task_fsm_server']['ros__parameters']['decision_policy'] = 'fsm'
+    if resume_completed_objects:
+        config['task_fsm_server']['ros__parameters']['resume_completed_objects'] = True
     if qualification_no_recovery:
         config['task_fsm_server']['ros__parameters']['recovery_budget'] = 0
     config['task_fsm_server']['ros__parameters']['episode_dir'] = str(out / 'episodes')

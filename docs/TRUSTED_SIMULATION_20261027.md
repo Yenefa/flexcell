@@ -129,3 +129,19 @@ unresolved. This record changes neither joint admission nor the earlier STOPPED 
 
 Decision: [ADR-004](ADR/ADR-004-trusted-simulation-plane.md).
 Portable commands: [REPRODUCE.md](../REPRODUCE.md).
+
+## Resume partially completed tasks
+
+Set the task server's `resume_completed_objects` parameter to `true` to enable
+the same completion shortcut for FSM, Jev, LLM or Hybrid. After observing an
+object at its assigned goal, the policy requests the independent verifier.
+Only a successful measured verification skips that object's pick/place;
+remaining assignments continue through the selected policy. A failed initial
+check starts with a fresh observation and uses the existing verification budget.
+The option defaults to false and records a distinct `<policy>+resume` identity.
+
+Run the physical control with `gh workflow run sim.yml -f resume_smoke=true`.
+Both arms use the same already-placed object, Joint/legacy skills and verifier.
+The runner checks one pick/place in the reference arm and zero in the resume
+arm, with one successful independent verification in each. This measures the
+completion feature; learned-policy reliability, latency and cost remain separate.
