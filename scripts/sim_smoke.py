@@ -61,6 +61,61 @@ def remember_owned(out, proc):
         stream.write(json.dumps(dict(pid=proc.pid, start_ticks=stat[19])) + '\n')
 
 
+MODEL_SOURCES = ('llm', 'jev')
+
+
+def summarize_routing(rows):
+    """Summarise what the decision log actually shows. Pure: no ROS, no I/O.
+
+    A hybrid row keeps the router metadata at the top and the real arm responses under
+    ``proposals``; every other policy row is a single leaf. Calls are counted per leaf,
+    so a fast call that escalated to the slow arm reports fast 1 + slow 1 instead of
+    nothing, and identity is reported separately from the call itself.
+    """
+    sources, leaves, models, backends = {}, {}, set(), set()
+    fast = slow = unknown = fallbacks = 0
+    for row in rows:
+        trace = row.get('policy_trace') or {}
+        outer = trace.get('source') or ('fallback' if trace.get('fallback') else row.get('policy'))
+        sources[str(outer)] = sources.get(str(outer), 0) + 1
+        if trace.get('fallback'):
+            fallbacks += 1
+        proposals = trace.get('proposals') or []
+        leaf_traces = [proposal.get('policy_trace') or {} for proposal in proposals] or [trace]
+        for leaf in leaf_traces:
+            source = str(leaf.get('source') or '')
+            leaves[source] = leaves.get(source, 0) + 1
+            if source not in MODEL_SOURCES:
+                continue
+            if source == 'jev':
+                fast += 1
+            else:
+                slow += 1
+            # The slow arm reports response_model, the fast arm reports model; neither is
+            # guaranteed. A missing identity must not erase a call that did happen.
+            identity = leaf.get('response_model') or leaf.get('model')
+            if identity:
+                models.add(str(identity))
+            else:
+                unknown += 1
+            if leaf.get('backend'):
+                backends.add(str(leaf['backend']))
+    return dict(decisions=len(rows), sources=sources, leaves=leaves, fallbacks=fallbacks,
+                models=sorted(models), backends=sorted(backends),
+                fast_calls=fast, slow_calls=slow, model_calls=fast + slow,
+                calls_without_identity=unknown)
+
+
+def completion_expectation(decision_policy, resume_completed):
+    """Skill calls an already_placed task must show, or None when a model may legally
+    verify an object that is already at its goal instead of carrying it."""
+    if resume_completed:
+        return {'pick': 0, 'place': 0, 'verify': 1}
+    if decision_policy == 'fsm':
+        return {'pick': 1, 'place': 1, 'verify': 1}
+    return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--out', type=Path, required=True)
@@ -295,30 +350,10 @@ def main():
         decisions = out / 'skills' / 'decisions.jsonl'
         if decisions.exists():
             rows = [json.loads(line) for line in decisions.read_text().splitlines() if line.strip()]
-            sources, fallbacks, models, backends = {}, 0, set(), set()
-            for row in rows:
-                trace = row.get('policy_trace') or {}
-                source = trace.get('source') or ('fallback' if trace.get('fallback') else row.get('policy'))
-                sources[str(source)] = sources.get(str(source), 0) + 1
-                if trace.get('fallback'):
-                    fallbacks += 1
-                if trace.get('response_model'):
-                    models.add(str(trace['response_model']))
-                if trace.get('backend'):
-                    backends.add(str(trace['backend']))
-            result['actual_routing'] = dict(
-                decisions=len(rows), sources=sources, fallbacks=fallbacks,
-                models=sorted(models), backends=sorted(backends))
-            # A model call is a decision the fast or slow arm actually answered. Policy
-            # names such as completion_check are not model traffic, and the two arms are
-            # counted apart because only the slow one consumes the paid budget.
-            fast_calls = sum(1 for row in rows
-                             if (row.get('policy_trace') or {}).get('source') == 'jev')
-            slow_calls = sum(1 for row in rows
-                             if (row.get('policy_trace') or {}).get('response_model'))
-            result['model_calls'] = fast_calls + slow_calls
-            result['fast_calls'] = fast_calls
-            result['slow_calls'] = slow_calls
+            result['actual_routing'] = summarize_routing(rows)
+            result['model_calls'] = result['actual_routing']['model_calls']
+            result['fast_calls'] = result['actual_routing']['fast_calls']
+            result['slow_calls'] = result['actual_routing']['slow_calls']
         skill_records = []
         for name in ('pick', 'place'):
             path = out / ('skills/%s.jsonl' % name)
@@ -355,9 +390,16 @@ def main():
             for skill in ('pick', 'place', 'verify'):
                 path = out / ('skills/%s.jsonl' % skill)
                 counts[skill] = len(path.read_text().splitlines()) if path.exists() else 0
-            result['completion_check'] = dict(resume_enabled=args.resume_completed, skill_calls=counts)
-            expected = {'pick': 0, 'place': 0, 'verify': 1} if args.resume_completed else {'pick': 1, 'place': 1, 'verify': 1}
-            succeeded = succeeded and counts == expected
+            expected = completion_expectation(args.decision_policy, args.resume_completed)
+            result['completion_check'] = dict(resume_enabled=args.resume_completed,
+                                              declared_policy=args.decision_policy,
+                                              expected=expected, skill_calls=counts)
+            if expected is None:
+                # A model may legally verify an object that is already at its goal instead
+                # of carrying it. Judge the goal and the verification, never the carrying.
+                succeeded = succeeded and counts.get('verify', 0) >= 1
+            else:
+                succeeded = succeeded and counts == expected
         if not succeeded and not expected_failure:
             result['status'] = 'ROBOT_FAILURE'
             raise RuntimeError('typed task failure retained; no replacement task')
