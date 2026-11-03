@@ -22,6 +22,13 @@ installed() {
 case "${1:-help}" in
   install)
     ros_setup
+    install_args=()
+    if [[ -n "${FLEXCELL_MCP_PIP_INDEX:-}" ]]; then
+      install_args+=(--index-url "$FLEXCELL_MCP_PIP_INDEX")
+    fi
+    if [[ "${FLEXCELL_MCP_VERBOSE:-0}" == 1 ]]; then
+      install_args+=(--verbose)
+    fi
     if ! ros2 pkg prefix rosbridge_server >/dev/null 2>&1 || ! ros2 pkg prefix rosapi >/dev/null 2>&1 ||
         { ! command -v uv >/dev/null && ! python3 -c 'import ensurepip' >/dev/null 2>&1; } ||
         ! python3 -c 'import ctypes; ctypes.CDLL("libGL.so.1"); ctypes.CDLL("libglib-2.0.so.0")' >/dev/null 2>&1; then
@@ -41,9 +48,9 @@ case "${1:-help}" in
       fi
     fi
     if command -v uv >/dev/null; then
-      uv pip install --python "$MCP_VENV/bin/python" 'ros-mcp==3.1.2'
+      uv pip install --python "$MCP_VENV/bin/python" "${install_args[@]}" 'ros-mcp==3.1.2'
     else
-      "$MCP_VENV/bin/python" -m pip install 'ros-mcp==3.1.2'
+      "$MCP_VENV/bin/python" -m pip install "${install_args[@]}" 'ros-mcp==3.1.2'
     fi
     echo "Installed upstream ros-mcp 3.1.2 in $MCP_VENV"
     ;;
@@ -52,7 +59,10 @@ case "${1:-help}" in
     ros_setup
     ros2 interface show flexcell_interfaces/action/RunPickPlace >/dev/null ||
       fail 'Source the active FlexCell install, or set FLEXCELL_ROS_SETUP=/path/to/install/setup.bash.'
-    echo "rosbridge: ${FLEXCELL_MCP_ADDRESS:-127.0.0.1}:${FLEXCELL_MCP_PORT:-9090}, ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}" >&2
+    echo "rosbridge: ${FLEXCELL_MCP_ADDRESS:-127.0.0.1}:${FLEXCELL_MCP_PORT:-9090}, ROS_DOMAIN_ID=${ROS_DOMAIN_ID:-0}, RMW_IMPLEMENTATION=${RMW_IMPLEMENTATION:-ROS-default}" >&2
+    if [[ -z "${RMW_IMPLEMENTATION:-}" ]]; then
+      echo 'Match RMW_IMPLEMENTATION to the running stack; run110 uses rmw_cyclonedds_cpp.' >&2
+    fi
     exec ros2 launch rosbridge_server rosbridge_websocket_launch.xml \
       address:="${FLEXCELL_MCP_ADDRESS:-127.0.0.1}" port:="${FLEXCELL_MCP_PORT:-9090}" "$@"
     ;;
@@ -76,6 +86,7 @@ case "${1:-help}" in
     echo 'Usage: scripts/ros_mcp.sh install|bridge|server|check|codex'
     echo 'bridge uses the existing simulation; it does not start or reset it.'
     echo 'Set ROS_DOMAIN_ID to the running simulation domain before bridge.'
+    echo 'Set RMW_IMPLEMENTATION to the same middleware as the running stack.'
     echo 'Set FLEXCELL_ROS_SETUP when its install is outside this checkout.'
     ;;
 esac

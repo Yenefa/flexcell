@@ -21,9 +21,19 @@ def tool_value(reply):
     return value
 
 
+def action_fields(value):
+    """Read the explicit Action result, including clients exposing it as JSON text."""
+    result = value.get('result')
+    if isinstance(result, str):
+        result = json.loads(result)
+    if not isinstance(result, dict):
+        raise RuntimeError('Action result is missing or not an object: ' + str(result))
+    return result
+
+
 def observed_world(value):
     # Upstream success=True means an action result arrived, including FAILED results.
-    result = value.get('result', {})
+    result = action_fields(value)
     if (value.get('success') is not True or value.get('status') != 4
             or type(result.get('outcome')) is not int or result['outcome'] != 0
             or result.get('error_code') != 0):
@@ -85,7 +95,8 @@ def main():
         def explain(error):
             nested = getattr(error, 'exceptions', None)
             return '; '.join(explain(e) for e in nested) if nested else str(error) or type(error).__name__
-        print(json.dumps({'status': 'NOT_READY', 'detail': explain(exc), 'motion_dispatched': False}))
+        print(json.dumps({'status': 'NOT_READY', 'detail': explain(exc), 'motion_dispatched': False,
+                          'hint': 'Check bridge ROS_DOMAIN_ID, RMW_IMPLEMENTATION and the active FlexCell install.'}))
         return 1
     print(json.dumps(report, ensure_ascii=False, allow_nan=False))
     return 0

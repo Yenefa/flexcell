@@ -6,12 +6,14 @@ ASPIRE 或新增模型 API。先启动已有 FlexCell 仿真；以下命令不�
 
 ## 1. WSL 终端：安装并启动桥接
 
-在当前 FlexCell checkout 中执行。`ROS_DOMAIN_ID` 必须与仿真一致，
-例如电脑 Agent 的 `run105` 使用 **46**。当前实际运行的 domain 优先。
+在当前 FlexCell checkout 中执行。桥接进程的 **`ROS_DOMAIN_ID` 和
+`RMW_IMPLEMENTATION` 都与当前仿真栈保持一致**。电脑端 `run105/run110` 已验证的
+组合是 domain **46** + **CycloneDDS**；实际运行配置优先。
 
 ```bash
 ./scripts/ros_mcp.sh install
 export ROS_DOMAIN_ID=46
+export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 # 如果当前 install 不在本 checkout 的 install/，指定实际路径：
 export FLEXCELL_ROS_SETUP=/home/ros/flexcell-merged/install/setup.bash
 ./scripts/ros_mcp.sh bridge
@@ -19,6 +21,23 @@ export FLEXCELL_ROS_SETUP=/home/ros/flexcell-merged/install/setup.bash
 
 已有 ROS/install 环境的用户也可直接 source 后执行 `bridge`。
 桥接只监听 WSL 的 `127.0.0.1:9090`；另选端口时设置 `FLEXCELL_MCP_PORT`。
+启动日志会显示 domain 与 RMW。端口 OPEN 仅表示 WebSocket 已监听；若 Observe 超时，
+先核对桥接与栈的 RMW、domain 和 install。现场曾出现同 domain 下桥接使用默认
+FastDDS、栈使用 CycloneDDS，切到相同 RMW 后恢复 READY。
+这些 ROS 配置属于桥接进程，Agent/MCP 客户端无需加载 ROS 环境。
+
+### PyPI 下载慢时
+
+可显式指定现场已可用的 Aliyun 镜像，同时打开安装器详细输出：
+
+```bash
+FLEXCELL_MCP_PIP_INDEX=https://mirrors.aliyun.com/pypi/simple/ \
+FLEXCELL_MCP_VERBOSE=1 ./scripts/ros_mcp.sh install 2>&1 | tee /tmp/flexcell-mcp-install.log
+```
+
+这两个选项同时支持 uv 与 pip，只影响本次安装，不修改全局源。
+不设置时沿用安装器原有源配置。OpenCV 等包较大，安装应允许数分钟并查看日志；
+脚本没有为整个安装设置短超时，Action 的 150 秒超时不适用于依赖下载。
 
 ## 2. 另一个 WSL 终端：只读检查
 
@@ -28,7 +47,7 @@ export FLEXCELL_ROS_SETUP=/home/ros/flexcell-merged/install/setup.bash
 
 应输出 `status: READY`、物体实测位置和区域信息。它核对三个自定义 Action，
 只执行 Observe，**不会搬动机械臂**。连接失败时先检查 domain、仿真是否运行、
-桥接进程是否 source 了当前 FlexCell install。
+桥接进程的 RMW 是否匹配、是否 source 了当前 FlexCell install。
 
 ## 3. 接入现有 Agent
 
@@ -83,5 +102,43 @@ Agent 调用规则：
 - 取消请求已发出不等于终态已确认。未知终态后停止后续运动、reset 和清理运动。
 - Agent 选择任务与工具，现有技能负责运动规划、执行和实际验证。
   不通过直接发布关节命令、修改碰撞场景或 set_pose 绕过技能。
+
+## 5. 每个 Action 的实际结果字段
+
+`get_action_details` 返回字段定义；实际值来自 `send_action_goal` 的返回。
+Python MCP SDK 优先读取 `reply.structuredContent`，没有时解析 `reply.content` 的
+text JSON，然后读取其中的 **`result`**。若这个 `result` 是 JSON 字符串，先解析一次。
+
+在仓库根目录运行的 Python 客户端可复用现有解码函数：
+
+```python
+from scripts.ros_mcp_check import tool_value, action_fields
+
+payload = tool_value(reply)  # reply = await session.call_tool(...)
+fields = action_fields(payload)
+```
+
+| Action | `fields` 中的实际字段 | 完成判断 |
+| --- | --- | --- |
+| Observe | `outcome`, `error_code`, `world_state` | outcome/error_code 为 0，读取可用物体的实测位姿 |
+| RunPickPlace | `outcome`, `error_code`, `object_at_place`, `final_position_error_m`, `detail` | outcome/error_code 为 0 且 object_at_place 为 true |
+| VerifyObject | `outcome`, `error_code`, `verified`, `has_measured_pose`, `position_error_m`, `measured_pose` | outcome/error_code 为 0、verified 与 has_measured_pose 为 true，误差为有限值且在容差内 |
+
+例如 VerifyObject 的布尔值在标准结构中是
+`reply.structuredContent["result"]["verified"]`，不是
+`reply.structuredContent["verified"]`；JSON 字符串结果按上面先解码。
+字段缺失或实际为 null 时保留原始返回并报告“验证结果无法读取”，不能默认当作
+false 或 true，也不能为重新取得报告而重复已完成的搬运动作。
+
+## 6. 已验证范围
+
+电脑端在相同目标 A→zone_1 下，CLI 与 MCP 的最终独立验证均通过，B 均保持原位。
+报告中的 CLI 15.53 s / 2.423 mm、MCP 14.94 s / 2.229 mm 是单次读数，
+不足以推断速度或精度的统计差异。首次 MCP 试跑因验证解析失败，虽然物体已搬到目标，
+仍应作为额外试跑计入并保留记录，不能被后续报告完整的一次覆盖。
+
+目前已验证的是等价 stdio 客户端的 MCP 链路。WorkBuddy 配置已由电脑端写好，
+连接器面板的 Trust 和第一次 UI 调用仍由本机用户确认，不能据 stdio 成功宣称 UI 已通过。
+日常任务优先使用 MCP；排障仍可使用 CLI、`skills/*.jsonl` 与 ROS 日志。
 
 本入口不修复 #104 的第三次放置几何错误。任务能否完成仍以本次实际结果为准。
