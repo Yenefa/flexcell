@@ -6,6 +6,9 @@ and [portable CPU reproduction](REPRODUCE.md#portable-cpu-simulation-plane-2026-
 **Official project name: Agentic Flexible Robotic Workcell**  
 Repository handle: `flexcell`
 
+Use an existing Codex/Claude/WorkBuddy agent with the robot through the upstream
+[ROS-MCP quick start](docs/ROS_MCP.md): install, bridge, check, then give the agent a task.
+
 A ROS 2 Jazzy workcell around a ROBOTIS **OpenMANIPULATOR-X**, simulated in
 Gazebo Harmonic and planned/executed through MoveIt 2 - built so that an **agent** can drive it.
 
