@@ -81,7 +81,8 @@ def summarize_routing(rows):
         if trace.get('fallback'):
             fallbacks += 1
         proposals = trace.get('proposals') or []
-        leaf_traces = [proposal.get('policy_trace') or {} for proposal in proposals] or [trace]
+        leaf_traces = ([proposal.get('policy_trace') or {} for proposal in proposals]
+                       or [trace or {'source': row.get('policy')}])
         for leaf in leaf_traces:
             source = str(leaf.get('source') or '')
             leaves[source] = leaves.get(source, 0) + 1

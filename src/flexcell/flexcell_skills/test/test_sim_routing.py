@@ -28,6 +28,8 @@ def test_fsm_and_resume_rows_are_not_model_calls():
     assert summary['fast_calls'] == 0
     assert summary['slow_calls'] == 0
     assert summary['models'] == []
+    # A trace-less FSM row is still a leaf, labelled by its policy, not by ''.
+    assert summary['leaves'] == {'fsm': 3, 'completion_check': 1}
 
 
 def test_a_fast_call_that_escalated_reports_both_arms():
