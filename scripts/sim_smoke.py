@@ -94,7 +94,7 @@ def summarize_routing(rows):
                 slow += 1
             # The slow arm reports response_model, the fast arm reports model; neither is
             # guaranteed. A missing identity must not erase a call that did happen.
-            identity = leaf.get('response_model') or leaf.get('model')
+            identity = leaf.get('response_model') if source == 'llm' else leaf.get('model')
             if identity:
                 models.add(str(identity))
             else:

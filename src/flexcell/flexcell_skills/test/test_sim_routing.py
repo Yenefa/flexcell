@@ -68,6 +68,28 @@ def test_a_slow_call_without_an_identity_is_still_a_call():
     assert summary['calls_without_identity'] == 1
 
 
+@pytest.mark.parametrize('response_model', [None, 'actual-response-model'])
+def test_requested_slow_model_is_not_evidence_of_response_identity(response_model):
+    # LLMPolicy always records the requested model as well as the optional
+    # response identity. Only the latter establishes which model answered.
+    rows = [row('PICK', 'llm', leaf(source='llm', fallback=False,
+                model='configured-request-alias', response_model=response_model))]
+    summary = summarize_routing(rows)
+    assert summary['slow_calls'] == 1
+    assert summary['models'] == ([response_model] if response_model else [])
+    assert summary['calls_without_identity'] == (0 if response_model else 1)
+
+
+def test_a_bypassed_fast_arm_does_not_hide_the_real_slow_response():
+    rows = [row('PICK', 'hybrid', dict(source='llm', fallback=False, proposals=[
+        dict(policy='jev', skipped=True),
+        dict(policy='llm', policy_trace=leaf(source='llm', fallback=False,
+             model='requested-alias', response_model='deepseek-flash'))]))]
+    summary = summarize_routing(rows)
+    assert (summary['fast_calls'], summary['slow_calls'], summary['model_calls']) == (0, 1, 1)
+    assert summary['models'] == ['deepseek-flash']
+
+
 def test_a_fast_identity_comes_from_the_fast_schema():
     rows = [row('VERIFY', 'jev', leaf(source='jev', fallback=False, backend='clef',
                                       model='clef-flash-q8_0', model_sha256='a' * 64))]
