@@ -42,6 +42,10 @@ class ResumePolicy(DecisionPolicy):
             # This is a view for the delegate, not a rewrite of recorded history.
             last_probe = max(i for i, h in enumerate(scoped) if h is probes[-1])
             scoped = tuple(h for i, h in enumerate(scoped) if h.target != target or i > last_probe)
+            if not any(h.target == target for h in scoped):
+                return Decision(ACTION_OBSERVE, target, reason_code=RC_PLAN_NEXT,
+                                explanation='completion check failed; refresh before continuing',
+                                policy_trace={'source': 'completion_check', 'fallback': False})
         if (not probes and leg and leg[-1].action == ACTION_OBSERVE and leg[-1].outcome == 0
                 and not any(h.action == ACTION_PICK for h in leg)
                 and ACTION_VERIFY in constraints.allowed_actions

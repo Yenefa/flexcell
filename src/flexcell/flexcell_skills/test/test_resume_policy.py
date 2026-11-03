@@ -74,3 +74,15 @@ def test_any_delegate_receives_the_same_world_and_only_independently_verified_le
     args = delegate.decide.call_args.args
     assert args[0] is world and args[1].assignments == (('b', 'other'),)
     assert args[2] is limits and args[3] == ()
+
+
+def test_failed_check_requires_new_observation_before_any_model_delegate():
+    world, goal, limits, history = inputs()
+    delegate = Mock(version='2')
+    delegate.name = 'llm'
+    wrapper = ResumePolicy(delegate)
+    history += (record('VERIFY', outcome=1, error=25),)
+    assert wrapper.decide(world, goal, limits, history).action == 'OBSERVE'
+    delegate.decide.assert_not_called()
+    wrapper.decide(world, goal, limits, history + (record('OBSERVE'),))
+    assert delegate.decide.call_args.args[3] == (record('OBSERVE'),)
