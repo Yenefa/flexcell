@@ -309,10 +309,16 @@ def main():
             result['actual_routing'] = dict(
                 decisions=len(rows), sources=sources, fallbacks=fallbacks,
                 models=sorted(models), backends=sorted(backends))
-            # A model call is a decision whose trace names the model that answered;
-            # policy names such as completion_check are not model traffic.
-            result['model_calls'] = sum(1 for row in rows
-                                        if (row.get('policy_trace') or {}).get('response_model'))
+            # A model call is a decision the fast or slow arm actually answered. Policy
+            # names such as completion_check are not model traffic, and the two arms are
+            # counted apart because only the slow one consumes the paid budget.
+            fast_calls = sum(1 for row in rows
+                             if (row.get('policy_trace') or {}).get('source') == 'jev')
+            slow_calls = sum(1 for row in rows
+                             if (row.get('policy_trace') or {}).get('response_model'))
+            result['model_calls'] = fast_calls + slow_calls
+            result['fast_calls'] = fast_calls
+            result['slow_calls'] = slow_calls
         skill_records = []
         for name in ('pick', 'place'):
             path = out / ('skills/%s.jsonl' % name)
