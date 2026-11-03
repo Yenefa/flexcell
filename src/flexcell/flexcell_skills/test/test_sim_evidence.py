@@ -54,7 +54,9 @@ def test_export_refuses_bad_data_without_selecting_good_subset(tmp_path, monkeyp
 @pytest.mark.parametrize('guard', ['world', 'config', 'fingerprint', 'rendering', 'egl_vendor'])
 def test_declared_identity_mismatch_dispatches_no_stack_or_task(tmp_path, monkeypatch, guard):
     module = script('sim_smoke', monkeypatch)
-    def profile(out, *args):
+    def profile(out, *args, **kwargs):
+        # The runner may gain declared options (policy, clearance, ...); this stub
+        # stands in for the whole materialisation step and must stay signature-agnostic.
         params, world = out / 'params.yaml', out / 'world.sdf'
         params.write_text('node:\n  ros__parameters:\n    log_dir: /tmp/record\n')
         world.write_text('<sdf><world name="empty"/></sdf>')
