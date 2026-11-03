@@ -6,7 +6,30 @@ from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
-from flexcell_skills.joint_follow import JointFollowMonitor, SnapshotWatch, check_backend_parameter
+from flexcell_skills.joint_follow import (
+    JointFollowMonitor, SnapshotWatch, check_backend_parameter, follow_failure_detail)
+
+
+def test_settled_cancellation_is_known_without_claiming_trajectory_preemption():
+    # Recorded boundary case: all terminal/rest checks passed, but the final
+    # joint deviation was 0.019916 rad, below the unchanged 0.02 rad cut-short
+    # criterion. MoveToPose returned CANCELED with stop_mode=already_completed.
+    result = SimpleNamespace(outcome=2, error_code=32, execution_started=True,
+                             preempted=False, stop_confirmed=False)
+    detail = follow_failure_detail('relative pose exceeded follow limits', result,
+                                   motion_may_be_active=True)
+    assert 'motion terminal confirmed' in detail
+    assert 'MotionTerminalUnknown' not in detail
+    assert 'carry held for reconciliation' in detail
+    assert not result.preempted and not result.stop_confirmed
+
+
+@pytest.mark.parametrize('outcome,error', [(3, 33), (3, 32), (2, 33), (2, 2), (1, 30)])
+def test_unknown_or_unproven_terminals_remain_unknown(outcome, error):
+    result = SimpleNamespace(outcome=outcome, error_code=error, execution_started=True,
+                             preempted=False, stop_confirmed=False)
+    assert 'MotionTerminalUnknown' in follow_failure_detail(
+        'relative pose exceeded follow limits', result, motion_may_be_active=True)
 
 
 class Clock:

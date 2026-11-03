@@ -93,6 +93,12 @@ def follow_failure_detail(reason, result=None, *, motion_may_be_active=False):
     elif (getattr(result, 'outcome', 3) == 0 or not getattr(result, 'execution_started', True)
           or getattr(result, 'stop_confirmed', False)):
         state = 'motion terminal confirmed'
+    elif getattr(result, 'outcome', 3) == 2 and getattr(result, 'error_code', 33) == 32:
+        # MoveToPose returns CANCELED/ERR_CANCELED for a settled cancellation,
+        # including already_completed. Its strict stop_confirmed flag also
+        # requires a measurably cut-short trajectory; that is a separate fact.
+        # Unsettled or unreadable execution is returned as STATE_UNKNOWN above.
+        state = 'motion terminal confirmed'
     else:
         state = 'MotionTerminalUnknown: movement stop was not confirmed'
     return 'physical follow unconfirmed: %s; %s; carry held for reconciliation' % (reason, state)
