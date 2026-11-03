@@ -61,6 +61,62 @@ def remember_owned(out, proc):
         stream.write(json.dumps(dict(pid=proc.pid, start_ticks=stat[19])) + '\n')
 
 
+MODEL_SOURCES = ('llm', 'jev')
+
+
+def summarize_routing(rows):
+    """Summarise what the decision log actually shows. Pure: no ROS, no I/O.
+
+    A hybrid row keeps the router metadata at the top and the real arm responses under
+    ``proposals``; every other policy row is a single leaf. Calls are counted per leaf,
+    so a fast call that escalated to the slow arm reports fast 1 + slow 1 instead of
+    nothing, and identity is reported separately from the call itself.
+    """
+    sources, leaves, models, backends = {}, {}, set(), set()
+    fast = slow = unknown = fallbacks = 0
+    for row in rows:
+        trace = row.get('policy_trace') or {}
+        outer = trace.get('source') or ('fallback' if trace.get('fallback') else row.get('policy'))
+        sources[str(outer)] = sources.get(str(outer), 0) + 1
+        if trace.get('fallback'):
+            fallbacks += 1
+        proposals = trace.get('proposals') or []
+        leaf_traces = ([proposal.get('policy_trace') or {} for proposal in proposals]
+                       or [trace or {'source': row.get('policy')}])
+        for leaf in leaf_traces:
+            source = str(leaf.get('source') or '')
+            leaves[source] = leaves.get(source, 0) + 1
+            if source not in MODEL_SOURCES:
+                continue
+            if source == 'jev':
+                fast += 1
+            else:
+                slow += 1
+            # The slow arm reports response_model, the fast arm reports model; neither is
+            # guaranteed. A missing identity must not erase a call that did happen.
+            identity = leaf.get('response_model') if source == 'llm' else leaf.get('model')
+            if identity:
+                models.add(str(identity))
+            else:
+                unknown += 1
+            if leaf.get('backend'):
+                backends.add(str(leaf['backend']))
+    return dict(decisions=len(rows), sources=sources, leaves=leaves, fallbacks=fallbacks,
+                models=sorted(models), backends=sorted(backends),
+                fast_calls=fast, slow_calls=slow, model_calls=fast + slow,
+                calls_without_identity=unknown)
+
+
+def completion_expectation(decision_policy, resume_completed):
+    """Skill calls an already_placed task must show, or None when a model may legally
+    verify an object that is already at its goal instead of carrying it."""
+    if resume_completed:
+        return {'pick': 0, 'place': 0, 'verify': 1}
+    if decision_policy == 'fsm':
+        return {'pick': 1, 'place': 1, 'verify': 1}
+    return None
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--out', type=Path, required=True)
@@ -80,6 +136,9 @@ def main():
     parser.add_argument('--qualification-no-recovery', action='store_true')
     parser.add_argument('--planner-diagnostics', action='store_true')
     parser.add_argument('--resume-completed', action='store_true')
+    parser.add_argument('--decision-policy', choices=['fsm', 'jev', 'llm', 'hybrid'], default='fsm')
+    parser.add_argument('--hybrid-threshold', type=float,
+                        help='declared router threshold; required for, and only for, the hybrid policy')
     parser.add_argument('--case', choices=['normal', 'dual_object', 'recovery_once', 'budget_exhaustion',
                                            'unreachable_place', 'false_attach', 'already_placed'], default='normal')
     parser.add_argument('--false-attach', default='',
@@ -92,6 +151,8 @@ def main():
     if args.release_clearance_m is not None: options['release_clearance_m'] = args.release_clearance_m
     if args.qualification_no_recovery: options['qualification_no_recovery'] = True
     if args.resume_completed: options['resume_completed_objects'] = True
+    options['decision_policy'] = args.decision_policy
+    if args.hybrid_threshold is not None: options['hybrid_threshold'] = args.hybrid_threshold
     params, world = profile(out, args.backend, args.camera, args.skill_backend,
                             args.joint_hold_sim_s, args.physics_step_s, **options)
     if args.physics_step_s is not None:
@@ -114,6 +175,16 @@ def main():
     result = dict(schema_version=1, status='HARNESS_ERROR', backend=args.backend,
                   skill_backend=args.skill_backend, physical_tasks_dispatched=0,
                   qualification='FUNCTIONAL_SMOKE_ONLY', case=args.case, object=args.object, out=str(out))
+    # Declared routing, plus the non-secret model configuration the child processes
+    # inherit. The actual routing is summarised from the decision log after the task,
+    # so a silent fallback to the FSM cannot be reported as a model sample.
+    result['decision_policy'] = args.decision_policy
+    result['hybrid_threshold'] = args.hybrid_threshold
+    result['resume_completed'] = bool(args.resume_completed)
+    result['model_env'] = {name: os.environ.get(name) for name in
+                           ('FLEXCELL_LLM_ENDPOINT', 'FLEXCELL_LLM_MODEL',
+                            'FLEXCELL_LLM_BACKEND', 'FLEXCELL_JEV_ENDPOINT',
+                            'FLEXCELL_JEV_MODEL', 'FLEXCELL_JEV_BACKEND')}
     stack = None
     recorder = None
     log = (out / 'stack.log').open('x')
@@ -275,6 +346,15 @@ def main():
             raise RuntimeError('task has no terminal result; subsequent reset is forbidden')
         task = json.loads(task_output.split('RESULT ', 1)[1])
         result['task'] = task
+        # Actual routing for this run, read back from the decision log: the declared
+        # policy alone cannot show whether a model answered or the FSM fell back.
+        decisions = out / 'skills' / 'decisions.jsonl'
+        if decisions.exists():
+            rows = [json.loads(line) for line in decisions.read_text().splitlines() if line.strip()]
+            result['actual_routing'] = summarize_routing(rows)
+            result['model_calls'] = result['actual_routing']['model_calls']
+            result['fast_calls'] = result['actual_routing']['fast_calls']
+            result['slow_calls'] = result['actual_routing']['slow_calls']
         skill_records = []
         for name in ('pick', 'place'):
             path = out / ('skills/%s.jsonl' % name)
@@ -311,9 +391,16 @@ def main():
             for skill in ('pick', 'place', 'verify'):
                 path = out / ('skills/%s.jsonl' % skill)
                 counts[skill] = len(path.read_text().splitlines()) if path.exists() else 0
-            result['completion_check'] = dict(resume_enabled=args.resume_completed, skill_calls=counts)
-            expected = {'pick': 0, 'place': 0, 'verify': 1} if args.resume_completed else {'pick': 1, 'place': 1, 'verify': 1}
-            succeeded = succeeded and counts == expected
+            expected = completion_expectation(args.decision_policy, args.resume_completed)
+            result['completion_check'] = dict(resume_enabled=args.resume_completed,
+                                              declared_policy=args.decision_policy,
+                                              expected=expected, skill_calls=counts)
+            if expected is None:
+                # A model may legally verify an object that is already at its goal instead
+                # of carrying it. Judge the goal and the verification, never the carrying.
+                succeeded = succeeded and counts.get('verify', 0) >= 1
+            else:
+                succeeded = succeeded and counts == expected
         if not succeeded and not expected_failure:
             result['status'] = 'ROBOT_FAILURE'
             raise RuntimeError('typed task failure retained; no replacement task')
