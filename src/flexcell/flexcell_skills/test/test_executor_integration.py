@@ -573,7 +573,7 @@ class TestJointFollowStop(unittest.TestCase):
         def close(self): return True
         def confirm_now(self): return not self.fault
 
-    def pick_node(self, watch, stop_confirmed):
+    def pick_node(self, watch, stop_confirmed, *, already_completed=False):
         node = PickServer.__new__(PickServer)
         node._backend_consistent = lambda: (True, '')
         for name, value in dict(_seq=0, _admission=threading.Lock(),
@@ -599,17 +599,22 @@ class TestJointFollowStop(unittest.TestCase):
             if rid.endswith('-lift'):
                 watch.fault = 'measured relative pose exceeded follow limits'
                 assert cancel_check()
-                return (SimpleNamespace(outcome=2, error_code=32, execution_started=True,
-                                        stop_confirmed=stop_confirmed), 32, 'stopped')
+                known = stop_confirmed or already_completed
+                # Match MoveToPose's actual result contract: an unsettled stop
+                # is STATE_UNKNOWN; a settled endpoint race is CANCELED with
+                # stop_confirmed=False because it was not measurably cut short.
+                outcome, error = (2, 32) if known else (3, 33)
+                return (SimpleNamespace(outcome=outcome, error_code=error, execution_started=True,
+                                        stop_confirmed=stop_confirmed), error, 'stopped')
             return SimpleNamespace(outcome=0, error_code=0), 0, 'ok'
         node._motion = motion
         return node
 
     def test_pick_follow_fault_stops_and_never_releases_before_reconciliation(self):
-        for stop_confirmed in (True, False):
-            with self.subTest(stop_confirmed=stop_confirmed):
+        for stop_confirmed, already_completed in ((True, False), (False, True), (False, False)):
+            with self.subTest(stop_confirmed=stop_confirmed, already_completed=already_completed):
                 watch = self.Watch()
-                node = self.pick_node(watch, stop_confirmed)
+                node = self.pick_node(watch, stop_confirmed, already_completed=already_completed)
                 goal = PickObject.Goal(); goal.object_name = 'target_box_a'; goal.motion_profile_id = 'demo_slow'
                 handle = _GoalHandle(goal)
                 sample = (((.22, 0., .0175), (0., 0., 0., 1.)), None)
@@ -620,7 +625,8 @@ class TestJointFollowStop(unittest.TestCase):
                 self.assertEqual(result.error_code, PickObject.Result.ERR_INTERNAL)
                 self.assertFalse(result.grasp_attached)
                 self.assertEqual(handle.terminal, 'abort')
-                self.assertEqual('MotionTerminalUnknown' in result.detail, not stop_confirmed)
+                self.assertEqual('MotionTerminalUnknown' in result.detail,
+                                 not (stop_confirmed or already_completed))
                 node._release_everything.assert_not_called()
                 self.assertEqual(node._gripper.command.call_count, 2)  # pre-open, then close; no cleanup open
 
