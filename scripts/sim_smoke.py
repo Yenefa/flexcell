@@ -309,8 +309,10 @@ def main():
             result['actual_routing'] = dict(
                 decisions=len(rows), sources=sources, fallbacks=fallbacks,
                 models=sorted(models), backends=sorted(backends))
-            result['model_calls'] = sum(count for name, count in sources.items()
-                                        if name not in ('fsm', 'fallback'))
+            # A model call is a decision whose trace names the model that answered;
+            # policy names such as completion_check are not model traffic.
+            result['model_calls'] = sum(1 for row in rows
+                                        if (row.get('policy_trace') or {}).get('response_model'))
         skill_records = []
         for name in ('pick', 'place'):
             path = out / ('skills/%s.jsonl' % name)
