@@ -36,6 +36,7 @@ from flexcell_skills.contracts.episode import EpisodeStore, replay_episode
 from flexcell_skills.contracts.injection import InjectionLifecycle
 from flexcell_skills.common import JsonlLog, MoveToPoseClient, PlanningSceneOps
 from flexcell_skills.decision_policy import FSMPolicy
+from flexcell_skills.resume_policy import ResumePolicy
 from flexcell_skills.jev_policy import JevBackend, JevPolicy, JevResponse
 from flexcell_skills.task_fsm_server import TaskFsmServer
 from flexcell_skills import pick_server as pick_server_module
@@ -187,6 +188,47 @@ def _make_fsm(tmpdir, demo_call):
     node._cli_place = node._cli_verify = None
     node._demo_call = demo_call
     return node
+
+
+def test_resume_partial_demo_skips_verified_a_and_executes_b_with_replay(tmp_path):
+    world = _world_state()
+    world.objects[0].pose = _pose(.12, -.15)
+    calls = []
+    script = {
+        'OBSERVE': [(_skill_result(world_state=world), None)],
+        'PICK': [(_skill_result(), None)],
+        'PLACE': [(SimpleNamespace(outcome=0, error_code=0, detail='placed', evidence_id='p',
+                    released=True, object_pose_after=_pose(.25, .05)), None)],
+        'VERIFY': [(SimpleNamespace(outcome=0, error_code=0, detail='measured', evidence_id='v',
+                    has_measured_pose=True, position_error_m=.002), None)],
+    }
+    node = _make_fsm(str(tmp_path), _make_demo_call(script, calls))
+    node._policy = ResumePolicy(FSMPolicy())
+    goal = _GoalHandle(RunDemo.Goal(scenario_id='resume_partial'))
+    result = node._execute_demo(goal)
+    assert result.outcome == 0 and result.object_a_at_zone and result.object_b_at_zone
+    assert calls == ['OBSERVE_A', 'VERIFY_A(attempt=1)', 'OBSERVE_B',
+                     'PICK_B(attempt=1)', 'PLACE_B', 'VERIFY_B(attempt=1)']
+    episode = json.loads(next(tmp_path.glob('resume_partial_*.json')).read_text())
+    # The fake skill fixture above mutates its shared message in later steps;
+    # replay uses the actual canonical snapshots recorded at each decision.
+    assert all(row['ok'] for row in replay_episode(episode, ResumePolicy(FSMPolicy())))
+    assert episode['steps'][2]['policy_input']['goal']['assignments'] == [
+        ['target_box_a', 'zone_1'], ['target_box_b', 'zone_2']]
+
+
+def test_resume_does_not_accept_a_default_verifier_result(tmp_path):
+    world = _world_state()
+    world.objects[0].pose = _pose(.12, -.15)
+    calls = []
+    from flexcell_interfaces.action import VerifyObject
+    script = {'OBSERVE': [(_skill_result(world_state=world), None)],
+              'VERIFY': [(VerifyObject.Result(), None)]}
+    node = _make_fsm(str(tmp_path), _make_demo_call(script, calls))
+    node._policy = ResumePolicy(FSMPolicy())
+    result = node._execute_demo(_GoalHandle(RunDemo.Goal(scenario_id='resume_ghost')))
+    assert result.outcome == 1 and result.error_code == RunDemo.Result.ERR_SKILL_CONTRACT_VIOLATION
+    assert calls == ['OBSERVE_A', 'VERIFY_A(attempt=1)']
 
 
 class TestDemoAbortPath(unittest.TestCase):

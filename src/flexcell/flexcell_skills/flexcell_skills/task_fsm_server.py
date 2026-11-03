@@ -141,6 +141,7 @@ class TaskFsmServer(Node):
         self.declare_parameter('episode_dir', '~/.ros/flexcell/episodes')
         self.declare_parameter('task_state_topic', '/flexcell/task_state')
         self.declare_parameter('decision_policy', 'fsm')
+        self.declare_parameter('resume_completed_objects', False)
         self.declare_parameter('jev_backend', 'local')
         self.declare_parameter('hybrid_threshold', 0.7)
         self.declare_parameter('decision_log_file', 'decisions.jsonl')
@@ -194,6 +195,9 @@ class TaskFsmServer(Node):
         else:
             raise ValueError(
                 'unknown decision_policy %r (fsm|jev|llm|hybrid)' % policy_name)
+        if gp2('resume_completed_objects').value:
+            from flexcell_skills.resume_policy import ResumePolicy
+            self._policy = ResumePolicy(self._policy)
         self._decision_log = JsonlLog(self, gp2('log_dir').value,
                                       gp2('decision_log_file').value)
 

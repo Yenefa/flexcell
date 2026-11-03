@@ -21,11 +21,15 @@ on:
         description: Run only the existing five-task legacy carry comparison
         type: boolean
         default: false
+      resume_smoke:
+        description: Compare the same already-placed task with completion shortcuts off/on
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
   sim-smoke:
-    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.legacy_parity) }}
+    if: ${{ !(github.event_name == 'workflow_dispatch' && (inputs.legacy_parity || inputs.resume_smoke)) }}
     concurrency:
       group: core-sim-${{ github.ref }}
       cancel-in-progress: false
@@ -102,7 +106,7 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
   joint-follow-smoke:
-    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.legacy_parity) }}
+    if: ${{ !(github.event_name == 'workflow_dispatch' && (inputs.legacy_parity || inputs.resume_smoke)) }}
     concurrency:
       group: joint-follow-${{ github.ref }}
       cancel-in-progress: false
@@ -134,7 +138,7 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
   false-attach-smoke:
-    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.legacy_parity) }}
+    if: ${{ !(github.event_name == 'workflow_dispatch' && (inputs.legacy_parity || inputs.resume_smoke)) }}
     concurrency:
       group: false-attach-${{ github.ref }}
       cancel-in-progress: false
@@ -163,7 +167,7 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
   native-five-cycle-smoke:
-    if: ${{ !(github.event_name == 'workflow_dispatch' && inputs.legacy_parity) }}
+    if: ${{ !(github.event_name == 'workflow_dispatch' && (inputs.legacy_parity || inputs.resume_smoke)) }}
     concurrency:
       group: native-five-${{ github.ref }}
       cancel-in-progress: false
@@ -253,6 +257,46 @@ jobs:
         with:
           name: legacy-parity-${{ github.run_id }}-${{ github.run_attempt }}
           path: artifacts/legacy-carry-parity.json
+          retention-days: 14
+          if-no-files-found: warn
+  resume-smoke:
+    if: github.event_name == 'workflow_dispatch' && inputs.resume_smoke
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [reference, resume]
+    concurrency:
+      group: resume-${{ matrix.mode }}-${{ github.ref }}
+      cancel-in-progress: false
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/Dockerfile.sim
+          load: true
+          tags: flexcell-sim:ci
+          build-args: SOURCE_REV=${{ github.sha }}
+          cache-from: type=gha,scope=flexcell-sim
+      - name: One already-placed task with the same physical initial state and verifier
+        env:
+          COMPLETION_MODE: ${{ matrix.mode }}
+        run: |
+          mkdir -p artifacts
+          resume_args=()
+          if [ "$COMPLETION_MODE" = resume ]; then resume_args+=(--resume-completed); fi
+          docker run --init --rm -v "$PWD/artifacts:/artifacts" flexcell-sim:ci \
+            python3 /opt/flexcell/repo/scripts/sim_smoke.py \
+            --out "/artifacts/$COMPLETION_MODE" --case already_placed \
+            --backend detachable_joint --skill-backend legacy "${resume_args[@]}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: resume-${{ matrix.mode }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/
           retention-days: 14
           if-no-files-found: warn
   camera-data:
