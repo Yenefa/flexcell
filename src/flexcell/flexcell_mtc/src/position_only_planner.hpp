@@ -107,12 +107,16 @@ class LevelPitchPlanner : public moveit::task_constructor::solvers::PipelinePlan
       candidate.update();
       if (!candidate.setFromIK(group, link_target, link.getName(), timeout)) continue;
       ++last_sampled_;
-      const double pitch = candidate.getVariablePosition(i2) + candidate.getVariablePosition(i3) +
-                           candidate.getVariablePosition(i4);
+      // Index by joint NAME: getVariablePosition(size_t) and
+      // getVariablePositions() use whole-model indices, not group indices.
+      const double pitch = candidate.getVariablePosition("joint2") +
+                           candidate.getVariablePosition("joint3") +
+                           candidate.getVariablePosition("joint4");
       if (std::abs(pitch) >= best_abs) continue;
       if (scene->isStateColliding(candidate, group->getName())) continue;
       best_abs = std::abs(pitch);
-      best.assign(candidate.getVariablePositions(), candidate.getVariablePositions() + candidate.getVariableCount());
+      best.clear();
+      for (const auto& name : names) best.push_back(candidate.getVariablePosition(name));
     }
 
     if (best.empty())  // no collision-free candidate: fall back, never guess
