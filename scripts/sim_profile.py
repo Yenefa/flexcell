@@ -13,12 +13,21 @@ BACKENDS = ('teleport', 'velocity_servo', 'detachable_joint')
 DECISION_POLICIES = ('fsm', 'jev', 'llm', 'hybrid')
 
 
+# Opt-in scenes keep the shipped two-box world and every historical profile
+# byte-compatible. A scene adds same-spec models and declares the object set;
+# it does not generalize shape, size or perception.
+SCENES = ('three_boxes',)
+THREE_OBJECTS = ('target_box_a', 'target_box_b', 'target_box_c')
+
+
 def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
             joint_hold_sim_s=0., physics_step_s=None, *, contact_trace=False, release_clearance_m=None,
             qualification_no_recovery=False, synchronous_step_logs=False, resume_completed_objects=False,
-            decision_policy='fsm', hybrid_threshold=None):
+            decision_policy='fsm', hybrid_threshold=None, scene=None):
     if backend not in BACKENDS or skill_backend not in ('legacy', 'mtc'):
         raise ValueError('unsupported backend')
+    if scene is not None and scene not in SCENES:
+        raise ValueError('unknown scene %r %r' % (scene, SCENES))
     if decision_policy not in DECISION_POLICIES:
         raise ValueError('unknown decision policy %r %r' % (decision_policy, DECISION_POLICIES))
     if decision_policy == 'hybrid':
@@ -37,9 +46,17 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
     out = Path(out)
     config = yaml.safe_load((ROOT / 'src/flexcell/flexcell_skills/config/week1.yaml').read_text())
     config.update(yaml.safe_load((ROOT / 'src/flexcell/flexcell_skills/config/move_to_pose.yaml').read_text()))
-    for node in config.values():
+    if scene == 'three_boxes':
+        config['observe_server']['ros__parameters']['tracked_objects'] = list(THREE_OBJECTS)
+        config['observe_server']['ros__parameters']['object_target_box_c_size'] = [.035, .035, .035]
+    # One declaration of the object set, propagated to every node that validates
+    # names: a new same-spec box is then a configuration change only.
+    tracked = list(config['observe_server']['ros__parameters']['tracked_objects'])
+    for name, node in config.items():
         if 'ros__parameters' in node:
             node['ros__parameters']['log_dir'] = str(out / 'skills')
+            if scene == 'three_boxes' and name != 'observe_server':
+                node['ros__parameters']['tracked_objects'] = list(tracked)  # fresh copy: PyYAML must not emit aliases
     for name in ('pick_server', 'place_server', 'carry_server'):
         config[name]['ros__parameters']['carry_backend'] = backend
     if release_clearance_m is not None:
@@ -63,19 +80,38 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
     base = 'flexcell_velocity_servo.sdf' if backend == 'velocity_servo' else 'flexcell_world.sdf'
     tree = ET.parse(ROOT / 'worlds' / base)
     world = tree.getroot().find('world')
+    if scene == 'three_boxes':
+        model = ET.parse(ROOT / 'worlds' / 'target_box_c.sdf').getroot().find('model')
+        if model is None or model.get('name') != 'target_box_c':
+            raise ValueError('the three-box scene asset is missing target_box_c')
+        world.append(model)
+        if backend == 'velocity_servo':
+            carry = world.find("plugin[@name='flexcell::CarryDynamics']")
+            for item in list(carry.findall('allowed_model')):
+                carry.remove(item)
+            for name in tracked:
+                ET.SubElement(carry, 'allowed_model').text = name
     if physics_step_s is not None:
         if backend != 'detachable_joint' or physics_step_s != .002:
             raise ValueError('only the declared 2 ms joint qualification step is supported')
         world.find('physics/max_step_size').text = '0.002'
-    ET.SubElement(world, 'plugin', name='flexcell::PhysicsTrace', filename='libflexcell_physics_trace.so')
+    trace = ET.SubElement(world, 'plugin', name='flexcell::PhysicsTrace',
+                          filename='libflexcell_physics_trace.so')
+    if scene == 'three_boxes':
+        for name in tracked:
+            ET.SubElement(trace, 'object').text = name
     if backend == 'detachable_joint':
-        ET.SubElement(world, 'plugin', name='flexcell::DetachableCarryGuard',
-                      filename='libflexcell_detachable_carry.so')
+        guard = ET.SubElement(world, 'plugin', name='flexcell::DetachableCarryGuard',
+                              filename='libflexcell_detachable_carry.so')
+        if scene == 'three_boxes':
+            for name in tracked:
+                ET.SubElement(guard, 'allowed_model').text = name
     if contact_trace:
         physics = world.find("plugin[@name='gz::sim::systems::Physics']")
         ET.SubElement(physics, 'contacts_entity_names').text = 'true'
         observer = ET.SubElement(world, 'plugin', name='flexcell::ContactTrace', filename='libflexcell_contact_trace.so')
-        for name, collision in [('target_box_a', 'col'), ('target_box_b', 'col'), ('ground_plane', 'collision')]:
+        watches = [(name, 'col') for name in tracked] + [('ground_plane', 'collision')]
+        for name, collision in watches:
             watch = ET.SubElement(observer, 'watch')
             for key, value in [('model', name), ('link', 'link'), ('collision', collision)]:
                 ET.SubElement(watch, key).text = value

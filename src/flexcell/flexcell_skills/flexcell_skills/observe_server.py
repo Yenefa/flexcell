@@ -54,6 +54,8 @@ class ObserveServer(Node):
         super().__init__('observe_server')
 
         self.declare_parameter('tracked_objects', ['target_box_a', 'target_box_b'])
+        from flexcell_skills import known_objects
+        known_objects.configure(self.get_parameter('tracked_objects').value)
         self.declare_parameter('move_epsilon_m', 0.002)
         self.declare_parameter('base_frame', 'world')
         self.declare_parameter('end_effector_link', 'end_effector_link')

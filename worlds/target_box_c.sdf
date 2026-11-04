@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='utf-8'?>
+<sdf version='1.9'>
+  <!-- Same-spec 35 mm box used only by the opt-in three-object scene. -->
+  <model name='target_box_c'>
+    <pose>0.150000 -0.050000 0.0175 0 0 0</pose>
+    <link name='link'>
+      <inertial>
+        <mass>0.05</mass>
+        <inertia><ixx>1.0e-05</ixx><iyy>1.0e-05</iyy><izz>1.0e-05</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+      <collision name='col'>
+        <geometry><box><size>0.035 0.035 0.035</size></box></geometry>
+        <surface><friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction></surface>
+      </collision>
+      <visual name='vis'>
+        <geometry><box><size>0.035 0.035 0.035</size></box></geometry>
+        <material><ambient>0.200000 0.700000 0.300000 1</ambient><diffuse>0.200000 0.700000 0.300000 1</diffuse></material>
+      </visual>
+    </link>
+  </model>
+</sdf>

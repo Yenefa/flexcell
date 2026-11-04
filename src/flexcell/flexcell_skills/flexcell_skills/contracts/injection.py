@@ -183,8 +183,8 @@ def parse_false_attach(text, backend):
     if len(parts) not in (2, 3):
         raise ValueError('false-attach spec must be object:offset_m[:hold_s]')
     object_id = parts[0].strip()
-    if object_id not in ('target_box_a', 'target_box_b'):
-        raise ValueError('unknown false-attach object %r' % (object_id,))
+    from flexcell_skills.known_objects import require as _require_object
+    _require_object(object_id, 'false-attach object')
     if backend != 'detachable_joint':
         raise ValueError('false-attach injection requires the detachable_joint backend')
     try:

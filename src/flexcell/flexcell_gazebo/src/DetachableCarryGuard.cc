@@ -23,6 +23,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <unordered_set>
+#include <vector>
 
 namespace flexcell {
 using namespace gz::sim;
@@ -40,10 +41,10 @@ class DetachableCarryGuard final : public System, public ISystemConfigure,
   gz::transport::Node node;
   std::mutex mutex;
   Entity world{kNullEntity}, parent{kNullEntity};
-  Entity children[2]{kNullEntity, kNullEntity};
-  const std::string names[2]{"target_box_a", "target_box_b"};
-  gz::transport::Node::Publisher attach[2], detach[2];
-  bool present[2]{false, false}, seenInitial[2]{false, false};
+  std::vector<std::string> names;
+  std::vector<Entity> children;
+  std::vector<gz::transport::Node::Publisher> attach, detach;
+  std::vector<bool> present, seenInitial;
   bool ready{false}, releasing{false};
   bool channelsConnected{false};
   unsigned detachedFrames{0};
@@ -67,8 +68,17 @@ class DetachableCarryGuard final : public System, public ISystemConfigure,
         [](char c) { return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f'); });
   }
   int Index(const std::string &name) const {
-    for (int i = 0; i < 2; ++i) if (name == names[i]) return i;
+    for (size_t i = 0; i < names.size(); ++i) if (name == names[i]) return static_cast<int>(i);
     return -1;
+  }
+  bool AnyPresent() const {
+    for (bool value : present) if (value) return true;
+    return false;
+  }
+  bool OtherPresent(int index) const {
+    for (size_t i = 0; i < present.size(); ++i)
+      if (static_cast<int>(i) != index && present[i]) return true;
+    return false;
   }
   Entity Link(const EntityComponentManager &ecm, const std::string &modelName,
               const std::string &linkName) const {
@@ -79,12 +89,12 @@ class DetachableCarryGuard final : public System, public ISystemConfigure,
   }
   void Inspect(const EntityComponentManager &ecm) {
     parent = Link(ecm, "open_manipulator_x", "link5");
-    for (int i = 0; i < 2; ++i) {
+    for (size_t i = 0; i < names.size(); ++i) {
       children[i] = Link(ecm, names[i], "link");
       present[i] = false;
     }
     ecm.Each<components::DetachableJoint>([&](const Entity &, const components::DetachableJoint *j) {
-      for (int i = 0; i < 2; ++i)
+      for (size_t i = 0; i < names.size(); ++i)
         if (parent != kNullEntity && children[i] != kNullEntity &&
             j->Data().parentLink == parent && j->Data().childLink == children[i]) present[i] = true;
       return true;
@@ -92,6 +102,18 @@ class DetachableCarryGuard final : public System, public ISystemConfigure,
   }
   void DetachAll() {
     for (auto &publisher : detach) publisher.Publish(gz::msgs::Empty());
+  }
+  void ReadObjects(const std::shared_ptr<const sdf::Element> &sdf) {
+    const auto config = sdf->Clone();
+    for (auto item = config->FindElement("allowed_model"); item;
+         item = item->GetNextElement("allowed_model")) {
+      const auto name = item->Get<std::string>();
+      if (!name.empty()) names.push_back(name);
+    }
+    if (names.empty()) names = {"target_box_a", "target_box_b"};
+    children.assign(names.size(), kNullEntity);
+    present.assign(names.size(), false);
+    seenInitial.assign(names.size(), false);
   }
   bool Submit(Kind kind, const gz::msgs::Pose &pose, const std::string &token,
               gz::msgs::Boolean &reply) {
@@ -120,10 +142,11 @@ class DetachableCarryGuard final : public System, public ISystemConfigure,
          << relative.Pos().X() << ',' << relative.Pos().Y() << ',' << relative.Pos().Z() << ','
          << relative.Rot().X() << ',' << relative.Rot().Y() << ',' << relative.Rot().Z() << ','
          << relative.Rot().W() << "],\"channels_connected\":" << (channelsConnected ? "true" : "false")
-         << ",\"initial_joint_observed\":[" << (seenInitial[0] ? "true" : "false") << ','
-         << (seenInitial[1] ? "true" : "false") << "],\"component_present\":["
-         << (present[0] ? "true" : "false") << ',' << (present[1] ? "true" : "false")
-         << "],\"detached_frames\":" << detachedFrames << '}';
+         << ",\"initial_joint_observed\":[";
+    for (size_t i = 0; i < names.size(); ++i) text << (i ? "," : "") << (seenInitial[i] ? "true" : "false");
+    text << "],\"component_present\":[";
+    for (size_t i = 0; i < names.size(); ++i) text << (i ? "," : "") << (present[i] ? "true" : "false");
+    text << "],\"detached_frames\":" << detachedFrames << '}';
     reply.set_data(text.str());
     return true;
   }
@@ -131,14 +154,15 @@ class DetachableCarryGuard final : public System, public ISystemConfigure,
     command->success = success; command->done = true; command->ready.notify_all();
   }
  public:
-  void Configure(const Entity &entity, const std::shared_ptr<const sdf::Element> &,
+  void Configure(const Entity &entity, const std::shared_ptr<const sdf::Element> &sdf,
                  EntityComponentManager &ecm, EventManager &) override {
     world = entity;
+    ReadObjects(sdf);
     const auto name = ecm.Component<components::Name>(world)->Data();
-    for (int i = 0; i < 2; ++i) {
+    for (size_t i = 0; i < names.size(); ++i) {
       const auto topic = "/flexcell/detachable/" + names[i];
-      attach[i] = node.Advertise<gz::msgs::Empty>(topic + "/attach");
-      detach[i] = node.Advertise<gz::msgs::Empty>(topic + "/detach");
+      attach.push_back(node.Advertise<gz::msgs::Empty>(topic + "/attach"));
+      detach.push_back(node.Advertise<gz::msgs::Empty>(topic + "/detach"));
     }
     const auto prefix = "/world/" + name + "/flexcell/carry/";
     if (!node.Advertise(prefix + "engage", &DetachableCarryGuard::Engage, this) ||
@@ -150,10 +174,11 @@ class DetachableCarryGuard final : public System, public ISystemConfigure,
   void PreUpdate(const UpdateInfo &info, EntityComponentManager &ecm) override {
     std::lock_guard<std::mutex> lock(mutex);
     Inspect(ecm);
-    channelsConnected = attach[0].HasConnections() && attach[1].HasConnections() &&
-                        detach[0].HasConnections() && detach[1].HasConnections();
-    for (int i = 0; i < 2; ++i) seenInitial[i] = seenInitial[i] || present[i];
-    if ((active < 0 && (present[0] || present[1])) || (active >= 0 && present[1-active])) {
+    channelsConnected = !names.empty();
+    for (size_t i = 0; i < names.size(); ++i)
+      channelsConnected = channelsConnected && attach[i].HasConnections() && detach[i].HasConnections();
+    for (size_t i = 0; i < names.size(); ++i) seenInitial[i] = seenInitial[i] || present[i];
+    if ((active < 0 && AnyPresent()) || (active >= 0 && OtherPresent(active))) {
       ready = false; releasing = true; DetachAll();
     }
     if (!ready || releasing) DetachAll();
@@ -189,11 +214,13 @@ class DetachableCarryGuard final : public System, public ISystemConfigure,
     const auto currentNs = std::chrono::duration_cast<std::chrono::nanoseconds>(info.simTime).count();
     const bool advanced = !info.paused && currentNs > simNs;
     simNs = currentNs;
-    if (advanced && active >= 0 && present[active] && !present[1-active]) ++attachedFrames;
-    else if (active < 0 || !present[active] || present[1-active]) attachedFrames = 0;
-    if (!channelsConnected || parent == kNullEntity || children[0] == kNullEntity || children[1] == kNullEntity) {
+    if (advanced && active >= 0 && present[active] && !OtherPresent(active)) ++attachedFrames;
+    else if (active < 0 || !present[active] || OtherPresent(active)) attachedFrames = 0;
+    bool missing_child = parent == kNullEntity;
+    for (const auto child : children) missing_child = missing_child || child == kNullEntity;
+    if (!channelsConnected || missing_child) {
       ready = false; detachedFrames = 0;
-    } else if (!present[0] && !present[1]) {
+    } else if (!AnyPresent()) {
       if (advanced) ++detachedFrames;
       // Initial joints can be detached before this observer ever sees them.
       // Readiness depends on current reconciled physics and connected official
@@ -207,9 +234,9 @@ class DetachableCarryGuard final : public System, public ISystemConfigure,
     for (auto it = pending.begin(); it != pending.end();) {
       auto command = *it;
       const bool released = command->kind == Kind::Release && !releasing &&
-                            !present[0] && !present[1] && detachedFrames >= 2;
+                            !AnyPresent() && detachedFrames >= 2;
       const bool attached = command->kind != Kind::Release && !releasing && active >= 0 &&
-                            command->token == session && present[active] && !present[1-active] && attachedFrames >= 2;
+                            command->token == session && present[active] && !OtherPresent(active) && attachedFrames >= 2;
       if (released || attached || command->cancelled) {
         Complete(command, !command->cancelled && (released || attached));
         it = pending.erase(it);
