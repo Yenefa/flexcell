@@ -136,6 +136,35 @@ PY
 三个物体，非目标物体位移 ≤1 mm；全程同一世界，不 reset、不 set_pose。未运动
 且无抓持的拒绝可调整暂存选择；实际运动失败或终态未知则停止并保留现场。
 
+### 相机图像选物（#114）
+
+用 `profile(..., scene='three_boxes', camera=True)` 生成带相机的 profile，启动时加
+`camera:=true`。图像在 `/flexcell/camera/rgb`，标定在
+`/flexcell/camera/rgb/camera_info`；后者由本仓库桥接 gz 的真实
+`/flexcell/camera/camera_info` 并 remap 到文档话题（见 PR #116）。
+
+```python
+# 通过 ROS-MCP 的 stdio 客户端调用；图像会保存到 MCP 服务进程的
+# ./camera/received_image.jpeg，下一次调用会覆盖，需立即复制到独立文件名。
+subscribe_once(topic='/flexcell/camera/rgb', msg_type='sensor_msgs/msg/Image',
+               expects_image='true', timeout=20)
+subscribe_once(topic='/flexcell/camera/rgb/camera_info',
+               msg_type='sensor_msgs/msg/CameraInfo', expects_image='false', timeout=15)
+subscribe_once(topic='/clock', msg_type='rosgraph_msgs/msg/Clock',
+               expects_image='false', timeout=10)
+view_saved_image(image_path='./camera/received_image.jpeg')
+```
+
+选物流程：先 Observe 取得各箱体三维位置，再用 CameraInfo 的 K 与 profile 的
+`dataset_camera` 外参把中心投影到图像，在投影点邻域统计绿色像素；最高且唯一者
+作为目标。不要从 SDF 材质表或固定坐标决定“绿色是哪只”，也不要写死绿色=某个 ID。
+zone_1 本身也是绿色半透明圆盘，按“投影到实体箱体中心”匹配可将其排除。
+
+已验证（一次功能演示）：颜色 fixture 为 A=绿/B=蓝/C=红，图像唯一命中 A；A→zone_1
+一次搬运误差 2.536 mm，B/C 位移 2.5e-9 m；最终 health 19/19、IDLE、carry=false。
+三维位置来自 Observe 的 `SIMULATION_GROUND_TRUTH`，因此结论是“视觉选物 + Observe
+定位 + 已有技能搬运”，不是纯视觉三维定位；n=1，不是成功率。
+
 ## 5. 每个 Action 的实际结果字段
 
 `get_action_details` 返回字段定义；实际值来自 `send_action_goal` 的返回。
