@@ -215,7 +215,20 @@ class Planner : public rclcpp::Node {
       add->addObject(box); task.add(std::move(add));
       gripper_stage("open gripper", .02);
     }
-    auto pipeline = std::make_shared<flexcell::PositionOnlyPlanner>(shared_from_this(), "ompl");
+    // Issue #121 opt-in: on the attached-object PLACE path, bias the IK towards
+    // a level box (small end-effector pitch). Disabled unless the profile sets
+    // level_release_pitch_tolerance_deg >= 0, so default behaviour is unchanged.
+    std::shared_ptr<flexcell::LevelPitchPlanner> level;
+    std::shared_ptr<moveit::task_constructor::solvers::PipelinePlanner> pipeline;
+    const double level_tol_deg = has_parameter("level_release_pitch_tolerance_deg")
+        ? get_parameter("level_release_pitch_tolerance_deg").as_double() : -1.0;
+    if (!pick && q.attached_object_targets && level_tol_deg >= 0.0) {
+      level = std::make_shared<flexcell::LevelPitchPlanner>(shared_from_this(), "ompl");
+      level->max_pitch_rad = level_tol_deg * 3.14159265358979323846 / 180.0;
+      pipeline = level;
+    } else {
+      pipeline = std::make_shared<flexcell::PositionOnlyPlanner>(shared_from_this(), "ompl");
+    }
     pipeline->setMaxVelocityScalingFactor(profiles.at(q.motion_profile_id));
     pipeline->setMaxAccelerationScalingFactor(profiles.at(q.motion_profile_id));
     const char* pick_names[] = {"hover", "grasp", "lift"};
@@ -300,6 +313,16 @@ class Planner : public rclcpp::Node {
     r.detail = q.attached_object_targets ?
         "MTC planned attached shape-center hover/descend and relative EE retreat; explicit EE endpoints; execution remains skill-owned" :
         "MTC planned three position-only stages; execution and physics remain skill-owned";
+    if (level) {
+      // Report the chosen pitch so a live window can compare it with the
+      // recorded release tilt without changing the response contract.
+      RCLCPP_INFO(get_logger(), "level-release seed: pitch=%.4f rad level=%d sampled=%d",
+                  level->last_pitch_rad(), int(level->last_was_level_seed()),
+                  level->last_sampled_seeds());
+      r.detail += "; level-release seed pitch=" + std::to_string(level->last_pitch_rad()) +
+                  " rad level=" + (level->last_was_level_seed() ? "true" : "false") +
+                  " sampled=" + std::to_string(level->last_sampled_seeds());
+    }
   }
   std::mutex mutex_;
   uint64_t snapshot_sequence_{0};
