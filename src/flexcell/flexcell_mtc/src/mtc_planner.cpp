@@ -47,6 +47,16 @@ class Planner : public rclcpp::Node {
       rmw_qos_profile_services_default, group_);
   }
  private:
+  // The accepted object set is declared by the profile, not by a name list in
+  // the planner. Unconfigured names stay refused even if a caller invents one.
+  bool knownObject(const std::string& name) {
+    if (has_parameter("tracked_objects")) {
+      const auto objects = get_parameter("tracked_objects").as_string_array();
+      return std::find(objects.begin(), objects.end(), name) != objects.end();
+    }
+    return name == "target_box_a" || name == "target_box_b";
+  }
+
   void handle(Service::Request::SharedPtr q, Service::Response::SharedPtr r, bool point) {
     std::unique_lock<std::mutex> lock(mutex_, std::try_to_lock);
     if (!lock.owns_lock()) { r->detail = "planner busy"; return; }
@@ -74,7 +84,7 @@ class Planner : public rclcpp::Node {
     const std::map<std::string, double> profiles{{"demo_veryslow", .05},
                                                {"demo_slow", .2}, {"demo_default", .5}};
     if (q.operation != "POINT" || !q.attached_object_targets || q.targets.size() != 1 ||
-        (q.object_name != "target_box_a" && q.object_name != "target_box_b") ||
+        !knownObject(q.object_name) ||
         !profiles.count(q.motion_profile_id) || q.deadline_ms < 1000 || q.deadline_ms > 60000)
       throw std::runtime_error("invalid attached-point request");
     const auto& target = q.targets.front();
@@ -138,7 +148,7 @@ class Planner : public rclcpp::Node {
     const std::map<std::string, double> profiles{{"demo_veryslow", .05},
                                                {"demo_slow", .2}, {"demo_default", .5}};
     if ((!pick && q.operation != "PLACE") || q.targets.size() != 3 ||
-        (q.object_name != "target_box_a" && q.object_name != "target_box_b") ||
+        !knownObject(q.object_name) ||
         !profiles.count(q.motion_profile_id) || q.deadline_ms < 1000 || q.deadline_ms > 60000 ||
         (q.attached_object_targets && pick))
       throw std::runtime_error("invalid operation, object, profile or stage count");

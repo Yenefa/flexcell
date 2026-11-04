@@ -18,6 +18,8 @@
 #include <limits>
 #include <sstream>
 #include <stdexcept>
+#include <string>
+#include <vector>
 
 namespace flexcell {
 class PhysicsTrace final : public gz::sim::System, public gz::sim::ISystemConfigure,
@@ -29,7 +31,8 @@ class PhysicsTrace final : public gz::sim::System, public gz::sim::ISystemConfig
   int64_t lastPhysics{-1}, minPhysicsStep{std::numeric_limits<int64_t>::max()}, maxPhysicsStep{0};
   uint64_t physicsSteps{0}, missingPoseSteps{0};
   bool badPhysicsTime{false}, nonfinitePose{false}, havePrevious{false};
-  gz::math::Vector3d previous[3];
+  std::vector<std::string> names;
+  std::vector<gz::math::Vector3d> previous;
   double maxPoseJump{0.};
   std::ofstream stepLog;
   uint64_t stepRecords{0};
@@ -51,6 +54,12 @@ class PhysicsTrace final : public gz::sim::System, public gz::sim::ISystemConfig
                  gz::sim::EntityComponentManager&, gz::sim::EventManager&) override {
     world = entity;
     const auto config = sdf->Clone();
+    for (auto item = config->FindElement("object"); item; item = item->GetNextElement("object")) {
+      const auto name = item->Get<std::string>();
+      if (!name.empty()) names.push_back(name);
+    }
+    if (names.empty()) names = {"target_box_a", "target_box_b"};
+    previous.assign(names.size() + 1, gz::math::Vector3d(0, 0, 0));
     flushEachStep = config->HasElement("flush_each_step") && config->Get<bool>("flush_each_step");
     publisher = node.Advertise<gz::msgs::StringMsg>("/flexcell/physics_trace");
     const char *path = std::getenv("FLEXCELL_PHYSICS_STEP_LOG");
@@ -76,25 +85,37 @@ class PhysicsTrace final : public gz::sim::System, public gz::sim::ISystemConfig
     }
     lastPhysics = ns;
     const auto parent = Link(ecm, "open_manipulator_x", "link5");
-    const auto a = Link(ecm, "target_box_a", "link"), b = Link(ecm, "target_box_b", "link");
-    if (parent == kNullEntity || a == kNullEntity || b == kNullEntity) {
+    std::vector<gz::sim::Entity> objects;
+    objects.reserve(names.size());
+    bool missing = parent == kNullEntity;
+    for (const auto& name : names) {
+      const auto entity = Link(ecm, name, "link");
+      objects.push_back(entity);
+      missing = missing || entity == kNullEntity;
+    }
+    if (missing) {
       ++missingPoseSteps; havePrevious = false; return;
     }
-    const gz::math::Pose3d poses[3]{worldPose(parent, ecm), worldPose(a, ecm), worldPose(b, ecm)};
-    if (!poses[0].IsFinite() || !poses[1].IsFinite() || !poses[2].IsFinite()) {
+    std::vector<gz::math::Pose3d> poses;
+    poses.reserve(objects.size() + 1);
+    poses.push_back(worldPose(parent, ecm));
+    for (const auto entity : objects) poses.push_back(worldPose(entity, ecm));
+    bool finite = true;
+    for (const auto& pose : poses) finite = finite && pose.IsFinite();
+    if (!finite) {
       nonfinitePose = true; havePrevious = false;
     } else {
       if (havePrevious)
-        for (int i = 0; i < 3; ++i)
+        for (size_t i = 0; i < poses.size(); ++i)
           maxPoseJump = std::max(maxPoseJump, (poses[i].Pos() - previous[i]).Length());
-      for (int i = 0; i < 3; ++i) previous[i] = poses[i].Pos();
+      for (size_t i = 0; i < poses.size(); ++i) previous[i] = poses[i].Pos();
       havePrevious = true;
     }
-    bool attached[2]{false, false};
+    std::vector<bool> attached(names.size(), false);
     ecm.Each<components::DetachableJoint>([&](const Entity&, const components::DetachableJoint* j) {
-      if (j->Data().parentLink == parent) {
-        attached[0] |= j->Data().childLink == a; attached[1] |= j->Data().childLink == b;
-      }
+      if (j->Data().parentLink == parent)
+        for (size_t i = 0; i < objects.size(); ++i)
+          attached[i] = attached[i] || j->Data().childLink == objects[i];
       return true;
     });
     const auto monotonicNs = std::chrono::duration_cast<std::chrono::nanoseconds>(
@@ -104,13 +125,13 @@ class PhysicsTrace final : public gz::sim::System, public gz::sim::ISystemConfig
               << ",\"step_ns\":" << currentStep << ",\"monotonic_ns\":" << monotonicNs
               << ",\"parent_pose\":";
       Pose(stepLog, poses[0]);
-      stepLog << ",\"objects\":{\"target_box_a\":{\"pose\":";
-      Pose(stepLog, poses[1]);
-      stepLog << ",\"joint_component\":" << (attached[0] ? "true" : "false")
-              << "},\"target_box_b\":{\"pose\":";
-      Pose(stepLog, poses[2]);
-      stepLog << ",\"joint_component\":" << (attached[1] ? "true" : "false")
-              << "}},\"contact_force_observed\":false}\n";
+      stepLog << ",\"objects\":{";
+      for (size_t i = 0; i < names.size(); ++i) {
+        stepLog << (i ? "," : "") << '"' << names[i] << "\":{\"pose\":";
+        Pose(stepLog, poses[i + 1]);
+        stepLog << ",\"joint_component\":" << (attached[i] ? "true" : "false") << '}';
+      }
+      stepLog << "},\"contact_force_observed\":false}\n";
       ++stepRecords;
       if (flushEachStep || stepRecords % 10 == 0) stepLog.flush();
     }
@@ -131,11 +152,13 @@ class PhysicsTrace final : public gz::sim::System, public gz::sim::ISystemConfig
     Pose(out, parentPose);
     out << ",\"ee_pose\":";
     Pose(out, parentPose * gz::math::Pose3d(.126, 0, 0, 0, 0, 0));
-    out << ",\"ee_source\":\"link5_plus_urdf_fixed_transform\",\"objects\":{\"target_box_a\":{\"pose\":";
-    Pose(out, poses[1]);
-    out << ",\"joint_component\":" << (attached[0] ? "true" : "false") << "},\"target_box_b\":{\"pose\":";
-    Pose(out, poses[2]);
-    out << ",\"joint_component\":" << (attached[1] ? "true" : "false") << "}}}";
+    out << ",\"ee_source\":\"link5_plus_urdf_fixed_transform\",\"objects\":{";
+    for (size_t i = 0; i < names.size(); ++i) {
+      out << (i ? "," : "") << '"' << names[i] << "\":{\"pose\":";
+      Pose(out, poses[i + 1]);
+      out << ",\"joint_component\":" << (attached[i] ? "true" : "false") << '}';
+    }
+    out << "}}";
     gz::msgs::StringMsg message; message.set_data(out.str()); publisher.Publish(message); last = ns;
     physicsSteps = missingPoseSteps = 0;
     minPhysicsStep = std::numeric_limits<int64_t>::max(); maxPhysicsStep = 0;

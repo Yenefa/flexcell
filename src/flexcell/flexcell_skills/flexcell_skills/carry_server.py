@@ -62,6 +62,9 @@ class CarryServer(Node):
         self.declare_parameter('engage_service', '/flexcell/carry_engage')
         self.declare_parameter('query_service', '/flexcell/carry_snapshot')
         self.declare_parameter('log_dir', '~/.ros/flexcell')
+        from flexcell_skills import known_objects
+        known_objects.configure(self.declare_parameter(
+            'tracked_objects', list(known_objects.DEFAULT_OBJECTS)).value)
         self.declare_parameter('log_file', 'carry.jsonl')
         # A joint session is anchored on a measured pre-attach reference: the
         # body must be detached and the arm at rest before the joint appears.

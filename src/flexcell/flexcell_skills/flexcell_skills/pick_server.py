@@ -22,6 +22,7 @@ from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
 
+from flexcell_skills import known_objects
 from geometry_msgs.msg import PoseStamped, Vector3
 from std_msgs.msg import Empty as EmptyMsg
 from std_msgs.msg import String as StringMsg
@@ -88,6 +89,9 @@ class PickServer(Node):
         self.declare_parameter('motion_profile_names', ['demo_veryslow', 'demo_slow', 'demo_default'])
         self.declare_parameter('default_motion_profile', 'demo_slow')
         self.declare_parameter('log_dir', '~/.ros/flexcell')
+        from flexcell_skills import known_objects
+        known_objects.configure(self.declare_parameter(
+            'tracked_objects', list(known_objects.DEFAULT_OBJECTS)).value)
         self.declare_parameter('log_file', 'pick.jsonl')
 
         gp = self.get_parameter
@@ -170,6 +174,27 @@ class PickServer(Node):
             % (self._hover, self._grasp_dz, self._raise, self._attach_radius))
 
     # ------------------------------------------------------------- utilities
+    def _sync_scene_objects(self, attached_name):
+        """Upsert every configured box into the planning scene at its measured pose.
+
+        Only the grasp target used to be registered, so the planner was blind to the
+        other boxes and could sweep straight through them (measured 2026-11-04: a
+        carry knocked the third box 0.18 m away).
+        """
+        synced, skipped = [], []
+        for name in known_objects.known():
+            if name == attached_name:
+                continue
+            measured, error = sample_gz_pose(name, max_age_s=.5)
+            if measured is None:
+                skipped.append([name, str(error)])
+                continue
+            position, quaternion = measured
+            ok, scene_error = self._scene.add_box(
+                name, position, self._size, frame='world', orientation=quaternion)
+            (synced if ok else skipped).append(name if ok else [name, scene_error])
+        return synced, skipped
+
     def _ee_position(self):
         try:
             tr = self._tf_buffer.lookup_transform(
@@ -392,6 +417,20 @@ class PickServer(Node):
             res.object_pose_before = pose_msg(box_pos, box_quat)
             rec['box_before'] = box_pos
 
+            # A scene that declares additional boxes must show every one of them
+            # to the planner before the approach. Historical two-box profiles keep
+            # their exact existing scene sequence.
+            if len(known_objects.known()) > len(known_objects.DEFAULT_OBJECTS):
+                synced, skipped = self._sync_scene_objects(goal.object_name)
+                rec['scene_synced'] = synced
+                rec['scene_sync_skipped'] = skipped
+                if skipped:
+                    code = (R.ERR_WORLD_STATE_UNAVAILABLE
+                            if any('not flowing' in str(reason) for _name, reason in skipped)
+                            else R.ERR_OBJECT_UNKNOWN)
+                    return finish(R.OUTCOME_FAILED, code,
+                                  'configured objects not observable before PICK: %s' % skipped)
+
             mtc = getattr(self, '_mtc', None)
             if mtc is not None:
                 targets = [[box_pos[0], box_pos[1], box_pos[2] + dz]
@@ -412,8 +451,8 @@ class PickServer(Node):
 
             # ---------- APPROACHING ----------
             self._feedback(goal_handle, 'APPROACHING', t0)
-            # make the box known to MoveIt so the approach plans AROUND it
-            # instead of knocking it (measured 2026-09-26: a blind approach
+            # make the grasped box known to MoveIt at its measured pose so the
+            # approach plans AROUND it (measured 2026-09-26: a blind approach
             # swept the box aside and landed 4.7cm short of the hover target)
             scene_added, serr = self._scene.add_box(
                 goal.object_name, box_pos, self._size, orientation=box_quat)

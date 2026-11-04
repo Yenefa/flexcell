@@ -108,6 +108,34 @@ Agent 调用规则：
 - Agent 选择任务与工具，现有技能负责运动规划、执行和实际验证。
   不通过直接发布关节命令、修改碰撞场景或 set_pose 绕过技能。
 
+### 三物体场景（可选）
+
+默认 profile 仍是两物体。需要三物体时，用 `scene="three_boxes"` 生成独立
+profile；它会加入 `target_box_c`，并把对象集声明给 Observe、Pick、Place、Carry、
+MTC 与物理守卫。使用独立的 `ROS_DOMAIN_ID`、`GZ_PARTITION` 和桥接端口，
+不要覆盖已有的两物体运行：
+
+```bash
+python3 - <<'PY'
+import sys
+sys.path.insert(0, '/home/ros/agentic_workcell_ws/scripts')
+from sim_profile import profile
+profile('/home/ros/run116/profile', backend='detachable_joint',
+        skill_backend='legacy', decision_policy='fsm', scene='three_boxes')
+PY
+```
+
+可直接发给 Agent 的用户目标：
+
+> 先观察并记住 A、B、C 的实际起始位置。把 A 放到 B 的起始位置，B 放到 C 的
+> 起始位置，C 放到 A 的起始位置。目标互相占用时，由你决定顺序并选择空闲暂存
+> 位置。完成后暂存位置应为空，三个箱体身份不能互换。每只箱体距各自指定目标
+> 不超过 10 mm；朝向不作要求。
+
+约束：最多 6 次 `/run_pick_place`（含被拒绝的调用）；每次搬运后独立核对全部
+三个物体，非目标物体位移 ≤1 mm；全程同一世界，不 reset、不 set_pose。未运动
+且无抓持的拒绝可调整暂存选择；实际运动失败或终态未知则停止并保留现场。
+
 ## 5. 每个 Action 的实际结果字段
 
 `get_action_details` 返回字段定义；实际值来自 `send_action_goal` 的返回。
@@ -154,3 +182,14 @@ false 或 true，也不能为重新取得报告而重复已完成的搬运动作
 失败；另有目标被占却推开非目标物体的反例。#107 保留实测四元数、绑定前刷新姿态、
 放置后同步实测场景，并增加上述占用拒绝。多步操作是否恢复，仍需同一世界的三步交换
 和全物体验证证明；离线回归或首次搬运成功不能替代这项现场验证。
+
+三物体配置驱动已在电脑端完成一次现场验收（`detachable_joint + legacy + fsm`，
+domain 56 / 桥接 9096，同一世界、无 reset / set_pose）：Observe 从开始即返回
+A、B、C；每次 PICK 前 `pick.jsonl` 的 `scene_synced` 都包含其余全部箱体
+（包括尚未搬过的 C），`scene_sync_skipped=[]`。Agent 选择 A→暂存
+(0.12, −0.15)、C→A 原位、B→C 原位、A→B 原位，共 4 次 `RunPickPlace`，
+全部 `outcome=0 / error_code=0 / object_at_place=true`；每步非目标物体
+Δxyz ≤1e-5 m。最终独立 VerifyObject：A 2.445 mm、B 3.281 mm、C 0.749 mm，
+均 ≤10 mm；暂存点已清空，最终 health 19/19、IDLE、carry=false。
+这是 n=1 的功能演示，不是成功率或统计结论。默认两物体行为、历史 profile
+哈希与原有场景序列保持不变；三物体场景必须通过 `scene="three_boxes"` 显式启用。

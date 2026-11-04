@@ -15,13 +15,15 @@ import math
 import threading
 import time
 
+from flexcell_skills import known_objects
+
 PREPOSITION_SAMPLES = 6                    # 50 Hz endpoints spanning the full 0.1 s hold
 PREPOSITION_WINDOW_NS = 100_000_000
 PREPOSITION_SAMPLE_GAP_NS = 20_000_000
 PREPOSITION_MAX_SPREAD_M = .001            # half the follow translation limit
 PREPOSITION_MAX_SPREAD_RAD = .0015         # ~1/12 of the follow rotation limit
 PREPOSITION_MAX_AGE_NS = 300_000_000
-PREPOSITION_OBJECTS = ('target_box_a', 'target_box_b')
+PREPOSITION_OBJECTS = ('target_box_a', 'target_box_b')  # default; see known_objects
 
 
 def _pose(value):
@@ -137,14 +139,18 @@ class PrepositionLatch:
     def __init__(self, *, clock=time.monotonic_ns, samples=PREPOSITION_SAMPLES,
                  window_ns=PREPOSITION_WINDOW_NS, sample_gap_ns=PREPOSITION_SAMPLE_GAP_NS,
                  max_spread_m=PREPOSITION_MAX_SPREAD_M,
-                 max_spread_rad=PREPOSITION_MAX_SPREAD_RAD, max_age_ns=PREPOSITION_MAX_AGE_NS):
+                 max_spread_rad=PREPOSITION_MAX_SPREAD_RAD, max_age_ns=PREPOSITION_MAX_AGE_NS,
+                 objects=None):
         if samples < 2:
             raise ValueError('a preposition reference needs at least two samples')
         self.clock, self.samples, self.window_ns = clock, samples, window_ns
         self.sample_gap_ns, self.max_spread_m, self.max_spread_rad = sample_gap_ns, max_spread_m, max_spread_rad
         self.max_age_ns = max_age_ns
         self.cv = threading.Condition()
-        self.buffer = {name: [] for name in PREPOSITION_OBJECTS}
+        self.objects = tuple(objects) if objects is not None else tuple(known_objects.known())
+        if not self.objects:
+            raise ValueError('a preposition reference needs at least one object')
+        self.buffer = {name: [] for name in self.objects}
 
     def feed(self, data):
         """Buffer one detached observation; malformed data leaves the buffer untouched."""
@@ -158,8 +164,11 @@ class PrepositionLatch:
                     return
                 if source > now + 1_000_000 or now - source > self.max_age_ns:
                     return
-                for name in PREPOSITION_OBJECTS:
-                    obj = data['objects'][name]
+                for name in self.objects:
+                    obj = data['objects'].get(name)
+                    if obj is None:
+                        self.buffer[name].clear()  # a vanished object ends its detached history
+                        continue
                     if obj['joint_component'] is not False:
                         self.buffer[name].clear()  # an attachment ends the detached history
                         continue
@@ -213,7 +222,7 @@ class PrepositionLatch:
 
     def take(self, object_id, timeout=3.):
         """Wait for a declared pre-attach hold; returns (ok, reference, detail)."""
-        if object_id not in PREPOSITION_OBJECTS:
+        if object_id not in self.buffer:
             return False, None, 'unknown preposition object'
         deadline = time.monotonic() + timeout
         with self.cv:
@@ -250,7 +259,9 @@ class JointFollowMonitor:
         self.max_translation = self.max_rotation = 0.
 
     def arm(self, object_id, session, reference=None, preposition=None):
-        if (object_id not in ('target_box_a', 'target_box_b') or len(session) != 32 or
+        from flexcell_skills.known_objects import require as _require_object
+        _require_object(object_id, 'follow object')
+        if (len(session) != 32 or
                 any(c not in '0123456789abcdef' for c in session)):
             raise ValueError('invalid follow session')
         if reference is not None:

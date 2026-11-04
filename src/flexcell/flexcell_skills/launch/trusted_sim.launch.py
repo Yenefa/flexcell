@@ -38,7 +38,7 @@ def launch_stack(context):
     if config['carry_server']['ros__parameters']['carry_backend'] == 'detachable_joint':
         urdf = ET.fromstring(robot)
         gazebo = ET.SubElement(urdf, 'gazebo')
-        for object_name in ('target_box_a', 'target_box_b'):
+        for object_name in config['observe_server']['ros__parameters']['tracked_objects']:
             plugin = ET.SubElement(gazebo, 'plugin', filename='gz-sim-detachable-joint-system',
                                    name='gz::sim::systems::DetachableJoint')
             for key, value in [('parent_link', 'link5'), ('child_model', object_name), ('child_link', 'link')]:
@@ -98,7 +98,10 @@ def launch_stack(context):
             .planning_pipelines(pipelines=['ompl'])
             .to_moveit_configs())
         nodes.append(Node(package='flexcell_mtc', executable='mtc_planner', output='screen',
-                          parameters=[moveit_config.to_dict(), {'use_sim_time': True}]))
+                          parameters=[moveit_config.to_dict(), {
+                              'use_sim_time': True,
+                              'tracked_objects': config['observe_server']['ros__parameters']['tracked_objects'],
+                          }]))
     return nodes
 
 
