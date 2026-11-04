@@ -1,5 +1,56 @@
 # HANDOFF — project-033-flexcell
 
+> 2026-11-04 本机接手（本轮）：在干净 `main@f85e0ab` 上重建开发基线
+> （`gh repo clone Yenefa/flexcell`，origin 可读写）。核对本机三份旧副本，均不可直接续用：
+> `Desktop/workspace/project-033-flexcell` 无 remote、停在 `343cafb`（PM 工作区，
+> HANDOFF 有未提交更新）；`WorkBuddy/2026-10-23-15-02-50/flexcell` 虽指向 origin 但停在
+> `e7a6963`（#52，落后 60+ 提交）；`Documents/Codex/...` 不是 git 仓库。
+> **PR #116 的 GitHub CI 全部 job 0 step / 2 s 失败，属账户侧门禁，与代码无关**：
+> check-run annotation 原文 "The job was not started because recent account payments have
+> failed or your spending limit needs to be increased. Please check the 'Billing & plans'
+> section in your settings"，job `runner_id=0`、`steps=[]`、无日志（`gh run view --log-failed`
+> 返回 not found）；`actions/permissions` 为 `enabled=true / allowed_actions=all`。
+> 因此 #116 **不能按绿合并**，需先在 Billing & plans 解除门禁再重跑 checks。
+> 本机独立复现 #116 回归：Windows（Python 3.13.14 / pytest 9.2.0）与 WSL Ubuntu-24.04
+> + ROS 2 Jazzy（Python 3.12.3 / pytest 7.4.4）双端各 **26/26 通过**，输出连同门禁证据
+> 存 `setup/acceptance/takeover_20261104/`。本轮**未改生产代码、未起新 Gazebo 窗口、
+> 未合并 #116、未开工 #115**；只固化接手事实。完整台账 [TAKEOVER_20261104](TAKEOVER_20261104.md)。
+>
+> 2026-11-04 #113 已合并为 `f85e0ab`，Closes #112（completed）；五项 CI 全绿。
+> 同日执行 #114 看图选物：main + `fix/camera-info-bridge`（PR #116），
+> `scene='three_boxes', camera=True`，domain 58 / bridge 9098，legacy + detachable_joint + fsm。
+> 现场把 visual 颜色改为 A=绿/B=蓝/C=红（默认 C=绿），执行逻辑不读颜色→ID 表；
+> 用 ROS-MCP 读 RGB + CameraInfo，Observe 三维位置投影，绿色占比唯一命中
+> `target_box_a`（0.998），zone_1 空闲。唯一一次 RunPickPlace：A→zone_1，
+> `outcome=0/err=0/at_place=true`，15.59 s，落点 2.536 mm；B/C 位移 2.5e-9 m；
+> 独立 Verify A 2.525 mm、B/C 2.5e-9 m；zone_1 被 A 占用、zone_2 空闲；
+> health 19/19、IDLE、carry=false。结论仅为“视觉选物 + Observe 定位 + 已有技能搬运”，
+> n=1，不是纯视觉三维定位。
+> 发现并修复真实缺口：gz CameraInfo 实际发布在 `/flexcell/camera/camera_info`，
+> 原 launch 桥接 `/flexcell/camera/rgb/camera_info` 没有 gz 发布者；PR #116 改为
+> 桥接真实 gz topic + ROS remap，保持公开话题不变，不改 world 哈希。现场 K=
+> `[467.7427,0,320;0,467.7427,240;0,0,1]`，640×480。相关 26 项本地测试通过。
+> **GitHub CI 被账户付款/额度门禁阻断（0 step、25 秒失败），#116 不能按绿合并；
+> 先解除门禁。** 证据分支 `evidence/camera-select-114`，本机 `/home/ros/run118/`。
+> #114 现场表已发 issue；issue 保持 open，等 #116 处理与用户裁决。
+>
+> 2026-11-04 接手 #112 三物体主线：[PR #113](https://github.com/Yenefa/flexcell/pull/113)
+> 基于 main `7ce9771`，把对象集改为一次配置、全链传递（Observe / Pick / Place /
+> Carry / joint follow / preposition / MTC / DetachableCarryGuard / PhysicsTrace），
+> 未配置对象仍拒绝。新增 opt-in `scene="three_boxes"`：注入 `worlds/target_box_c.sdf`，
+> 不改 `worlds/flexcell_world.sdf`，默认两物体世界与历史 profile 哈希保持原样。
+> 每次 PICK 前其余箱体以完整实测位置+姿态进入 MoveIt 场景；三物体场景缺物体即停。
+> 现场（detachable_joint + legacy + fsm，domain 56 / port 9096，同一世界无 reset）：
+> Agent 自主选序 A→暂存 (0.12,−0.15)、C→A 原位、B→C 原位、A→B 原位，4 次搬运全部
+> `outcome=0/err=0/at_place=true`；最终独立 Verify A 2.445 / B 3.281 / C 0.749 mm；
+> 每步非目标 Δxyz ≤1e-5 m；另加 1 次把 A 指向 C 占用点的调用，被
+> `ERR_SAFETY_REJECTED=53` 零运动拒绝；health 19/19、IDLE、carry=false。
+> 证据 `/home/ros/run116/`，现场表已回填 #112。另做默认 A/B 冒烟（domain 57）：
+> A→zone_1 成功 2.182 mm，B 位移 2.5e-9 m，health 19/19，确认 C++ 插件 A/B 回退未回退。
+> 离线构建通过，919 tests 中仅 4 个依赖 `/home/ros/parity-teleport` 的环境用例失败；
+> CI 以 PR #113 为准。WSL 工作区 `build/legacy-point-stage1` 留有旧分支测试 XML，
+> `colcon test-result` 会聚合它；看本包结果请直接读 `build/flexcell_skills/pytest.xml`。
+>
 > 2026-11-03 本机修掉 CI `native-five-cycle-smoke` 的唯一红灯（固定 330 s worker 超时）：
 > 原轮五轮协议全部完成，被杀的是每轮原始审计；审计间隔 14.4/21.2/28.3/35.5 s 逐轮增长，
 > 因为审计读到当时 EOF，把上一轮审计期间仿真追加的行也算了进来（反馈），且 330 s 本身
