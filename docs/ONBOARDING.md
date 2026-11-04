@@ -1,20 +1,27 @@
-# FlexCell — 新机器接手清单（2026-10-02，HEAD `4b5db28`）
+# FlexCell — 新机器接手清单
 
 从零到能跑起来的最短路径。先跑通再谈数据。
+
+当前任务和能力范围见 [HANDOFF](HANDOFF.md) 与 [ROS-MCP 操作说明](ROS_MCP.md)。
+本文其余部署记录始于 2026-10-02，机器路径及环境参数需按现场核对。
 
 ## 0. 先确认一件事：能不能 clone
 
 ```bash
 git clone https://github.com/Yenefa/flexcell.git && cd flexcell
-git log --oneline -1        # 应为 4b5db28
+git fetch origin
+git status --short
+git log --oneline -1 HEAD
+git log --oneline -1 origin/main
 ```
 
-**不要**从任何旧 WSL clone 继续用（那个还停在 `d03d06c`，落后 11 个提交）。
+新 clone 的 HEAD 应与当前 `origin/main` 对照，不能用历史提交 `4b5db28` 判断完整性。
+旧工作区先保留未提交修改，再用新 clone 或独立 worktree 接手，避免误用旧源码和构建产物。
 
 ## 1. WSL 前置（Windows 侧，一次性）
 
-WSL 是**唯一**能跑仿真的地方——Gazebo / ros_gz / MoveIt 在 Windows 上没有原生构建。
-Windows 侧只放 git 工作副本和编辑器。
+本节介绍 Windows 上通过 WSL 运行 Gazebo / ros_gz / MoveIt 的方式。
+Linux / Docker 运行入口见仓库 [README](../README.md)；Windows 侧可放 git 工作副本和编辑器。
 
 `.wslconfig`（`C:\Users\<你>\.wslconfig`）：
 
