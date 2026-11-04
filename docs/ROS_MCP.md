@@ -269,12 +269,12 @@ python3 scripts/apriltag_capture.py \
 标准 parameter_bridge 默认符合。云端大图曾在 best-effort 传输中丢失，不能补帧掩盖。
 已实际运行 Jazzy `apriltag_ros` 3.4.0、AprilTag 3.4.5。
 三个 ID 0/1/2 对应 A/B/C；黑色标记边长 25 mm，含白边 visual 31.25 mm，
-标记平面高于箱体中心 17.7 mm。新场景使用 1280×960、2 Hz 俯视相机及真实外参，
+标记平面高于箱体中心 17.7 mm。新场景使用 1280×960、2 Hz 斜上方相机及真实外参，
 原有无标记颜色场景及默认世界不变。纹理按上游推荐作 nearest-neighbor 等值放大；
 直接使用 10 像素原图会因渲染插值而模糊。
 
 `vision.json` 只含相机标定和 tag→中心几何，不含箱体 world 真值。
-读取器先等待元数据发布端的 DDS 发现，再订阅 RGB、取最先收到的五张不同时间戳画面，
+读取器先等待元数据端 DDS 发现并收到首条 CameraInfo，再订阅 RGB、取最先收到的五张不同时间戳画面，
 启动不以检测成功或 tag 可见为条件。保存 PNG 与 `observations.json`，
 逐物体输出 `available/reason/world_center_m`，坐标单位为米，来源 `VISION_APRILTAG`。
 RGB/CameraInfo/检测/TF 必须同帧；丢检、重复匹配、旧 TF、无标定或畸变未校正均不可用，
