@@ -66,8 +66,17 @@ ISSUE121 = {
 
 
 def up_vector(q):
-    """Box local +Z expressed in world frame, for quaternion (x, y, z, w)."""
+    """Box local +Z expressed in world frame, for quaternion (x, y, z, w).
+
+    Normalize first: logged quaternions are rounded to six decimals and are
+    not exactly unit length. This must match release_attitude.up_vector so the
+    offline analysis and the production gate cannot disagree.
+    """
     x, y, z, w = (float(v) for v in q)
+    n = math.sqrt(x * x + y * y + z * z + w * w)
+    if not math.isfinite(n) or n <= 0.0:
+        raise ValueError('quaternion has zero or non-finite norm')
+    x, y, z, w = x / n, y / n, z / n, w / n
     return (2.0 * (x * z + w * y),
             2.0 * (y * z - w * x),
             1.0 - 2.0 * (x * x + y * y))
@@ -120,7 +129,10 @@ def analyze_record(rec, source=""):
     if not before or len(before) < 7 or not after or len(after) < 2:
         return None
     q = before[3:7]
-    t = tilt_deg(q)
+    try:
+        t = tilt_deg(q)
+    except (ValueError, TypeError, ZeroDivisionError, OverflowError):
+        return None
     dx, dy = horizontal_shift(before, after)
     shift_mm = math.hypot(dx, dy) * 1000.0
     err = rec.get("place_error_m")
@@ -144,6 +156,7 @@ def load_records(logs_root):
     pattern = os.path.join(logs_root, "**", "place.jsonl")
     files = sorted(glob.glob(pattern, recursive=True))
     rows = []
+    skipped = 0
     for path in files:
         try:
             with open(path, "r", errors="replace") as handle:
@@ -158,9 +171,11 @@ def load_records(logs_root):
                     row = analyze_record(rec, path)
                     if row is not None:
                         rows.append(row)
+                    elif rec.get("object_before_release"):
+                        skipped += 1
         except OSError:
             continue
-    return files, rows
+    return files, rows, skipped
 
 
 def gate_simulation(rows, limits=(10, 15, 20, 25, 30)):
@@ -186,7 +201,7 @@ def gate_simulation(rows, limits=(10, 15, 20, 25, 30)):
     return out
 
 
-def summarize(files, rows, max_tilt_observed=None):
+def summarize(files, rows, skipped_invalid_quaternion=0, max_tilt_observed=None):
     oriented = [r for r in rows
                 if r["direction_cosine"] is not None
                 and r["tilt_deg"] >= TILT_FLOOR_DEG
@@ -210,6 +225,7 @@ def summarize(files, rows, max_tilt_observed=None):
     return {
         "files_scanned": len(files),
         "records_with_release_pose": len(rows),
+        "records_skipped_invalid_quaternion": skipped_invalid_quaternion,
         "records_usable_for_direction": len(oriented),
         "noise_level_records_excluded": len(rows) - len(oriented),
         "max_tilt_observed_deg": max_tilt_observed if max_tilt_observed is not None
@@ -274,8 +290,8 @@ def main(argv=None):
     if not args.issue121_only:
         if not args.logs_root:
             ap.error("--logs-root is required unless --issue121-only is given")
-        files, rows = load_records(args.logs_root)
-        report["summary"] = summarize(files, rows)
+        files, rows, skipped = load_records(args.logs_root)
+        report["summary"] = summarize(files, rows, skipped)
         report["records"] = rows
 
     text = json.dumps(report, indent=2, ensure_ascii=False)

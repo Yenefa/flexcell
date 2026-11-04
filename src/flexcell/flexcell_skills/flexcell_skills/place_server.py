@@ -25,6 +25,8 @@ from flexcell_interfaces.action import PlaceObject
 from flexcell_interfaces.srv import QueryCarry
 
 from flexcell_skills.contracts.skill_result import derive_status
+from flexcell_skills.release_attitude import (
+    DEFAULT_MAX_RELEASE_TILT_DEG, attitude_gate, tilt_deg)
 from flexcell_skills.joint_follow import SnapshotWatch, follow_failure_detail, check_backend_parameter
 from flexcell_skills.common import (
     GripperClient, JsonlLog, MoveToPoseClient, PlanningSceneOps,
@@ -65,6 +67,7 @@ class PlaceServer(Node):
         self.declare_parameter('carry_query_service', '/flexcell/carry_snapshot')
         self.declare_parameter('carry_parameters_service', '/carry_server/get_parameters')
         self.declare_parameter('object_size', [0.035, 0.035, 0.035])
+        self.declare_parameter('max_release_tilt_deg', DEFAULT_MAX_RELEASE_TILT_DEG)
         self.declare_parameter('default_deadline_ms', 30000)
         self.declare_parameter('motion_profile_names', ['demo_veryslow', 'demo_slow', 'demo_default'])
         self.declare_parameter('default_motion_profile', 'demo_slow')
@@ -109,6 +112,7 @@ class PlaceServer(Node):
             callback_group=ReentrantCallbackGroup())
         self.create_service(Trigger, '/flexcell/place_ready', self._on_ready)
         self._size = list(gp('object_size').value)
+        self._max_release_tilt = float(gp('max_release_tilt_deg').value)
         self._deadline = int(gp('default_deadline_ms').value)
         self._profiles = list(gp('motion_profile_names').value)
         self._default_profile = gp('default_motion_profile').value
@@ -339,6 +343,21 @@ class PlaceServer(Node):
                 if not math.isfinite(rec['release_target_error_m']) or rec['release_target_error_m'] > self._tol:
                     return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
                                   'attached object outside unchanged place tolerance before release; carry held')
+                # Position alone is not enough: a tilted box tips over after
+                # release (issue #121). Refuse before detach so no drift is
+                # produced and no success can be claimed.
+                rec['release_tilt_deg'] = None
+                try:
+                    rec['release_tilt_deg'] = tilt_deg(release_quat)
+                except (ValueError, TypeError, ZeroDivisionError, OverflowError):
+                    pass
+                attitude_ok, attitude_detail = attitude_gate(
+                    release_quat, self._max_release_tilt)
+                rec['release_attitude'] = attitude_detail
+                if not attitude_ok:
+                    return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
+                                  'attached object attitude rejected before release; '
+                                  'carry held: %s' % attitude_detail)
             if follow is not None:
                 if not follow.confirm_now():
                     return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
