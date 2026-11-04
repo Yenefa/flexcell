@@ -106,6 +106,7 @@ def joint_place_server(monkeypatch, skill):
     server._backend_consistent = lambda: (True, '')
     server._scene = Mock()
     server._scene.is_attached.return_value = (True, '')
+    server._scene.add_box.return_value = (True, '')
     server._carry_backend = 'detachable_joint'
     server._carry_query = Mock()
     server._carry_release = Mock()
@@ -173,7 +174,8 @@ def test_unknown_executor_result_latches_adapter(monkeypatch, kind):
     assert client.executor.call.call_count == 1
 
 
-def test_legacy_joint_place_replans_each_stage_and_retreats_from_measured_ee(monkeypatch):
+@pytest.mark.parametrize('scene_ok', [True, False])
+def test_legacy_joint_place_replans_and_preserves_released_orientation(monkeypatch, scene_ok):
     from flexcell_skills import place_server as place
     server, handle = joint_place_server(monkeypatch, 'legacy')
     del server._motion  # Exercise the real stage adapter.
@@ -184,15 +186,30 @@ def test_legacy_joint_place_replans_each_stage_and_retreats_from_measured_ee(mon
     server._point.call.return_value = server._m2p.call.return_value = (motion, None)
     server._carry_release.call_async.return_value.result.return_value = NS(success=True)
     server._scene.detach_to_world.return_value = (True, None)
+    server._scene.add_box.return_value = (scene_ok, 'scene rejected' if not scene_ok else '')
     server._gripper.command.return_value = (True, None)
     server._size, server._gripper_open, server._settle = [.035]*3, .02, 0.
     poses = [[.25, 0., .12], [.12, -.15, .1675], [.12, -.15, .0675], [.12, -.15, .0175]]
-    sampler = Mock(side_effect=[((p, [0., 0., 0., 1.]), None) for p in poses])
+    quats = [[0., 0., 0., 1.], [0., 0., 0., 1.],
+             [0., 0., .5, .8660254037844386], [0., 0., .7071067811865475, .7071067811865476]]
+    sampler = Mock(side_effect=[((p, q), None) for p, q in zip(poses, quats)])
     monkeypatch.setattr(place, 'sample_gz_pose', sampler)
     monkeypatch.setattr(place, 'wait_future', lambda *_: 'done')
     monkeypatch.setattr(place, 'interruptible_sleep', lambda *_: False)
     result = server._execute(handle)
-    assert result.outcome == result.OUTCOME_SUCCEEDED and result.released
+    assert result.released
+    assert server._scene.detach_to_world.call_args.args[1] == poses[2]
+    assert server._scene.detach_to_world.call_args.kwargs['orientation'] == quats[2]
+    assert server._scene.add_box.call_args.args[1] == poses[3]
+    assert server._scene.add_box.call_args.kwargs['orientation'] == quats[3]
+    if not scene_ok:
+        assert result.outcome == result.OUTCOME_FAILED
+        assert result.error_code == result.ERR_PLACE_FAILED
+        assert 'object released' in result.detail
+        server._m2p.call.assert_not_called()  # No retreat with a stale scene.
+        handle.abort.assert_called_once()
+        return
+    assert result.outcome == result.OUTCOME_SUCCEEDED
     assert [c.args[2] for c in server._point.prepare_point.call_args_list] == [
         [.12, -.15, .1675], [.12, -.15, .0675]]
     assert [c.args[1][0] for c in server._point.prepare_point.call_args_list] == poses[:2]

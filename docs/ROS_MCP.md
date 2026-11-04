@@ -81,11 +81,12 @@ Linux/WSL 原生客户端的 command 直接使用本 checkout 的 `scripts/ros_m
 ## 4. 发给 Agent 的第一条指令
 
 > 使用 flexcell-ros MCP 连接 127.0.0.1:9090。先读取本仓库 docs/ROS_MCP.md，
-> 查询 Action 类型并观察场景。把 target_box_b 放到 world 坐标 (0.22, 0, 0.0175)，
-> target_box_a 保持任务开始时的位置。由你决定下一步，完成后分别独立验证两个物体；
+> 查询 Action 类型并观察场景。确认目标空闲后，把 target_box_a 放到 world 坐标
+> (0.12, -0.15, 0.0175)，target_box_b 保持任务开始时的位置。
+> 目标被占或无法确认空闲就停止报告。由你决定下一步，完成后分别独立验证两个物体；
 > 已到目标就验证，动作失败或终态未知就停止并报告。
 
-这是 `run105` 后可接续尝试的指令；实际执行前仍要观察当前场景，不假设旧坐标仍成立。
+执行前观察当前场景，不假设旧坐标仍成立；已在目标处则只验证。
 
 Agent 调用规则：
 
@@ -93,6 +94,10 @@ Agent 调用规则：
   `get_action_details` 查看真实字段；一次只派发一个任务。
 - 搬运 Goal 的 `place_pose.header.frame_id` 为 `world`，四元数 `w=1`，
   `motion_profile_id="demo_slow"`，`skip_verify=false`。
+- `/run_pick_place` 和 `/run_demo` 在 PICK 前按 Observe 中所有箱体的实测几何
+  检查目的地；被占返回 `ERR_SAFETY_REJECTED`，detail 含
+  `destination_occupied:物体名`。几何不可用也拒绝。此检查保守包络搬运物体的
+  可能转角，可能拒绝紧邻放置；它不保证沿途避障，也不覆盖直接调用底层 Pick/Place。
 - `send_action_goal` **显式指定 `timeout=150`**，上游默认仅 5 秒。
   不自动重发已接受或接受状态未知的 Goal。
 - 返回 `success=true` 只说明收到 Action 结果。搬运需要嵌套 `result.outcome==0`、
@@ -124,6 +129,10 @@ fields = action_fields(payload)
 | RunPickPlace | `outcome`, `error_code`, `object_at_place`, `final_position_error_m`, `detail` | outcome/error_code 为 0 且 object_at_place 为 true |
 | VerifyObject | `outcome`, `error_code`, `verified`, `has_measured_pose`, `position_error_m`, `measured_pose` | outcome/error_code 为 0、verified 与 has_measured_pose 为 true，误差为有限值且在容差内 |
 
+VerifyObject Goal 的 `expected_pose` 是 **Pose**：直接包含 `position` 与 `orientation`，
+不再包一层 `pose` 或 `header`。容差字段是 `position_tolerance_m=0.06`。
+现场一次“验证字段为 null”已定位为 Goal 字段传错；应先修正 Goal，再检查结果解码。
+
 例如 VerifyObject 的布尔值在标准结构中是
 `reply.structuredContent["result"]["verified"]`，不是
 `reply.structuredContent["verified"]`；JSON 字符串结果按上面先解码。
@@ -141,4 +150,7 @@ false 或 true，也不能为重新取得报告而重复已完成的搬运动作
 连接器面板的 Trust 和第一次 UI 调用仍由本机用户确认，不能据 stdio 成功宣称 UI 已通过。
 日常任务优先使用 MCP；排障仍可使用 CLI、`skills/*.jsonl` 与 ROS 日志。
 
-本入口不修复 #104 的第三次放置几何错误。任务能否完成仍以本次实际结果为准。
+修复前，电脑端报告同一配置中首次搬运 12/12 成功，二次抓取 5/5 在 PLACE hover
+失败；另有目标被占却推开非目标物体的反例。#107 保留实测四元数、绑定前刷新姿态、
+放置后同步实测场景，并增加上述占用拒绝。多步操作是否恢复，仍需同一世界的三步交换
+和全物体验证证明；离线回归或首次搬运成功不能替代这项现场验证。
