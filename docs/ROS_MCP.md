@@ -189,7 +189,10 @@ A、B、C；每次 PICK 前 `pick.jsonl` 的 `scene_synced` 都包含其余全�
 （包括尚未搬过的 C），`scene_sync_skipped=[]`。Agent 选择 A→暂存
 (0.12, −0.15)、C→A 原位、B→C 原位、A→B 原位，共 4 次 `RunPickPlace`，
 全部 `outcome=0 / error_code=0 / object_at_place=true`；每步非目标物体
-Δxyz ≤1e-5 m。最终独立 VerifyObject：A 2.445 mm、B 3.281 mm、C 0.749 mm，
-均 ≤10 mm；暂存点已清空，最终 health 19/19、IDLE、carry=false。
+Δxyz ≤1e-5 m。另用第 5 次调用把 A 指向 C 当前占用点，0.09 s 内被
+`ERR_SAFETY_REJECTED=53` 零运动拒绝，detail 为
+`destination_occupied:target_box_c`。最终独立 VerifyObject：A 2.445 mm、
+B 3.281 mm、C 0.749 mm，均 ≤10 mm；暂存点已清空，最终 health 19/19、
+IDLE、carry=false。
 这是 n=1 的功能演示，不是成功率或统计结论。默认两物体行为、历史 profile
 哈希与原有场景序列保持不变；三物体场景必须通过 `scene="three_boxes"` 显式启用。
