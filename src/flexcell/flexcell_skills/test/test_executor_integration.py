@@ -16,6 +16,7 @@ plus the atomic admission lock (second concurrent task -> RESOURCE_BUSY).
 """
 
 import json
+import math
 from pathlib import Path
 import shutil
 import tempfile
@@ -453,6 +454,44 @@ class TestSingleTaskPolicySeam(unittest.TestCase):
         self.assertFalse(any(c.startswith('VERIFY') for c in calls))
 
 
+class TestDestinationGuard(unittest.TestCase):
+    def drive(self, single=True, available=True):
+        with tempfile.TemporaryDirectory(prefix='fx_occupied_it_') as tmp:
+            calls = []
+            world = _world_state()
+            world.objects[0].available = available
+            script = {'OBSERVE': [(_skill_result(world_state=world), None)]}
+            node = _make_fsm(tmp, _make_demo_call(script, calls))
+            if single:
+                goal = RunPickPlace.Goal()
+                goal.object_name = 'target_box_b'
+                goal.place_pose.pose = _pose(.22, 0.)
+                result = node._execute(_GoalHandle(goal))
+            else:
+                node._zones['zone_1'] = (.20, -.18, .0175)
+                result = node._execute_demo(_GoalHandle(RunDemo.Goal()))
+            return result, calls
+
+    def test_single_task_rejects_occupied_target_before_pick(self):
+        result, calls = self.drive()
+        self.assertEqual(result.error_code, RunPickPlace.Result.ERR_SAFETY_REJECTED)
+        self.assertIn('destination_occupied:target_box_a', result.detail)
+        self.assertFalse(result.object_at_place)
+        self.assertEqual(calls, ['OBSERVE_A'])
+
+    def test_demo_rejects_occupied_target_before_pick(self):
+        result, calls = self.drive(single=False)
+        self.assertEqual(result.error_code, RunDemo.Result.ERR_SAFETY_REJECTED)
+        self.assertIn('destination_occupied:target_box_b', result.detail)
+        self.assertEqual(calls, ['OBSERVE_A'])
+
+    def test_unavailable_passive_object_rejects_before_pick(self):
+        result, calls = self.drive(available=False)
+        self.assertEqual(result.error_code, RunPickPlace.Result.ERR_SAFETY_REJECTED)
+        self.assertIn('destination_geometry_unavailable', result.detail)
+        self.assertEqual(calls, ['OBSERVE_A'])
+
+
 class TestCallSkillTimeout(unittest.TestCase):
 
     def test_result_timeout_cancels_and_reports(self):
@@ -592,7 +631,7 @@ class TestJointFollowStop(unittest.TestCase):
         node._engage_carry = lambda *args: (True, 'confirmed')
         node._release_everything = unittest.mock.Mock(return_value=(True, ''))
         node._gripper = SimpleNamespace(command=unittest.mock.Mock(return_value=(None, None)))
-        node._scene = SimpleNamespace(add_box=lambda *args: (True, ''),
+        node._scene = SimpleNamespace(add_box=lambda *args, **kwargs: (True, ''),
                                       attach=lambda *args: (True, ''),
                                       remove=unittest.mock.Mock())
         def motion(position, profile, rid, cancel_check=None):
@@ -609,6 +648,41 @@ class TestJointFollowStop(unittest.TestCase):
             return SimpleNamespace(outcome=0, error_code=0), 0, 'ok'
         node._motion = motion
         return node
+
+    def test_mtc_pick_receives_rotated_object_pose(self):
+        node = self.pick_node(self.Watch(), True)
+        node._mtc = unittest.mock.Mock(audit=[])
+        node._mtc.prepare.return_value = (False, 'stop before execution')
+        node._engage_carry = unittest.mock.Mock()
+        angle = math.radians(54.3) / 2
+        quat = (0., 0., math.sin(angle), math.cos(angle))
+        gh = _GoalHandle(PickObject.Goal(object_name='target_box_a'))
+        with patch.object(pick_server_module, 'sample_gz_pose',
+                          return_value=(((.22, 0., .0175), quat), None)):
+            result = node._execute(gh)
+        self.assertEqual(result.error_code, PickObject.Result.ERR_MOTION_FAILED)
+        self.assertEqual(node._mtc.prepare.call_args.kwargs['object_orientation'], quat)
+        node._engage_carry.assert_not_called()
+        node._gripper.command.assert_not_called()
+
+    def test_unusable_pre_attach_pose_stops_with_carry_held(self):
+        for failure in ('observation', 'scene'):
+            with self.subTest(failure=failure):
+                node = self.pick_node(self.Watch(), True)
+                node._scene.attach = unittest.mock.Mock()
+                node._scene.add_box = unittest.mock.Mock(side_effect=[
+                    (True, ''), (False, 'scene rejected')])
+                sample = (((.22, 0., .0175), (0., 0., 0., 1.)), None)
+                samples = [sample, (None, 'stale')] if failure == 'observation' else [sample, sample]
+                gh = _GoalHandle(PickObject.Goal(object_name='target_box_a'))
+                with patch.object(pick_server_module, 'sample_gz_pose', side_effect=samples), \
+                        patch.object(pick_server_module, 'SnapshotWatch', return_value=self.Watch()), \
+                        patch.object(pick_server_module, 'interruptible_sleep', return_value=False):
+                    result = node._execute(gh)
+                self.assertEqual(result.error_code, PickObject.Result.ERR_INTERNAL)
+                self.assertIn('carry held', result.detail)
+                node._scene.attach.assert_not_called()
+                node._release_everything.assert_not_called()
 
     def test_pick_follow_fault_stops_and_never_releases_before_reconciliation(self):
         for stop_confirmed, already_completed in ((True, False), (False, True), (False, False)):
@@ -701,7 +775,7 @@ class TestJointFollowStop(unittest.TestCase):
 class TestPickLiftCleanup(unittest.TestCase):
     """Drive the real lift failure branch and real planning-scene messages."""
 
-    def drive(self, scene_ok=True, gripper_ok=True, cancel=False):
+    def drive(self, scene_ok=True, gripper_ok=True, cancel=False, samples=None):
         node = PickServer.__new__(PickServer)
         node._backend_consistent = lambda: (True, '')
         values = dict(_seq=0, _admission=threading.Lock(),
@@ -753,11 +827,28 @@ class TestPickLiftCleanup(unittest.TestCase):
             return (False, 'apply rejected') if cleanup and not scene_ok else (True, '')
 
         node._scene._apply_scene = apply
-        with patch.object(pick_server_module, 'sample_gz_pose', return_value=(
-                ((0.22, 0.0, 0.0175), (0.0, 0.0, 0.0, 1.0)), None)), \
+        with patch.object(pick_server_module, 'sample_gz_pose', side_effect=samples,
+                          return_value=(((0.22, 0.0, 0.0175), (0.0, 0.0, 0.0, 1.0)), None)), \
                 patch.object(pick_server_module, 'interruptible_sleep', return_value=False):
             result = node._execute(gh)
         return result, scenes, stopped
+
+    def test_regrasp_refreshes_full_measured_pose_before_attachment(self):
+        def rotated(degrees):
+            angle = math.radians(degrees) / 2
+            return (0., 0., math.sin(angle), math.cos(angle))
+        before = ((.22, 0., .0175), rotated(54.3))
+        engaged = ((.22013, 0., .0175), rotated(111.3))
+        result, scenes, _ = self.drive(cancel=True, samples=[(before, None), (engaged, None)])
+        self.assertEqual(result.error_code, PickObject.Result.ERR_CANCELED)
+        self.assertEqual(len(scenes), 3)
+        for scene, (position, quat) in zip(scenes[:2], (before, engaged)):
+            pose = scene.world.collision_objects[0].primitive_poses[0]
+            self.assertEqual((pose.position.x, pose.position.y, pose.position.z), position)
+            self.assertEqual((pose.orientation.x, pose.orientation.y,
+                              pose.orientation.z, pose.orientation.w), quat)
+        self.assertEqual(scenes[2].robot_state.attached_collision_objects[0].object.id,
+                         'target_box_a')
 
     def test_lift_failure_clears_attachment_and_world_in_one_diff(self):
         result, scenes, stopped = self.drive()
@@ -787,7 +878,7 @@ class TestPickLiftCleanup(unittest.TestCase):
         result, scenes, stopped = self.drive(cancel=True)
         self.assertEqual(result.error_code, PickObject.Result.ERR_CANCELED)
         self.assertEqual(stopped, [])
-        self.assertEqual(len(scenes), 2)  # world ADD, attachment ADD; no cleanup
+        self.assertEqual(len(scenes), 3)  # world ADD, measured refresh, attach; no cleanup
 
 
 if __name__ == '__main__':

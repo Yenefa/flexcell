@@ -325,12 +325,13 @@ class PlaceServer(Node):
                 if not all(math.isfinite(value) for value in retreat):
                     return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
                                   'nonfinite measured retreat target; carry held')
+            sampled, error = sample_gz_pose(goal.object_name, max_age_s=.5)
+            if sampled is None:
+                return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
+                              'pre-release physical observation unavailable; carry held: %s' % error)
+            release_pos, release_quat = sampled
+            rec['object_before_release'] = list(release_pos) + list(release_quat)
             if joint_targets:
-                sampled, error = sample_gz_pose(goal.object_name, max_age_s=.5)
-                if sampled is None:
-                    return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
-                                  'pre-release physical observation unavailable; carry held: %s' % error)
-                rec['object_before_release'] = list(sampled[0]) + list(sampled[1])
                 rec['release_target_error_m'] = dist3(sampled[0], descend)
                 if not math.isfinite(rec['release_target_error_m']) or rec['release_target_error_m'] > self._tol:
                     return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
@@ -359,7 +360,7 @@ class PlaceServer(Node):
                               'carry release failed: %s' % release.message)
             rec['carry_release_confirmed'] = True
             sok, serr = self._scene.detach_to_world(
-                goal.object_name, place_pos, self._size)
+                goal.object_name, release_pos, self._size, orientation=release_quat)
             if not sok:
                 return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
                               'planning-scene detach failed: %s' % serr)
@@ -383,6 +384,13 @@ class PlaceServer(Node):
             rec['box_after'] = box_after
             drop_err = dist3(box_after, place_pos)
             rec['place_error_m'] = drop_err
+            # The released object may settle at a different pose. Keep that
+            # measured orientation for subsequent plans and re-grasps.
+            sok, serr = self._scene.add_box(
+                goal.object_name, box_after, self._size, orientation=box_quat)
+            if not sok:
+                return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
+                              'post-drop scene refresh failed (object released): %s' % serr)
 
             # ---------- RETREATING ----------
             self._feedback(goal_handle, 'RETREATING', t0)

@@ -49,7 +49,8 @@ from flexcell_skills.contracts.action_result import AcceptedGoalResult
 from flexcell_skills.contracts.episode import EpisodeRecorder, EpisodeStore
 from flexcell_skills.contracts.benchmark_protocol import load_protocol
 from flexcell_skills.contracts.safety_gate import (
-    metrics as safety_metrics, sanitize as sanitize_decision, validate)
+    destination_clear, metrics as safety_metrics,
+    sanitize as sanitize_decision, validate)
 from flexcell_skills.contracts.recovery import (
     RECIPE_PICK, RECIPE_VERIFY, recovery_eligible)
 from flexcell_skills.contracts.skill_result import previous_skill_result
@@ -529,6 +530,9 @@ class TaskFsmServer(Node):
                               if world_canonical is not None else None)
                 gate_ok, gate_reason = validate(decision, goal_obj, world_dict,
                                                 constraints)
+                if gate_ok and decision.action == ACTION_PICK:
+                    gate_ok, gate_reason = destination_clear(
+                        world_dict, decision.target, zones[zone_of[decision.target]])
                 if not gate_ok:
                     safety_rejected += 1
                     self._decision_log.write({

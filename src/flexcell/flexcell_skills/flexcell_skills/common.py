@@ -494,7 +494,8 @@ class PlanningSceneOps:
         resp = fut.result()
         return bool(resp.success), ''
 
-    def add_box(self, name, position, size, frame='world'):
+    def add_box(self, name, position, size, frame='world',
+                *, orientation=(0.0, 0.0, 0.0, 1.0)):
         co = CollisionObject()
         co.header.frame_id = frame
         co.id = name
@@ -502,7 +503,7 @@ class PlanningSceneOps:
         sp.type = SolidPrimitive.BOX
         sp.dimensions = list(size)
         co.primitives.append(sp)
-        co.primitive_poses.append(pose_msg(position, (0.0, 0.0, 0.0, 1.0)))
+        co.primitive_poses.append(pose_msg(position, orientation))
         co.operation = CollisionObject.ADD
         scene = PlanningScene()
         scene.world.collision_objects.append(co)
@@ -518,7 +519,8 @@ class PlanningSceneOps:
         scene.robot_state.is_diff = True
         return self._apply_scene(scene)
 
-    def detach_to_world(self, name, position, size, frame='world'):
+    def detach_to_world(self, name, position, size, frame='world',
+                        *, orientation=(0.0, 0.0, 0.0, 1.0)):
         aco = AttachedCollisionObject()
         aco.object.id = name
         aco.object.operation = CollisionObject.REMOVE
@@ -532,7 +534,7 @@ class PlanningSceneOps:
         sp.type = SolidPrimitive.BOX
         sp.dimensions = list(size)
         co.primitives.append(sp)
-        co.primitive_poses.append(pose_msg(position, (0.0, 0.0, 0.0, 1.0)))
+        co.primitive_poses.append(pose_msg(position, orientation))
         co.operation = CollisionObject.ADD
         scene.world.collision_objects.append(co)
         return self._apply_scene(scene)

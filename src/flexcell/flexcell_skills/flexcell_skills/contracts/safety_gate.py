@@ -26,6 +26,8 @@ Counting is the EXECUTOR's job (B2/B3): the gate returns the verdict, the
 executor accounts evaluated/rejected and exposes invalid-decisions-per-1000.
 """
 
+import math
+
 STALE_WORLD = 'world_stale'
 SAFETY_REJECTED = 'safety_rejected'
 
@@ -93,6 +95,58 @@ def validate(decision, goal, world_dict, constraints):
     return True, None
 
 
+def destination_clear(world_dict, target, destination):
+    """Conservative pre-PICK check against the observed boxes.
+
+    The carried box can rotate en route: bound it by its circumscribed sphere
+    and test that sphere against each passive box in the box's measured frame.
+    This checks destination occupancy only; MoveIt still plans the motion.
+    Missing or invalid geometry cannot establish a free destination.
+    """
+    def vector(value, length):
+        values = tuple(float(v) for v in value)
+        if len(values) != length or not all(math.isfinite(v) for v in values):
+            raise ValueError('invalid geometry')
+        return values
+
+    def size_of(obj):
+        if obj['klass'] != 'box' or not obj['available']:
+            raise ValueError('unavailable box')
+        size = vector(obj['size'], 3)
+        if min(size) <= 0:
+            raise ValueError('invalid box size')
+        return size
+
+    try:
+        objects = world_dict['world_state']['objects']
+        moving = next(obj for obj in objects if obj['name'] == target)
+        radius = math.hypot(*size_of(moving)) / 2
+        goal = vector(destination, 3)
+        for obj in objects:
+            if obj['name'] == target:
+                continue
+            half = tuple(s / 2 for s in size_of(obj))
+            pose = obj['pose']
+            center = vector((pose['position'][k] for k in 'xyz'), 3)
+            x, y, z, w = vector((pose['orientation'][k] for k in 'xyzw'), 4)
+            norm = math.hypot(x, y, z, w)
+            if abs(norm - 1.0) > .001:
+                raise ValueError('invalid quaternion')
+            x, y, z, w = (v / norm for v in (x, y, z, w))
+            # Columns of the rotation matrix map world deltas into box axes.
+            axes = ((1 - 2*(y*y + z*z), 2*(x*y + z*w), 2*(x*z - y*w)),
+                    (2*(x*y - z*w), 1 - 2*(x*x + z*z), 2*(y*z + x*w)),
+                    (2*(x*z + y*w), 2*(y*z - x*w), 1 - 2*(x*x + y*y)))
+            delta = tuple(g - c for g, c in zip(goal, center))
+            outside = [max(0.0, abs(sum(a*d for a, d in zip(axis, delta))) - h)
+                       for axis, h in zip(axes, half)]
+            if math.hypot(*outside) <= radius:
+                return False, 'destination_occupied:' + obj['name']
+    except (KeyError, TypeError, ValueError, StopIteration, OverflowError):
+        return False, 'destination_geometry_unavailable'
+    return True, None
+
+
 def rejection_canonical_code(reason):
     """Typed canonical code for a rejection (error_codes vocabulary)."""
     from flexcell_skills.contracts.error_codes import (
@@ -106,7 +160,9 @@ def rejection_canonical_code(reason):
         'target_not_available': ERR_OBJECT_NOT_FOUND,
         'already_carried': ERR_SAFETY_REJECTED,
         'not_carried': ERR_NOT_CARRIED,
-    }.get(reason, ERR_INTERNAL)
+        'destination_occupied': ERR_SAFETY_REJECTED,
+        'destination_geometry_unavailable': ERR_SAFETY_REJECTED,
+    }.get((reason or '').split(':', 1)[0], ERR_INTERNAL)
 
 
 def metrics(evaluated, rejected):

@@ -397,7 +397,8 @@ class PickServer(Node):
                 targets = [[box_pos[0], box_pos[1], box_pos[2] + dz]
                            for dz in (self._hover, self._grasp_dz, self._grasp_dz + self._raise)]
                 planned, message = mtc.prepare('PICK', goal.object_name, box_pos,
-                                               targets, profile, self._deadline)
+                                               targets, profile, self._deadline,
+                                               object_orientation=box_quat)
                 rec.update(skill_backend='mtc', planning_detail=message)
                 if not planned:
                     return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
@@ -415,7 +416,7 @@ class PickServer(Node):
             # instead of knocking it (measured 2026-09-26: a blind approach
             # swept the box aside and landed 4.7cm short of the hover target)
             scene_added, serr = self._scene.add_box(
-                goal.object_name, box_pos, self._size)
+                goal.object_name, box_pos, self._size, orientation=box_quat)
             rec['scene_box_added'] = bool(scene_added)
 
             cancel_requested = lambda: goal_handle.is_cancel_requested  # noqa: E731
@@ -505,6 +506,23 @@ class PickServer(Node):
                 return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
                               follow_failure_detail(follow.problem()))
 
+            # Carry engagement can rotate the box. MoveIt derives the attached
+            # shape from the world object at attach time, so refresh its FULL
+            # measured pose instead of attaching the pre-approach belief.
+            sampled, err = sample_gz_pose(goal.object_name, max_age_s=.5)
+            if sampled is None:
+                return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                              'pre-attach observation unavailable; carry held: %s' % err)
+            attach_pos, attach_quat = sampled
+            rec['object_before_attach'] = list(attach_pos) + list(attach_quat)
+            sok, serr = self._scene.add_box(
+                goal.object_name, attach_pos, self._size, orientation=attach_quat)
+            if not sok:
+                return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                              'pre-attach scene refresh failed; carry held: %s' % serr)
+            if follow is not None and follow.problem():
+                return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
+                              follow_failure_detail(follow.problem()))
             sok, serr = self._scene.attach(goal.object_name)
             if not sok:
                 if follow is not None:
