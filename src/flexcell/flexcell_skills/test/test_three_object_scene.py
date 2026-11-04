@@ -62,6 +62,13 @@ def test_a_detachable_guard_without_a_three_box_scene_keeps_the_default_names(tm
     assert guard.findall('allowed_model') == []
 
 
+def test_the_three_box_velocity_carry_allows_every_tracked_object(tmp_path):
+    params_path, world_path = profile(tmp_path / 'servo-three', scene='three_boxes')
+    tracked = read_params(params_path)['observe_server']['ros__parameters']['tracked_objects']
+    carry = plugin(world_path, 'flexcell::CarryDynamics')
+    assert [item.text for item in carry.findall('allowed_model')] == tracked
+
+
 def test_an_unknown_scene_is_refused(tmp_path):
     with pytest.raises(ValueError, match='unknown scene'):
         profile(tmp_path / 'bad', scene='four_boxes')

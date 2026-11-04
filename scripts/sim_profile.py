@@ -85,6 +85,12 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
         if model is None or model.get('name') != 'target_box_c':
             raise ValueError('the three-box scene asset is missing target_box_c')
         world.append(model)
+        if backend == 'velocity_servo':
+            carry = world.find("plugin[@name='flexcell::CarryDynamics']")
+            for item in list(carry.findall('allowed_model')):
+                carry.remove(item)
+            for name in tracked:
+                ET.SubElement(carry, 'allowed_model').text = name
     if physics_step_s is not None:
         if backend != 'detachable_joint' or physics_step_s != .002:
             raise ValueError('only the declared 2 ms joint qualification step is supported')
