@@ -19,7 +19,7 @@ DECISION_POLICIES = ('fsm', 'jev', 'llm', 'hybrid')
 # it does not generalize shape, size or perception.
 SCENES = ('three_boxes', 'tagged_three_boxes')
 THREE_OBJECTS = ('target_box_a', 'target_box_b', 'target_box_c')
-TAGGED_CAMERA_POSE = [.18, -.09, .35, 0., 1.5707963267948966, 0.]
+TAGGED_CAMERA_POSE = [.30, -.30, .40, 0., .98, 2.09]
 
 
 def add_visual_tags(world):

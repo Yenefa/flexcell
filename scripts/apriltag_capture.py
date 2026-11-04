@@ -108,10 +108,11 @@ def main():
     try:
         while rclpy.ok() and time.monotonic() - started < args.timeout:
             rclpy.spin_once(node, timeout_sec=.05)
-            # Discover metadata endpoints before subscribing to raw frames. This
-            # avoids losing the first frame's CameraInfo during DDS discovery;
+            # Wait for metadata discovery and the first CameraInfo delivery;
+            # endpoint discovery can precede the first delivered metadata.
             # it does not wait for detections, valid tags or a successful pose.
-            if node.image_input is None and all(s.get_publisher_count() for s in node.inputs):
+            if (node.image_input is None and node.infos
+                    and all(s.get_publisher_count() for s in node.inputs)):
                 node.image_input = node.create_subscription(Image, '/flexcell/camera/rgb', node.image, 5)
             if (len(node.images) == args.frames and
                     time.monotonic() - node.last_image_received >= args.grace):
@@ -134,7 +135,7 @@ def main():
                       status='OBSERVATIONS_AVAILABLE' if complete else 'UNAVAILABLE',
                       accuracy_assessed=False, requested_frames=args.frames,
                       capture_started=node.image_input is not None,
-                      start_condition='metadata_publishers_matched',
+                      start_condition='metadata_publishers_matched_and_camera_info_received',
                       captured_frames=len(rows), frames=rows)
         (args.out / 'observations.json').write_text(json.dumps(report, indent=2, allow_nan=False) + '\n')
         print(json.dumps({k: v for k, v in report.items() if k != 'frames'}))
