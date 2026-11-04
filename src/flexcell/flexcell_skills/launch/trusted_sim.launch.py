@@ -58,9 +58,14 @@ def launch_stack(context):
                    for name in ('arm_controller', 'gripper_controller')]
     bridges = ['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
                '/flexcell/physics_trace@std_msgs/msg/String[gz.msgs.StringMsg']
+    remaps = []
     if camera:
         bridges += ['/flexcell/camera/rgb@sensor_msgs/msg/Image[gz.msgs.Image',
-                    '/flexcell/camera/rgb/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo']
+                    '/flexcell/camera/camera_info@sensor_msgs/msg/CameraInfo[gz.msgs.CameraInfo']
+        # The gz camera publishes CameraInfo on /flexcell/camera/camera_info
+        # while the documented ROS topic stays /flexcell/camera/rgb/camera_info.
+        remaps = ['--ros-args', '-r',
+                  '/flexcell/camera/camera_info:=/flexcell/camera/rgb/camera_info']
     gazebo_args = ['gz', 'sim', '-s', '-r', '-v', '2']
     if camera:
         gazebo_args += ['--headless-rendering']
@@ -71,7 +76,7 @@ def launch_stack(context):
         ExecuteProcess(cmd=gazebo_args, output='screen'),
         Node(package='robot_state_publisher', executable='robot_state_publisher',
              parameters=[{'robot_description': robot, 'use_sim_time': True}], output='screen'),
-        Node(package='ros_gz_bridge', executable='parameter_bridge', arguments=bridges,
+        Node(package='ros_gz_bridge', executable='parameter_bridge', arguments=bridges + remaps,
              parameters=[{'use_sim_time': True}], output='screen'),
         RegisterEventHandler(OnProcessExit(target_action=spawn,
             on_exit=successful_exit([broadcaster], 'robot model spawn'))),
