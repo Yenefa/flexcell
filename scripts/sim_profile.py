@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Materialize a new simulation profile; never rewrite a historical world."""
 from copy import deepcopy
+import json
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
@@ -16,18 +17,50 @@ DECISION_POLICIES = ('fsm', 'jev', 'llm', 'hybrid')
 # Opt-in scenes keep the shipped two-box world and every historical profile
 # byte-compatible. A scene adds same-spec models and declares the object set;
 # it does not generalize shape, size or perception.
-SCENES = ('three_boxes',)
+SCENES = ('three_boxes', 'tagged_three_boxes')
 THREE_OBJECTS = ('target_box_a', 'target_box_b', 'target_box_c')
+TAGGED_CAMERA_POSE = [.18, -.09, .35, 0., 1.5707963267948966, 0.]
+
+
+def add_visual_tags(world):
+    """Attach upstream tag textures; the 25 mm black square has a white border."""
+    tags = []
+    for tag_id, name in enumerate(THREE_OBJECTS):
+        link = world.find("model[@name='%s']/link[@name='link']" % name)
+        visual = ET.SubElement(link, 'visual', name='apriltag_%d' % tag_id)
+        ET.SubElement(visual, 'pose').text = '0 0 0.0177 0 0 0'
+        plane = ET.SubElement(ET.SubElement(visual, 'geometry'), 'plane')
+        ET.SubElement(plane, 'normal').text = '0 0 1'
+        ET.SubElement(plane, 'size').text = '0.03125 0.03125'
+        material = ET.SubElement(visual, 'material')
+        ET.SubElement(material, 'ambient').text = '1 1 1 1'
+        ET.SubElement(material, 'diffuse').text = '1 1 1 1'
+        metal = ET.SubElement(ET.SubElement(material, 'pbr'), 'metal')
+        asset = ROOT / 'worlds' / 'tags' / ('tag36_11_%05d_texture.png' % tag_id)
+        if not asset.is_file():
+            raise ValueError('missing upstream AprilTag image: ' + str(asset))
+        ET.SubElement(metal, 'albedo_map').text = asset.resolve().as_uri()
+        ET.SubElement(metal, 'metalness').text = '0'
+        ET.SubElement(metal, 'roughness').text = '1'
+        tags.append(dict(id=tag_id, object=name, frame='vision_tag_%d' % tag_id,
+                         tag_to_center=[0., 0., -.0177, 0., 0., 0., 1.]))
+    return tags
 
 
 def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
             joint_hold_sim_s=0., physics_step_s=None, *, contact_trace=False, release_clearance_m=None,
             qualification_no_recovery=False, synchronous_step_logs=False, resume_completed_objects=False,
-            decision_policy='fsm', hybrid_threshold=None, scene=None):
+            decision_policy='fsm', hybrid_threshold=None, scene=None, perception_only=False):
     if backend not in BACKENDS or skill_backend not in ('legacy', 'mtc'):
         raise ValueError('unsupported backend')
     if scene is not None and scene not in SCENES:
         raise ValueError('unknown scene %r %r' % (scene, SCENES))
+    tagged = scene == 'tagged_three_boxes'
+    three_boxes = scene in ('three_boxes', 'tagged_three_boxes')
+    if tagged and not camera:
+        raise ValueError('the tagged scene requires camera=True')
+    if perception_only and (not tagged or backend != 'detachable_joint' or contact_trace or joint_hold_sim_s):
+        raise ValueError('perception_only requires the tagged detachable_joint scene without carry qualification')
     if decision_policy not in DECISION_POLICIES:
         raise ValueError('unknown decision policy %r %r' % (decision_policy, DECISION_POLICIES))
     if decision_policy == 'hybrid':
@@ -46,7 +79,7 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
     out = Path(out)
     config = yaml.safe_load((ROOT / 'src/flexcell/flexcell_skills/config/week1.yaml').read_text())
     config.update(yaml.safe_load((ROOT / 'src/flexcell/flexcell_skills/config/move_to_pose.yaml').read_text()))
-    if scene == 'three_boxes':
+    if three_boxes:
         config['observe_server']['ros__parameters']['tracked_objects'] = list(THREE_OBJECTS)
         config['observe_server']['ros__parameters']['object_target_box_c_size'] = [.035, .035, .035]
     # One declaration of the object set, propagated to every node that validates
@@ -55,7 +88,7 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
     for name, node in config.items():
         if 'ros__parameters' in node:
             node['ros__parameters']['log_dir'] = str(out / 'skills')
-            if scene == 'three_boxes' and name != 'observe_server':
+            if three_boxes and name != 'observe_server':
                 node['ros__parameters']['tracked_objects'] = list(tracked)  # fresh copy: PyYAML must not emit aliases
     for name in ('pick_server', 'place_server', 'carry_server'):
         config[name]['ros__parameters']['carry_backend'] = backend
@@ -80,7 +113,7 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
     base = 'flexcell_velocity_servo.sdf' if backend == 'velocity_servo' else 'flexcell_world.sdf'
     tree = ET.parse(ROOT / 'worlds' / base)
     world = tree.getroot().find('world')
-    if scene == 'three_boxes':
+    if three_boxes:
         model = ET.parse(ROOT / 'worlds' / 'target_box_c.sdf').getroot().find('model')
         if model is None or model.get('name') != 'target_box_c':
             raise ValueError('the three-box scene asset is missing target_box_c')
@@ -95,15 +128,16 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
         if backend != 'detachable_joint' or physics_step_s != .002:
             raise ValueError('only the declared 2 ms joint qualification step is supported')
         world.find('physics/max_step_size').text = '0.002'
-    trace = ET.SubElement(world, 'plugin', name='flexcell::PhysicsTrace',
-                          filename='libflexcell_physics_trace.so')
-    if scene == 'three_boxes':
-        for name in tracked:
-            ET.SubElement(trace, 'object').text = name
-    if backend == 'detachable_joint':
+    if not perception_only:
+        trace = ET.SubElement(world, 'plugin', name='flexcell::PhysicsTrace',
+                              filename='libflexcell_physics_trace.so')
+        if three_boxes:
+            for name in tracked:
+                ET.SubElement(trace, 'object').text = name
+    if backend == 'detachable_joint' and not perception_only:
         guard = ET.SubElement(world, 'plugin', name='flexcell::DetachableCarryGuard',
                               filename='libflexcell_detachable_carry.so')
-        if scene == 'three_boxes':
+        if three_boxes:
             for name in tracked:
                 ET.SubElement(guard, 'allowed_model').text = name
     if contact_trace:
@@ -127,20 +161,30 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
         ET.SubElement(sensors, 'render_engine').text = 'ogre2'
         model = ET.SubElement(world, 'model', name='dataset_camera')
         ET.SubElement(model, 'static').text = 'true'
-        ET.SubElement(model, 'pose').text = '0.55 -0.45 0.55 0 0.693 2.297'
+        ET.SubElement(model, 'pose').text = (' '.join(map(str, TAGGED_CAMERA_POSE)) if tagged
+                                           else '0.55 -0.45 0.55 0 0.693 2.297')
         link = ET.SubElement(model, 'link', name='camera_link')
         sensor = ET.SubElement(link, 'sensor', name='rgb', type='camera')
         ET.SubElement(sensor, 'always_on').text = 'true'
-        ET.SubElement(sensor, 'update_rate').text = '10'
+        ET.SubElement(sensor, 'update_rate').text = '2' if tagged else '10'
         ET.SubElement(sensor, 'topic').text = '/flexcell/camera/rgb'
         rgb = ET.SubElement(sensor, 'camera')
-        ET.SubElement(rgb, 'horizontal_fov').text = '1.20'
+        ET.SubElement(rgb, 'horizontal_fov').text = '0.80' if tagged else '1.20'
         image = ET.SubElement(rgb, 'image')
-        for key, value in [('width', '640'), ('height', '480'), ('format', 'R8G8B8')]:
+        dimensions = ('1280', '960') if tagged else ('640', '480')
+        for key, value in [('width', dimensions[0]), ('height', dimensions[1]), ('format', 'R8G8B8')]:
             ET.SubElement(image, key).text = value
         clip = ET.SubElement(rgb, 'clip')
         ET.SubElement(clip, 'near').text = '0.02'
         ET.SubElement(clip, 'far').text = '3.0'
+    calibration = None
+    if tagged:
+        # Sensor/tag calibration only: no box world coordinates enter the reader.
+        calibration = dict(camera_frame='dataset_camera/camera_link/rgb',
+                           camera_sdf_pose=list(TAGGED_CAMERA_POSE),
+                           tag_size_m=.025, tags=add_visual_tags(world))
+        if perception_only:
+            calibration['perception_only'] = True
     if synchronous_step_logs:
         for name in ('flexcell::PhysicsTrace', 'flexcell::ContactTrace'):
             ET.SubElement(world.find("plugin[@name='%s']" % name), 'flush_each_step').text = 'true'
@@ -150,4 +194,8 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
         yaml.safe_dump(config, stream, sort_keys=False)
     with world_path.open('xb') as stream:
         tree.write(stream, encoding='utf-8', xml_declaration=True)
+    if tagged:
+        with (out / 'vision.json').open('x') as stream:
+            json.dump(calibration, stream, indent=2, allow_nan=False)
+            stream.write('\n')
     return params_path, world_path

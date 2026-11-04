@@ -225,3 +225,63 @@ B 3.281 mm、C 0.749 mm，均 ≤10 mm；暂存点已清空，最终 health 19/1
 IDLE、carry=false。
 这是 n=1 的功能演示，不是成功率或统计结论。默认两物体行为、历史 profile
 哈希与原有场景序列保持不变；三物体场景必须通过 `scene="three_boxes"` 显式启用。
+
+## 7. 可选：用现成 AprilTag 做只读三维定位（#115）
+
+使用 [christianrauch/apriltag_ros](https://github.com/christianrauch/apriltag_ros)
+及官方 AprilRobotics 标记，CPU 即可。它与 MCP 搬运入口独立；输出不会替换 Observe，
+也不进入 Pick/Place。以下模式仅启动箱体、相机、桥接和检测节点，没有机械臂或控制器。
+需要 Jazzy + Gazebo Harmonic；相机桥接包含 #116 的 CameraInfo 修复。
+
+```bash
+sudo apt-get install ros-jazzy-apriltag-ros ros-jazzy-cv-bridge \
+  ros-jazzy-ros-gz-sim ros-jazzy-ros-gz-bridge python3-opencv
+source /opt/ros/jazzy/setup.bash
+colcon build --base-paths src/flexcell/flexcell_skills --packages-select flexcell_skills
+source install/setup.bash
+export ROS_DOMAIN_ID=63                 # 所有相关终端一致，避开正在工作的栈
+export GZ_PARTITION=flexcell-vision-115  # 所有相关终端一致，隔离其他 Gazebo 世界
+export FLEXCELL_VISION_RUN=$(mktemp -d /tmp/flexcell-vision-115.XXXXXX)
+printf '%s\n' "$FLEXCELL_VISION_RUN"
+python3 - "$FLEXCELL_VISION_RUN/profile" <<'PY'
+import sys
+from scripts.sim_profile import profile
+profile(sys.argv[1], backend='detachable_joint', scene='tagged_three_boxes',
+        camera=True, perception_only=True)
+PY
+ros2 launch flexcell_skills apriltag_readonly.launch.py \
+  calibration:="$FLEXCELL_VISION_RUN/profile/vision.json" \
+  world:="$FLEXCELL_VISION_RUN/profile/world.sdf"
+```
+
+另一个同 ROS 环境/domain/partition 的终端，将 `FLEXCELL_VISION_RUN` 指向上一步
+打印的实际目录，然后执行。无 GPU 的云端可在启动前执行
+`export LIBGL_ALWAYS_SOFTWARE=1 EGL_PLATFORM=surfaceless`。
+
+```bash
+python3 scripts/apriltag_capture.py \
+  --calibration "$FLEXCELL_VISION_RUN/profile/vision.json" \
+  --out "$FLEXCELL_VISION_RUN/capture" --frames 5
+```
+
+已有带标记相机栈时，省略 launch 的 `world` 参数，仅接入检测和固定相机 TF。
+本配置使用可靠 QoS，RGB 与 CameraInfo 的上游发布者也须为 RELIABLE；
+标准 parameter_bridge 默认符合。云端大图曾在 best-effort 传输中丢失，不能补帧掩盖。
+已实际运行 Jazzy `apriltag_ros` 3.4.0、AprilTag 3.4.5。
+三个 ID 0/1/2 对应 A/B/C；黑色标记边长 25 mm，含白边 visual 31.25 mm，
+标记平面高于箱体中心 17.7 mm。新场景使用 1280×960、2 Hz 俯视相机及真实外参，
+原有无标记颜色场景及默认世界不变。纹理按上游推荐作 nearest-neighbor 等值放大；
+直接使用 10 像素原图会因渲染插值而模糊。
+
+`vision.json` 只含相机标定和 tag→中心几何，不含箱体 world 真值。
+读取器先等待元数据发布端的 DDS 发现，再订阅 RGB、取最先收到的五张不同时间戳画面，
+启动不以检测成功或 tag 可见为条件。保存 PNG 与 `observations.json`，
+逐物体输出 `available/reason/world_center_m`，坐标单位为米，来源 `VISION_APRILTAG`。
+RGB/CameraInfo/检测/TF 必须同帧；丢检、重复匹配、旧 TF、无标定或畸变未校正均不可用，
+不可用项没有坐标。需要畸变校正时应先复用 image_proc；当前仿真相机无畸变。
+
+`OBSERVATIONS_AVAILABLE` **仅表示五帧数据齐全，不表示定位达标**；
+报告固定保留 `accuracy_assessed=false`。独立比较端另取静止箱体真值，计算每帧三维
+误差，再按 ≤10 mm 验收；真值不能输入上述节点或读取器。保留失败画面，不补帧替换。
+这是有标记、已知尺寸物体的定位验证；10 mm 目标也不构成运动授权，
+不放宽现有 2 mm / 1° 附着一致性门禁。
