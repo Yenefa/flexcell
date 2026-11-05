@@ -11,10 +11,16 @@ This module has no ROS dependency so the geometry can be unit-tested offline.
 It is deliberately fail-closed: an unavailable, malformed or non-finite
 quaternion is refused rather than guessed.
 
-The 20 degree default is a *provisional* gate derived from a historical
+The 20 degree default is the fail-closed ceiling, derived from a historical
 replay of 85 local releases (only one exceeded 20 deg, and it settled at
-12.317 mm). It is not an accepted acceptance threshold and must be confirmed
-on a live window before being treated as one.
+12.317 mm). It is a safety net, not the quality target: the declared level
+contract sets ``max_release_tilt_deg`` from the profile (the harness passes
+the same number as the planner's level tolerance), and the issue #121 live
+windows released at 0.019 / 0.141 / 0.412 / 0.494 deg with it enabled. The
+closed-form workspace map (bundle: tilt-floor-map.json) shows the achievable
+box-tilt floor is <= 10.25 deg in every reachable cell of the tested grid,
+mean 0.61 deg, so a 5 deg contract is achievable in 214/220 cells and fails
+closed - never silently - in the six cramped edge cells.
 """
 
 import math

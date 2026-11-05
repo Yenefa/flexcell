@@ -164,8 +164,14 @@ def main():
         if not 0. <= args.level_release_tolerance_deg <= 45.:
             raise ValueError('the level-release tolerance must be within [0, 45] deg')
         config = yaml.safe_load(params.read_text())
+        tolerance = float(args.level_release_tolerance_deg)
         config.setdefault('mtc_planner', {}).setdefault('ros__parameters', {})[
-            'level_release_pitch_tolerance_deg'] = float(args.level_release_tolerance_deg)
+            'level_release_pitch_tolerance_deg'] = tolerance
+        # ONE declared contract: the pre-release gate enforces the same number the
+        # solver targets, so a solution the planner reports as level=false cannot
+        # still be released under the wider default ceiling.
+        config.setdefault('place_server', {}).setdefault('ros__parameters', {})[
+            'max_release_tilt_deg'] = tolerance
         with params.open('w') as stream:
             yaml.safe_dump(config, stream, sort_keys=False)
     if args.physics_step_s is not None:
