@@ -41,6 +41,18 @@ def command(argv, out, timeout=120):
     return proc.returncode
 
 
+def json_payload(text):
+    """Parse the first JSON object in a stream that may carry log lines.
+
+    Fast DDS prints RTPS transport warnings (e.g. a stale /dev/shm port lock)
+    to stdout before our own payload; a bare json.loads would die on them.
+    """
+    start, end = text.find('{'), text.rfind('}')
+    if start < 0 or end <= start:
+        raise ValueError('no JSON payload in output')
+    return json.loads(text[start:end + 1])
+
+
 def terminate_owned(proc):
     if proc.poll() is None:
         os.killpg(proc.pid, signal.SIGINT)
@@ -143,7 +155,8 @@ def main():
     parser.add_argument('--hybrid-threshold', type=float,
                         help='declared router threshold; required for, and only for, the hybrid policy')
     parser.add_argument('--case', choices=['normal', 'dual_object', 'recovery_once', 'budget_exhaustion',
-                                           'unreachable_place', 'false_attach', 'already_placed', 'regrasp'], default='normal')
+                                           'unreachable_place', 'false_attach', 'already_placed', 'regrasp',
+                                           'gate_refusal'], default='normal')
     parser.add_argument('--false-attach', default='',
                         help='declared live false-attach spec, object:offset_m[:hold_s]')
     args = parser.parse_args()
@@ -215,7 +228,7 @@ def main():
         rc = command([sys.executable, str(ROOT / 'infra/runtime_identity.py')], out / 'identity')
         if rc:
             raise RuntimeError('installed/source identity mismatch')
-        identity = json.loads((out / 'identity.stdout').read_text())
+        identity = json_payload((out / 'identity.stdout').read_text())
         semantic_config = yaml.safe_load(params.read_text())
         for node in semantic_config.values():
             for key, value in list(node.get('ros__parameters', {}).items()):
@@ -255,7 +268,7 @@ def main():
             time.sleep(3)
             target = out / ('health_before_%d' % attempt)
             if command([sys.executable, str(ROOT / 'setup/flexcell_admin.py'), 'health'], target, timeout=40) == 0:
-                doc = json.loads(target.with_suffix('.stdout').read_text())
+                doc = json_payload(target.with_suffix('.stdout').read_text())
                 if (doc.get('ok') is True and doc.get('hard_fail') == []
                         and doc['checks'].get('task_state') == 'IDLE'
                         and doc['checks'].get('carry_engaged') is False):
@@ -440,6 +453,12 @@ def main():
             args.case == 'unreachable_place' and task.get('outcome_val') == 1
             and task.get('error_code') == 'ERR_SKILL_FAILED'
             and any(row.get('skill_backend') == 'mtc' and row.get('outcome') != '0'
+                    for row in skill_records))
+        # Negative control: a gate limit below the achievable floor must refuse
+        # the release and hold the carry - no release, no drift, typed failure.
+        expected_failure = expected_failure or (
+            args.case == 'gate_refusal' and task.get('outcome_val') == 1
+            and any('exceeds' in str(row.get('detail', '')) and row.get('released') is False
                     for row in skill_records))
         succeeded = rc == 0 and task.get('outcome_val') == 0 and (
             task.get('object_a_at_zone') is True and task.get('object_b_at_zone') is True
