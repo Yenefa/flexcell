@@ -72,6 +72,8 @@ class LevelPitchPlanner : public moveit::task_constructor::solvers::PipelinePlan
   using PipelinePlanner::PipelinePlanner;
   using PipelinePlanner::plan;
 
+  static constexpr const char* kJointNames[4] = {"joint1", "joint2", "joint3", "joint4"};
+
   double max_box_tilt_rad = -1.0;   // < 0 disables; otherwise the box-tilt ceiling
   Eigen::Matrix3d attach_rotation = Eigen::Matrix3d::Identity();  // box frame relative to EE
   Eigen::Vector3d attach_translation = Eigen::Vector3d::Zero();   // box centre relative to EE
@@ -92,6 +94,7 @@ class LevelPitchPlanner : public moveit::task_constructor::solvers::PipelinePlan
     last_box_tilt_rad_ = std::numeric_limits<double>::quiet_NaN();
     last_level_ = false;
     last_enumerated_ = 0;
+    last_min_position_error_m_ = std::numeric_limits<double>::infinity();
     const auto fallback = [&]() {
       return PipelinePlanner::plan(scene, group, positionGoal(scene->getPlanningFrame(), link.getName(),
           offset, target, properties().get<double>("goal_position_tolerance")), timeout, result, path_constraints);
@@ -99,7 +102,9 @@ class LevelPitchPlanner : public moveit::task_constructor::solvers::PipelinePlan
     if (!(max_box_tilt_rad >= 0.0) || !std::isfinite(max_box_tilt_rad)) return fallback();
 
     const auto& names = group->getVariableNames();
-    const bool four_dof = std::count(names.begin(), names.end(), "joint2") &&
+    const bool four_dof = names.size() == 4 &&
+                          std::count(names.begin(), names.end(), "joint1") &&
+                          std::count(names.begin(), names.end(), "joint2") &&
                           std::count(names.begin(), names.end(), "joint3") &&
                           std::count(names.begin(), names.end(), "joint4");
     // Not the four-DOF arm this rule was derived for: keep previous behaviour.
@@ -110,8 +115,10 @@ class LevelPitchPlanner : public moveit::task_constructor::solvers::PipelinePlan
       return std::chrono::duration<double>(std::chrono::steady_clock::now() - started).count();
     };
 
-    // goal == attached box centre in world; the link sits at
-    // goal - R_link * attach_translation, and R_link = Rz(j1)*Ry(phi).
+    // goal == attached box centre in world: the stage constrains the private
+    // point link, a fixed child of end_effector_link at attach_translation
+    // with identity rotation, so the point origin IS the box centre. The EE
+    // sits at goal - R_ee * attach_translation, with R_ee = Rz(j1)*Ry(phi).
     const Eigen::Vector3d goal = target.translation();
     const double j1 = std::atan2(goal.y(), goal.x() - 0.012);
     const double r = std::hypot(goal.x() - 0.012, goal.y());
@@ -145,24 +152,29 @@ class LevelPitchPlanner : public moveit::task_constructor::solvers::PipelinePlan
         const double j4 = phi - j2 - j3;
         const std::vector<double> q{j1, j2, j3, j4};
         bool inside = true;
-        for (size_t i = 0; i < names.size(); ++i) {
-          const auto& bounds = candidate.getRobotModel()->getVariableBounds(names[i]);
+        for (int i = 0; i < 4; ++i) {
+          const auto& bounds = candidate.getRobotModel()->getVariableBounds(kJointNames[i]);
           if (!std::isfinite(bounds.min_position_) || !std::isfinite(bounds.max_position_)) continue;
           if (q[i] < bounds.min_position_ || q[i] > bounds.max_position_) { inside = false; break; }
         }
         if (!inside) continue;
-        for (size_t i = 0; i < names.size(); ++i) candidate.setVariablePosition(names[i], q[i]);
+        // Map by NAME, never by group-variable order: the closed form is
+        // defined on (joint1..joint4).
+        for (int i = 0; i < 4; ++i) candidate.setVariablePosition(kJointNames[i], q[i]);
         candidate.update();
-        // FK-verify: the attached box centre must sit on the goal.
-        const Eigen::Vector3d link_pos = candidate.getGlobalLinkTransform(link.getName()).translation();
-        const Eigen::Vector3d box = link_pos + candidate.getGlobalLinkTransform(link.getName()).linear() *
-                                    attach_translation;
-        const double position_error = (box - goal).norm();
+        // FK-verify against TRUE model FK. The IK frame is the private point
+        // link: a fixed child of the EE at attach_translation with identity
+        // rotation, so the link origin IS the attached box centre. (An earlier
+        // version added attach_translation to the point-link pose again,
+        // double-counted the ~0.158 m offset and rejected every candidate.)
+        const auto& tip = candidate.getGlobalLinkTransform(link.getName());
+        const double position_error = (tip.translation() - goal).norm();
         if (position_error < last_min_position_error_m_) last_min_position_error_m_ = position_error;
         if (position_error > 0.001) continue;
         ++last_enumerated_;
-        const Eigen::Vector3d box_up = candidate.getGlobalLinkTransform(link.getName()).linear() *
-                                       rot_attach * Eigen::Vector3d::UnitZ();
+        // tip.linear() == R_ee (identity fixed joint), so this is the
+        // world-frame box up-vector.
+        const Eigen::Vector3d box_up = tip.linear() * rot_attach * Eigen::Vector3d::UnitZ();
         if (!box_up.allFinite() || std::abs(box_up.norm() - 1.0) > 1e-3) continue;
         const double tilt = std::acos(std::clamp(box_up.z(), -1.0, 1.0));
         if (!(tilt < best_tilt)) continue;

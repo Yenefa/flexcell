@@ -335,7 +335,8 @@ class Planner : public rclcpp::Node {
                   level->last_enumerated());
       r.detail += "; level-release box tilt=" + std::to_string(level->last_box_tilt_rad()) +
                   " rad level=" + (level->last_was_level() ? "true" : "false") +
-                  " enumerated=" + std::to_string(level->last_enumerated());
+                  " enumerated=" + std::to_string(level->last_enumerated()) +
+                  " min_err=" + std::to_string(level->last_min_position_error_m());
     }
   }
   std::mutex mutex_;

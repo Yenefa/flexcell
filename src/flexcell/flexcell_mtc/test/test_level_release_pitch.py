@@ -29,14 +29,15 @@ from shape_msgs.msg import SolidPrimitive
 from flexcell_interfaces.srv import PlanManipulation
 from flexcell_skills.joint_follow import relative_pose
 
-TOLERANCE_DEG = 15.0
-# The 15 deg acceptance is not arbitrary: the closed-form null-space scan
-# (analytic_check.py, frozen in the bundle) shows that at THIS fixture target
-# the joint limits + the measured -7.25 deg attachment offset put the box-tilt
-# floor at 13.25 deg (predicted settled shift 4.48 mm, inside the 10 mm gate).
-# What the test must guarantee is that the enumeration is DETERMINISTIC and
-# reaches that floor - not that it reaches 2.5 deg, which no 4DOF solution
-# reaches at this target.
+TOLERANCE_DEG = 5.0
+# The acceptance is grounded in the closed-form null-space scan at THIS
+# descend target (0.12, -0.15, 0.0675) with the real URDF limits: 54
+# in-limit solutions, box-tilt floor 0.2496 deg at phi=+7 (the +7 deg EE
+# pitch cancels the measured -7.25 deg attachment offset). The planner must
+# reach that floor deterministically; 5 deg leaves ~20x headroom while
+# staying far below the 20 deg pre-release gate. An earlier 13.25 deg
+# "floor" was an artifact of scanning at the carry position instead of the
+# descend target - corrected by re-running the scan at the real target.
 
 
 def pose(position, quaternion=(0., 0., 0., 1.)):
