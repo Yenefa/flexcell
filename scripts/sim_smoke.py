@@ -351,7 +351,9 @@ def main():
                       '--timeout', '150'], out / 'task', timeout=170)
         task_output = (out / 'task.stdout').read_text()
         result['task_end_monotonic_ns'] = time.monotonic_ns()
-        if args.camera:
+        if args.camera and args.case != 'regrasp':
+            # A regrasp run keeps recording through the second task; the
+            # boundary is finalised below so the exported episode covers both.
             time.sleep(1.)
             result['recording_end_monotonic_ns'] = time.monotonic_ns()
         if 'RESULT ' not in task_output:
@@ -364,15 +366,34 @@ def main():
         # samples gz ground truth at grasp time, so no reset happens). The final
         # judgement covers both tasks.
         if args.case == 'regrasp':
+            # Stop for reconciliation: never dispatch a second physical task when
+            # the first failed, or when a skill row reports an unknown motion
+            # terminal - the previous motion/attachment state is unresolved.
+            first_ok = rc == 0 and task.get('outcome_val') == 0
+            result['regrasp_first_task_ok'] = first_ok
+            first_rows = []
+            first_place = out / 'skills/place.jsonl'
+            if first_place.exists():
+                first_rows = [json.loads(line) for line in first_place.read_text().splitlines() if line.strip()]
+            unknown_terminal = any('MotionTerminalUnknown' in str(row.get('detail', '')) for row in first_rows)
+            if not first_ok or unknown_terminal:
+                result['regrasp_blocked'] = dict(first_task_ok=first_ok, unknown_terminal=unknown_terminal)
+                result['status'] = 'REGRASP_BLOCKED_FIRST_TASK'
+                raise RuntimeError('regrasp not dispatched: first task not clean (ok=%s unknown_terminal=%s)'
+                                   % (first_ok, unknown_terminal))
             result['physical_tasks_dispatched'] = 2
-            result['regrasp_first_task_ok'] = (rc == 0 and task.get('outcome_val') == 0)
-            regrasp_pose = ['0.25', '0.05', '0.0175']  # zone_2, declared in the FSM
+            regrasp_pose = ['0.25', '0.05', '.0175']  # zone_2, declared in the FSM
             result['regrasp_goal_pose'] = [float(value) for value in regrasp_pose]
             result['regrasp_start_monotonic_ns'] = time.monotonic_ns()
             rc = command([sys.executable, str(ROOT / 'src/flexcell/flexcell_skills/test/w1_client.py'),
                           '--action', 'task', '--object', args.object, '--pose', *regrasp_pose,
                           '--timeout', '150'], out / 'task_regrasp', timeout=170)
             result['regrasp_end_monotonic_ns'] = time.monotonic_ns()
+            if args.camera:
+                # Cover the second pick-place in the exported episode: the
+                # ledger filters frames by this boundary.
+                time.sleep(1.)
+                result['recording_end_monotonic_ns'] = time.monotonic_ns()
             regrasp_output = (out / 'task_regrasp.stdout').read_text()
             if 'RESULT ' not in regrasp_output:
                 result['status'] = 'ACTION_TERMINAL_UNKNOWN'

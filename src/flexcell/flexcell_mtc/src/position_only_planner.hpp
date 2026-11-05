@@ -120,8 +120,17 @@ class LevelPitchPlanner : public moveit::task_constructor::solvers::PipelinePlan
     // with identity rotation, so the point origin IS the box centre. The EE
     // sits at goal - R_ee * attach_translation, with R_ee = Rz(j1)*Ry(phi).
     const Eigen::Vector3d goal = target.translation();
-    const double j1 = std::atan2(goal.y(), goal.x() - 0.012);
-    const double r = std::hypot(goal.x() - 0.012, goal.y());
+    // J1 must ALSO place the measured lateral attachment component: the arm
+    // plane always contains the J1 axis, so a nonzero attach_translation.y()
+    // sits that far off the plane unless the yaw is offset so the goal lies
+    // there. Ignoring it leaves every candidate with the same lateral error
+    // and the 1 mm FK gate rejects them all, silently falling back to
+    // unconstrained position-only planning (review finding).
+    const double psi = std::atan2(goal.y(), goal.x() - 0.012);
+    const double g = std::hypot(goal.x() - 0.012, goal.y());
+    const double lateral = g > 1e-6 ? attach_translation.y() / g : 0.0;
+    const double j1 = psi + std::asin(std::clamp(lateral, -1.0, 1.0));
+    const double r = g * std::cos(j1 - psi);
     const Eigen::Matrix3d rot_attach = attach_rotation;
     const Eigen::Vector3d up_ee = rot_attach * Eigen::Vector3d::UnitZ();
 
