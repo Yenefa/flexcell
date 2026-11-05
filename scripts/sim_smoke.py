@@ -135,6 +135,9 @@ def main():
     parser.add_argument('--release-clearance-m', type=float)
     parser.add_argument('--qualification-no-recovery', action='store_true')
     parser.add_argument('--planner-diagnostics', action='store_true')
+    parser.add_argument('--level-release-tolerance-deg', type=float,
+                        help='issue #121: opt-in level-release box-tilt tolerance for the '
+                             'mtc place path; requires --skill-backend mtc')
     parser.add_argument('--resume-completed', action='store_true')
     parser.add_argument('--decision-policy', choices=['fsm', 'jev', 'llm', 'hybrid'], default='fsm')
     parser.add_argument('--hybrid-threshold', type=float,
@@ -155,6 +158,16 @@ def main():
     if args.hybrid_threshold is not None: options['hybrid_threshold'] = args.hybrid_threshold
     params, world = profile(out, args.backend, args.camera, args.skill_backend,
                             args.joint_hold_sim_s, args.physics_step_s, **options)
+    if args.level_release_tolerance_deg is not None:
+        if args.skill_backend != 'mtc':
+            raise ValueError('the level-release tolerance belongs to the mtc place path only')
+        if not 0. <= args.level_release_tolerance_deg <= 45.:
+            raise ValueError('the level-release tolerance must be within [0, 45] deg')
+        config = yaml.safe_load(params.read_text())
+        config.setdefault('mtc_planner', {}).setdefault('ros__parameters', {})[
+            'level_release_pitch_tolerance_deg'] = float(args.level_release_tolerance_deg)
+        with params.open('w') as stream:
+            yaml.safe_dump(config, stream, sort_keys=False)
     if args.physics_step_s is not None:
         os.environ['FLEXCELL_PHYSICS_STEP_LOG'] = str(out / 'physics_steps.jsonl')
     if args.contact_trace:
