@@ -1,8 +1,10 @@
-"""Issue #121: the opt-in level-release path must actually pick a low pitch.
+"""Issue #121: the opt-in level-release path must level the ATTACHED BOX.
 
-Same frozen attached-point scene as test_attached_point_plan.py, but the
-planner is started with level_release_pitch_tolerance_deg set. The planner
-service only: no Gazebo, no actuator, no motion goal.
+Same frozen attached-point scene as test_attached_point_plan.py, started with
+level_release_pitch_tolerance_deg set. The physical assertion comes first and
+is taken from the descend trajectory endpoint (the box attitude in world
+frame); the planner's own report is checked second for consistency. The
+planner service only: no Gazebo, no actuator, no motion goal.
 """
 import json
 import math
@@ -14,6 +16,7 @@ import subprocess
 import time
 import xml.etree.ElementTree as ET
 
+import numpy as np
 import rclpy
 import yaml
 from ament_index_python.packages import get_package_share_directory
@@ -36,6 +39,20 @@ def pose(position, quaternion=(0., 0., 0., 1.)):
     (result.pose.orientation.x, result.pose.orientation.y,
      result.pose.orientation.z, result.pose.orientation.w) = map(float, quaternion)
     return result
+
+
+def quat_to_matrix(q):
+    x, y, z, w = q
+    return np.array([
+        [1 - 2 * (y * y + z * z), 2 * (x * y - z * w), 2 * (x * z + y * w)],
+        [2 * (x * y + z * w), 1 - 2 * (x * x + z * z), 2 * (y * z - x * w)],
+        [2 * (x * z - y * w), 2 * (y * z + x * w), 1 - 2 * (x * x + y * y)]])
+
+
+def box_tilt_deg(rotation_ee, orientation_offset):
+    """World-frame tilt of the attached box up-axis, in degrees."""
+    box_up = rotation_ee @ quat_to_matrix(orientation_offset) @ np.array([0., 0., 1.])
+    return math.degrees(math.acos(max(-1.0, min(1.0, float(box_up[2])))))
 
 
 def build(tmp_path, fixture, tolerance_deg):
@@ -89,12 +106,12 @@ def build(tmp_path, fixture, tolerance_deg):
     request.targets = [pose([.12, -.15, .1675]), pose([.12, -.15, .0675]), pose([.12, -.15, .1675])]
     request.attached_object_targets = True
     request.motion_profile_id, request.deadline_ms = 'demo_slow', 15000
-    return config, scene, request
+    return config, scene, request, orientation_offset, state
 
 
-def test_level_release_path_selects_a_low_pitch(tmp_path):
+def test_level_release_path_levels_the_attached_box(tmp_path):
     fixture = json.loads(Path(__file__).with_name('attached_point_fixture.json').read_text())
-    config, scene, request = build(tmp_path, fixture, TOLERANCE_DEG)
+    config, scene, request, orientation_offset, state = build(tmp_path, fixture, TOLERANCE_DEG)
     environment = dict(os.environ, ROS_DOMAIN_ID='76', ROS_AUTOMATIC_DISCOVERY_RANGE='LOCALHOST')
     os.environ['ROS_DOMAIN_ID'] = '76'
     log = (tmp_path/'planner.log').open('w')
@@ -123,16 +140,26 @@ def test_level_release_path_selects_a_low_pitch(tmp_path):
             {'success': bool(response.success), 'detail': response.detail}, indent=2))
         assert response.success, response.detail
         assert len(response.trajectories) == 3
-        # The adapter reports the pitch it selected; the feature must be active.
-        assert 'level-release seed pitch=' in response.detail, response.detail
-        reported = response.detail.split('level-release seed pitch=')[1].split(' rad')[0]
-        reported_deg = math.degrees(float(reported))
-        assert abs(reported_deg) <= TOLERANCE_DEG + .5, reported_deg
-        # And the descend endpoint the executor would actually run must agree.
+
+        # 1) The physical quantity first: the box attitude at the descend
+        #    endpoint, reconstructed from the returned trajectory.
         joints = response.trajectories[1].joint_trajectory
         endpoint = dict(zip(joints.joint_names, joints.points[-1].positions))
-        pitch = endpoint['joint2'] + endpoint['joint3'] + endpoint['joint4']
-        assert abs(math.degrees(pitch)) <= TOLERANCE_DEG + .5, math.degrees(pitch)
+        state.joint_positions = dict(
+            zip(fixture['names'], scene.robot_state.joint_state.position)) | endpoint
+        state.update()
+        rotation_ee = np.asarray(state.get_global_link_transform('end_effector_link'))[:3, :3]
+        descend_tilt = box_tilt_deg(rotation_ee, orientation_offset)
+        (tmp_path/'probe.json').write_text(json.dumps({'descend_box_tilt_deg': descend_tilt}, indent=2))
+        assert abs(descend_tilt) <= TOLERANCE_DEG + .5, descend_tilt
+
+        # 2) The planner's own report must agree (it now describes the descend
+        #    solve: the retreat stage runs on a separate planner instance).
+        assert 'level-release box tilt=' in response.detail, response.detail
+        reported = response.detail.split('level-release box tilt=')[1].split(' rad')[0]
+        reported_deg = math.degrees(float(reported))
+        assert abs(reported_deg - descend_tilt) <= 1.0, (reported_deg, descend_tilt)
+        assert abs(reported_deg) <= TOLERANCE_DEG + .5, reported_deg
     finally:
         node.destroy_service(server)
         node.destroy_node()

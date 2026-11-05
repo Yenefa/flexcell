@@ -180,12 +180,14 @@ class Planner : public rclcpp::Node {
     const auto measured_state = scene->getCurrentState();
     if (!pick && !measured_state.hasAttachedBody(q.object_name))
       throw std::runtime_error("PLACE object not attached in measured scene");
+    Eigen::Matrix3d attach_rotation = Eigen::Matrix3d::Identity();
     if (q.attached_object_targets) {
       const auto* body = measured_state.getAttachedBody(q.object_name);
       if (body->getAttachedLinkName() != "end_effector_link" || body->getShapes().size() != 1 ||
           body->getShapePosesInLinkFrame().size() != 1)
         throw std::runtime_error("joint PLACE requires one measured end-effector-attached shape");
       const auto shape_frame = body->getShapePosesInLinkFrame().front();
+      attach_rotation = shape_frame.linear();
       flexcell::checkAttachedObjectPose(measured_state.getGlobalLinkTransform("end_effector_link"), shape_frame, q.object_pose);
       point_model = flexcell::attachedPointModel(shared_from_this(), shape_frame.translation());
       task.setRobotModel(point_model->getModel());
@@ -215,22 +217,31 @@ class Planner : public rclcpp::Node {
       add->addObject(box); task.add(std::move(add));
       gripper_stage("open gripper", .02);
     }
-    // Issue #121 opt-in: on the attached-object PLACE path, bias the IK towards
-    // a level box (small end-effector pitch). Disabled unless the profile sets
-    // level_release_pitch_tolerance_deg >= 0, so default behaviour is unchanged.
+    // Issue #121 opt-in: on the attached-object PLACE path, rank IK solutions
+    // by the world-frame ATTACHED BOX tilt (the measured attachment carries a
+    // rotational offset, so a level EE does not mean a level box). Disabled
+    // unless the profile sets level_release_pitch_tolerance_deg >= 0.
     std::shared_ptr<flexcell::LevelPitchPlanner> level;
     std::shared_ptr<moveit::task_constructor::solvers::PipelinePlanner> pipeline;
     const double level_tol_deg = has_parameter("level_release_pitch_tolerance_deg")
         ? get_parameter("level_release_pitch_tolerance_deg").as_double() : -1.0;
     if (!pick && q.attached_object_targets && level_tol_deg >= 0.0) {
       level = std::make_shared<flexcell::LevelPitchPlanner>(shared_from_this(), "ompl");
-      level->max_pitch_rad = level_tol_deg * 3.14159265358979323846 / 180.0;
+      level->max_box_tilt_rad = level_tol_deg * 3.14159265358979323846 / 180.0;
+      level->attach_rotation = attach_rotation;
       pipeline = level;
     } else {
       pipeline = std::make_shared<flexcell::PositionOnlyPlanner>(shared_from_this(), "ompl");
     }
     pipeline->setMaxVelocityScalingFactor(profiles.at(q.motion_profile_id));
     pipeline->setMaxAccelerationScalingFactor(profiles.at(q.motion_profile_id));
+    // Retreat runs after detachment: the box is no longer carried, so the
+    // level-release ranking does not apply. A separate planner instance also
+    // keeps the level planner's diagnostics describing the descend stage (its
+    // last invocation) instead of the post-detachment retreat.
+    auto retreat_planner = std::make_shared<flexcell::PositionOnlyPlanner>(shared_from_this(), "ompl");
+    retreat_planner->setMaxVelocityScalingFactor(profiles.at(q.motion_profile_id));
+    retreat_planner->setMaxAccelerationScalingFactor(profiles.at(q.motion_profile_id));
     const char* pick_names[] = {"hover", "grasp", "lift"};
     const char* place_names[] = {"hover", "descend", "retreat"};
     for (size_t i = 0; i < 3; ++i) {
@@ -245,7 +256,7 @@ class Planner : public rclcpp::Node {
         if (std::abs(direction.vector.x) > 1e-9 || std::abs(direction.vector.y) > 1e-9 ||
             direction.vector.z <= 0. || direction.vector.z > .3)
           throw std::runtime_error("joint PLACE retreat must be a positive world-vertical displacement");
-        auto retreat = std::make_unique<mtc::stages::MoveRelative>("retreat", pipeline);
+        auto retreat = std::make_unique<mtc::stages::MoveRelative>("retreat", retreat_planner);
         retreat->setGroup("arm"); retreat->setIKFrame("end_effector_link"); retreat->setDirection(direction);
         retreat->setTimeout(std::min(5.0, q.deadline_ms / 3000.0)); task.add(std::move(retreat));
         continue;
@@ -314,13 +325,13 @@ class Planner : public rclcpp::Node {
         "MTC planned attached shape-center hover/descend and relative EE retreat; explicit EE endpoints; execution remains skill-owned" :
         "MTC planned three position-only stages; execution and physics remain skill-owned";
     if (level) {
-      // Report the chosen pitch so a live window can compare it with the
-      // recorded release tilt without changing the response contract.
-      RCLCPP_INFO(get_logger(), "level-release seed: pitch=%.4f rad level=%d sampled=%d",
-                  level->last_pitch_rad(), int(level->last_was_level_seed()),
+      // Report the box tilt the descend solve selected so a live window can
+      // compare it with the measured release tilt without changing the schema.
+      RCLCPP_INFO(get_logger(), "level-release box tilt=%.4f rad level=%d sampled=%d",
+                  level->last_box_tilt_rad(), int(level->last_was_level()),
                   level->last_sampled_seeds());
-      r.detail += "; level-release seed pitch=" + std::to_string(level->last_pitch_rad()) +
-                  " rad level=" + (level->last_was_level_seed() ? "true" : "false") +
+      r.detail += "; level-release box tilt=" + std::to_string(level->last_box_tilt_rad()) +
+                  " rad level=" + (level->last_was_level() ? "true" : "false") +
                   " sampled=" + std::to_string(level->last_sampled_seeds());
     }
   }
