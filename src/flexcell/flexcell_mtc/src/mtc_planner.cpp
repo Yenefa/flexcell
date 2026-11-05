@@ -181,6 +181,7 @@ class Planner : public rclcpp::Node {
     if (!pick && !measured_state.hasAttachedBody(q.object_name))
       throw std::runtime_error("PLACE object not attached in measured scene");
     Eigen::Matrix3d attach_rotation = Eigen::Matrix3d::Identity();
+    Eigen::Vector3d attach_translation = Eigen::Vector3d::Zero();
     if (q.attached_object_targets) {
       const auto* body = measured_state.getAttachedBody(q.object_name);
       if (body->getAttachedLinkName() != "end_effector_link" || body->getShapes().size() != 1 ||
@@ -188,6 +189,7 @@ class Planner : public rclcpp::Node {
         throw std::runtime_error("joint PLACE requires one measured end-effector-attached shape");
       const auto shape_frame = body->getShapePosesInLinkFrame().front();
       attach_rotation = shape_frame.linear();
+      attach_translation = shape_frame.translation();
       flexcell::checkAttachedObjectPose(measured_state.getGlobalLinkTransform("end_effector_link"), shape_frame, q.object_pose);
       point_model = flexcell::attachedPointModel(shared_from_this(), shape_frame.translation());
       task.setRobotModel(point_model->getModel());
@@ -229,6 +231,7 @@ class Planner : public rclcpp::Node {
       level = std::make_shared<flexcell::LevelPitchPlanner>(shared_from_this(), "ompl");
       level->max_box_tilt_rad = level_tol_deg * 3.14159265358979323846 / 180.0;
       level->attach_rotation = attach_rotation;
+      level->attach_translation = attach_translation;
       pipeline = level;
     } else {
       pipeline = std::make_shared<flexcell::PositionOnlyPlanner>(shared_from_this(), "ompl");
@@ -327,12 +330,12 @@ class Planner : public rclcpp::Node {
     if (level) {
       // Report the box tilt the descend solve selected so a live window can
       // compare it with the measured release tilt without changing the schema.
-      RCLCPP_INFO(get_logger(), "level-release box tilt=%.4f rad level=%d sampled=%d",
+      RCLCPP_INFO(get_logger(), "level-release box tilt=%.4f rad level=%d enumerated=%d",
                   level->last_box_tilt_rad(), int(level->last_was_level()),
-                  level->last_sampled_seeds());
+                  level->last_enumerated());
       r.detail += "; level-release box tilt=" + std::to_string(level->last_box_tilt_rad()) +
                   " rad level=" + (level->last_was_level() ? "true" : "false") +
-                  " sampled=" + std::to_string(level->last_sampled_seeds());
+                  " enumerated=" + std::to_string(level->last_enumerated());
     }
   }
   std::mutex mutex_;
