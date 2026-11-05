@@ -11,16 +11,14 @@ This module has no ROS dependency so the geometry can be unit-tested offline.
 It is deliberately fail-closed: an unavailable, malformed or non-finite
 quaternion is refused rather than guessed.
 
-The 20 degree default is the fail-closed ceiling, derived from a historical
-replay of 85 local releases (only one exceeded 20 deg, and it settled at
-12.317 mm). It is a safety net, not the quality target: the declared level
-contract sets ``max_release_tilt_deg`` from the profile (the harness passes
-the same number as the planner's level tolerance), and the issue #121 live
-windows released at 0.019 / 0.141 / 0.412 / 0.494 deg with it enabled. The
-closed-form workspace map (bundle: tilt-floor-map.json) shows the achievable
-box-tilt floor is <= 10.25 deg in every reachable cell of the tested grid,
-mean 0.61 deg, so a 5 deg contract is achievable in 214/220 cells and fails
-closed - never silently - in the six cramped edge cells.
+The gate is OPT-IN: place_server declares ``max_release_tilt_deg`` with a
+default of -1 (disabled), and refuses a configuration that declares a limit on
+a path which cannot level the release (the level solver only exists on the mtc
+place backend with the detachable_joint carry). Profiles that declare the
+level contract set the gate to the same number the solver targets; profiles
+that declare nothing keep the pre-#121 behaviour exactly. The 20 deg constant
+below is the reference ceiling used by the unit tests and by callers that do
+not pass an explicit limit - it is not a default any more.
 """
 
 import math

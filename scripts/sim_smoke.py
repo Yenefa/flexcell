@@ -159,6 +159,8 @@ def main():
                                            'gate_refusal'], default='normal')
     parser.add_argument('--false-attach', default='',
                         help='declared live false-attach spec, object:offset_m[:hold_s]')
+    parser.add_argument('--place-pose', nargs=3, type=float, metavar=('X', 'Y', 'Z'),
+                        help='override the first task goal (issue #121 counterexample point)')
     args = parser.parse_args()
     out = args.out / ('run-' + uuid.uuid4().hex[:12])
     out.mkdir(parents=True, exist_ok=False)
@@ -359,6 +361,8 @@ def main():
             time.sleep(1.)
         result['task_start_monotonic_ns'] = time.monotonic_ns()
         pose = ['.44', '.40', '.0175'] if args.case == 'unreachable_place' else ['.12', '-.15', '.0175']
+        if args.place_pose is not None:
+            pose = ['%.6f' % value for value in args.place_pose]
         if args.case == 'already_placed':
             # The declared task goal equals this object's canonical spawn. No
             # fixture teleport or changed verifier is needed for this control.
@@ -455,11 +459,17 @@ def main():
             and any(row.get('skill_backend') == 'mtc' and row.get('outcome') != '0'
                     for row in skill_records))
         # Negative control: a gate limit below the achievable floor must refuse
-        # the release and hold the carry - no release, no drift, typed failure.
+        # EVERY release and hold the carry. A success path must never satisfy
+        # this: the run has to fail, the box must not be at the goal, and no
+        # skill row anywhere may report a release.
+        gate_rows = [row for row in skill_records if 'exceeds' in str(row.get('detail', ''))]
         expected_failure = expected_failure or (
-            args.case == 'gate_refusal' and task.get('outcome_val') == 1
-            and any('exceeds' in str(row.get('detail', '')) and row.get('released') is False
-                    for row in skill_records))
+            args.case == 'gate_refusal'
+            and task.get('outcome_val') == 1
+            and task.get('object_at_place') is False
+            and bool(gate_rows)
+            and all(row.get('released') is False for row in gate_rows)
+            and not any(row.get('released') is True for row in skill_records))
         succeeded = rc == 0 and task.get('outcome_val') == 0 and (
             task.get('object_a_at_zone') is True and task.get('object_b_at_zone') is True
             if args.case == 'dual_object' else task.get('object_at_place') is True)

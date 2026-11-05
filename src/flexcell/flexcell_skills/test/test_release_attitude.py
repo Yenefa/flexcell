@@ -86,9 +86,14 @@ def test_gate_geometry_agrees_with_the_offline_analysis_module():
 
 def test_place_server_wires_the_gate_before_release():
     source = (ROOT / "src/flexcell/flexcell_skills/flexcell_skills/place_server.py").read_text()
-    assert "from flexcell_skills.release_attitude import (" in source
+    assert "from flexcell_skills.release_attitude import" in source
     assert "attitude_gate(" in source
     assert "release_tilt_deg" in source
     assert "max_release_tilt_deg" in source
+    # Opt-in contract: the gate is disabled unless the profile declares it, and
+    # declaring it on a backend that cannot level the release is a config error.
+    assert "'max_release_tilt_deg', -1.0" in source
+    assert "if self._max_release_tilt >= 0.0:" in source
+    assert "skill_backend=mtc" in source
     # The gate must run before the carry release service is called.
     assert source.index("attitude_ok, attitude_detail") < source.index("res.released = True")
