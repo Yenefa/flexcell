@@ -79,3 +79,32 @@ def test_parse_chain_reads_a_minimal_urdf(tmp_path):
     chain, ee = fk.parse_chain(str(urdf))
     assert chain == CHAIN
     assert ee == EE
+
+
+def test_pitch_and_fk_roundtrip_property():
+    """Property test: for any limit-feasible joint vector, the released
+    least-squares solver asked to reproduce that exact FK target at that exact
+    pitch must return a limit-feasible solution with <1 mm error and the same
+    pitch. That is the invariant the level-release enumeration relies on.
+    Skipped when hypothesis is not installed (it is an optional dev dependency).
+    """
+    import pytest
+    pytest.importorskip('hypothesis')
+    from hypothesis import given, settings, strategies as st
+
+    @settings(max_examples=40, deadline=None)
+    @given(st.tuples(
+        st.floats(-3.14, 3.14, allow_nan=False, allow_infinity=False),
+        st.floats(-1.49, 1.49, allow_nan=False, allow_infinity=False),
+        st.floats(-1.49, 1.39, allow_nan=False, allow_infinity=False),
+        st.floats(-1.69, 1.96, allow_nan=False, allow_infinity=False)))
+    def check(q):
+        t = fk.fk(q, CHAIN, EE)
+        target = (t[0][3], t[1][3], t[2][3])
+        err, solution = fk.solve_at_pitch(target, q[1] + q[2] + q[3], CHAIN, EE)
+        if not fk.joint_limits_ok(solution):
+            return  # the fixed-pitch closure has no limit-feasible root here
+        assert err < 1e-3, (q, err)
+        assert abs(fk.pitch_deg(solution) - fk.pitch_deg(q)) < 1e-6
+
+    check()
