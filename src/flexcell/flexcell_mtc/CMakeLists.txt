@@ -22,6 +22,9 @@ install(TARGETS mtc_planner DESTINATION lib/${PROJECT_NAME})
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
   find_package(ament_cmake_pytest REQUIRED)
+  ament_add_gtest(level_release_ik_test test/level_release_ik_test.cpp)
+  target_compile_features(level_release_ik_test PUBLIC cxx_std_17)
+  target_include_directories(level_release_ik_test PRIVATE src)
   ament_add_pytest_test(attached_point_plan_test test/test_attached_point_plan.py TIMEOUT 90
     ENV "PYTEST_ADDOPTS=-p no:cacheprovider" "PYTHONDONTWRITEBYTECODE=1")
   ament_add_pytest_test(level_release_pitch_test test/test_level_release_pitch.py TIMEOUT 120
