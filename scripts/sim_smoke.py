@@ -143,7 +143,7 @@ def main():
     parser.add_argument('--hybrid-threshold', type=float,
                         help='declared router threshold; required for, and only for, the hybrid policy')
     parser.add_argument('--case', choices=['normal', 'dual_object', 'recovery_once', 'budget_exhaustion',
-                                           'unreachable_place', 'false_attach', 'already_placed'], default='normal')
+                                           'unreachable_place', 'false_attach', 'already_placed', 'regrasp'], default='normal')
     parser.add_argument('--false-attach', default='',
                         help='declared live false-attach spec, object:offset_m[:hold_s]')
     args = parser.parse_args()
@@ -359,6 +359,26 @@ def main():
             raise RuntimeError('task has no terminal result; subsequent reset is forbidden')
         task = json.loads(task_output.split('RESULT ', 1)[1])
         result['task'] = task
+        # Issue #121 regrasp window: a second pick-place on the SAME live stack,
+        # picking the object from wherever the first task left it (the pick
+        # samples gz ground truth at grasp time, so no reset happens). The final
+        # judgement covers both tasks.
+        if args.case == 'regrasp':
+            result['physical_tasks_dispatched'] = 2
+            result['regrasp_first_task_ok'] = (rc == 0 and task.get('outcome_val') == 0)
+            regrasp_pose = ['0.25', '0.05', '0.0175']  # zone_2, declared in the FSM
+            result['regrasp_goal_pose'] = [float(value) for value in regrasp_pose]
+            result['regrasp_start_monotonic_ns'] = time.monotonic_ns()
+            rc = command([sys.executable, str(ROOT / 'src/flexcell/flexcell_skills/test/w1_client.py'),
+                          '--action', 'task', '--object', args.object, '--pose', *regrasp_pose,
+                          '--timeout', '150'], out / 'task_regrasp', timeout=170)
+            result['regrasp_end_monotonic_ns'] = time.monotonic_ns()
+            regrasp_output = (out / 'task_regrasp.stdout').read_text()
+            if 'RESULT ' not in regrasp_output:
+                result['status'] = 'ACTION_TERMINAL_UNKNOWN'
+                raise RuntimeError('regrasp task has no terminal result; subsequent reset is forbidden')
+            task = json.loads(regrasp_output.split('RESULT ', 1)[1])
+            result['task_regrasp'] = task
         # Actual routing for this run, read back from the decision log: the declared
         # policy alone cannot show whether a model answered or the FSM fell back.
         decisions = out / 'skills' / 'decisions.jsonl'
@@ -397,6 +417,8 @@ def main():
         succeeded = rc == 0 and task.get('outcome_val') == 0 and (
             task.get('object_a_at_zone') is True and task.get('object_b_at_zone') is True
             if args.case == 'dual_object' else task.get('object_at_place') is True)
+        if args.case == 'regrasp':
+            succeeded = succeeded and bool(result.get('regrasp_first_task_ok'))
         if args.case == 'recovery_once':
             succeeded = succeeded and sum(row.get('injected') is True for row in skill_records) == 1
         if args.case == 'already_placed':
