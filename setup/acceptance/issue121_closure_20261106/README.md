@@ -23,8 +23,10 @@ machine.
 | `gate-refusal-0p001/` | negative control, gate limit far below the tilt actually achieved in this run | `--case gate_refusal --level-release-tolerance-deg 0.001` | `EXPECTED_FAILURE`; task `OUTCOME_FAILED`; `object_at_place: false`; place row `outcome=1 released=False`, detail `release tilt 0.085 deg exceeds 0.001 deg limit; carry held` |
 
 Both windows use the same declared scene/profile as the earlier rounds; the only differences are
-the goal pose and the gate limit. Provenance (tree and artifact digests, and how they reconcile
-with `a7c49ef`) is in `provenance.md`; each window keeps its own `identity.stdout`.
+the goal pose and the gate limit. Provenance is in `provenance.md`; each window keeps its own
+`identity.stdout`. Two digests are in play and must not be conflated: the source claim rests on the
+**git-tracked** digest `e91eda9b…` (255 files), while the harness recorded the working-tree walk
+`3b41f5a1…` (261 files) which also contains six local `.pytest_cache` files.
 
 ## Why the gate limit is 0.001 deg, not 0.1 deg
 
