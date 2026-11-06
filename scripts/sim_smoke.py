@@ -35,6 +35,22 @@ def json_result(value):
     return result
 
 
+def classify_outcome(case, succeeded, expected_failure):
+    """PASS / EXPECTED_FAILURE / ROBOT_FAILURE for a finished run.
+
+    A gate_refusal run can never pass: if the place reached the goal the gate
+    did not fire, which is a failure of the control, not a success (the review
+    reproduced PASS/0 here through the real runner).
+    """
+    if case == 'gate_refusal' and succeeded:
+        return 'ROBOT_FAILURE'
+    if succeeded:
+        return 'PASS'
+    if expected_failure:
+        return 'EXPECTED_FAILURE'
+    return 'ROBOT_FAILURE'
+
+
 def command(argv, out, timeout=120):
     with out.with_suffix('.stdout').open('x') as stdout, out.with_suffix('.stderr').open('x') as stderr:
         proc = subprocess.run(argv, stdout=stdout, stderr=stderr, timeout=timeout)
@@ -473,6 +489,12 @@ def main():
         succeeded = rc == 0 and task.get('outcome_val') == 0 and (
             task.get('object_a_at_zone') is True and task.get('object_b_at_zone') is True
             if args.case == 'dual_object' else task.get('object_at_place') is True)
+        if args.case == 'gate_refusal':
+            # This control asserts a REFUSAL. A place that reaches the goal means
+            # the gate did not fire - that is a failure of the control, never a
+            # pass. (The review reproduced PASS/0 here through the real runner;
+            # #123 returns ROBOT_FAILURE/1 for the same input.)
+            succeeded = False
         if args.case == 'regrasp':
             succeeded = succeeded and bool(result.get('regrasp_first_task_ok'))
         if args.case == 'recovery_once':
@@ -492,7 +514,8 @@ def main():
                 succeeded = succeeded and counts.get('verify', 0) >= 1
             else:
                 succeeded = succeeded and counts == expected
-        if not succeeded and not expected_failure:
+        status = classify_outcome(args.case, succeeded, expected_failure)
+        if status == 'ROBOT_FAILURE':
             result['status'] = 'ROBOT_FAILURE'
             raise RuntimeError('typed task failure retained; no replacement task')
         if args.case in ('recovery_once', 'budget_exhaustion'):
@@ -504,7 +527,7 @@ def main():
             raise RuntimeError('post-task reset failed')
         if command([sys.executable, str(ROOT / 'setup/flexcell_admin.py'), 'health'], out / 'health_after'):
             raise RuntimeError('post-task strict health failed')
-        result['status'] = 'EXPECTED_FAILURE' if expected_failure else 'PASS'
+        result['status'] = status
         result['expectation_met'] = True
     except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired) as exc:
         result['error'] = str(exc)

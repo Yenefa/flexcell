@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "status": "EXPECTED_FAILURE",
+  "backend": "detachable_joint",
+  "skill_backend": "mtc",
+  "physical_tasks_dispatched": 1,
+  "qualification": "FUNCTIONAL_SMOKE_ONLY",
+  "case": "gate_refusal",
+  "object": "target_box_a",
+  "out": "/home/ros/live121-gate2/run-24c161ad6753",
+  "decision_policy": "fsm",
+  "hybrid_threshold": null,
+  "resume_completed": false,
+  "model_env": {
+    "FLEXCELL_LLM_ENDPOINT": null,
+    "FLEXCELL_LLM_MODEL": null,
+    "FLEXCELL_LLM_BACKEND": null,
+    "FLEXCELL_JEV_ENDPOINT": null,
+    "FLEXCELL_JEV_MODEL": null,
+    "FLEXCELL_JEV_BACKEND": null
+  },
+  "world_sha256": "1e345b3a4c985045d14e5c38124b4fc73a749c52efcf09d5a53b19148fe696ca",
+  "semantic_config_sha256": "6e09c7cc2524678b2731739a5bb2f0b218b83d65f368db6a53ea372cce6470df",
+  "runtime_fingerprint": "071a257e1214fb52ec0fb26cfeddd5a626890673a9a59f1c37dcf39a313a40ab",
+  "task_start_monotonic_ns": 208916846568384,
+  "goal_pose": [
+    0.12,
+    -0.15,
+    0.0175
+  ],
+  "task_end_monotonic_ns": 208933816807621,
+  "task": {
+    "action": "task",
+    "goal_uuid": "b24a9836286545b4aecdb125bf82d9e6",
+    "outcome": "OUTCOME_FAILED",
+    "outcome_val": 1,
+    "error_code": "ERR_SKILL_FAILED",
+    "detail": "policy abort (NON_RECOVERABLE): place failed (ERR_PLACE_FAILED, carried box is not retried) (trace=PICK_A(attempt=1):OK,PLACE_A:FAIL); previous_skill=PLACE cause=ERR_PLACE_FAILED legacy_error_code=25",
+    "evidence_id": "pick_place_v1-e60a9b40",
+    "wall_seconds": 15.659,
+    "fsm_trace": [
+      "PICK_A(attempt=1):OK",
+      "PLACE_A:FAIL"
+    ],
+    "object_at_place": false,
+    "final_position_error_m": null,
+    "skip_verify": false
+  },
+  "actual_routing": {
+    "decisions": 4,
+    "sources": {
+      "fsm": 4
+    },
+    "leaves": {
+      "fsm": 4
+    },
+    "fallbacks": 0,
+    "models": [],
+    "backends": [],
+    "fast_calls": 0,
+    "slow_calls": 0,
+    "model_calls": 0,
+    "calls_without_identity": 0
+  },
+  "model_calls": 0,
+  "fast_calls": 0,
+  "slow_calls": 0,
+  "expectation_met": true,
+  "recorder_exit": 0,
+  "owned_launch_exit": 0,
+  "unavailable_numeric_fields": {
+    "task.final_position_error_m": "nan"
+  }
+}

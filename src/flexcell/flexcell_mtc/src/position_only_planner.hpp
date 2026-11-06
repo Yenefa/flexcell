@@ -138,15 +138,31 @@ class LevelPitchPlanner : public moveit::task_constructor::solvers::PipelinePlan
     double best_tilt = std::numeric_limits<double>::infinity();
     std::vector<double> best;
     moveit::core::RobotState candidate(scene->getCurrentState());
-    // The null-space coordinate is swept over the whole feasible range, not a
-    // fixed +-30 deg window: a large measured attachment rotation needs |phi|
-    // well outside 30 deg. Joint limits still reject what the arm cannot do,
-    // and 361*2 closed-form candidates cost well under a millisecond.
-    const int span = 180;
-    for (int deg = -span; deg <= span; deg += std::max(1, phi_step_deg)) {
+    // phi = j2 + j3 + j4, so the feasible interval is the SUM of the three
+    // joint ranges. It is neither symmetric nor one turn wide ([-4.70, +4.87]
+    // rad with this arm), so a fixed +-180 deg window would silently drop the
+    // outer parts of the feasible set; sweeping the derived interval also
+    // covers the +-360 deg periodic equivalents. Unbounded joints fall back to
+    // a generous four-turn sweep.
+    double phi_min = 0.0, phi_max = 0.0;
+    bool phi_bounded = true;
+    for (const char* name : {"joint2", "joint3", "joint4"}) {
+      const auto& bounds = candidate.getRobotModel()->getVariableBounds(name);
+      if (!std::isfinite(bounds.min_position_) || !std::isfinite(bounds.max_position_)) {
+        phi_bounded = false;
+        break;
+      }
+      phi_min += bounds.min_position_;
+      phi_max += bounds.max_position_;
+    }
+    if (!phi_bounded) {
+      phi_min = -4.0 * 3.14159265358979323846;
+      phi_max = 4.0 * 3.14159265358979323846;
+    }
+    const double phi_step = std::max(1, phi_step_deg) * 3.14159265358979323846 / 180.0;
+    for (double phi = phi_min; phi <= phi_max + 1e-9; phi += phi_step) {
       // Leave the remaining share for the upstream path planning.
       if (elapsed() >= timeout * sampling_share) break;
-      const double phi = deg * 3.14159265358979323846 / 180.0;
       const double cp = std::cos(phi), sp = std::sin(phi);
       // EE position (local) that puts the box centre on target.
       const double pex = r - (attach_translation.x() * cp + attach_translation.z() * sp);

@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "backend": "detachable_joint",
+  "skill_backend": "mtc",
+  "physical_tasks_dispatched": 2,
+  "qualification": "FUNCTIONAL_SMOKE_ONLY",
+  "case": "regrasp",
+  "object": "target_box_a",
+  "out": "/home/ros/live121-orig/run-774bfe72dec3",
+  "decision_policy": "fsm",
+  "hybrid_threshold": null,
+  "resume_completed": false,
+  "model_env": {
+    "FLEXCELL_LLM_ENDPOINT": null,
+    "FLEXCELL_LLM_MODEL": null,
+    "FLEXCELL_LLM_BACKEND": null,
+    "FLEXCELL_JEV_ENDPOINT": null,
+    "FLEXCELL_JEV_MODEL": null,
+    "FLEXCELL_JEV_BACKEND": null
+  },
+  "world_sha256": "1e345b3a4c985045d14e5c38124b4fc73a749c52efcf09d5a53b19148fe696ca",
+  "semantic_config_sha256": "ccbf128d424dc59314149ee6a97b8f5abd95052e7e26fc7ae2b95b01379c73e4",
+  "runtime_fingerprint": "3d6a85f87a345a0eca08009f65383762c63fe1dbd135f68cac004973590c9eda",
+  "task_start_monotonic_ns": 208805702265625,
+  "goal_pose": [
+    0.12,
+    0.04,
+    0.0175
+  ],
+  "task_end_monotonic_ns": 208827545933242,
+  "task": {
+    "action": "task",
+    "goal_uuid": "446e93334edb4293bb0e574e311c9492",
+    "outcome": "OUTCOME_SUCCEEDED",
+    "outcome_val": 0,
+    "error_code": "ERR_NONE",
+    "detail": "task done: all assignments verified",
+    "evidence_id": "pick_place_v1-db30c1ca",
+    "wall_seconds": 19.591,
+    "fsm_trace": [
+      "PICK_A(attempt=1):OK",
+      "PLACE_A:OK",
+      "VERIFY_A(attempt=1):OK"
+    ],
+    "object_at_place": true,
+    "final_position_error_m": 2.9295748040657425e-05,
+    "skip_verify": false
+  },
+  "regrasp_first_task_ok": true,
+  "regrasp_goal_pose": [
+    0.25,
+    0.05,
+    0.0175
+  ],
+  "regrasp_start_monotonic_ns": 208827546139355,
+  "regrasp_end_monotonic_ns": 208850280769250,
+  "task_regrasp": {
+    "action": "task",
+    "goal_uuid": "6e81e2ca84ea43e18bd072323bada8fc",
+    "outcome": "OUTCOME_SUCCEEDED",
+    "outcome_val": 0,
+    "error_code": "ERR_NONE",
+    "detail": "task done: all assignments verified",
+    "evidence_id": "pick_place_v1-84be6064",
+    "wall_seconds": 18.667,
+    "fsm_trace": [
+      "PICK_A(attempt=1):OK",
+      "PLACE_A:OK",
+      "VERIFY_A(attempt=1):OK"
+    ],
+    "object_at_place": true,
+    "final_position_error_m": 0.0002925841084198246,
+    "skip_verify": false
+  },
+  "actual_routing": {
+    "decisions": 8,
+    "sources": {
+      "fsm": 8
+    },
+    "leaves": {
+      "fsm": 8
+    },
+    "fallbacks": 0,
+    "models": [],
+    "backends": [],
+    "fast_calls": 0,
+    "slow_calls": 0,
+    "model_calls": 0,
+    "calls_without_identity": 0
+  },
+  "model_calls": 0,
+  "fast_calls": 0,
+  "slow_calls": 0,
+  "expectation_met": true,
+  "recorder_exit": 0,
+  "owned_launch_exit": 0,
+  "unavailable_numeric_fields": {}
+}
