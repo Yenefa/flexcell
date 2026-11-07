@@ -192,6 +192,38 @@ zone_1 本身也是绿色半透明圆盘，按“投影到实体箱体中心”�
 三维位置来自 Observe 的 `SIMULATION_GROUND_TRUTH`，因此结论是“视觉选物 + Observe
 定位 + 已有技能搬运”，不是纯视觉三维定位；n=1，不是成功率。
 
+### 从视觉快照生成区域腾空和恢复计划
+
+拿到第 7 节的 `observations.json` 后，可以先生成只读计划，再交给现有 Agent 通过
+ROS-MCP 执行。输入是 AprilTag 视觉中心和标记映射；工具不读取 Observe/Gazebo 真值，
+也不发送运动 Goal。下面沿用三只 35 mm 箱体和 world 平面的示例区域：
+
+```bash
+python3 scripts/plan_region.py \
+    --observations /tmp/flexcell-camera-level-capture/observations.json \
+    --calibration /tmp/flexcell-camera-level/vision.json \
+    --region 0.20 0.28 -0.21 0.04 \
+    --staging 0.12 0.05 --staging 0.12 -0.15 \
+    --out /tmp/flexcell-camera-level/region-plan.json
+```
+
+将路径和区域替换为实际任务输入。`--staging` 可重复声明候选位置，工具会检查完整保守包络
+出区及箱体间距，并尝试其他组合，避免首个暂存点挡住后续箱子。输出包括选中/保持
+不动的物体、原始视觉中心、图像时间戳，以及先全部搬出、后逐一恢复的 `moves`。
+恢复目标采用视觉 x/y 和已知桌面箱体中心高度 0.0175 m，三箱体最多六次搬运。
+
+默认位置余量 10 mm；区域边界归属不明确、缺检测、捕获期间物体移动或暂存位置不足时，
+返回 `UNAVAILABLE`/非零退出码，不输出部分 moves。只使用首帧作计划基准，并校验
+整个采集批次，不从后续成功帧挑选替换缺失数据。输出文件拒绝覆盖。
+快照只有箱体中心，边界选择同时使用内接/外接球包络；外包络碰到区域而真实箱体
+是否进入仍不明确时，会停止，避免搬动本应保持原位的区域外箱体。
+
+`execution_ready=false` 表示这仍是快照计划。计划固定后，Agent 再用新鲜 Observe
+核对**全部**物体与视觉中心差 ≤10 mm；不一致就停止。每次只派发一个现有
+`/run_pick_place`，动作后核对全部物体；全部暂存完成后，先确认完整出区，再恢复。
+控制器继续负责目的地占用、可达性和运动规划。此工具的规划结果已做离线验证，
+不代表新的现场搬运结果。
+
 ## 5. 每个 Action 的实际结果字段
 
 `get_action_details` 返回字段定义；实际值来自 `send_action_goal` 的返回。
