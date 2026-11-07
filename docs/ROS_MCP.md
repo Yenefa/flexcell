@@ -78,6 +78,33 @@ FLEXCELL_MCP_VERBOSE=1 ./scripts/ros_mcp.sh install 2>&1 | tee /tmp/flexcell-mcp
 Linux/WSL 原生客户端的 command 直接使用本 checkout 的 `scripts/ros_mcp.sh`，args 为 `["server"]`。
 自定义端口时先让 Agent 调用 `connect_to_robot(ip="127.0.0.1", port=实际端口)`。
 
+### 启用水平放置的三物体相机场景
+
+#122 的水平放置功能可通过统一 profile 入口启用。生成器会把同一个角度限值传给
+MTC 规划器和释放门禁；超过限值时保持夹持并报告失败。需要仿真机已构建当前源码，
+使用 `mtc` 技能和 `detachable_joint` 搬运后端。
+
+在已 source ROS 及当前 FlexCell install 的终端中执行：
+
+```bash
+export ROS_DOMAIN_ID=46
+export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+export GZ_PARTITION=flexcell-camera-level
+python3 scripts/sim_profile.py --out /tmp/flexcell-camera-level \
+    --backend detachable_joint --skill-backend mtc \
+    --camera --scene tagged_three_boxes --level-release-tolerance-deg 5
+ros2 launch flexcell_skills trusted_sim.launch.py \
+    world:=/tmp/flexcell-camera-level/world.sdf \
+    params_file:=/tmp/flexcell-camera-level/params.yaml camera:=true
+```
+
+生成命令只写入新的 `params.yaml`、`world.sdf` 和 `vision.json`，并输出它们的 JSON
+路径，不启动机器人。已有文件会拒绝覆盖；每次实验使用新目录。桥接终端沿用相同的
+domain、RMW 和 install，再按上文启动 ROS-MCP。后续 Action 调用方式相同。
+
+不传 `--level-release-tolerance-deg` 时保留原默认配置。该入口的配置和 CLI 已做离线
+验证；#122 的物理窗口是两物体固定点测试，三物体相机场景的整链搬运需单独实跑。
+
 ## 4. 发给 Agent 的第一条指令
 
 > 使用 flexcell-ros MCP 连接 127.0.0.1:9090。先读取本仓库 docs/ROS_MCP.md，

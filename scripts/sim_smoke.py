@@ -187,24 +187,10 @@ def main():
     if args.resume_completed: options['resume_completed_objects'] = True
     options['decision_policy'] = args.decision_policy
     if args.hybrid_threshold is not None: options['hybrid_threshold'] = args.hybrid_threshold
+    if args.level_release_tolerance_deg is not None:
+        options['level_release_tolerance_deg'] = args.level_release_tolerance_deg
     params, world = profile(out, args.backend, args.camera, args.skill_backend,
                             args.joint_hold_sim_s, args.physics_step_s, **options)
-    if args.level_release_tolerance_deg is not None:
-        if args.skill_backend != 'mtc':
-            raise ValueError('the level-release tolerance belongs to the mtc place path only')
-        if not 0. <= args.level_release_tolerance_deg <= 45.:
-            raise ValueError('the level-release tolerance must be within [0, 45] deg')
-        config = yaml.safe_load(params.read_text())
-        tolerance = float(args.level_release_tolerance_deg)
-        config.setdefault('mtc_planner', {}).setdefault('ros__parameters', {})[
-            'level_release_pitch_tolerance_deg'] = tolerance
-        # ONE declared contract: the pre-release gate enforces the same number the
-        # solver targets, so a solution the planner reports as level=false cannot
-        # still be released under the wider default ceiling.
-        config.setdefault('place_server', {}).setdefault('ros__parameters', {})[
-            'max_release_tilt_deg'] = tolerance
-        with params.open('w') as stream:
-            yaml.safe_dump(config, stream, sort_keys=False)
     if args.physics_step_s is not None:
         os.environ['FLEXCELL_PHYSICS_STEP_LOG'] = str(out / 'physics_steps.jsonl')
     if args.contact_trace:

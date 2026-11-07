@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Materialize a new simulation profile; never rewrite a historical world."""
 from copy import deepcopy
+import argparse
 import json
+import math
 from pathlib import Path
 import xml.etree.ElementTree as ET
 
@@ -50,9 +52,18 @@ def add_visual_tags(world):
 def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
             joint_hold_sim_s=0., physics_step_s=None, *, contact_trace=False, release_clearance_m=None,
             qualification_no_recovery=False, synchronous_step_logs=False, resume_completed_objects=False,
-            decision_policy='fsm', hybrid_threshold=None, scene=None, perception_only=False):
+            decision_policy='fsm', hybrid_threshold=None, scene=None, perception_only=False,
+            level_release_tolerance_deg=None):
     if backend not in BACKENDS or skill_backend not in ('legacy', 'mtc'):
         raise ValueError('unsupported backend')
+    if level_release_tolerance_deg is not None:
+        if skill_backend != 'mtc' or backend != 'detachable_joint':
+            raise ValueError('level release requires skill_backend=mtc and backend=detachable_joint')
+        if (isinstance(level_release_tolerance_deg, bool)
+                or not isinstance(level_release_tolerance_deg, (int, float))
+                or not math.isfinite(level_release_tolerance_deg)
+                or not 0. <= level_release_tolerance_deg <= 45.):
+            raise ValueError('the level-release tolerance must be a finite number within [0, 45] deg')
     if scene is not None and scene not in SCENES:
         raise ValueError('unknown scene %r %r' % (scene, SCENES))
     tagged = scene == 'tagged_three_boxes'
@@ -110,6 +121,14 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
         config['task_fsm_server']['ros__parameters']['recovery_budget'] = 0
     config['task_fsm_server']['ros__parameters']['episode_dir'] = str(out / 'episodes')
     config['move_to_pose_server']['ros__parameters']['enable_mtc_handoff'] = skill_backend == 'mtc'
+    if level_release_tolerance_deg is not None:
+        # The shared profile is the single declaration used by normal launch
+        # sessions and smoke runs. The planner target and measured release gate
+        # must agree before any stack is started.
+        tolerance = float(level_release_tolerance_deg)
+        config.setdefault('mtc_planner', {}).setdefault('ros__parameters', {})[
+            'level_release_pitch_tolerance_deg'] = tolerance
+        config['place_server']['ros__parameters']['max_release_tilt_deg'] = tolerance
     base = 'flexcell_velocity_servo.sdf' if backend == 'velocity_servo' else 'flexcell_world.sdf'
     tree = ET.parse(ROOT / 'worlds' / base)
     world = tree.getroot().find('world')
@@ -199,3 +218,30 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
             json.dump(calibration, stream, indent=2, allow_nan=False)
             stream.write('\n')
     return params_path, world_path
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--out', type=Path, required=True, help='directory for a new profile')
+    parser.add_argument('--backend', choices=BACKENDS, default='velocity_servo')
+    parser.add_argument('--skill-backend', choices=('legacy', 'mtc'), default='legacy')
+    parser.add_argument('--camera', action='store_true')
+    parser.add_argument('--scene', choices=SCENES)
+    parser.add_argument('--level-release-tolerance-deg', type=float,
+                        help='enable level release with one planner/gate limit; requires mtc + detachable_joint')
+    args = parser.parse_args(argv)
+    try:
+        params, world = profile(
+            args.out, backend=args.backend, camera=args.camera, skill_backend=args.skill_backend,
+            scene=args.scene, level_release_tolerance_deg=args.level_release_tolerance_deg)
+    except (ValueError, FileExistsError) as exc:
+        parser.error(str(exc))
+    result = dict(params=str(params.resolve()), world=str(world.resolve()))
+    if args.scene == 'tagged_three_boxes':
+        result['vision'] = str((args.out / 'vision.json').resolve())
+    print(json.dumps(result))
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
