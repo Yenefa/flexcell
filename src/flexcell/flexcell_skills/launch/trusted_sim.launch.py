@@ -106,6 +106,11 @@ def launch_stack(context):
                           parameters=[moveit_config.to_dict(), {
                               'use_sim_time': True,
                               'tracked_objects': config['observe_server']['ros__parameters']['tracked_objects'],
+                              # Optional per-profile planner parameters, declared
+                              # under an mtc_planner key in the profile params.yaml
+                              # (e.g. the issue #121 level_release_pitch_tolerance_deg).
+                              # Profiles that do not declare the key are unchanged.
+                              **config.get('mtc_planner', {}).get('ros__parameters', {}),
                           }]))
     return nodes
 

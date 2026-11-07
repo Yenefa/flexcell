@@ -35,10 +35,38 @@ def json_result(value):
     return result
 
 
+def classify_outcome(case, succeeded, expected_failure):
+    """PASS / EXPECTED_FAILURE / ROBOT_FAILURE for a finished run.
+
+    A gate_refusal run can never pass: if the place reached the goal the gate
+    did not fire, which is a failure of the control, not a success (the review
+    reproduced PASS/0 here through the real runner).
+    """
+    if case == 'gate_refusal' and succeeded:
+        return 'ROBOT_FAILURE'
+    if succeeded:
+        return 'PASS'
+    if expected_failure:
+        return 'EXPECTED_FAILURE'
+    return 'ROBOT_FAILURE'
+
+
 def command(argv, out, timeout=120):
     with out.with_suffix('.stdout').open('x') as stdout, out.with_suffix('.stderr').open('x') as stderr:
         proc = subprocess.run(argv, stdout=stdout, stderr=stderr, timeout=timeout)
     return proc.returncode
+
+
+def json_payload(text):
+    """Parse the first JSON object in a stream that may carry log lines.
+
+    Fast DDS prints RTPS transport warnings (e.g. a stale /dev/shm port lock)
+    to stdout before our own payload; a bare json.loads would die on them.
+    """
+    start, end = text.find('{'), text.rfind('}')
+    if start < 0 or end <= start:
+        raise ValueError('no JSON payload in output')
+    return json.loads(text[start:end + 1])
 
 
 def terminate_owned(proc):
@@ -135,14 +163,20 @@ def main():
     parser.add_argument('--release-clearance-m', type=float)
     parser.add_argument('--qualification-no-recovery', action='store_true')
     parser.add_argument('--planner-diagnostics', action='store_true')
+    parser.add_argument('--level-release-tolerance-deg', type=float,
+                        help='issue #121: opt-in level-release box-tilt tolerance for the '
+                             'mtc place path; requires --skill-backend mtc')
     parser.add_argument('--resume-completed', action='store_true')
     parser.add_argument('--decision-policy', choices=['fsm', 'jev', 'llm', 'hybrid'], default='fsm')
     parser.add_argument('--hybrid-threshold', type=float,
                         help='declared router threshold; required for, and only for, the hybrid policy')
     parser.add_argument('--case', choices=['normal', 'dual_object', 'recovery_once', 'budget_exhaustion',
-                                           'unreachable_place', 'false_attach', 'already_placed'], default='normal')
+                                           'unreachable_place', 'false_attach', 'already_placed', 'regrasp',
+                                           'gate_refusal'], default='normal')
     parser.add_argument('--false-attach', default='',
                         help='declared live false-attach spec, object:offset_m[:hold_s]')
+    parser.add_argument('--place-pose', nargs=3, type=float, metavar=('X', 'Y', 'Z'),
+                        help='override the first task goal (issue #121 counterexample point)')
     args = parser.parse_args()
     out = args.out / ('run-' + uuid.uuid4().hex[:12])
     out.mkdir(parents=True, exist_ok=False)
@@ -155,6 +189,22 @@ def main():
     if args.hybrid_threshold is not None: options['hybrid_threshold'] = args.hybrid_threshold
     params, world = profile(out, args.backend, args.camera, args.skill_backend,
                             args.joint_hold_sim_s, args.physics_step_s, **options)
+    if args.level_release_tolerance_deg is not None:
+        if args.skill_backend != 'mtc':
+            raise ValueError('the level-release tolerance belongs to the mtc place path only')
+        if not 0. <= args.level_release_tolerance_deg <= 45.:
+            raise ValueError('the level-release tolerance must be within [0, 45] deg')
+        config = yaml.safe_load(params.read_text())
+        tolerance = float(args.level_release_tolerance_deg)
+        config.setdefault('mtc_planner', {}).setdefault('ros__parameters', {})[
+            'level_release_pitch_tolerance_deg'] = tolerance
+        # ONE declared contract: the pre-release gate enforces the same number the
+        # solver targets, so a solution the planner reports as level=false cannot
+        # still be released under the wider default ceiling.
+        config.setdefault('place_server', {}).setdefault('ros__parameters', {})[
+            'max_release_tilt_deg'] = tolerance
+        with params.open('w') as stream:
+            yaml.safe_dump(config, stream, sort_keys=False)
     if args.physics_step_s is not None:
         os.environ['FLEXCELL_PHYSICS_STEP_LOG'] = str(out / 'physics_steps.jsonl')
     if args.contact_trace:
@@ -196,7 +246,7 @@ def main():
         rc = command([sys.executable, str(ROOT / 'infra/runtime_identity.py')], out / 'identity')
         if rc:
             raise RuntimeError('installed/source identity mismatch')
-        identity = json.loads((out / 'identity.stdout').read_text())
+        identity = json_payload((out / 'identity.stdout').read_text())
         semantic_config = yaml.safe_load(params.read_text())
         for node in semantic_config.values():
             for key, value in list(node.get('ros__parameters', {}).items()):
@@ -236,7 +286,7 @@ def main():
             time.sleep(3)
             target = out / ('health_before_%d' % attempt)
             if command([sys.executable, str(ROOT / 'setup/flexcell_admin.py'), 'health'], target, timeout=40) == 0:
-                doc = json.loads(target.with_suffix('.stdout').read_text())
+                doc = json_payload(target.with_suffix('.stdout').read_text())
                 if (doc.get('ok') is True and doc.get('hard_fail') == []
                         and doc['checks'].get('task_state') == 'IDLE'
                         and doc['checks'].get('carry_engaged') is False):
@@ -327,6 +377,8 @@ def main():
             time.sleep(1.)
         result['task_start_monotonic_ns'] = time.monotonic_ns()
         pose = ['.44', '.40', '.0175'] if args.case == 'unreachable_place' else ['.12', '-.15', '.0175']
+        if args.place_pose is not None:
+            pose = ['%.6f' % value for value in args.place_pose]
         if args.case == 'already_placed':
             # The declared task goal equals this object's canonical spawn. No
             # fixture teleport or changed verifier is needed for this control.
@@ -338,7 +390,9 @@ def main():
                       '--timeout', '150'], out / 'task', timeout=170)
         task_output = (out / 'task.stdout').read_text()
         result['task_end_monotonic_ns'] = time.monotonic_ns()
-        if args.camera:
+        if args.camera and args.case != 'regrasp':
+            # A regrasp run keeps recording through the second task; the
+            # boundary is finalised below so the exported episode covers both.
             time.sleep(1.)
             result['recording_end_monotonic_ns'] = time.monotonic_ns()
         if 'RESULT ' not in task_output:
@@ -346,6 +400,45 @@ def main():
             raise RuntimeError('task has no terminal result; subsequent reset is forbidden')
         task = json.loads(task_output.split('RESULT ', 1)[1])
         result['task'] = task
+        # Issue #121 regrasp window: a second pick-place on the SAME live stack,
+        # picking the object from wherever the first task left it (the pick
+        # samples gz ground truth at grasp time, so no reset happens). The final
+        # judgement covers both tasks.
+        if args.case == 'regrasp':
+            # Stop for reconciliation: never dispatch a second physical task when
+            # the first failed, or when a skill row reports an unknown motion
+            # terminal - the previous motion/attachment state is unresolved.
+            first_ok = rc == 0 and task.get('outcome_val') == 0
+            result['regrasp_first_task_ok'] = first_ok
+            first_rows = []
+            first_place = out / 'skills/place.jsonl'
+            if first_place.exists():
+                first_rows = [json.loads(line) for line in first_place.read_text().splitlines() if line.strip()]
+            unknown_terminal = any('MotionTerminalUnknown' in str(row.get('detail', '')) for row in first_rows)
+            if not first_ok or unknown_terminal:
+                result['regrasp_blocked'] = dict(first_task_ok=first_ok, unknown_terminal=unknown_terminal)
+                result['status'] = 'REGRASP_BLOCKED_FIRST_TASK'
+                raise RuntimeError('regrasp not dispatched: first task not clean (ok=%s unknown_terminal=%s)'
+                                   % (first_ok, unknown_terminal))
+            result['physical_tasks_dispatched'] = 2
+            regrasp_pose = ['0.25', '0.05', '.0175']  # zone_2, declared in the FSM
+            result['regrasp_goal_pose'] = [float(value) for value in regrasp_pose]
+            result['regrasp_start_monotonic_ns'] = time.monotonic_ns()
+            rc = command([sys.executable, str(ROOT / 'src/flexcell/flexcell_skills/test/w1_client.py'),
+                          '--action', 'task', '--object', args.object, '--pose', *regrasp_pose,
+                          '--timeout', '150'], out / 'task_regrasp', timeout=170)
+            result['regrasp_end_monotonic_ns'] = time.monotonic_ns()
+            if args.camera:
+                # Cover the second pick-place in the exported episode: the
+                # ledger filters frames by this boundary.
+                time.sleep(1.)
+                result['recording_end_monotonic_ns'] = time.monotonic_ns()
+            regrasp_output = (out / 'task_regrasp.stdout').read_text()
+            if 'RESULT ' not in regrasp_output:
+                result['status'] = 'ACTION_TERMINAL_UNKNOWN'
+                raise RuntimeError('regrasp task has no terminal result; subsequent reset is forbidden')
+            task = json.loads(regrasp_output.split('RESULT ', 1)[1])
+            result['task_regrasp'] = task
         # Actual routing for this run, read back from the decision log: the declared
         # policy alone cannot show whether a model answered or the FSM fell back.
         decisions = out / 'skills' / 'decisions.jsonl'
@@ -381,9 +474,29 @@ def main():
             and task.get('error_code') == 'ERR_SKILL_FAILED'
             and any(row.get('skill_backend') == 'mtc' and row.get('outcome') != '0'
                     for row in skill_records))
+        # Negative control: a gate limit below the achievable floor must refuse
+        # EVERY release and hold the carry. A success path must never satisfy
+        # this: the run has to fail, the box must not be at the goal, and no
+        # skill row anywhere may report a release.
+        gate_rows = [row for row in skill_records if 'exceeds' in str(row.get('detail', ''))]
+        expected_failure = expected_failure or (
+            args.case == 'gate_refusal'
+            and task.get('outcome_val') == 1
+            and task.get('object_at_place') is False
+            and bool(gate_rows)
+            and all(row.get('released') is False for row in gate_rows)
+            and not any(row.get('released') is True for row in skill_records))
         succeeded = rc == 0 and task.get('outcome_val') == 0 and (
             task.get('object_a_at_zone') is True and task.get('object_b_at_zone') is True
             if args.case == 'dual_object' else task.get('object_at_place') is True)
+        if args.case == 'gate_refusal':
+            # This control asserts a REFUSAL. A place that reaches the goal means
+            # the gate did not fire - that is a failure of the control, never a
+            # pass. (The review reproduced PASS/0 here through the real runner;
+            # #123 returns ROBOT_FAILURE/1 for the same input.)
+            succeeded = False
+        if args.case == 'regrasp':
+            succeeded = succeeded and bool(result.get('regrasp_first_task_ok'))
         if args.case == 'recovery_once':
             succeeded = succeeded and sum(row.get('injected') is True for row in skill_records) == 1
         if args.case == 'already_placed':
@@ -401,7 +514,8 @@ def main():
                 succeeded = succeeded and counts.get('verify', 0) >= 1
             else:
                 succeeded = succeeded and counts == expected
-        if not succeeded and not expected_failure:
+        status = classify_outcome(args.case, succeeded, expected_failure)
+        if status == 'ROBOT_FAILURE':
             result['status'] = 'ROBOT_FAILURE'
             raise RuntimeError('typed task failure retained; no replacement task')
         if args.case in ('recovery_once', 'budget_exhaustion'):
@@ -413,7 +527,7 @@ def main():
             raise RuntimeError('post-task reset failed')
         if command([sys.executable, str(ROOT / 'setup/flexcell_admin.py'), 'health'], out / 'health_after'):
             raise RuntimeError('post-task strict health failed')
-        result['status'] = 'EXPECTED_FAILURE' if expected_failure else 'PASS'
+        result['status'] = status
         result['expectation_met'] = True
     except (RuntimeError, OSError, ValueError, subprocess.TimeoutExpired) as exc:
         result['error'] = str(exc)
