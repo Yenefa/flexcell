@@ -881,6 +881,22 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
 - Next runtime use: launch the configured stack and resume the existing visual
   task loop. Commands are in [ROS_MCP.md](ROS_MCP.md).
 
+### E-027 — Visual region clear/restore plans (#126, 2026-11-07)
+
+- A read-only planner consumes the existing AprilTag capture/calibration schema,
+  selects boxes by visual geometry, searches caller-declared staging candidates,
+  and emits clear-then-restore moves for up to three 35 mm boxes. Ambiguous
+  boundaries, incomplete/moving captures and blocked staging produce no plan.
+- Verification: 75 targeted geometry/CLI/occupancy tests; 912 ROS-independent
+  tests plus 3 subtests; static scan 46/0. Fourteen ROS-dependent files are
+  explicitly excluded on this host. Nominal plan endpoints are cross-checked
+  with the existing destination occupancy gate.
+- Actual CLI calls on two **synthetic** identity permutations choose A/B then
+  B/C, each with four moves and a different untouched object. No camera,
+  ROS/Gazebo stack or robot action ran; these are software checks, not new
+  physical evidence. Live Observe and existing motion checks remain required.
+- Usage: [ROS_MCP.md](ROS_MCP.md), `scripts/plan_region.py --help`.
+
 ## Evidence locations
 
 - Delivery host: `F:\flexcell-stage\setup\acceptance\{day1,day2,week1,week15}\`
