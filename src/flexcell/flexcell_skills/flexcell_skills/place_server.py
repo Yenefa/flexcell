@@ -44,7 +44,19 @@ PHASES = {
 }
 
 
+# A negative limit means the pre-release attitude gate is disabled. This is
+# the single source of truth for both the declared parameter default and the
+# instance attribute, so fixtures that bypass __init__ inherit the same
+# opt-out behaviour instead of raising AttributeError (CI finding 2026-11-07).
+DISABLED_RELEASE_TILT_DEG = -1.0
+
+
 class PlaceServer(Node):
+
+    # Class-level default: __init__ overwrites it from the declared parameter.
+    # Objects built with PlaceServer.__new__ in offline tests inherit the
+    # opt-out value, matching the "declare nothing -> no gate" contract.
+    _max_release_tilt = DISABLED_RELEASE_TILT_DEG
 
     def __init__(self):
         super().__init__('place_server')
@@ -66,7 +78,7 @@ class PlaceServer(Node):
         self.declare_parameter('carry_query_service', '/flexcell/carry_snapshot')
         self.declare_parameter('carry_parameters_service', '/carry_server/get_parameters')
         self.declare_parameter('object_size', [0.035, 0.035, 0.035])
-        self.declare_parameter('max_release_tilt_deg', -1.0)
+        self.declare_parameter('max_release_tilt_deg', DISABLED_RELEASE_TILT_DEG)
         self.declare_parameter('default_deadline_ms', 30000)
         self.declare_parameter('motion_profile_names', ['demo_veryslow', 'demo_slow', 'demo_default'])
         self.declare_parameter('default_motion_profile', 'demo_slow')

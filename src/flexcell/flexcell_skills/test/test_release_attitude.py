@@ -92,7 +92,11 @@ def test_place_server_wires_the_gate_before_release():
     assert "max_release_tilt_deg" in source
     # Opt-in contract: the gate is disabled unless the profile declares it, and
     # declaring it on a backend that cannot level the release is a config error.
-    assert "'max_release_tilt_deg', -1.0" in source
+    # The declared default and the class-level default share one constant so
+    # fixtures that bypass __init__ cannot raise AttributeError (CI finding).
+    assert "DISABLED_RELEASE_TILT_DEG = -1.0" in source
+    assert "declare_parameter('max_release_tilt_deg', DISABLED_RELEASE_TILT_DEG)" in source
+    assert "_max_release_tilt = DISABLED_RELEASE_TILT_DEG" in source
     assert "if self._max_release_tilt >= 0.0:" in source
     assert "skill_backend=mtc" in source
     # The gate must run before the carry release service is called.
