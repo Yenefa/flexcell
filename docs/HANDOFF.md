@@ -14,6 +14,10 @@
 - 复跑一次（run 42397617878，n=2）同样 success；该次 live 掉帧更多，对账回填
   trial-01/02/03/04/05 = 1/4/4/4/6 帧（trial-01/05 有少量 invalid 回填，均落在导出窗口外）。
   注意：live 丢帧随 CI 负载波动；若 invalid 回填落在导出窗口内，export 会显式失败（不静默）。
+- 进一步加固（PR #130，main `3e44de6`）：对账只回填 live 覆盖区间内的缺失帧，
+  避免把启动/收尾边缘（无对齐遥测）写成 invalid 行；补“区间外不回填”“多 raw_N.db3 合并”单测，reconcile 5/5。
+- n=3（run 42401973181）在 main 仍 **success**；reconcile 回填 trial-02/03/05 = 4/2/2，trial-03 有 2 帧 invalid
+  但均落在导出窗口外，导出 roundtrip 通过。
 
 - 仓库为 `Yenefa/flexcell`；接手先核对当前 `origin/main`，保留旧工作树的未提交修改。
 - #122 已按用户授权人工验收合并为 `df21596`，#121 已关闭；62 项定向测试和静态扫描
