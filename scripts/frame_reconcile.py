@@ -116,7 +116,13 @@ def reconcile_run(out, bag_dir, *, deserialize, write_png, joints,
     for stamp, msg in camera:
         cam_map.setdefault(stamp, msg)
     expected = sorted(cam_map)
-    missing = [stamp for stamp in expected if stamp not in existing]
+    live = [row['sim_ns'] for row in rows]
+    lo_live, hi_live = (min(live), max(live)) if live else (None, None)
+    # Only fill holes inside the live coverage. Bag frames captured before the
+    # live stream started (or after it ended) are startup/teardown edges that can
+    # have no aligned telemetry; adding them would only create invalid rows.
+    missing = [stamp for stamp in expected
+               if stamp not in existing and (lo_live is None or lo_live <= stamp <= hi_live)]
     if not missing:
         return dict(status='COMPLETE', expected=len(expected), existing=len(existing),
                     frames_total=len(rows),

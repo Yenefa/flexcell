@@ -110,3 +110,37 @@ def test_backfilled_frame_without_aligned_state_is_invalid_not_dropped(tmp_path)
     rows = [json.loads(l) for l in (out / "frames.jsonl").read_text().splitlines()]
     bf = [r for r in rows if r.get("backfilled_from_bag")][0]
     assert bf["valid"] is False and any("missing_or_stale" in x for x in bf["reasons"])
+
+
+def test_bag_frames_outside_live_coverage_are_not_backfilled(tmp_path):
+    stamps = [100_000_000, 200_000_000, 300_000_000]
+    out = prepare(tmp_path, stamps, [0, 100_000_000, 200_000_000, 300_000_000, 400_000_000],
+                  [0, 100_000_000, 200_000_000, 300_000_000, 400_000_000],
+                  [0, 100_000_000, 200_000_000, 300_000_000, 400_000_000],
+                  {"kind": "gripper_position_target", "accepted": True, "position": 0.02, "sim_ns": 0})
+    before = (out / "frames.jsonl").read_text()
+    mod = reconcile_module()
+    res = mod.reconcile_run(out, out / "raw", deserialize=fake_deserialize, write_png=fake_write_png, joints=JOINTS)
+    assert res["status"] == "COMPLETE" and res["backfilled"] == 0
+    assert (out / "frames.jsonl").read_text() == before
+
+
+def test_split_bag_files_are_combined(tmp_path):
+    out = tmp_path / "run"
+    (out / "images").mkdir(parents=True)
+    rows = [dict(frame_index=i, sim_ns=s, monotonic_ns=1_000_000_000 + 145_000_000 * i,
+                 image="images/%06d.png" % i, valid=True, reasons=[])
+            for i, s in enumerate([0, 100_000_000, 300_000_000])]
+    (out / "frames.jsonl").write_text("".join(json.dumps(r) + chr(10) for r in rows))
+    raw = out / "raw"
+    raw.mkdir()
+    make_bag(raw / "raw_0.db3", [0, 100_000_000], [0, 100_000_000], [0, 100_000_000],
+             {"kind": "gripper_position_target", "accepted": True, "position": 0.02, "sim_ns": 0})
+    make_bag(raw / "raw_1.db3", [200_000_000, 300_000_000], [200_000_000, 300_000_000],
+             [200_000_000, 300_000_000],
+             {"kind": "gripper_position_target", "accepted": True, "position": 0.02, "sim_ns": 0})
+    mod = reconcile_module()
+    res = mod.reconcile_run(out, raw, deserialize=fake_deserialize, write_png=fake_write_png, joints=JOINTS)
+    assert res["status"] == "RECONCILED" and res["backfilled"] == 1
+    got = [json.loads(l)["sim_ns"] for l in (out / "frames.jsonl").read_text().splitlines()]
+    assert got == [0, 100_000_000, 200_000_000, 300_000_000]
