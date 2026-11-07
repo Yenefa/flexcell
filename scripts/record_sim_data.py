@@ -23,7 +23,7 @@ from rclpy.signals import SignalHandlerOptions
 from sensor_msgs.msg import Image, JointState
 from control_msgs.msg import JointTrajectoryControllerState
 from std_msgs.msg import String
-from frame_writer import FrameWriter
+from frame_writer import FrameWriter, LineWriter
 
 JOINTS = ['joint1', 'joint2', 'joint3', 'joint4', 'gripper_left_joint']
 TOPICS = ['/clock', '/tf', '/tf_static', '/joint_states', '/arm_controller/controller_state',
@@ -65,7 +65,7 @@ class Recorder(Node):
         super().__init__('flexcell_data_recorder', parameter_overrides=[
             rclpy.parameter.Parameter('use_sim_time', value=True)])
         self.out, self.states, self.references, self.gripper = out, deque(maxlen=500), deque(maxlen=500), deque(maxlen=100)
-        self.physics = (out / 'physics.jsonl').open('x')
+        self.physics = LineWriter(out, 'physics.jsonl', max_pending=200000)
         self.index, self.last, self.errors = 0, -1, []
         (out / 'images').mkdir()
         self.writer = FrameWriter(out, write_png)
@@ -76,7 +76,7 @@ class Recorder(Node):
             QoSProfile(depth=10, durability=DurabilityPolicy.TRANSIENT_LOCAL))
         self.create_subscription(String, '/flexcell/physics_trace', self.trace, 100)
         self.create_subscription(Image, '/flexcell/camera/rgb', self.frame,
-                                 QoSProfile(depth=32, reliability=ReliabilityPolicy.BEST_EFFORT))
+                                 QoSProfile(depth=200, reliability=ReliabilityPolicy.BEST_EFFORT))
 
     def state(self, msg):
         self.states.append(dict(sim_ns=stamp_ns(msg.header), positions=dict(zip(msg.name, msg.position))))
@@ -98,8 +98,7 @@ class Recorder(Node):
             data = json.loads(msg.data)
             if data['schema_version'] != 1 or data['sim_ns'] < 0:
                 raise ValueError('invalid physics trace')
-            self.physics.write(json.dumps(data, allow_nan=False) + '\n')
-            self.physics.flush()
+            self.physics.write(json.dumps(data, allow_nan=False))
         except (ValueError, KeyError) as exc:
             self.errors.append(str(exc))
 
@@ -164,16 +163,39 @@ def main():
         node.writer.close()
         writer = node.writer.report()
         node.errors.extend(writer['errors'])
-        node.physics.close(); log.close()
+        node.physics.close()
+        physics = node.physics.report()
+        node.errors.extend(physics['errors'])
+        reconcile = None
+        if args.camera:
+            try:
+                from frame_reconcile import reconcile_run
+                from rclpy.serialization import deserialize_message
+                from rosidl_runtime_py.utilities import get_message
+                _types = {'/flexcell/camera/rgb': 'sensor_msgs/msg/Image',
+                          '/joint_states': 'sensor_msgs/msg/JointState',
+                          '/arm_controller/controller_state': 'control_msgs/msg/JointTrajectoryControllerState',
+                          '/flexcell/execution_command': 'std_msgs/msg/String'}
+                def _deser(name, data):
+                    return deserialize_message(data, get_message(_types[name]))
+                reconcile = reconcile_run(args.out, args.out / 'raw', deserialize=_deser,
+                                          write_png=write_png, joints=JOINTS)
+            except Exception as exc:
+                reconcile = dict(status='ERROR', error=str(exc))
+                node.errors.append('camera_reconcile_failed: ' + str(exc))
+        log.close()
+        frames_total = reconcile.get('frames_total', node.index) if reconcile else node.index
+        valid_total = reconcile.get('valid_total', writer['valid_frames']) if reconcile else writer['valid_frames']
         (args.out / 'collection.json').write_text(json.dumps(dict(
-            schema_version=1, frames=node.index, valid_frames=writer['valid_frames'], errors=node.errors,
-            image_writer=writer,
+            schema_version=1, frames=frames_total, valid_frames=valid_total, errors=node.errors,
+            image_writer=writer, physics_writer=physics, reconcile=reconcile,
             rosbag_exit=bag.returncode, joints=JOINTS,
             action_semantics='arm controller reference positions + held accepted gripper position target',
-            synchronization='causal source stamps; state/reference age <=50ms; no interpolation',
+            synchronization='causal source stamps; state/reference age <=50ms; backfilled rows from bag',
             observation_source='SIMULATION_GROUND_TRUTH; camera is data-only'), indent=2) + '\n')
         node.destroy_node(); rclpy.shutdown()
-    return 0 if (not args.camera or writer['valid_frames'] > 0) and not node.errors and bag.returncode == 0 else 1
+    reconcile_ok = (not args.camera) or (reconcile is not None and reconcile.get('status') in ('COMPLETE', 'RECONCILED'))
+    return 0 if (not args.camera or valid_total > 0) and not node.errors and bag.returncode == 0 and reconcile_ok else 1
 
 
 if __name__ == '__main__':

@@ -92,3 +92,29 @@ def test_incomplete_drain_is_rejected(tmp_path):
     finally:
         release.set()
         writer.worker.join(2)
+
+def line_writer_type():
+    path = Path(__file__).resolve().parents[4] / 'scripts/frame_writer.py'
+    spec = importlib.util.spec_from_file_location('frame_writer_lw', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.LineWriter
+
+
+def test_line_writer_preserves_order_and_flushes_on_close(tmp_path):
+    writer = line_writer_type()(tmp_path, 'physics.jsonl', max_pending=1024)
+    for i in range(500):
+        assert writer.write('{"seq": %d}' % i)
+    assert writer.close()
+    lines = (tmp_path / 'physics.jsonl').read_text().splitlines()
+    assert len(lines) == 500
+    assert lines[0] == '{"seq": 0}' and lines[-1] == '{"seq": 499}'
+    assert writer.report()['lines_written'] == 500
+
+
+def test_line_writer_write_after_close_is_rejected(tmp_path):
+    writer = line_writer_type()(tmp_path, 'physics.jsonl')
+    assert writer.write('x')
+    assert writer.close()
+    assert not writer.write('y')
+    assert 'jsonl_writer_not_running' in writer.report()['errors']
