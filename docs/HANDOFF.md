@@ -2,6 +2,19 @@
 
 ## 当前执行入口（2026-11-07）
 
+- 2026-11-07（本会话）：仓库按用户授权转为 **public**，GitHub Actions 计费门禁解除，
+  push / PR / workflow_dispatch 均正常分配 runner（此前私有时 0-step 的拒绝已消失）。
+- PR [#128](https://github.com/Yenefa/flexcell/pull/128) 合并为 `d17c284`：录制器新增
+  `LineWriter` 把 500 Hz `physics_trace` 写盘移出 ROS 回调、相机 QoS depth 32→200；
+  新增 `frame_reconcile` 在录制收尾用 rosbag 完整相机流回填 live 丢失帧（真像素、真对齐，
+  仅窗口映射 `monotonic_ns` 线性插值；不放宽 85–115 ms 导出与门禁、不覆盖原 cohort）。
+- `camera-data` 在 main 通过（run 42393693376；产物 trial-02/03/04 各回填 2 帧、invalid=0）。
+  原始 4 个默认跳过 job 现已全部在 main 真跑通过：legacy-skill-matrix /
+  legacy-carry-parity / resume-smoke（run 42391981170）、camera-data（run 42393693376）。
+- 复跑一次（run 42397617878，n=2）同样 success；该次 live 掉帧更多，对账回填
+  trial-01/02/03/04/05 = 1/4/4/4/6 帧（trial-01/05 有少量 invalid 回填，均落在导出窗口外）。
+  注意：live 丢帧随 CI 负载波动；若 invalid 回填落在导出窗口内，export 会显式失败（不静默）。
+
 - 仓库为 `Yenefa/flexcell`；接手先核对当前 `origin/main`，保留旧工作树的未提交修改。
 - #122 已按用户授权人工验收合并为 `df21596`，#121 已关闭；62 项定向测试和静态扫描
   通过，CI 未执行。释放姿态修正及固定点/二次抓取记录见
@@ -16,9 +29,8 @@
 - #116 相机接线与 #118 官方 AprilTag 只读定位已合并至 main；#115 已完成关闭。
   云端实际 Gazebo 五帧×三物体定位最大误差 1.458 mm，属于单个静止标记场景。
 - #120 修正机械臂进场后的相机遮挡和首帧元数据竞态，沿用相同官方资产与控制器。
-- GitHub Actions 当前因账户付款/额度拒绝启动，runner 为零、无执行步骤；
-  原始 annotation 和合并状态见 [#116](https://github.com/Yenefa/flexcell/pull/116)。
-  恢复 Actions 后重跑现有检查，不通过修改 workflow 或空提交反复触发来处理。
+- GitHub Actions 计费/额度门禁已通过公开仓库解除；原“0 step 拒绝启动”记录仅保留为历史
+  （annotation 见 [#116](https://github.com/Yenefa/flexcell/pull/116)）。
 - [#119](https://github.com/Yenefa/flexcell/issues/119) 已完成：Agent 根据视觉位置选出
   区域内箱体，经现有 MCP 腾空并恢复；两种随机摆放验证选择会随场景改变。
   最新执行结果与失败记录见该 issue。视觉用于任务规划，底层仍用新鲜 Observe 抓取，
