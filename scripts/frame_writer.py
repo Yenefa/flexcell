@@ -70,3 +70,71 @@ class FrameWriter:
                     queue_capacity=self.queue.maxsize, queue_high_watermark=self.high_watermark,
                     drain_completed=self.drained, errors=list(self.errors),
                     rejected_frames=list(self.rejected))
+
+class LineWriter:
+    """Bounded background JSONL line writer.
+
+    Keeps blocking disk writes/flushes off ROS callbacks. A full queue or a
+    failed write is reported as an explicit collection error, never silently
+    dropped. Lines are flushed on close, so an orderly shutdown never loses a
+    queued record.
+    """
+
+    def __init__(self, out, name, max_pending=8192):
+        self.path = out / name
+        self.queue = Queue(maxsize=max_pending)
+        self.errors = []
+        self.stopping = threading.Event()
+        self.drained = False
+        self.written = 0
+        self.high_watermark = 0
+        self.stream = self.path.open('x')
+        self.worker = threading.Thread(target=self._run, name='jsonl-writer', daemon=True)
+        self.worker.start()
+
+    def write(self, line):
+        if self.stopping.is_set() or not self.worker.is_alive():
+            self.errors.append('jsonl_writer_not_running')
+            return False
+        try:
+            self.queue.put_nowait(line)
+            self.high_watermark = max(self.high_watermark, self.queue.qsize())
+            return True
+        except Full:
+            self.errors.append('jsonl_writer_queue_full')
+            return False
+
+    def _run(self):
+        try:
+            while not self.stopping.is_set() or not self.queue.empty():
+                try:
+                    line = self.queue.get(timeout=.05)
+                except Empty:
+                    continue
+                try:
+                    self.stream.write(line + '\n')
+                except Exception as exc:  # Report I/O failure; never fabricate a record.
+                    self.errors.append('jsonl_writer_failed: ' + str(exc))
+                self.written += 1
+                self.queue.task_done()
+        except Exception as exc:
+            self.errors.append('jsonl_writer_thread_failed: ' + str(exc))
+        finally:
+            try:
+                self.stream.flush()
+                self.stream.close()
+            except Exception as exc:
+                self.errors.append('jsonl_writer_close_failed: ' + str(exc))
+
+    def close(self, timeout=10):
+        self.stopping.set()
+        self.worker.join(timeout)
+        self.drained = not self.worker.is_alive() and self.queue.empty()
+        if not self.drained:
+            self.errors.append('jsonl_writer_drain_incomplete')
+        return self.drained and not self.errors
+
+    def report(self):
+        return dict(lines_written=self.written, queue_capacity=self.queue.maxsize,
+                    queue_high_watermark=self.high_watermark,
+                    drain_completed=self.drained, errors=list(self.errors))
