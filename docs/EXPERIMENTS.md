@@ -867,6 +867,20 @@ Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`,
   Root cause UNKNOWN; n≥50/AC@90 and benchmark qualifications stay frozen.
   [Manual handoff](GRASP_PHASE3_GATE_20261026.md).
 
+### E-026 — Shared level-release profiles (#124, 2026-11-07)
+
+- Following #122's merge (`df21596`), normal profile generation and the smoke
+  runner share one optional tolerance for the MTC solver and release gate.
+  `scripts/sim_profile.py` exposes profile generation for three-box/camera sessions.
+- Configuration/CLI verification: 73 targeted tests and 863 ROS-independent
+  tests plus 3 subtests pass. Fourteen ROS-dependent files are excluded from the
+  host suite; no native build or new physical acceptance window is claimed.
+- Twelve default backend/camera/skill combinations retain the same configuration
+  bytes after output-path normalization and identical world bytes. Static scan
+  45/0; a real CLI invocation generated params, world and vision files.
+- Next runtime use: launch the configured stack and resume the existing visual
+  task loop. Commands are in [ROS_MCP.md](ROS_MCP.md).
+
 ## Evidence locations
 
 - Delivery host: `F:\flexcell-stage\setup\acceptance\{day1,day2,week1,week15}\`

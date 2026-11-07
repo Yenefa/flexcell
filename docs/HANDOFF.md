@@ -1,8 +1,14 @@
 # HANDOFF — project-033-flexcell
 
-## 当前执行入口（2026-11-04）
+## 当前执行入口（2026-11-07）
 
 - 仓库为 `Yenefa/flexcell`；接手先核对当前 `origin/main`，保留旧工作树的未提交修改。
+- #122 已按用户授权人工验收合并为 `df21596`，#121 已关闭；62 项定向测试和静态扫描
+  通过，CI 未执行。释放姿态修正及固定点/二次抓取记录见
+  [收口窗口](../setup/acceptance/issue121_closure_20261106/README.md)。#123 保留草稿。
+- 接续 #124：共享 profile 和生成 CLI 可同时启用水平释放规划器/门禁，普通相机三物体
+  场景可直接生成启动配置，操作见 [ROS_MCP.md](ROS_MCP.md)。下一项运行验证是使用该配置
+  继续现有视觉任务链；本轮配置测试不冒充新的 Gazebo 搬运结果。
 - #113 已合并为 `f85e0ab`，三物体配置、占用拒绝和一次循环搬运已验证；
   操作与实际边界见 [ROS_MCP.md](ROS_MCP.md)。
 - #116 相机接线与 #118 官方 AprilTag 只读定位已合并至 main；#115 已完成关闭。
@@ -11,7 +17,7 @@
 - GitHub Actions 当前因账户付款/额度拒绝启动，runner 为零、无执行步骤；
   原始 annotation 和合并状态见 [#116](https://github.com/Yenefa/flexcell/pull/116)。
   恢复 Actions 后重跑现有检查，不通过修改 workflow 或空提交反复触发来处理。
-- 主线为 [#119](https://github.com/Yenefa/flexcell/issues/119)：Agent 根据视觉位置选出
+- [#119](https://github.com/Yenefa/flexcell/issues/119) 已完成：Agent 根据视觉位置选出
   区域内箱体，经现有 MCP 腾空并恢复；两种随机摆放验证选择会随场景改变。
   最新执行结果与失败记录见该 issue。视觉用于任务规划，底层仍用新鲜 Observe 抓取，
   不放宽 2 mm / 1° 附着门禁；中转位置按完整出区验收，最终恢复 ≤10 mm。
