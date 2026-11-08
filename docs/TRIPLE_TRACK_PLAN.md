@@ -58,7 +58,7 @@
 
 **Blocker**：原始本地模型权重不可得（远程 paid 提案的权重身份不可审计）；无真实机器人 → `physical_acceptance` 不可完成。
 
-**Next Action**：B2 的 fast 端点前置条件（本地小模型或可接受成本的远端 fast 端点）；在此之前 B2 记为 INFRA_BLOCKED，转 B3/其它 Track。
+**Next Action**：B2 fast 臂可行性已写（`docs/B2_FAST_ARM_FEASIBILITY.md`）：鉴权/超时已支持，**校准产物是唯一硬阻塞**；下一步采集真实校准数据（不得编造）。
 
 ---
 
