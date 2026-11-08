@@ -54,7 +54,7 @@ No runtime. Large. Decide between a separate evidence PR and a frozen external p
 | U1 interfaces | **MERGED** | PR #134 -> `c04863c`; `RunComposite.action`, `CompositeStage.msg`, `ObjectPosition.msg`; `ci` + `trusted-simulation` green |
 | U2 pure contracts | **MERGED** | same PR; 6 pure modules + 5 offline test files (92 tests locally) |
 | U4 harness | **BLOCKED on U6** | trial import gave 183 pass / **17 fail**, all reading `setup/acceptance/*` evidence; tooling and evidence must land together |
-| U3 runtime | not started | needs ROS/Gazebo window + new fingerprint |
+| U3 runtime | **MERGED** | PR #138 -> `7fecbe2`; live Gazebo composite chain OUTCOME_SUCCEEDED; plain smoke regression PASS; CI green |
 | U5 bounded runner | not started | depends on U4 |
 | U6 evidence (1805 files) | not started | separate decision: evidence PR vs frozen external pointer |
 | U0 docs | partial | this plan + competition status only |

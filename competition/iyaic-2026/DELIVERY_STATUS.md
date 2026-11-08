@@ -25,6 +25,7 @@
 | Recorder rosbag reconcile + LineWriter (#128, #130) | merged; `camera-data` green |
 | Harness/tooling honesty gates (#28, #29) | merged |
 | TransferBench U1/U2: composite interfaces + pure contracts (#134, `c04863c`) | merged; offline + CI green |
+| TransferBench U3: composite runtime integration (#138, `7fecbe2`) | merged; live Gazebo chain succeeded, plain smoke regression PASS, CI green |
 
 > "Implemented" means the source is on `main` and the offline/CI suites pass. It is **not** a claim
 > of a fresh ROS/Gazebo physical acceptance for every path, and still less a success-rate claim.
