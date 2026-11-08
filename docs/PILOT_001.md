@@ -152,4 +152,4 @@
 
 - 固定任务：真实 Gazebo `sim_smoke --case normal` PASS（指纹 `aa5ac497…`，误差 5.33 mm）。
 - T-G1 管道：脚本化 agent 写 `place_pose` → 真实执行 → 独立验证 → **success=true, 证据 1.0**（管道级 M3-S）。
-- **LLM 成功**：deepseek-chat 在 T-G1 上 3 轮完成修复，独立验收 PASS，证据 1.0（`runs/p1.4-tg1-llm-success-20261109/`）；W1 **M3-S（单任务 n=1）**。
+- **LLM 成功**：deepseek-chat 在 T-G1 上 3 轮完成修复，独立验收 PASS，证据 1.0（`runs/p1.4-tg1-llm-success-20261109/`）；W1 **M3-S（单任务，可靠性 3/3）**。

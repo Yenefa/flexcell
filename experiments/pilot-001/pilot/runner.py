@@ -69,12 +69,12 @@ def run_one(manifest, arm, agent, template, out_dir, meta=None, protected=None,
     execution = execution_factory(ws) if execution_factory else Execution(ws, extra_env)
     if extra_env and hasattr(execution, "extra_env"):
         execution.extra_env = dict(extra_env)
+    task_name = (meta or {}).get("task")
+    budget = manifest.get("task_budget", {}).get(task_name, manifest["budget"])
     toolbox = ToolBox(arm, manifest["arms"][arm]["tools"], ws, guard,
                       ws / "verdict.json", execution)
     judge = Judge(ws, ACCEPTANCE.get(meta.get("task", "") if meta else "", "gate/acceptance.py"),
-                  env=extra_env)
-    task_name = (meta or {}).get("task")
-    budget = manifest.get("task_budget", {}).get(task_name, manifest["budget"])
+                  env=extra_env, timeout=int(budget.get("judge_timeout_s", 120)))
 
     rec.emit("run_start", arm=arm, task=manifest.get("pilot"), tools=sorted(toolbox.allowed))
     verdict = {"passed": False}
