@@ -67,12 +67,12 @@
 - C0 ✅ ADR-003：FSM = 控制臂（冻结），MTC = 同一 skill seam 下的 treatment 臂。
 - C1 ✅ MTC treatment arm **重新通过资格**：2026-11-09 真实 Gazebo `--skill-backend mtc --case normal` → `PASS / OUTCOME_SUCCEEDED`（`setup/acceptance/mtc_qualification_20261109/`）。
 - C2 ✅ MTC 资格重复：**3/3 通过**（同 fingerprint `33b420d1…`，`setup/acceptance/mtc_qualification_20261109/`，`verify.py` = `MTC_QUALIFICATION_N3_PASS`）。
-- C3 ⏳ FSM vs MTC 同条件对照实验（协议先冻结）。
+- C3 ✅ FSM vs MTC 同条件对照：协议 `docs/C3_FSM_VS_MTC_PROTOCOL.md`；两臂 **3/3 PASS**，FSM 平均 15.70 s vs MTC 19.30 s（n=3，探索性，无显著性结论）；证据 `setup/acceptance/c3_fsm_vs_mtc_20261109/`。
 
 **Task Queue**
 1. ~~C2：MTC 资格再跑 2 次（同配置），确认 n=3。~~ ✅ 已完成（3/3，同指纹）。
-2. 写并冻结 C3 对照协议（同一 world/pose/预算；指标：成功率、planning 时间、token/成本、恢复行为）。
-3. 执行 C3 并记录；无论结果如何都保留。
+2. ~~写并冻结 C3 对照协议~~ ✅ 已冻结并执行。
+3. ~~执行 C3~~ ✅ 已完成；下一步 C4：扩大 n 或扩展场景（需重新预注册）。
 
 **Acceptance Gates**
 - MTC 严格位于 Task Executor 之下，不接触 Decision/WorldState/action menu（ADR-003）；
@@ -84,7 +84,7 @@
 
 **Blocker**：C3 需要先冻结协议；MTC 运行成本较高。
 
-**Next Action**：起草并冻结 C3 对照协议（FSM vs MTC，同条件），然后执行。
+**Next Action**：C4 设计（扩 n 或换场景；先预注册），并保持 MTC 资格回归。
 
 ---
 
