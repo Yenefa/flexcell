@@ -263,4 +263,5 @@ class JevPolicy:
         return replace(
             d, explanation='%s %s (%s): %s' % (self.name, POLICY_FAILURE, reason, detail),
             policy_trace={'source': 'fsm', 'fallback': True,
-                          'requested_policy': self.name, 'failure': reason})
+                          'requested_policy': self.name, 'failure': reason,
+                          'detail': str(detail)[:200]})

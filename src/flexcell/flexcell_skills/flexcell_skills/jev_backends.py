@@ -26,6 +26,7 @@ No vendor secret, key, or endpoint is ever committed (workspace rule).
 
 import json
 import os
+from pathlib import Path
 import socket
 import urllib.error
 import urllib.request
@@ -101,7 +102,8 @@ class LocalReproductionBackend(JevBackend):
         self._endpoint_env = endpoint_env
         self._timeout_s = float(timeout_s if timeout_s is not None else
                                 os.environ.get('FLEXCELL_JEV_TIMEOUT_S', '2'))
-        self._max_tokens = int(max_tokens)
+        self._max_tokens = int(os.environ.get(
+            'FLEXCELL_JEV_MAX_TOKENS', max_tokens))
 
     @staticmethod
     def _auth_headers():
@@ -112,6 +114,12 @@ class LocalReproductionBackend(JevBackend):
         FLEXCELL_JEV_API_KEY and never logged or recorded.
         """
         key = os.environ.get('FLEXCELL_JEV_API_KEY', '')
+        key_file = os.environ.get('FLEXCELL_JEV_API_KEY_FILE', '')
+        if not key and key_file:
+            try:
+                key = Path(key_file).read_text(encoding='utf-8').strip()
+            except OSError:
+                key = ''
         headers = {'Content-Type': 'application/json'}
         if key:
             headers['Authorization'] = 'Bearer ' + key
@@ -126,8 +134,12 @@ class LocalReproductionBackend(JevBackend):
                   if urlparse(url).hostname in ('localhost', '127.0.0.1', '::1')
                   else None)
         open_request = opener.open if opener else urllib.request.urlopen
-        with open_request(req, timeout=timeout_s) as resp:
-            return json.loads(resp.read().decode())
+        try:
+            with open_request(req, timeout=timeout_s) as resp:
+                return json.loads(resp.read().decode())
+        except urllib.error.HTTPError as exc:
+            body = exc.read().decode("utf-8", "replace")[:300]
+            raise RuntimeError("http %s: %s" % (exc.code, body)) from exc
 
     def health(self):
         if not self._endpoint:

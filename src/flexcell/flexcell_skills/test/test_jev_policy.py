@@ -247,5 +247,23 @@ class TestBackends(unittest.TestCase):
         self.assertNotIn("Authorization", LocalReproductionBackend._auth_headers())
 
 
+    def test_api_key_file_is_used_without_exposing_the_key(self):
+        """Env may carry only a path; the key itself stays in a file."""
+        import os
+        import tempfile
+        from flexcell_skills.jev_backends import LocalReproductionBackend
+        with tempfile.NamedTemporaryFile("w", delete=False) as fh:
+            fh.write("file-key\n")
+            path = fh.name
+        try:
+            os.environ["FLEXCELL_JEV_API_KEY_FILE"] = path
+            self.assertEqual(
+                LocalReproductionBackend._auth_headers()["Authorization"],
+                "Bearer file-key")
+        finally:
+            os.environ.pop("FLEXCELL_JEV_API_KEY_FILE", None)
+            os.unlink(path)
+
+
 if __name__ == '__main__':
     unittest.main()
