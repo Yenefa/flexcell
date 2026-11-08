@@ -1,0 +1,56 @@
+{
+  "arm": "B2",
+  "meta": {
+    "task": "T-C-v1",
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "key_fingerprint": "84edc02f"
+  },
+  "success": true,
+  "first_pass": false,
+  "iterations": 5,
+  "claim_success": false,
+  "false_success": false,
+  "violation": null,
+  "cost": {
+    "tokens": 8113,
+    "agent_s": 20.906,
+    "execution_s": 0.282
+  },
+  "evidence": {
+    "items": {
+      "verdict.json": {
+        "present": true,
+        "bytes": 186,
+        "sha256": "e05118806cc84d8562b1f8f36e85a7dd9ad30f092322eb1f5e524970ec975b08"
+      },
+      "telemetry/execution.log": {
+        "present": true,
+        "bytes": 391,
+        "sha256": "7f298301275ef18f20606b0258cd18146855dd62c5313f10a8304a1e3a0a17a7"
+      },
+      "episode.json": {
+        "present": true,
+        "bytes": 32,
+        "sha256": "55aad578660b83494d1164e4b6e71de695054800f3223963fa9272834fb15546"
+      },
+      "fingerprint.json": {
+        "present": true,
+        "bytes": 259,
+        "sha256": "656190414e56e45cd16fd9bb0c1f30099233957fe1d32b88bc82f18c43c72785"
+      }
+    },
+    "present": 4,
+    "required": 4,
+    "completeness": 1.0
+  },
+  "verdict": {
+    "passed": true,
+    "returncode": 0,
+    "stdout": "{\"passed\": true, \"reach_m\": 0.29, \"stage\": \"verified\"}\n",
+    "stderr": "",
+    "reach_m": 0.29,
+    "stage": "verified"
+  },
+  "run_dir": "C:\\Users\\fuker\\Desktop\\workspace\\project-033-flexcell\\ci-public-window\\evidence\\pilot001-b2\\tc1\\tc1-B2"
+}

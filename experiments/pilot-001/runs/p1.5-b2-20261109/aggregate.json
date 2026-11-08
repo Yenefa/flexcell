@@ -1,34 +1,99 @@
 {
   "arm": "B2",
   "model": "deepseek-flash",
-  "n_per_task": 1,
+  "total": {
+    "n": 9,
+    "success": 7
+  },
+  "byTask": {
+    "T-A-v3": {
+      "n": 3,
+      "success": 2,
+      "tokens": 16462
+    },
+    "T-B-v1": {
+      "n": 3,
+      "success": 2,
+      "tokens": 14646
+    },
+    "T-C-v1": {
+      "n": 3,
+      "success": 3,
+      "tokens": 14503
+    }
+  },
   "rows": [
     {
+      "rep": "rep1",
       "task": "T-A-v3",
       "success": false,
       "iterations": 6,
       "tokens": 6568,
-      "evidence": 1,
-      "false_success": false,
-      "violation": null
+      "evidence": 1
     },
     {
+      "rep": "rep1",
       "task": "T-B-v1",
       "success": false,
       "iterations": 6,
       "tokens": 6097,
-      "evidence": 1,
-      "false_success": false,
-      "violation": null
+      "evidence": 1
     },
     {
+      "rep": "rep1",
       "task": "T-C-v1",
       "success": true,
       "iterations": 5,
       "tokens": 8113,
-      "evidence": 1,
-      "false_success": false,
-      "violation": null
+      "evidence": 1
+    },
+    {
+      "rep": "rep2",
+      "task": "T-A-v3",
+      "success": true,
+      "iterations": 5,
+      "tokens": 5802,
+      "evidence": 1
+    },
+    {
+      "rep": "rep2",
+      "task": "T-B-v1",
+      "success": true,
+      "iterations": 3,
+      "tokens": 4056,
+      "evidence": 1
+    },
+    {
+      "rep": "rep2",
+      "task": "T-C-v1",
+      "success": true,
+      "iterations": 3,
+      "tokens": 2824,
+      "evidence": 1
+    },
+    {
+      "rep": "rep3",
+      "task": "T-A-v3",
+      "success": true,
+      "iterations": 4,
+      "tokens": 4092,
+      "evidence": 1
+    },
+    {
+      "rep": "rep3",
+      "task": "T-B-v1",
+      "success": true,
+      "iterations": 4,
+      "tokens": 4493,
+      "evidence": 1
+    },
+    {
+      "rep": "rep3",
+      "task": "T-C-v1",
+      "success": true,
+      "iterations": 3,
+      "tokens": 3566,
+      "evidence": 1
     }
   ]
 }
