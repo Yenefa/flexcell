@@ -4,7 +4,11 @@
   "commit": "1a184b7b23aa60fb66914bc0283a4387c351515b",
   "arms": {
     "A": {
-      "tools": ["read_file", "write_file", "run_checks"]
+      "tools": [
+        "read_file",
+        "write_file",
+        "run_checks"
+      ]
     },
     "C": {
       "tools": [
@@ -62,6 +66,11 @@
     "protected_changed",
     "missing_evidence"
   ],
-  "revision": 2,
-  "revised_at": "2026-11-09"
+  "revision": 3,
+  "revised_at": "2026-11-09",
+  "model": {
+    "id": "deepseek-flash",
+    "provider": "deepseek",
+    "note": "set explicitly; FLEXCELL_PILOT_MODEL is not persisted in the environment"
+  }
 }

@@ -1,0 +1,61 @@
+{
+  "arm": "A",
+  "meta": {
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "key_fingerprint": "84edc02f"
+  },
+  "success": true,
+  "first_pass": false,
+  "iterations": 2,
+  "claim_success": true,
+  "false_success": false,
+  "violation": null,
+  "cost": {
+    "tokens": 848,
+    "agent_s": 2.0,
+    "execution_s": 0.047
+  },
+  "evidence": {
+    "items": {
+      "verdict.json": {
+        "present": true,
+        "bytes": 214,
+        "sha256": "f29002145ea7bef7fcbb3d26e29ce900a7cb0b1416f28bf1d9107da3ca2f194a"
+      },
+      "telemetry/execution.log": {
+        "present": false,
+        "bytes": 0,
+        "sha256": null
+      },
+      "episode.json": {
+        "present": false,
+        "bytes": 0,
+        "sha256": null
+      },
+      "fingerprint.json": {
+        "present": true,
+        "bytes": 258,
+        "sha256": "d4da94beadc8ab9b75013202e5196bdf9985501ba692f4455005ae5509aaf757"
+      }
+    },
+    "present": 2,
+    "required": 4,
+    "completeness": 0.5
+  },
+  "verdict": {
+    "passed": true,
+    "returncode": 0,
+    "stdout": "{\"passed\": true, \"observed\": [4, 6], \"target\": [4, 6]}\n",
+    "stderr": "",
+    "observed": [
+      4,
+      6
+    ],
+    "target": [
+      4,
+      6
+    ]
+  },
+  "run_dir": "C:\\Users\\fuker\\Desktop\\workspace\\project-033-flexcell\\ci-public-window\\evidence\\pilot001-p11-flash\\llm-A"
+}
