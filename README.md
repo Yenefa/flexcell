@@ -15,6 +15,14 @@ Gazebo Harmonic and planned/executed through MoveIt 2 - built so that an **agent
 > **Origin & motivation:** see [docs/ORIGIN.md](docs/ORIGIN.md) - why this project exists,
 > and how it relates to NVIDIA's Agent Skills (Development Plane) vs FlexCell (Runtime Plane).
 
+## IYAIC 2026 competition
+
+Competition packaging lives in [competition/iyaic-2026/](competition/iyaic-2026/). It separates the
+shared runtime core from raw evidence and the judge-facing showcase, and tracks a three-state
+delivery index (**implemented / accepted / branch-pending**) in
+[DELIVERY_STATUS.md](competition/iyaic-2026/DELIVERY_STATUS.md). It adds no second runtime and does
+not change the decision / skill / execution / verification boundaries.
+
 ---
 
 ## What "agentic" means here

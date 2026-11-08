@@ -23,6 +23,14 @@ qualification complete.
 | **M3** Hybrid Agent Benchmark          | Execute cells A-D on S1-S7; threshold sweep; calibration                         | ⚪ FUTURE — RFC #15                                          |
 
 ## Completed
+## IYAIC 2026 competition
+
+Registration 2026-11-13, contest 2026-11-21–22 (Henan, creative group). Packaging and a three-state
+delivery index (implemented / accepted / branch-pending) live in
+[competition/iyaic-2026/DELIVERY_STATUS.md](../competition/iyaic-2026/DELIVERY_STATUS.md). The
+competition adds no milestone and does not unfreeze n>=50; TransferBench stays a branch-pending
+capability to be split for review, not merged whole.
+
 
 - **Day 1** — Gazebo Harmonic 8.15.0 + MoveIt 2 Plan & Execute on OpenMANIPULATOR-X
   (ROS 2 Jazzy), verified on-machine. See [DAY1_REPORT.md](../DAY1_REPORT.md).
