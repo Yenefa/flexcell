@@ -1,0 +1,49 @@
+{
+  "as_of": "2026-11-08",
+  "source": "current main (runtime packages unchanged across docs-only commits)",
+  "core_window": {
+    "status": "FUNCTIONAL_WINDOW_PASS",
+    "window_id": "8b1c18af664c41d1bcf736c0745d0f66",
+    "runtime_fingerprint": "dd456b9bc0fd0e1f2f35c76b6eedfd6d3ca3d82cdb0af08e2466787accdbf790",
+    "runs": [
+      {
+        "case": "normal_a",
+        "result": "PASS",
+        "err_mm": 7.47
+      },
+      {
+        "case": "normal_b",
+        "result": "PASS",
+        "err_mm": 2.78
+      },
+      {
+        "case": "dual_object",
+        "result": "PASS",
+        "err_mm": null
+      },
+      {
+        "case": "recovery_once",
+        "result": "PASS",
+        "err_mm": 10.22
+      },
+      {
+        "case": "budget_exhaustion",
+        "result": "EXPECTED_FAILURE",
+        "err_mm": null
+      }
+    ]
+  },
+  "smoke": {
+    "normal_a_err_mm": 0.514,
+    "camera_err_mm": 10.85,
+    "note": "同源早期构建"
+  },
+  "frames": {
+    "total": 442,
+    "backfilled": 146
+  },
+  "composite": {
+    "outcome": "OUTCOME_SUCCEEDED",
+    "wall_s": 14.5
+  }
+}

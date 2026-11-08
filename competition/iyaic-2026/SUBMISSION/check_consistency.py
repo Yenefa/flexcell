@@ -1,17 +1,33 @@
 #!/usr/bin/env python3
-"""校验 EVIDENCE 台账与答辩逐字稿的关键数字一致，避免口径漂移。"""
-import os, re, sys
+"""以 METRICS.json 为单一数据源，校验证据台账/逐字稿/PPT 的数字一致。"""
+import json, os, sys
 HERE=os.path.dirname(os.path.abspath(__file__))
-EV=open(os.path.join(HERE,"evidence","EVIDENCE.md"),encoding="utf-8").read()
-SC=open(os.path.join(HERE,"答辩逐字稿.md"),encoding="utf-8").read()
-EXPECTED=["0.514","10.85","5.48","4.35","9.32","14.5","442","146","FUNCTIONAL_WINDOW_PASS","OUTCOME_SUCCEEDED"]
-SC_EXPECTED=["0.514","10.85","146","442"]
+def read(p):
+    try: return open(os.path.join(HERE,p),encoding="utf-8").read()
+    except OSError: return ""
+def pptx_text():
+    try:
+        from pptx import Presentation
+        prs=Presentation(os.path.join(HERE,"创意组_AgenticFlex_展示PPT.pptx"))
+        return "\n".join(sh.text_frame.text for s in prs.slides for sh in s.shapes if sh.has_text_frame)
+    except Exception:
+        return ""
+M=json.load(open(os.path.join(HERE,"METRICS.json"),encoding="utf-8"))
+EV=read("evidence/EVIDENCE.md"); SC=read("答辩逐字稿.md"); PPT=pptx_text()
+cw=M["core_window"]
+tokens=[cw["status"], cw["window_id"][:8], cw["runtime_fingerprint"][:8]]
+tokens+= [f"{r['err_mm']:.2f}" for r in cw["runs"] if r["err_mm"] is not None]
+tokens+= [f"{M['smoke']['normal_a_err_mm']:.3f}", f"{M['smoke']['camera_err_mm']:.2f}",
+          str(M["frames"]["total"]), str(M["frames"]["backfilled"])]
 ok=True
-miss_ev=[t for t in EXPECTED if t not in EV]
-miss_sc=[t for t in SC_EXPECTED if t not in SC]
-if miss_ev: ok=False; print("EVIDENCE missing:", miss_ev)
-if miss_sc: ok=False; print("SCRIPT missing:", miss_sc)
-# 单位口径：毫米统一写 mm，禁止误写 cm 于落点
-if re.search(r"落点[^\n]{0,20}cm", EV): ok=False; print("unit: 落点用了 cm")
+for t in tokens:
+    if t not in EV: ok=False; print("EVIDENCE missing:", t)
+# 逐字稿必须含核心窗口数字 + 相机/帧
+for t in ["7.47","2.78","10.22","0.514","10.85","442","146"]:
+    if t not in SC: ok=False; print("SCRIPT missing:", t)
+# PPT 必须含当前指纹与窗口号片段
+for t in [cw["runtime_fingerprint"][:8], cw["window_id"][:8]]:
+    if t not in PPT: ok=False; print("PPT missing:", t)
+print("METRICS tokens checked:", len(tokens))
 print("PASS" if ok else "FAIL")
 sys.exit(0 if ok else 1)

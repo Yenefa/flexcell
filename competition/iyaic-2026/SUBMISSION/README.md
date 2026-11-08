@@ -7,7 +7,8 @@
 | `演示脚本.md` | 现场复跑 + 录屏分镜 + 兜底 | 可用 |
 | `答辩逐字稿.md` | ≤8 分钟逐字稿 + 预判问答 | 可用 |
 | `package.py` | 按官方命名规则打包提交 zip | 可用 |
-| `check_consistency.py` | 证据台账与逐字稿关键数字一致性自检 | PASS |
+| `check_consistency.py` | 以 METRICS.json 为准的一致性自检 | PASS |
+| `METRICS.json` | **指标单一数据源**（窗口号/指纹/各项误差/帧数） | 当前 |
 | `score_check.py` | 6 项评分权重覆盖自检（计划书/PPT/逐字稿） | PASS |
 | `现场操作卡.md` | 一键复跑命令 + 预期输出 + 故障兜底 | 可用 |
 | `make_release.py` | **一键出包**：填占位→跑自检→打包 zip | 可用 |
