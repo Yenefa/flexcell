@@ -17,6 +17,10 @@
 - `package.py`：官方命名 zip（16 文件）；示例 ~350 KB
 - 当前 main 核心窗口：`FUNCTIONAL_WINDOW_PASS`，`window_id=8b1c18af…`，运行时指纹 **`dd456b9b…`**
 
+## CI
+- `ci`（离线测试）push 成功：`2fb1fbf`（run 42474689388）。
+- `trusted-simulation` 在含运行代码的提交上成功：`751e466` / `7fecbe2`（run 42472385068 / 42468818560）；其后仅文档提交会因并发组取消 sim（预期，非失败）。
+
 ## 运行环境（演示可复跑）
 - WSL2 Ubuntu 24.04，ROS 2 Jazzy + Gazebo Harmonic，Mesa llvmpipe（无 GPU）。
 - 现场操作卡含一键命令与故障兜底。
