@@ -32,7 +32,7 @@
 
 | Branch | State vs main | Plan |
 | --- | --- | --- |
-| `feat/transferbench-foundation-20261006` (TransferBench) | diverged: **ahead 29 / behind 211 / 300 files** | **Do not blind-merge.** Split into reviewable capabilities (combined multi-task, pause/resume), re-base onto current `main`, and re-accept each with a new fingerprint. |
+| `feat/transferbench-foundation-20261006` (TransferBench) | diverged: **ahead 29 / behind 211 / 1884 files** (1805 are acceptance evidence) | **Do not blind-merge.** Split into reviewable units U1-U6; see [TRANSFERBENCH_SPLIT_PLAN_20261108.md](../../docs/TRANSFERBENCH_SPLIT_PLAN_20261108.md). |
 
 ## Boundaries
 - n>=50 stays frozen; M3/hybrid qualification is not claimed here.
