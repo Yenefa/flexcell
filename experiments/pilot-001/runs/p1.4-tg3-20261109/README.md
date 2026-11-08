@@ -1,10 +1,14 @@
-# P1.4 stage 2 — T-G3（regrasp 场景，真实 Gazebo，成功）
+# P1.4 stage 2 — T-G3（regrasp 真实 Gazebo）可靠性 n=3
 
-- 初始：`case=regrasp`, `place_pose=[0.45,0,0.0175]` → 探测得 `REGRASP_BLOCKED_FIRST_TASK / ERR_SKILL_FAILED`；
-- deepseek-chat（FC agent）3 轮：`run_execution` → 读 telemetry/verdict → 写 `place_pose=[0.25,0]`；
-- 独立验收：`gate/acceptance.py` 重跑真实 Gazebo（case=regrasp）→ `PASS`，指纹 `aa5ac497…`；
-- 结果：**success=true，证据 1.0，false_success 0**。
+| rep | success | iters | tokens | 证据完整度 |
+| --- | --- | --- | --- | --- |
+| rep1 | true | 3 | 3574 | 1 |
+| rep2 | true | 3 | 3556 | 1 |
+| rep3 | true | 3 | 3516 | 1 |
 
-## 意义
-- 这是**第二类真实任务**（不同技能路径：regrasp），W1 的 M3-S 不再只是单一场景；
-- 仍为 n=1；可靠性待重复验证。
+**3/3 成功**，均 3 轮、约 3.5k tokens；每次都由 `gate/acceptance.py` 独立重跑真实 Gazebo（case=regrasp）判定。
+
+## 边界
+- 单任务族（regrasp）+ 单模型（deepseek-chat）；
+- 初始失败确定（`place_pose=0.45` 不可达）；
+- **M3-R 未达**（真实机器人）。
