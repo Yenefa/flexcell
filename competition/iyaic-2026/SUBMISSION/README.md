@@ -10,6 +10,7 @@
 | `电梯陈述60秒.md` | 60 秒口播卡 | 可用 |
 | `package.py` | 按官方命名规则打包提交 zip | 可用 |
 | `check_consistency.py` | 以 METRICS.json 为准的一致性自检 | PASS |
+| `audit.py` / `AUDIT.md` | 终检（旧数字残留/必备要素） | PASS |
 | `METRICS.json` | **指标单一数据源**（窗口号/指纹/各项误差/帧数） | 当前 |
 | `score_check.py` | 6 项评分权重覆盖自检（计划书/PPT/逐字稿） | PASS |
 | `readiness_check.py` | 提交就绪判定（文件/自检/占位符） | 填队伍后 READY |
