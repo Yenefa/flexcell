@@ -1,0 +1,11 @@
+{"arm": "B", "kind": "run_start", "t": 0.015, "task": "PILOT-001", "tools": ["read_file", "read_telemetry", "read_verification", "run_checks", "run_execution", "write_file"]}
+{"kind": "agent_step_s", "seconds": 56.125, "t": 56.14}
+{"calls": [["run_execution", true], ["read_file", "plan.json"]], "claim_success": false, "index": 1, "kind": "iteration", "t": 56.14}
+{"index": 1, "kind": "verdict", "passed": false, "t": 111.25}
+{"kind": "agent_step_s", "seconds": 0.781, "t": 112.031}
+{"calls": [["run_execution", true], ["read_file", "plan.json"], ["run_checks"], ["read_telemetry"], ["read_verification"]], "claim_success": false, "index": 2, "kind": "iteration", "t": 112.031}
+{"index": 2, "kind": "verdict", "passed": false, "t": 166.406}
+{"kind": "agent_step_s", "seconds": 0.969, "t": 167.375}
+{"calls": [["run_execution", true], ["read_file", "plan.json"], ["run_checks"], ["read_telemetry"], ["read_verification"], ["write_file", "plan.json"]], "claim_success": false, "index": 3, "kind": "iteration", "t": 167.375}
+{"index": 3, "kind": "verdict", "passed": true, "t": 315.078}
+{"kind": "run_end", "success": true, "t": 422.453, "violation": null}

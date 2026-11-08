@@ -20,8 +20,9 @@ repo = os.environ["PILOT_P14_REPO"]
 ws = os.environ["PILOT_P14_WS"]
 src = os.environ["PILOT_P14_SRC"]
 out = "/tmp/p14-judge"
+case = plan.get("case", "normal")
 res = __import__("pilot.gazebo", fromlist=["run_smoke"]).run_smoke(
-    src, repo, ws, out, case="normal", build=False, place_pose=pose, timeout_s=420)
+    src, repo, ws, out, case=case, build=False, place_pose=pose, timeout_s=420)
 import tempfile
 G = __import__("pilot.gazebo", fromlist=["collect"])
 run_dir = G.latest("/tmp/p14-judge")
@@ -52,10 +53,11 @@ class GazeboTaskExecution:
     def run_execution(self, episode=True):
         plan = json.loads((self.workspace / "plan.json").read_text(encoding="utf-8"))
         started = time.monotonic()
+        case = plan.get("case", "normal")
         res = gazebo.run_smoke(self.extra_env["PILOT_P14_SRC"],
                                self.extra_env["PILOT_P14_REPO"],
                                self.extra_env["PILOT_P14_WS"],
-                               "/tmp/p14-agent", case="normal", build=False,
+                               "/tmp/p14-agent", case=case, build=False,
                                place_pose=plan["place_pose"], timeout_s=420)
         self.execution_s += time.monotonic() - started
         run_dir = gazebo.latest("/tmp/p14-agent")
@@ -111,4 +113,23 @@ def build_tg2(target):
     (target / "gate" / "acceptance.py").write_text(ACCEPT, encoding="utf-8")
     (target / "plan.json").write_text(json.dumps(
         {"place_pose": [0.05, 0.0, 0.0175]}, indent=2) + "\n", encoding="utf-8")
+    return target
+
+
+def build_tg3(target):
+    target = Path(target)
+    if target.exists():
+        import shutil
+        shutil.rmtree(target)
+    (target / "gate").mkdir(parents=True)
+    (target / "task.md").write_text(
+        "# T-G3 - regrasp scenario (real Gazebo)\n\n"
+        "The robot fails during the regrasp scenario because the place pose is out\n"
+        "of reach. The arm reaches strictly less than 0.30 m from the base.\n"
+        "Fix plan.json so the real task verifies. gate/ is read-only.\n",
+        encoding="utf-8")
+    (target / "gate" / "acceptance.py").write_text(ACCEPT, encoding="utf-8")
+    (target / "plan.json").write_text(json.dumps(
+        {"case": "regrasp", "place_pose": [0.45, 0.0, 0.0175]}, indent=2) + "\n",
+        encoding="utf-8")
     return target
