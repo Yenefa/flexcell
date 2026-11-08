@@ -35,6 +35,14 @@
 | --- | --- | --- |
 | `feat/transferbench-foundation-20261006` (TransferBench) | diverged: **ahead 29 / behind 211 / 1884 files** (1805 are acceptance evidence) | **Do not blind-merge.** Split into reviewable units U1-U6; see [TRANSFERBENCH_SPLIT_PLAN_20261108.md](../../docs/TRANSFERBENCH_SPLIT_PLAN_20261108.md). |
 
+## Local acceptance capability
+
+The delivery desktop runs the ROS/Gazebo acceptance **natively in WSL** (Mesa llvmpipe, no
+Docker, no GPU passthrough): plain smoke PASS at 0.514 mm and camera smoke PASS at 10.85 mm,
+with the rosbag reconcile backfilling 146 camera frames under the slower software renderer.
+Provenance caveat: the upstream ROBOTIS checkout is `6c563fd`, not the pinned `17efe42`, so a
+locked re-run is still required. Details: [LOCAL_SIM_ACCEPTANCE_20261108.md](../../docs/LOCAL_SIM_ACCEPTANCE_20261108.md).
+
 ## Boundaries
 - n>=50 stays frozen; M3/hybrid qualification is not claimed here.
 - Competition dates: registration 2026-11-13, contest 2026-11-21–22.
