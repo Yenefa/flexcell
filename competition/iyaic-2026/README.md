@@ -18,6 +18,8 @@ n>=50 benchmark freeze. The runtime stays the one in `src/`, `scripts/`, `worlds
 
 ## Where things are
 
+- Creative-group rules parsed: [CREATIVE_GROUP_REQUIREMENTS.md](CREATIVE_GROUP_REQUIREMENTS.md).
+
 - Status (implemented / accepted / branch-pending): [DELIVERY_STATUS.md](DELIVERY_STATUS.md).
 - Evidence index and identity rules: [evidence/README.md](evidence/README.md).
 - Demo narrative and shot list: [showcase/README.md](showcase/README.md).
