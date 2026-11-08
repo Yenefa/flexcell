@@ -38,6 +38,21 @@
 ## CI
 - `ci`（构建 interfaces+skills + 全部离线测试）与 `trusted-simulation`（全包构建 + native 四作业）在合并提交上均 **success**。
 
+
+## 最新刷新（current main，2026-11-08）
+在**当前 main 源码**上重新构建并跑核心 5 任务窗口：
+
+| trial | 结果 | 落点误差 |
+| --- | --- | --- |
+| normal A | PASS | 7.47 mm |
+| normal B | PASS | 2.78 mm |
+| dual_object | PASS | — |
+| recovery_once | PASS | 10.22 mm |
+| budget_exhaustion | EXPECTED_FAILURE | — |
+
+- `status=FUNCTIONAL_WINDOW_PASS`；`window_id=8b1c18af664c41d1bcf736c0745d0f66`。
+- 统一运行时指纹：**`dd456b9b…accdbf790`**（含 composite 合并后的当前运行时；取代文档轮次前的旧指纹）。
+- 说明：仍是一次有界功能窗口（n=1），非成功率。
 ## 复跑命令（本机）
 ```bash
 # 构建
