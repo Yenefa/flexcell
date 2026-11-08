@@ -236,3 +236,31 @@ def test_tg_template_has_plan_and_gate(tmp_path):
     plan = json.loads((ws / "plan.json").read_text())
     assert plan["place_pose"] == [0.45, 0.0, 0.0175]
     assert (ws / "gate" / "acceptance.py").is_file()
+
+
+def test_fc_agent_force_first_tool(tmp_path):
+    from pilot.agent_fc import FCAgent
+    from pilot import gazebo_task
+    from pilot.hash_guard import HashGuard
+    from pilot.toolbox import ToolBox
+
+    class FakeChat:
+        def __init__(self):
+            self.choices = []
+        def chat(self, messages, tools=None, tool_choice=None):
+            self.choices.append(tool_choice)
+            return {"content": "done", "tool_calls": [], "tokens": 1}
+
+    class DummyExec:
+        def run_checks(self): return {}
+        def run_execution(self, episode=True): return {}
+        def telemetry(self): return ""
+
+    ws = gazebo_task.build_tg(tmp_path / "ws")
+    guard = HashGuard(ws, [])
+    guard.snapshot()
+    tb = ToolBox("B", ["read_file"], ws, guard, ws / "verdict.json", DummyExec())
+    chat = FakeChat()
+    agent = FCAgent(chat, ["read_file"], "task", force_first_tool="read_file")
+    agent.step(tb, 1)
+    assert chat.choices[0]["function"]["name"] == "read_file"

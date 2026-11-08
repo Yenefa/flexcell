@@ -191,8 +191,9 @@ def tc_run(manifest, out, arms, repo_src):
     return 0
 
 
-def tg_run(manifest, out, arms, repo_src):
+def tg_run(manifest, out, arms, repo_src, agent_kind="json"):
     from pilot.agent_llm import LLMAgent
+    from pilot.agent_fc import FCAgent
     from pilot.llm import Chat
     env = {"PILOT_P14_REPO": "/home/ros/flexcell-p14",
            "PILOT_P14_WS": "/home/ros/flexcell-p14-ws",
@@ -201,7 +202,10 @@ def tg_run(manifest, out, arms, repo_src):
     rows = []
     for arm in arms:
         chat = Chat()
-        agent = LLMAgent(chat, manifest["arms"][arm]["tools"], TASK_TG1)
+        tools = manifest["arms"][arm]["tools"]
+        agent = (FCAgent(chat, tools, TASK_TG1)
+                 if agent_kind == "fc" else
+                 LLMAgent(chat, manifest["arms"][arm]["tools"], TASK_TG1))
         res = runner.run_one(manifest, arm, agent,
                              gazebo_task.build_tg(out / ("tpl-tg1-" + arm)),
                              out / ("tg1-" + arm),
@@ -244,13 +248,14 @@ def main():
     ap.add_argument("--ws-wsl", default="/home/ros/flexcell-p14-ws")
     ap.add_argument("--case", default="normal")
     ap.add_argument("--gazebo-check", action="store_true")
+    ap.add_argument("--agent", choices=["json", "fc"], default="json")
     a = ap.parse_args()
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     manifest = load(a.manifest)
     arms = [x.strip() for x in a.arms.split(",") if x.strip()]
     if a.llm and a.task == "T-G1":
-        return tg_run(manifest, out, arms, a.repo_src)
+        return tg_run(manifest, out, arms, a.repo_src, a.agent)
     if a.gazebo_check:
         return gazebo_check(out, a.repo_src, a.repo_wsl, a.ws_wsl, a.case)
     if a.llm and a.task == "T-A-v3":

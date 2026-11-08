@@ -76,12 +76,17 @@ class Chat:
         return {"model": self.model, "base_url": self.base_url,
                 "key_fingerprint": self.fingerprint}
 
-    def chat(self, messages):
-        body = json.dumps({
+    def chat(self, messages, tools=None, tool_choice=None):
+        payload = {
             "model": self.model, "messages": messages,
             "temperature": self.temperature, "max_tokens": self.max_tokens,
-            "response_format": {"type": "json_object"},
-        }).encode()
+        }
+        if tools:
+            payload["tools"] = tools
+            payload["tool_choice"] = tool_choice or "auto"
+        else:
+            payload["response_format"] = {"type": "json_object"}
+        body = json.dumps(payload).encode()
         req = urllib.request.Request(
             self.base_url + "/chat/completions", data=body,
             headers={"Content-Type": "application/json",
@@ -92,8 +97,10 @@ class Chat:
         usage = doc.get("usage", {})
         self.calls += 1
         self.tokens += int(usage.get("total_tokens", 0) or 0)
+        message = doc["choices"][0]["message"]
         return {
-            "content": doc["choices"][0]["message"]["content"],
+            "content": message.get("content"),
+            "tool_calls": message.get("tool_calls") or [],
             "tokens": int(usage.get("total_tokens", 0) or 0),
             "seconds": round(time.monotonic() - started, 3),
             "model": doc.get("model", self.model),
