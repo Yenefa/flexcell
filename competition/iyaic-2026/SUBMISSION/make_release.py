@@ -48,7 +48,7 @@ def main():
     left=len(re.findall(r"<[^>\s]{1,20}>", plan))
     print("remaining <placeholders> in plan:", left)
     # checks
-    for script in ("check_consistency.py","score_check.py"):
+    for script in ("check_consistency.py","score_check.py","audit.py"):
         rc,out=run([sys.executable, os.path.join(build,script)])
         print(f"[{script}] rc={rc}"); print(out.strip())
         if rc: print("CHECK FAILED:", script); return 1
