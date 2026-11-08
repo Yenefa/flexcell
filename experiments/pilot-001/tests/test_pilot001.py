@@ -7,7 +7,7 @@ import pytest
 HERE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(HERE))
 
-from pilot import fixtures, runner
+from pilot import fixtures, runner, tasks
 from pilot.hash_guard import HashGuard, ProtectedViolation
 from pilot.manifest import ManifestError, load, seal, verify_seal
 from pilot.metrics import summarize
@@ -98,3 +98,28 @@ def test_metrics_deltas(tmp_path):
     s = summarize(rows)
     assert s["deltas"]["B-C"] == 0.0
     assert s["deltas"]["C-A"] == 1.0
+
+
+def _contracts_src():
+    return HERE.parents[1] / "src/flexcell/flexcell_skills/flexcell_skills/contracts/composite.py"
+
+
+def test_ta2_initial_plan_rejected(manifest, tmp_path):
+    ws = tasks.build(tmp_path / "ws", _contracts_src())
+    import subprocess
+    proc = subprocess.run([sys.executable, "gate/acceptance.py"], cwd=ws, capture_output=True, text=True)
+    assert proc.returncode != 0
+    assert "\"error_code\": 60" in proc.stdout
+
+
+def test_ta2_scripted_fix_passes(manifest, tmp_path):
+    import json
+    contracts = _contracts_src()
+    plan = json.loads((tasks.build(tmp_path / "tpl", contracts) / "plan.json").read_text())
+    plan["clearance_m"] = 0.06
+    good = json.dumps(plan)
+    agent = fixtures.ScriptedAgent([("write_file", ("plan.json", good))])
+    res = runner.run_one(manifest, "B", agent, tasks.build(tmp_path / "tpl2", contracts), tmp_path / "run",
+                         meta={"task": "T-A-v2"},
+                         protected=manifest["task_protected"]["T-A-v2"])
+    assert res["success"]

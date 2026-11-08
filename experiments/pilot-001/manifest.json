@@ -72,5 +72,11 @@
     "id": "deepseek-flash",
     "provider": "deepseek",
     "note": "set explicitly; FLEXCELL_PILOT_MODEL is not persisted in the environment"
+  },
+  "task_protected": {
+    "T-A-v2": [
+      "gate/acceptance.py",
+      "gate/composite_contract.py"
+    ]
   }
 }

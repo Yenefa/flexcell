@@ -9,8 +9,11 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-from pilot import fixtures, runner
+from pilot import fixtures, runner, tasks
 from pilot.manifest import load
+
+TASK_TA2 = ("The composite plan in plan.json is rejected by the contract validator. "
+            "Fix plan.json so gate/acceptance.py passes. Do not modify anything under gate/.")
 
 TASK = ("tests/test_app.py fails because app.scale is wrong. Fix app.py so that "
         "scale(2)==4 and scale(3)==6. Do not modify tests/ or gate/.")
@@ -66,18 +69,45 @@ def llm_run(manifest, out, arms):
     return 0
 
 
+def ta2_run(manifest, out, arms, repo_src):
+    from pilot.agent_llm import LLMAgent
+    from pilot.llm import Chat
+    contracts = Path(repo_src) / "src/flexcell/flexcell_skills/flexcell_skills/contracts/composite.py"
+    rows = []
+    for arm in arms:
+        chat = Chat()
+        agent = LLMAgent(chat, manifest["arms"][arm]["tools"], TASK_TA2)
+        res = runner.run_one(manifest, arm, agent,
+                             tasks.build(out / ("tpl-ta2-" + arm), contracts),
+                             out / ("ta2-" + arm),
+                             meta={"task": "T-A-v2", **chat.metadata()},
+                             protected=manifest["task_protected"]["T-A-v2"])
+        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        rows.append(res)
+        print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
+              (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
+    summary = {"task": "T-A-v2", "rows": rows}
+    (out / "p1.2-ta2-runs.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=tempfile.mkdtemp(prefix="pilot001-"))
     ap.add_argument("--manifest", default=str(HERE / "manifest.json"))
     ap.add_argument("--llm", action="store_true")
     ap.add_argument("--arms", default="A,C,B")
+    ap.add_argument("--task", default="toy")
+    ap.add_argument("--repo-src", default=str(HERE.parents[1]))
     a = ap.parse_args()
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     manifest = load(a.manifest)
+    arms = [x.strip() for x in a.arms.split(",") if x.strip()]
+    if a.llm and a.task == "T-A-v2":
+        return ta2_run(manifest, out, arms, a.repo_src)
     if a.llm:
-        return llm_run(manifest, out, [x.strip() for x in a.arms.split(",") if x.strip()])
+        return llm_run(manifest, out, arms)
     return self_test(manifest, out)
 
 

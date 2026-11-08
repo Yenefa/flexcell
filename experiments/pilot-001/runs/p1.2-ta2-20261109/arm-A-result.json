@@ -1,0 +1,56 @@
+{
+  "arm": "A",
+  "meta": {
+    "task": "T-A-v2",
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "key_fingerprint": "84edc02f"
+  },
+  "success": true,
+  "first_pass": false,
+  "iterations": 3,
+  "claim_success": false,
+  "false_success": false,
+  "violation": null,
+  "cost": {
+    "tokens": 5756,
+    "agent_s": 6.438,
+    "execution_s": 0.0
+  },
+  "evidence": {
+    "items": {
+      "verdict.json": {
+        "present": true,
+        "bytes": 176,
+        "sha256": "8477272b65e0425190b46af43a6994e5f5e069130c814b42bb893172c1ef472d"
+      },
+      "telemetry/execution.log": {
+        "present": false,
+        "bytes": 0,
+        "sha256": null
+      },
+      "episode.json": {
+        "present": false,
+        "bytes": 0,
+        "sha256": null
+      },
+      "fingerprint.json": {
+        "present": true,
+        "bytes": 258,
+        "sha256": "2ff7f05792f4d66e96a17e1c01aa973d72605bd09a34abb76bea7ff103de9f95"
+      }
+    },
+    "present": 2,
+    "required": 4,
+    "completeness": 0.5
+  },
+  "verdict": {
+    "passed": true,
+    "returncode": 0,
+    "stdout": "{\"passed\": true, \"stages\": 1, \"clearance_m\": 0.05}\n",
+    "stderr": "",
+    "stages": 1,
+    "clearance_m": 0.05
+  },
+  "run_dir": "C:\\Users\\fuker\\Desktop\\workspace\\project-033-flexcell\\ci-public-window\\evidence\\pilot001-ta2\\ta2-A"
+}

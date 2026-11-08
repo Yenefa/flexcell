@@ -14,6 +14,8 @@ from .manifest import digest
 from .recorder import Recorder
 from .toolbox import ToolBox, ToolPermissionError
 
+ACCEPTANCE = {"T-A-v2": "gate/acceptance.py"}
+
 
 class Execution:
     """Deterministic execution surface: unit checks + (fake) robot execution."""
@@ -48,7 +50,7 @@ class Execution:
         return path.read_text(encoding="utf-8")[-4000:]
 
 
-def run_one(manifest, arm, agent, template, out_dir, meta=None):
+def run_one(manifest, arm, agent, template, out_dir, meta=None, protected=None):
     out = Path(out_dir)
     if out.exists():
         shutil.rmtree(out)
@@ -57,12 +59,12 @@ def run_one(manifest, arm, agent, template, out_dir, meta=None):
     shutil.copytree(template, ws)
 
     rec = Recorder(out)
-    guard = HashGuard(ws, manifest["protected"])
+    guard = HashGuard(ws, protected if protected is not None else manifest["protected"])
     guard.snapshot()
     execution = Execution(ws)
     toolbox = ToolBox(arm, manifest["arms"][arm]["tools"], ws, guard,
                       ws / "verdict.json", execution)
-    judge = Judge(ws, "gate/acceptance.py")
+    judge = Judge(ws, ACCEPTANCE.get(meta.get("task", "") if meta else "", "gate/acceptance.py"))
     budget = manifest["budget"]
 
     rec.emit("run_start", arm=arm, task=manifest.get("pilot"), tools=sorted(toolbox.allowed))
