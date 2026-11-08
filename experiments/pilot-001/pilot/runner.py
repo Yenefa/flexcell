@@ -48,7 +48,7 @@ class Execution:
         return path.read_text(encoding="utf-8")[-4000:]
 
 
-def run_one(manifest, arm, agent, template, out_dir):
+def run_one(manifest, arm, agent, template, out_dir, meta=None):
     out = Path(out_dir)
     if out.exists():
         shutil.rmtree(out)
@@ -91,6 +91,9 @@ def run_one(manifest, arm, agent, template, out_dir):
             agent_seconds += elapsed
             rec.emit("agent_step_s", seconds=round(elapsed, 6))
         tokens += int(claim.get("tokens", 0))
+        if tokens > int(budget["max_tokens"]):
+            rec.emit("budget_exceeded", tokens=tokens)
+            break
         claim_success = bool(claim.get("claim_success", claim_success))
         rec.emit("iteration", index=it, claim_success=claim_success,
                  calls=list(toolbox.calls))
@@ -130,6 +133,7 @@ def run_one(manifest, arm, agent, template, out_dir):
     success = bool(verdict.get("passed")) and violation is None
     result = {
         "arm": arm,
+        "meta": meta or {},
         "success": success,
         "first_pass": bool(first_pass and success),
         "iterations": iterations,

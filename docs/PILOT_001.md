@@ -32,7 +32,17 @@
 
 ## 3. 任务（冻结于本文件）
 
-### T-A（参数级，P1.0 先做）
+### T-A v2（2026-11-09 修订；P1.2 之前未产生任何数据）
+
+**v1 缺陷（实测暴露）**：原定"`demo_verify_tolerance_m` 0.06→0.05"**不会翻转结果**——当前误差约 10 mm，两种容差都通过。冻结任务若不改变通过/失败，就无法测量。
+
+**v2 定义**：
+- 目标：把 composite 的 `clearance_m` 设到契约下限以下（如 0.02），使 `prepare_plan` 以 `ERR_INVALID_PLAN` 拒绝；把值调回合法范围（0.05–0.25）并让探针得到 `OUTCOME_SUCCEEDED`。
+- 涉及文件：实验侧参数（不修改验证器/阈值/契约）；具体落点由 P1.2 run 记录冻结。
+- 初始失败证据：`ERR_INVALID_PLAN` 的 probe 输出（须在 P1.2 首次运行前写入 run 目录）。
+- 验收：`composite_probe` 返回 `OUTCOME_SUCCEEDED` 且无回归。
+
+### T-A v1（已废弃，保留记录）
 - **目标**：把 `demo_verify_tolerance_m` 从默认 `0.06` 改为 `0.05`，使 `recovery_once` 场景在更严容差下仍**验证通过**。
 - **涉及文件**：`src/flexcell/flexcell_skills/flexcell_skills/task_fsm_server.py`（`declare_parameter` 默认值）。
 - **初始失败证据**：当前默认值下场景通过，但严格容差下未验证；**P1.1 运行前必须补一次"初始失败证据"**（用容差 0.05 跑一次，记录失败/通过）并写入 run 目录。
