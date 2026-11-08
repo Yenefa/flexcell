@@ -1,0 +1,58 @@
+{
+  "arm": "B",
+  "meta": {
+    "task": "T-G1"
+  },
+  "success": true,
+  "first_pass": true,
+  "iterations": 1,
+  "claim_success": true,
+  "false_success": false,
+  "violation": null,
+  "cost": {
+    "tokens": 10,
+    "agent_s": 87.765,
+    "execution_s": 86.984
+  },
+  "evidence": {
+    "items": {
+      "verdict.json": {
+        "present": true,
+        "bytes": 442,
+        "sha256": "0b2121701a80550afe5812798c10322c52e0a7c8d950a637c0eeba63e79631ca"
+      },
+      "telemetry/execution.log": {
+        "present": true,
+        "bytes": 631,
+        "sha256": "45341bb43b4dfc1beee334d6a7890715545d0aa2834b6c8b8df369824ab87a90"
+      },
+      "episode.json": {
+        "present": true,
+        "bytes": 584,
+        "sha256": "6db657156adfb0b98921f5dbc57ed9703cf01b4af03818de1f2e2cf1ae07d687"
+      },
+      "fingerprint.json": {
+        "present": true,
+        "bytes": 258,
+        "sha256": "f8d5c94673fc0efd158dd972988112253fb1c488b169793d208525a2622ae52e"
+      }
+    },
+    "present": 4,
+    "required": 4,
+    "completeness": 1.0
+  },
+  "verdict": {
+    "passed": true,
+    "returncode": 0,
+    "stdout": "{\"passed\": true, \"status\": \"PASS\", \"runtime_fingerprint\": \"aa5ac4970b9e659a7123ec01099dd64a830e478f86f4f23f2a30731daea60238\", \"place_pose\": [0.2, 0.0, 0.0175], \"returncode\": 0}\n",
+    "stderr": "",
+    "status": "PASS",
+    "runtime_fingerprint": "aa5ac4970b9e659a7123ec01099dd64a830e478f86f4f23f2a30731daea60238",
+    "place_pose": [
+      0.2,
+      0.0,
+      0.0175
+    ]
+  },
+  "run_dir": "C:\\Users\\fuker\\Desktop\\workspace\\project-033-flexcell\\ci-public-window\\evidence\\pilot001-tg1-scripted\\run"
+}

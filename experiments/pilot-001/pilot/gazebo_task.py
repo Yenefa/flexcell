@@ -86,7 +86,8 @@ def build_tg(target):
     (target / "task.md").write_text(
         "# T-G1 - real Gazebo parameter task\n\n"
         "plan.json holds place_pose = [x, y, z]. The robot fails when the pose is\n"
-        "out of reach. Fix plan.json so the real task verifies. gate/ is read-only.\n",
+        "out of reach. The arm reaches strictly less than 0.30 m from the base. Fix plan.json\n"
+        "so the real task verifies. gate/ is read-only.\n",
         encoding="utf-8")
     (target / "gate" / "acceptance.py").write_text(ACCEPT, encoding="utf-8")
     (target / "plan.json").write_text(json.dumps(
