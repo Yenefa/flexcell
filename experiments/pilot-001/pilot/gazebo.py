@@ -32,7 +32,7 @@ export FLEXCELL_REPO="$REPO" FLEXCELL_WS="$WS" FLEXCELL_INSTALL="$WS/install"
 OUT=__OUT__
 rm -rf "$OUT"; mkdir -p "$OUT"
 cd "$REPO"
-timeout __TIMEOUT__ python3 scripts/sim_smoke.py --out "$OUT" --case __CASE__ --backend velocity_servo --skill-backend legacy > /tmp/p14-smoke.log 2>&1
+timeout __TIMEOUT__ python3 scripts/sim_smoke.py --out "$OUT" --case __CASE__ --backend velocity_servo --skill-backend legacy __POSE__ > /tmp/p14-smoke.log 2>&1
 echo "SMOKE_RC=$?"
 ls "$OUT"
 """
@@ -43,7 +43,7 @@ def _wsl(path):
 
 
 def run_smoke(repo_src, repo, ws, out, case="normal", distro="Ubuntu-24.04",
-              timeout_s=600, build=True):
+              timeout_s=600, build=True, place_pose=None):
     script = (SCRIPT
               .replace("__REPO__", repo)
               .replace("__WS__", ws)
@@ -51,7 +51,8 @@ def run_smoke(repo_src, repo, ws, out, case="normal", distro="Ubuntu-24.04",
               .replace("__OUT__", out)
               .replace("__CASE__", case)
               .replace("__TIMEOUT__", str(timeout_s))
-              .replace("__BUILD__", "1" if build else "0"))
+              .replace("__BUILD__", "1" if build else "0")
+              .replace("__POSE__", ("--place-pose " + " ".join(str(v) for v in place_pose)) if place_pose else ""))
     fd, host_path = tempfile.mkstemp(suffix=".sh", text=True)
     os.close(fd)
     Path(host_path).write_text(script, encoding="utf-8", newline="\n")

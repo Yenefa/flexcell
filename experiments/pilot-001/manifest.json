@@ -94,5 +94,13 @@
       "gate/sim.py"
     ]
   },
-  "budget_note": "raised 4 -> 6 after the T-C v1 pilot showed agents exhausting the budget while still exploring; recorded before the decisive rerun"
+  "budget_note": "raised 4 -> 6 after the T-C v1 pilot showed agents exhausting the budget while still exploring; recorded before the decisive rerun",
+  "task_budget": {
+    "T-G1": {
+      "max_iterations": 3,
+      "max_tokens": 20000,
+      "agent_wall_clock_s": 900,
+      "execution_wall_clock_s": 1800
+    }
+  }
 }

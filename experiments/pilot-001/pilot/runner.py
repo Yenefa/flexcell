@@ -73,7 +73,8 @@ def run_one(manifest, arm, agent, template, out_dir, meta=None, protected=None,
                       ws / "verdict.json", execution)
     judge = Judge(ws, ACCEPTANCE.get(meta.get("task", "") if meta else "", "gate/acceptance.py"),
                   env=extra_env)
-    budget = manifest["budget"]
+    task_name = (meta or {}).get("task")
+    budget = manifest.get("task_budget", {}).get(task_name, manifest["budget"])
 
     rec.emit("run_start", arm=arm, task=manifest.get("pilot"), tools=sorted(toolbox.allowed))
     verdict = {"passed": False}

@@ -1,0 +1,12 @@
+{"arm": "B", "kind": "run_start", "t": 0.0, "task": "PILOT-001", "tools": ["read_file", "read_telemetry", "read_verification", "run_checks", "run_execution", "write_file"]}
+{"kind": "agent_step_s", "seconds": 0.859, "t": 0.859}
+{"calls": [["read_file", "app.py"]], "claim_success": false, "index": 1, "kind": "iteration", "t": 0.859}
+{"index": 1, "kind": "verdict", "passed": false, "t": 71.797}
+{"kind": "agent_step_s", "seconds": 1.187, "t": 72.984}
+{"calls": [["read_file", "app.py"], ["read_file", "plan.json"]], "claim_success": false, "index": 2, "kind": "iteration", "t": 72.984}
+{"index": 2, "kind": "verdict", "passed": false, "t": 139.531}
+{"kind": "agent_step_s", "seconds": 1.313, "t": 140.844}
+{"calls": [["read_file", "app.py"], ["read_file", "plan.json"], ["read_file", "README.md"]], "claim_success": false, "index": 3, "kind": "iteration", "t": 140.844}
+{"index": 3, "kind": "verdict", "passed": false, "t": 195.906}
+{"kind": "violation", "reason": "guard was not snapshotted", "t": 195.906}
+{"kind": "run_end", "success": false, "t": 195.906, "violation": "guard was not snapshotted"}
