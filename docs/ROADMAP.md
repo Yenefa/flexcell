@@ -14,6 +14,14 @@ in [the 2026-10-07 diagrams](ARCHITECTURE_AND_PLAN_20261007.md). This update
 records implemented decision layers; it does not unfreeze n≥50 or declare M3
 qualification complete.
 
+## 顶层定位：Self-Evolving Agentic Robotics
+
+本项目的研究对象不是"会抓放的机械臂"，而是 **Agent 如何开发、控制、验证并持续进化机器人**。
+能力阶梯 **L1 开发 → L2 运行 → L3 进化**；**Agent 定 WHAT、执行器定 HOW、独立验证定 WHETHER**。
+完整拆解（研究问题→可证伪命题→工作包→里程碑→指标）：[SELF_EVOLVING_AGENTIC_ROBOTICS.md](SELF_EVOLVING_AGENTIC_ROBOTICS.md)。
+
+> 下方的里程碑是本定位下的**平台/基础设施**进展；平台通过 ≠ L1–L3 能力已达成。
+
 ## Milestone map
 
 | Milestone                              | Scope                                                                            | Status                                                       |
