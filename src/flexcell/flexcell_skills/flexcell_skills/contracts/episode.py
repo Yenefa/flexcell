@@ -169,10 +169,27 @@ class EpisodeRecorder:
         """A step that never produced a result (canceled mid-flight)."""
         self._pending = None
 
+    def _first_canonical_state(self):
+        """First non-null canonical world recorded in the steps.
+
+        Step 1 is often a bootstrap decision made before any observation
+        (world_canonical=None), so the first non-null state is the one the
+        episode actually started from.
+        """
+        for step in self._steps:
+            canonical = (step.get("policy_input") or {}).get("world_state_canonical")
+            if canonical:
+                return canonical
+        return None
+
     def to_dict(self, final_state=None, injection_schedule=None, protocol=None):
         # idempotent: the episode is frozen on the first finalize so the
-        # stored bytes (and the end timestamp) are stable
+        # stored bytes (and the end timestamp) are stable. One field is
+        # recomputed: a first finalize may happen before the first observe
+        # (bootstrap step), and the steps list keeps growing afterwards, so
+        # initial_world_state must follow the steps actually recorded.
         if self._frozen is not None:
+            self._frozen["initial_world_state"] = self._first_canonical_state()
             return self._frozen
         self._frozen = _sanitize({
             EPISODE_SCHEMA_VERSION_KEY: EPISODE_SCHEMA_VERSION,
@@ -183,9 +200,7 @@ class EpisodeRecorder:
             "benchmark_protocol": protocol,
             "runtime_fingerprint": os.environ.get('FLEXCELL_RUNTIME_FINGERPRINT'),
             "injection_schedule": injection_schedule or [],
-            "initial_world_state": (
-                self._steps[0]["policy_input"]["world_state_canonical"]
-                if self._steps else None),
+            "initial_world_state": self._first_canonical_state(),
             "steps": self._steps,
             "final_state": final_state or {},
             "env": env_snapshot(),
