@@ -58,6 +58,10 @@
 - `sim_smoke --camera`（velocity_servo / normal / target_box_a）：**PASS**，落点 **5.25 mm**。
 - 相机帧 **557**，有效 388，`reconcile=RECONCILED`，**回填 39** 帧。
 - 运行时指纹 **`f04e37e2…`**（camera 配置独立于无相机的 `dd456b9b…`，属预期）。
+
+## composite 探针（current main，2026-11-08）
+- `composite_probe` 单 stage 链：**OUTCOME_SUCCEEDED**，`completed_stage_ids=["one"]`，`component_run_ids=["pick_place_v1-2f479ab1"]`，**14.6 s**。
+- 构建指纹 `dd456b9b…`（与核心窗口同一当前构建）。
 ## 复跑命令（本机）
 ```bash
 # 构建
