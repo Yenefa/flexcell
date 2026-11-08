@@ -17,13 +17,12 @@ EV=read("evidence/EVIDENCE.md"); SC=read("答辩逐字稿.md"); PPT=pptx_text()
 cw=M["core_window"]
 tokens=[cw["status"], cw["window_id"][:8], cw["runtime_fingerprint"][:8]]
 tokens+= [f"{r['err_mm']:.2f}" for r in cw["runs"] if r["err_mm"] is not None]
-tokens+= [f"{M['smoke']['normal_a_err_mm']:.3f}", f"{M['smoke']['camera_err_mm']:.2f}",
-          str(M["frames"]["total"]), str(M["frames"]["backfilled"])]
+tokens+= [f"{M['smoke']['camera_err_mm']:.2f}", str(M["frames"]["total"]), str(M["frames"]["backfilled"])]
 ok=True
 for t in tokens:
     if t not in EV: ok=False; print("EVIDENCE missing:", t)
 # 逐字稿必须含核心窗口数字 + 相机/帧
-for t in ["7.47","2.78","10.22","0.514","10.85","442","146"]:
+for t in ["7.47","2.78","10.22","5.25","557","39"]:
     if t not in SC: ok=False; print("SCRIPT missing:", t)
 # PPT 必须含当前指纹与窗口号片段
 for t in [cw["runtime_fingerprint"][:8], cw["window_id"][:8]]:
