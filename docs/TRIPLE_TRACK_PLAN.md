@@ -13,10 +13,11 @@
 - A3 ✅ 相关工作解释（P1.3）。
 - A4 ✅ 真实 Gazebo：T-G1 normal 3/3、T-G3 regrasp 1/1（`runs/p1.4-*`）。
 - A5 ✅ T-G3 可靠性：**3/3**（`runs/p1.4-tg3-20261109/`）。
+- A6 ✅ 组合任务 T-G4：LLM 修复成功、独立验收 PASS（n=1）。
 
 **Task Queue**
 1. T-G3 重复 2 次（补 n=3）。
-2. ~~组合类真实任务探测~~ → **BLOCKED**（`dual_object` 的 place-pose 不产生失败；见 `runs/p1.4-dual-probe-20261109/`）。
+2. ✅ 组合类真实任务：新增 `--zone-2-pose` 杠杆；T-G4 由 LLM 修复并通过独立验收（`runs/p1.4-tg4-20261109/`）。
 3. 合成层与真实层交叉验证（同任务族两层都跑）。
 
 **Acceptance Gates**
