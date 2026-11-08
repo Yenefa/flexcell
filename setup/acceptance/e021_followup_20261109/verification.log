@@ -1,0 +1,42 @@
+=== verify_recovery ===
+wsl: �hKm0R localhost �NtM�n�FO*g\��P0R WSL0NAT !j_N�v WSL 
+N/ec localhost �Nt0
+
+recovery verification — e021_native_recovery_20261024
+  batches archived      : 3/3 byte-identical
+  episodes verified     : 60/60 sha+size match (60 files on disk)
+  reference set         : 60 recovered vs 60 frozen -> identical
+  summary batch_20261005_161922.jsonl: {'SUCCEEDED': 18, 'FAILED': 2} dual_object_rows=20 agrees=True
+  summary batch_20261005_185833.jsonl: {'SUCCEEDED': 19, 'FAILED': 1} dual_object_rows=20 agrees=True
+  summary batch_20261005_192253.jsonl: {'SUCCEEDED': 17, 'FAILED': 3} dual_object_rows=20 agrees=True
+  evidence tiers        : byte_recovery=PASS, summary_recompute=PASS, model_source_audit=PASS, model_replay=NOT_RUN, physical_acceptance=NOT_RUN
+  provenance tally      : 315 routed of 478 steps, 275 fast proposals (275 with weight digest), 31 paid
+  initial_world_state   : 0/60 episodes record it
+
+VERDICT: VERIFIED
+RC=0
+=== selftest ===
+  A clean archive verifies         PASS  (exit=0)
+  B one flipped byte rejected      PASS  (exit=1)
+  C deleted episode rejected       PASS  (exit=1)
+  D unlisted episode rejected      PASS  (exit=1)
+  E tampered batch rejected        PASS  (exit=1)
+  F reference set shrink detected  PASS  (exit=1)
+
+6/6 cases behave as specified
+RC=0
+=== decision_audit ===
+    weight sha256   : 8754b06f7d16d6d6ab63493b2ee385cc0ed6abde8c25c39298dc3e1eb05593d9  (139 proposals)
+    gate failures   : 0  calibrated=134/139  tokens=200914
+  paid arm          : 26 proposals, backends={'deepseek-official': 26}
+    cost status     : {'USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING': 26}
+    completion tok  : 1596  mean latency 900.7 ms
+  calibration sha256: 0af588a8d02a91efe60a8a84497c3fe587e590e3d060233fccbb762e88ec3fa7
+
+LIMITATIONS (not defects)
+  - batch_20261005_161922.jsonl: 5 paid proposals carry no weight digest — remote-backend weight identity is not auditable from this archive
+  - batch_20261005_192253.jsonl: 26 paid proposals carry no weight digest — remote-backend weight identity is not auditable from this archive
+
+VERDICT: CONSISTENT
+RC=0
+
