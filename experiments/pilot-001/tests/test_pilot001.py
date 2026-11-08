@@ -216,3 +216,15 @@ def test_ta3_scripted_fix_passes(manifest, tmp_path):
                          execution_factory=tasks.TCExecution, extra_env=env)
     assert res["success"]
     assert res["evidence"]["completeness"] == 1.0
+
+
+def test_gazebo_collect_reads_result(tmp_path):
+    from pilot import gazebo
+    run = tmp_path / "run"
+    run.mkdir()
+    (run / "result.json").write_text(json.dumps({"status": "PASS", "case": "normal",
+                                                "runtime_fingerprint": "abc", "world_sha256": "w",
+                                                "semantic_config_sha256": "c",
+                                                "physical_tasks_dispatched": 1}))
+    out = gazebo.collect(str(run))
+    assert out["found"] and out["summary"]["status"] == "PASS"

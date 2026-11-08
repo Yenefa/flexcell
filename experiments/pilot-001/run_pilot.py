@@ -2,6 +2,7 @@
 """P1.0 self-test and P1.1 real-LLM three-arm run (measurement only)."""
 import argparse
 import json
+import os
 import sys
 import tempfile
 from pathlib import Path
@@ -9,7 +10,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 
-from pilot import fixtures, runner, tasks
+from pilot import fixtures, gazebo, runner, tasks
 from pilot.manifest import load
 
 TASK_TA3 = ("The plan is rejected when executed on the robot. Use the execution tool "
@@ -186,6 +187,22 @@ def tc_run(manifest, out, arms, repo_src):
     return 0
 
 
+def gazebo_check(out, repo_src, repo_wsl, ws_wsl, case):
+    res = gazebo.run_smoke(repo_src, repo_wsl, ws_wsl, "/tmp/p14-cli", case=case, build=False)
+    print("SMOKE_RC", res["returncode"])
+    print((res["stdout"] or "")[-800:])
+    run_dir = gazebo.latest("/tmp/p14-cli")
+    if run_dir:
+        gazebo.export(run_dir, str(out / "gazebo-run"))
+    summary = gazebo.collect(str(out / "gazebo-run"))
+    out.mkdir(parents=True, exist_ok=True)
+    (out / "m3s.json").write_text(json.dumps({"smoke": res, "summary": summary}, indent=2) + "\n", encoding="utf-8")
+    if summary.get("found"):
+        gazebo.export(os.path.dirname(summary["path"]), str(out / "gazebo-run"))
+    print("SUMMARY", json.dumps(summary.get("summary", {})))
+    return 0 if summary.get("found") and summary["summary"].get("status") == "PASS" else 1
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=tempfile.mkdtemp(prefix="pilot001-"))
@@ -194,11 +211,17 @@ def main():
     ap.add_argument("--arms", default="A,C,B")
     ap.add_argument("--task", default="toy")
     ap.add_argument("--repo-src", default=str(HERE.parents[1]))
+    ap.add_argument("--repo-wsl", default="/home/ros/flexcell-p14")
+    ap.add_argument("--ws-wsl", default="/home/ros/flexcell-p14-ws")
+    ap.add_argument("--case", default="normal")
+    ap.add_argument("--gazebo-check", action="store_true")
     a = ap.parse_args()
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
     manifest = load(a.manifest)
     arms = [x.strip() for x in a.arms.split(",") if x.strip()]
+    if a.gazebo_check:
+        return gazebo_check(out, a.repo_src, a.repo_wsl, a.ws_wsl, a.case)
     if a.llm and a.task == "T-A-v3":
         return ta3_run(manifest, out, arms, a.repo_src)
     if a.llm and a.task == "T-B-v1":
