@@ -1,0 +1,85 @@
+{
+  "protocol": "docs/C4_PREREGISTRATION.md",
+  "n_per_arm": 3,
+  "fsm": {
+    "success": 3,
+    "wall": [
+      28.564,
+      28.518,
+      28.566
+    ],
+    "mean_wall": 28.549333333333333
+  },
+  "mtc": {
+    "success": 3,
+    "wall": [
+      33.327,
+      33.635,
+      36.143
+    ],
+    "mean_wall": 34.36833333333333
+  },
+  "delta_wall_s": 5.818999999999999,
+  "rows": [
+    {
+      "run": "legacy-a",
+      "arm": "fsm",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall": 28.564,
+      "trace_len": 6,
+      "fingerprint": "da8da4617a28df279de4cef2a85b3c50d54944d5e9096d43bbad0b0c9b3a0787",
+      "sha": "e0d42f9ebcb26c4a2165c0984e0f4d6e9dbdf157693e150fd2f39b0d3877d2f9"
+    },
+    {
+      "run": "mtc-b",
+      "arm": "mtc",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall": 33.327,
+      "trace_len": 6,
+      "fingerprint": "0ca2b7f93fc7472a03794a708506524bdf613feda382241a6144e7590ca4492e",
+      "sha": "d016ed2be84f5871ed8caa9c66c8bc2ecc1acf3f62d98dd0be4383dce92ee1b2"
+    },
+    {
+      "run": "mtc-c",
+      "arm": "mtc",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall": 33.635,
+      "trace_len": 6,
+      "fingerprint": "0ca2b7f93fc7472a03794a708506524bdf613feda382241a6144e7590ca4492e",
+      "sha": "bf23e83fb50ea70219fa43ff726093a0fb8ac74d530c87437c64eaf46ca34b59"
+    },
+    {
+      "run": "legacy-d",
+      "arm": "fsm",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall": 28.518,
+      "trace_len": 6,
+      "fingerprint": "da8da4617a28df279de4cef2a85b3c50d54944d5e9096d43bbad0b0c9b3a0787",
+      "sha": "7f61631af23ecf4ee89bddfe07a860ae32cd4d2487e50257c5af04055466728a"
+    },
+    {
+      "run": "legacy-e",
+      "arm": "fsm",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall": 28.566,
+      "trace_len": 6,
+      "fingerprint": "da8da4617a28df279de4cef2a85b3c50d54944d5e9096d43bbad0b0c9b3a0787",
+      "sha": "cb2e9ade0688e805de26c5e8ee19ffdf950335456d34e0c2f634654bbe0f41c7"
+    },
+    {
+      "run": "mtc-f",
+      "arm": "mtc",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall": 36.143,
+      "trace_len": 6,
+      "fingerprint": "0ca2b7f93fc7472a03794a708506524bdf613feda382241a6144e7590ca4492e",
+      "sha": "2aff94fa5a8071ed39946acccda7ad05586d348bd48e81c370dfaf24b4a11ac5"
+    }
+  ]
+}

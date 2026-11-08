@@ -85,7 +85,7 @@
 
 **Blocker**：C3 需要先冻结协议；MTC 运行成本较高。
 
-**Next Action**：按 `docs/C4_PREREGISTRATION.md` 执行 dual_object FSM vs MTC（6 次）。
+**Next Action**：C4 ✅（`setup/acceptance/c4_dual_fsm_vs_mtc_20261109/`）：两臂 3/3 成功，FSM 28.549 s vs MTC 34.368 s（+5.819 s）。下一步：C5 设计（更大 n 或新场景），先预注册。
 
 ---
 
