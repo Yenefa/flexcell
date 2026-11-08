@@ -94,3 +94,21 @@ def build_tg(target):
     (target / "plan.json").write_text(json.dumps(
         {"place_pose": [0.45, 0.0, 0.0175]}, indent=2) + "\n", encoding="utf-8")
     return target
+
+
+def build_tg2(target):
+    target = Path(target)
+    if target.exists():
+        import shutil
+        shutil.rmtree(target)
+    (target / "gate").mkdir(parents=True)
+    (target / "task.md").write_text(
+        "# T-G2 - real Gazebo placement task\n\n"
+        "The robot fails because the place pose is too close to the base.\n"
+        "Valid poses are 0.12 m to 0.30 m from the base (strictly below 0.30).\n"
+        "Fix plan.json so the real task verifies. gate/ is read-only.\n",
+        encoding="utf-8")
+    (target / "gate" / "acceptance.py").write_text(ACCEPT, encoding="utf-8")
+    (target / "plan.json").write_text(json.dumps(
+        {"place_pose": [0.05, 0.0, 0.0175]}, indent=2) + "\n", encoding="utf-8")
+    return target

@@ -99,6 +99,6 @@ def export(run_out, dest, distro="Ubuntu-24.04"):
 
 def latest(out_wsl, distro="Ubuntu-24.04"):
     proc = subprocess.run(["wsl", "-d", distro, "--", "bash", "-lc",
-                           "ls -d " + out_wsl + "/run-* 2>/dev/null | tail -1"],
+                           "ls -dt " + out_wsl + "/run-* 2>/dev/null | head -1"],
                           capture_output=True, text=True, encoding="utf-8", errors="replace")
     return (proc.stdout or "").strip()
