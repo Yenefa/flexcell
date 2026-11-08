@@ -12,7 +12,7 @@
 - A2 ✅ 合成层对照矩阵（P1.2，27 次；C−A p=0.0023，B−C p=1.0）。
 - A3 ✅ 相关工作解释（P1.3）。
 - A4 ✅ 真实 Gazebo：T-G1 normal 3/3、T-G3 regrasp 1/1（`runs/p1.4-*`）。
-- A5 ⏳ 第二任务族可靠性（T-G3 n=3）。
+- A5 ✅ T-G3 可靠性：**3/3**（`runs/p1.4-tg3-20261109/`）。
 
 **Task Queue**
 1. T-G3 重复 2 次（补 n=3）。
@@ -27,7 +27,7 @@
 
 **Blocker**：真实 Gazebo 1–2 分钟/次；组合任务初始失败需确定性设计。
 
-**Next Action**：T-G3 ×2。
+**Next Action**：组合类真实任务设计（composite）；合成层/真实层交叉验证。
 
 ---
 
@@ -57,7 +57,7 @@
 
 **Blocker**：原始本地模型权重不可得（远程 paid 提案的权重身份不可审计）；无真实机器人 → `physical_acceptance` 不可完成。
 
-**Next Action**：写 B1 资格实验协议（含替代证据的边界），冻结后执行。
+**Next Action**：B1 协议草案已写（`docs/B1_E021_FOLLOWUP_PROTOCOL.md`）；下一步实现 B1-A router 逻辑回放脚本并执行。
 
 ---
 
