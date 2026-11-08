@@ -20,6 +20,7 @@ qualification complete.
 能力阶梯 **L1 开发 → L2 运行 → L3 进化**；**Agent 定 WHAT、执行器定 HOW、独立验证定 WHETHER**。
 完整拆解（研究问题→可证伪命题→工作包→里程碑→指标）：[SELF_EVOLVING_AGENTIC_ROBOTICS.md](SELF_EVOLVING_AGENTIC_ROBOTICS.md)。
 相关工作与集成决策：[RELATED_WORK.md](RELATED_WORK.md)；首个可测实验：[PILOT_001.md](PILOT_001.md)。
+三 Track 并行计划（A 开发 / B 混合运行时 / C 任务编排）：[TRIPLE_TRACK_PLAN.md](TRIPLE_TRACK_PLAN.md)。
 
 > 下方的里程碑是本定位下的**平台/基础设施**进展；平台通过 ≠ L1–L3 能力已达成。
 
