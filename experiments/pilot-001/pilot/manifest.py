@@ -23,8 +23,8 @@ def load(path):
     missing = [k for k in REQUIRED if k not in doc]
     if missing:
         raise ManifestError("missing manifest keys: %s" % missing)
-    if set(doc["arms"]) != {"A", "C", "B"}:
-        raise ManifestError("arms must be exactly A, C, B")
+    if not {"A", "C", "B"} <= set(doc["arms"]):
+        raise ManifestError("arms must include A, C, B")
     return doc
 
 

@@ -273,3 +273,13 @@ def test_hash_guard_allows_empty_protected(tmp_path):
     guard = HashGuard(ws, [])
     guard.snapshot()
     assert guard.verify() is True
+
+
+def test_diagnosis_derive(tmp_path):
+    from pilot.diagnosis import derive
+    path = tmp_path / "verdict.json"
+    path.write_text(json.dumps({"passed": False, "error_code": 71, "detail": "unreachable"}))
+    doc = derive(path)
+    assert doc["cause"] == "reachability"
+    assert doc["limits"]["max_reach_m"] == 0.30
+    assert doc["suggested_action"]

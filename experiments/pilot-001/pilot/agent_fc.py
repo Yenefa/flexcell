@@ -14,7 +14,8 @@ SPECS = {
     "run_checks": {"type": "object", "properties": {}},
     "run_execution": {"type": "object", "properties": {}},
     "read_telemetry": {"type": "object", "properties": {}},
-    "read_verification": {"type": "object", "properties": {}},
+    "read_verification": {"type": "object", "properties": {}}
+    ,"read_diagnosis": {"type": "object", "properties": {}},
 }
 
 

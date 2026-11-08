@@ -1,0 +1,17 @@
+{"arm": "B2", "kind": "run_start", "t": 0.0, "task": "PILOT-001", "tools": ["read_diagnosis", "read_file", "read_telemetry", "read_verification", "run_checks", "run_execution", "write_file"]}
+{"kind": "agent_step_s", "seconds": 2.953, "t": 2.953}
+{"calls": [["read_file", "plan.json"], ["run_execution", true]], "claim_success": false, "index": 1, "kind": "iteration", "t": 2.953}
+{"index": 1, "kind": "verdict", "passed": false, "t": 3.031}
+{"kind": "agent_step_s", "seconds": 1.515, "t": 4.562}
+{"calls": [["read_file", "plan.json"], ["run_execution", true], ["read_verification"], ["read_telemetry"]], "claim_success": false, "index": 2, "kind": "iteration", "t": 4.562}
+{"index": 2, "kind": "verdict", "passed": false, "t": 4.656}
+{"kind": "agent_step_s", "seconds": 8.688, "t": 13.344}
+{"calls": [["read_file", "plan.json"], ["run_execution", true], ["read_verification"], ["read_telemetry"], ["write_file", "plan.json"], ["run_execution", true]], "claim_success": false, "index": 3, "kind": "iteration", "t": 13.344}
+{"index": 3, "kind": "verdict", "passed": false, "t": 13.406}
+{"kind": "agent_step_s", "seconds": 1.484, "t": 14.89}
+{"calls": [["read_file", "plan.json"], ["run_execution", true], ["read_verification"], ["read_telemetry"], ["write_file", "plan.json"], ["run_execution", true], ["read_verification"], ["read_telemetry"]], "claim_success": false, "index": 4, "kind": "iteration", "t": 14.89}
+{"index": 4, "kind": "verdict", "passed": false, "t": 14.984}
+{"kind": "agent_step_s", "seconds": 6.266, "t": 21.25}
+{"calls": [["read_file", "plan.json"], ["run_execution", true], ["read_verification"], ["read_telemetry"], ["write_file", "plan.json"], ["run_execution", true], ["read_verification"], ["read_telemetry"], ["write_file", "plan.json"], ["run_execution", true]], "claim_success": false, "index": 5, "kind": "iteration", "t": 21.25}
+{"index": 5, "kind": "verdict", "passed": true, "t": 21.312}
+{"kind": "run_end", "success": true, "t": 21.39, "violation": null}

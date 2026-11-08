@@ -62,6 +62,12 @@ class ToolBox:
         self.calls.append(("read_telemetry",))
         return self.execution.telemetry()
 
+    def read_diagnosis(self):
+        self._need("read_diagnosis")
+        self.calls.append(("read_diagnosis",))
+        from .diagnosis import derive
+        return derive(self.judge_verdict_path)
+
     def read_verification(self):
         self._need("read_verification")
         self.calls.append(("read_verification",))
