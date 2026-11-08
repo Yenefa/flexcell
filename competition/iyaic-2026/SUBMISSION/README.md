@@ -10,6 +10,8 @@
 | `check_consistency.py` | 以 METRICS.json 为准的一致性自检 | PASS |
 | `METRICS.json` | **指标单一数据源**（窗口号/指纹/各项误差/帧数） | 当前 |
 | `score_check.py` | 6 项评分权重覆盖自检（计划书/PPT/逐字稿） | PASS |
+| `readiness_check.py` | 提交就绪判定（文件/自检/占位符） | 填队伍后 READY |
+| `READY.md` | 提交就绪报告 + 定稿发送步骤 | 见内 |
 | `现场操作卡.md` | 一键复跑命令 + 预期输出 + 故障兜底 | 可用 |
 | `make_release.py` | **一键出包**：填占位→跑自检→打包 zip | 可用 |
 | `team.example.json` | 队伍信息样例（填好后 --team 传入） | 样例 |
