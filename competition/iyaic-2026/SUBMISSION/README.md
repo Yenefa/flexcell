@@ -15,6 +15,7 @@
 | `score_check.py` | 6 项评分权重覆盖自检（计划书/PPT/逐字稿） | PASS |
 | `readiness_check.py` | 提交就绪判定（文件/自检/占位符） | 填队伍后 READY |
 | `READY.md` | 提交就绪报告 + 定稿发送步骤 | 见内 |
+| `DELIVERY_VERIFICATION.md` | 示例包最终核验（16文件/sha256/READY） | PASS |
 | `一键提交.md` | 拿到队伍信息后的操作清单（命令+预期） | 可用 |
 | `发送回执模板.md` | 提交后归档回执（含 zip sha256） | 模板 |
 | `现场操作卡.md` | 一键复跑命令 + 预期输出 + 故障兜底 | 可用 |
