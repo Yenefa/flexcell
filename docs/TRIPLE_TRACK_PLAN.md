@@ -37,7 +37,7 @@
 - B0 ✅ E-021 恢复与验证：`verify_recovery`=VERIFIED、`selftest`=6/6、`decision_audit`=CONSISTENT（2026-11-09 复跑，日志见 `setup/acceptance/e021_followup_20261109/`）。
 - B1 ✅ E-021 后续资格验证（logic-level）：router 回放 **315/315 一致**（`setup/acceptance/e021_followup_20261109/`）；model replay 与 physical acceptance 仍 BLOCKED。
 - B1-B ✅ 新 episode 记录 `initial_world_state`（修复 bootstrap/提前冻结两个缺陷；真实运行验证 sha256 `fa084018…`）。
-- B2 ⏳ 混合路由实验（当前端点）与 FSM 对照。
+- B2 ⏳ 混合路由实验：试点已完成 → **DEGRADED_HYBRID / INFRA_BLOCKED**（fast 与 slow 端点均不可用，router 安全回退 FSM；`setup/acceptance/b2_hybrid_vs_fsm_20261109/`）。真正的分层价值实验需先有可用 fast 端点。
 - B3 ⏳ 置信度校准与 τ 扫描扩展。
 
 **Task Queue**
@@ -58,7 +58,7 @@
 
 **Blocker**：原始本地模型权重不可得（远程 paid 提案的权重身份不可审计）；无真实机器人 → `physical_acceptance` 不可完成。
 
-**Next Action**：起草 B2 协议（当前端点 hybrid vs FSM，冻结指标与预算），然后执行。
+**Next Action**：B2 的 fast 端点前置条件（本地小模型或可接受成本的远端 fast 端点）；在此之前 B2 记为 INFRA_BLOCKED，转 B3/其它 Track。
 
 ---
 
