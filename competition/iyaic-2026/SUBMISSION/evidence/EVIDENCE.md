@@ -53,6 +53,11 @@
 - `status=FUNCTIONAL_WINDOW_PASS`；`window_id=8b1c18af664c41d1bcf736c0745d0f66`。
 - 统一运行时指纹：**`dd456b9b…accdbf790`**（含 composite 合并后的当前运行时；取代文档轮次前的旧指纹）。
 - 说明：仍是一次有界功能窗口（n=1），非成功率。
+
+## 相机 smoke（current main，2026-11-08）
+- `sim_smoke --camera`（velocity_servo / normal / target_box_a）：**PASS**，落点 **5.25 mm**。
+- 相机帧 **557**，有效 388，`reconcile=RECONCILED`，**回填 39** 帧。
+- 运行时指纹 **`f04e37e2…`**（camera 配置独立于无相机的 `dd456b9b…`，属预期）。
 ## 复跑命令（本机）
 ```bash
 # 构建
