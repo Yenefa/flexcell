@@ -1,0 +1,83 @@
+{
+  "arm": "B2",
+  "meta": {
+    "task": "T-B-v1",
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "key_fingerprint": "84edc02f"
+  },
+  "success": true,
+  "first_pass": false,
+  "iterations": 3,
+  "claim_success": false,
+  "false_success": false,
+  "violation": null,
+  "cost": {
+    "tokens": 4056,
+    "agent_s": 10.61,
+    "execution_s": 1.39
+  },
+  "evidence": {
+    "items": {
+      "verdict.json": {
+        "present": true,
+        "bytes": 1109,
+        "sha256": "628a00bce7e865ee1f53af9c79294f29300fa50a244ceeaafb20e5642fae083b"
+      },
+      "telemetry/execution.log": {
+        "present": true,
+        "bytes": 526,
+        "sha256": "20cc5a4166cd4ed50c87af0c0d0adc19a473d716f53228e1c6b63083c028fddf"
+      },
+      "episode.json": {
+        "present": true,
+        "bytes": 32,
+        "sha256": "11bd43cc97ae3c7c138a3eb6e8daba4c46e8ac531decfb975e0ee7ec27ea26de"
+      },
+      "fingerprint.json": {
+        "present": true,
+        "bytes": 259,
+        "sha256": "ce8693ac19e1896266a51f3e794bd83b7abc57861344fb9cbe583b66e3f91311"
+      }
+    },
+    "present": 4,
+    "required": 4,
+    "completeness": 1.0
+  },
+  "verdict": {
+    "passed": true,
+    "returncode": 0,
+    "stdout": "{\"passed\": true, \"stage_results\": [{\"stage_id\": \"s1\", \"object_name\": \"a\", \"destination\": [0.18, 0.16, 0.0175], \"reach_m\": 0.2408, \"postcondition\": \"object_at_destination\", \"passed\": true, \"detail\": null}, {\"stage_id\": \"s2\", \"object_name\": \"b\", \"destination\": [0.25, -0.1, 0.0175], \"reach_m\": 0.2693, \"postcondition\": \"object_at_destination\", \"passed\": true, \"detail\": null}], \"failed_stage\": null}\n",
+    "stderr": "",
+    "stage_results": [
+      {
+        "stage_id": "s1",
+        "object_name": "a",
+        "destination": [
+          0.18,
+          0.16,
+          0.0175
+        ],
+        "reach_m": 0.2408,
+        "postcondition": "object_at_destination",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "stage_id": "s2",
+        "object_name": "b",
+        "destination": [
+          0.25,
+          -0.1,
+          0.0175
+        ],
+        "reach_m": 0.2693,
+        "postcondition": "object_at_destination",
+        "passed": true,
+        "detail": null
+      }
+    ],
+    "failed_stage": null
+  },
+  "run_dir": "C:\\Users\\fuker\\Desktop\\workspace\\project-033-flexcell\\ci-public-window\\evidence\\pilot001-b2-r2\\tb1\\tb1-B2"
+}
