@@ -8,6 +8,8 @@
 | `答辩逐字稿.md` | ≤8 分钟逐字稿 + 预判问答 | 可用 |
 | `package.py` | 按官方命名规则打包提交 zip | 可用 |
 | `check_consistency.py` | 证据台账与逐字稿关键数字一致性自检 | PASS |
+| `score_check.py` | 6 项评分权重覆盖自检（计划书/PPT/逐字稿） | PASS |
+| `现场操作卡.md` | 一键复跑命令 + 预期输出 + 故障兜底 | 可用 |
 | `证据台账 evidence/EVIDENCE.md` | 构建/smoke/窗口/composite/CI 可复跑记录 | 可用 |
 | `evidence/demo_sim.mp4` | **真实仿真演示视频**（29.6s，960×720，由相机帧合成） | 可用 |
 | `提交清单.md` | 命名规则 + 邮箱 + 评分自检 + 合规 | 待逐项勾选 |
