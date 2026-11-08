@@ -13,6 +13,10 @@ sys.path.insert(0, str(HERE))
 from pilot import fixtures, gazebo, gazebo_task, runner, tasks
 from pilot.manifest import load
 
+TASK_TG2 = ("The real robot fails because the place pose is too close to the base. "
+            "Valid poses are 0.12 m to 0.30 m from the base. Use run_execution to see "
+            "the failure, then fix plan.json. Do not modify gate/.")
+
 TASK_TG1 = ("The real robot fails because place_pose is out of reach. Use run_execution "
             "to see the failure. IMPORTANT: after a failed execution you MUST include a "
             "write_file action for plan.json in the SAME reply. Do not modify gate/.")
@@ -191,6 +195,33 @@ def tc_run(manifest, out, arms, repo_src):
     return 0
 
 
+def tg2_run(manifest, out, arms, repo_src):
+    from pilot.agent_llm import LLMAgent
+    from pilot.agent_fc import FCAgent
+    from pilot.llm import Chat
+    env = {"PILOT_P14_REPO": "/home/ros/flexcell-p14",
+           "PILOT_P14_WS": "/home/ros/flexcell-p14-ws",
+           "PILOT_P14_SRC": repo_src,
+           "PYTHONPATH": str(HERE)}
+    rows = []
+    for arm in arms:
+        chat = Chat()
+        tools = manifest["arms"][arm]["tools"]
+        agent = FCAgent(chat, tools, TASK_TG2)
+        res = runner.run_one(manifest, arm, agent,
+                             gazebo_task.build_tg2(out / ("tpl-tg2-" + arm)),
+                             out / ("tg2-" + arm),
+                             meta={"task": "T-G2", **chat.metadata()},
+                             protected=[],
+                             execution_factory=gazebo_task.GazeboTaskExecution,
+                             extra_env=env)
+        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        rows.append(res)
+        print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
+              (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
+    (out / "p1.4-tg2-runs.json").write_text(json.dumps({"task": "T-G2", "rows": rows}, indent=2) + "\n", encoding="utf-8")
+    return 0
+
 def tg_run(manifest, out, arms, repo_src, agent_kind="json"):
     from pilot.agent_llm import LLMAgent
     from pilot.agent_fc import FCAgent
@@ -254,6 +285,8 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     manifest = load(a.manifest)
     arms = [x.strip() for x in a.arms.split(",") if x.strip()]
+    if a.llm and a.task == "T-G2":
+        return tg2_run(manifest, out, arms, a.repo_src)
     if a.llm and a.task == "T-G1":
         return tg_run(manifest, out, arms, a.repo_src, a.agent)
     if a.gazebo_check:
