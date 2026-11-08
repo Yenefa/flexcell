@@ -16,6 +16,10 @@ n>=50 benchmark freeze. The runtime stays the one in `src/`, `scripts/`, `worlds
 | **Raw evidence** | `setup/acceptance/` (in-repo) and the frozen cloud copy | Immutable measured records referenced by the status index. Never rewritten; historical identity preserved. |
 | **Competition showcase** | `competition/iyaic-2026/showcase/` | Demo script, narrative and captured stills/clips for the judges. No runtime logic. |
 
+## Short-term goal
+
+This directory is the delivery vehicle for the project's **short-term goal**: entering the IYAIC 2026 Henan *creative group*. See [GOAL.md](GOAL.md) for milestones and [SUBMISSION/](SUBMISSION/) for the plan/PPT/checklist drafts.
+
 ## Where things are
 
 - Creative-group rules parsed: [CREATIVE_GROUP_REQUIREMENTS.md](CREATIVE_GROUP_REQUIREMENTS.md).
