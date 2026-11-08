@@ -26,13 +26,14 @@
 
 ### 2.1 RoboForge / Agentic Robot Creation（arXiv 2610.17881，2026-10-13）
 - **已核实（摘要原文）**：把高层意图变成可运行机器人，分两轴——**本体生成**（embodiment creation，多模态模型产出机械设计，并提出计算指标在制造前评估）与**行为生成**（behavior creation：生成参考运动 → 配置学习目标 → 训练策略；**rollout 反馈可回改参考运动或奖励**）；在四种机器人上对照 reward-refinement 与 one-shot motion 基线；并**制造了一台 agent 生成的 Gorilla 并部署学习到的行为**。
-- **未核实**：代码是否公开（搜索结果只显示论文/项目页，未见公开仓库）；具体 ROS 集成方式；其"verification"是否含独立验证器还是仅 rollout 指标。**需要精读论文再判断**。
-- **对我们的含义**：**不能宣称"无人做生成-验证-修订"**。其重点是**本体 + 行为策略（learning-based）**；我们的差异候选是 **ROS 软件工程层**（模块化技能契约、独立验证器、证据追踪、回归门）。这是**待验证的差异**，不是已确立的差异。
+- **已核实（2026-11-09，arXiv HTML）**：其"verification"是 **execution/rollout 作为物理验证信号**（原文：*Execution therefore serves as a physical verification signal rather than merely the endpoint of learning*）；失败时区分"行为请求错误"与"学习方式错误"，修订运动或奖励并重训。**不是**与执行器分离的独立验证器。代码公开性仍未确认（项目页存在）。
+- **对我们的含义**：**不能宣称"无人做生成-验证-修订"**；其执行反馈机制与我们的 C 臂同构。我们的差异候选是 **ROS 软件工程层**（模块化技能契约、独立验证器、证据追踪、回归门），且 P1.2 显示"独立验证"当前无额外增益 → 差异仍是假设。
 - **状态**：**Conceptual Reference**（代码未公开前不引入）。
 
 ### 2.2 RoboOS（FlagOpen，Apache-2.0，arXiv 2505.03673）
 - **已核实（README）**：Brain-Cerebellum 分层；三组件 = Embodied Cloud Model（MLLM 做全局感知与高层决策）+ **Cerebellum Skill Library**（模块化即插即用技能）+ **Real-Time Shared Memory**（多智能体状态时空同步）；真实场景实验覆盖餐厅/家庭/超市，支持单臂/双臂/人形/轮式异构本体；运行需 **Redis + master/slaver 多进程 + Gradio UI**；**RoboOS 2.0（stand-alone 单机轻量版）尚未正式发布**（README 写"推迟数天"）。
-- **对我们的含义**：跨本体与多机协作**不是空白**。它的技能库是"即插即用执行单元"，与我们的 **Skill Contract + 独立验证** 的差别需要精读（重点看它是否要求技能自带后置条件验证、是否保留可回放证据）。它的部署形态（Redis/多机/云模型）与我们"单机可复现 + 证据留痕"取向不同。
+- **已核实（2026-11-09，arXiv v2 全文检索）**：论文**未出现** postcondition / independent verification / evidence 的表述（0 命中）；仅提到 FlagScale 的 TB 级历史数据支持 "task replay / anomaly backtracking"。因此可说"**论文未记录技能级后置条件与独立验证**"，不能说"其系统没有"。
+- **对我们的含义**：跨本体与多机协作**不是空白**；其技能库是"即插即用执行单元"，与我们的 **Skill Contract + 独立验证** 的差别是**文档级候选差异**。部署形态（Redis/多机/云模型）与我们"单机可复现 + 证据留痕"取向不同。
 - **状态**：**Conceptual Reference**（当前不引入；若将来做多机/多本体，重评是否 Adapter Required）。
 
 ### 2.3 LeRobot（huggingface，Apache-2.0，28.7k★，2026-11 活跃）
