@@ -9,6 +9,7 @@ Reply with a single JSON object and nothing else:
  "claim_success": false, "done": false}
 
 Rules:
+- If the task is not yet passing you MUST include at least one write_file action.
 - write_file requires "path" and "content" (the FULL new file content).
 - run_checks / run_execution take no arguments.
 - read_telemetry / read_verification take no arguments.
@@ -53,7 +54,16 @@ class LLMAgent:
         try:
             action = json.loads(content)
         except json.JSONDecodeError:
-            action = {"actions": [], "claim_success": False, "done": True}
+            repair = self.chat.chat(messages + [
+                {"role": "assistant", "content": content},
+                {"role": "user",
+                 "content": "Your reply was not valid JSON. Reply again with ONLY the JSON object."}])
+            content = repair["content"]
+            reply["tokens"] += repair["tokens"]
+            try:
+                action = json.loads(content)
+            except json.JSONDecodeError:
+                action = {"actions": [], "claim_success": False, "done": True}
 
         observations = []
         for item in action.get("actions", []):

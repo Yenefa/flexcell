@@ -12,6 +12,9 @@ sys.path.insert(0, str(HERE))
 from pilot import fixtures, runner, tasks
 from pilot.manifest import load
 
+TASK_TC1 = ("The plan in plan.json is rejected when executed on the robot. "
+            "Use the execution tool to see why, then fix plan.json. Do not modify gate/.")
+
 TASK_TA2 = ("The composite plan in plan.json is rejected by the contract validator. "
             "Fix plan.json so gate/acceptance.py passes. Do not modify anything under gate/.")
 
@@ -91,6 +94,35 @@ def ta2_run(manifest, out, arms, repo_src):
     return 0
 
 
+def tc_run(manifest, out, arms, repo_src):
+    from pilot.agent_llm import LLMAgent
+    from pilot.llm import Chat
+    contracts = Path(repo_src) / "src/flexcell/flexcell_skills/flexcell_skills/contracts/composite.py"
+    robot = {"max_reach_m": 0.30, "base": [0.0, 0.0, 0.0]}
+    hidden = out / "hidden"
+    hidden.mkdir(parents=True, exist_ok=True)
+    (hidden / "robot.json").write_text(json.dumps(robot) + "\n", encoding="utf-8")
+    env = {"PILOT_ROBOT": str(hidden / "robot.json")}
+    rows = []
+    for arm in arms:
+        chat = Chat()
+        agent = LLMAgent(chat, manifest["arms"][arm]["tools"], TASK_TC1)
+        res = runner.run_one(manifest, arm, agent,
+                             tasks.build_tc(out / ("tpl-tc1-" + arm), contracts),
+                             out / ("tc1-" + arm),
+                             meta={"task": "T-C-v1", **chat.metadata()},
+                             protected=manifest["task_protected"]["T-C-v1"],
+                             execution_factory=tasks.TCExecution,
+                             extra_env=env)
+        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        rows.append(res)
+        print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
+              (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
+    summary = {"task": "T-C-v1", "rows": rows}
+    (out / "p1.2-tc1-runs.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=tempfile.mkdtemp(prefix="pilot001-"))
@@ -104,6 +136,8 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     manifest = load(a.manifest)
     arms = [x.strip() for x in a.arms.split(",") if x.strip()]
+    if a.llm and a.task == "T-C-v1":
+        return tc_run(manifest, out, arms, a.repo_src)
     if a.llm and a.task == "T-A-v2":
         return ta2_run(manifest, out, arms, a.repo_src)
     if a.llm:

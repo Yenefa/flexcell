@@ -6,9 +6,10 @@ from pathlib import Path
 
 
 class Judge:
-    def __init__(self, workspace, acceptance):
+    def __init__(self, workspace, acceptance, env=None):
         self.workspace = Path(workspace)
         self.acceptance = acceptance
+        self.env = dict(env) if env else None
 
     def evaluate(self):
         proc = subprocess.run(
@@ -17,6 +18,7 @@ class Judge:
             capture_output=True,
             text=True,
             timeout=120,
+            env={**__import__("os").environ, **self.env} if self.env else None,
         )
         verdict = {
             "passed": False,

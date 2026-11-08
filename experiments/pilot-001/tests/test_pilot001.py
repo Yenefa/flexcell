@@ -1,4 +1,7 @@
 """P1.0 fixtures and unit tests; no research claims."""
+import json
+import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -123,3 +126,35 @@ def test_ta2_scripted_fix_passes(manifest, tmp_path):
                          meta={"task": "T-A-v2"},
                          protected=manifest["task_protected"]["T-A-v2"])
     assert res["success"]
+
+
+def _hidden_robot(tmp_path):
+    hidden = tmp_path / "hidden"
+    hidden.mkdir(exist_ok=True)
+    path = hidden / "robot.json"
+    path.write_text(json.dumps({"max_reach_m": 0.30, "base": [0.0, 0.0, 0.0]}))
+    return {"PILOT_ROBOT": str(path)}
+
+
+def test_tc1_initial_plan_unreachable_on_execution(manifest, tmp_path):
+    env = _hidden_robot(tmp_path)
+    ws = tasks.build_tc(tmp_path / "ws", _contracts_src())
+    proc = subprocess.run([sys.executable, "gate/acceptance.py"], cwd=ws,
+                          capture_output=True, text=True, env={**os.environ, **env})
+    assert proc.returncode != 0
+    assert "\"error_code\": 71" in proc.stdout
+
+
+def test_tc1_scripted_execution_fix_passes(manifest, tmp_path):
+    env = _hidden_robot(tmp_path)
+    contracts = _contracts_src()
+    plan = json.loads((tasks.build_tc(tmp_path / "tpl", contracts) / "plan.json").read_text())
+    plan["stages"][0]["destination"] = [0.20, 0.15, 0.0175]
+    agent = fixtures.ScriptedAgent([("write_file", ("plan.json", json.dumps(plan))),
+                                    ("run_execution", ())])
+    res = runner.run_one(manifest, "C", agent, tasks.build_tc(tmp_path / "tpl2", contracts),
+                         tmp_path / "run", meta={"task": "T-C-v1"},
+                         protected=manifest["task_protected"]["T-C-v1"],
+                         execution_factory=tasks.TCExecution, extra_env=env)
+    assert res["success"]
+    assert res["evidence"]["completeness"] == 1.0

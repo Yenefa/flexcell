@@ -1,0 +1,57 @@
+{
+  "arm": "A",
+  "meta": {
+    "task": "T-C-v1",
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "key_fingerprint": "84edc02f"
+  },
+  "success": false,
+  "first_pass": false,
+  "iterations": 6,
+  "claim_success": false,
+  "false_success": false,
+  "violation": null,
+  "cost": {
+    "tokens": 10222,
+    "agent_s": 28.954,
+    "execution_s": 0.062
+  },
+  "evidence": {
+    "items": {
+      "verdict.json": {
+        "present": true,
+        "bytes": 331,
+        "sha256": "d732464668613a47d7b57cbcff90cc6e9f6f2f8b7ecdd077f5e5695df981a728"
+      },
+      "telemetry/execution.log": {
+        "present": false,
+        "bytes": 0,
+        "sha256": null
+      },
+      "episode.json": {
+        "present": false,
+        "bytes": 0,
+        "sha256": null
+      },
+      "fingerprint.json": {
+        "present": true,
+        "bytes": 258,
+        "sha256": "d437b8c6240085605284f7db5e9ecb89c50d17e4e0108a2acb1379fc5168f99f"
+      }
+    },
+    "present": 2,
+    "required": 4,
+    "completeness": 0.5
+  },
+  "verdict": {
+    "passed": false,
+    "returncode": 1,
+    "stdout": "{\"passed\": false, \"error_code\": 71, \"detail\": \"destination unreachable: 0.340 m > max_reach 0.300 m\", \"stage\": \"execution\"}\n",
+    "stderr": "",
+    "error_code": 71,
+    "detail": "destination unreachable: 0.340 m > max_reach 0.300 m",
+    "stage": "execution"
+  },
+  "run_dir": "C:\\Users\\fuker\\Desktop\\workspace\\project-033-flexcell\\ci-public-window\\evidence\\pilot001-tc1\\tc1-A"
+}

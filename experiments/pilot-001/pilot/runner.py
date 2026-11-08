@@ -14,15 +14,16 @@ from .manifest import digest
 from .recorder import Recorder
 from .toolbox import ToolBox, ToolPermissionError
 
-ACCEPTANCE = {"T-A-v2": "gate/acceptance.py"}
+ACCEPTANCE = {"T-A-v2": "gate/acceptance.py", "T-C-v1": "gate/acceptance.py"}
 
 
 class Execution:
     """Deterministic execution surface: unit checks + (fake) robot execution."""
 
-    def __init__(self, workspace):
+    def __init__(self, workspace, extra_env=None):
         self.workspace = Path(workspace)
         self.execution_s = 0.0
+        self.extra_env = dict(extra_env) if extra_env else None
 
     def run_checks(self):
         started = time.monotonic()
@@ -30,7 +31,8 @@ class Execution:
         env["PYTHONPATH"] = str(self.workspace) + os.pathsep + env.get("PYTHONPATH", "")
         proc = subprocess.run(
             [sys.executable, "-m", "pytest", "-q", "tests"],
-            cwd=str(self.workspace), capture_output=True, text=True, timeout=120, env=env)
+            cwd=str(self.workspace), capture_output=True, text=True, timeout=120,
+            env={**env, **(self.extra_env or {})})
         self.execution_s += time.monotonic() - started
         return {"returncode": proc.returncode,
                 "tail": (proc.stdout or "")[-2000:]}
@@ -39,7 +41,8 @@ class Execution:
         started = time.monotonic()
         argv = [sys.executable, "gate/sim.py"] + ([] if episode else ["--no-episode"])
         proc = subprocess.run(argv, cwd=str(self.workspace),
-                              capture_output=True, text=True, timeout=180)
+                              capture_output=True, text=True, timeout=180,
+                              env={**os.environ, **(self.extra_env or {})})
         self.execution_s += time.monotonic() - started
         return {"returncode": proc.returncode, "tail": (proc.stdout or "")[-2000:]}
 
@@ -50,7 +53,8 @@ class Execution:
         return path.read_text(encoding="utf-8")[-4000:]
 
 
-def run_one(manifest, arm, agent, template, out_dir, meta=None, protected=None):
+def run_one(manifest, arm, agent, template, out_dir, meta=None, protected=None,
+            execution_factory=None, extra_env=None):
     out = Path(out_dir)
     if out.exists():
         shutil.rmtree(out)
@@ -61,10 +65,13 @@ def run_one(manifest, arm, agent, template, out_dir, meta=None, protected=None):
     rec = Recorder(out)
     guard = HashGuard(ws, protected if protected is not None else manifest["protected"])
     guard.snapshot()
-    execution = Execution(ws)
+    execution = execution_factory(ws) if execution_factory else Execution(ws, extra_env)
+    if extra_env and hasattr(execution, "extra_env"):
+        execution.extra_env = dict(extra_env)
     toolbox = ToolBox(arm, manifest["arms"][arm]["tools"], ws, guard,
                       ws / "verdict.json", execution)
-    judge = Judge(ws, ACCEPTANCE.get(meta.get("task", "") if meta else "", "gate/acceptance.py"))
+    judge = Judge(ws, ACCEPTANCE.get(meta.get("task", "") if meta else "", "gate/acceptance.py"),
+                  env=extra_env)
     budget = manifest["budget"]
 
     rec.emit("run_start", arm=arm, task=manifest.get("pilot"), tools=sorted(toolbox.allowed))
