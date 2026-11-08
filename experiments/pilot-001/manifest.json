@@ -28,6 +28,18 @@
         "read_telemetry",
         "read_verification"
       ]
+    },
+    "B2": {
+      "tools": [
+        "read_file",
+        "write_file",
+        "run_checks",
+        "run_execution",
+        "read_telemetry",
+        "read_verification",
+        "read_diagnosis"
+      ],
+      "note": "B plus a structured diagnosis tool; used to test whether attribution, not verdict, adds value"
     }
   },
   "budget": {

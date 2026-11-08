@@ -24,6 +24,7 @@ TOOL_SPEC = {
     "run_execution": '{"tool": "run_execution"}',
     "read_telemetry": '{"tool": "read_telemetry"}',
     "read_verification": '{"tool": "read_verification"}',
+    "read_diagnosis": '{"tool": "read_diagnosis"}',
 }
 
 

@@ -1,0 +1,34 @@
+{
+  "arm": "B2",
+  "model": "deepseek-flash",
+  "n_per_task": 1,
+  "rows": [
+    {
+      "task": "T-A-v3",
+      "success": false,
+      "iterations": 6,
+      "tokens": 6568,
+      "evidence": 1,
+      "false_success": false,
+      "violation": null
+    },
+    {
+      "task": "T-B-v1",
+      "success": false,
+      "iterations": 6,
+      "tokens": 6097,
+      "evidence": 1,
+      "false_success": false,
+      "violation": null
+    },
+    {
+      "task": "T-C-v1",
+      "success": true,
+      "iterations": 5,
+      "tokens": 8113,
+      "evidence": 1,
+      "false_success": false,
+      "violation": null
+    }
+  ]
+}
