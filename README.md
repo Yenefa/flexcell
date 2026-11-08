@@ -6,6 +6,12 @@ and [portable CPU reproduction](REPRODUCE.md#portable-cpu-simulation-plane-2026-
 **Official project name: Agentic Flexible Robotic Workcell**  
 Repository handle: `flexcell`
 
+> **定位：Self-Evolving Agentic Robotics（自进化智能机器人系统）。**
+> 研究对象是"Agent 如何开发、控制、验证并持续进化机器人"；FlexCell 是验证该愿景的**执行平台**，
+> ROS 2 / Gazebo / MoveIt 2 等是实现手段。能力阶梯 **L1 开发 → L2 运行 → L3 进化**，
+> 原则是 **Agent 定 WHAT、执行器定 HOW、独立验证定 WHETHER**。
+> 目标拆解：[docs/SELF_EVOLVING_AGENTIC_ROBOTICS.md](docs/SELF_EVOLVING_AGENTIC_ROBOTICS.md)。
+
 Use an existing Codex/Claude/WorkBuddy agent with the robot through the upstream
 [ROS-MCP quick start](docs/ROS_MCP.md): install, bridge, check, then give the agent a task.
 
