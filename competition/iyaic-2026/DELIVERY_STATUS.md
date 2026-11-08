@@ -24,6 +24,7 @@
 | Release attitude / level-release geometry + gate-refusal controls (#121, #122, #123) | merged `8a16a35`; offline + CI tests |
 | Recorder rosbag reconcile + LineWriter (#128, #130) | merged; `camera-data` green |
 | Harness/tooling honesty gates (#28, #29) | merged |
+| TransferBench U1/U2: composite interfaces + pure contracts (#134, `c04863c`) | merged; offline + CI green |
 
 > "Implemented" means the source is on `main` and the offline/CI suites pass. It is **not** a claim
 > of a fresh ROS/Gazebo physical acceptance for every path, and still less a success-rate claim.
