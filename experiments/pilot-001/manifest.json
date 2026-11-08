@@ -1,0 +1,62 @@
+{
+  "pilot": "PILOT-001",
+  "frozen_at": "2026-11-08",
+  "commit": "1a184b7b23aa60fb66914bc0283a4387c351515b",
+  "arms": {
+    "A": {
+      "tools": ["read_file", "write_file", "run_checks"]
+    },
+    "C": {
+      "tools": [
+        "read_file",
+        "write_file",
+        "run_checks",
+        "run_execution",
+        "read_telemetry"
+      ]
+    },
+    "B": {
+      "tools": [
+        "read_file",
+        "write_file",
+        "run_checks",
+        "run_execution",
+        "read_telemetry",
+        "read_verification"
+      ]
+    }
+  },
+  "budget": {
+    "max_iterations": 4,
+    "max_tokens": 20000,
+    "agent_wall_clock_s": 600,
+    "execution_wall_clock_s": 900
+  },
+  "protected": [
+    "gate/acceptance.py",
+    "gate/thresholds.json",
+    "gate/sim.py",
+    "tests/test_app.py"
+  ],
+  "tasks": {
+    "T-A": {
+      "kind": "parameter",
+      "description": "set demo_verify_tolerance_m 0.06 -> 0.05 and keep recovery_once passing"
+    },
+    "T-B": {
+      "kind": "composite",
+      "description": "add two-stage A->zone_1, B->zone_2 chain"
+    },
+    "T-C": {
+      "kind": "repair",
+      "description": "fix an injected coordinate/sign defect"
+    }
+  },
+  "fixtures": [
+    "normal_pass",
+    "task_fail",
+    "false_success",
+    "protected_changed",
+    "missing_evidence"
+  ]
+}

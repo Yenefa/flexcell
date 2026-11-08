@@ -136,6 +136,12 @@ jobs:
           name: native-archive-status
           path: /tmp/native-archive-report.json
 
+      - name: pilot-001 P1.0 measurement self-test
+        shell: bash
+        run: |
+          python3 -m pytest experiments/pilot-001/tests -q
+          python3 experiments/pilot-001/run_pilot.py --out /tmp/pilot001
+
       - name: colcon test (all suites, 0 failures required)
         shell: bash
         run: |
