@@ -47,6 +47,21 @@ No runtime. Large. Decide between a separate evidence PR and a frozen external p
 `docs/TRANSFER_BENCHMARK.md`, `COMPOSITE_TASKS.md`, `PRE_BATCH_CHECKPOINT.md`, `QUALIFICATION_*.md`,
 `DIRECT_GRASP_DIAGNOSTIC.md`, and the edits to `README.md` / `ROADMAP.md` / `EXPERIMENTS.md`.
 
+## Progress (2026-11-08)
+
+| Unit | State | Note |
+| --- | --- | --- |
+| U1 interfaces | **MERGED** | PR #134 -> `c04863c`; `RunComposite.action`, `CompositeStage.msg`, `ObjectPosition.msg`; `ci` + `trusted-simulation` green |
+| U2 pure contracts | **MERGED** | same PR; 6 pure modules + 5 offline test files (92 tests locally) |
+| U4 harness | **BLOCKED on U6** | trial import gave 183 pass / **17 fail**, all reading `setup/acceptance/*` evidence; tooling and evidence must land together |
+| U3 runtime | not started | needs ROS/Gazebo window + new fingerprint |
+| U5 bounded runner | not started | depends on U4 |
+| U6 evidence (1805 files) | not started | separate decision: evidence PR vs frozen external pointer |
+| U0 docs | partial | this plan + competition status only |
+
+Excluded from U2 on purpose: `test_composite_resume_audit.py` (needs `setup/129_*`, i.e. U4).
+Server-integration tests (`test_composite_server`, `test_place_dependency`, `test_controller_transport`) stay in U3.
+
 ## Recommended order
 1. U1 -> U2 -> U3 (runtime chain, one unit per PR, CI + ROS/Gazebo, new fingerprint).
 2. U4 -> U5 (tooling, can run in parallel with the runtime chain).
