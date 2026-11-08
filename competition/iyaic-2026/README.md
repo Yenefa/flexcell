@@ -1,7 +1,7 @@
 # IYAIC 2026 — competition packaging
 
 **Event:** IYAIC 2026, Henan division, AI & Robotics Innovation (Creative group).
-Registration 2026-11-13; division contest 2026-11-21–22.
+Registration **2026-10-01 — 2026-11-13** (system locks after submit); division contest **2026-11-21 — 2026-11-22**. Checked against the official notice: [IYAIC_HENAN_DATES_20261108.md](IYAIC_HENAN_DATES_20261108.md).
 **Long-term positioning:** Agentic Flexible Robotic Workcell (this repository).
 
 This directory is **competition packaging only**. It does not add a second runtime, does not
