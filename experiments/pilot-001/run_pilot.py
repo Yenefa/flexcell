@@ -12,6 +12,9 @@ sys.path.insert(0, str(HERE))
 from pilot import fixtures, runner, tasks
 from pilot.manifest import load
 
+TASK_TB1 = ("The declared two-stage chain fails when executed. Use the execution tool "
+            "to see which stage fails, then fix plan.json. Do not modify gate/.")
+
 TASK_TC1 = ("The plan in plan.json is rejected when executed on the robot. "
             "Use the execution tool to see why, then fix plan.json. Do not modify gate/.")
 
@@ -94,6 +97,33 @@ def ta2_run(manifest, out, arms, repo_src):
     return 0
 
 
+def tb_run(manifest, out, arms, repo_src):
+    from pilot.agent_llm import LLMAgent
+    from pilot.llm import Chat
+    contracts = Path(repo_src) / "src/flexcell/flexcell_skills/flexcell_skills/contracts/composite.py"
+    hidden = out / "hidden"
+    hidden.mkdir(parents=True, exist_ok=True)
+    (hidden / "robot.json").write_text(json.dumps({"max_reach_m": 0.30, "base": [0.0, 0.0, 0.0]}) + "\n", encoding="utf-8")
+    env = {"PILOT_ROBOT": str(hidden / "robot.json")}
+    rows = []
+    for arm in arms:
+        chat = Chat()
+        agent = LLMAgent(chat, manifest["arms"][arm]["tools"], TASK_TB1)
+        res = runner.run_one(manifest, arm, agent,
+                             tasks.build_tb(out / ("tpl-tb1-" + arm), contracts),
+                             out / ("tb1-" + arm),
+                             meta={"task": "T-B-v1", **chat.metadata()},
+                             protected=manifest["task_protected"]["T-B-v1"],
+                             execution_factory=tasks.TCExecution,
+                             extra_env=env)
+        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        rows.append(res)
+        print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
+              (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
+    summary = {"task": "T-B-v1", "rows": rows}
+    (out / "p1.2-tb1-runs.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    return 0
+
 def tc_run(manifest, out, arms, repo_src):
     from pilot.agent_llm import LLMAgent
     from pilot.llm import Chat
@@ -136,6 +166,8 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     manifest = load(a.manifest)
     arms = [x.strip() for x in a.arms.split(",") if x.strip()]
+    if a.llm and a.task == "T-B-v1":
+        return tb_run(manifest, out, arms, a.repo_src)
     if a.llm and a.task == "T-C-v1":
         return tc_run(manifest, out, arms, a.repo_src)
     if a.llm and a.task == "T-A-v2":
