@@ -11,7 +11,8 @@ import argparse, os, sys, zipfile
 REQUIRED = ["项目创意计划书.md", "创意组_AgenticFlex_展示PPT.pptx"]
 INCLUDE_DIRS = ["evidence"]
 INCLUDE_FILES = ["项目创意计划书.md", "创意组_AgenticFlex_展示PPT.pptx", "PPT大纲.md",
-                 "演示脚本.md", "答辩逐字稿.md", "提交清单.md", "README.md"]
+                 "演示脚本.md", "答辩逐字稿.md", "现场操作卡.md", "提交清单.md",
+                 "README.md", "RELEASE_NOTES.md"]
 
 def main():
     ap = argparse.ArgumentParser()
