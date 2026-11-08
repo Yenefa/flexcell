@@ -29,5 +29,22 @@ python3 setup/acceptance/e021_followup_20261109/router_replay.py
 - `physical_acceptance` 仍 **BLOCKED**（无真实机器人）；
 - `initial_world_state`：60/60 历史 episode 均为 `null`（协议缺陷，不可补造）→ B1-B 只做前瞻要求。
 
-## B1-B ⏳ 前瞻记录
-后续新运行必须记录 `initial_world_state`（canonical + sha256）；尚未实现。
+## B1-B ✅ 前瞻记录（2026-11-09）
+
+修复了两个真实缺陷：
+1. `initial_world_state` 取 `steps[0]`，而首步是 bootstrap（world 为 null）→ 恒为 null；改为取**第一个非空** canonical；
+2. `to_dict()` 可能在首步就被调用并冻结（`_frozen`），导致即使后续 steps 有 world 也永远读到 null；改为在每次 `to_dict` 时用当前 steps 重算该字段。
+
+验证：一次真实 Gazebo 运行（`--case normal --skill-backend legacy`）的新 episode：
+
+| 项 | 值 |
+| --- | --- |
+| run status | PASS / OUTCOME_SUCCEEDED |
+| steps | 4 |
+| initial_world_state | 1902 chars |
+| sha256 | `fa084018…d2cd33a5` |
+
+```bash
+python3 setup/acceptance/e021_followup_20261109/b1b/b1b_verify.py
+```
+

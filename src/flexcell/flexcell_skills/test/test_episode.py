@@ -224,5 +224,47 @@ class TestEpisodeRecordReplay(unittest.TestCase):
         self.assertIsInstance(env_snapshot(), dict)
 
 
+    def test_initial_world_state_skips_bootstrap_step(self):
+        """A pre-observe bootstrap step has no world; the episode must record
+        the first canonical state instead of None."""
+        policy = FSMPolicy()
+        rec = EpisodeRecorder('week1_demo_v1', 'run-bootstrap', policy.name,
+                              policy.version)
+        goal = _goal(('target_box_a', 'zone_1'))
+        cons = _constraints()
+        rec.begin_step(None, goal, cons, [])
+        rec.record_decision(policy.decide(None, goal, cons, []), 0.0)
+        rec.record_executor_result(outcome=0, error_code=0, detail='observe',
+                                   evidence_id='e1')
+        canonical = serialize_envelope(_world_state())
+        rec.begin_step(canonical, goal, cons, [])
+        rec.record_decision(policy.decide(_world_state(), goal, cons, []), 0.0)
+        rec.record_executor_result(outcome=0, error_code=0, detail='pick',
+                                   evidence_id='e2')
+        self.assertEqual(rec.to_dict()['initial_world_state'], canonical)
+
+
+    def test_initial_world_state_survives_early_finalize(self):
+        """to_dict() can run before the first observe (bootstrap freeze);
+        the recorded initial state must follow the steps added later."""
+        policy = FSMPolicy()
+        rec = EpisodeRecorder('week1_demo_v1', 'run-early', policy.name,
+                              policy.version)
+        goal = _goal(('target_box_a', 'zone_1'))
+        cons = _constraints()
+        rec.begin_step(None, goal, cons, [])
+        rec.record_decision(policy.decide(None, goal, cons, []), 0.0)
+        rec.record_executor_result(outcome=0, error_code=0, detail='observe',
+                                   evidence_id='e1')
+        self.assertIsNone(rec.to_dict()['initial_world_state'])
+        canonical = serialize_envelope(_world_state())
+        rec.begin_step(canonical, goal, cons, [])
+        rec.record_decision(policy.decide(_world_state(), goal, cons, []), 0.0)
+        rec.record_executor_result(outcome=0, error_code=0, detail='pick',
+                                   evidence_id='e2')
+        self.assertEqual(rec.to_dict()['initial_world_state'], canonical)
+
+
 if __name__ == '__main__':
     unittest.main()
+

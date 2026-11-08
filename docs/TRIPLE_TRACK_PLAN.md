@@ -36,7 +36,8 @@
 **Milestone**
 - B0 ✅ E-021 恢复与验证：`verify_recovery`=VERIFIED、`selftest`=6/6、`decision_audit`=CONSISTENT（2026-11-09 复跑，日志见 `setup/acceptance/e021_followup_20261109/`）。
 - B1 ✅ E-021 后续资格验证（logic-level）：router 回放 **315/315 一致**（`setup/acceptance/e021_followup_20261109/`）；model replay 与 physical acceptance 仍 BLOCKED。
-- B2 ⏳ 混合路由实验（当前端点）与 FSM 对照；B1-B（前瞻 initial_world_state）待实现。
+- B1-B ✅ 新 episode 记录 `initial_world_state`（修复 bootstrap/提前冻结两个缺陷；真实运行验证 sha256 `fa084018…`）。
+- B2 ⏳ 混合路由实验（当前端点）与 FSM 对照。
 - B3 ⏳ 置信度校准与 τ 扫描扩展。
 
 **Task Queue**
@@ -57,7 +58,7 @@
 
 **Blocker**：原始本地模型权重不可得（远程 paid 提案的权重身份不可审计）；无真实机器人 → `physical_acceptance` 不可完成。
 
-**Next Action**：实现 B1-B（新运行记录 `initial_world_state` 并回放校验），再准备 B2 协议。
+**Next Action**：起草 B2 协议（当前端点 hybrid vs FSM，冻结指标与预算），然后执行。
 
 ---
 
