@@ -64,6 +64,7 @@ class GazeboTaskExecution:
         if run_dir:
             gazebo.export(run_dir, dest)
         summary = gazebo.collect(dest).get("summary", {})
+        summary["limits"] = {"max_reach_m": 0.30, "rule": "reach = hypot(x, y) must be strictly below max_reach_m"}
         (self.workspace / "telemetry").mkdir(exist_ok=True)
         (self.workspace / "telemetry" / "execution.log").write_text(
             json.dumps(summary, indent=2) + "\n", encoding="utf-8")
