@@ -16,7 +16,7 @@
 
 **Task Queue**
 1. T-G3 重复 2 次（补 n=3）。
-2. 组合类真实任务（composite / dual_object）设计与探测。
+2. ~~组合类真实任务探测~~ → **BLOCKED**（`dual_object` 的 place-pose 不产生失败；见 `runs/p1.4-dual-probe-20261109/`）。
 3. 合成层与真实层交叉验证（同任务族两层都跑）。
 
 **Acceptance Gates**
@@ -85,7 +85,7 @@
 
 **Blocker**：C3 需要先冻结协议；MTC 运行成本较高。
 
-**Next Action**：C4 设计（扩 n 或换场景；先预注册），并保持 MTC 资格回归。
+**Next Action**：按 `docs/C4_PREREGISTRATION.md` 执行 dual_object FSM vs MTC（6 次）。
 
 ---
 
