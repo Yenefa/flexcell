@@ -30,6 +30,25 @@ Camera path detail: 442 frames in `frames.jsonl`, 296 written live (209 valid), 
 The slow software renderer drops more live camera frames than CI does, so this is a stronger
 load test of the rosbag-reconcile fix (#128/#130) than the CI camera-data runs.
 
+
+## Core five-task window (same host, same source)
+
+`scripts/sim_window.py --manifest infra/core-window.json --backend velocity_servo --skill-backend legacy`
+on current `main` (`a020f23`) returned **`FUNCTIONAL_WINDOW_PASS`**:
+
+| Trial | Case | Result | Final error |
+| --- | --- | --- | --- |
+| 01 | normal / target_box_a | PASS | 5.48 mm |
+| 02 | normal / target_box_b | PASS | 4.35 mm |
+| 03 | dual_object / target_box_a | PASS | (dual-object verify) |
+| 04 | recovery_once / target_box_a | PASS | 9.32 mm |
+| 05 | budget_exhaustion / target_box_a | EXPECTED_FAILURE | n/a |
+
+- `window_id` `5e683f14557f4283a27e0e7896437e77`; declaration `49443988…af0eb`;
+  every trial reports runtime fingerprint `bccc9338…f96501`.
+- This is one bounded functional window (n=1), not a success rate and not the
+  n>=50 / M3 qualification.
+
 ## What this unlocks
 - U3 (composite runtime integration) can now be rebased and exercised with a real ROS/Gazebo
   window **on this machine**, with a new fingerprint, instead of waiting for an external host.
