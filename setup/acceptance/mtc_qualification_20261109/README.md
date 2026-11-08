@@ -1,22 +1,19 @@
-# MTC treatment-arm qualification — 2026-11-09
+# MTC treatment-arm qualification — 2026-11-09（n=3）
 
-ADR-003 的 treatment arm（MTC orchestration，同一 skill seam 之下）在**当前 main** 上的一次真实 Gazebo 运行。
+ADR-003 的 treatment arm（MTC orchestration，同一 skill seam 之下）在**当前 main** 上的 3 次真实 Gazebo 运行。
 
 ```bash
 python3 setup/acceptance/mtc_qualification_20261109/verify.py
 ```
 
-## 结果
-| 项 | 值 |
-| --- | --- |
-| status | **PASS** |
-| skill_backend | `mtc`（`backend=velocity_servo`） |
-| task | `OUTCOME_SUCCEEDED / ERR_NONE` |
-| trace | `PICK_A(attempt=1):OK → PLACE_A:OK → VERIFY_A(attempt=1):OK` |
-| runtime_fingerprint | `33b420d1…1ce116f52` |
-| evidence_id | `pick_place_v1-8cff3db5` |
+| run | status | outcome | fingerprint |
+| --- | --- | --- | --- |
+| `result.json` | PASS | OUTCOME_SUCCEEDED | `33b420d1…` |
+| `r2/result.json` | PASS | OUTCOME_SUCCEEDED | `33b420d1…` |
+| `r3/result.json` | PASS | OUTCOME_SUCCEEDED | `33b420d1…` |
 
 ## 意义与边界
 - 历史上（2026-10-30）MTC 首轮两次均被拒（`mtc_first_attempt_20261030`、`mtc_main_failure_20261030`）；
-- 本次是**一次**通过，**不等于**对照实验完成；n=1，且未与 FSM 在同条件下做统计比较；
-- 不能据此宣称 MTC 更优；只证明"资格门可以被重新打开"。
+- 本次 **3/3 通过**，MTC 资格门重新打开；
+- 但**尚未**与 FSM 在同条件下对照（C3），**不得**宣称 MTC 更优；
+- 三次同一 fingerprint 说明运行条件一致。
