@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "backend": "velocity_servo",
+  "skill_backend": "legacy",
+  "physical_tasks_dispatched": 1,
+  "qualification": "FUNCTIONAL_SMOKE_ONLY",
+  "case": "normal",
+  "object": "target_box_a",
+  "out": "/tmp/b2c-fsm-a/run-0ce088b089f4",
+  "decision_policy": "fsm",
+  "hybrid_threshold": null,
+  "resume_completed": false,
+  "model_env": {
+    "FLEXCELL_LLM_ENDPOINT": null,
+    "FLEXCELL_LLM_MODEL": null,
+    "FLEXCELL_LLM_BACKEND": null,
+    "FLEXCELL_JEV_ENDPOINT": null,
+    "FLEXCELL_JEV_MODEL": null,
+    "FLEXCELL_JEV_BACKEND": null
+  },
+  "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+  "semantic_config_sha256": "e6bf42c91f4c71beb3ba60beaeae3e3c99799f1aedf391fd4a490cd02d70556f",
+  "runtime_fingerprint": "7808f64ebbdd4200425d1d635f30235c5099031a5f062836fcb21e8bcc9f46d1",
+  "task_start_monotonic_ns": 5965048734144,
+  "goal_pose": [
+    0.12,
+    -0.15,
+    0.0175
+  ],
+  "task_end_monotonic_ns": 5980203089381,
+  "task": {
+    "action": "task",
+    "goal_uuid": "db6df2f65e594ae0b79f54a42edac82e",
+    "outcome": "OUTCOME_SUCCEEDED",
+    "outcome_val": 0,
+    "error_code": "ERR_NONE",
+    "detail": "task done: all assignments verified",
+    "evidence_id": "pick_place_v1-951395f0",
+    "wall_seconds": 14.542,
+    "fsm_trace": [
+      "PICK_A(attempt=1):OK",
+      "PLACE_A:OK",
+      "VERIFY_A(attempt=1):OK"
+    ],
+    "object_at_place": true,
+    "final_position_error_m": 0.00991569112884238,
+    "skip_verify": false
+  },
+  "actual_routing": {
+    "decisions": 4,
+    "sources": {
+      "fsm": 4
+    },
+    "leaves": {
+      "fsm": 4
+    },
+    "fallbacks": 0,
+    "models": [],
+    "backends": [],
+    "fast_calls": 0,
+    "slow_calls": 0,
+    "model_calls": 0,
+    "calls_without_identity": 0
+  },
+  "model_calls": 0,
+  "fast_calls": 0,
+  "slow_calls": 0,
+  "expectation_met": true,
+  "recorder_exit": 0,
+  "owned_launch_exit": 0,
+  "unavailable_numeric_fields": {}
+}

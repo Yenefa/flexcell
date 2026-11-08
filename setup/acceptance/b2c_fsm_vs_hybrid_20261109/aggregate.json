@@ -1,0 +1,130 @@
+{
+  "protocol": "docs/B2C_PROTOCOL.md",
+  "n_per_arm": 3,
+  "fsm": {
+    "success": 3,
+    "wall": [
+      14.542,
+      14.133,
+      13.98
+    ],
+    "mean_wall": 14.218333333333334
+  },
+  "hybrid": {
+    "success": 3,
+    "wall": [
+      18.097,
+      17.726,
+      17.134
+    ],
+    "mean_wall": 17.652333333333335,
+    "fast_decisions": 9,
+    "routed": 9,
+    "escalations": 0,
+    "fast_latency_ms": [
+      1019,
+      1240,
+      1506,
+      1262,
+      1210,
+      1169,
+      813,
+      1170,
+      1177
+    ]
+  },
+  "delta_wall_s": 3.434000000000001,
+  "rows": [
+    {
+      "run": "fsm-a",
+      "arm": "fsm",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall": 14.542,
+      "fingerprint": "7808f64ebbdd4200425d1d635f30235c5099031a5f062836fcb21e8bcc9f46d1",
+      "routed": 0,
+      "fast_decisions": 0,
+      "escalated": 0,
+      "fast_latency_ms": [],
+      "sha": "384166eb240d26e72d08388de416ccc4523f29f54a10162b81569cd91ebccc28"
+    },
+    {
+      "run": "hybrid-b",
+      "arm": "hybrid",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall": 18.097,
+      "fingerprint": "fdc81ed9f4d43dd30ebe5c8bb4f597d9427128b8669081d8337a5b9180ad5a7d",
+      "routed": 3,
+      "fast_decisions": 3,
+      "escalated": 0,
+      "fast_latency_ms": [
+        1019,
+        1240,
+        1506
+      ],
+      "sha": "01f8c6837c745f844460ca8bce473294bf14be46ddf19cce1b8a8e054f1c944f"
+    },
+    {
+      "run": "hybrid-c",
+      "arm": "hybrid",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall": 17.726,
+      "fingerprint": "fdc81ed9f4d43dd30ebe5c8bb4f597d9427128b8669081d8337a5b9180ad5a7d",
+      "routed": 3,
+      "fast_decisions": 3,
+      "escalated": 0,
+      "fast_latency_ms": [
+        1262,
+        1210,
+        1169
+      ],
+      "sha": "a8796cfa6ab93a0bd7ee0ea836534dd9b094eea5f893e7c2de54ebb7ebc11f0b"
+    },
+    {
+      "run": "fsm-d",
+      "arm": "fsm",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall": 14.133,
+      "fingerprint": "7808f64ebbdd4200425d1d635f30235c5099031a5f062836fcb21e8bcc9f46d1",
+      "routed": 0,
+      "fast_decisions": 0,
+      "escalated": 0,
+      "fast_latency_ms": [],
+      "sha": "b1e454022383ac3d411121a835bfa649a1ba939799893fd6232185f5621a1647"
+    },
+    {
+      "run": "fsm-e",
+      "arm": "fsm",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall": 13.98,
+      "fingerprint": "7808f64ebbdd4200425d1d635f30235c5099031a5f062836fcb21e8bcc9f46d1",
+      "routed": 0,
+      "fast_decisions": 0,
+      "escalated": 0,
+      "fast_latency_ms": [],
+      "sha": "c9c8c993492238d8b4ad73dd00084c6415ab30786d9311f15ca0a5fee3bdebe3"
+    },
+    {
+      "run": "hybrid-f",
+      "arm": "hybrid",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall": 17.134,
+      "fingerprint": "fdc81ed9f4d43dd30ebe5c8bb4f597d9427128b8669081d8337a5b9180ad5a7d",
+      "routed": 3,
+      "fast_decisions": 3,
+      "escalated": 0,
+      "fast_latency_ms": [
+        813,
+        1170,
+        1177
+      ],
+      "sha": "e4534474f4b7a6f85f12a9a801b27e806d6924a9226eeaed4c4b2248f2098d63"
+    }
+  ],
+  "note": "routed counts post-bootstrap decisions only (bootstrap has no world state)"
+}
