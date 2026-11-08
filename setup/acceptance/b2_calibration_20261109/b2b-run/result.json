@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "backend": "velocity_servo",
+  "skill_backend": "legacy",
+  "physical_tasks_dispatched": 1,
+  "qualification": "FUNCTIONAL_SMOKE_ONLY",
+  "case": "normal",
+  "object": "target_box_a",
+  "out": "/tmp/b2b/run-876fc9e38a61",
+  "decision_policy": "hybrid",
+  "hybrid_threshold": 0.85,
+  "resume_completed": false,
+  "model_env": {
+    "FLEXCELL_LLM_ENDPOINT": null,
+    "FLEXCELL_LLM_MODEL": null,
+    "FLEXCELL_LLM_BACKEND": null,
+    "FLEXCELL_JEV_ENDPOINT": "https://api.deepseek.com/v1/chat/completions",
+    "FLEXCELL_JEV_MODEL": "deepseek-flash",
+    "FLEXCELL_JEV_BACKEND": null
+  },
+  "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+  "semantic_config_sha256": "25b248a95eced67541b33aeb44a1116074c4c23b99e5d429774ad88f405b6fac",
+  "runtime_fingerprint": "fdc81ed9f4d43dd30ebe5c8bb4f597d9427128b8669081d8337a5b9180ad5a7d",
+  "task_start_monotonic_ns": 5503306619897,
+  "goal_pose": [
+    0.12,
+    -0.15,
+    0.0175
+  ],
+  "task_end_monotonic_ns": 5522212551209,
+  "task": {
+    "action": "task",
+    "goal_uuid": "edc57711abe04c28957c07a065db1af0",
+    "outcome": "OUTCOME_SUCCEEDED",
+    "outcome_val": 0,
+    "error_code": "ERR_NONE",
+    "detail": "task done: all assignments verified",
+    "evidence_id": "pick_place_v1-901c3045",
+    "wall_seconds": 18.372,
+    "fsm_trace": [
+      "PICK_A(attempt=1):OK",
+      "PLACE_A:OK",
+      "VERIFY_A(attempt=1):OK"
+    ],
+    "object_at_place": true,
+    "final_position_error_m": 0.00406089096299061,
+    "skip_verify": false
+  },
+  "actual_routing": {
+    "decisions": 4,
+    "sources": {
+      "fsm": 1,
+      "jev": 3
+    },
+    "leaves": {
+      "fsm": 1,
+      "jev": 3
+    },
+    "fallbacks": 1,
+    "models": [
+      "deepseek-flash"
+    ],
+    "backends": [
+      "local-reproduction"
+    ],
+    "fast_calls": 3,
+    "slow_calls": 0,
+    "model_calls": 3,
+    "calls_without_identity": 0
+  },
+  "model_calls": 3,
+  "fast_calls": 3,
+  "slow_calls": 0,
+  "expectation_met": true,
+  "recorder_exit": 0,
+  "owned_launch_exit": 0,
+  "unavailable_numeric_fields": {}
+}
