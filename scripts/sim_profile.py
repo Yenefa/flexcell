@@ -53,7 +53,7 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
             joint_hold_sim_s=0., physics_step_s=None, *, contact_trace=False, release_clearance_m=None,
             qualification_no_recovery=False, synchronous_step_logs=False, resume_completed_objects=False,
             decision_policy='fsm', hybrid_threshold=None, scene=None, perception_only=False,
-            level_release_tolerance_deg=None):
+            level_release_tolerance_deg=None, zone_2_pose=None):
     if backend not in BACKENDS or skill_backend not in ('legacy', 'mtc'):
         raise ValueError('unsupported backend')
     if level_release_tolerance_deg is not None:
@@ -112,6 +112,12 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
     for name in ('pick_server', 'place_server'):
         config[name]['ros__parameters']['skill_backend'] = skill_backend
         config[name]['ros__parameters']['record_execution_commands'] = bool(camera)
+    if zone_2_pose is not None:
+        pose = tuple(float(v) for v in zone_2_pose)
+        if len(pose) != 3 or not all(math.isfinite(v) for v in pose):
+            raise ValueError('zone_2_pose must be three finite numbers')
+        params = config['task_fsm_server']['ros__parameters']
+        params['zone_2_x'], params['zone_2_y'], params['zone_2_z'] = pose
     config['task_fsm_server']['ros__parameters']['decision_policy'] = decision_policy
     if decision_policy == 'hybrid':
         config['task_fsm_server']['ros__parameters']['hybrid_threshold'] = float(hybrid_threshold)
