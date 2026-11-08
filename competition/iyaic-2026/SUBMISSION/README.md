@@ -12,6 +12,8 @@
 | `现场操作卡.md` | 一键复跑命令 + 预期输出 + 故障兜底 | 可用 |
 | `make_release.py` | **一键出包**：填占位→跑自检→打包 zip | 可用 |
 | `team.example.json` | 队伍信息样例（填好后 --team 传入） | 样例 |
+| `邮件提交正文.md` | 发给 iyaicmsczh@163.com 的邮件模板（主题/正文/附件命名） | 可用 |
+| `RELEASE_NOTES.md` | 参赛包版本说明与自检结果 | 可用 |
 | `证据台账 evidence/EVIDENCE.md` | 构建/smoke/窗口/composite/CI 可复跑记录 | 可用 |
 | `evidence/demo_sim.mp4` | **真实仿真演示视频**（29.6s，960×720，由相机帧合成） | 可用 |
 | `提交清单.md` | 命名规则 + 邮箱 + 评分自检 + 合规 | 待逐项勾选 |
