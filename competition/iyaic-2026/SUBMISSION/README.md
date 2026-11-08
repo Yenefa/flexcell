@@ -7,7 +7,8 @@
 | `演示脚本.md` | 现场复跑 + 录屏分镜 + 兜底 | 可用 |
 | `答辩逐字稿.md` | ≤8 分钟逐字稿 + 预判问答 | 可用 |
 | `package.py` | 按官方命名规则打包提交 zip | 可用 |
-| `证据台账 evidence/EVIDENCE.md` | 构建/smoke/窗口/composite/CI 可复跑记录 | 可用（需补录屏） |
+| `证据台账 evidence/EVIDENCE.md` | 构建/smoke/窗口/composite/CI 可复跑记录 | 可用 |
+| `evidence/demo_sim.mp4` | **真实仿真演示视频**（29.6s，960×720，由相机帧合成） | 可用 |
 | `提交清单.md` | 命名规则 + 邮箱 + 评分自检 + 合规 | 待逐项勾选 |
 
 ## 待办（提交前）
