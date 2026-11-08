@@ -1,0 +1,57 @@
+{
+  "arm": "C",
+  "meta": {
+    "task": "T-A-v3",
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "key_fingerprint": "84edc02f"
+  },
+  "success": false,
+  "first_pass": false,
+  "iterations": 6,
+  "claim_success": false,
+  "false_success": false,
+  "violation": null,
+  "cost": {
+    "tokens": 7228,
+    "agent_s": 12.25,
+    "execution_s": 0.672
+  },
+  "evidence": {
+    "items": {
+      "verdict.json": {
+        "present": true,
+        "bytes": 283,
+        "sha256": "b2f81cfa5e3e3e89ac5981123e23af2448e5963d829d8d55501bfc9d93604627"
+      },
+      "telemetry/execution.log": {
+        "present": true,
+        "bytes": 205,
+        "sha256": "b9a695cd3596437d4471d82887d2b743ccd0e3dfe14df336dbcf5811600bbc2b"
+      },
+      "episode.json": {
+        "present": true,
+        "bytes": 33,
+        "sha256": "d2efd2dc5494eb27fe613386feae9e383dda7241e712f27f29dc543e9a27c83f"
+      },
+      "fingerprint.json": {
+        "present": true,
+        "bytes": 258,
+        "sha256": "17ffc2698be07792a37a3b3fd4afdd9cfe9900d05a9046233166ce3c4071c93e"
+      }
+    },
+    "present": 4,
+    "required": 4,
+    "completeness": 1.0
+  },
+  "verdict": {
+    "passed": false,
+    "returncode": 1,
+    "stdout": "{\"passed\": false, \"error_code\": 73, \"detail\": \"unknown motion profile: safe\", \"stage\": \"execution\"}\n",
+    "stderr": "",
+    "error_code": 73,
+    "detail": "unknown motion profile: safe",
+    "stage": "execution"
+  },
+  "run_dir": "C:\\Users\\fuker\\Desktop\\workspace\\project-033-flexcell\\ci-public-window\\evidence\\pilot001-ta3-r2\\ta3-C"
+}

@@ -12,6 +12,9 @@ sys.path.insert(0, str(HERE))
 from pilot import fixtures, runner, tasks
 from pilot.manifest import load
 
+TASK_TA3 = ("The plan is rejected when executed on the robot. Use the execution tool "
+             "to see why, then fix the parameter in plan.json. Do not modify gate/.")
+
 TASK_TB1 = ("The declared two-stage chain fails when executed. Use the execution tool "
             "to see which stage fails, then fix plan.json. Do not modify gate/.")
 
@@ -97,6 +100,36 @@ def ta2_run(manifest, out, arms, repo_src):
     return 0
 
 
+def ta3_run(manifest, out, arms, repo_src):
+    from pilot.agent_llm import LLMAgent
+    from pilot.llm import Chat
+    contracts = Path(repo_src) / "src/flexcell/flexcell_skills/flexcell_skills/contracts/composite.py"
+    hidden = out / "hidden"
+    hidden.mkdir(parents=True, exist_ok=True)
+    robot = {"max_reach_m": 0.30, "max_overshoot_mm": 5,
+             "profiles": {"standard": {"overshoot_mm": 2}, "slow": {"overshoot_mm": 1},
+                          "fast": {"overshoot_mm": 15}}}
+    (hidden / "robot.json").write_text(json.dumps(robot) + "\n", encoding="utf-8")
+    env = {"PILOT_ROBOT": str(hidden / "robot.json")}
+    rows = []
+    for arm in arms:
+        chat = Chat()
+        agent = LLMAgent(chat, manifest["arms"][arm]["tools"], TASK_TA3)
+        res = runner.run_one(manifest, arm, agent,
+                             tasks.build_ta3(out / ("tpl-ta3-" + arm), contracts),
+                             out / ("ta3-" + arm),
+                             meta={"task": "T-A-v3", **chat.metadata()},
+                             protected=manifest["task_protected"]["T-A-v3"],
+                             execution_factory=tasks.TCExecution,
+                             extra_env=env)
+        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        rows.append(res)
+        print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
+              (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
+    summary = {"task": "T-A-v3", "rows": rows}
+    (out / "p1.2-ta3-runs.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    return 0
+
 def tb_run(manifest, out, arms, repo_src):
     from pilot.agent_llm import LLMAgent
     from pilot.llm import Chat
@@ -166,6 +199,8 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     manifest = load(a.manifest)
     arms = [x.strip() for x in a.arms.split(",") if x.strip()]
+    if a.llm and a.task == "T-A-v3":
+        return ta3_run(manifest, out, arms, a.repo_src)
     if a.llm and a.task == "T-B-v1":
         return tb_run(manifest, out, arms, a.repo_src)
     if a.llm and a.task == "T-C-v1":

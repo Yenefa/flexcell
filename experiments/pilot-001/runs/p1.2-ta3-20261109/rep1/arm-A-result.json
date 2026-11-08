@@ -1,0 +1,57 @@
+{
+  "arm": "A",
+  "meta": {
+    "task": "T-A-v3",
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "key_fingerprint": "84edc02f"
+  },
+  "success": false,
+  "first_pass": false,
+  "iterations": 6,
+  "claim_success": false,
+  "false_success": false,
+  "violation": null,
+  "cost": {
+    "tokens": 10383,
+    "agent_s": 22.158,
+    "execution_s": 1.313
+  },
+  "evidence": {
+    "items": {
+      "verdict.json": {
+        "present": true,
+        "bytes": 289,
+        "sha256": "6b3bc6ea44f18a97ba124912e19d39133e974796d2d343c429c30f5dd23ed99c"
+      },
+      "telemetry/execution.log": {
+        "present": false,
+        "bytes": 0,
+        "sha256": null
+      },
+      "episode.json": {
+        "present": false,
+        "bytes": 0,
+        "sha256": null
+      },
+      "fingerprint.json": {
+        "present": true,
+        "bytes": 258,
+        "sha256": "48bf68f876ef1deceb391a35e6ff54f0be7fb6d0eefac9e61fdabd3c07de14f2"
+      }
+    },
+    "present": 2,
+    "required": 4,
+    "completeness": 0.5
+  },
+  "verdict": {
+    "passed": false,
+    "returncode": 1,
+    "stdout": "{\"passed\": false, \"error_code\": 73, \"detail\": \"unknown motion profile: careful\", \"stage\": \"execution\"}\n",
+    "stderr": "",
+    "error_code": 73,
+    "detail": "unknown motion profile: careful",
+    "stage": "execution"
+  },
+  "run_dir": "C:\\Users\\fuker\\Desktop\\workspace\\project-033-flexcell\\ci-public-window\\evidence\\pilot001-ta3-r1\\ta3-A"
+}

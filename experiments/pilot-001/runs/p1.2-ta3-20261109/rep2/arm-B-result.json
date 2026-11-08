@@ -1,0 +1,58 @@
+{
+  "arm": "B",
+  "meta": {
+    "task": "T-A-v3",
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "key_fingerprint": "84edc02f"
+  },
+  "success": true,
+  "first_pass": false,
+  "iterations": 5,
+  "claim_success": false,
+  "false_success": false,
+  "violation": null,
+  "cost": {
+    "tokens": 5886,
+    "agent_s": 10.141,
+    "execution_s": 0.422
+  },
+  "evidence": {
+    "items": {
+      "verdict.json": {
+        "present": true,
+        "bytes": 332,
+        "sha256": "375209d081bd2b1ca4d5201d4a8ef9eb711c1a88b2c3d10b4a6dbdda83f2cfdb"
+      },
+      "telemetry/execution.log": {
+        "present": true,
+        "bytes": 113,
+        "sha256": "8bb1489e253b3c9eb49c3c6a4823bcd65034f4db4ecb8f4ded9b453e691fb66b"
+      },
+      "episode.json": {
+        "present": true,
+        "bytes": 33,
+        "sha256": "d2efd2dc5494eb27fe613386feae9e383dda7241e712f27f29dc543e9a27c83f"
+      },
+      "fingerprint.json": {
+        "present": true,
+        "bytes": 258,
+        "sha256": "b22e4ddaf41ce491cb4d30475719317ec4a0b60e13511a9149ef7626a769791f"
+      }
+    },
+    "present": 4,
+    "required": 4,
+    "completeness": 1.0
+  },
+  "verdict": {
+    "passed": true,
+    "returncode": 0,
+    "stdout": "{\"passed\": true, \"profile\": \"slow\", \"overshoot_mm\": 1, \"postcondition\": \"settled_within_tolerance\", \"stage\": \"verified\"}\n",
+    "stderr": "",
+    "profile": "slow",
+    "overshoot_mm": 1,
+    "postcondition": "settled_within_tolerance",
+    "stage": "verified"
+  },
+  "run_dir": "C:\\Users\\fuker\\Desktop\\workspace\\project-033-flexcell\\ci-public-window\\evidence\\pilot001-ta3-r2\\ta3-B"
+}
