@@ -1,0 +1,125 @@
+{
+  "protocol": "docs/C3_FSM_VS_MTC_PROTOCOL.md",
+  "n_per_arm": 3,
+  "fsm": {
+    "success": 3,
+    "wall_seconds": [
+      14.671,
+      17.853,
+      14.588
+    ],
+    "mean_wall": 15.704
+  },
+  "mtc": {
+    "success": 3,
+    "wall_seconds": [
+      16.771,
+      16.6,
+      24.52
+    ],
+    "mean_wall": 19.297
+  },
+  "tokens": {
+    "fsm": 0,
+    "mtc": 0,
+    "note": "deterministic execution; no model calls"
+  },
+  "rows": [
+    {
+      "run": "legacy-a",
+      "arm": "fsm",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error": "ERR_NONE",
+      "wall": 14.671,
+      "trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK"
+      ],
+      "evidence": "pick_place_v1-1d3c5e38",
+      "fingerprint": "aa5ac4970b9e659a7123ec01099dd64a830e478f86f4f23f2a30731daea60238",
+      "sha": "4e86ae44b2322472e6a150164b99dac89bf4709a0387a5df946b356d1500d7cb"
+    },
+    {
+      "run": "legacy-d",
+      "arm": "fsm",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error": "ERR_NONE",
+      "wall": 17.853,
+      "trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK"
+      ],
+      "evidence": "pick_place_v1-6547260f",
+      "fingerprint": "aa5ac4970b9e659a7123ec01099dd64a830e478f86f4f23f2a30731daea60238",
+      "sha": "424b2c245b1c5549b9f0b235190227b0da0f5f086813928b44cfc0a4490b4bbd"
+    },
+    {
+      "run": "legacy-e",
+      "arm": "fsm",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error": "ERR_NONE",
+      "wall": 14.588,
+      "trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK"
+      ],
+      "evidence": "pick_place_v1-3ff4649b",
+      "fingerprint": "aa5ac4970b9e659a7123ec01099dd64a830e478f86f4f23f2a30731daea60238",
+      "sha": "59f8a9f53e80469c42b0f08b28d6d1b77d3e66d0f9ca00e72e55c5fb36cc2620"
+    },
+    {
+      "run": "mtc-b",
+      "arm": "mtc",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error": "ERR_NONE",
+      "wall": 16.771,
+      "trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK"
+      ],
+      "evidence": "pick_place_v1-de559810",
+      "fingerprint": "33b420d1698242958c69fea3112f71a86cf3b0d65e2109fa7aa6650c1a116f52",
+      "sha": "6209ce33296138baf696fcd7d8314066347716ca6a8c39f1c9f1507fa8b390e1"
+    },
+    {
+      "run": "mtc-c",
+      "arm": "mtc",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error": "ERR_NONE",
+      "wall": 16.6,
+      "trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK"
+      ],
+      "evidence": "pick_place_v1-22946a62",
+      "fingerprint": "33b420d1698242958c69fea3112f71a86cf3b0d65e2109fa7aa6650c1a116f52",
+      "sha": "3c804037f70fa23a1dc4fa76da2d75a4f07c99b085d97a27bf8a92a3e239254e"
+    },
+    {
+      "run": "mtc-f",
+      "arm": "mtc",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error": "ERR_NONE",
+      "wall": 24.52,
+      "trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK"
+      ],
+      "evidence": "pick_place_v1-1132f360",
+      "fingerprint": "33b420d1698242958c69fea3112f71a86cf3b0d65e2109fa7aa6650c1a116f52",
+      "sha": "5c29a0ff849d4fd304e07c4fe3644ef36ef026f8fdf4a5489da74e92d2c44c7b"
+    }
+  ]
+}
