@@ -186,3 +186,107 @@ def build_tc(target, contracts_src):
     }
     (target / "plan.json").write_text(json.dumps(plan, indent=2) + "\n", encoding="utf-8")
     return target
+
+TB_ACCEPTANCE = '''import json
+import os
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from composite_contract import CompositeError, prepare_plan
+
+plan = json.loads(Path("plan.json").read_text(encoding="utf-8"))
+robot = json.loads(Path(os.environ["PILOT_ROBOT"]).read_text(encoding="utf-8"))
+verdict = {"passed": False, "stage_results": []}
+try:
+    prepare_plan(plan)
+except CompositeError as exc:
+    verdict = {"passed": False, "error_code": exc.code, "detail": str(exc),
+               "stage": "contract", "stage_results": []}
+else:
+    for stage in plan["stages"]:
+        dest = stage["destination"]
+        reach = (dest[0] ** 2 + dest[1] ** 2) ** 0.5
+        ok = reach <= robot["max_reach_m"] + 1e-9
+        verdict["stage_results"].append({
+            "stage_id": stage["stage_id"],
+            "object_name": stage["object_name"],
+            "destination": dest,
+            "reach_m": round(reach, 4),
+            "postcondition": "object_at_destination" if ok else "destination_reachable",
+            "passed": ok,
+            "detail": None if ok else "unreachable: %.3f m > max_reach %.3f m" % (reach, robot["max_reach_m"]),
+        })
+    failed = [s for s in verdict["stage_results"] if not s["passed"]]
+    verdict["passed"] = not failed
+    verdict["failed_stage"] = failed[0]["stage_id"] if failed else None
+print(json.dumps(verdict))
+sys.exit(0 if verdict["passed"] else 1)
+'''
+
+TB_SIM = r'''import json
+import os
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+
+from composite_contract import CompositeError, prepare_plan
+
+plan = json.loads(Path("plan.json").read_text(encoding="utf-8"))
+robot = json.loads(Path(os.environ["PILOT_ROBOT"]).read_text(encoding="utf-8"))
+Path("telemetry").mkdir(exist_ok=True)
+with open("telemetry/execution.log", "a", encoding="utf-8") as log:
+    log.write("robot max_reach_m=%.3f\n" % robot["max_reach_m"])
+    try:
+        prepare_plan(plan)
+        log.write("contract: accepted\n")
+    except CompositeError as exc:
+        log.write("contract: REJECTED code=%s %s\n" % (exc.code, exc))
+        ok = False
+    else:
+        ok = True
+        for stage in plan["stages"]:
+            dest = stage["destination"]
+            reach = (dest[0] ** 2 + dest[1] ** 2) ** 0.5
+            log.write("stage %s object=%s destination=(%.3f, %.3f) reach=%.3f\n"
+                      % (stage["stage_id"], stage["object_name"], dest[0], dest[1], reach))
+            if reach > robot["max_reach_m"] + 1e-9:
+                ok = False
+                log.write("EXECUTION_ERROR code=71 stage %s unreachable: reach %.3f > max %.3f\n"
+                          % (stage["stage_id"], reach, robot["max_reach_m"]))
+                break
+            log.write("stage %s: moved and postcondition verified\n" % stage["stage_id"])
+Path("episode.json").write_text(json.dumps({"task": "T-B-v1", "ok": ok}) + "\n", encoding="utf-8")
+raise SystemExit(0 if ok else 1)
+'''
+
+
+def build_tb(target, contracts_src):
+    target = Path(target)
+    if target.exists():
+        shutil.rmtree(target)
+    (target / "gate").mkdir(parents=True)
+    (target / "task.md").write_text(
+        "# T-B v1 - composite two-stage task\n\n"
+        "The declared two-stage chain fails when executed. Fix plan.json so all\n"
+        "stage postconditions hold. gate/ is read-only.\n",
+        encoding="utf-8")
+    shutil.copyfile(contracts_src, target / "gate" / "composite_contract.py")
+    (target / "gate" / "acceptance.py").write_text(TB_ACCEPTANCE, encoding="utf-8")
+    (target / "gate" / "sim.py").write_text(TB_SIM, encoding="utf-8")
+    plan = {
+        "scenario_id": "pilot-t-b-v1",
+        "initial_objects": {"a": [0.22, 0.0, 0.0175], "b": [0.20, -0.18, 0.0175]},
+        "stages": [
+            {"stage_id": "s1", "object_name": "a", "destination": [0.18, 0.16, 0.0175]},
+            {"stage_id": "s2", "object_name": "b", "destination": [0.34, 0.0, 0.0175]},
+        ],
+        "final_empty_positions": [[0.22, 0.0, 0.0175], [0.20, -0.18, 0.0175]],
+        "position_tolerance_m": 0.02,
+        "clearance_m": 0.06,
+        "motion_profile_id": "default",
+    }
+    (target / "plan.json").write_text(json.dumps(plan, indent=2) + "\n", encoding="utf-8")
+    return target

@@ -158,3 +158,26 @@ def test_tc1_scripted_execution_fix_passes(manifest, tmp_path):
                          execution_factory=tasks.TCExecution, extra_env=env)
     assert res["success"]
     assert res["evidence"]["completeness"] == 1.0
+
+
+def test_tb1_initial_fails_at_second_stage(manifest, tmp_path):
+    env = _hidden_robot(tmp_path)
+    ws = tasks.build_tb(tmp_path / "ws", _contracts_src())
+    proc = subprocess.run([sys.executable, "gate/acceptance.py"], cwd=ws,
+                          capture_output=True, text=True, env={**os.environ, **env})
+    assert proc.returncode != 0
+    assert "\"failed_stage\": \"s2\"" in proc.stdout
+
+
+def test_tb1_scripted_fix_passes(manifest, tmp_path):
+    env = _hidden_robot(tmp_path)
+    contracts = _contracts_src()
+    plan = json.loads((tasks.build_tb(tmp_path / "tpl", contracts) / "plan.json").read_text())
+    plan["stages"][1]["destination"] = [0.15, 0.10, 0.0175]
+    agent = fixtures.ScriptedAgent([("write_file", ("plan.json", json.dumps(plan))),
+                                    ("run_execution", ())])
+    res = runner.run_one(manifest, "C", agent, tasks.build_tb(tmp_path / "tpl2", contracts),
+                         tmp_path / "run", meta={"task": "T-B-v1"},
+                         protected=manifest["task_protected"]["T-B-v1"],
+                         execution_factory=tasks.TCExecution, extra_env=env)
+    assert res["success"]

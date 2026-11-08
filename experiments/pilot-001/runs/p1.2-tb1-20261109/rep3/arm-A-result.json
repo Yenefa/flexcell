@@ -1,0 +1,83 @@
+{
+  "arm": "A",
+  "meta": {
+    "task": "T-B-v1",
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "key_fingerprint": "84edc02f"
+  },
+  "success": false,
+  "first_pass": false,
+  "iterations": 6,
+  "claim_success": false,
+  "false_success": false,
+  "violation": null,
+  "cost": {
+    "tokens": 8898,
+    "agent_s": 19.64,
+    "execution_s": 1.125
+  },
+  "evidence": {
+    "items": {
+      "verdict.json": {
+        "present": true,
+        "bytes": 1187,
+        "sha256": "91398d69a99dd11e1a98e85520949fd6e43a779f8e4ede8464a5917841d63331"
+      },
+      "telemetry/execution.log": {
+        "present": false,
+        "bytes": 0,
+        "sha256": null
+      },
+      "episode.json": {
+        "present": false,
+        "bytes": 0,
+        "sha256": null
+      },
+      "fingerprint.json": {
+        "present": true,
+        "bytes": 258,
+        "sha256": "47ea08cc6b803a276c9a48392442d784d97f51538303e1cc2cb00bb76dcb2f3c"
+      }
+    },
+    "present": 2,
+    "required": 4,
+    "completeness": 0.5
+  },
+  "verdict": {
+    "passed": false,
+    "returncode": 1,
+    "stdout": "{\"passed\": false, \"stage_results\": [{\"stage_id\": \"s1\", \"object_name\": \"a\", \"destination\": [0.18, 0.16, 0.0175], \"reach_m\": 0.2408, \"postcondition\": \"object_at_destination\", \"passed\": true, \"detail\": null}, {\"stage_id\": \"s2\", \"object_name\": \"b\", \"destination\": [0.34, 0.0, 0.0175], \"reach_m\": 0.34, \"postcondition\": \"destination_reachable\", \"passed\": false, \"detail\": \"unreachable: 0.340 m > max_reach 0.300 m\"}], \"failed_stage\": \"s2\"}\n",
+    "stderr": "",
+    "stage_results": [
+      {
+        "stage_id": "s1",
+        "object_name": "a",
+        "destination": [
+          0.18,
+          0.16,
+          0.0175
+        ],
+        "reach_m": 0.2408,
+        "postcondition": "object_at_destination",
+        "passed": true,
+        "detail": null
+      },
+      {
+        "stage_id": "s2",
+        "object_name": "b",
+        "destination": [
+          0.34,
+          0.0,
+          0.0175
+        ],
+        "reach_m": 0.34,
+        "postcondition": "destination_reachable",
+        "passed": false,
+        "detail": "unreachable: 0.340 m > max_reach 0.300 m"
+      }
+    ],
+    "failed_stage": "s2"
+  },
+  "run_dir": "C:\\Users\\fuker\\Desktop\\workspace\\project-033-flexcell\\ci-public-window\\evidence\\pilot001-tb1-r3\\tb1-A"
+}

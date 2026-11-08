@@ -1,0 +1,431 @@
+{
+  "task": "T-B-v1",
+  "model": "deepseek-flash",
+  "n_per_arm": 3,
+  "arms": {
+    "A": {
+      "n": 3,
+      "success": 0,
+      "success_rate": 0,
+      "first_pass": 0,
+      "mean_iterations": 5.666666666666667,
+      "false_success": 0,
+      "tokens": [
+        15094,
+        8312,
+        8898
+      ],
+      "mean_tokens": 10768,
+      "evidence": [
+        0.5,
+        0.5,
+        0.5
+      ]
+    },
+    "C": {
+      "n": 3,
+      "success": 2,
+      "success_rate": 0.6666666666666666,
+      "first_pass": 0,
+      "mean_iterations": 3.6666666666666665,
+      "false_success": 0,
+      "tokens": [
+        4425,
+        7873,
+        6918
+      ],
+      "mean_tokens": 6405.333333333333,
+      "evidence": [
+        1,
+        1,
+        1
+      ]
+    },
+    "B": {
+      "n": 3,
+      "success": 3,
+      "success_rate": 1,
+      "first_pass": 0,
+      "mean_iterations": 3.6666666666666665,
+      "false_success": 0,
+      "tokens": [
+        4004,
+        4681,
+        5883
+      ],
+      "mean_tokens": 4856,
+      "evidence": [
+        1,
+        1,
+        1
+      ]
+    },
+    "deltas": {
+      "C-A_success_rate": 0.6666666666666666,
+      "B-C_success_rate": 0.33333333333333337,
+      "B-A_success_rate": 1
+    }
+  },
+  "rows": [
+    {
+      "arm": "A",
+      "success": false,
+      "first_pass": false,
+      "iterations": 5,
+      "false_success": false,
+      "violation": null,
+      "evidence": {
+        "items": {
+          "verdict.json": {
+            "present": true,
+            "bytes": 1187,
+            "sha256": "91398d69a99dd11e1a98e85520949fd6e43a779f8e4ede8464a5917841d63331"
+          },
+          "telemetry/execution.log": {
+            "present": false,
+            "bytes": 0,
+            "sha256": null
+          },
+          "episode.json": {
+            "present": false,
+            "bytes": 0,
+            "sha256": null
+          },
+          "fingerprint.json": {
+            "present": true,
+            "bytes": 258,
+            "sha256": "47ea08cc6b803a276c9a48392442d784d97f51538303e1cc2cb00bb76dcb2f3c"
+          }
+        },
+        "present": 2,
+        "required": 4,
+        "completeness": 0.5
+      },
+      "cost": {
+        "tokens": 15094,
+        "agent_s": 50,
+        "execution_s": 0.187
+      }
+    },
+    {
+      "arm": "C",
+      "success": true,
+      "first_pass": false,
+      "iterations": 4,
+      "false_success": false,
+      "violation": null,
+      "evidence": {
+        "items": {
+          "verdict.json": {
+            "present": true,
+            "bytes": 1103,
+            "sha256": "111949247353e63895f5b4e7cc56a6009740d98d4dcf04c278f2cc5f49977c22"
+          },
+          "telemetry/execution.log": {
+            "present": true,
+            "bytes": 276,
+            "sha256": "0e086d8e2ea5b42a4f623b4ea7d6b425b186affc90c329a5e12984287e45688c"
+          },
+          "episode.json": {
+            "present": true,
+            "bytes": 33,
+            "sha256": "20591c985a65f8bc19296a2e0ae9b56721dd929194beb19f330669eb1a792451"
+          },
+          "fingerprint.json": {
+            "present": true,
+            "bytes": 258,
+            "sha256": "b4f863a8c4cbb5d15562e9de24d8cfe26294a1ac4936c1b06c2f5f04b64458b8"
+          }
+        },
+        "present": 4,
+        "required": 4,
+        "completeness": 1
+      },
+      "cost": {
+        "tokens": 4425,
+        "agent_s": 10.656,
+        "execution_s": 0.094
+      }
+    },
+    {
+      "arm": "B",
+      "success": true,
+      "first_pass": false,
+      "iterations": 3,
+      "false_success": false,
+      "violation": null,
+      "evidence": {
+        "items": {
+          "verdict.json": {
+            "present": true,
+            "bytes": 1103,
+            "sha256": "8508652aba24d07cadead6d89c98ae680b65dbbc5b57cc7838832e6fa1e22077"
+          },
+          "telemetry/execution.log": {
+            "present": true,
+            "bytes": 525,
+            "sha256": "c44de3d70c2e0dc0bd02b5ac4c12514e057fd809537f98bcb427220212d7e3b3"
+          },
+          "episode.json": {
+            "present": true,
+            "bytes": 32,
+            "sha256": "11bd43cc97ae3c7c138a3eb6e8daba4c46e8ac531decfb975e0ee7ec27ea26de"
+          },
+          "fingerprint.json": {
+            "present": true,
+            "bytes": 258,
+            "sha256": "2a00118de5f5f5d6bbc471184ca2641d0ae6c19b0ed0bf0fd863af3523c168a5"
+          }
+        },
+        "present": 4,
+        "required": 4,
+        "completeness": 1
+      },
+      "cost": {
+        "tokens": 4004,
+        "agent_s": 10.048,
+        "execution_s": 0.235
+      }
+    },
+    {
+      "arm": "A",
+      "success": false,
+      "first_pass": false,
+      "iterations": 6,
+      "false_success": false,
+      "violation": null,
+      "evidence": {
+        "items": {
+          "verdict.json": {
+            "present": true,
+            "bytes": 1187,
+            "sha256": "91398d69a99dd11e1a98e85520949fd6e43a779f8e4ede8464a5917841d63331"
+          },
+          "telemetry/execution.log": {
+            "present": false,
+            "bytes": 0,
+            "sha256": null
+          },
+          "episode.json": {
+            "present": false,
+            "bytes": 0,
+            "sha256": null
+          },
+          "fingerprint.json": {
+            "present": true,
+            "bytes": 258,
+            "sha256": "47ea08cc6b803a276c9a48392442d784d97f51538303e1cc2cb00bb76dcb2f3c"
+          }
+        },
+        "present": 2,
+        "required": 4,
+        "completeness": 0.5
+      },
+      "cost": {
+        "tokens": 8312,
+        "agent_s": 18.596,
+        "execution_s": 0.204
+      }
+    },
+    {
+      "arm": "C",
+      "success": false,
+      "first_pass": false,
+      "iterations": 4,
+      "false_success": false,
+      "violation": null,
+      "evidence": {
+        "items": {
+          "verdict.json": {
+            "present": true,
+            "bytes": 1187,
+            "sha256": "91398d69a99dd11e1a98e85520949fd6e43a779f8e4ede8464a5917841d63331"
+          },
+          "telemetry/execution.log": {
+            "present": true,
+            "bytes": 276,
+            "sha256": "0e086d8e2ea5b42a4f623b4ea7d6b425b186affc90c329a5e12984287e45688c"
+          },
+          "episode.json": {
+            "present": true,
+            "bytes": 33,
+            "sha256": "20591c985a65f8bc19296a2e0ae9b56721dd929194beb19f330669eb1a792451"
+          },
+          "fingerprint.json": {
+            "present": true,
+            "bytes": 258,
+            "sha256": "10512487158e4fce07d971aac48c023ed054b0bc6ddc6aa43aa59eb3bdfac0db"
+          }
+        },
+        "present": 4,
+        "required": 4,
+        "completeness": 1
+      },
+      "cost": {
+        "tokens": 7873,
+        "agent_s": 25.953,
+        "execution_s": 0.375
+      }
+    },
+    {
+      "arm": "B",
+      "success": true,
+      "first_pass": false,
+      "iterations": 3,
+      "false_success": false,
+      "violation": null,
+      "evidence": {
+        "items": {
+          "verdict.json": {
+            "present": true,
+            "bytes": 1107,
+            "sha256": "b09fdc6ae2db0419ea54990522c168054f6b9bb6e9f2659336722cb07c2472eb"
+          },
+          "telemetry/execution.log": {
+            "present": true,
+            "bytes": 525,
+            "sha256": "e96d1010424c78ba90eb8188fd164105fc39bb84165bb9e05d77eb555d858431"
+          },
+          "episode.json": {
+            "present": true,
+            "bytes": 32,
+            "sha256": "11bd43cc97ae3c7c138a3eb6e8daba4c46e8ac531decfb975e0ee7ec27ea26de"
+          },
+          "fingerprint.json": {
+            "present": true,
+            "bytes": 258,
+            "sha256": "bf713b76016c9a703369c949c04a805282775531934ff8a0703c0a60aeed6495"
+          }
+        },
+        "present": 4,
+        "required": 4,
+        "completeness": 1
+      },
+      "cost": {
+        "tokens": 4681,
+        "agent_s": 13.047,
+        "execution_s": 0.749
+      }
+    },
+    {
+      "arm": "A",
+      "success": false,
+      "first_pass": false,
+      "iterations": 6,
+      "false_success": false,
+      "violation": null,
+      "evidence": {
+        "items": {
+          "verdict.json": {
+            "present": true,
+            "bytes": 1187,
+            "sha256": "91398d69a99dd11e1a98e85520949fd6e43a779f8e4ede8464a5917841d63331"
+          },
+          "telemetry/execution.log": {
+            "present": false,
+            "bytes": 0,
+            "sha256": null
+          },
+          "episode.json": {
+            "present": false,
+            "bytes": 0,
+            "sha256": null
+          },
+          "fingerprint.json": {
+            "present": true,
+            "bytes": 258,
+            "sha256": "47ea08cc6b803a276c9a48392442d784d97f51538303e1cc2cb00bb76dcb2f3c"
+          }
+        },
+        "present": 2,
+        "required": 4,
+        "completeness": 0.5
+      },
+      "cost": {
+        "tokens": 8898,
+        "agent_s": 19.64,
+        "execution_s": 1.125
+      }
+    },
+    {
+      "arm": "C",
+      "success": true,
+      "first_pass": false,
+      "iterations": 3,
+      "false_success": false,
+      "violation": null,
+      "evidence": {
+        "items": {
+          "verdict.json": {
+            "present": true,
+            "bytes": 1103,
+            "sha256": "8508652aba24d07cadead6d89c98ae680b65dbbc5b57cc7838832e6fa1e22077"
+          },
+          "telemetry/execution.log": {
+            "present": true,
+            "bytes": 525,
+            "sha256": "c44de3d70c2e0dc0bd02b5ac4c12514e057fd809537f98bcb427220212d7e3b3"
+          },
+          "episode.json": {
+            "present": true,
+            "bytes": 32,
+            "sha256": "11bd43cc97ae3c7c138a3eb6e8daba4c46e8ac531decfb975e0ee7ec27ea26de"
+          },
+          "fingerprint.json": {
+            "present": true,
+            "bytes": 258,
+            "sha256": "f42ed44bc0877f3693980e260ce24122d0f976f5d744a9b0e7ab6c92c263aba3"
+          }
+        },
+        "present": 4,
+        "required": 4,
+        "completeness": 1
+      },
+      "cost": {
+        "tokens": 6918,
+        "agent_s": 23.797,
+        "execution_s": 2.188
+      }
+    },
+    {
+      "arm": "B",
+      "success": true,
+      "first_pass": false,
+      "iterations": 5,
+      "false_success": false,
+      "violation": null,
+      "evidence": {
+        "items": {
+          "verdict.json": {
+            "present": true,
+            "bytes": 1111,
+            "sha256": "e84b9b300a6055946517adcc75dc4abf1fe8282322e594b6c8fd999deb20ad13"
+          },
+          "telemetry/execution.log": {
+            "present": true,
+            "bytes": 276,
+            "sha256": "0e086d8e2ea5b42a4f623b4ea7d6b425b186affc90c329a5e12984287e45688c"
+          },
+          "episode.json": {
+            "present": true,
+            "bytes": 33,
+            "sha256": "20591c985a65f8bc19296a2e0ae9b56721dd929194beb19f330669eb1a792451"
+          },
+          "fingerprint.json": {
+            "present": true,
+            "bytes": 258,
+            "sha256": "b9475bb17909cbb238b81bb5da5ede1e74b29887c02ee0a43d5b4bb722d3296f"
+          }
+        },
+        "present": 4,
+        "required": 4,
+        "completeness": 1
+      },
+      "cost": {
+        "tokens": 5883,
+        "agent_s": 13.404,
+        "execution_s": 1.031
+      }
+    }
+  ]
+}
