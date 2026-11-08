@@ -41,7 +41,10 @@
   "tasks": {
     "T-A": {
       "kind": "parameter",
-      "description": "set demo_verify_tolerance_m 0.06 -> 0.05 and keep recovery_once passing"
+      "revision": 2,
+      "description": "composite clearance below the contract minimum makes prepare_plan reject the goal with ERR_INVALID_PLAN; raise it into the legal range and obtain OUTCOME_SUCCEEDED",
+      "acceptance": "composite_probe returns OUTCOME_SUCCEEDED for a legal plan",
+      "supersedes": "v1 (demo_verify_tolerance_m 0.06->0.05) did not flip pass/fail; recorded in docs/PILOT_001.md"
     },
     "T-B": {
       "kind": "composite",
@@ -58,5 +61,7 @@
     "false_success",
     "protected_changed",
     "missing_evidence"
-  ]
+  ],
+  "revision": 2,
+  "revised_at": "2026-11-09"
 }

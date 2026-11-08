@@ -1,0 +1,8 @@
+{"arm": "A", "kind": "run_start", "t": 0.0, "task": "PILOT-001", "tools": ["read_file", "run_checks", "write_file"]}
+{"kind": "agent_step_s", "seconds": 1.203, "t": 1.203}
+{"calls": [["read_file", "app.py"]], "claim_success": false, "index": 1, "kind": "iteration", "t": 1.203}
+{"index": 1, "kind": "verdict", "passed": false, "t": 1.281}
+{"kind": "agent_step_s", "seconds": 1.25, "t": 2.531}
+{"calls": [["read_file", "app.py"], ["write_file", "app.py"], ["run_checks"]], "claim_success": true, "index": 2, "kind": "iteration", "t": 2.531}
+{"index": 2, "kind": "verdict", "passed": true, "t": 2.594}
+{"kind": "run_end", "success": true, "t": 2.688, "violation": null}
