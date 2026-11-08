@@ -3,11 +3,11 @@
 #include <moveit/kinematic_constraints/utils.hpp>
 #include <moveit/robot_state/robot_state.h>
 #include <moveit/planning_scene/planning_scene.hpp>
+#include "level_release_ik.hpp"
 #include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <limits>
-#include <random>
 #include <string>
 #include <vector>
 
@@ -95,9 +95,14 @@ class LevelPitchPlanner : public moveit::task_constructor::solvers::PipelinePlan
     last_level_ = false;
     last_enumerated_ = 0;
     last_min_position_error_m_ = std::numeric_limits<double>::infinity();
+    const auto started = std::chrono::steady_clock::now();
+    const auto elapsed = [&] {
+      return std::chrono::duration<double>(std::chrono::steady_clock::now() - started).count();
+    };
     const auto fallback = [&]() {
       return PipelinePlanner::plan(scene, group, positionGoal(scene->getPlanningFrame(), link.getName(),
-          offset, target, properties().get<double>("goal_position_tolerance")), timeout, result, path_constraints);
+          offset, target, properties().get<double>("goal_position_tolerance")),
+          std::max(0.0, timeout - elapsed()), result, path_constraints);
     };
     if (!(max_box_tilt_rad >= 0.0) || !std::isfinite(max_box_tilt_rad)) return fallback();
 
@@ -110,77 +115,31 @@ class LevelPitchPlanner : public moveit::task_constructor::solvers::PipelinePlan
     // Not the four-DOF arm this rule was derived for: keep previous behaviour.
     if (!four_dof) return fallback();
 
-    const auto started = std::chrono::steady_clock::now();
-    const auto elapsed = [&] {
-      return std::chrono::duration<double>(std::chrono::steady_clock::now() - started).count();
-    };
-
     // goal == attached box centre in world: the stage constrains the private
     // point link, a fixed child of end_effector_link at attach_translation
     // with identity rotation, so the point origin IS the box centre. The EE
     // sits at goal - R_ee * attach_translation, with R_ee = Rz(j1)*Ry(phi).
     const Eigen::Vector3d goal = target.translation();
-    // J1 must ALSO place the measured lateral attachment component: the arm
-    // plane always contains the J1 axis, and the box sits attach_translation.y()
-    // off that plane. Matching it means the goal must sit that far off the
-    // plane's centre line: at.y = g*sin(psi - j1), i.e.
-    // j1 = psi - asin(at.y/g). (An earlier revision used +; that doubles the
-    // residual instead of nulling it: 10 mm lateral -> 20 mm error -> every
-    // candidate rejected and a silent fallback.)
-    const double psi = std::atan2(goal.y(), goal.x() - 0.012);
-    const double g = std::hypot(goal.x() - 0.012, goal.y());
-    const double lateral = g > 1e-6 ? attach_translation.y() / g : 0.0;
-    const double j1 = psi - std::asin(std::clamp(lateral, -1.0, 1.0));
-    const double r = g * std::cos(j1 - psi);
     const Eigen::Matrix3d rot_attach = attach_rotation;
     const Eigen::Vector3d up_ee = rot_attach * Eigen::Vector3d::UnitZ();
+    double phi_min = 0.0, phi_max = 0.0;
+    for (int i = 1; i < 4; ++i) {
+      const auto& bounds = scene->getRobotModel()->getVariableBounds(kJointNames[i]);
+      phi_min += bounds.min_position_;
+      phi_max += bounds.max_position_;
+    }
+    const auto pitches = level_release::pitchCandidates(
+        phi_min, phi_max, phi_step_deg, up_ee.x(), up_ee.z());
 
     double best_tilt = std::numeric_limits<double>::infinity();
     std::vector<double> best;
     moveit::core::RobotState candidate(scene->getCurrentState());
-    // phi = j2 + j3 + j4, so the feasible interval is the SUM of the three
-    // joint ranges. It is neither symmetric nor one turn wide ([-4.70, +4.87]
-    // rad with this arm), so a fixed +-180 deg window would silently drop the
-    // outer parts of the feasible set; sweeping the derived interval also
-    // covers the +-360 deg periodic equivalents. Unbounded joints fall back to
-    // a generous four-turn sweep.
-    double phi_min = 0.0, phi_max = 0.0;
-    bool phi_bounded = true;
-    for (const char* name : {"joint2", "joint3", "joint4"}) {
-      const auto& bounds = candidate.getRobotModel()->getVariableBounds(name);
-      if (!std::isfinite(bounds.min_position_) || !std::isfinite(bounds.max_position_)) {
-        phi_bounded = false;
-        break;
-      }
-      phi_min += bounds.min_position_;
-      phi_max += bounds.max_position_;
-    }
-    if (!phi_bounded) {
-      phi_min = -4.0 * 3.14159265358979323846;
-      phi_max = 4.0 * 3.14159265358979323846;
-    }
-    const double phi_step = std::max(1, phi_step_deg) * 3.14159265358979323846 / 180.0;
-    for (double phi = phi_min; phi <= phi_max + 1e-9; phi += phi_step) {
+    for (const double phi : pitches) {
       // Leave the remaining share for the upstream path planning.
       if (elapsed() >= timeout * sampling_share) break;
-      const double cp = std::cos(phi), sp = std::sin(phi);
-      // EE position (local) that puts the box centre on target.
-      const double pex = r - (attach_translation.x() * cp + attach_translation.z() * sp);
-      const double pez = goal.z() - (-attach_translation.x() * sp + attach_translation.z() * cp);
-      // joint4 position (local), then the two-link closure to joint2.
-      const double pj4x = pex - (0.126 * cp);
-      const double pj4z = pez - (-0.126 * sp);
-      const double wx = pj4x;
-      const double wz = pj4z - 0.0595;
-      const double d2 = wx * wx + wz * wz;
-      const double cosk = (d2 - 0.01696 - 0.015376) / (2 * 0.130223 * 0.124);
-      if (std::abs(cosk) > 1.0) continue;
-      for (const double sign : {1.0, -1.0}) {
-        const double j3 = sign * std::acos(std::clamp(cosk, -1.0, 1.0)) - 1.385448;
-        const double j2 = std::atan2(0.128 - 0.124 * std::sin(j3),
-                                     0.024 + 0.124 * std::cos(j3)) - std::atan2(wz, wx);
-        const double j4 = phi - j2 - j3;
-        const std::vector<double> q{j1, j2, j3, j4};
+      for (const auto& q : level_release::attachedPointCandidates(
+               {goal.x(), goal.y(), goal.z()},
+               {attach_translation.x(), attach_translation.y(), attach_translation.z()}, phi)) {
         bool inside = true;
         for (int i = 0; i < 4; ++i) {
           const auto& bounds = candidate.getRobotModel()->getVariableBounds(kJointNames[i]);
@@ -230,7 +189,7 @@ class LevelPitchPlanner : public moveit::task_constructor::solvers::PipelinePlan
       joint.weight = 1.0;
       goal_constraints.joint_constraints.push_back(joint);
     }
-    const double plan_timeout = std::max(0.5, timeout - elapsed());
+    const double plan_timeout = std::max(0.0, timeout - elapsed());
     return PipelinePlanner::plan(scene, group, goal_constraints, plan_timeout, result, path_constraints);
   }
 

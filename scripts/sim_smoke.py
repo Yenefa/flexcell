@@ -145,6 +145,21 @@ def completion_expectation(decision_policy, resume_completed):
     return None
 
 
+def gate_refusal_expected(task, object_name, places, verifies):
+    """A negative control needs one actual attitude refusal, with no release or verify."""
+    if (task.get('outcome_val') != 1 or task.get('error_code') != 'ERR_SKILL_FAILED'
+            or task.get('object_at_place') is not False or len(places) != 1 or verifies):
+        return False
+    row = places[0]
+    attitude = str(row.get('release_attitude', ''))
+    return (row.get('object_name') == object_name and row.get('outcome') == '1'
+            and row.get('error_code') == 25  # PlaceObject.ERR_PLACE_FAILED
+            and row.get('released') is False and row.get('carry_release_confirmed') is not True
+            and str(row.get('detail', '')).startswith('attached object attitude rejected before release;')
+            and attitude.startswith('release tilt ') and ' exceeds ' in attitude
+            and attitude.endswith('carry held'))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--out', type=Path, required=True)
@@ -434,11 +449,12 @@ def main():
             result['model_calls'] = result['actual_routing']['model_calls']
             result['fast_calls'] = result['actual_routing']['fast_calls']
             result['slow_calls'] = result['actual_routing']['slow_calls']
-        skill_records = []
-        for name in ('pick', 'place'):
+        records_by_skill = {}
+        for name in ('pick', 'place', 'verify'):
             path = out / ('skills/%s.jsonl' % name)
-            if path.exists():
-                skill_records.extend(json.loads(line) for line in path.read_text().splitlines())
+            records_by_skill[name] = ([json.loads(line) for line in path.read_text().splitlines()]
+                                      if path.exists() else [])
+        skill_records = records_by_skill['pick'] + records_by_skill['place']
         if any('MotionTerminalUnknown' in row.get('detail', '') for row in skill_records):
             result['status'] = 'ACTION_TERMINAL_UNKNOWN'
             raise RuntimeError('child motion terminal unknown; subsequent reset is forbidden')
@@ -460,27 +476,19 @@ def main():
             and task.get('error_code') == 'ERR_SKILL_FAILED'
             and any(row.get('skill_backend') == 'mtc' and row.get('outcome') != '0'
                     for row in skill_records))
-        # Negative control: a gate limit below the achievable floor must refuse
-        # EVERY release and hold the carry. A success path must never satisfy
-        # this: the run has to fail, the box must not be at the goal, and no
-        # skill row anywhere may report a release.
-        gate_rows = [row for row in skill_records if 'exceeds' in str(row.get('detail', ''))]
+        # Negative control: require the typed attitude refusal, no release and
+        # no verification. A successful placement cannot satisfy this case.
         expected_failure = expected_failure or (
-            args.case == 'gate_refusal'
-            and task.get('outcome_val') == 1
-            and task.get('object_at_place') is False
-            and bool(gate_rows)
-            and all(row.get('released') is False for row in gate_rows)
-            and not any(row.get('released') is True for row in skill_records))
+            args.case == 'gate_refusal' and rc == 1
+            and not any(row.get('released') is True or row.get('carry_release_confirmed') is True
+                        for row in skill_records)
+            and gate_refusal_expected(
+                task, args.object, records_by_skill['place'], records_by_skill['verify']))
         succeeded = rc == 0 and task.get('outcome_val') == 0 and (
             task.get('object_a_at_zone') is True and task.get('object_b_at_zone') is True
             if args.case == 'dual_object' else task.get('object_at_place') is True)
         if args.case == 'gate_refusal':
-            # This control asserts a REFUSAL. A place that reaches the goal means
-            # the gate did not fire - that is a failure of the control, never a
-            # pass. (The review reproduced PASS/0 here through the real runner;
-            # #123 returns ROBOT_FAILURE/1 for the same input.)
-            succeeded = False
+            succeeded = False  # A successful release does not exercise this negative control.
         if args.case == 'regrasp':
             succeeded = succeeded and bool(result.get('regrasp_first_task_ok'))
         if args.case == 'recovery_once':
