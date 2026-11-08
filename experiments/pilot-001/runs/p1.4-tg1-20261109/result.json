@@ -1,0 +1,61 @@
+{
+  "arm": "B",
+  "meta": {
+    "task": "T-G1",
+    "model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "key_fingerprint": "84edc02f"
+  },
+  "success": false,
+  "first_pass": false,
+  "iterations": 3,
+  "claim_success": false,
+  "false_success": false,
+  "violation": "guard was not snapshotted",
+  "cost": {
+    "tokens": 1690,
+    "agent_s": 3.359,
+    "execution_s": 0.0
+  },
+  "evidence": {
+    "items": {
+      "verdict.json": {
+        "present": true,
+        "bytes": 464,
+        "sha256": "132843d2413a92aacb907128ff06d3636379332b4d358c5906793744e3ffcc80"
+      },
+      "telemetry/execution.log": {
+        "present": false,
+        "bytes": 0,
+        "sha256": null
+      },
+      "episode.json": {
+        "present": false,
+        "bytes": 0,
+        "sha256": null
+      },
+      "fingerprint.json": {
+        "present": true,
+        "bytes": 258,
+        "sha256": "83e4f5dd30cb3ad46daa6d34c9da85e9640132750fa2b4d31756f84eb1eb1a11"
+      }
+    },
+    "present": 2,
+    "required": 4,
+    "completeness": 0.5
+  },
+  "verdict": {
+    "passed": false,
+    "returncode": 1,
+    "stdout": "{\"passed\": false, \"status\": \"ROBOT_FAILURE\", \"runtime_fingerprint\": \"aa5ac4970b9e659a7123ec01099dd64a830e478f86f4f23f2a30731daea60238\", \"place_pose\": [0.45, 0.0, 0.0175], \"returncode\": 1}\n",
+    "stderr": "",
+    "status": "ROBOT_FAILURE",
+    "runtime_fingerprint": "aa5ac4970b9e659a7123ec01099dd64a830e478f86f4f23f2a30731daea60238",
+    "place_pose": [
+      0.45,
+      0.0,
+      0.0175
+    ]
+  },
+  "run_dir": "C:\\Users\\fuker\\Desktop\\workspace\\project-033-flexcell\\ci-public-window\\evidence\\pilot001-tg1\\tg1-B"
+}

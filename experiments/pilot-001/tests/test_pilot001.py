@@ -228,3 +228,11 @@ def test_gazebo_collect_reads_result(tmp_path):
                                                 "physical_tasks_dispatched": 1}))
     out = gazebo.collect(str(run))
     assert out["found"] and out["summary"]["status"] == "PASS"
+
+
+def test_tg_template_has_plan_and_gate(tmp_path):
+    from pilot import gazebo_task
+    ws = gazebo_task.build_tg(tmp_path / "ws")
+    plan = json.loads((ws / "plan.json").read_text())
+    assert plan["place_pose"] == [0.45, 0.0, 0.0175]
+    assert (ws / "gate" / "acceptance.py").is_file()
