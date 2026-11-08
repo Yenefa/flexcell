@@ -5,6 +5,13 @@
 > record; this document does not claim a live check of either robot host.
 > The Week-1.5 behavior reference `7956d63` remains frozen.
 
+## Competition packaging (IYAIC 2026)
+
+Judge-facing packaging is isolated in [competition/iyaic-2026/](../competition/iyaic-2026/):
+shared runtime core (`src/`, `scripts/`) vs raw evidence vs showcase. The runtime architecture
+below is unchanged; the three-state index lives in
+[DELIVERY_STATUS.md](../competition/iyaic-2026/DELIVERY_STATUS.md).
+
 ## Current runtime
 
 ![Current runtime components](diagrams/current-architecture.svg)

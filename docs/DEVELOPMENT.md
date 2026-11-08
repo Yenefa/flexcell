@@ -18,7 +18,14 @@
 - Experiments and their evidence: [EXPERIMENTS.md](EXPERIMENTS.md).
 - Architecture-level decisions: [ADR/](ADR/).
 
-## M1 — Deterministic Workcell Baseline ✅ DONE
+## M1 — Deterministic Workcell Baseline ✅ DONE## IYAIC 2026 competition track (P0, #30)
+
+Competition packaging and a three-state delivery index (implemented / accepted / branch-pending)
+live in [competition/iyaic-2026/](../competition/iyaic-2026/). Current scope: directory +
+documentation convergence. Runtime merges still require ROS/Gazebo acceptance and a new
+fingerprint; TransferBench is split into reviewable capabilities, never merged whole.
+
+
 
 Day 1 → Day 2 → Week 1 → Week 1.5 all accepted (see [EXPERIMENTS.md](EXPERIMENTS.md)
 entries E-001..E-005). The Week-1.5 delivery baseline `7956d63` is the frozen behavior
