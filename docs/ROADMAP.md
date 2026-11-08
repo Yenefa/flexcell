@@ -31,6 +31,14 @@ delivery index (implemented / accepted / branch-pending) live in
 competition adds no milestone and does not unfreeze n>=50; TransferBench stays a branch-pending
 capability to be split for review, not merged whole.
 
+### Near-term goal (2026-11): IYAIC 2026 Henan creative group
+
+Ship flexcell as an entry to the *AI & Robotics Innovation (Creative Group)*:
+registration and materials due **2026-11-13**, division selection
+**2026-11-21/22**. Goal, milestones and deliverables:
+[competition/iyaic-2026/GOAL.md](../competition/iyaic-2026/GOAL.md) and
+[SUBMISSION/](../competition/iyaic-2026/SUBMISSION/).
+
 
 - **Day 1** — Gazebo Harmonic 8.15.0 + MoveIt 2 Plan & Execute on OpenMANIPULATOR-X
   (ROS 2 Jazzy), verified on-machine. See [DAY1_REPORT.md](../DAY1_REPORT.md).
