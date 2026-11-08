@@ -234,5 +234,18 @@ class TestBackends(unittest.TestCase):
             make_backend('quantum')
 
 
+    def test_transport_adds_bearer_when_key_is_set(self):
+        """A remote fast arm needs auth; the header is optional and never logged."""
+        import os
+        from flexcell_skills.jev_backends import LocalReproductionBackend
+        os.environ["FLEXCELL_JEV_API_KEY"] = "test-key"
+        try:
+            headers = LocalReproductionBackend._auth_headers()
+            self.assertEqual(headers["Authorization"], "Bearer test-key")
+        finally:
+            del os.environ["FLEXCELL_JEV_API_KEY"]
+        self.assertNotIn("Authorization", LocalReproductionBackend._auth_headers())
+
+
 if __name__ == '__main__':
     unittest.main()

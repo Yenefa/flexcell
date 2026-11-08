@@ -104,10 +104,24 @@ class LocalReproductionBackend(JevBackend):
         self._max_tokens = int(max_tokens)
 
     @staticmethod
-    def _http_transport(url, payload, timeout_s):
+    def _auth_headers():
+        """Bearer auth for remote OpenAI-compatible endpoints.
+
+        Local servers (localhost / 127.0.0.1) usually need no auth, but a
+        remote fast arm (e.g. an official API) does.  The key is read from
+        FLEXCELL_JEV_API_KEY and never logged or recorded.
+        """
+        key = os.environ.get('FLEXCELL_JEV_API_KEY', '')
+        headers = {'Content-Type': 'application/json'}
+        if key:
+            headers['Authorization'] = 'Bearer ' + key
+        return headers
+
+    @classmethod
+    def _http_transport(cls, url, payload, timeout_s):
         req = urllib.request.Request(
             url, data=json.dumps(payload).encode(),
-            headers={'Content-Type': 'application/json'})
+            headers=cls._auth_headers())
         opener = (urllib.request.build_opener(urllib.request.ProxyHandler({}))
                   if urlparse(url).hostname in ('localhost', '127.0.0.1', '::1')
                   else None)
@@ -241,7 +255,7 @@ class ClefBackend(JevBackend):
     def _http_transport(url, payload, timeout_s):
         req = urllib.request.Request(
             url, data=json.dumps(payload).encode(),
-            headers={'Content-Type': 'application/json'})
+            headers=LocalReproductionBackend._auth_headers())
         opener = (urllib.request.build_opener(urllib.request.ProxyHandler({}))
                   if urlparse(url).hostname in ('localhost', '127.0.0.1', '::1')
                   else None)
