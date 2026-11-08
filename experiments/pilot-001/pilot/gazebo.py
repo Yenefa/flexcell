@@ -76,7 +76,10 @@ def collect(run_out):
     doc = json.load(open(files[0], encoding="utf-8"))
     keep = {k: doc.get(k) for k in ("status", "case", "runtime_fingerprint", "world_sha256",
                                     "semantic_config_sha256", "physical_tasks_dispatched",
-                                    "window_id")}
+                                    "window_id", "goal_pose")}
+    task = doc.get("task") or {}
+    keep["task"] = {k: task.get(k) for k in ("outcome", "error_code", "detail",
+                                             "final_position_error_m")}
     return {"found": True, "path": files[0], "summary": keep}
 
 

@@ -147,3 +147,9 @@
 - C−A=+77.8%（Fisher p=0.0023）；**B−C=+11.1%（p=1.0）**；B−A=+88.9%（p=0.0004）。
 - 完整报告：[`experiments/pilot-001/P1.2_REPORT.md`](../experiments/pilot-001/P1.2_REPORT.md)。
 - **探索性**：单模型、合成执行模型（非 Gazebo）、n=9/臂；**M3-S 未达成**。
+
+## 10. P1.4（真实 Gazebo）状态
+
+- 固定任务：真实 Gazebo `sim_smoke --case normal` PASS（指纹 `aa5ac497…`，误差 5.33 mm）。
+- T-G1 管道：脚本化 agent 写 `place_pose` → 真实执行 → 独立验证 → **success=true, 证据 1.0**（管道级 M3-S）。
+- LLM 可靠性：deepseek-chat 会调用执行工具，但参数选择不稳定（0.30/0.35）→ **W1 不升级**。

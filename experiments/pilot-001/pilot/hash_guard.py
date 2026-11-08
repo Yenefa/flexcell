@@ -16,9 +16,11 @@ class HashGuard:
         self.root = Path(root)
         self.protected = list(protected)
         self._snapshot = {}
+        self._snapshotted = False
 
     def snapshot(self):
         self._snapshot = {}
+        self._snapshotted = True
         for rel in self.protected:
             path = self.root / rel
             if not path.is_file():
@@ -31,7 +33,7 @@ class HashGuard:
         return any(norm == p or norm.startswith(p.rstrip("/") + "/") for p in self.protected)
 
     def verify(self):
-        if not self._snapshot:
+        if not self._snapshotted:
             raise ProtectedViolation("guard was not snapshotted")
         changed = []
         for rel, expected in self._snapshot.items():

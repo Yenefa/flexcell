@@ -264,3 +264,12 @@ def test_fc_agent_force_first_tool(tmp_path):
     agent = FCAgent(chat, ["read_file"], "task", force_first_tool="read_file")
     agent.step(tb, 1)
     assert chat.choices[0]["function"]["name"] == "read_file"
+
+
+def test_hash_guard_allows_empty_protected(tmp_path):
+    from pilot.hash_guard import HashGuard
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    guard = HashGuard(ws, [])
+    guard.snapshot()
+    assert guard.verify() is True
