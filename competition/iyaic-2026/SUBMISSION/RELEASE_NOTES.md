@@ -14,7 +14,8 @@
 - 占位符：填队伍信息后 **0 剩余**
 - `check_consistency.py`：**PASS**（台账与逐字稿数字一致）
 - `score_check.py`：**PASS**（6 项评分权重全覆盖，合计 100）
-- `package.py`：官方命名 zip，14 文件（示例 347 KB）
+- `package.py`：官方命名 zip（16 文件）；示例 ~350 KB
+- 当前 main 核心窗口：`FUNCTIONAL_WINDOW_PASS`，`window_id=8b1c18af…`，运行时指纹 **`dd456b9b…`**
 
 ## 运行环境（演示可复跑）
 - WSL2 Ubuntu 24.04，ROS 2 Jazzy + Gazebo Harmonic，Mesa llvmpipe（无 GPU）。
