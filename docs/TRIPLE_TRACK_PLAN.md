@@ -66,11 +66,11 @@
 **Milestone**
 - C0 ✅ ADR-003：FSM = 控制臂（冻结），MTC = 同一 skill seam 下的 treatment 臂。
 - C1 ✅ MTC treatment arm **重新通过资格**：2026-11-09 真实 Gazebo `--skill-backend mtc --case normal` → `PASS / OUTCOME_SUCCEEDED`（`setup/acceptance/mtc_qualification_20261109/`）。
-- C2 ⏳ MTC 资格重复（n=3）。
+- C2 ✅ MTC 资格重复：**3/3 通过**（同 fingerprint `33b420d1…`，`setup/acceptance/mtc_qualification_20261109/`，`verify.py` = `MTC_QUALIFICATION_N3_PASS`）。
 - C3 ⏳ FSM vs MTC 同条件对照实验（协议先冻结）。
 
 **Task Queue**
-1. C2：MTC 资格再跑 2 次（同配置），确认 n=3。
+1. ~~C2：MTC 资格再跑 2 次（同配置），确认 n=3。~~ ✅ 已完成（3/3，同指纹）。
 2. 写并冻结 C3 对照协议（同一 world/pose/预算；指标：成功率、planning 时间、token/成本、恢复行为）。
 3. 执行 C3 并记录；无论结果如何都保留。
 
@@ -84,7 +84,7 @@
 
 **Blocker**：C3 需要先冻结协议；MTC 运行成本较高。
 
-**Next Action**：C2（MTC ×2）+ 起草 C3 协议。
+**Next Action**：起草并冻结 C3 对照协议（FSM vs MTC，同条件），然后执行。
 
 ---
 
