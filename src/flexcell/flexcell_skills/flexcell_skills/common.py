@@ -470,6 +470,53 @@ class GripperClient:
         return rf.result().result, None
 
 
+def gripper_outcome(result, requested=None, aperture_tolerance_m=0.002):
+    """Classify one GripperCommand result (P1-D).
+
+    A completed action is NOT evidence that the object was grasped. The
+    controller reports `reached_goal` and `stalled`; `stalled` means the jaws
+    stopped on an obstacle (usually the object) while the goal position was
+    not reached, and `position`/`effort` are the measured end state.
+
+    Returns a dict:
+      reached_goal  - controller says the target aperture was reached
+      stalled       - controller says it stalled before the target
+      position      - measured aperture (m)
+      effort        - measured effort
+      aperture_error- |position - requested| when a request is supplied
+      classification- GRASPED_AT_GOAL / GRASP_STALLED / NO_CONTACT / UNKNOWN
+    """
+    if result is None:
+        return {"reached_goal": False, "stalled": False, "position": None,
+                "effort": None, "aperture_error": None,
+                "classification": "UNKNOWN", "reason": "no gripper result"}
+    reached = bool(getattr(result, "reached_goal", False))
+    stalled = bool(getattr(result, "stalled", False))
+    position = getattr(result, "position", None)
+    effort = getattr(result, "effort", None)
+    error = None
+    if requested is not None and position is not None:
+        error = abs(float(position) - float(requested))
+    if reached:
+        classification = "GRASPED_AT_GOAL"
+    elif stalled:
+        classification = "GRASP_STALLED"
+    elif error is not None and error <= aperture_tolerance_m:
+        classification = "GRASPED_AT_GOAL"
+    elif position is None:
+        # No measured aperture: the controller said nothing either way. This
+        # is NOT evidence of a failed grasp - the physical verification path
+        # still decides. Report it as unmeasured so callers do not reject.
+        classification = "UNMEASURED"
+    else:
+        classification = "NO_CONTACT"
+    return {"reached_goal": reached, "stalled": stalled,
+            "position": None if position is None else float(position),
+            "effort": None if effort is None else float(effort),
+            "aperture_error": error, "classification": classification,
+            "reason": ""}
+
+
 class PlanningSceneOps:
     """Add / attach / detach-move / remove collision objects via ApplyPlanningScene."""
 

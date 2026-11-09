@@ -29,8 +29,8 @@ from flexcell_skills.release_attitude import attitude_gate, tilt_deg
 from flexcell_skills.joint_follow import SnapshotWatch, follow_failure_detail, check_backend_parameter
 from flexcell_skills.common import (
     GripperClient, JsonlLog, MoveToPoseClient, PlanningSceneOps,
-    crash_detail, dist3, interruptible_sleep, new_evidence, pose_msg,
-    sample_gz_pose, wait_future)
+    crash_detail, dist3, gripper_outcome, interruptible_sleep, new_evidence,
+    pose_msg, sample_gz_pose, wait_future)
 
 R = PlaceObject.Result
 F = PlaceObject.Feedback
@@ -66,6 +66,7 @@ class PlaceServer(Node):
         self.declare_parameter('record_execution_commands', False)
         self.declare_parameter('gripper_action', '/gripper_controller/gripper_cmd')
         self.declare_parameter('gripper_open_position', 0.02)
+        self.declare_parameter('release_aperture_tolerance_m', 0.005)
         self.declare_parameter('release_hover_m', 0.10)
         self.declare_parameter('release_clearance_m', 0.012)
         self.declare_parameter('carry_offset_m', 0.16)
@@ -101,6 +102,8 @@ class PlaceServer(Node):
                                       telemetry=gp('record_execution_commands').value)
         self._scene = PlanningSceneOps(self)
         self._gripper_open = float(gp('gripper_open_position').value)
+        self._release_aperture_tolerance_m = float(
+            gp('release_aperture_tolerance_m').value)
         self._hover = float(gp('release_hover_m').value)
         self._clearance = float(gp('release_clearance_m').value)
         self._carry = float(gp('carry_offset_m').value)
@@ -414,6 +417,20 @@ class PlaceServer(Node):
             if gerr is not None:
                 return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
                               'gripper open failed: %s' % gerr)
+            # P1-D: record what the release actually reported. A release that
+            # never moved is a PLACE failure even though the action succeeded;
+            # the drop check below still decides the physical outcome.
+            open_state = gripper_outcome(gres, requested=self._gripper_open)
+            rec['gripper_open'] = open_state
+            if (open_state["position"] is not None
+                    and open_state["aperture_error"] is not None
+                    and open_state["aperture_error"] > self._release_aperture_tolerance_m
+                    and not open_state["reached_goal"]):
+                return finish(
+                    R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
+                    'gripper did not open (position=%r requested=%r stalled=%r)'
+                    % (open_state["position"], self._gripper_open,
+                       open_state["stalled"]))
             res.released = True
 
             # ---------- VERIFYING (internal, ground truth) ----------

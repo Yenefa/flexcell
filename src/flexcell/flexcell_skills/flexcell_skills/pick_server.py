@@ -42,8 +42,8 @@ from flexcell_skills.contracts.skill_result import derive_status
 from flexcell_skills.joint_follow import SnapshotWatch, follow_failure_detail, check_backend_parameter
 from flexcell_skills.common import (
     GripperClient, JsonlLog, MoveToPoseClient, PlanningSceneOps,
-    crash_detail, dist3, interruptible_sleep, new_evidence, pose_msg,
-    sample_gz_pose, wait_future)
+    crash_detail, dist3, gripper_outcome, interruptible_sleep, new_evidence,
+    pose_msg, sample_gz_pose, wait_future)
 
 R = PickObject.Result
 F = PickObject.Feedback
@@ -505,6 +505,20 @@ class PickServer(Node):
             if gerr is not None:
                 return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
                               'gripper close failed: %s' % gerr)
+            # P1-D: a completed GripperCommand is not a grasp. Record what the
+            # controller actually reported; a close that reports NO_CONTACT is
+            # a failed grasp even when the action succeeded.
+            close_state = gripper_outcome(gres, requested=self._gripper_close)
+            rec['gripper_close'] = close_state
+            if close_state["classification"] == "NO_CONTACT":
+                cleaned, cleanup_error = self._release_everything(goal.object_name)
+                return finish(
+                    R.OUTCOME_FAILED,
+                    R.ERR_GRASP_FAILED if cleaned else R.ERR_INTERNAL,
+                    'gripper closed without contact (position=%r stalled=%r)'
+                    % (close_state["position"], close_state["stalled"])
+                    if cleaned else 'gripper closed without contact; cleanup failed: %s'
+                    % cleanup_error)
 
             # engage the carry servo at the MEASURED gripper-to-object offset
             offset = [box_pos[i] - ee_pos[i] for i in range(3)]

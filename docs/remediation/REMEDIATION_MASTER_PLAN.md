@@ -11,7 +11,7 @@
 | P1-A | WorldState 新鲜度 | **DONE** | `test_world_freshness.py` 6 passed |
 | P1-B | Safety Gate 错误码分类 | **DONE** | `test_rejection_typing.py` 5 passed |
 | P1-C | FSM 动作顺序约束 | **DONE** | `test_action_order.py` 11 passed |
-| P1-D | Gripper 反馈验证 | TODO | — |
+| P1-D | Gripper 反馈验证 | **DONE** | `test_gripper_feedback.py` 9 passed |
 | P1-E | known_objects 状态解耦 | TODO | — |
 | P1-F | Episode 与日志完整性 | TODO | — |
 | P2-A | Inference Budget 完善 | TODO | — |
@@ -33,3 +33,4 @@
 | `fefd628` | P0-A/P0-B 停止确认 + 隔离 |
 | `1dd4543` | P1-A 世界新鲜度 + P0-C 安全评估 |
 | `64136eb` | P1-B 拒绝码分类 |
+| `ec2ee41` | P1-C 动作顺序约束 |
