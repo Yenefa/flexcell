@@ -17,7 +17,7 @@
 - W6 ✅ 迁移 3+3：Cold **0/3**、Warm **2/3**（`runs/p1.5-w6-transfer-20261109/`）；Cold 均未写 plan；n=3 探索性。
 - W7 📝 设计（M0）：`docs/W7_CROSS_EMBODIMENT_DESIGN.md`；无第二本体 → BLOCKED。
 - W5 ✅ 试点（合成层）：W5A 成功（目标 PASS + 回归 0），W5B 未成功；`runs/p1.5-w5-20261109/`；n=1/臂。
-- W5-E2 ⛔ **BLOCKED**（3 次试点均失败）：agent 诊断正确但预算全用于探索，未写文件；见 `runs/p1.5-w5e2-20261109/` 与 `docs/W5E2_PREREGISTRATION.md`。
+- W5-E2 ⛔ BLOCKED（3 次失败，归因明确）；**W5-E2b ✅ 成功**：5 轮、目标+回归双门 PASS（`runs/p1.5-w5e2b-20261109/`，n=1）。
 
 **Task Queue**
 1. T-G3 重复 2 次（补 n=3）。
