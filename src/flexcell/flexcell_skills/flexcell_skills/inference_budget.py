@@ -86,18 +86,35 @@ class InferenceBudget:
         return self._update(operation)
 
     def settle(self, call_id, response):
-        usage = response.get('usage') or {}
+        """Settle a call from the provider usage block (P2-A hardening).
+
+        An unknown call id, a missing usage block, or usage above the reservation
+        must not crash the caller and must never silently free money: the
+        reservation stays committed and the call is marked for an auditor.
+        """
+        usage = (response or {}).get('usage') or {}
         prompt, completion = usage.get('prompt_tokens'), usage.get('completion_tokens')
         if (not isinstance(prompt, int) or not isinstance(completion, int)
                 or prompt < 0 or completion < 0):
             return {'call_id': call_id, 'status': 'RESERVED_OR_UNKNOWN'}
 
         def operation(state):
-            call = next(c for c in state['calls'] if c['id'] == call_id)
+            call = next((c for c in state['calls'] if c['id'] == call_id), None)
+            if call is None:
+                return {'call_id': call_id, 'status': 'UNKNOWN_CALL_ID'}
             cost = prompt * self.INPUT_MICROYUAN + completion * self.OUTPUT_MICROYUAN
             if (prompt > call['input_token_bound'] or completion > call['max_output_tokens']
                     or cost > call['reserved_microyuan']):
-                raise ValueError('provider usage exceeded reservation assumptions')
+                # The provider used more than reserved: keep the WHOLE
+                # reservation (never settle it down) and record the anomaly.
+                call.update(status='ANOMALY_USAGE_EXCEEDED_RESERVATION',
+                            observed_prompt_tokens=prompt,
+                            observed_completion_tokens=completion,
+                            observed_microyuan=cost,
+                            response_model=(response or {}).get('model'))
+                return {'call_id': call_id, 'status': call['status'],
+                        'observed_microyuan': cost,
+                        'kept_reservation_microyuan': call['reserved_microyuan']}
             call.update(status='USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING',
                         prompt_tokens=prompt, completion_tokens=completion,
                         settled_microyuan=cost, response_model=response.get('model'),
@@ -106,3 +123,32 @@ class InferenceBudget:
                         status=call['status'])
 
         return self._update(operation)
+
+    def void(self, call_id, reason):
+        """Release a reservation ONLY for a request the provider never took.
+
+        An unknown network outcome keeps its entire reservation (fail-closed).
+        This covers the provable case - connection refused, DNS failure, a 4xx
+        raised before the body was sent - where no tokens could be billed.
+        `reason` is recorded so the release is auditable.
+        """
+        if not isinstance(reason, str) or not reason.strip():
+            raise ValueError('void() requires a reason for the release audit')
+
+        def operation(state):
+            call = next((c for c in state['calls'] if c['id'] == call_id), None)
+            if call is None:
+                return {'call_id': call_id, 'status': 'UNKNOWN_CALL_ID'}
+            if call.get('status') != 'RESERVED_OR_UNKNOWN':
+                return {'call_id': call_id, 'status': call['status'],
+                        'released_microyuan': 0}
+            call.update(status='RELEASED_NEVER_SENT', settled_microyuan=0,
+                        void_reason=reason.strip(),
+                        voided_at_unix=time.time())
+            return {'call_id': call_id, 'status': call['status'],
+                    'released_microyuan': call['reserved_microyuan']}
+
+        return self._update(operation)
+
+    #: alias kept for callers that speak in terms of releasing a reservation
+    release = void

@@ -14,7 +14,7 @@
 | P1-D | Gripper 反馈验证 | **DONE** | `test_gripper_feedback.py` 9 passed |
 | P1-E | known_objects 状态解耦 | **DONE** | `test_object_registry_scope.py` 7 passed |
 | P1-F | Episode 与日志完整性 | **DONE** | `test_log_integrity.py` 6 + `test_finish_idempotent.py` 2 |
-| P2-A | Inference Budget 完善 | TODO | — |
+| P2-A | Inference Budget 完善 | **DONE** | `test_budget_lifecycle.py` 10 passed |
 | P2-B | Task FSM 模块化 | TODO | — |
 | P2-C | MoveToPose 模块化 | TODO | — |
 | P2-D | 时间域规范 | TODO | — |
@@ -38,6 +38,7 @@
 | `43f5e27` | P1 集成验证 + 世界刷新 |
 | `3273a65` | P0-A 取消集成验证 |
 | `81a4c47` | P1-E 对象注册表解耦 |
+| `25c3216` | P1-F 日志完整性 + M2 收口 |
 
 ## Milestone 2 阶段总结（DONE）
 P1-A~P1-F 全部完成，三场景真实 Gazebo 全 PASS（normal 14.2s / dual_object 28.6s / regrasp 14.6s）。
