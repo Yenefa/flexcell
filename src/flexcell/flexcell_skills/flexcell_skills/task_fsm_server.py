@@ -60,7 +60,7 @@ from flexcell_skills.contracts.episode import EpisodeRecorder, EpisodeStore
 from flexcell_skills.contracts.benchmark_protocol import load_protocol
 from flexcell_skills.contracts.safety_gate import (
     destination_clear, metrics as safety_metrics,
-    sanitize as sanitize_decision, validate)
+    rejection_canonical_code, sanitize as sanitize_decision, validate)
 from flexcell_skills.contracts.recovery import (
     RECIPE_PICK, RECIPE_VERIFY, recovery_eligible)
 from flexcell_skills.contracts.skill_result import previous_skill_result
@@ -973,6 +973,13 @@ class TaskFsmServer(Node):
                         world_dict, decision.target, zones[zone_of[decision.target]])
                 if not gate_ok:
                     safety_rejected += 1
+                    # P1-B: the rejection reason is typed, not flattened into
+                    # one code. The mapping is the existing
+                    # rejection_canonical_code() vocabulary, so a stale world,
+                    # an unknown target and a contract violation stay
+                    # distinguishable for the caller and for the decision log.
+                    rejection_code = rejection_canonical_code(gate_reason)
+                    rejection_kind = str(gate_reason or '').split(':', 1)[0]
                     self._decision_log.write({
                         'run_id': run_id, 'scenario_id': scenario,
                         'seq': decision_seq,
@@ -990,15 +997,24 @@ class TaskFsmServer(Node):
                         'policy_trace': decision.policy_trace,
                         'dispatched': False,
                         'safety_rejection': gate_reason,
+                        'rejection_kind': rejection_kind,
+                        'rejection_error_code': int(rejection_code),
                     })
                     episode.record_executor_result(
                         detail='safety rejection: %s' % gate_reason,
                         post_condition='SAFETY_REJECTED')
+                    # The ACTION contract keeps ERR_SAFETY_REJECTED (a client
+                    # switch on the action code must not change); the typed
+                    # canonical cause rides in the detail prefix and in the
+                    # decision log so a caller/auditor can still tell a stale
+                    # world from an unknown target.
                     return finish(result_type.OUTCOME_FAILED,
                                   result_type.ERR_SAFETY_REJECTED,
-                                  'safety gate rejected %s on %r: %s'
+                                  'safety gate rejected %s on %r: %s '
+                                  '[canonical_error_code=%d kind=%s]'
                                   % (decision.action, decision.target,
-                                     gate_reason))
+                                     gate_reason, int(rejection_code),
+                                     rejection_kind))
                 dispatch_view = sanitize_decision(decision)
                 # the dispatch sites read ONLY action/target - the sanitized
                 # assert proves free text (explanation) can never reach a
