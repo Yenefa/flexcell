@@ -63,7 +63,8 @@ class CarryServer(Node):
         self.declare_parameter('query_service', '/flexcell/carry_snapshot')
         self.declare_parameter('log_dir', '~/.ros/flexcell')
         from flexcell_skills import known_objects
-        known_objects.configure(self.declare_parameter(
+        # P1-E: a node-scoped registry, not the shared module-level set
+        self._objects = known_objects.Registry(self.declare_parameter(
             'tracked_objects', list(known_objects.DEFAULT_OBJECTS)).value)
         self.declare_parameter('log_file', 'carry.jsonl')
         # A joint session is anchored on a measured pre-attach reference: the

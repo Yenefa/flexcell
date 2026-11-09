@@ -90,7 +90,8 @@ class PickServer(Node):
         self.declare_parameter('default_motion_profile', 'demo_slow')
         self.declare_parameter('log_dir', '~/.ros/flexcell')
         from flexcell_skills import known_objects
-        known_objects.configure(self.declare_parameter(
+        # P1-E: a node-scoped registry, not the shared module-level set
+        self._objects = known_objects.Registry(self.declare_parameter(
             'tracked_objects', list(known_objects.DEFAULT_OBJECTS)).value)
         self.declare_parameter('log_file', 'pick.jsonl')
 
@@ -182,7 +183,7 @@ class PickServer(Node):
         carry knocked the third box 0.18 m away).
         """
         synced, skipped = [], []
-        for name in known_objects.known():
+        for name in known_objects.for_owner(self).known():
             if name == attached_name:
                 continue
             measured, error = sample_gz_pose(name, max_age_s=.5)
@@ -420,7 +421,7 @@ class PickServer(Node):
             # A scene that declares additional boxes must show every one of them
             # to the planner before the approach. Historical two-box profiles keep
             # their exact existing scene sequence.
-            if len(known_objects.known()) > len(known_objects.DEFAULT_OBJECTS):
+            if len(known_objects.for_owner(self).known()) > len(known_objects.DEFAULT_OBJECTS):
                 synced, skipped = self._sync_scene_objects(goal.object_name)
                 rec['scene_synced'] = synced
                 rec['scene_sync_skipped'] = skipped

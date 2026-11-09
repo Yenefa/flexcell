@@ -12,7 +12,7 @@
 | P1-B | Safety Gate 错误码分类 | **DONE** | `test_rejection_typing.py` 5 passed |
 | P1-C | FSM 动作顺序约束 | **DONE** | `test_action_order.py` 11 passed |
 | P1-D | Gripper 反馈验证 | **DONE** | `test_gripper_feedback.py` 9 passed |
-| P1-E | known_objects 状态解耦 | TODO | — |
+| P1-E | known_objects 状态解耦 | **DONE** | `test_object_registry_scope.py` 7 passed |
 | P1-F | Episode 与日志完整性 | TODO | — |
 | P2-A | Inference Budget 完善 | TODO | — |
 | P2-B | Task FSM 模块化 | TODO | — |
@@ -36,3 +36,4 @@
 | `ec2ee41` | P1-C 动作顺序约束 |
 | `da06b2a` | P1-D 夹爪反馈 |
 | `43f5e27` | P1 集成验证 + 世界刷新 |
+| `3273a65` | P0-A 取消集成验证 |

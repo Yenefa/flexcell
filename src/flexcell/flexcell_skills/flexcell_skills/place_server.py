@@ -85,7 +85,8 @@ class PlaceServer(Node):
         self.declare_parameter('default_motion_profile', 'demo_slow')
         self.declare_parameter('log_dir', '~/.ros/flexcell')
         from flexcell_skills import known_objects
-        known_objects.configure(self.declare_parameter(
+        # P1-E: a node-scoped registry, not the shared module-level set
+        self._objects = known_objects.Registry(self.declare_parameter(
             'tracked_objects', list(known_objects.DEFAULT_OBJECTS)).value)
         self.declare_parameter('log_file', 'place.jsonl')
 
