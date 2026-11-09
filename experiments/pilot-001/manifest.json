@@ -7,7 +7,8 @@
       "tools": [
         "read_file",
         "write_file",
-        "run_checks"
+        "run_checks",
+        "edit_file"
       ]
     },
     "C": {
@@ -16,7 +17,8 @@
         "write_file",
         "run_checks",
         "run_execution",
-        "read_telemetry"
+        "read_telemetry",
+        "edit_file"
       ]
     },
     "B": {
@@ -26,7 +28,8 @@
         "run_checks",
         "run_execution",
         "read_telemetry",
-        "read_verification"
+        "read_verification",
+        "edit_file"
       ]
     },
     "B2": {
@@ -37,7 +40,8 @@
         "run_execution",
         "read_telemetry",
         "read_verification",
-        "read_diagnosis"
+        "read_diagnosis",
+        "edit_file"
       ],
       "note": "B plus a structured diagnosis tool; used to test whether attribution, not verdict, adds value"
     },
@@ -47,7 +51,8 @@
         "write_file",
         "run_checks",
         "run_execution",
-        "read_telemetry"
+        "read_telemetry",
+        "edit_file"
       ],
       "note": "W5 arm: failure output only (no independent verdict)"
     },
@@ -58,7 +63,8 @@
         "run_checks",
         "run_execution",
         "read_telemetry",
-        "read_verification"
+        "read_verification",
+        "edit_file"
       ],
       "note": "W5 arm: failure output plus independent verdict"
     }

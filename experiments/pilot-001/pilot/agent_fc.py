@@ -11,6 +11,10 @@ SPECS = {
     "write_file": {"type": "object",
                    "properties": {"path": {"type": "string"}, "content": {"type": "string"}},
                    "required": ["path", "content"]},
+    "edit_file": {"type": "object",
+                  "properties": {"path": {"type": "string"}, "old": {"type": "string"},
+                                 "new": {"type": "string"}},
+                  "required": ["path", "old", "new"]},
     "run_checks": {"type": "object", "properties": {}},
     "run_execution": {"type": "object", "properties": {}},
     "read_telemetry": {"type": "object", "properties": {}},
@@ -20,13 +24,14 @@ SPECS = {
 
 
 class FCAgent:
-    def __init__(self, chat, tools, task_text, force_first_tool=None):
+    def __init__(self, chat, tools, task_text, force_first_tool=None, max_iterations=5):
         self.chat = chat
         self.tools = list(tools)
         self.force_first_tool = force_first_tool if force_first_tool in self.tools else None
         self.task_text = task_text
         self.history = []
         self.calls = 0
+        self.max_iterations = int(max_iterations)
 
     def _schemas(self):
         return [{"type": "function",
@@ -34,7 +39,13 @@ class FCAgent:
                               "parameters": SPECS[name]}} for name in self.tools]
 
     def step(self, toolbox, iteration):
-        messages = [{"role": "system", "content": SYSTEM + "\nTask: " + self.task_text}]
+        modified = [c for c in toolbox.calls if c and c[0] in ("write_file", "edit_file")]
+        progress = ("Iteration %d/%d. Files modified so far: %s. Reading alone does not "
+                    "complete the task; once you know the fix, apply it with edit_file "
+                    "(small targeted change) or write_file." %
+                    (iteration, self.max_iterations, "yes" if modified else "none"))
+        messages = [{"role": "system", "content": SYSTEM + "\nTask: " + self.task_text},
+                    {"role": "system", "content": progress}]
         messages.extend(self.history)
         choice = "auto"
         if not self.history and self.force_first_tool:
@@ -61,6 +72,9 @@ class FCAgent:
                 elif name == "write_file":
                     toolbox.write_file(args["path"], args["content"])
                     result = "wrote " + args["path"]
+                elif name == "edit_file":
+                    toolbox.edit_file(args["path"], args["old"], args["new"])
+                    result = "edited " + args["path"]
                 elif name == "run_checks":
                     result = json.dumps(toolbox.run_checks())
                 elif name == "run_execution":

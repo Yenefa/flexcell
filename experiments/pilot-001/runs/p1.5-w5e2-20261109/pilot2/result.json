@@ -1,0 +1,64 @@
+{
+  "arm": "W5A",
+  "meta": {
+    "task": "T-W5E2",
+    "model": "deepseek-chat",
+    "base_url": "https://api.deepseek.com",
+    "key_fingerprint": "84edc02f"
+  },
+  "success": false,
+  "first_pass": false,
+  "iterations": 4,
+  "claim_success": false,
+  "false_success": false,
+  "violation": null,
+  "cost": {
+    "tokens": 8709,
+    "agent_s": 144.125,
+    "execution_s": 138.578
+  },
+  "evidence": {
+    "items": {
+      "verdict.json": {
+        "present": true,
+        "bytes": 716,
+        "sha256": "64651907005a0482a2c1c5dea9471def9eb3088aab41c525656f61ece5ff99ee"
+      },
+      "telemetry/execution.log": {
+        "present": true,
+        "bytes": 974,
+        "sha256": "36cab7e64197113e283bef98090a5ca96bf9215d5875329bfb4c48b3e8f948be"
+      },
+      "episode.json": {
+        "present": true,
+        "bytes": 910,
+        "sha256": "6ee36a65ac634de50ca958ff33d428827332684ef5454d4f719df81c4a11ec64"
+      },
+      "fingerprint.json": {
+        "present": true,
+        "bytes": 260,
+        "sha256": "22229bc67c529c71d40f41ea242584018894c45f660ca9cbcb8cbfe758d91521"
+      }
+    },
+    "present": 4,
+    "required": 4,
+    "completeness": 1.0
+  },
+  "verdict": {
+    "passed": false,
+    "returncode": 1,
+    "stdout": "{\"passed\": false, \"target\": {\"status\": \"ROBOT_FAILURE\", \"returncode\": 1, \"fingerprint\": \"0984d29d890bd9614deddfb9d0948877c84f11e61a34af071915a01d680bb2d3\"}, \"regression\": {\"status\": \"PASS\", \"returncode\": 0, \"fingerprint\": \"0984d29d890bd9614deddfb9d0948877c84f11e61a34af071915a01d680bb2d3\"}}\n",
+    "stderr": "",
+    "target": {
+      "status": "ROBOT_FAILURE",
+      "returncode": 1,
+      "fingerprint": "0984d29d890bd9614deddfb9d0948877c84f11e61a34af071915a01d680bb2d3"
+    },
+    "regression": {
+      "status": "PASS",
+      "returncode": 0,
+      "fingerprint": "0984d29d890bd9614deddfb9d0948877c84f11e61a34af071915a01d680bb2d3"
+    }
+  },
+  "run_dir": "C:\\Users\\fuker\\Desktop\\workspace\\project-033-flexcell\\ci-public-window\\evidence\\pilot001-w5e2\\w5e2-W5A"
+}

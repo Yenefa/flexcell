@@ -76,6 +76,8 @@ def run_one(manifest, arm, agent, template, out_dir, meta=None, protected=None,
     judge = Judge(ws, ACCEPTANCE.get(meta.get("task", "") if meta else "", "gate/acceptance.py"),
                   env=extra_env, timeout=int(budget.get("judge_timeout_s", 120)))
 
+    if hasattr(agent, "max_iterations"):
+        agent.max_iterations = int(budget["max_iterations"])
     rec.emit("run_start", arm=arm, task=manifest.get("pilot"), tools=sorted(toolbox.allowed))
     verdict = {"passed": False}
     violation = None
