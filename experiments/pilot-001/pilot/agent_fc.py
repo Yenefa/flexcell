@@ -11,6 +11,7 @@ SPECS = {
     "write_file": {"type": "object",
                    "properties": {"path": {"type": "string"}, "content": {"type": "string"}},
                    "required": ["path", "content"]},
+    "list_dir": {"type": "object", "properties": {"path": {"type": "string"}}},
     "edit_file": {"type": "object",
                   "properties": {"path": {"type": "string"}, "old": {"type": "string"},
                                  "new": {"type": "string"}},
@@ -59,6 +60,7 @@ class FCAgent:
 
         assistant = {"role": "assistant", "content": reply.get("content") or "",
                      "tool_calls": calls}
+        results = []
         self.history.append(assistant)
         for call in calls:
             name = call["function"]["name"]
@@ -69,6 +71,8 @@ class FCAgent:
             try:
                 if name == "read_file":
                     result = toolbox.read_file(args["path"])
+                elif name == "list_dir":
+                    result = toolbox.list_dir(args.get("path", "."))
                 elif name == "write_file":
                     toolbox.write_file(args["path"], args["content"])
                     result = "wrote " + args["path"]
@@ -89,4 +93,6 @@ class FCAgent:
                 result = "ERROR " + type(exc).__name__ + ": " + str(exc)
             self.history.append({"role": "tool", "tool_call_id": call.get("id", ""),
                                  "content": str(result)[:4000]})
-        return {"claim_success": False, "done": False, "tokens": reply["tokens"]}
+            results.append({"tool": name, "result": str(result)[:400]})
+        return {"claim_success": False, "done": False, "tokens": reply["tokens"],
+                "assistant_text": (reply.get("content") or "")[:800], "results": results}

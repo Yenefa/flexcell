@@ -34,7 +34,18 @@ class ToolBox:
     def read_file(self, rel):
         self._need("read_file")
         self.calls.append(("read_file", rel))
-        return self._inside(rel).read_text(encoding="utf-8")
+        path = self._inside(rel)
+        if path.is_dir():
+            return "directory %s:\n%s" % (rel, "\n".join(sorted(p.name for p in path.iterdir())))
+        return path.read_text(encoding="utf-8")
+
+    def list_dir(self, rel="."):
+        self._need("list_dir")
+        self.calls.append(("list_dir", rel))
+        path = self._inside(rel)
+        if not path.is_dir():
+            raise NotADirectoryError("%s is not a directory" % rel)
+        return "\n".join(sorted(p.name + ("/" if p.is_dir() else "") for p in path.iterdir()))
 
     def write_file(self, rel, content):
         self._need("write_file")

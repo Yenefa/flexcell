@@ -309,3 +309,16 @@ def test_toolbox_edit_file_refuses_protected(tmp_path):
     box = ToolBox("A", ["edit_file"], ws, guard, ws / "verdict.json", None)
     with pytest.raises(ProtectedViolation):
         box.edit_file("gate/acceptance.py", "ok", "no")
+
+
+def test_toolbox_read_file_lists_a_directory_and_list_dir(tmp_path):
+    ws = tmp_path / "ws"
+    (ws / "gate").mkdir(parents=True)
+    (ws / "gate" / "acceptance.py").write_text("print('ok')\n", encoding="utf-8")
+    guard = HashGuard(ws, [])
+    guard.snapshot()
+    box = ToolBox("A", ["read_file", "list_dir"], ws, guard, ws / "verdict.json", None)
+    listed = box.list_dir("gate")
+    assert listed == "acceptance.py"
+    as_read = box.read_file("gate")
+    assert "directory gate" in as_read and "acceptance.py" in as_read

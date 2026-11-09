@@ -110,6 +110,9 @@ def run_one(manifest, arm, agent, template, out_dir, meta=None, protected=None,
         claim_success = bool(claim.get("claim_success", claim_success))
         rec.emit("iteration", index=it, claim_success=claim_success,
                  calls=list(toolbox.calls))
+        if claim.get("results") or claim.get("assistant_text"):
+            rec.emit("transcript", index=it, assistant=claim.get("assistant_text", ""),
+                     results=claim.get("results", []))
 
         if not any(c and c[0] == "run_execution" for c in toolbox.calls):
             # execution is optional (A arm); still record an A-side observation
