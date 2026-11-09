@@ -157,3 +157,27 @@ def build_tg4(target):
         {"case": "dual_object", "zone_2_pose": [0.45, 0.05, 0.0175]}, indent=2) + "\n",
         encoding="utf-8")
     return target
+
+
+def build_tg3_transfer(target, warm=False):
+    """W6 transfer probe: same regrasp failure, with or without prior attribution."""
+    target = Path(target)
+    if target.exists():
+        import shutil
+        shutil.rmtree(target)
+    (target / "gate").mkdir(parents=True)
+    header = (
+        "# T-G3T - regrasp task, diagnose from telemetry (real Gazebo)\n\n"
+        "The robot fails during the regrasp scenario. Diagnose the cause from the\n"
+        "execution telemetry and fix plan.json so the real task verifies.\n"
+        "gate/ is read-only.\n")
+    note = (
+        "\n## Prior experience (transferred from an earlier task)\n"
+        "PLACE failures with ERR_MOTION_FAILED were caused by a destination that the\n"
+        "arm cannot reach. Destinations with 0.20 <= hypot(x, y) < 0.30 worked.\n")
+    (target / "task.md").write_text(header + (note if warm else ""), encoding="utf-8")
+    (target / "gate" / "acceptance.py").write_text(ACCEPT, encoding="utf-8")
+    (target / "plan.json").write_text(json.dumps(
+        {"case": "regrasp", "place_pose": [0.45, 0.0, 0.0175]}, indent=2) + "\n",
+        encoding="utf-8")
+    return target

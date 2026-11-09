@@ -1,0 +1,62 @@
+{
+  "arm": "B",
+  "meta": {
+    "task": "T-G3C",
+    "model": "deepseek-chat",
+    "base_url": "https://api.deepseek.com",
+    "key_fingerprint": "84edc02f"
+  },
+  "success": false,
+  "first_pass": false,
+  "iterations": 5,
+  "claim_success": false,
+  "false_success": false,
+  "violation": null,
+  "cost": {
+    "tokens": 6260,
+    "agent_s": 93.25,
+    "execution_s": 88.891
+  },
+  "evidence": {
+    "items": {
+      "verdict.json": {
+        "present": true,
+        "bytes": 537,
+        "sha256": "5ec1f30504c778b2f3a69437bb0c3ab67276b60c71d08d6c2ff6fb0f27ec2260"
+      },
+      "telemetry/execution.log": {
+        "present": true,
+        "bytes": 926,
+        "sha256": "e2dcdd3ecceb022724bf923a072731fa3cc4478164ea2c08b4e575c3ea927c89"
+      },
+      "episode.json": {
+        "present": true,
+        "bytes": 863,
+        "sha256": "6ec0fa4296c90c9c8210769ebf2f51f7c7a9b06eac7ef5f5d335b16160111b29"
+      },
+      "fingerprint.json": {
+        "present": true,
+        "bytes": 258,
+        "sha256": "b798f2d2f119f0f33d50c578cfea8c48c218c8865fa1fd8867a86f8978c5acfa"
+      }
+    },
+    "present": 4,
+    "required": 4,
+    "completeness": 1.0
+  },
+  "verdict": {
+    "passed": false,
+    "returncode": 1,
+    "stdout": "{\"passed\": false, \"status\": \"REGRASP_BLOCKED_FIRST_TASK\", \"runtime_fingerprint\": \"3cab9dd5e2dd62013736f8cef0a2a65eec8468a9d7a353c06acf9add25371a1d\", \"place_pose\": [0.45, 0.0, 0.0175], \"zone_2_pose\": null, \"returncode\": 1}\n",
+    "stderr": "",
+    "status": "REGRASP_BLOCKED_FIRST_TASK",
+    "runtime_fingerprint": "3cab9dd5e2dd62013736f8cef0a2a65eec8468a9d7a353c06acf9add25371a1d",
+    "place_pose": [
+      0.45,
+      0.0,
+      0.0175
+    ],
+    "zone_2_pose": null
+  },
+  "run_dir": "C:\\Users\\fuker\\Desktop\\workspace\\project-033-flexcell\\ci-public-window\\evidence\\pilot001-w6-cold\\T-G3C-B"
+}
