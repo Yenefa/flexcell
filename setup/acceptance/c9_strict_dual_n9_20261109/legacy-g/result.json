@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "backend": "velocity_servo",
+  "skill_backend": "legacy",
+  "physical_tasks_dispatched": 1,
+  "qualification": "FUNCTIONAL_SMOKE_ONLY",
+  "case": "dual_object",
+  "object": "target_box_a",
+  "out": "/tmp/c9-legacy-g/run-ba25fb8703e0",
+  "decision_policy": "fsm",
+  "hybrid_threshold": null,
+  "resume_completed": false,
+  "model_env": {
+    "FLEXCELL_LLM_ENDPOINT": null,
+    "FLEXCELL_LLM_MODEL": null,
+    "FLEXCELL_LLM_BACKEND": null,
+    "FLEXCELL_JEV_ENDPOINT": null,
+    "FLEXCELL_JEV_MODEL": null,
+    "FLEXCELL_JEV_BACKEND": null
+  },
+  "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+  "semantic_config_sha256": "940fe0add4af876eefd46d145a66843e364e4042695f3b4c4a1f0d53ec4553ed",
+  "runtime_fingerprint": "2a08bfc7aa7453f054defd8b2955f52a843d52dc4c38d406a48f9b469b2abee0",
+  "task_start_monotonic_ns": 34160133308578,
+  "goal_pose": [
+    0.12,
+    -0.15,
+    0.0175
+  ],
+  "zone_2_pose": null,
+  "config_override": "/tmp/c9-overlay.yaml",
+  "task_end_monotonic_ns": 34188908636833,
+  "task": {
+    "action": "demo",
+    "goal_uuid": "7acebb5f5c1e4e8fbcbc2756a0aff54a",
+    "outcome": "OUTCOME_SUCCEEDED",
+    "outcome_val": 0,
+    "error_code": "ERR_NONE",
+    "detail": "task done: all assignments verified",
+    "evidence_id": "week1_demo_v1-0ef3860f",
+    "wall_seconds": 28.143,
+    "fsm_trace": [
+      "PICK_A(attempt=1):OK",
+      "PLACE_A:OK",
+      "VERIFY_A(attempt=1):OK",
+      "PICK_B(attempt=1):OK",
+      "PLACE_B:OK",
+      "VERIFY_B(attempt=1):OK"
+    ],
+    "object_a_at_zone": true,
+    "object_b_at_zone": true,
+    "zone_a_error_m": 0.0020624375801779724,
+    "zone_b_error_m": 0.0033275341120598393,
+    "run_id": "week1_demo_v1-d99af91d",
+    "scenario_id": "week1_demo_v1"
+  },
+  "actual_routing": {
+    "decisions": 8,
+    "sources": {
+      "fsm": 8
+    },
+    "leaves": {
+      "fsm": 8
+    },
+    "fallbacks": 0,
+    "models": [],
+    "backends": [],
+    "fast_calls": 0,
+    "slow_calls": 0,
+    "model_calls": 0,
+    "calls_without_identity": 0
+  },
+  "model_calls": 0,
+  "fast_calls": 0,
+  "slow_calls": 0,
+  "expectation_met": true,
+  "recorder_exit": 0,
+  "owned_launch_exit": 0,
+  "unavailable_numeric_fields": {}
+}

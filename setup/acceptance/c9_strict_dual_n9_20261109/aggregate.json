@@ -1,0 +1,201 @@
+{
+  "protocol": "docs/C9_PREREGISTRATION.md",
+  "tolerance_m": 0.02,
+  "n_per_arm": 9,
+  "fsm": {
+    "success": 9,
+    "walls": [
+      28.149,
+      28.89,
+      27.931,
+      28.143,
+      28.386,
+      27.481,
+      28.389,
+      28.362,
+      28.799
+    ],
+    "mean": 28.281111111111112,
+    "median": 28.362
+  },
+  "mtc": {
+    "success": 6,
+    "walls": [
+      54.436,
+      41.911,
+      54.399,
+      33.299,
+      33.05,
+      33.317,
+      54.344,
+      32.726,
+      33.267
+    ],
+    "mean": 41.19433333333333,
+    "median": 33.317
+  },
+  "rows": [
+    {
+      "phase": "C8",
+      "run": "legacy-a",
+      "arm": "fsm",
+      "status": "PASS",
+      "wall": 28.149,
+      "error": "ERR_NONE",
+      "sha": "c0f645e03f3742cb93fa2054a99f617660b5e93482eafb49088f027391ba5bc6"
+    },
+    {
+      "phase": "C8",
+      "run": "mtc-b",
+      "arm": "mtc",
+      "status": "ROBOT_FAILURE",
+      "wall": 54.436,
+      "error": "ERR_RECOVERY_EXHAUSTED",
+      "sha": "8ef7c5ca7ddd3c34dce15aab045eb1f954572f8481d81362632d8fd836a48ff3"
+    },
+    {
+      "phase": "C8",
+      "run": "mtc-c",
+      "arm": "mtc",
+      "status": "PASS",
+      "wall": 41.911,
+      "error": "ERR_NONE",
+      "sha": "db72de510f0df139d82cff486ffee4d39de54e2d82376f0225dc698ce4345f52"
+    },
+    {
+      "phase": "C8",
+      "run": "legacy-d",
+      "arm": "fsm",
+      "status": "PASS",
+      "wall": 28.89,
+      "error": "ERR_NONE",
+      "sha": "cf23d6b6e832780fdb8887c30d22bafbf7362a207525d94d589b6722112c48eb"
+    },
+    {
+      "phase": "C8",
+      "run": "legacy-e",
+      "arm": "fsm",
+      "status": "PASS",
+      "wall": 27.931,
+      "error": "ERR_NONE",
+      "sha": "77cb27fa6f02d75c28e6bdfb36c1dd15f1a5009b720f5006e6be87126cc4c31b"
+    },
+    {
+      "phase": "C8",
+      "run": "mtc-f",
+      "arm": "mtc",
+      "status": "ROBOT_FAILURE",
+      "wall": 54.399,
+      "error": "ERR_RECOVERY_EXHAUSTED",
+      "sha": "561b0572872aae20dadc7c015b9e901198b9b624d1aa3de601fe5114a94ce20e"
+    },
+    {
+      "phase": "C9",
+      "run": "legacy-g",
+      "arm": "fsm",
+      "status": "PASS",
+      "wall": 28.143,
+      "error": "ERR_NONE",
+      "sha": "ef225b1ce19d67694232187df1892d1a2cf131c62c3a3bfc5aa7213d5e546efc"
+    },
+    {
+      "phase": "C9",
+      "run": "mtc-h",
+      "arm": "mtc",
+      "status": "PASS",
+      "wall": 33.299,
+      "error": "ERR_NONE",
+      "sha": "ab0d78a8d83349d440efa7c085da9d589de114ee2d0555ffee4825fe6d3af1b7"
+    },
+    {
+      "phase": "C9",
+      "run": "mtc-i",
+      "arm": "mtc",
+      "status": "PASS",
+      "wall": 33.05,
+      "error": "ERR_NONE",
+      "sha": "c70ef8bf789c921c9daaee946ec2718398107327908adc2442fdcae725f998bc"
+    },
+    {
+      "phase": "C9",
+      "run": "legacy-j",
+      "arm": "fsm",
+      "status": "PASS",
+      "wall": 28.386,
+      "error": "ERR_NONE",
+      "sha": "f8ac674ca3b60aabc3cdf2ec1081edf2661d1132b9734ddd88e65c6e1394b396"
+    },
+    {
+      "phase": "C9",
+      "run": "mtc-k",
+      "arm": "mtc",
+      "status": "PASS",
+      "wall": 33.317,
+      "error": "ERR_NONE",
+      "sha": "a575a87bf076a35e6f94fc9494036309c00741d2f4ae3fbc7594750883356a17"
+    },
+    {
+      "phase": "C9",
+      "run": "legacy-l",
+      "arm": "fsm",
+      "status": "PASS",
+      "wall": 27.481,
+      "error": "ERR_NONE",
+      "sha": "f77e41c6d4fb5e8de78aa6c23925b7a1d8c6641c026c97041c209c41a1caf606"
+    },
+    {
+      "phase": "C9",
+      "run": "mtc-m",
+      "arm": "mtc",
+      "status": "ROBOT_FAILURE",
+      "wall": 54.344,
+      "error": "ERR_RECOVERY_EXHAUSTED",
+      "sha": "c52d28abfe85aa46d362b2c64b1a3e4c829dd56a55d121ef62f83568f65bd652"
+    },
+    {
+      "phase": "C9",
+      "run": "legacy-n",
+      "arm": "fsm",
+      "status": "PASS",
+      "wall": 28.389,
+      "error": "ERR_NONE",
+      "sha": "c931fc34c6e117203a89cb8a81d318fced4b72fa95b092bbba2d2f846156637b"
+    },
+    {
+      "phase": "C9",
+      "run": "legacy-o",
+      "arm": "fsm",
+      "status": "PASS",
+      "wall": 28.362,
+      "error": "ERR_NONE",
+      "sha": "7a1e5e181249ebf76c3e792701b57a842292f0d20535cf2466e3188e3e6e2cc1"
+    },
+    {
+      "phase": "C9",
+      "run": "mtc-p",
+      "arm": "mtc",
+      "status": "PASS",
+      "wall": 32.726,
+      "error": "ERR_NONE",
+      "sha": "97c59e12ae21a4938068403836e25eeea91cac5e25ab2e936e8f528e1d4ee854"
+    },
+    {
+      "phase": "C9",
+      "run": "mtc-q",
+      "arm": "mtc",
+      "status": "PASS",
+      "wall": 33.267,
+      "error": "ERR_NONE",
+      "sha": "fe1f93f55bf2d87bb024597847acc6c19ea147dc961ddeeea6ab429f1d9d36da"
+    },
+    {
+      "phase": "C9",
+      "run": "legacy-r",
+      "arm": "fsm",
+      "status": "PASS",
+      "wall": 28.799,
+      "error": "ERR_NONE",
+      "sha": "8d4373917eb19c1264bc9182d00874865c47d7d3560748de246fba86ba0aeb69"
+    }
+  ]
+}
