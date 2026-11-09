@@ -90,7 +90,7 @@
 
 **Blocker**：C3 需要先冻结协议；MTC 运行成本较高。
 
-**Next Action**：C8 预注册已写（`docs/C8_PREREGISTRATION.md`，dual_object + 2 cm 容差），待执行。
+**Next Action**：C8 ✅（FSM 3/3 vs MTC 1/3，首次成功差异；n=3 不显著）。下一步：C9 需先预注册（重复 C8 至 n=9 以检验差异是否稳定）。
 
 ---
 

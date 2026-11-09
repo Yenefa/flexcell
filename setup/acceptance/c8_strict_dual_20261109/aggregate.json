@@ -1,0 +1,85 @@
+{
+  "protocol": "docs/C8_PREREGISTRATION.md",
+  "tolerance_m": 0.02,
+  "n_per_arm": 3,
+  "fsm": {
+    "success": 3,
+    "walls": [
+      28.149,
+      28.89,
+      27.931
+    ],
+    "mean": 28.323333333333334
+  },
+  "mtc": {
+    "success": 1,
+    "walls": [
+      54.436,
+      41.911,
+      54.399
+    ],
+    "mean": 50.24866666666667
+  },
+  "rows": [
+    {
+      "run": "legacy-a",
+      "arm": "fsm",
+      "status": "PASS",
+      "wall": 28.149,
+      "error": "ERR_NONE",
+      "detail": "task done: all assignments verified",
+      "fingerprint": "2a08bfc7aa7453f054defd8b2955f52a843d52dc4c38d406a48f9b469b2abee0",
+      "sha": "c0f645e03f3742cb93fa2054a99f617660b5e93482eafb49088f027391ba5bc6"
+    },
+    {
+      "run": "mtc-b",
+      "arm": "mtc",
+      "status": "ROBOT_FAILURE",
+      "wall": 54.436,
+      "error": "ERR_RECOVERY_EXHAUSTED",
+      "detail": "policy abort (BUDGET_EXHAUSTED): pick attempt 2 failed (error 30) (trace=PICK_A(attempt=1):OK,PLACE_A:OK,VERIFY_A(attempt=1):OK,PICK_B(attempt=1):FAIL:ERR_MOTION_FAILED,RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1)),P",
+      "fingerprint": "d9f2ddf6de6b21675ce4bb3ced885b66a1938cbf67b29295b8304d3e7e95c22b",
+      "sha": "8ef7c5ca7ddd3c34dce15aab045eb1f954572f8481d81362632d8fd836a48ff3"
+    },
+    {
+      "run": "mtc-c",
+      "arm": "mtc",
+      "status": "PASS",
+      "wall": 41.911,
+      "error": "ERR_NONE",
+      "detail": "task done: all assignments verified",
+      "fingerprint": "d9f2ddf6de6b21675ce4bb3ced885b66a1938cbf67b29295b8304d3e7e95c22b",
+      "sha": "db72de510f0df139d82cff486ffee4d39de54e2d82376f0225dc698ce4345f52"
+    },
+    {
+      "run": "legacy-d",
+      "arm": "fsm",
+      "status": "PASS",
+      "wall": 28.89,
+      "error": "ERR_NONE",
+      "detail": "task done: all assignments verified",
+      "fingerprint": "2a08bfc7aa7453f054defd8b2955f52a843d52dc4c38d406a48f9b469b2abee0",
+      "sha": "cf23d6b6e832780fdb8887c30d22bafbf7362a207525d94d589b6722112c48eb"
+    },
+    {
+      "run": "legacy-e",
+      "arm": "fsm",
+      "status": "PASS",
+      "wall": 27.931,
+      "error": "ERR_NONE",
+      "detail": "task done: all assignments verified",
+      "fingerprint": "2a08bfc7aa7453f054defd8b2955f52a843d52dc4c38d406a48f9b469b2abee0",
+      "sha": "77cb27fa6f02d75c28e6bdfb36c1dd15f1a5009b720f5006e6be87126cc4c31b"
+    },
+    {
+      "run": "mtc-f",
+      "arm": "mtc",
+      "status": "ROBOT_FAILURE",
+      "wall": 54.399,
+      "error": "ERR_RECOVERY_EXHAUSTED",
+      "detail": "policy abort (BUDGET_EXHAUSTED): pick attempt 2 failed (error 30) (trace=PICK_A(attempt=1):OK,PLACE_A:OK,VERIFY_A(attempt=1):OK,PICK_B(attempt=1):FAIL:ERR_MOTION_FAILED,RECOVERY:REOBSERVE+RETRY(after PICK_B(attempt=1)),P",
+      "fingerprint": "d9f2ddf6de6b21675ce4bb3ced885b66a1938cbf67b29295b8304d3e7e95c22b",
+      "sha": "561b0572872aae20dadc7c015b9e901198b9b624d1aa3de601fe5114a94ce20e"
+    }
+  ]
+}
