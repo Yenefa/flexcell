@@ -207,3 +207,31 @@ def build_t_w5e2d(target, config_source):
         "regrasp regressions; you do not need to run them yourself.\n",
         encoding="utf-8")
     return target
+
+
+E2E_OVERLAY = '''observe_server:
+  ros__parameters:
+    tracked_objects: ["target_box_a"]
+'''
+
+
+def build_t_w5e2e(target, config_source):
+    target = Path(target)
+    if target.exists():
+        import shutil
+        shutil.rmtree(target)
+    (target / "gate").mkdir(parents=True)
+    (target / "config").mkdir()
+    (target / "telemetry").mkdir()
+    (target / "config" / "week1.yaml").write_text(E2E_OVERLAY, encoding="utf-8")
+    (target / "gate" / "acceptance.py").write_text(ACCEPT_C, encoding="utf-8")
+    (target / "task.md").write_text(
+        "# W5-E2e - second object is not registered\n\n"
+        "The two-object task stops at the second object: the safety gate rejects it as\n"
+        "target_not_available. The first object and the normal/regrasp tasks work.\n\n"
+        "The defect is a missing entry in config/week1.yaml (observe_server\n"
+        "tracked_objects). Do not inspect gate/ or other files. Run the target scenario\n"
+        "once with run_execution, then edit config/week1.yaml so both objects are\n"
+        "tracked and all three gates pass.\n",
+        encoding="utf-8")
+    return target

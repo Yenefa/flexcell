@@ -1,0 +1,24 @@
+{
+  "status": "ROBOT_FAILURE",
+  "case": "dual_object",
+  "runtime_fingerprint": "6780bf7934d55e1317b4770a33f01352264e6bd0346c8da012b736d29ef3f24a",
+  "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+  "semantic_config_sha256": "766b07f396d00628b626137685cbd0e61dc2deafc435e46c43b1b713bf491976",
+  "physical_tasks_dispatched": 1,
+  "window_id": null,
+  "goal_pose": [
+    0.12,
+    -0.15,
+    0.0175
+  ],
+  "task": {
+    "outcome": "OUTCOME_FAILED",
+    "error_code": "ERR_SAFETY_REJECTED",
+    "detail": "safety gate rejected PICK on 'target_box_b': target_not_available",
+    "final_position_error_m": null
+  },
+  "limits": {
+    "max_reach_m": 0.3,
+    "rule": "reach = hypot(x, y) must be strictly below max_reach_m"
+  }
+}
