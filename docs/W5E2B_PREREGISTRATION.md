@@ -25,7 +25,7 @@
 - `experiments/pilot-001/runs/p1.5-w5e2b-20261109/`。
 
 ## 5. 结果附录（运行后追加，不改规则）
-- **成功**：5 轮、5161 tokens；目标门 PASS、回归门 PASS、独立验收 `passed=true`；
+- **3/3 成功**：轮数 5/3/3，tokens 5161/2668/2668；三组目标门与回归门均 PASS、独立验收均 `passed=true`；
 - agent 用 `edit_file` 把 `zone_2_x` 0.45 → 0.25；`gate/` 未修改；
 - 记录：`experiments/pilot-001/runs/p1.5-w5e2b-20261109/`（含 `transcript.md`、`verify.py`）；
 - 期间发现并修正一个**任务缺陷注入 bug**：原注入误改旧键 `zone_zone_2_x` 且留下两处不可一次修复；改为最小覆盖文件。
