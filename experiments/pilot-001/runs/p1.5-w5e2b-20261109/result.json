@@ -1,0 +1,64 @@
+{
+  "arm": "W5A",
+  "meta": {
+    "task": "T-W5E2B",
+    "model": "deepseek-chat",
+    "base_url": "https://api.deepseek.com",
+    "key_fingerprint": "84edc02f"
+  },
+  "success": true,
+  "first_pass": false,
+  "iterations": 5,
+  "claim_success": false,
+  "false_success": false,
+  "violation": null,
+  "cost": {
+    "tokens": 5161,
+    "agent_s": 67.516,
+    "execution_s": 61.406
+  },
+  "evidence": {
+    "items": {
+      "verdict.json": {
+        "present": true,
+        "bytes": 696,
+        "sha256": "6eb722ff70c315526dea7ef96a9a3b832897f5abfb772d05f3f5a249a857d9fe"
+      },
+      "telemetry/execution.log": {
+        "present": true,
+        "bytes": 974,
+        "sha256": "328f8844e20e46380880fb74a61d23b0b752ff5b8dc8aca6625bbbc656a5e83f"
+      },
+      "episode.json": {
+        "present": true,
+        "bytes": 910,
+        "sha256": "2b131af0a5f1e672866ddbe74ef27580f208c5f7240fe4e44b5a2449f2eb22c7"
+      },
+      "fingerprint.json": {
+        "present": true,
+        "bytes": 260,
+        "sha256": "1028777121ec8e6305c6d9a72a72f21f851ca494fb18dcefc1100cb8b495230f"
+      }
+    },
+    "present": 4,
+    "required": 4,
+    "completeness": 1.0
+  },
+  "verdict": {
+    "passed": true,
+    "returncode": 0,
+    "stdout": "{\"passed\": true, \"target\": {\"status\": \"PASS\", \"returncode\": 0, \"fingerprint\": \"372b8971f63a46f4618c4fdebe2abc88c6dd72977633dc6324b346632d27ce2f\"}, \"regression\": {\"status\": \"PASS\", \"returncode\": 0, \"fingerprint\": \"372b8971f63a46f4618c4fdebe2abc88c6dd72977633dc6324b346632d27ce2f\"}}\n",
+    "stderr": "",
+    "target": {
+      "status": "PASS",
+      "returncode": 0,
+      "fingerprint": "372b8971f63a46f4618c4fdebe2abc88c6dd72977633dc6324b346632d27ce2f"
+    },
+    "regression": {
+      "status": "PASS",
+      "returncode": 0,
+      "fingerprint": "372b8971f63a46f4618c4fdebe2abc88c6dd72977633dc6324b346632d27ce2f"
+    }
+  },
+  "run_dir": "C:\\Users\\fuker\\Desktop\\workspace\\project-033-flexcell\\ci-public-window\\evidence\\pilot001-w5e2b\\w5e2b-W5A"
+}

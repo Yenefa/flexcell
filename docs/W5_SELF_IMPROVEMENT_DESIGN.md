@@ -48,3 +48,8 @@
 - n=1/臂，仅记录现象；
 - 期间修复 3 个 harness 缺陷（sim `sys.path`、动作集未声明、Windows 无 pytest）；
 - 记录：`experiments/pilot-001/runs/p1.5-w5-20261109/`。
+
+## 7. 真实层结果（2026-11-09）
+- W5-E2（≤3 轮）3 次失败 → BLOCKED（归因：预算全用于探索）；
+- **W5-E2b（6 轮 + 明确 gate 只读）成功**：5 轮、目标门 PASS、回归门 PASS、独立验收通过；
+- 记录：`experiments/pilot-001/runs/p1.5-w5e2b-20261109/`；n=1。

@@ -101,3 +101,33 @@ class W5E2Execution:
     def telemetry(self):
         path = self.workspace / "telemetry" / "execution.log"
         return path.read_text(encoding="utf-8") if path.is_file() else "(no telemetry)"
+
+
+OVERLAY = """task_fsm_server:
+  ros__parameters:
+    zone_2_x: 0.45
+    zone_2_y: 0.05
+    zone_2_z: 0.0175
+"""
+
+
+def build_t_w5e2b(target, config_source):
+    target = Path(target)
+    if target.exists():
+        import shutil
+        shutil.rmtree(target)
+    (target / "gate").mkdir(parents=True)
+    (target / "config").mkdir()
+    (target / "telemetry").mkdir()
+    (target / "config" / "week1.yaml").write_text(OVERLAY, encoding="utf-8")
+    (target / "gate" / "acceptance.py").write_text(ACCEPT, encoding="utf-8")
+    (target / "task.md").write_text(
+        "# W5-E2b - repair the workcell configuration\n\n"
+        "The two-object task fails: the SECOND object destination (zone_2) is out of\n"
+        "reach (the arm reaches strictly below 0.30 m from the base). The normal task\n"
+        "still works.\n\n"
+        "The defect is a single value in config/week1.yaml. gate/ is read-only and\n"
+        "does NOT need to be inspected. Fix config/week1.yaml so BOTH the two-object\n"
+        "task and the normal task verify on the real stack.\n",
+        encoding="utf-8")
+    return target
