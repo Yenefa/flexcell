@@ -1,0 +1,31 @@
+{
+  "run": "p0a_cancel",
+  "stack": "ROS 2 Jazzy + Gazebo Harmonic, trusted_sim.launch.py, domain 171, partition p0a-cancel",
+  "cancel_after_s": 6,
+  "observed": {
+    "outcome": 2,
+    "error_code": 32,
+    "detail": "canceled during PICK_A(attempt=1) (trace=PICK_A(attempt=1):FAIL:ERR_CANCELED)",
+    "fsm_trace": [
+      "PICK_A(attempt=1):FAIL:ERR_CANCELED"
+    ],
+    "saw_quarantined": false,
+    "task_states": [
+      "BUSY",
+      "IDLE",
+      "IDLE",
+      "BUSY",
+      "IDLE",
+      "IDLE"
+    ],
+    "second_task": {
+      "outcome": 1,
+      "error_code": 53,
+      "detail": "safety gate rejected PICK on 'target_box_a': already_carried [canonical_error_code=35 kind=already_carried]"
+    },
+    "reset": {
+      "success": false,
+      "message": "no active quarantine"
+    }
+  }
+}
