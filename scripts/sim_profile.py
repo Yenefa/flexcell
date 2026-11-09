@@ -53,7 +53,7 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
             joint_hold_sim_s=0., physics_step_s=None, *, contact_trace=False, release_clearance_m=None,
             qualification_no_recovery=False, synchronous_step_logs=False, resume_completed_objects=False,
             decision_policy='fsm', hybrid_threshold=None, scene=None, perception_only=False,
-            level_release_tolerance_deg=None, zone_2_pose=None):
+            level_release_tolerance_deg=None, zone_2_pose=None, config_override=None):
     if backend not in BACKENDS or skill_backend not in ('legacy', 'mtc'):
         raise ValueError('unsupported backend')
     if level_release_tolerance_deg is not None:
@@ -88,8 +88,21 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
     if synchronous_step_logs and not contact_trace:
         raise ValueError('synchronous step logs require the declared contact profile')
     out = Path(out)
+    if config_override is not None:
+        override_path = Path(config_override)
+        if not override_path.is_file():
+            raise ValueError('config override is missing: ' + str(override_path))
     config = yaml.safe_load((ROOT / 'src/flexcell/flexcell_skills/config/week1.yaml').read_text())
     config.update(yaml.safe_load((ROOT / 'src/flexcell/flexcell_skills/config/move_to_pose.yaml').read_text()))
+    if config_override is not None:
+        override = yaml.safe_load(Path(config_override).read_text())
+        if not isinstance(override, dict):
+            raise ValueError('config override must be a mapping')
+        for node_name, node in override.items():
+            if node_name not in config:
+                raise ValueError('unknown node in config override: ' + str(node_name))
+            params = node.get('ros__parameters', {}) if isinstance(node, dict) else {}
+            config[node_name]['ros__parameters'].update(params)
     if three_boxes:
         config['observe_server']['ros__parameters']['tracked_objects'] = list(THREE_OBJECTS)
         config['observe_server']['ros__parameters']['object_target_box_c_size'] = [.035, .035, .035]

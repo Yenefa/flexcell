@@ -32,3 +32,21 @@ def test_zone_2_pose_rejects_malformed_input(tmp_path):
     profile = _load_sim_profile()
     with pytest.raises(ValueError):
         profile.profile(tmp_path, zone_2_pose=(0.45, 0.05))
+
+
+def test_config_override_merges_the_node_parameters(tmp_path):
+    profile = _load_sim_profile()
+    overlay = tmp_path / "override.yaml"
+    overlay.write_text("task_fsm_server:\n  ros__parameters:\n    zone_2_x: 0.45\n")
+    params_path, _world = profile.profile(tmp_path / "out", config_override=overlay)
+    import yaml
+    params = yaml.safe_load(Path(params_path).read_text())
+    assert params["task_fsm_server"]["ros__parameters"]["zone_2_x"] == 0.45
+
+
+def test_config_override_rejects_unknown_nodes(tmp_path):
+    profile = _load_sim_profile()
+    overlay = tmp_path / "override.yaml"
+    overlay.write_text("no_such_node:\n  ros__parameters:\n    zone_2_x: 0.45\n")
+    with pytest.raises(ValueError):
+        profile.profile(tmp_path / "out", config_override=overlay)

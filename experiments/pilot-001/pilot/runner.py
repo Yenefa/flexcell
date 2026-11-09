@@ -15,7 +15,7 @@ from .recorder import Recorder
 from .toolbox import ToolBox, ToolPermissionError
 
 ACCEPTANCE = {"T-A-v2": "gate/acceptance.py", "T-C-v1": "gate/acceptance.py",
-              "T-B-v1": "gate/acceptance.py", "T-A-v3": "gate/acceptance.py", "T-G2": "gate/acceptance.py", "T-G3": "gate/acceptance.py", "T-G4": "gate/acceptance.py", "T-G3C": "gate/acceptance.py", "T-G3W": "gate/acceptance.py", "T-W5": "gate/acceptance.py"}
+              "T-B-v1": "gate/acceptance.py", "T-A-v3": "gate/acceptance.py", "T-G2": "gate/acceptance.py", "T-G3": "gate/acceptance.py", "T-G4": "gate/acceptance.py", "T-G3C": "gate/acceptance.py", "T-G3W": "gate/acceptance.py", "T-W5": "gate/acceptance.py", "T-W5E2": "gate/acceptance.py"}
 
 
 class Execution:
