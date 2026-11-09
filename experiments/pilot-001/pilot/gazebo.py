@@ -1,6 +1,7 @@
 """P1.4: drive a real Gazebo/ROS 2 task through sim_smoke and collect evidence."""
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -48,6 +49,35 @@ def _wsl(path):
     return posix
 
 
+DISTRO = os.environ.get("FLEXCELL_WSL_DISTRO", "Ubuntu-24.04")
+
+
+def _to_wsl_path(host_path):
+    """Host path -> path usable inside the target environment.
+
+    A Windows path is translated through /mnt/<drive>; a path that is already
+    POSIX (the harness running inside WSL) is returned unchanged. Doing
+    split(":", 1)[1] unconditionally raised IndexError on every POSIX path.
+    """
+    normalized = str(host_path).replace("\\", "/")
+    if len(normalized) > 1 and normalized[1] == ":" and normalized[0].isalpha():
+        return "/mnt/" + normalized[0].lower() + normalized[2:]
+    return normalized
+
+
+def _bash(*args):
+    """Command prefix that runs a bash command on the target distro.
+
+    On the Windows host this goes through the `wsl` launcher. Inside WSL there is
+    no `wsl` binary, so the same command runs directly - otherwise every
+    run_execution call failed with FileNotFoundError: wsl and the agent never saw
+    a single Gazebo result.
+    """
+    if os.environ.get("WSL_DISTRO_NAME") or not shutil.which("wsl"):
+        return ["bash"] + list(args)
+    return ["wsl", "-d", DISTRO] + ["--", "bash"] + list(args)
+
+
 def run_smoke(repo_src, repo, ws, out, case="normal", distro="Ubuntu-24.04",
               timeout_s=600, build=True, place_pose=None, zone_2_pose=None, config_override=None,
               extra_setup=None, install_override=None):
@@ -67,20 +97,26 @@ def run_smoke(repo_src, repo, ws, out, case="normal", distro="Ubuntu-24.04",
     fd, host_path = tempfile.mkstemp(suffix=".sh", text=True)
     os.close(fd)
     Path(host_path).write_text(script, encoding="utf-8", newline="\n")
-    wsl_path = "/mnt/c" + host_path.replace("\\", "/").split(":", 1)[1]
+    # The harness runs on the host, but a caller inside WSL (Linux python) has
+    # no drive letter, so `split(":")` used to raise IndexError and the agent saw
+    # "run_execution -> ERROR IndexError" instead of a Gazebo failure. Accept both:
+    # a Windows temp path is translated, an already-POSIX path is used as-is.
+    wsl_path = _to_wsl_path(host_path)
     # A fresh VM per gate removes stale ROS/Gazebo state between judge gates.
-    subprocess.run(["wsl", "--shutdown"], capture_output=True, text=True, timeout=120)
+    if shutil.which("wsl"):
+        subprocess.run(["wsl", "--shutdown"], capture_output=True, text=True,
+                       timeout=120)
     time.sleep(3)
-    proc = subprocess.run(["wsl", "-d", distro, "--", "bash", wsl_path],
+    proc = subprocess.run(_bash(wsl_path),
                           capture_output=True, text=True, encoding="utf-8",
                           errors="replace", timeout=timeout_s + 300)
     # A gate may leave a simulator or node behind; the next gate must start clean.
-    subprocess.run(["wsl", "-d", distro, "--", "bash", "-lc",
+    subprocess.run(_bash("-lc",
                     "pkill -9 -f '[g]z sim' 2>/dev/null; pkill -9 -f '[m]ove_group' 2>/dev/null; "
                     "pkill -9 -f '[t]ask_fsm_server' 2>/dev/null; pkill -9 -f '[s]im_smoke' 2>/dev/null; "
                     "pkill -9 -f '[r]os2 launch' 2>/dev/null; pkill -9 -f '[r]obot_state_publisher' 2>/dev/null; "
                     "for i in $(seq 1 40); do pgrep -f '[g]z sim' >/dev/null || break; sleep 1; done; "
-                    "sleep 5"],
+                    "sleep 5"),
                    capture_output=True, text=True, encoding="utf-8",
                    errors="replace", timeout=120)
     return {"returncode": proc.returncode,
@@ -110,9 +146,9 @@ def build_source(package_src, wsl_ws="/home/ros/w5src-ws", distro="Ubuntu-24.04"
     fd, host_path = tempfile.mkstemp(suffix=".sh", text=True)
     os.close(fd)
     Path(host_path).write_text(script, encoding="utf-8", newline="\n")
-    wsl_path = host_path if host_path.startswith("/") else "/mnt/c" + host_path.replace("\\", "/").split(":", 1)[1]
+    wsl_path = _to_wsl_path(host_path)
     command = (["bash", wsl_path] if host_path.startswith("/")
-               else ["wsl", "-d", distro, "--", "bash", wsl_path])
+               else _bash(wsl_path))
     try:
         proc = subprocess.run(command, capture_output=True, text=True, encoding="utf-8",
                               errors="replace", timeout=timeout_s)
@@ -146,20 +182,21 @@ def collect(run_out):
 
 def export(run_out, dest, distro="Ubuntu-24.04"):
     """Copy the WSL run directory to a Windows path via /mnt/c."""
-    dest_wsl = "/mnt/c" + dest.replace("\\", "/").split(":", 1)[1]
+    dest_wsl = _to_wsl_path(dest)
     script = "#!/bin/bash\nset -e\nrm -rf " + dest_wsl + "\nmkdir -p " + dest_wsl + "\ncp -r " + run_out + "/. " + dest_wsl + "/\n"
     fd, host_path = tempfile.mkstemp(suffix=".sh", text=True)
     os.close(fd)
     Path(host_path).write_text(script, encoding="utf-8", newline="\n")
-    wsl_path = "/mnt/c" + host_path.replace("\\", "/").split(":", 1)[1]
-    proc = subprocess.run(["wsl", "-d", distro, "--", "bash", wsl_path],
+    wsl_path = _to_wsl_path(host_path)
+    proc = subprocess.run(_bash(wsl_path),
                           capture_output=True, text=True, encoding="utf-8",
                           errors="replace", timeout=300)
     return proc.returncode == 0
 
 
 def latest(out_wsl, distro="Ubuntu-24.04"):
-    proc = subprocess.run(["wsl", "-d", distro, "--", "bash", "-lc",
-                           "ls -dt " + out_wsl + "/run-* 2>/dev/null | head -1"],
-                          capture_output=True, text=True, encoding="utf-8", errors="replace")
+    proc = subprocess.run(_bash("-lc",
+                                "ls -dt " + out_wsl + "/run-* 2>/dev/null | head -1"),
+                          capture_output=True, text=True, encoding="utf-8",
+                          errors="replace")
     return (proc.stdout or "").strip()

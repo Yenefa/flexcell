@@ -100,7 +100,11 @@ class ToolBox:
         except re.error as exc:
             return "ERROR: bad regex: %s" % exc
         hits = []
-        for file in sorted(root.rglob("*")):
+        # A file path is a legitimate search target: rglob() on a FILE yields
+        # nothing, so passing a path used to return "(no matches)" for patterns
+        # that are plainly present. Search the single file in that case.
+        candidates = [root] if root.is_file() else sorted(root.rglob("*"))
+        for file in candidates:
             if not file.is_file() or "__pycache__" in str(file) or file.suffix not in (".py", ".yaml", ".yml", ".md", ".txt", ".json"):
                 continue
             try:

@@ -64,10 +64,14 @@ class FCAgent:
 
     def step(self, toolbox, iteration):
         modified = [c for c in toolbox.calls if c and c[0] in ("write_file", "edit_file")]
-        progress = ("Iteration %d/%d. Files modified so far: %s. Reading alone does not "
-                    "complete the task; once you know the fix, apply it with edit_file "
-                    "(small targeted change) or write_file." %
-                    (iteration, self.max_iterations, "yes" if modified else "none"))
+        ran = [c for c in toolbox.calls if c and c[0] == "run_execution"]
+        progress = (
+            "Iteration %d/%d. Files modified so far: %s. Executions run so far: %d. "
+            "Reading alone does not complete the task. The scenario must be run at "
+            "least once so the failure is observed, and the fix must be applied with "
+            "edit_file (a small targeted change)." %
+            (iteration, self.max_iterations,
+             "yes" if modified else "none", len(ran)))
         messages = [{"role": "system", "content": SYSTEM + "\nTask: " + self.task_text},
                     {"role": "system", "content": progress}]
         messages.extend(self.history)
@@ -119,6 +123,10 @@ class FCAgent:
             limit = 20000 if name in ("read_file", "search_code") else 4000
             self.history.append({"role": "tool", "tool_call_id": call.get("id", ""),
                                  "content": str(result)[:limit]})
-            results.append({"tool": name, "result": str(result)[:400]})
+            # P1 tooling: record the ARGUMENTS too. Without them a failed run is
+            # undiagnosable - you cannot tell which pattern the agent searched for
+            # or which page it read.
+            results.append({"tool": name, "args": args,
+                            "result": str(result)[:400]})
         return {"claim_success": False, "done": False, "tokens": reply["tokens"],
                 "assistant_text": (reply.get("content") or "")[:800], "results": results}
