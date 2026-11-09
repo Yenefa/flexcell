@@ -61,7 +61,7 @@ place_server:
     retreat_m: 0.10
     carry_stop_topic: /flexcell/carry_stop
     object_size: [0.035, 0.035, 0.035]
-    default_deadline_ms: 30000
+    default_deadline_ms: 60000
     motion_profile_names: ["demo_veryslow", "demo_slow", "demo_default"]
     default_motion_profile: demo_slow
     log_dir: ~/.ros/flexcell
