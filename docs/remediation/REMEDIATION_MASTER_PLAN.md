@@ -13,7 +13,7 @@
 | P1-C | FSM 动作顺序约束 | **DONE** | `test_action_order.py` 11 passed |
 | P1-D | Gripper 反馈验证 | **DONE** | `test_gripper_feedback.py` 9 passed |
 | P1-E | known_objects 状态解耦 | **DONE** | `test_object_registry_scope.py` 7 passed |
-| P1-F | Episode 与日志完整性 | TODO | — |
+| P1-F | Episode 与日志完整性 | **DONE** | `test_log_integrity.py` 6 + `test_finish_idempotent.py` 2 |
 | P2-A | Inference Budget 完善 | TODO | — |
 | P2-B | Task FSM 模块化 | TODO | — |
 | P2-C | MoveToPose 模块化 | TODO | — |
@@ -37,3 +37,11 @@
 | `da06b2a` | P1-D 夹爪反馈 |
 | `43f5e27` | P1 集成验证 + 世界刷新 |
 | `3273a65` | P0-A 取消集成验证 |
+| `81a4c47` | P1-E 对象注册表解耦 |
+
+## Milestone 2 阶段总结（DONE）
+P1-A~P1-F 全部完成，三场景真实 Gazebo 全 PASS（normal 14.2s / dual_object 28.6s / regrasp 14.6s）。
+
+集成过程中暴露并修复的两个真实缺陷（单测无法发现）：
+1. 新鲜度上界 2s 与实测 7s 腿时长冲突 → 改为 10s 并按需刷新世界；
+2. 刷新写入 history 打断 FSMPolicy 严格顺序 → 刷新只替换世界视图。

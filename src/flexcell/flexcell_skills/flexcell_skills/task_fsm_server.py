@@ -783,7 +783,16 @@ class TaskFsmServer(Node):
                 '(%r -> %r)' % (planted.action, planted.target))
         planted_used = False
 
+        finished = []
+
         def finish(outcome, error, detail):
+            # P1-F: finish() is idempotent. A second call (an exception handler
+            # after a normal return, a cancel race) must NOT write a second
+            # episode, a second log line or a different result - it returns the
+            # first, already-decided result unchanged.
+            if finished:
+                return finished[0]
+            finished.append(res)
             res.outcome, res.error_code = outcome, error
             res.detail, res.fsm_trace, res.evidence_id = detail, trace, evidence
             duration_s = time.monotonic() - t0
@@ -981,6 +990,29 @@ class TaskFsmServer(Node):
                     planted_used = True
                 episode.record_decision(decision, d_ms, clock='perf_counter_ns')
 
+                recovery_audit = None
+                if (history and decision.reason_code in (
+                        RC_RECOVERABLE_RETRY, RC_VERIFY_MISMATCH_RETRY,
+                        RC_BUDGET_EXHAUSTED)):
+                    last_rec = history[-1]
+                    recovery_audit = {
+                        'recipe': (RECIPE_PICK
+                                   if decision.reason_code == RC_RECOVERABLE_RETRY
+                                   else (RECIPE_VERIFY
+                                         if decision.reason_code == RC_VERIFY_MISMATCH_RETRY
+                                         else 'BUDGET_EXHAUSTED')),
+                        'eligible': recovery_eligible(
+                            last_rec.action, last_rec.error_code,
+                            last_rec.outcome),
+                        'error_code': int(last_rec.error_code),
+                        'canonical_error_code': (
+                            prev['canonical_error_code'] if prev else None),
+                        'attempt': (vattempt
+                                    if decision.reason_code == RC_VERIFY_MISMATCH_RETRY
+                                    else attempt),
+                        'budget_cap': constraints.recovery_budget,
+                    }
+
                 # ---- safety gate (issue #6): deterministic, BEFORE dispatch.
                 # Consumes the policy-facing view (canonical envelope), never
                 # the planning-scene belief; free text cannot pass (sanitize
@@ -1050,28 +1082,7 @@ class TaskFsmServer(Node):
                 # skill goal (issue #6 §2.6)
                 assert dispatch_view == {'action': decision.action,
                                          'target': decision.target}
-                recovery_audit = None
-                if (history and decision.reason_code in (
-                        RC_RECOVERABLE_RETRY, RC_VERIFY_MISMATCH_RETRY,
-                        RC_BUDGET_EXHAUSTED)):
-                    last_rec = history[-1]
-                    recovery_audit = {
-                        'recipe': (RECIPE_PICK
-                                   if decision.reason_code == RC_RECOVERABLE_RETRY
-                                   else (RECIPE_VERIFY
-                                         if decision.reason_code == RC_VERIFY_MISMATCH_RETRY
-                                         else 'BUDGET_EXHAUSTED')),
-                        'eligible': recovery_eligible(
-                            last_rec.action, last_rec.error_code,
-                            last_rec.outcome),
-                        'error_code': int(last_rec.error_code),
-                        'canonical_error_code': (
-                            prev['canonical_error_code'] if prev else None),
-                        'attempt': (vattempt
-                                    if decision.reason_code == RC_VERIFY_MISMATCH_RETRY
-                                    else attempt),
-                        'budget_cap': constraints.recovery_budget,
-                    }
+                # P1-F: recovery_audit is computed BEFORE the gate below, so a
                 self._decision_log.write({
                     'run_id': run_id, 'scenario_id': scenario,
                     'seq': decision_seq,

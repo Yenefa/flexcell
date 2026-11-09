@@ -24,6 +24,7 @@ This module is pure python: no rclpy, no ROS msgs - offline testable.
 import json
 import math
 import os
+import threading
 import time
 
 from flexcell_skills.canonical_state import SCHEMA_VERSION, deserialize_envelope
@@ -226,18 +227,29 @@ class EpisodeStore:
         self._log = node_logger
 
     def write(self, record):
+        tmp_exists = None
         try:
             os.makedirs(self._dir, exist_ok=True)
             path = os.path.join(
                 self._dir, "%s_%s.json" % (record["scenario_id"], record["run_id"]))
-            tmp = path + ".tmp"
-            with open(tmp, "w") as fh:
+            # P1-F: explicit UTF-8 (serialize_episode uses ensure_ascii=False, so a
+            # non-ASCII detail would fail under a C locale) and a unique temp name
+            # so two writers cannot clobber each other's half-written file.
+            tmp = "%s.tmp.%d.%d" % (path, os.getpid(), threading.get_ident())
+            tmp_exists = tmp
+            with open(tmp, "w", encoding="utf-8") as fh:
                 fh.write(serialize_episode(record))
             os.replace(tmp, path)
             return path
-        except OSError as exc:
+        except (OSError, TypeError, ValueError) as exc:
+            # a serialization failure must not escape into the action result
             if self._log is not None:
                 self._log.error("episode write failed: %s" % exc)
+            try:
+                if tmp_exists:
+                    os.unlink(tmp_exists)
+            except (OSError, UnboundLocalError):
+                pass
             return None
 
 
