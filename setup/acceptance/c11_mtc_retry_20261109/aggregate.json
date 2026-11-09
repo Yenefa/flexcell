@@ -1,0 +1,139 @@
+{
+  "protocol": "docs/C11_PREREGISTRATION.md",
+  "strict_mtc": {
+    "n": 5,
+    "success": 5,
+    "walls": [
+      34.402,
+      34.414,
+      34.516,
+      35.435,
+      35.96
+    ],
+    "mean": 34.9454
+  },
+  "strict_fsm": {
+    "n": 3,
+    "success": 3,
+    "walls": [
+      29.224,
+      28.887,
+      29.25
+    ],
+    "mean": 29.120333333333335
+  },
+  "default_mtc": {
+    "n": 4,
+    "success": 4,
+    "walls": [
+      34.376,
+      34.309,
+      33.263,
+      33.334
+    ],
+    "mean": 33.8205
+  },
+  "baseline": {
+    "strict_mtc": "6/9 (C8+C9, pre-fix)",
+    "strict_fsm": "3/3 (C8)",
+    "default_mtc": "3/3 (C4)"
+  },
+  "rows": [
+    {
+      "run": "mtc-a",
+      "arm": "mtc",
+      "mode": "strict",
+      "status": "PASS",
+      "wall": 34.402,
+      "sha": "a201a7782414b795b3612562bebb05bb52a5cb5126021383b4d4d4f513110ff0"
+    },
+    {
+      "run": "mtc-b",
+      "arm": "mtc",
+      "mode": "strict",
+      "status": "PASS",
+      "wall": 34.414,
+      "sha": "962007ff95de1a8cd76834438b0e75261f810c4b728bd1dbb36dd79657476154"
+    },
+    {
+      "run": "legacy-c",
+      "arm": "legacy",
+      "mode": "strict",
+      "status": "PASS",
+      "wall": 29.224,
+      "sha": "9be1609e93fe97558dea44c169570d37b7787540ed5bb399b01dc7526d67e6c4"
+    },
+    {
+      "run": "mtc-d",
+      "arm": "mtc",
+      "mode": "strict",
+      "status": "PASS",
+      "wall": 34.516,
+      "sha": "56eeb73fe5c205a85a70ae6aa55c4b29be27180846a881be402413dd72740843"
+    },
+    {
+      "run": "legacy-e",
+      "arm": "legacy",
+      "mode": "strict",
+      "status": "PASS",
+      "wall": 28.887,
+      "sha": "a49c80bfec46394987b2c73f42d5161ae07e0d40f443b9ec1f18c8376d34b061"
+    },
+    {
+      "run": "mtc-f",
+      "arm": "mtc",
+      "mode": "strict",
+      "status": "PASS",
+      "wall": 35.435,
+      "sha": "06b259eea74dced5a613ba2cfe14deae682ae5fcdc4bbac85aa307046f5fd583"
+    },
+    {
+      "run": "mtc-g",
+      "arm": "mtc",
+      "mode": "strict",
+      "status": "PASS",
+      "wall": 35.96,
+      "sha": "cc63a94a72127c20fa9d3d9f81c41fd8acf3bef7f51c288193e518f89a399dcb"
+    },
+    {
+      "run": "legacy-h",
+      "arm": "legacy",
+      "mode": "strict",
+      "status": "PASS",
+      "wall": 29.25,
+      "sha": "e4d08e9b8ca1962d1c5c416b309afb060af68dbc00101ee300a66d839bcee668"
+    },
+    {
+      "run": "mtc-i",
+      "arm": "mtc",
+      "mode": "default",
+      "status": "PASS",
+      "wall": 34.376,
+      "sha": "b179db067fbafebce02ca8e8a7b19bf1b882c972af0dd59352a403e8b5f30124"
+    },
+    {
+      "run": "mtc-j",
+      "arm": "mtc",
+      "mode": "default",
+      "status": "PASS",
+      "wall": 34.309,
+      "sha": "c653b2127fe8b53264bafb750a2c26ee9490fdc309f153c34c6858aab7bcf8d8"
+    },
+    {
+      "run": "mtc-k",
+      "arm": "mtc",
+      "mode": "default",
+      "status": "PASS",
+      "wall": 33.263,
+      "sha": "a6b492d9e2d0d12cbd9786b6b64d721d3c86a17f69ae02ee30a8225d8e48cb5e"
+    },
+    {
+      "run": "mtc-l",
+      "arm": "mtc",
+      "mode": "default",
+      "status": "PASS",
+      "wall": 33.334,
+      "sha": "07da3f4b7cf8880d329e1891ecc5659e2152b99707042f8313b288f306400172"
+    }
+  ]
+}
