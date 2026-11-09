@@ -14,7 +14,7 @@
 - A4 ✅ 真实 Gazebo：T-G1 normal 3/3、T-G3 regrasp 1/1（`runs/p1.4-*`）。
 - A5 ✅ T-G3 可靠性：**3/3**（`runs/p1.4-tg3-20261109/`）。
 - A6 ✅ 组合任务 T-G4：**3/3 成功**（`runs/p1.4-tg4-20261109/`）。
-- W6 迁移试点：协议 `docs/W6_TRANSFER_PREREGISTRATION.md`；n=1 试点（Warm 4 轮成功 / Cold 5 轮未改 plan），正式 3+3 待跑。
+- W6 ✅ 迁移 3+3：Cold **0/3**、Warm **2/3**（`runs/p1.5-w6-transfer-20261109/`）；Cold 均未写 plan；n=3 探索性。
 
 **Task Queue**
 1. T-G3 重复 2 次（补 n=3）。

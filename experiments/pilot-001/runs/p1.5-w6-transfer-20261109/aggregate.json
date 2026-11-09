@@ -1,0 +1,141 @@
+{
+  "task": "W6-transfer-regrasp",
+  "model": "deepseek-chat",
+  "n_per_arm": 3,
+  "cold": {
+    "success": 0,
+    "wrote_plan": 0,
+    "iters": [
+      5,
+      5,
+      5
+    ],
+    "tokens": [
+      6368,
+      5534,
+      6344
+    ],
+    "mean_tokens": 6082
+  },
+  "warm": {
+    "success": 2,
+    "wrote_plan": 2,
+    "iters": [
+      5,
+      4,
+      5
+    ],
+    "tokens": [
+      5889,
+      4646,
+      5317
+    ],
+    "mean_tokens": 5284
+  },
+  "pilots_excluded": [
+    {
+      "arm": "warm",
+      "success": true,
+      "iters": 4,
+      "tokens": 3840
+    },
+    {
+      "arm": "cold",
+      "success": false,
+      "iters": 5,
+      "tokens": 6260
+    }
+  ],
+  "rows": [
+    {
+      "arm": "cold",
+      "tag": "c1",
+      "success": false,
+      "iters": 5,
+      "tokens": 6368,
+      "plan": [
+        0.45,
+        0,
+        0.0175
+      ],
+      "wrote_plan": false,
+      "verdict": "REGRASP_BLOCKED_FIRST_TASK",
+      "sha": "920fdb83b448b5e6510c58e7bff392c26e351af4b443fc930de1376caf6a76ff"
+    },
+    {
+      "arm": "warm",
+      "tag": "w1",
+      "success": true,
+      "iters": 5,
+      "tokens": 5889,
+      "plan": [
+        0.25,
+        0,
+        0.0175
+      ],
+      "wrote_plan": true,
+      "verdict": "PASS",
+      "sha": "4115288155295990e70c8b98c08bc8c83663cbdfbce0742a0de5884718deb90f"
+    },
+    {
+      "arm": "warm",
+      "tag": "w2",
+      "success": true,
+      "iters": 4,
+      "tokens": 4646,
+      "plan": [
+        0.25,
+        0,
+        0.0175
+      ],
+      "wrote_plan": true,
+      "verdict": "PASS",
+      "sha": "09fefe02b746573ccd64906c906991f2d0024300906e56f720c3a53fc397ee3e"
+    },
+    {
+      "arm": "cold",
+      "tag": "c2",
+      "success": false,
+      "iters": 5,
+      "tokens": 5534,
+      "plan": [
+        0.45,
+        0,
+        0.0175
+      ],
+      "wrote_plan": false,
+      "verdict": "REGRASP_BLOCKED_FIRST_TASK",
+      "sha": "9745532d0bc8b03a97b10bdc62f0ef2996163f64b9c0303f4120845dae54fff2"
+    },
+    {
+      "arm": "cold",
+      "tag": "c3",
+      "success": false,
+      "iters": 5,
+      "tokens": 6344,
+      "plan": [
+        0.45,
+        0,
+        0.0175
+      ],
+      "wrote_plan": false,
+      "verdict": "REGRASP_BLOCKED_FIRST_TASK",
+      "sha": "7931c67528d467e64e5c40ffe73d48c2aabf1bcdaad48535f912fb833bd3325a"
+    },
+    {
+      "arm": "warm",
+      "tag": "w3",
+      "success": false,
+      "iters": 5,
+      "tokens": 5317,
+      "plan": [
+        0.45,
+        0,
+        0.0175
+      ],
+      "wrote_plan": false,
+      "verdict": "REGRASP_BLOCKED_FIRST_TASK",
+      "sha": "a4daa6d5c0541b94a237ca1e71546401966b8180fc3f0214b0e16e3800644478"
+    }
+  ]
+}
