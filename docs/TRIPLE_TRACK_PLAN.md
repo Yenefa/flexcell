@@ -17,7 +17,7 @@
 - W6 ✅ 迁移 3+3：Cold **0/3**、Warm **2/3**（`runs/p1.5-w6-transfer-20261109/`）；Cold 均未写 plan；n=3 探索性。
 - W7 📝 设计（M0）：`docs/W7_CROSS_EMBODIMENT_DESIGN.md`；无第二本体 → BLOCKED。
 - W5 ✅ 试点（合成层）：W5A 成功（目标 PASS + 回归 0），W5B 未成功；`runs/p1.5-w5-20261109/`；n=1/臂。
-- W5-E2 ⛔ BLOCKED；**W5-E2b ✅ 3/3**；**W5-E2c ❌ 0/2**；行动缺口分析 `docs/W5_ACTION_GAP_ANALYSIS.md`；E2d 预注册（显式行动指令）。
+- W5-E2 ⛔ BLOCKED；**W5-E2b ✅ 3/3**；**W5-E2c ❌ 0/2**；**W5-E2d ✅ 2/2**（显式行动指令，三门全 PASS，`runs/p1.5-w5e2d-20261109/`）。
 
 **Task Queue**
 1. T-G3 重复 2 次（补 n=3）。
