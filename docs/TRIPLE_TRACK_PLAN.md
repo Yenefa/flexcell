@@ -90,7 +90,7 @@
 
 **Blocker**：C3 需要先冻结协议；MTC 运行成本较高。
 
-**Next Action**：C7 ✅（2 cm 容差仍未区分两臂；FSM 14.101 s vs MTC 16.440 s）。下一步：C8 需先预注册（多对象/更严格场景或障碍场景）。
+**Next Action**：C8 预注册已写（`docs/C8_PREREGISTRATION.md`，dual_object + 2 cm 容差），待执行。
 
 ---
 
