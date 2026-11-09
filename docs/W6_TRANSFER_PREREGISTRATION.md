@@ -42,3 +42,9 @@
 - 只测一个目标任务（regrasp）；
 - 仿真（M3-S）；
 - 结果写入 `experiments/pilot-001/runs/p1.5-w6-transfer-20261109/`。
+
+## 7. 结果附录（运行后追加，不改规则）
+- 3+3：Cold **0/3**、Warm **2/3**；Cold 三次均未写 plan（只读循环），Warm 两次写入 0.25；
+- 平均 token：Cold 6082 / Warm 5284；成功样本迭代 5/4；
+- 记录：`experiments/pilot-001/runs/p1.5-w6-transfer-20261109/`；
+- 结论口径：**方向与假设一致（迁移可能降低失败率），n=3，不宣称显著**。
