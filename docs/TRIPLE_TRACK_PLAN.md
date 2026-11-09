@@ -90,7 +90,7 @@
 
 **Blocker**：C3 需要先冻结协议；MTC 运行成本较高。
 
-**Next Action**：C8 ✅（FSM 3/3 vs MTC 1/3，首次成功差异；n=3 不显著）。下一步：C9 需先预注册（重复 C8 至 n=9 以检验差异是否稳定）。
+**Next Action**：C9 ✅（FSM 9/9 vs MTC 6/9，Fisher 双侧 p≈0.0035；失败全在 PICK_B）。下一步：C10 需先预注册（机制归因：MTC PICK_B 运动失败）。
 
 ---
 
