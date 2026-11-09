@@ -13,6 +13,12 @@ sys.path.insert(0, str(HERE))
 from pilot import fixtures, gazebo, gazebo_task, runner, tasks
 from pilot.manifest import load
 
+TASK_W5E2D = ("The two-object task fails: zone_2 is out of reach. Do NOT inspect "
+              "gate/ or other files. First run the target scenario once with "
+              "run_execution, then edit config/week1.yaml and set zone_2_x to a "
+              "reachable value (0.20-0.25). The gate checks the normal and regrasp "
+              "regressions itself.")
+
 TASK_W5E2C = ("The two-object task fails: zone_2 is out of reach. The defect is a "
               "single value in config/week1.yaml; gate/ is read-only. Fix it so the "
               "two-object task AND the normal and regrasp tasks all verify.")
@@ -229,6 +235,33 @@ def tc_run(manifest, out, arms, repo_src):
     (out / "p1.2-tc1-runs.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     return 0
 
+
+def w5e2d_run(manifest, out, arms, repo_src):
+    from pilot.agent_fc import FCAgent
+    from pilot.llm import Chat
+    from pilot import w5e2
+    env = {"PILOT_P14_REPO": "/home/ros/flexcell-p14",
+           "PILOT_P14_WS": "/home/ros/flexcell-p14-ws",
+           "PILOT_P14_SRC": repo_src, "PILOT_HOME": str(HERE)}
+    os.environ.update(env)
+    config_src = Path(repo_src) / "src/flexcell/flexcell_skills/config/week1.yaml"
+    rows = []
+    for arm in arms:
+        chat = Chat()
+        agent = FCAgent(chat, manifest["arms"][arm]["tools"], TASK_W5E2D)
+        res = runner.run_one(manifest, arm, agent,
+                             w5e2.build_t_w5e2d(out / ("tpl-w5e2d-" + arm), config_src),
+                             out / ("w5e2d-" + arm),
+                             meta={"task": "T-W5E2D", **chat.metadata()},
+                             protected=["gate/acceptance.py"],
+                             execution_factory=w5e2.W5E2Execution,
+                             extra_env=env)
+        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        rows.append(res)
+        print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
+              (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
+    (out / "w5e2d-runs.json").write_text(json.dumps({"task": "T-W5E2D", "rows": rows}, indent=2) + "\n", encoding="utf-8")
+    return 0
 
 def w5e2c_run(manifest, out, arms, repo_src):
     from pilot.agent_fc import FCAgent
@@ -501,6 +534,8 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     manifest = load(a.manifest)
     arms = [x.strip() for x in a.arms.split(",") if x.strip()]
+    if a.llm and a.task == "T-W5E2D":
+        return w5e2d_run(manifest, out, arms, a.repo_src)
     if a.llm and a.task == "T-W5E2C":
         return w5e2c_run(manifest, out, arms, a.repo_src)
     if a.llm and a.task == "T-W5E2B":

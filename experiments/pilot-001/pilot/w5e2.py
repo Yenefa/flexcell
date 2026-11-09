@@ -186,3 +186,24 @@ def build_t_w5e2c(target, config_source):
         "task AND the existing normal and regrasp tasks all verify on the real stack.\n",
         encoding="utf-8")
     return target
+
+
+def build_t_w5e2d(target, config_source):
+    target = Path(target)
+    if target.exists():
+        import shutil
+        shutil.rmtree(target)
+    (target / "gate").mkdir(parents=True)
+    (target / "config").mkdir()
+    (target / "telemetry").mkdir()
+    (target / "config" / "week1.yaml").write_text(OVERLAY, encoding="utf-8")
+    (target / "gate" / "acceptance.py").write_text(ACCEPT_C, encoding="utf-8")
+    (target / "task.md").write_text(
+        "# W5-E2d - repair the workcell configuration (explicit action)\n\n"
+        "The two-object task fails: zone_2 is out of reach.\n\n"
+        "Do not inspect gate/ or other files. First run the target scenario once with\n"
+        "run_execution. Then edit config/week1.yaml and set zone_2_x to a reachable\n"
+        "value (0.20-0.25). The gate checks the two-object task and the normal and\n"
+        "regrasp regressions; you do not need to run them yourself.\n",
+        encoding="utf-8")
+    return target
