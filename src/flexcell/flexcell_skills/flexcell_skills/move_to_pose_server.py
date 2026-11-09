@@ -67,37 +67,11 @@ PHASE_NAMES = {
 ARM_JOINTS = ['joint1', 'joint2', 'joint3', 'joint4']
 
 
-# ---------------------------------------------------------------- quaternion
-def q_norm(q):
-    return math.sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w)
-
-
-def q_mul(a, b):
-    return (
-        a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
-        a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
-        a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w,
-        a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z,
-    )
-
-
-def q_rotate(q, v):
-    x, y, z, w = q.x, q.y, q.z, q.w
-    vx, vy, vz = v
-    tx = 2.0 * (y * vz - z * vy)
-    ty = 2.0 * (z * vx - x * vz)
-    tz = 2.0 * (x * vy - y * vx)
-    return (
-        vx + w * tx + (y * tz - z * ty),
-        vy + w * ty + (z * tx - x * tz),
-        vz + w * tz + (x * ty - y * tx),
-    )
-
-
-def q_angle_between(a, b):
-    d = a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w
-    d = max(-1.0, min(1.0, abs(d)))
-    return 2.0 * math.acos(d)
+# ---------------------------------------------------------------- geometry
+# P2-C: the pure quaternion helpers moved to pose_geometry and are re-exported
+# here so every existing importer (and the action server itself) is unchanged.
+from flexcell_skills.pose_geometry import (  # noqa: E402
+    q_angle_between, q_mul, q_norm, q_rotate)
 
 
 class MoveToPoseServer(Node):

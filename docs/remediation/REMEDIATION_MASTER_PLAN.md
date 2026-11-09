@@ -16,7 +16,7 @@
 | P1-F | Episode 与日志完整性 | **DONE** | `test_log_integrity.py` 6 + `test_finish_idempotent.py` 2 |
 | P2-A | Inference Budget 完善 | **DONE** | `test_budget_lifecycle.py` 10 passed |
 | P2-B | Task FSM 模块化 | **DONE**（首拆：决策日志） | `test_decision_record.py` 7 passed |
-| P2-C | MoveToPose 模块化 | TODO | — |
+| P2-C | MoveToPose 模块化 | **DONE**（首拆：几何工具） | `test_pose_geometry.py` 14 passed |
 | P2-D | 时间域规范 | **DONE** | `test_time_domain.py` 5 + `TIME_DOMAIN_CONVENTION.md` |
 | P2-E | Sim2Real 感知准备 | **DONE**（边界）/ 真实相机 **NOT_VERIFIED** | `test_perception_boundary.py` 9 + `P2E_SIM2REAL_PERCEPTION_PLAN.md` |
 
@@ -42,6 +42,11 @@
 | `1ba8db8` | P2-A 预算生命周期 |
 | `5f1eec9` | P2-D 时间域规范 |
 | `4e3577e` | P2-E 感知边界 |
+| `768e54b` | P2-B 决策日志统一 |
+
+## Milestone 3 阶段总结（DONE）
+P2-A/B/C/D/E 全部完成，最终三场景真实 Gazebo 全 PASS。
+见 `FINAL_REMEDIATION_REPORT.md`。
 
 ## Milestone 2 阶段总结（DONE）
 P1-A~P1-F 全部完成，三场景真实 Gazebo 全 PASS（normal 14.2s / dual_object 28.6s / regrasp 14.6s）。
