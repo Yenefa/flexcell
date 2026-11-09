@@ -11,11 +11,12 @@ set -e
 REPO=__REPO__
 WS=__WS__
 BUILD=__BUILD__
+pkill -9 -f "gz sim" 2>/dev/null || true
+pkill -9 -f move_group 2>/dev/null || true
+pkill -9 -f task_fsm_server 2>/dev/null || true
+pkill -9 -f sim_smoke 2>/dev/null || true
+sleep 2
 if [ "$BUILD" = "1" ]; then
-  pkill -9 -f "gz sim" 2>/dev/null || true
-  pkill -9 -f move_group 2>/dev/null || true
-  pkill -9 -f task_fsm_server 2>/dev/null || true
-  sleep 2
   rm -rf "$REPO" "$WS"; mkdir -p "$REPO" "$WS/src"
   rsync -a --exclude=.git --exclude=build --exclude=install --exclude=log __SRC__/ "$REPO"/
   ln -sfn "$REPO/src/flexcell" "$WS/src/flexcell"

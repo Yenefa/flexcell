@@ -1,7 +1,8 @@
 # IYAIC 2026 delivery status
 
 > Status index, not a new acceptance. Evidence entries live in [docs/EXPERIMENTS.md](../../docs/EXPERIMENTS.md)
-> and `setup/acceptance/`. Snapshot: `main` = `8a16a35`, 2026-11-08.
+> and `setup/acceptance/`. Snapshot: `main` = `49183b5`, 2026-11-09.
+> Canonical status: [docs/PROJECT_STATUS.md](../../docs/PROJECT_STATUS.md); statistics: [docs/STATS_AUDIT.md](../../docs/STATS_AUDIT.md).
 > Three states are used exactly: **Implemented** (source merged, CI/offline covered),
 > **Accepted** (has a frozen/measured acceptance record), **Branch pending review** (not merged).
 
@@ -13,6 +14,13 @@
 | Trusted simulation plane gates (native five cycles, joint follow, false attach, sim smoke) | CI `trusted-simulation` jobs on `8a16a35` (public repo, push) |
 | Camera data plane: LeRobot writer + official loader roundtrip | `camera-data` job green on `main` (n=3); reconcile backfill for sporadic live-frame loss |
 | Visual pick + region clear/restore (functional, single-window) | #114 n=1 demo (2026-11-04), #119 closed, #126 plan tool |
+
+## 1b. Added 2026-11-09 (accepted)
+
+| Capability | Evidence |
+| --- | --- |
+| Self-improvement loop (real Gazebo, W5-E2b/E2d) | `runs/p1.5-w5e2b-20261109/` 3/3, `runs/p1.5-w5e2d-20261109/` 2/2; offline demo `experiments/pilot-001/demo/replay.py` |
+| Substrate comparison C3–C11 (FSM vs MTC) | `setup/acceptance/c3..c11_*`; C11 retry evaluation 12/12 PASS |
 
 ## 2. Implemented (on main, CI/offline covered; not a fresh physical acceptance)
 
