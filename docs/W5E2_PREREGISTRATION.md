@@ -43,3 +43,9 @@
 
 ## 7. 冻结声明
 - 结果写入 `experiments/pilot-001/runs/p1.5-w5e2-20261109/`。
+
+## 8. 结果附录（运行后追加，不改规则）
+- 试点 n=1 **失败**：agent 4 轮未修改 config，目标门 `ROBOT_FAILURE`、回归门 PASS；
+- 验收机制正常（两门独立判定、fingerprint 一致）；
+- 记录：`experiments/pilot-001/runs/p1.5-w5e2-20261109/`；
+- 期间修复 4 个 harness 缺陷（config-override 杠杆、W5A 工具集、WSL 路径转换、tempfile 导入）。

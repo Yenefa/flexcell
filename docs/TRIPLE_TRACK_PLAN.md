@@ -17,7 +17,7 @@
 - W6 ✅ 迁移 3+3：Cold **0/3**、Warm **2/3**（`runs/p1.5-w6-transfer-20261109/`）；Cold 均未写 plan；n=3 探索性。
 - W7 📝 设计（M0）：`docs/W7_CROSS_EMBODIMENT_DESIGN.md`；无第二本体 → BLOCKED。
 - W5 ✅ 试点（合成层）：W5A 成功（目标 PASS + 回归 0），W5B 未成功；`runs/p1.5-w5-20261109/`；n=1/臂。
-- W5-E2 📝 预注册（`docs/W5E2_PREREGISTRATION.md`，真实 Gazebo 双门），待执行。
+- W5-E2 ⚠️ 试点 n=1 **失败**：agent 未改 config（目标门失败、回归门 PASS）；`runs/p1.5-w5e2-20261109/`。
 
 **Task Queue**
 1. T-G3 重复 2 次（补 n=3）。

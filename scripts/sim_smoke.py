@@ -190,6 +190,7 @@ def main():
                                            'gate_refusal'], default='normal')
     parser.add_argument('--false-attach', default='',
                         help='declared live false-attach spec, object:offset_m[:hold_s]')
+    parser.add_argument('--config-override', help='yaml overlay merged into the generated config')
     parser.add_argument('--zone-2-pose', nargs=3, type=float, metavar=('X', 'Y', 'Z'),
                         help='override zone_2 (the second object) for dual_object tasks')
     parser.add_argument('--place-pose', nargs=3, type=float, metavar=('X', 'Y', 'Z'),
@@ -204,6 +205,7 @@ def main():
     if args.resume_completed: options['resume_completed_objects'] = True
     options['decision_policy'] = args.decision_policy
     if args.zone_2_pose is not None: options['zone_2_pose'] = list(args.zone_2_pose)
+    if args.config_override is not None: options['config_override'] = args.config_override
     if args.hybrid_threshold is not None: options['hybrid_threshold'] = args.hybrid_threshold
     if args.level_release_tolerance_deg is not None:
         options['level_release_tolerance_deg'] = args.level_release_tolerance_deg
@@ -389,6 +391,7 @@ def main():
             pose = (['.22', '0', '.0175'] if args.object == 'target_box_a' else ['.20', '-.18', '.0175'])
         result['goal_pose'] = [float(value) for value in pose]
         result['zone_2_pose'] = (None if args.zone_2_pose is None else [float(v) for v in args.zone_2_pose])
+        result['config_override'] = args.config_override
         rc = command([sys.executable, str(ROOT / 'src/flexcell/flexcell_skills/test/w1_client.py'),
                       '--action', 'demo' if args.case == 'dual_object' else 'task',
                       '--object', args.object, '--pose', *pose,
