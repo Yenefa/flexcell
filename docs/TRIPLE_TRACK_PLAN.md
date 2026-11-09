@@ -90,7 +90,7 @@
 
 **Blocker**：C3 需要先冻结协议；MTC 运行成本较高。
 
-**Next Action**：C9 ✅（FSM 9/9 vs MTC 6/9，Fisher 双侧 p≈0.0035；失败全在 PICK_B）。下一步：C10 需先预注册（机制归因：MTC PICK_B 运动失败）。
+**Next Action**：C10 ✅ 机制归因：MTC 失败=规划服务 timeout+planner busy（3/3 失败 vs 0/6 成功）；C11 最小修复需先预注册。
 
 ---
 

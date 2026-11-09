@@ -52,7 +52,7 @@
 | 平均 wall | 28.281 s | 41.194 s |
 
 - 差异在 n=9 下持续（Fisher 双侧 p≈0.0035）；失败全在 MTC 的 `PICK_B` 运动；
-- 不宣称因果，不外推。
+- 不宣称因果，不外推；C10 机制：3/3 失败 episode 均有 planning timeout + planner busy（6/6 成功无）。
 
 ## 3. 不能说明什么
 - 不能说 MTC 工程上更差：wall 差异可能来自规划器初始化、stage 搜索开销，未做 profile 归因；
