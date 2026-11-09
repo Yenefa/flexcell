@@ -88,7 +88,7 @@
 
 **Blocker**：C3 需要先冻结协议；MTC 运行成本较高。
 
-**Next Action**：C5 预注册已写（`docs/C5_PREREGISTRATION.md`，recovery_once FSM vs MTC 3+3），待执行。
+**Next Action**：C5 已完成；下一阶段 C6 需先预注册（扩 n=9 或换场景），并开始汇总 C3–C5 的 substrate 结论。
 
 ---
 
