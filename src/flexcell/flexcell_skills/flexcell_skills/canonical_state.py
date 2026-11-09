@@ -20,6 +20,7 @@ so the contract is unit-testable offline.
 """
 
 import json
+import time
 
 SCHEMA_VERSION = 2
 SCHEMA_VERSION_KEY = "WorldStateSchemaVersion"
@@ -166,22 +167,41 @@ def task_context_to_dict(tc):
     }
 
 
-def world_state_to_dict(ws):
-    """WorldState -> dict. Excludes `notes` (B1: free text never reaches a
-    policy) and `task` (it is serialized as the envelope's own part)."""
+def world_state_to_dict(ws, now_monotonic=None, sampled_monotonic=None):
+    """WorldState -> dict (P1-A: pose_age_s grows while a snapshot ages).
+
+    Excludes `notes` (B1: free text never reaches a policy) and `task` (it is
+    serialized as the envelope's own part).
+
+    `pose_age_s` on the message is the pose-stream age AT SAMPLE TIME. The
+    honest age at decision time is that value plus the time elapsed since the
+    executor received the snapshot, so the caller passes the monotonic instant
+    it received the snapshot in `sampled_monotonic`. Without it the message
+    value is reported unchanged (no behaviour change for other callers).
+    """
+    now = time.monotonic() if now_monotonic is None else now_monotonic
+    elapsed = 0.0
+    if sampled_monotonic is not None:
+        elapsed = max(0.0, now - float(sampled_monotonic))
+    objects = []
+    for obj in ws.objects:
+        item = object_to_dict(obj)
+        if sampled_monotonic is not None:
+            item["pose_age_s"] = _f(max(0.0, float(obj.pose_age_s or 0.0)) + elapsed)
+        objects.append(item)
     return {
         "header": _header_to_dict(ws.header),
         "revision": int(ws.revision),
         "source": ws.source,
         "schema_version": ws.schema_version,
         "robot": robot_to_dict(ws.robot),
-        "objects": [object_to_dict(o) for o in ws.objects],
+        "objects": objects,
         "carry": carry_to_dict(ws.carry),
         "zones": [zone_to_dict(z) for z in ws.zones],
     }
 
 
-def build_envelope(ws, tc=None):
+def build_envelope(ws, tc=None, sampled_monotonic=None):
     """WorldState (+ optional TaskContext override) -> the versioned envelope.
 
     `tc=None` uses `ws.task` (executor-owned field; observe publishes it
@@ -190,7 +210,8 @@ def build_envelope(ws, tc=None):
     task = tc if tc is not None else ws.task
     return {
         SCHEMA_VERSION_KEY: SCHEMA_VERSION,
-        "world_state": world_state_to_dict(ws),
+        "world_state": world_state_to_dict(
+            ws, sampled_monotonic=sampled_monotonic),
         "task_context": task_context_to_dict(task),
     }
 
@@ -202,9 +223,9 @@ def serialize_dict(envelope):
         ensure_ascii=False, allow_nan=False)
 
 
-def serialize_envelope(ws, tc=None):
+def serialize_envelope(ws, tc=None, sampled_monotonic=None):
     """WorldState + TaskContext msgs -> deterministic policy-facing JSON text."""
-    return serialize_dict(build_envelope(ws, tc))
+    return serialize_dict(build_envelope(ws, tc, sampled_monotonic))
 
 
 def deserialize_envelope(text):

@@ -163,12 +163,12 @@ class ObserveServer(Node):
         raise CarrySnapshotUnavailable('carry snapshot response timed out')
 
     # ------------------------------------------------------------ snapshot
-    def _snapshot(self):
+    def _snapshot(self, max_age_s=1.0):
         notes = []
         objects = []
         moved_any = False
         for name in self._tracked:
-            sampled, age_s, err = sample_gz_pose_age(name)
+            sampled, age_s, err = sample_gz_pose_age(name, max_age_s=max_age_s)
             wo = WorldObject()
             wo.name = name
             wo.klass = 'box'
@@ -303,7 +303,10 @@ class ObserveServer(Node):
             if goal_handle.is_cancel_requested:
                 return finish(R.OUTCOME_CANCELED, R.ERR_CANCELED,
                               'canceled before snapshot')
-            ws = self._snapshot()
+            # P1-A: the goal's max_age_s is finally consumed; 0 keeps the
+            # historical 1.0 s default so existing callers do not change.
+            requested_age = float(getattr(goal_handle.request, "max_age_s", 0.0) or 0.0)
+            ws = self._snapshot(max_age_s=(requested_age if requested_age > 0 else 1.0))
             rec.update(
                 revision=self._revision,
                 available=[o.name for o in ws.objects if o.available],

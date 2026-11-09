@@ -160,6 +160,7 @@ class TaskFsmServer(Node):
         # same arm (audit P1-3: the old per-action check-then-set flags were
         # racy and mutually blind; RunDemo and RunPickPlace could run
         # concurrently on one robot)
+        self.declare_parameter('max_world_age_s', 2.0)
         self.declare_parameter('stop_cancel_timeout_s', 4.0)
         self.declare_parameter('stop_result_timeout_s', 12.0)
         self._admission = threading.Lock()
@@ -221,6 +222,8 @@ class TaskFsmServer(Node):
                                     'version': protocol['protocol_version'],
                                     'sha256': digest}
 
+        self._max_world_age_s = float(
+            self.get_parameter('max_world_age_s').value)
         self._stop_cancel_timeout_s = float(
             self.get_parameter('stop_cancel_timeout_s').value)
         self._stop_result_timeout_s = float(
@@ -300,6 +303,14 @@ class TaskFsmServer(Node):
     @_quarantine.setter
     def _quarantine(self, value):
         self.__dict__["_motion_quarantine"] = value
+
+    @property
+    def _max_world_age_s(self):
+        return float(self.__dict__.get("_max_world_age_value", 2.0))
+
+    @_max_world_age_s.setter
+    def _max_world_age_s(self, value):
+        self.__dict__["_max_world_age_value"] = value
 
     @property
     def _stop_cancel_timeout_s(self):
@@ -872,10 +883,11 @@ class TaskFsmServer(Node):
                 verify_tolerance_m=(self._tol if single else self._demo_tol),
                 motion_profile_id=(goal.motion_profile_id or 'demo_slow'
                                    if single else 'demo_slow'),
-                max_world_age_s=0.0,
+                max_world_age_s=self._max_world_age_s,
             )
             zone_of = dict(goal_obj.assignments)
             world = None
+            world_sampled_monotonic = None
             history = []
             last_skill_result = None
 
@@ -924,8 +936,9 @@ class TaskFsmServer(Node):
                                   'executor decision limit reached (64)')
                 # ---- ask the policy WHAT next ----
                 # issue #7: persist the EXACT policy input before decide()
-                world_canonical = (serialize_envelope(world)
-                                   if world is not None else None)
+                world_canonical = (serialize_envelope(
+                    world, sampled_monotonic=world_sampled_monotonic)
+                    if world is not None else None)
                 episode.begin_step(world_canonical, goal_obj, constraints,
                                    history)
                 t_dec = time.perf_counter_ns()
@@ -1086,6 +1099,9 @@ class TaskFsmServer(Node):
                             world_revision=last_world_revision, evidence_id=''))
                         continue
                     world = r.world_state
+                    # P1-A: the instant this executor received the snapshot;
+                    # the world age is measured from here, not from sample time.
+                    world_sampled_monotonic = time.monotonic()
                     if single:
                         zone = ZoneState()
                         zone.id = 'task_place'
