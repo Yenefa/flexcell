@@ -34,3 +34,9 @@
 - 仿真（M3-S）；
 - `recovery_once` 的故障注入是**场景声明**，不是硬件故障；
 - 结果写入 `setup/acceptance/c5_recovery_fsm_vs_mtc_20261109/`。
+
+## 6. 结果附录（运行后追加，不改规则）
+- 6/6 PASS；两臂每次都有 1 次 `RECOVERY:REOBSERVE+RETRY`；
+- FSM 平均 14.267 s，MTC 平均 16.330 s（+2.063 s ≈ +14.5%）；
+- 记录：`setup/acceptance/c5_recovery_fsm_vs_mtc_20261109/`；
+- 结论：无成功差异，MTC 时间成本更高（n=3，探索性）。

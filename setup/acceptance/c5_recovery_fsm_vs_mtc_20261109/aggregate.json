@@ -1,0 +1,101 @@
+{
+  "protocol": "docs/C5_PREREGISTRATION.md",
+  "n_per_arm": 3,
+  "fsm": {
+    "success": 3,
+    "wall": [
+      14.218,
+      14.214,
+      14.369
+    ],
+    "mean_wall": 14.267000000000001,
+    "recoveries": [
+      1,
+      1,
+      1
+    ]
+  },
+  "mtc": {
+    "success": 3,
+    "wall": [
+      16.341,
+      16.326,
+      16.323
+    ],
+    "mean_wall": 16.330000000000002,
+    "recoveries": [
+      1,
+      1,
+      1
+    ]
+  },
+  "delta_wall_s": 2.0630000000000006,
+  "rows": [
+    {
+      "run": "legacy-a",
+      "arm": "fsm",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall": 14.218,
+      "recoveries": 1,
+      "stages": 5,
+      "fingerprint": "3cab9dd5e2dd62013736f8cef0a2a65eec8468a9d7a353c06acf9add25371a1d",
+      "sha": "1c77fde09d3c5aa215172b6757edacabef25d6d809a3a374d2c831e85aea2774"
+    },
+    {
+      "run": "mtc-b",
+      "arm": "mtc",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall": 16.341,
+      "recoveries": 1,
+      "stages": 5,
+      "fingerprint": "9f231689a2509fc6739b6db5fb4d904770ea91447e4d1e3368c1d69580a7334d",
+      "sha": "ab3c9ea75d7db17944fb9fe15e2b542a9593d51581ad692a21b2a32bc462cc6b"
+    },
+    {
+      "run": "mtc-c",
+      "arm": "mtc",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall": 16.326,
+      "recoveries": 1,
+      "stages": 5,
+      "fingerprint": "9f231689a2509fc6739b6db5fb4d904770ea91447e4d1e3368c1d69580a7334d",
+      "sha": "d2e28d333fcb471ff2f11dd1460b3220e1f3a85ff4166a3977d17c6d756f9dba"
+    },
+    {
+      "run": "legacy-d",
+      "arm": "fsm",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall": 14.214,
+      "recoveries": 1,
+      "stages": 5,
+      "fingerprint": "3cab9dd5e2dd62013736f8cef0a2a65eec8468a9d7a353c06acf9add25371a1d",
+      "sha": "1b42a4bdaf9d66af2dd9e428b419346ec9a14238e44a42ac5ce5a2eb4c86e07d"
+    },
+    {
+      "run": "legacy-e",
+      "arm": "fsm",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall": 14.369,
+      "recoveries": 1,
+      "stages": 5,
+      "fingerprint": "3cab9dd5e2dd62013736f8cef0a2a65eec8468a9d7a353c06acf9add25371a1d",
+      "sha": "ebbd0ca81efac3cdb13d9b9f4ed23511f2e3e72c8a80d98c99f2020f117563de"
+    },
+    {
+      "run": "mtc-f",
+      "arm": "mtc",
+      "status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "wall": 16.323,
+      "recoveries": 1,
+      "stages": 5,
+      "fingerprint": "9f231689a2509fc6739b6db5fb4d904770ea91447e4d1e3368c1d69580a7334d",
+      "sha": "108f958440db68f17a6ae99ce8278671e0787c8c123ae5c75478b878c24ccb4f"
+    }
+  ]
+}

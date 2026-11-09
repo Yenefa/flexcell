@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "backend": "velocity_servo",
+  "skill_backend": "legacy",
+  "physical_tasks_dispatched": 1,
+  "qualification": "FUNCTIONAL_SMOKE_ONLY",
+  "case": "recovery_once",
+  "object": "target_box_a",
+  "out": "/tmp/c5-legacy-a/run-88279135fb55",
+  "decision_policy": "fsm",
+  "hybrid_threshold": null,
+  "resume_completed": false,
+  "model_env": {
+    "FLEXCELL_LLM_ENDPOINT": null,
+    "FLEXCELL_LLM_MODEL": null,
+    "FLEXCELL_LLM_BACKEND": null,
+    "FLEXCELL_JEV_ENDPOINT": null,
+    "FLEXCELL_JEV_MODEL": null,
+    "FLEXCELL_JEV_BACKEND": null
+  },
+  "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+  "semantic_config_sha256": "2e4906170d7755c6966d5dab71a5d101b3cf0fd0279ce22134e8e36be04f2bc1",
+  "runtime_fingerprint": "3cab9dd5e2dd62013736f8cef0a2a65eec8468a9d7a353c06acf9add25371a1d",
+  "task_start_monotonic_ns": 14670840466848,
+  "goal_pose": [
+    0.12,
+    -0.15,
+    0.0175
+  ],
+  "zone_2_pose": null,
+  "task_end_monotonic_ns": 14685786153426,
+  "task": {
+    "action": "task",
+    "goal_uuid": "a9e5b58d4c404d5d8e80ad7e39e5e268",
+    "outcome": "OUTCOME_SUCCEEDED",
+    "outcome_val": 0,
+    "error_code": "ERR_NONE",
+    "detail": "task done: all assignments verified",
+    "evidence_id": "pick_place_v1-fe584594",
+    "wall_seconds": 14.218,
+    "fsm_trace": [
+      "PICK_A(attempt=1):FAIL:ERR_GRASP_FAILED",
+      "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+      "PICK_A(attempt=2):OK",
+      "PLACE_A:OK",
+      "VERIFY_A(attempt=1):OK"
+    ],
+    "object_at_place": true,
+    "final_position_error_m": 0.004208052226799982,
+    "skip_verify": false
+  },
+  "actual_routing": {
+    "decisions": 6,
+    "sources": {
+      "fsm": 6
+    },
+    "leaves": {
+      "fsm": 6
+    },
+    "fallbacks": 0,
+    "models": [],
+    "backends": [],
+    "fast_calls": 0,
+    "slow_calls": 0,
+    "model_calls": 0,
+    "calls_without_identity": 0
+  },
+  "model_calls": 0,
+  "fast_calls": 0,
+  "slow_calls": 0,
+  "expectation_met": true,
+  "recorder_exit": 0,
+  "owned_launch_exit": 0,
+  "unavailable_numeric_fields": {}
+}
