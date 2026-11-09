@@ -30,3 +30,9 @@
 ## 5. 边界
 - 仿真（M3-S）；单场景；
 - 结果写入 `setup/acceptance/c7_strict_tolerance_20261109/`。
+
+## 6. 结果附录（运行后追加，不改规则）
+- 6/6 PASS：FSM 平均 14.101 s，MTC 平均 16.440 s（+2.338 s ≈ +16.6%）；
+- fingerprint 确认容差覆盖生效；
+- 记录：`setup/acceptance/c7_strict_tolerance_20261109/`；
+- 结论：**2 cm 容差未区分两臂**，MTC 仍更慢（n=3，探索性）。
