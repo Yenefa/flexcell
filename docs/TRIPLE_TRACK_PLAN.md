@@ -90,7 +90,7 @@
 
 **Blocker**：C3 需要先冻结协议；MTC 运行成本较高。
 
-**Next Action**：C10 ✅ 机制归因：MTC 失败=规划服务 timeout+planner busy（3/3 失败 vs 0/6 成功）；C11 最小修复需先预注册。
+**Next Action**：C11 已实现（有界重试 + 单测 32 passed），待执行 12 次评估。
 
 ---
 

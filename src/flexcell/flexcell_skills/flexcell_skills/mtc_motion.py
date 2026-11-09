@@ -3,6 +3,7 @@
 Only MoveToPose owns actuator goals, admission, cancellation and stop checks.
 An unknown terminal state prevents task recovery or subsequent cleanup motion.
 """
+import time
 import uuid
 import hashlib
 import math
@@ -41,6 +42,7 @@ class MtcMotionClient:
         self.blocked = False
         self.plans = []
         self.audit = []
+        self.planning_audit = []
 
     def _unknown(self, detail):
         self.blocked = True
@@ -61,13 +63,29 @@ class MtcMotionClient:
         request.targets = [stamped(position) for position in targets]
         request.motion_profile_id = profile
         request.deadline_ms = min(60000, max(1000, int(deadline_ms)))
-        future = self.planner.call_async(request)
-        if wait_future(future, request.deadline_ms / 1000 + 8) != 'done':
-            self.planner.remove_pending_request(future)
-            return False, 'planning reply timed out; no motion dispatched'
-        response = future.result()
-        if not response.success:
-            return False, response.detail
+        response = None
+        retries = 2
+        for attempt in range(retries + 1):
+            future = self.planner.call_async(request)
+            status = wait_future(future, request.deadline_ms / 1000 + 8)
+            if status == 'done':
+                response = future.result()
+                if response.success:
+                    break
+                busy = 'planner busy' in str(getattr(response, 'detail', ''))
+                self.planning_audit.append(dict(attempt=attempt + 1, outcome='busy' if busy else 'failed',
+                                                detail=str(getattr(response, 'detail', ''))[:120]))
+                if not busy or attempt >= retries:
+                    return False, response.detail
+            else:
+                self.planner.remove_pending_request(future)
+                self.planning_audit.append(dict(attempt=attempt + 1, outcome='timeout',
+                                                detail='planning reply timed out'))
+                if attempt >= retries:
+                    return False, 'planning reply timed out; no motion dispatched'
+            time.sleep(3.)
+        if response is None or not response.success:
+            return False, getattr(response, 'detail', 'planning failed')
         if len(response.trajectories) != len(targets):
             return False, 'wrong planned stage count'
         if attached_object_targets:

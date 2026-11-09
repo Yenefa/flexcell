@@ -345,3 +345,38 @@ def test_point_handoff_is_single_use_and_shares_motion_admission():
     server._admission.release()
     request.request_id = 'mtc-'+'a'*32
     assert not server._register_point(request,RegisterMtcTrajectory.Response()).success
+
+
+def test_prepare_retries_planner_busy_then_succeeds(monkeypatch):
+    client = adapter()
+    client.planner = Mock()
+    client.planning_audit = []
+    logical = [[.12, -.15, .0175]]
+    endpoints = [[.18, -.21, .28]]
+    busy = NS(success=False, detail='planner busy')
+    ok = NS(success=True, detail='planned', trajectories=[RobotTrajectory(joint_trajectory=trajectory())],
+            executor_targets=[module.stamped(p) for p in endpoints])
+    replies = [busy, ok]
+    client.planner.call_async.return_value.result.side_effect = replies
+    monkeypatch.setattr(module, 'wait_future', lambda *_: 'done')
+    monkeypatch.setattr(module.time, 'sleep', lambda *_: None)
+    assert client.prepare('PICK', 'target_box_a', [.2, 0., .02], logical, 'demo_slow', 30000)[0]
+    assert [a['outcome'] for a in client.planning_audit] == ['busy']
+    assert client.planner.call_async.call_count == 2
+
+
+def test_prepare_retries_timeout_then_succeeds(monkeypatch):
+    client = adapter()
+    client.planner = Mock()
+    client.planning_audit = []
+    logical = [[.12, -.15, .0175]]
+    endpoints = [[.18, -.21, .28]]
+    ok = NS(success=True, detail='planned', trajectories=[RobotTrajectory(joint_trajectory=trajectory())],
+            executor_targets=[module.stamped(p) for p in endpoints])
+    client.planner.call_async.return_value.result.return_value = ok
+    statuses = ['timeout', 'done']
+    monkeypatch.setattr(module, 'wait_future', lambda *_: statuses.pop(0))
+    monkeypatch.setattr(module.time, 'sleep', lambda *_: None)
+    assert client.prepare('PICK', 'target_box_a', [.2, 0., .02], logical, 'demo_slow', 30000)[0]
+    assert [a['outcome'] for a in client.planning_audit] == ['timeout']
+    assert client.planner.call_async.call_count == 2
