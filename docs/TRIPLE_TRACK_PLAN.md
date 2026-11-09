@@ -15,6 +15,7 @@
 - A5 ✅ T-G3 可靠性：**3/3**（`runs/p1.4-tg3-20261109/`）。
 - A6 ✅ 组合任务 T-G4：**3/3 成功**（`runs/p1.4-tg4-20261109/`）。
 - W6 ✅ 迁移 3+3：Cold **0/3**、Warm **2/3**（`runs/p1.5-w6-transfer-20261109/`）；Cold 均未写 plan；n=3 探索性。
+- W7 📝 设计（M0）：`docs/W7_CROSS_EMBODIMENT_DESIGN.md`；无第二本体 → BLOCKED。
 
 **Task Queue**
 1. T-G3 重复 2 次（补 n=3）。
@@ -87,7 +88,7 @@
 
 **Blocker**：C3 需要先冻结协议；MTC 运行成本较高。
 
-**Next Action**：C4 ✅（`setup/acceptance/c4_dual_fsm_vs_mtc_20261109/`）：两臂 3/3 成功，FSM 28.549 s vs MTC 34.368 s（+5.819 s）。下一步：C5 设计（更大 n 或新场景），先预注册。
+**Next Action**：C5 预注册已写（`docs/C5_PREREGISTRATION.md`，recovery_once FSM vs MTC 3+3），待执行。
 
 ---
 
