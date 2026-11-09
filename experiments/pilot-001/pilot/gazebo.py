@@ -32,7 +32,7 @@ export FLEXCELL_REPO="$REPO" FLEXCELL_WS="$WS" FLEXCELL_INSTALL="$WS/install"
 OUT=__OUT__
 rm -rf "$OUT"; mkdir -p "$OUT"
 cd "$REPO"
-timeout __TIMEOUT__ python3 scripts/sim_smoke.py --out "$OUT" --case __CASE__ --backend velocity_servo --skill-backend legacy __POSE__ __ZONE2__ __CFG__ > /tmp/p14-smoke.log 2>&1
+timeout -k 10 __TIMEOUT__ python3 scripts/sim_smoke.py --out "$OUT" --case __CASE__ --backend velocity_servo --skill-backend legacy __POSE__ __ZONE2__ __CFG__ > /tmp/p14-smoke.log 2>&1
 echo "SMOKE_RC=$?"
 ls "$OUT"
 """
@@ -66,6 +66,14 @@ def run_smoke(repo_src, repo, ws, out, case="normal", distro="Ubuntu-24.04",
     proc = subprocess.run(["wsl", "-d", distro, "--", "bash", wsl_path],
                           capture_output=True, text=True, encoding="utf-8",
                           errors="replace", timeout=timeout_s + 300)
+    # A gate may leave a simulator or node behind; the next gate must start clean.
+    subprocess.run(["wsl", "-d", distro, "--", "bash", "-lc",
+                    "pkill -9 -f '[g]z sim' 2>/dev/null; pkill -9 -f '[m]ove_group' 2>/dev/null; "
+                    "pkill -9 -f '[t]ask_fsm_server' 2>/dev/null; pkill -9 -f '[s]im_smoke' 2>/dev/null; "
+                    "pkill -9 -f '[r]os2 launch' 2>/dev/null; pkill -9 -f '[r]obot_state_publisher' 2>/dev/null; "
+                    "sleep 3"],
+                   capture_output=True, text=True, encoding="utf-8",
+                   errors="replace", timeout=120)
     return {"returncode": proc.returncode,
             "stdout": (proc.stdout or "")[-4000:],
             "stderr": (proc.stderr or "")[-4000:]}
