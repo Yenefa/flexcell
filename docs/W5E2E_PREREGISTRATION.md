@@ -32,5 +32,5 @@
 
 ## 6. 结果附录（运行后追加）
 - 探测：`ERR_SAFETY_REJECTED` / `target_not_available`（`runs/p1.5-w5e2e-20261109/probe.json`）；
-- 正式：**2/2 成功**，轮数 4/4，tokens 4063/4060，三门全 PASS；
+- 正式：**3/3 成功**（chat 2 + **deepseek-flash 1**），轮数 4/4/4，tokens 4063/4060/4321，三门全 PASS；
 - 结论：同一显式行动指令在**第二种、机制不同**的缺陷上仍有效（n=2，单模型）。

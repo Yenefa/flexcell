@@ -1,30 +1,40 @@
 {
   "task": "W5-E2e",
-  "defect": "observe_server.tracked_objects missing target_box_b",
-  "n": 2,
-  "success": 2,
+  "n": 3,
+  "success": 3,
   "rows": [
     {
       "rep": "rep1",
+      "model": "deepseek-chat",
       "success": true,
       "iters": 4,
       "tokens": 4063,
       "target": "PASS",
       "normal": "PASS",
       "regrasp": "PASS",
-      "config_has_b": true,
       "sha": "cb305b3a3417dea7a66ad02d5d8a4016f45cf3d400332e439b3851ae6376d5c8"
     },
     {
       "rep": "rep2",
+      "model": "deepseek-chat",
       "success": true,
       "iters": 4,
       "tokens": 4060,
       "target": "PASS",
       "normal": "PASS",
       "regrasp": "PASS",
-      "config_has_b": true,
       "sha": "0174fafadeff1dbb847c265d3e50b3f048ea49ed0332034a9ae3c2d538a79783"
+    },
+    {
+      "rep": "rep3-flash",
+      "model": "deepseek-flash",
+      "success": true,
+      "iters": 4,
+      "tokens": 4321,
+      "target": "PASS",
+      "normal": "PASS",
+      "regrasp": "PASS",
+      "sha": "e7c5cb42d3a471c2bff013fc7936bfc8093964f9ba5d2c586d2a2c165906d24f"
     }
   ]
 }
