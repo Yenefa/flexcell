@@ -43,3 +43,8 @@
 - 单元测试：`pytest experiments/pilot-001/tests -q`（29）与 `pytest src/flexcell/flexcell_skills/test/test_mtc_motion.py -q`（32）；
 - 证据校验：各 `setup/acceptance/*/verify.py` 与 `runs/*/verify.py`；
 - 演示：`docs/COMPETITION_DEMO.md`。
+
+## 模型口径（2026-11-09 项目负责人更正）
+- `deepseek-flash` 即 **DeepSeek v4.1 Flash（1017）**，是当前主力/最强模型；API 只暴露该 id（无版本化别名）；
+- `deepseek-v4-pro` 为较早的重模型对照，不再当作"更强"；
+- `deepseek-chat` 为早期默认，仅作跨版本稳定性对照。
