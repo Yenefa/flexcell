@@ -47,6 +47,20 @@ class ToolBox:
         self.calls.append(("write_file", rel))
         return True
 
+    def edit_file(self, rel, old, new):
+        self._need("edit_file")
+        if self.guard.is_protected(rel):
+            self.calls.append(("edit_file", rel, "REFUSED_PROTECTED"))
+            raise ProtectedViolation("refused to edit protected path: %s" % rel)
+        path = self._inside(rel)
+        text = path.read_text(encoding="utf-8")
+        count = text.count(old)
+        if count != 1:
+            raise ValueError("edit_file needs exactly one match, found %d" % count)
+        path.write_text(text.replace(old, new), encoding="utf-8")
+        self.calls.append(("edit_file", rel))
+        return True
+
     def run_checks(self):
         self._need("run_checks")
         self.calls.append(("run_checks",))

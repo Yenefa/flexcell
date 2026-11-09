@@ -12,6 +12,7 @@ sys.path.insert(0, str(HERE))
 
 from pilot import fixtures, runner, tasks
 from pilot.hash_guard import HashGuard, ProtectedViolation
+from pilot.toolbox import ToolBox
 from pilot.manifest import ManifestError, load, seal, verify_seal
 from pilot.metrics import summarize
 
@@ -283,3 +284,28 @@ def test_diagnosis_derive(tmp_path):
     assert doc["cause"] == "reachability"
     assert doc["limits"]["max_reach_m"] == 0.30
     assert doc["suggested_action"]
+
+
+def test_toolbox_edit_file_replaces_one_match_only(tmp_path):
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    (ws / "config.txt").write_text("zone_2_x: 0.45\n", encoding="utf-8")
+    guard = HashGuard(ws, [])
+    guard.snapshot()
+    box = ToolBox("A", ["edit_file"], ws, guard, ws / "verdict.json", None)
+    box.edit_file("config.txt", "0.45", "0.25")
+    assert (ws / "config.txt").read_text(encoding="utf-8") == "zone_2_x: 0.25\n"
+    with pytest.raises(ValueError):
+        box.edit_file("config.txt", "0.45", "0.20")
+
+
+def test_toolbox_edit_file_refuses_protected(tmp_path):
+    ws = tmp_path / "ws"
+    ws.mkdir()
+    (ws / "gate").mkdir()
+    (ws / "gate" / "acceptance.py").write_text("print('ok')\n", encoding="utf-8")
+    guard = HashGuard(ws, ["gate/acceptance.py"])
+    guard.snapshot()
+    box = ToolBox("A", ["edit_file"], ws, guard, ws / "verdict.json", None)
+    with pytest.raises(ProtectedViolation):
+        box.edit_file("gate/acceptance.py", "ok", "no")

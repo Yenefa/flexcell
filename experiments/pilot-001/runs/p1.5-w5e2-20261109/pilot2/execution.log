@@ -1,0 +1,24 @@
+{
+  "status": "ROBOT_FAILURE",
+  "case": "dual_object",
+  "runtime_fingerprint": "0984d29d890bd9614deddfb9d0948877c84f11e61a34af071915a01d680bb2d3",
+  "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+  "semantic_config_sha256": "93f2fedb1224704d9c1b795129d5c9854184d7958f28c7a7fcadb75330615148",
+  "physical_tasks_dispatched": 1,
+  "window_id": null,
+  "goal_pose": [
+    0.12,
+    -0.15,
+    0.0175
+  ],
+  "task": {
+    "outcome": "OUTCOME_FAILED",
+    "error_code": "ERR_SKILL_FAILED",
+    "detail": "policy abort (NON_RECOVERABLE): place failed (ERR_MOTION_FAILED, carried box is not retried) (trace=PICK_A(attempt=1):OK,PLACE_A:OK,VERIFY_A(attempt=1):OK,PICK_B(attempt=1):OK,PLACE_B:FAIL); previous_skill=PLACE cause=ERR_MOTION_FAILED legacy_error_code=30",
+    "final_position_error_m": null
+  },
+  "limits": {
+    "max_reach_m": 0.3,
+    "rule": "reach = hypot(x, y) must be strictly below max_reach_m"
+  }
+}

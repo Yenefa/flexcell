@@ -49,3 +49,9 @@
 - 验收机制正常（两门独立判定、fingerprint 一致）；
 - 记录：`experiments/pilot-001/runs/p1.5-w5e2-20261109/`；
 - 期间修复 4 个 harness 缺陷（config-override 杠杆、W5A 工具集、WSL 路径转换、tempfile 导入）。
+
+## 9. 第二次试点（追加，不改规则）
+- 新增 `edit_file` 工具 + 迭代提示后重跑：仍 **失败**（4 轮、8709 tokens、未修改 config）；
+- 与第一次一致：目标门 `ROBOT_FAILURE`、回归门 PASS；
+- 记录：`runs/p1.5-w5e2-20261109/pilot2/`；
+- 结论不变：W5-E2 未验证。
