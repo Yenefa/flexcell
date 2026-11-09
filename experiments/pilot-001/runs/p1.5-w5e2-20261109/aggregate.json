@@ -1,22 +1,27 @@
 {
   "task": "W5-E2",
-  "n": 2,
-  "rows": [
+  "n": 3,
+  "pilots": [
     {
-      "pilot": "pilot1",
+      "pilot": 1,
       "iters": 4,
       "tokens": 8235,
-      "wrote": false,
-      "target": true,
-      "passed": false
+      "wrote": false
     },
     {
-      "pilot": "pilot2",
+      "pilot": 2,
       "iters": 4,
       "tokens": 8709,
-      "wrote": false,
-      "target": true,
-      "passed": false
+      "wrote": false
+    },
+    {
+      "pilot": 3,
+      "iters": 4,
+      "tokens": 7500,
+      "wrote": false
     }
-  ]
+  ],
+  "attribution": "agent diagnosed the unreachable zone_2 correctly but spent the iteration budget exploring gate/ and did not write; read_file on a directory raised PermissionError in pilot2, fixed with list_dir; budget still exhausted before a write.",
+  "status": "BLOCKED",
+  "reason": "frozen protocol caps iterations at <=3; the agent needs exploration turns; changing budget would change the protocol"
 }

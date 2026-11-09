@@ -55,3 +55,9 @@
 - 与第一次一致：目标门 `ROBOT_FAILURE`、回归门 PASS；
 - 记录：`runs/p1.5-w5e2-20261109/pilot2/`；
 - 结论不变：W5-E2 未验证。
+
+## 10. 第三次试点与 BLOCKED 判定（追加，不改规则）
+- pilot3：加入消息级 transcript；agent 诊断正确（reach≈0.4528>0.3）但把 4 轮预算全部用于探索，未写文件；
+- 修复 `read_file("目录")` 的 PermissionError（改为列目录）并新增 `list_dir` 后仍失败；
+- 预注册规定 ≤3 迭代，实际 4 轮仍不足；按规则 **BLOCKED**，不修改协议上限去"凑通过"；
+- 后续 W5-E2b 必须重新预注册（预算 6 轮 + 明确 gate 只读）。
