@@ -1,0 +1,70 @@
+{
+  "arm": "W5A",
+  "meta": {
+    "task": "T-W5",
+    "model": "deepseek-chat",
+    "base_url": "https://api.deepseek.com",
+    "key_fingerprint": "84edc02f"
+  },
+  "success": true,
+  "first_pass": false,
+  "iterations": 4,
+  "claim_success": false,
+  "false_success": false,
+  "violation": null,
+  "cost": {
+    "tokens": 3521,
+    "agent_s": 4.109,
+    "execution_s": 0.218
+  },
+  "evidence": {
+    "items": {
+      "verdict.json": {
+        "present": true,
+        "bytes": 380,
+        "sha256": "5f019d2fe8464c4ac22e491c82a43eea9d0d07c197eb9ad839a0133795123899"
+      },
+      "telemetry/execution.log": {
+        "present": false,
+        "bytes": 0,
+        "sha256": null
+      },
+      "episode.json": {
+        "present": false,
+        "bytes": 0,
+        "sha256": null
+      },
+      "fingerprint.json": {
+        "present": true,
+        "bytes": 260,
+        "sha256": "98fd0ffaf55c2a4e76593c922b5cd09db6a04a84897f1bdbb24355c2054187ab"
+      }
+    },
+    "present": 2,
+    "required": 4,
+    "completeness": 0.5
+  },
+  "verdict": {
+    "passed": true,
+    "returncode": 0,
+    "stdout": "{\"passed\": true, \"target\": true, \"regression_rc\": 0, \"trace\": [[\"OBSERVE\", 1, 30, 1], [\"DONE\", 0, 0, 0]]}\n",
+    "stderr": "",
+    "target": true,
+    "regression_rc": 0,
+    "trace": [
+      [
+        "OBSERVE",
+        1,
+        30,
+        1
+      ],
+      [
+        "DONE",
+        0,
+        0,
+        0
+      ]
+    ]
+  },
+  "run_dir": "C:\\Users\\fuker\\Desktop\\workspace\\project-033-flexcell\\ci-public-window\\evidence\\pilot001-w5\\w5-W5A"
+}

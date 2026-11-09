@@ -13,6 +13,12 @@ sys.path.insert(0, str(HERE))
 from pilot import fixtures, gazebo, gazebo_task, runner, tasks
 from pilot.manifest import load
 
+TASK_W5 = ("The workcell aborts on a recoverable grasp failure (error 30) even "
+           "though one recovery attempt is available. Fix skill/recovery.py so the "
+           "target scenario reaches DONE, without breaking existing behaviour. "
+           "gate/ and tests/test_regression.py are read-only. Use run_execution to "
+           "see the failure and run_checks for the regression suite.")
+
 TASK_TG3C = ("The regrasp task fails. Diagnose the cause from the execution "
              "telemetry and fix plan.json. Do not modify gate/.")
 TASK_TG3W = (TASK_TG3C + "\n\nPrior experience (transferred from an earlier task): PLACE "
@@ -210,6 +216,27 @@ def tc_run(manifest, out, arms, repo_src):
     return 0
 
 
+def w5_run(manifest, out, arms, repo_src):
+    from pilot.agent_fc import FCAgent
+    from pilot.llm import Chat
+    from pilot import w5
+    rows = []
+    for arm in arms:
+        chat = Chat()
+        agent = FCAgent(chat, manifest["arms"][arm]["tools"], TASK_W5)
+        res = runner.run_one(manifest, arm, agent,
+                             w5.build_t_w5(out / ("tpl-w5-" + arm)),
+                             out / ("w5-" + arm),
+                             meta={"task": "T-W5", **chat.metadata()},
+                             protected=["gate/sim.py", "gate/acceptance.py", "gate/run_regression.py", "tests/test_regression.py"],
+                             execution_factory=w5.W5Execution)
+        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        rows.append(res)
+        print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
+              (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
+    (out / "w5-runs.json").write_text(json.dumps({"task": "T-W5", "rows": rows}, indent=2) + "\n", encoding="utf-8")
+    return 0
+
 def tg3_transfer_run(manifest, out, arms, repo_src, warm):
     from pilot.agent_fc import FCAgent
     from pilot.llm import Chat
@@ -375,6 +402,8 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     manifest = load(a.manifest)
     arms = [x.strip() for x in a.arms.split(",") if x.strip()]
+    if a.llm and a.task == "T-W5":
+        return w5_run(manifest, out, arms, a.repo_src)
     if a.llm and a.task in ("T-G3C", "T-G3W"):
         return tg3_transfer_run(manifest, out, arms, a.repo_src, warm=(a.task == "T-G3W"))
     if a.llm and a.task == "T-G4":
