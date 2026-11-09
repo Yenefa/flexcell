@@ -17,7 +17,7 @@
 | P2-A | Inference Budget 完善 | **DONE** | `test_budget_lifecycle.py` 10 passed |
 | P2-B | Task FSM 模块化 | TODO | — |
 | P2-C | MoveToPose 模块化 | TODO | — |
-| P2-D | 时间域规范 | TODO | — |
+| P2-D | 时间域规范 | **DONE** | `test_time_domain.py` 5 + `TIME_DOMAIN_CONVENTION.md` |
 | P2-E | Sim2Real 感知准备 | TODO | — |
 
 ## P0-A 详情
@@ -39,6 +39,7 @@
 | `3273a65` | P0-A 取消集成验证 |
 | `81a4c47` | P1-E 对象注册表解耦 |
 | `25c3216` | P1-F 日志完整性 + M2 收口 |
+| `1ba8db8` | P2-A 预算生命周期 |
 
 ## Milestone 2 阶段总结（DONE）
 P1-A~P1-F 全部完成，三场景真实 Gazebo 全 PASS（normal 14.2s / dual_object 28.6s / regrasp 14.6s）。

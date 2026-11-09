@@ -206,6 +206,10 @@ class EpisodeRecorder:
             "final_state": final_state or {},
             "env": env_snapshot(),
             "timestamps": {
+                # P2-D: WALL clock on purpose - this is the audit trail an
+                # operator reads. The label makes the domain explicit so it is
+                # never mistaken for, or compared against, a monotonic instant.
+                "clock": "wall_unix_seconds",
                 "start": self._t_start,
                 "end": time.time(),
             },

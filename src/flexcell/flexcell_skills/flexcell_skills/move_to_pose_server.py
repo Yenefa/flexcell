@@ -203,7 +203,10 @@ class MoveToPoseServer(Node):
 
         # ---------------- state ----------------
         self._js = None
-        self._js_wall = 0.0
+        # P2-D: monotonic, and None until the first message arrives. A 0.0
+        # sentinel compared against time.monotonic() makes a joint state that
+        # NEVER arrived look fresh on a freshly booted host.
+        self._js_monotonic = None
         self._admission = threading.Lock()
         self._motion_blocked = False
         self._motion_blocked_reason = ''
@@ -313,7 +316,7 @@ class MoveToPoseServer(Node):
 
     def _on_js(self, msg):
         self._js = msg
-        self._js_wall = time.monotonic()
+        self._js_monotonic = time.monotonic()
 
     def _on_goal(self, goal_request):
         return GoalResponse.ACCEPT
@@ -342,7 +345,8 @@ class MoveToPoseServer(Node):
                 'name': list(js.name),
                 'position': list(js.position),
                 'velocity': list(js.velocity),
-                'age_s': time.monotonic() - self._js_wall,
+                'age_s': (None if self._js_monotonic is None
+                          else time.monotonic() - self._js_monotonic),
             })
         try:
             with open(self._log_path, 'a') as fh:
@@ -388,9 +392,9 @@ class MoveToPoseServer(Node):
         return 'done'
 
     def _joint_state(self):
-        if self._js is None:
+        if self._js is None or self._js_monotonic is None:
             return None, None
-        age = time.monotonic() - self._js_wall
+        age = time.monotonic() - self._js_monotonic
         return self._js, age
 
     def _arm_at_rest(self):
