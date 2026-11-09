@@ -40,6 +40,23 @@
         "read_diagnosis"
       ],
       "note": "B plus a structured diagnosis tool; used to test whether attribution, not verdict, adds value"
+    },
+    "W5A": {
+      "tools": [
+        "read_file",
+        "write_file",
+        "run_checks"
+      ],
+      "note": "W5 arm: failure output only (no independent verdict)"
+    },
+    "W5B": {
+      "tools": [
+        "read_file",
+        "write_file",
+        "run_checks",
+        "read_verification"
+      ],
+      "note": "W5 arm: failure output plus independent verdict"
     }
   },
   "budget": {
@@ -150,6 +167,13 @@
       "agent_wall_clock_s": 900,
       "execution_wall_clock_s": 2400,
       "judge_timeout_s": 600
+    },
+    "T-W5": {
+      "max_iterations": 5,
+      "max_tokens": 20000,
+      "agent_wall_clock_s": 600,
+      "execution_wall_clock_s": 600,
+      "judge_timeout_s": 120
     }
   }
 }
