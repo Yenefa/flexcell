@@ -527,10 +527,16 @@ class TestCallSkillTimeout(unittest.TestCase):
                 return f
 
         rec = {}
+        node._stop_cancel_timeout_s = 0.1
+        node._stop_result_timeout_s = 0.1
         result, err = node._call_skill(_Cli(), RunDemo.Goal(), 'VERIFY',
                                        [], rec, 0.15)
         self.assertIsNone(result)
-        self.assertEqual(err, 'VERIFY result timeout (cancel sent)')
+        # P0-A: a timeout only requests the stop. The call must wait for the
+        # terminal result and, when the goal never terminates, quarantine the
+        # arm instead of reporting "cancel sent" as if the robot had stopped.
+        self.assertIn('stop unconfirmed', err)
+        self.assertTrue(node._quarantine.active)
 
 
 class TestPickEngageFailure(unittest.TestCase):

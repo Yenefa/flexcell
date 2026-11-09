@@ -37,6 +37,7 @@ from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
 
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import String as StringMsg
+from std_srvs.srv import Trigger
 
 from flexcell_interfaces.action import (
     Observe, PickObject, PlaceObject, RunComposite, RunDemo, RunPickPlace,
@@ -49,6 +50,7 @@ from flexcell_skills.skill_contract import (
 from flexcell_skills.canonical_state import serialize_envelope
 from flexcell_skills.contracts.error_codes import task_abort_error_code
 from flexcell_skills.contracts.action_result import AcceptedGoalResult
+from flexcell_skills.skill_lifecycle import MotionQuarantine, confirm_stop
 from flexcell_skills.contracts.composite import (
     CompositeError, Journal, execute as execute_composite, prepare_plan)
 from flexcell_skills.contracts.composite_checkpoint import (
@@ -158,7 +160,14 @@ class TaskFsmServer(Node):
         # same arm (audit P1-3: the old per-action check-then-set flags were
         # racy and mutually blind; RunDemo and RunPickPlace could run
         # concurrently on one robot)
+        self.declare_parameter('stop_cancel_timeout_s', 4.0)
+        self.declare_parameter('stop_result_timeout_s', 12.0)
         self._admission = threading.Lock()
+        # P0-A: a cancel request is not a stop confirmation. Once a skill's stop
+        # cannot be proven the arm stays quarantined: no lease release, no IDLE,
+        # no new motion dispatch until a verified reset.
+        self._motion_quarantine = MotionQuarantine()
+        self._last_stop = None
         self._seq = 0
 
         self._server = ActionServer(
@@ -212,6 +221,10 @@ class TaskFsmServer(Node):
                                     'version': protocol['protocol_version'],
                                     'sha256': digest}
 
+        self._stop_cancel_timeout_s = float(
+            self.get_parameter('stop_cancel_timeout_s').value)
+        self._stop_result_timeout_s = float(
+            self.get_parameter('stop_result_timeout_s').value)
         policy_name = gp2('decision_policy').value
         if policy_name == 'fsm':
             self._policy = FSMPolicy()
@@ -249,6 +262,8 @@ class TaskFsmServer(Node):
         qos.reliability = QoSReliabilityPolicy.RELIABLE
         self._state_pub = self.create_publisher(
             StringMsg, gp2('task_state_topic').value, qos)
+        self._reset_srv = self.create_service(
+            Trigger, 'reset_motion_quarantine', self._reset_motion_quarantine)
         self._publish_task_state('IDLE')
 
         self._demo_server = ActionServer(
@@ -272,57 +287,149 @@ class TaskFsmServer(Node):
             'policy=%s v%s' % (self._obj_a, self._obj_b, self._budget,
                                self._policy.name, self._policy.version))
 
+    # Lazily created so partially constructed nodes (tests that bypass __init__)
+    # still fail closed: a missing quarantine is an ACTIVE-free gate, not a crash.
+    @property
+    def _quarantine(self):
+        gate = self.__dict__.get("_motion_quarantine")
+        if gate is None:
+            gate = MotionQuarantine()
+            self.__dict__["_motion_quarantine"] = gate
+        return gate
+
+    @_quarantine.setter
+    def _quarantine(self, value):
+        self.__dict__["_motion_quarantine"] = value
+
+    @property
+    def _stop_cancel_timeout_s(self):
+        return float(self.__dict__.get("_stop_cancel_s", 4.0))
+
+    @_stop_cancel_timeout_s.setter
+    def _stop_cancel_timeout_s(self, value):
+        self.__dict__["_stop_cancel_s"] = value
+
+    @property
+    def _stop_result_timeout_s(self):
+        return float(self.__dict__.get("_stop_result_s", 12.0))
+
+    @_stop_result_timeout_s.setter
+    def _stop_result_timeout_s(self, value):
+        self.__dict__["_stop_result_s"] = value
+
+    def _finish_arm_state(self, owns_arm):
+        """Release the arm only when no skill stop is unconfirmed."""
+        if not owns_arm:
+            return
+        if self._quarantine.active:
+            self._publish_task_state("QUARANTINED")
+            return
+        self._admission.release()
+        self._publish_task_state('IDLE')
+
+    def _reset_motion_quarantine(self, request, response):
+        """Verified recovery: only a goal that terminated may leave quarantine."""
+        ok, detail = self._quarantine.clear("reset_motion_quarantine")
+        if ok:
+            try:
+                self._admission.release()
+            except RuntimeError:
+                pass
+            self._publish_task_state('IDLE')
+        response.success = bool(ok)
+        response.message = detail
+        try:
+            self.get_logger().info('reset_motion_quarantine: %s' % detail)
+        except Exception:  # noqa: BLE001
+            pass
+        return response
+
     def _publish_task_state(self, state):
-        self._state_pub.publish(StringMsg(data=state))
+        pub = self.__dict__.get("_state_pub")
+        if pub is None:
+            return
+        pub.publish(StringMsg(data=state))
+
+
+    # ---------------------------------------------------------------- P0-A
+    def _quarantine_skill(self, label, record, extra=None):
+        """Enter quarantine and log it; the arm lease is deliberately kept."""
+        payload = dict(record)
+        payload["label"] = label
+        payload["terminated"] = bool(record.get("terminated"))
+        if extra:
+            payload.update(extra)
+        entered = self._quarantine.enter(**payload)
+        self._last_stop = entered
+        try:
+            self.get_logger().error(
+                "motion quarantine: %s (cancel=%s terminated=%s reason=%s)"
+                % (label, entered.get("cancel_accepted"),
+                   entered.get("terminated"), entered.get("reason")))
+        except Exception:  # noqa: BLE001
+            pass
+        self._publish_task_state("QUARANTINED")
+        return entered
+
+    def _stop_detail(self, label, record):
+        return ("%s canceled: stop unconfirmed (%s)" % (label, record.get("reason")))
 
     def _call_skill(self, cli, goal, state, trace, rec, deadline_s, goal_handle=None, t0=None):
-        """Call one skill; returns (result, None) or (None, detail)."""
+        """Call one skill; returns (result, None) or (None, detail).
+
+        P0-A: a timeout or cancel is only a request; the call returns only after
+        the goal proved it stopped or the arm was quarantined.
+        """
         trace.append(state)
+        if self._quarantine.active:
+            return None, ("%s not dispatched: motion quarantine is active"
+                          % state)
         if goal_handle is not None:
             fb = RunPickPlace.Feedback()
             fb.state = state
             fb.elapsed_ms = int((time.monotonic() - t0) * 1000) if t0 else 0
             goal_handle.publish_feedback(fb)
         if not cli.wait_for_server(timeout_sec=10.0):
-            return None, '%s skill server unavailable' % state
+            return None, "%s skill server unavailable" % state
         send = cli.send_goal_async(goal)
-        t0 = time.monotonic()
+        t_send = time.monotonic()
         while not send.done():
-            if time.monotonic() - t0 > 15.0:
-                return None, '%s goal send timeout' % state
+            if time.monotonic() - t_send > 15.0:
+                record = {"cancel_requested": False, "cancel_accepted": False,
+                          "cancel_detail": "goal send future never completed",
+                          "terminated": False, "reason": "acceptance is unknown",
+                          "result_outcome": None, "result_error_code": None,
+                          "result_detail": ""}
+                self._quarantine_skill(state, record,
+                                       {"goal_identity_unknown": True})
+                return None, "%s goal send timeout: acceptance unknown, quarantined" % state
             time.sleep(0.02)
         gh = send.result()
         if gh is None or not gh.accepted:
-            return None, '%s goal rejected' % state
+            return None, "%s goal rejected" % state
         rf = AcceptedGoalResult(gh)
+        t_r = time.monotonic()
         while not rf.done():
             if goal_handle is not None and goal_handle.is_cancel_requested:
-                # outer cancel: stop the skill's motion and surface its
-                # CANCELED result (audit P0-3 - skills used to run to
-                # completion while the caller waited)
-                gh.cancel_goal_async()
-                t_c = time.monotonic()
-                while not rf.done() and time.monotonic() - t_c < 15.0:
-                    time.sleep(0.05)
-                if not rf.done():
-                    return None, '%s canceled: stop confirmation timeout' % state
-                result = rf.result().result
-                rec['%s_result' % state.lower()] = {
-                    'outcome': int(result.outcome),
-                    'error_code': int(getattr(result, 'error_code', 0)),
-                    'detail': getattr(result, 'detail', ''),
-                }
-                return result, None
-            if time.monotonic() - t0 > deadline_s:
-                gh.cancel_goal_async()
-                return None, '%s result timeout (cancel sent)' % state
+                return self._stop_skill(state, gh, rf, rec=rec)
+            if time.monotonic() - t_r > deadline_s:
+                return self._stop_skill(state, gh, rf, rec=rec)
             time.sleep(0.05)
         result = rf.result().result
-        rec['%s_result' % state.lower()] = {
-            'outcome': int(result.outcome),
-            'error_code': int(getattr(result, 'error_code', 0)),
-            'detail': getattr(result, 'detail', ''),
+        rec["%s_result" % state.lower()] = {
+            "outcome": int(result.outcome),
+            "error_code": int(getattr(result, "error_code", 0)),
+            "detail": getattr(result, "detail", ""),
         }
+        if getattr(result, "outcome", 0) == 3 or getattr(result, "error_code", 0) == 33:
+            record = {"cancel_requested": False, "cancel_accepted": False,
+                      "cancel_detail": "no cancel needed", "terminated": True,
+                      "result_outcome": int(getattr(result, "outcome", -1)),
+                      "result_error_code": int(getattr(result, "error_code", -1)),
+                      "result_detail": str(getattr(result, "detail", ""))[:400],
+                      "reason": "skill reported STATE_UNKNOWN"}
+            self._quarantine_skill(state, record)
+            return None, self._stop_detail(state, record)
         return result, None
 
     def _execute(self, goal_handle):
@@ -340,7 +447,15 @@ class TaskFsmServer(Node):
     # =================================================================
 
     def _demo_call(self, cli, goal, label, goal_handle, t0, deadline_s):
-        """Run one skill for the demo; returns (result, None) or (None, err_detail)."""
+        """Run one skill for the demo; returns (result, None) or (None, err_detail).
+
+        P0-A: a timeout or a cancel only *requests* a stop. This helper returns a
+        failure only after the downstream goal either proved it stopped or was
+        quarantined; it never releases the arm on an unconfirmed stop.
+        """
+        if self._quarantine.active:
+            return None, ("%s not dispatched: motion quarantine is active"
+                          % label)
         if goal_handle is not None:
             fb_type = (RunPickPlace.Feedback if isinstance(
                 goal_handle.request, RunPickPlace.Goal) else RunDemo.Feedback)
@@ -349,34 +464,76 @@ class TaskFsmServer(Node):
             fb.elapsed_ms = int((time.monotonic() - t0) * 1000)
             goal_handle.publish_feedback(fb)
         if not cli.wait_for_server(timeout_sec=10.0):
-            return None, '%s skill server unavailable' % label
+            return None, "%s skill server unavailable" % label
         send = cli.send_goal_async(goal)
         t_send = time.monotonic()
         while not send.done():
             if time.monotonic() - t_send > 15.0:
-                return None, '%s goal send timeout' % label
+                record = {"cancel_requested": False, "cancel_accepted": False,
+                          "cancel_detail": "goal send future never completed",
+                          "terminated": False, "result_outcome": None,
+                          "result_error_code": None, "result_detail": "",
+                          "reason": "skill goal acceptance is unknown"}
+                self._quarantine_skill(label, record,
+                                       {"goal_identity_unknown": True})
+                return None, ("%s goal send timeout: acceptance unknown, "
+                              "quarantined" % label)
+            if goal_handle is not None and goal_handle.is_cancel_requested:
+                record = {"cancel_requested": False, "cancel_accepted": False,
+                          "cancel_detail": "no goal handle to cancel",
+                          "terminated": False, "result_outcome": None,
+                          "result_error_code": None, "result_detail": "",
+                          "reason": "cancel requested while acceptance is unknown"}
+                self._quarantine_skill(label, record,
+                                       {"goal_identity_unknown": True})
+                return None, ("%s canceled before acceptance: identity unknown, "
+                              "quarantined" % label)
             time.sleep(0.02)
         gh = send.result()
         if gh is None or not gh.accepted:
-            return None, '%s goal rejected' % label
+            return None, "%s goal rejected" % label
         rf = AcceptedGoalResult(gh)
         t_r = time.monotonic()
         while not rf.done():
             if goal_handle is not None and goal_handle.is_cancel_requested:
-                # outer cancel: stop the skill's motion and surface its
-                # CANCELED result (audit P0-3)
-                gh.cancel_goal_async()
-                t_c = time.monotonic()
-                while not rf.done() and time.monotonic() - t_c < 15.0:
-                    time.sleep(0.05)
-                if not rf.done():
-                    return None, '%s canceled: stop confirmation timeout' % label
-                return rf.result().result, None
+                return self._stop_skill(label, gh, rf)
             if time.monotonic() - t_r > deadline_s:
-                gh.cancel_goal_async()
-                return None, '%s result timeout (cancel sent)' % label
+                return self._stop_skill(label, gh, rf)
             time.sleep(0.05)
-        return rf.result().result, None
+        result = rf.result().result
+        if getattr(result, "outcome", 0) == 3 or getattr(result, "error_code", 0) == 33:
+            record = {"cancel_requested": False, "cancel_accepted": False,
+                      "cancel_detail": "no cancel needed", "terminated": True,
+                      "result_outcome": int(getattr(result, "outcome", -1)),
+                      "result_error_code": int(getattr(result, "error_code", -1)),
+                      "result_detail": str(getattr(result, "detail", ""))[:400],
+                      "reason": "skill reported STATE_UNKNOWN"}
+            self._quarantine_skill(label, record)
+            return None, self._stop_detail(label, record)
+        return result, None
+
+    def _stop_skill(self, label, gh, rf, rec=None):
+        """Request a stop and wait for the proof; quarantine when unproven."""
+        record = confirm_stop(
+            gh, rf,
+            cancel_timeout_s=self._stop_cancel_timeout_s,
+            result_timeout_s=self._stop_result_timeout_s)
+        self._last_stop = record
+        if record.get("stop_confirmed"):
+            try:
+                result = rf.result().result
+            except Exception as exc:  # noqa: BLE001
+                self._quarantine_skill(label, record)
+                return None, "%s canceled: result unreadable (%s)" % (label, exc)
+            if rec is not None:
+                rec["%s_result" % label.lower()] = {
+                    "outcome": int(result.outcome),
+                    "error_code": int(getattr(result, "error_code", 0)),
+                    "detail": getattr(result, "detail", ""),
+                }
+            return result, None
+        self._quarantine_skill(label, record)
+        return None, self._stop_detail(label, record)
 
     def _has_pending_skill_goal(self):
         """True while a skill goal's acceptance is unknown.
@@ -385,7 +542,8 @@ class TaskFsmServer(Node):
         unconfirmed send; the hook exists so the composite path and the demo
         path share one admission rule.
         """
-        return bool(getattr(self, '_pending_skill_sends', {}))
+        return self._quarantine.active or bool(
+            getattr(self, "_pending_skill_sends", {}))
 
     def _execute_demo(self, goal_handle):
         return self._execute_plan(goal_handle, single=False)
@@ -555,9 +713,12 @@ class TaskFsmServer(Node):
                         'composite receipt failed: %s' % log_exc)
         finally:
             if owns_arm:
-                self._publish_task_state(
-                    'BUSY' if self._has_pending_skill_goal() else 'IDLE')
-                self._admission.release()
+                if self._quarantine.active:
+                    self._publish_task_state('QUARANTINED')
+                else:
+                    self._publish_task_state(
+                        'BUSY' if self._has_pending_skill_goal() else 'IDLE')
+                    self._admission.release()
             if journal is not None:
                 try:
                     journal.close()
@@ -673,6 +834,13 @@ class TaskFsmServer(Node):
             else:
                 goal_handle.abort()
             return res
+
+        if self._quarantine.active:
+            record = self._quarantine.record() or {}
+            return finish(result_type.OUTCOME_FAILED,
+                          result_type.ERR_SKILL_FAILED,
+                          ("motion quarantine active (%s): no new motion may be "
+                           "dispatched until a verified reset" % record.get("reason")))
 
         if not admission_held and not self._admission.acquire(blocking=False):
             return finish(result_type.OUTCOME_FAILED,
@@ -1193,9 +1361,7 @@ class TaskFsmServer(Node):
             return finish(result_type.OUTCOME_FAILED,
                           result_type.ERR_SKILL_FAILED, crash_detail(exc))
         finally:
-            if owns_arm:
-                self._admission.release()
-                self._publish_task_state('IDLE')
+            self._finish_arm_state(owns_arm)
 
 
 def main(args=None):
