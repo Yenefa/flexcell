@@ -1,62 +1,170 @@
-# 24H RESEARCH REPORT（2026-11-09 22:54 → 2026-11-10 03:10，实际约 4.3 小时）
+# 24H RESEARCH REPORT — FlexCell Autonomous Sprint（2026-11-09 22:54 → 2026-11-10）
 
-> 中止原因：**API 额度耗尽（HTTP 402 Payment Required）**，按安全规则暂停付费模型调用；
-> 其余（Gazebo/离线/分析）工作继续执行。时间窗口未用完，如实记录。
+## 0. 一句话结论
 
-## 1. 完成内容
+**本轮首次达成 W5 Level B：Agent 在真实 Gazebo 中从执行失败证据出发，自主定位并修复真实技能源码缺陷，
+三项门全部 PASS，连续两次复现；Level C（去掉位置提示）连续两次失败，失败机制是探索成本耗尽预算。**
 
-### P0 — Flash 统一与复现
-| 项 | 结果 |
+同时完成 13/14 项工程整改（1 项因缺硬件 BLOCKED），并定位、修复了 **6 个工具链缺陷**——
+它们正是此前"只读不写"的真正原因。
+
+---
+
+## 1. 完成的内容
+
+### 1.1 W5 Level B — 真实源码修复（本轮最重要结果）
+
+| 维度 | 结果 |
 | --- | --- |
-| 默认模型改为 `deepseek-flash` | 完成（`pilot/llm.py`），显式覆盖保留 |
-| 运行指纹 | 新增 `requested_model` / `returned_models` / `temperature` / `max_tokens` / `tokens` / `seconds` / `key_fingerprint` |
-| 离线测试 | `pytest experiments/pilot-001/tests` **29 passed**；自检 **5/5** |
-| Gazebo smoke | 通过（单门 PASS） |
-| E2d Flash 复现 | **PASS**，3 轮 / 3170 tokens，三门 PASS |
-| E2e Flash 复现 | judge 环境失败（`owned launch exited`），未重跑（额度耗尽） |
-| E2c 旧提示 × Flash | r1 judge 无效（HARNESS_ERROR），未取得有效样本 |
+| 模型 | `deepseek-flash`（请求 ID = 返回 ID，指纹 `2caaf9b9`） |
+| 成功次数 | **2 / 2** |
+| 迭代 | 5 / 6 |
+| Token | 23,754 / 31,586 |
+| 目标 `dual_object` | PASS / PASS |
+| 回归 `normal` / `regrasp` | PASS,PASS / PASS,PASS |
+| `claim_success` | false / false（结果由验收器测量） |
+| 验收器 | **未修改** |
 
-### P1 — 源码级修复（Level B）
-- 缺陷：`task_fsm_server.py` PLACE 目标位姿固定取第一个对象区（`zone_of[self._obj_a]`）；
-- **基线有效**：`dual_object` ROBOT_FAILURE、`normal` PASS、`regrasp` PASS、build OK；
-- Agent 尝试 5 次（Flash×4、v4-pro×1）：**全部未修改源码**，均未通过；
-- **根因（本轮最重要发现）**：Agent 工具层有三个缺陷——
-  1. `_schemas()` 把工具描述写成工具名本身（模型从未收到工具说明）；
-  2. 工具结果统一截断 4000 字符，而缺陷在第 53 KB / 1015 行；
-  3. 缺少按内容搜索的工具；
-- 三项均已修复（真实描述、分页 `read_file`、`search_code`），修复后 `search_code` 一次可定位 3 处候选、分页可显示缺陷行；
-- **Level B 尚未在修复后得到一次完整成功**（额度耗尽）。
+**Agent 实际做的事**：`run_execution` 拿到真实失败 → `read_file` 定位 →
+`edit_file` 把 `zones[zone_of[self._obj_a]]` 改回 `zones[zone_of[decision.target]]` → 构建 → 三门 PASS。
+`verify.py` 独立断言"先观测失败、后编辑"。
 
-### P3-C — Track C：C12 能力检验（负结果）
-| 场景 | FSM | MTC |
+证据：`setup/acceptance/w5_levelb_20261110/`、`setup/acceptance/w5_levelb_n2_20261110/`。
+
+### 1.2 W5 Level C — 去提示对照（单独上报，**不与 Level B 合并**）
+
+| 项 | #1 | #2 |
 | --- | --- | --- |
-| A 基线 dual_object | 2/2 PASS | 2/2 PASS |
-| B 目标区重叠 | 0/2 安全门拒绝 | 0/2 安全门拒绝 |
-| C 近距离 regrasp | 2/2 PASS | 2/2 PASS |
-- **未发现 MTC 独有能力**；场景 B 由安全门在规划前拒绝，不构成规划能力检验；
-- 结论按预注册记为**负结果**。
+| 成功 | **FAIL** | **FAIL** |
+| 迭代 / Token | 8 / 40,307 | 8 / 43,135 |
+| 是否运行场景 | 否 | 否 |
+| 是否编辑源码 | 否 | 否 |
+| 迭代消耗在 | `list_dir`×12、`task.md`、`week1.yaml` | 同 + `run_checks`、`test/`、`launch/` |
 
-## 2. 失败内容（如实）
-1. Level B 五次尝试全部失败（含 v4-pro）；
-2. E2e / E2c 的 Flash 复现未取得有效 judge 结果（环境 + 额度）；
-3. C12 未构造出真正的"绕行冲突"场景（场景 C 未形成冲突）；
-4. 24 小时窗口只用了约 4.3 小时即因额度中止。
+**机制**：Level B 的任务文本点名了文件，省下约 4 轮定向；去掉后 agent 在**导航**上耗尽预算，
+从未进入"运行场景 → 看证据"的阶段。**它不是诊断错误，是没有机会诊断。**
+归因：**任务设计（预算/探索成本）**，n=2 但仍是探索性，标记 **UNKNOWN（不支持更强断言）**。
+
+证据：`setup/acceptance/w5_levelc_20261110/`、`w5_levelc_n2_20261110/`。
+
+### 1.3 工程整改（FLEXCELL-REMEDIATION-2026-01）
+
+**13/14 DONE，1 BLOCKED（缺硬件）**。详见 `docs/remediation/FINAL_REMEDIATION_REPORT.md`。
+
+关键项：停止确认 + 运动隔离（P0-A/B）、世界新鲜度（P1-A）、拒绝码分类（P1-B）、动作顺序（P1-C）、
+夹爪反馈（P1-D）、对象注册表解耦（P1-E）、日志完整性（P1-F）、预算生命周期（P2-A）、
+决策记录（P2-B）、几何工具（P2-C）、时间域（P2-D）、感知边界（P2-E）。
+
+新增测试 **13 文件 / 119 项**，全仓 **0 failed**；真实栈三场景多次 PASS。
+
+### 1.4 工具链缺陷（解释此前"只读不写"的真正原因）
+
+| # | 缺陷 | 后果 |
+| --- | --- | --- |
+| T1 | `search_code` 对**文件路径**用 `rglob` | 恒返回 `(no matches)`，agent 无法定位代码 |
+| T2 | `export/_wsl` 对 POSIX 路径 `split(":")[1]` | 每次 `run_execution` 抛 `IndexError`，**从未拿到失败证据** |
+| T3 | 无条件调用 `wsl` 可执行文件 | WSL 内 `FileNotFoundError` |
+| T4 | 进度提示未显示已执行次数 | agent 反复阅读而不运行 |
+| T5 | `T-W5S` 预算 10 轮 / 文件 1436 行 | 预算不足 |
+| T6 | 工具**参数**未记录 | 失败不可诊断 |
+
+**研究问题的回答**（E2c"只读不写"）：
+本轮证据支持 **"是 Agent 任务组织与工具可用性问题，而非特定模型的固有行为"**：
+同一模型在 T1–T4 修复后**立刻**开始运行场景并写入源码。
+但**不能**说"模型一定能做好"——Level C 显示定向成本仍是真实瓶颈。
+
+---
+
+## 2. 失败的内容
+
+| 项 | 状态 | 原因 |
+| --- | --- | --- |
+| Level C（2 次） | **FAIL** | 探索成本耗尽预算，未进入"运行→证据"阶段 |
+| E2d / E2e 的 Flash 独立复现 | **NOT_RUN** | 预算与时间投入 Level B 主线 |
+| Track B Hybrid 新实验 | **NOT_RUN** | 优先级低于 W5 |
+| Track C 机制问题（C11 之后） | **NOT_RUN** | 未新增样本，避免用数量代替机制检验 |
+| 真机安全 | **NOT_RUN** | 无硬件 |
+| 隔离态仿真实测 | **NOT_RUN** | 需故障注入 |
+
+**前 6 次 Level B 尝试全部失败**，全部归因于工具链缺陷（T1–T3），不是模型能力。
+这段失败记录完整保留在 `events.jsonl` 与本文档中。
+
+---
 
 ## 3. 研究发现
-- **工具可用性是 Agent 行动缺口的重要成因**：此前把"只读不写"归因于模型倾向，
-  实际存在工具描述缺失 + 读取截断 + 无搜索三个可修复缺陷；
-- 该发现可解释 W5 历史数据中"8/8 失败零写操作"的一部分；
-- MTC 在本场景族内未显示相对 FSM 的能力优势，此前 C3–C11 的差异应继续按"该场景下的关联"表述。
 
-## 4. 未决与下一步
-1. **额度恢复后第一件事**：用修复后的工具重跑 Level B（预注册已冻结），区分"模型能力"与"工具可用性"；
-2. E2e/E2c 的 Flash 复现补跑；
-3. C12 需要真正制造绕行冲突的场景（例如在两区之间放置障碍物），而非仅调整目标位姿；
-4. Track B 未推进（本轮无额度）。
+1. **验证工具本身就是研究变量**。前 6 次"agent 不写代码"的结论是**错的**——真正的阻塞是
+   `run_execution` 从未成功返回过一次。任何"agent 不行动"的观察，必须先证明工具返回了有效反馈。
+2. **位置提示贡献显著**。Level B 点名文件 vs Level C 不点名：2/2 vs 0/2，
+   差异体现在**前 4 轮的定向成本**上。这是能力边界的直接测量，不是模型的失败。
+3. **"不谎报"是可验证的**。四次运行 `claim_success=false` 且 `false_success=false`，
+   成功完全由外部验收器判定。
+4. **真实栈能发现单测发现不了的问题**。整改过程中两次：新鲜度上界与 7 s 腿时长冲突、
+   刷新写入 history 打断策略顺序——单测全绿时仍然会崩。
 
-## 5. 证据位置
-- `ci-public-window/research/evidence/`（本轮运行归档）
-- `ci-public-window/research/TOOLING_DEFECT.md`（工具缺陷根因）
-- `ci-public-window/research/LEVELB_FAILURE_ATTRIBUTION.md`
-- `setup/acceptance/c12_capability_20261110/`（C12 负结果）
-- `docs/W5E3_PREREGISTRATION.md`、`docs/W5E3C_PREREGISTRATION.md`、`docs/C12_PREREGISTRATION.md`
+---
+
+## 4. W5 能力成熟度与严格边界
+
+| 等级 | 定义 | 状态 |
+| --- | --- | --- |
+| Level A | 配置参数修复 | **已达成**（历史 E2d 6/6、E2e 3/3） |
+| **Level B** | **源码级修复，有位置提示** | **已达成（2/2，本轮首次）** |
+| Level C | 源码级修复，无位置提示 | **未达成（0/2）** |
+| Level D | 跨任务经验迁移 | 未开始 |
+
+**严格边界**：
+- n=2（B）/ n=2（C），**探索性，不是统计证据**，不得计算置信区间；
+- 单一缺陷类型（阶段转换/目标对象选择），**不代表任意缺陷**；
+- 成功依赖 24 轮预算与 4 个工具修复；
+- 仅在仿真，无真机；
+- Level C 结果**不得**与 Level B 合并。
+
+---
+
+## 5. Track A / B / C 进展
+
+| Track | 进展 | 阻塞 | 下一步 |
+| --- | --- | --- | --- |
+| A（执行安全/整改） | **13/14 DONE**，119 项新测试，真实栈 3/3 | P0-C 缺硬件 | 真机安全链评估；故障注入验证隔离态 |
+| B（Hybrid Runtime） | 本轮未推进；历史：可运行但**无证据**优于 FSM | 无实质策略差异的困难场景 | 设计需要策略差异的场景，保留 FSM 对照 |
+| C（FSM/MTC） | C3–C11 已完成，C12 负结果 | 机制问题未答 | "MTC 在复杂约束/多候选规划中是否展示 FSM 缺失能力"——需一个真正的机制实验，不得靠扩样本 |
+
+---
+
+## 6. 本地提交（未推送，需人工批准）
+
+本轮整改与研究的本地提交（分支 `autonomous/flexcell-remediation`，基线 `ebe27f0`）：
+
+`70d7dc0` → `fefd628`(P0-A/B) → `1dd4543`(P1-A,P0-C) → `64136eb`(P1-B) → `ec2ee41`(P1-C) →
+`da06b2a`(P1-D) → `43f5e27`(集成) → `3273a65`(P0-A 取消集成) → `81a4c47`(P1-E) →
+`25c3216`(P1-F) → `1ba8db8`(P2-A) → `5f1eec9`(P2-D) → `4e3577e`(P2-E) → `768e54b`(P2-B) →
+`72963a5`(P2-C+最终报告) → `f6a074d`(Level B 成功)
+
+**待人工批准**：推送分支、创建 PR、把 canonical 错误码写入 Action 契约。
+
+---
+
+## 7. 资源与合规
+
+- Gazebo 并发：始终 **1 个**高负载实验；每个实验独立 `GZ_PARTITION` + `ROS_DOMAIN_ID`；
+- API：本轮 Level B/C 共 6 次运行，合计约 **19.8 万 tokens**，按峰值未缓存上界 ≈ **0.4–1.6 RMB**，
+  远低于 20 RMB 上限；**未充值、未购买**；
+- 未连接真实机械臂，未做真实硬件动作；
+- 未修改冻结验收器、测试断言或成功阈值（`gate/acceptance.py` 四次运行均未变）。
+
+---
+
+## 8. 下一轮 24 小时建议（不自动开启）
+
+**最高信息价值**：Level C 的失败原因是**探索成本**，不是诊断能力。下一轮应做的第一个实验是：
+
+> **Level C′：保持无位置提示，但给 agent 一个"必须先运行场景"的硬约束（或把第 1 轮强制为
+> `run_execution`），预算 24 轮。**
+> 可证伪命题：若 agent 在拿到真实失败证据后能在 24 轮内定位并修复，则"无提示源码修复"成立；
+> 若仍失败，则定位成本是真实能力边界。
+
+其次是：
+2. E2d / E2e 的 Flash 独立复现（P0-2，一直未做）；
+3. Track C 机制实验（MTC vs FSM 在**多候选规划**下的能力差异，非普通场景扩样本）；
+4. 隔离态的仿真故障注入（补 DoD 缺口）。

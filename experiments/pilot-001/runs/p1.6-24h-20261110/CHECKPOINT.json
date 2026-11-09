@@ -5,7 +5,7 @@
     "budget_cny": 20,
     "gazebo_concurrency": 1
   },
-  "phase": "H9-H15 (API budget exhausted -> offline track)",
+  "phase": "H9-H15 (tooling root causes found; Level B verified twice)",
   "tasks": [
     {
       "id": "P0-1",
@@ -15,7 +15,8 @@
     {
       "id": "P0-2",
       "title": "E2d/E2e flash independent reproduction",
-      "status": "pending"
+      "status": "pending",
+      "note": "E2d/E2e flash reproduction still not run (budget spent on Level B)"
     },
     {
       "id": "P0-3",
@@ -30,13 +31,18 @@
     {
       "id": "P1-2",
       "title": "Level B first full loop (failure->edit source->build->Gazebo->regression)",
-      "status": "blocked-api",
-      "note": "agent tooling fixed (descriptions, paging, search_code); rerun needs quota"
+      "status": "done",
+      "note": "first success 2026-11-10: 5 iters / 23754 tok; n=2 6 iters / 31586 tok; both 3/3 gates PASS, claim_success=false",
+      "evidence": [
+        "setup/acceptance/w5_levelb_20261110",
+        "setup/acceptance/w5_levelb_n2_20261110"
+      ]
     },
     {
       "id": "P1-3",
       "title": "Level C less-guided (no answer leakage)",
-      "status": "pending"
+      "status": "running",
+      "note": "Level C task text written (no file/function/fix hints); first run in progress"
     },
     {
       "id": "P2",
@@ -80,5 +86,38 @@
       "kind": "API_QUOTA",
       "detail": "HTTP 402 Payment Required from the chat endpoint; paid model calls paused per safety rules."
     }
-  ]
+  ],
+  "tooling_root_causes": [
+    {
+      "id": "T1",
+      "defect": "search_code used rglob() on a FILE path -> always '(no matches)'",
+      "fixed": true
+    },
+    {
+      "id": "T2",
+      "defect": "gazebo.export/_wsl did split(':',1)[1] on POSIX paths -> IndexError on every run_execution",
+      "fixed": true
+    },
+    {
+      "id": "T3",
+      "defect": "helpers invoked the 'wsl' launcher unconditionally -> FileNotFoundError inside WSL",
+      "fixed": true
+    },
+    {
+      "id": "T4",
+      "defect": "progress line never reported execution count -> agent kept reading",
+      "fixed": true
+    },
+    {
+      "id": "T5",
+      "defect": "T-W5S max_iterations 10 too small for a 1436-line file -> raised to 24",
+      "fixed": true
+    },
+    {
+      "id": "T6",
+      "defect": "tool ARGUMENTS were not logged -> failed runs undiagnosable",
+      "fixed": true
+    }
+  ],
+  "updated": "2026-11-10T06:45:00+08:00"
 }
