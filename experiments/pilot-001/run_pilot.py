@@ -123,7 +123,7 @@ def llm_run(manifest, out, arms):
         res = runner.run_one(manifest, arm, agent,
                              fixtures.make_template(out / ("tpl-" + arm)),
                              out / ("llm-" + arm), meta=chat.metadata())
-        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        res["llm"] = chat.summary()
         rows.append(res)
         print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
               (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
@@ -145,7 +145,7 @@ def ta2_run(manifest, out, arms, repo_src):
                              out / ("ta2-" + arm),
                              meta={"task": "T-A-v2", **chat.metadata()},
                              protected=manifest["task_protected"]["T-A-v2"])
-        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        res["llm"] = chat.summary()
         rows.append(res)
         print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
               (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
@@ -176,7 +176,7 @@ def ta3_run(manifest, out, arms, repo_src):
                              protected=manifest["task_protected"]["T-A-v3"],
                              execution_factory=tasks.TCExecution,
                              extra_env=env)
-        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        res["llm"] = chat.summary()
         rows.append(res)
         print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
               (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
@@ -203,7 +203,7 @@ def tb_run(manifest, out, arms, repo_src):
                              protected=manifest["task_protected"]["T-B-v1"],
                              execution_factory=tasks.TCExecution,
                              extra_env=env)
-        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        res["llm"] = chat.summary()
         rows.append(res)
         print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
               (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
@@ -231,7 +231,7 @@ def tc_run(manifest, out, arms, repo_src):
                              protected=manifest["task_protected"]["T-C-v1"],
                              execution_factory=tasks.TCExecution,
                              extra_env=env)
-        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        res["llm"] = chat.summary()
         rows.append(res)
         print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
               (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
@@ -239,6 +239,33 @@ def tc_run(manifest, out, arms, repo_src):
     (out / "p1.2-tc1-runs.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
     return 0
 
+
+def w5s_run(manifest, out, arms, repo_src):
+    from pilot.agent_fc import FCAgent
+    from pilot.llm import Chat
+    from pilot import w5s
+    env = {"PILOT_P14_REPO": "/home/ros/flexcell-p14",
+           "PILOT_P14_WS": "/home/ros/flexcell-p14-ws",
+           "PILOT_P14_SRC": repo_src, "PILOT_HOME": str(HERE)}
+    os.environ.update(env)
+    pkg = Path(repo_src) / "src/flexcell/flexcell_skills"
+    cfg = pkg / "config/week1.yaml"
+    rows = []
+    for arm in arms:
+        chat = Chat()
+        agent = FCAgent(chat, manifest["arms"][arm]["tools"], w5s.TASK)
+        res = runner.run_one(manifest, arm, agent,
+                             w5s.build_t_w5s(out / ("tpl-w5s-" + arm), pkg, cfg),
+                             out / ("w5s-" + arm),
+                             meta={"task": "T-W5S", **chat.metadata()},
+                             protected=["gate/acceptance.py"],
+                             execution_factory=w5s.W5SourceExecution,
+                             extra_env=env)
+        res["llm"] = chat.summary()
+        rows.append(res)
+        print("ARM %s success=%s iters=%s tokens=%s" % (arm, res["success"], res["iterations"], chat.tokens))
+    (out / "w5s-runs.json").write_text(json.dumps({"task": "T-W5S", "rows": rows}, indent=2) + "\n", encoding="utf-8")
+    return 0
 
 def w5e2e_run(manifest, out, arms, repo_src):
     from pilot.agent_fc import FCAgent
@@ -260,7 +287,7 @@ def w5e2e_run(manifest, out, arms, repo_src):
                              protected=["gate/acceptance.py"],
                              execution_factory=w5e2.W5E2Execution,
                              extra_env=env)
-        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        res["llm"] = chat.summary()
         rows.append(res)
         print("ARM %s success=%s iters=%s tokens=%s" % (arm, res["success"], res["iterations"], chat.tokens))
     (out / "w5e2e-runs.json").write_text(json.dumps({"task": "T-W5E2E", "rows": rows}, indent=2) + "\n", encoding="utf-8")
@@ -286,7 +313,7 @@ def w5e2d_run(manifest, out, arms, repo_src):
                              protected=["gate/acceptance.py"],
                              execution_factory=w5e2.W5E2Execution,
                              extra_env=env)
-        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        res["llm"] = chat.summary()
         rows.append(res)
         print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
               (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
@@ -313,7 +340,7 @@ def w5e2c_run(manifest, out, arms, repo_src):
                              protected=["gate/acceptance.py"],
                              execution_factory=w5e2.W5E2Execution,
                              extra_env=env)
-        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        res["llm"] = chat.summary()
         rows.append(res)
         print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
               (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
@@ -340,7 +367,7 @@ def w5e2b_run(manifest, out, arms, repo_src):
                              protected=["gate/acceptance.py"],
                              execution_factory=w5e2.W5E2Execution,
                              extra_env=env)
-        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        res["llm"] = chat.summary()
         rows.append(res)
         print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
               (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
@@ -371,7 +398,7 @@ def w5e2_run(manifest, out, arms, repo_src):
                              protected=["gate/acceptance.py"],
                              execution_factory=w5e2.W5E2Execution,
                              extra_env=env)
-        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        res["llm"] = chat.summary()
         rows.append(res)
         print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
               (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
@@ -392,7 +419,7 @@ def w5_run(manifest, out, arms, repo_src):
                              meta={"task": "T-W5", **chat.metadata()},
                              protected=["gate/sim.py", "gate/acceptance.py", "gate/run_regression.py", "tests/test_regression.py"],
                              execution_factory=w5.W5Execution)
-        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        res["llm"] = chat.summary()
         rows.append(res)
         print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
               (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
@@ -418,7 +445,7 @@ def tg3_transfer_run(manifest, out, arms, repo_src, warm):
                              protected=[],
                              execution_factory=gazebo_task.GazeboTaskExecution,
                              extra_env=env)
-        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        res["llm"] = chat.summary()
         rows.append(res)
         print("ARM %s success=%s iters=%s tokens=%s" % (arm, res["success"], res["iterations"], chat.tokens))
     (out / (task_id + "-runs.json")).write_text(json.dumps({"task": task_id, "rows": rows}, indent=2) + "\n", encoding="utf-8")
@@ -442,7 +469,7 @@ def tg4_run(manifest, out, arms, repo_src):
                              protected=[],
                              execution_factory=gazebo_task.GazeboTaskExecution,
                              extra_env=env)
-        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        res["llm"] = chat.summary()
         rows.append(res)
         print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
               (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
@@ -467,7 +494,7 @@ def tg3_run(manifest, out, arms, repo_src):
                              protected=[],
                              execution_factory=gazebo_task.GazeboTaskExecution,
                              extra_env=env)
-        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        res["llm"] = chat.summary()
         rows.append(res)
         print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
               (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
@@ -494,7 +521,7 @@ def tg2_run(manifest, out, arms, repo_src):
                              protected=[],
                              execution_factory=gazebo_task.GazeboTaskExecution,
                              extra_env=env)
-        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        res["llm"] = chat.summary()
         rows.append(res)
         print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
               (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
@@ -523,7 +550,7 @@ def tg_run(manifest, out, arms, repo_src, agent_kind="json"):
                              protected=[],
                              execution_factory=gazebo_task.GazeboTaskExecution,
                              extra_env=env)
-        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        res["llm"] = chat.summary()
         rows.append(res)
         print("ARM %s success=%s false_success=%s iters=%s tokens=%s" %
               (arm, res["success"], res["false_success"], res["iterations"], chat.tokens))
@@ -564,6 +591,8 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     manifest = load(a.manifest)
     arms = [x.strip() for x in a.arms.split(",") if x.strip()]
+    if a.llm and a.task == "T-W5S":
+        return w5s_run(manifest, out, arms, a.repo_src)
     if a.llm and a.task == "T-W5E2E":
         return w5e2e_run(manifest, out, arms, a.repo_src)
     if a.llm and a.task == "T-W5E2D":

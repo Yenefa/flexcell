@@ -6,7 +6,14 @@ Use the provided tools to inspect and modify files. Never modify anything under 
 You may call several tools per turn. When the task is done, reply without tool calls."""
 
 SPECS = {
-    "read_file": {"type": "object", "properties": {"path": {"type": "string"}},
+    "search_code": {
+        "name": "search_code",
+        "description": "Regex search across workspace source/text files; returns path:line matches. Use it first to find the relevant function, then read_file with start/count around that line.",
+        "parameters": {"type": "object", "properties": {"pattern": {"type": "string"}, "path": {"type": "string"}}, "required": ["pattern"]},
+    },
+    "read_file": {"type": "object",
+                  "properties": {"path": {"type": "string"}, "start": {"type": "integer"},
+                                 "count": {"type": "integer"}},
                   "required": ["path"]},
     "write_file": {"type": "object",
                    "properties": {"path": {"type": "string"}, "content": {"type": "string"}},
@@ -24,6 +31,21 @@ SPECS = {
 }
 
 
+DESCRIPTIONS = {
+    "read_file": "Read a workspace file. A directory returns a listing. For a large file pass "
+                 "start (1-based line) and count to read a line range.",
+    "list_dir": "List the entries of a workspace directory.",
+    "search_code": "Regex search across workspace .py/.yaml/.md/.json files; returns "
+                   "path:line: text. Use it to locate a function before reading it.",
+    "write_file": "Write a whole file with the given content.",
+    "edit_file": "Replace exactly one occurrence of old with new inside a file.",
+    "run_checks": "Run the workspace unit checks (fast, no simulation).",
+    "run_execution": "Run the target scenario on the real Gazebo stack and return its summary.",
+    "read_telemetry": "Read the telemetry of the most recent execution.",
+    "read_verification": "Read the independent judge verdict of the last execution.",
+    "read_diagnosis": "Read the recorded failure diagnosis of the last execution.",
+}
+
 class FCAgent:
     def __init__(self, chat, tools, task_text, force_first_tool=None, max_iterations=5):
         self.chat = chat
@@ -36,7 +58,8 @@ class FCAgent:
 
     def _schemas(self):
         return [{"type": "function",
-                 "function": {"name": name, "description": name,
+                 "function": {"name": name,
+                              "description": DESCRIPTIONS.get(name, name),
                               "parameters": SPECS[name]}} for name in self.tools]
 
     def step(self, toolbox, iteration):
@@ -70,7 +93,7 @@ class FCAgent:
                 args = {}
             try:
                 if name == "read_file":
-                    result = toolbox.read_file(args["path"])
+                    result = toolbox.read_file(args["path"], args.get("start"), args.get("count"))
                 elif name == "list_dir":
                     result = toolbox.list_dir(args.get("path", "."))
                 elif name == "write_file":
@@ -83,6 +106,8 @@ class FCAgent:
                     result = json.dumps(toolbox.run_checks())
                 elif name == "run_execution":
                     result = json.dumps(toolbox.run_execution())
+                elif name == "search_code":
+                    result = toolbox.search_code(args["pattern"], args.get("path", "."))
                 elif name == "read_telemetry":
                     result = str(toolbox.read_telemetry())
                 elif name == "read_verification":
@@ -91,8 +116,9 @@ class FCAgent:
                     result = "unknown tool: " + name
             except Exception as exc:
                 result = "ERROR " + type(exc).__name__ + ": " + str(exc)
+            limit = 20000 if name in ("read_file", "search_code") else 4000
             self.history.append({"role": "tool", "tool_call_id": call.get("id", ""),
-                                 "content": str(result)[:4000]})
+                                 "content": str(result)[:limit]})
             results.append({"tool": name, "result": str(result)[:400]})
         return {"claim_success": False, "done": False, "tokens": reply["tokens"],
                 "assistant_text": (reply.get("content") or "")[:800], "results": results}

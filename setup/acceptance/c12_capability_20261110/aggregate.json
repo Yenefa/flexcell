@@ -1,0 +1,19 @@
+{
+  "protocol": "docs/C12_PREREGISTRATION.md",
+  "summary": {
+    "A": {
+      "legacy": "2/2 PASS",
+      "mtc": "2/2 PASS"
+    },
+    "B": {
+      "legacy": "0/2 (ERR_SAFETY_REJECTED)",
+      "mtc": "0/2 (ERR_SAFETY_REJECTED)"
+    },
+    "C": {
+      "legacy": "2/2 PASS",
+      "mtc": "2/2 PASS"
+    }
+  },
+  "verdict": "C12_NO_CAPABILITY_ASYMMETRY",
+  "note": "Both arms behave identically in all three scenarios; scenario B is refused by the safety gate for both arms (zone_2 overlaps zone_1), so it does not test planning. No MTC capability advantage observed."
+}

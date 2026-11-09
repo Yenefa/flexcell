@@ -62,7 +62,7 @@ class Chat:
     def __init__(self, model=None, base_url=None, timeout=None):
         self.key = setting("FLEXCELL_PILOT_API_KEY")
         self.base_url = (setting("FLEXCELL_PILOT_BASE_URL", "https://api.deepseek.com")).rstrip("/")
-        self.model = model or setting("FLEXCELL_PILOT_MODEL", "deepseek-chat")
+        self.model = model or setting("FLEXCELL_PILOT_MODEL", "deepseek-flash")
         self.timeout = float(timeout or setting("FLEXCELL_PILOT_TIMEOUT_S", 120))
         self.temperature = float(setting("FLEXCELL_PILOT_TEMPERATURE", 0))
         self.max_tokens = int(setting("FLEXCELL_PILOT_MAX_TOKENS", 2048))
@@ -70,10 +70,21 @@ class Chat:
             raise RuntimeError("no API key: set FLEXCELL_PILOT_API_KEY")
         self.calls = 0
         self.tokens = 0
+        self.seconds = 0.0
+        self.returned_models = []
         self.fingerprint = key_fingerprint(self.key)
 
     def metadata(self):
-        return {"model": self.model, "base_url": self.base_url,
+        return {"requested_model": self.model, "base_url": self.base_url,
+                "temperature": self.temperature, "max_tokens": self.max_tokens,
+                "key_fingerprint": self.fingerprint}
+
+    def summary(self):
+        return {"requested_model": self.model,
+                "returned_models": sorted(set(self.returned_models)),
+                "base_url": self.base_url, "temperature": self.temperature,
+                "max_tokens": self.max_tokens, "calls": self.calls,
+                "tokens": self.tokens, "seconds": round(self.seconds, 3),
                 "key_fingerprint": self.fingerprint}
 
     def chat(self, messages, tools=None, tool_choice=None):
@@ -95,13 +106,17 @@ class Chat:
         with urllib.request.urlopen(req, timeout=self.timeout) as resp:
             doc = json.load(resp)
         usage = doc.get("usage", {})
+        elapsed = round(time.monotonic() - started, 3)
         self.calls += 1
         self.tokens += int(usage.get("total_tokens", 0) or 0)
+        self.seconds += elapsed
+        returned = doc.get("model", self.model)
+        self.returned_models.append(returned)
         message = doc["choices"][0]["message"]
         return {
             "content": message.get("content"),
             "tool_calls": message.get("tool_calls") or [],
             "tokens": int(usage.get("total_tokens", 0) or 0),
-            "seconds": round(time.monotonic() - started, 3),
-            "model": doc.get("model", self.model),
+            "seconds": elapsed,
+            "model": returned,
         }

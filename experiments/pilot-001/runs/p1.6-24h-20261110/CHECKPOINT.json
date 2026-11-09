@@ -1,0 +1,84 @@
+{
+  "sprint": {
+    "start": "2026-11-09T14:54:00.000Z",
+    "deadline": "2026-11-10T14:54:00.000Z",
+    "budget_cny": 20,
+    "gazebo_concurrency": 1
+  },
+  "phase": "H9-H15 (API budget exhausted -> offline track)",
+  "tasks": [
+    {
+      "id": "P0-1",
+      "title": "Flash default + config override + fingerprints",
+      "status": "done"
+    },
+    {
+      "id": "P0-2",
+      "title": "E2d/E2e flash independent reproduction",
+      "status": "pending"
+    },
+    {
+      "id": "P0-3",
+      "title": "E2c old prompt with flash, n<=3",
+      "status": "pending"
+    },
+    {
+      "id": "P1-1",
+      "title": "Level B source-code repair harness",
+      "status": "done"
+    },
+    {
+      "id": "P1-2",
+      "title": "Level B first full loop (failure->edit source->build->Gazebo->regression)",
+      "status": "blocked-api",
+      "note": "agent tooling fixed (descriptions, paging, search_code); rerun needs quota"
+    },
+    {
+      "id": "P1-3",
+      "title": "Level C less-guided (no answer leakage)",
+      "status": "pending"
+    },
+    {
+      "id": "P2",
+      "title": "Experience-driven improvement",
+      "status": "pending"
+    },
+    {
+      "id": "P3-B",
+      "title": "Track B hybrid runtime deeper check",
+      "status": "pending"
+    },
+    {
+      "id": "P3-C",
+      "title": "Track C MTC capability question",
+      "status": "pending"
+    },
+    {
+      "id": "W5E3-prereg",
+      "title": "Level B source-repair protocol",
+      "status": "done",
+      "path": "docs/W5E3_PREREGISTRATION.md"
+    }
+  ],
+  "evidence_root": "ci-public-window/research/evidence",
+  "notes": [
+    "PR/merge require human approval this sprint; local commits only."
+  ],
+  "progress": {
+    "p0_e2d_flash": "PASS 3 iters/3170 tokens",
+    "p0_e2e_flash": "judge env failure; not rerun (API paused)",
+    "p0_e2c_flash": "r1 judge invalid; not rerun (API paused)",
+    "w5s_baseline": "target ROBOT_FAILURE; normal/regrasp PASS; build OK (frozen, reusable)",
+    "w5s_flash_r1_r3": "FAIL, no edit; root cause found: tool descriptions were the tool name",
+    "w5s_v4pro": "FAIL, no edit (same root cause)",
+    "w5s_r4": "read_file paging + search_code used; 5 iters exhausted; found place_server lines",
+    "w5s_r5": "stopped by HTTP 402 after iteration 2"
+  },
+  "blockers": [
+    {
+      "at": "2026-11-10T02:47+08:00",
+      "kind": "API_QUOTA",
+      "detail": "HTTP 402 Payment Required from the chat endpoint; paid model calls paused per safety rules."
+    }
+  ]
+}

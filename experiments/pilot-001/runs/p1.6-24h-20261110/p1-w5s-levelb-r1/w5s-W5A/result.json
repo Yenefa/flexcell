@@ -1,0 +1,64 @@
+{
+  "arm": "W5A",
+  "meta": {
+    "task": "T-W5S",
+    "requested_model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "temperature": 0.0,
+    "max_tokens": 2048,
+    "key_fingerprint": "84edc02f"
+  },
+  "success": false,
+  "first_pass": false,
+  "iterations": 6,
+  "claim_success": false,
+  "false_success": false,
+  "violation": null,
+  "cost": {
+    "tokens": 10124,
+    "agent_s": 8.548,
+    "execution_s": 2.407
+  },
+  "evidence": {
+    "items": {
+      "verdict.json": {
+        "present": true,
+        "bytes": 1444,
+        "sha256": "8002228b0ed38e8359f8872eb69935a00a40fe15ee072355349a3c21c2bd29ec"
+      },
+      "telemetry/execution.log": {
+        "present": true,
+        "bytes": 490,
+        "sha256": "c4086756191a49f0b8830ed6230b58efb603fe1e6890dfb2966d36ed1f296396"
+      },
+      "episode.json": {
+        "present": true,
+        "bytes": 498,
+        "sha256": "cda38fc3256e3a7305b63844a896eb9a9045df419f52055728c0cfe1e156122d"
+      },
+      "fingerprint.json": {
+        "present": true,
+        "bytes": 260,
+        "sha256": "a9f71dba18e4d78c39de3d10463fa318af06a30e5c66d97157a6478f15103195"
+      }
+    },
+    "present": 4,
+    "required": 4,
+    "completeness": 1.0
+  },
+  "verdict": {
+    "passed": false,
+    "returncode": 1,
+    "stdout": "{\"passed\": false, \"build\": {\"returncode\": 1, \"stdout\": \"\", \"stderr\": \"w\\u0000s\\u0000l\\u0000:\\u0000 \\u0000\\ufffdhKm0R \\u0000l\\u0000o\\u0000c\\u0000a\\u0000l\\u0000h\\u0000o\\u0000s\\u0000t\\u0000 \\u0000\\ufffdN\\u0006tM\\ufffdn\\u007f\\f\\ufffdFO*g\\\\\\ufffd\\ufffdP0R \\u0000W\\u0000S\\u0000L\\u0000\\u00020N\\u0000A\\u0000T\\u0000 \\u0000!j\\u000f_\\u000bN\\ufffdv \\u0000W\\u0000S\\u0000L\\u0000 \\u0000\\nN/e\\u0001c \\u0000l\\u0000o\\u0000c\\u0000a\\u0000l\\u0000h\\u0000o\\u0000s\\u0000t\\u0000 \\u0000\\ufffdN\\u0006t\\u00020\\n\\u0000\\n\\u0000\", \"setup\": \"/home/ros/w5src-ws/install/setup.bash\", \"install\": \"/home/ros/w5src-ws/install\", \"repo\": \"/home/ros/w5src-ws/repo\"}}\n",
+    "stderr": "",
+    "build": {
+      "returncode": 1,
+      "stdout": "",
+      "stderr": "w\u0000s\u0000l\u0000:\u0000 \u0000�hKm0R \u0000l\u0000o\u0000c\u0000a\u0000l\u0000h\u0000o\u0000s\u0000t\u0000 \u0000�N\u0006tM�n\f�FO*g\\��P0R \u0000W\u0000S\u0000L\u0000\u00020N\u0000A\u0000T\u0000 \u0000!j\u000f_\u000bN�v \u0000W\u0000S\u0000L\u0000 \u0000\nN/e\u0001c \u0000l\u0000o\u0000c\u0000a\u0000l\u0000h\u0000o\u0000s\u0000t\u0000 \u0000�N\u0006t\u00020\n\u0000\n\u0000",
+      "setup": "/home/ros/w5src-ws/install/setup.bash",
+      "install": "/home/ros/w5src-ws/install",
+      "repo": "/home/ros/w5src-ws/repo"
+    }
+  },
+  "run_dir": "C:\\Users\\fuker\\Desktop\\workspace\\project-033-flexcell\\ci-public-window\\evidence\\sprint24\\p1-w5s-levelb-r1\\w5s-W5A"
+}

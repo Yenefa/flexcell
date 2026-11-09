@@ -31,13 +31,20 @@ class ToolBox:
         return path
 
     # ---- tools ----
-    def read_file(self, rel):
+    def read_file(self, rel, start=None, count=None):
         self._need("read_file")
         self.calls.append(("read_file", rel))
         path = self._inside(rel)
         if path.is_dir():
             return "directory %s:\n%s" % (rel, "\n".join(sorted(p.name for p in path.iterdir())))
-        return path.read_text(encoding="utf-8")
+        text = path.read_text(encoding="utf-8", errors="replace")
+        if start is None and count is None:
+            return text
+        lines = text.splitlines()
+        first = max(1, int(start or 1))
+        last = len(lines) if count is None else min(len(lines), first + int(count) - 1)
+        numbered = ["%5d| %s" % (no, lines[no - 1]) for no in range(first, last + 1)]
+        return "lines %d-%d of %d\n%s" % (first, last, len(lines), "\n".join(numbered))
 
     def list_dir(self, rel="."):
         self._need("list_dir")
@@ -81,6 +88,31 @@ class ToolBox:
         self._need("run_execution")
         self.calls.append(("run_execution", bool(episode)))
         return self.execution.run_execution(episode=episode)
+    def search_code(self, pattern, path=".", max_hits=60):
+        """Regex search inside workspace text files; returns path:line: text."""
+        import re
+        self._need("search_code")
+        root = (self.workspace / path).resolve()
+        if not str(root).startswith(str(self.workspace.resolve())):
+            raise ToolPermissionError("path escapes workspace: %s" % path)
+        try:
+            rx = re.compile(pattern)
+        except re.error as exc:
+            return "ERROR: bad regex: %s" % exc
+        hits = []
+        for file in sorted(root.rglob("*")):
+            if not file.is_file() or "__pycache__" in str(file) or file.suffix not in (".py", ".yaml", ".yml", ".md", ".txt", ".json"):
+                continue
+            try:
+                for no, line in enumerate(file.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+                    if rx.search(line):
+                        hits.append("%s:%d: %s" % (file.relative_to(self.workspace.resolve()), no, line.strip()[:160]))
+                        if len(hits) >= max_hits:
+                            return "\n".join(hits)
+            except OSError:
+                continue
+        return "\n".join(hits) if hits else "(no matches)"
+
 
     def read_telemetry(self):
         self._need("read_telemetry")

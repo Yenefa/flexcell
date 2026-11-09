@@ -1,0 +1,86 @@
+{
+  "task": "T-W5E2D",
+  "rows": [
+    {
+      "arm": "W5A",
+      "meta": {
+        "task": "T-W5E2D",
+        "requested_model": "deepseek-flash",
+        "base_url": "https://api.deepseek.com",
+        "temperature": 0.0,
+        "max_tokens": 2048,
+        "key_fingerprint": "84edc02f"
+      },
+      "success": true,
+      "first_pass": false,
+      "iterations": 3,
+      "claim_success": false,
+      "false_success": false,
+      "violation": null,
+      "cost": {
+        "tokens": 3170,
+        "agent_s": 69.093,
+        "execution_s": 65.796
+      },
+      "evidence": {
+        "items": {
+          "verdict.json": {
+            "present": true,
+            "bytes": 504,
+            "sha256": "4f4af4a248f50f8d268c23470d35faf5a31612c3cce2495acace55b8c8add6bf"
+          },
+          "telemetry/execution.log": {
+            "present": true,
+            "bytes": 974,
+            "sha256": "d096a0a10344df4f99d5b849cfd89b589bd74a13a94ccf3319fff502e486c007"
+          },
+          "episode.json": {
+            "present": true,
+            "bytes": 910,
+            "sha256": "d40343560f9425d319d804d3ebbeb721c57df35bf0a7c6ff0ec09f6ec3c446b0"
+          },
+          "fingerprint.json": {
+            "present": true,
+            "bytes": 260,
+            "sha256": "7e514136f7c212d2a6cb88b486a7a6b9866381e86edb4c368bc6d368b91e2820"
+          }
+        },
+        "present": 4,
+        "required": 4,
+        "completeness": 1.0
+      },
+      "verdict": {
+        "passed": true,
+        "returncode": 0,
+        "stdout": "{\"passed\": true, \"target\": {\"status\": \"PASS\", \"returncode\": 0}, \"regression_normal\": {\"status\": \"PASS\", \"returncode\": 0}, \"regression_regrasp\": {\"status\": \"PASS\", \"returncode\": 0}}\n",
+        "stderr": "",
+        "target": {
+          "status": "PASS",
+          "returncode": 0
+        },
+        "regression_normal": {
+          "status": "PASS",
+          "returncode": 0
+        },
+        "regression_regrasp": {
+          "status": "PASS",
+          "returncode": 0
+        }
+      },
+      "run_dir": "C:\\Users\\fuker\\Desktop\\workspace\\project-033-flexcell\\ci-public-window\\evidence\\sprint24\\p0-w5e2d-flash\\w5e2d-W5A",
+      "llm": {
+        "requested_model": "deepseek-flash",
+        "returned_models": [
+          "deepseek-flash"
+        ],
+        "base_url": "https://api.deepseek.com",
+        "temperature": 0.0,
+        "max_tokens": 2048,
+        "calls": 3,
+        "tokens": 3170,
+        "seconds": 2.906,
+        "key_fingerprint": "84edc02f"
+      }
+    }
+  ]
+}
