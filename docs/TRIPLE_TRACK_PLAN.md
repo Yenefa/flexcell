@@ -90,7 +90,7 @@
 
 **Blocker**：C3 需要先冻结协议；MTC 运行成本较高。
 
-**Next Action**：C6 预注册已写（`docs/C6_PREREGISTRATION.md`，normal n=9/臂），待执行。
+**Next Action**：C6 ✅（n=9/臂：9/9 vs 9/9，MTC +2.481 s ≈ +16.9%）。下一步：C7（MTC 独特能力场景）需先预注册。
 
 ---
 
