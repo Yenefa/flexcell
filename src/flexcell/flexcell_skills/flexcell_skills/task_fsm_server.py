@@ -306,7 +306,11 @@ class TaskFsmServer(Node):
 
     @property
     def _max_world_age_s(self):
-        return float(self.__dict__.get("_max_world_age_value", 2.0))
+        # Measured on the real stack: OBSERVE -> PICK -> PLACE spans about 7 s
+        # (a fresh snapshot would be needed every leg otherwise), so a 2 s bound
+        # rejected legitimate place decisions. 10 s still refuses a world left
+        # over from an earlier leg while covering one in-flight leg.
+        return float(self.__dict__.get("_max_world_age_value", 10.0))
 
     @_max_world_age_s.setter
     def _max_world_age_s(self, value):
@@ -934,6 +938,31 @@ class TaskFsmServer(Node):
                 if decision_seq >= 64:
                     return finish(result_type.OUTCOME_FAILED, result_type.ERR_SKILL_FAILED,
                                   'executor decision limit reached (64)')
+                # P1-A/P1-C: a single OBSERVE cannot cover a whole leg (PICK plus
+                # lift spans several seconds), so a world older than the bound is
+                # refreshed BEFORE the policy is asked. Refreshing keeps the
+                # freshness gate honest instead of widening it until it never fires.
+                if (world is not None and world_sampled_monotonic is not None
+                        and self._max_world_age_s > 0
+                        and time.monotonic() - world_sampled_monotonic
+                        > self._max_world_age_s):
+                    og = Observe.Goal()
+                    og.refresh = True
+                    stale_r, stale_err = self._demo_call(
+                        self._cli_observe, og, 'OBSERVE_refresh', goal_handle, t0, 30.0)
+                    if stale_err is None and stale_r is not None and (
+                            int(stale_r.outcome)
+                            == Observe.Result.OUTCOME_SUCCEEDED):
+                        world = stale_r.world_state
+                        world_sampled_monotonic = time.monotonic()
+                        last_world_revision = int(world.revision)
+                        last_observe_evidence = getattr(stale_r, 'evidence_id', '')
+                        # The refresh REPLACES the executor world only. It is not
+                        # appended to history: FSMPolicy replays the frozen
+                        # OBSERVE->PICK->PLACE->VERIFY order from history, so an
+                        # extra record would look like an out-of-order decision
+                        # and the policy would raise a state error.
+
                 # ---- ask the policy WHAT next ----
                 # issue #7: persist the EXACT policy input before decide()
                 world_canonical = (serialize_envelope(

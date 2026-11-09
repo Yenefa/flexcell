@@ -1,0 +1,41 @@
+{
+  "protocol": "docs/remediation/REMEDIATION_MASTER_PLAN.md#milestone-2",
+  "rows": [
+    {
+      "case": "normal",
+      "status": "PASS",
+      "error": "ERR_NONE",
+      "wall": 14.529,
+      "trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK"
+      ]
+    },
+    {
+      "case": "dual_object",
+      "status": "PASS",
+      "error": "ERR_NONE",
+      "wall": 28.286,
+      "trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK",
+        "PICK_B(attempt=1):OK",
+        "PLACE_B:OK",
+        "VERIFY_B(attempt=1):OK"
+      ]
+    },
+    {
+      "case": "regrasp",
+      "status": "PASS",
+      "error": "ERR_NONE",
+      "wall": 14.419,
+      "trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK"
+      ]
+    }
+  ]
+}
