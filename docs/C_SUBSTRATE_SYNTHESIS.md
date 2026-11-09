@@ -1,0 +1,34 @@
+# Track C 综合 — FSM vs MTC 在三个场景下的对照（截至 2026-11-09）
+
+> 范围：C3（normal）、C4（dual_object）、C5（recovery_once）。全部为仿真（M3-S）、n=3/臂、探索性。
+> 判读口径统一：**不宣称统计显著，不作"MTC 更好/更差"的结论**。
+
+## 1. 结果总表
+| 场景 | 协议 | 成功 FSM / MTC | 平均 wall FSM | 平均 wall MTC | 差值 |
+| --- | --- | --- | --- | --- | --- |
+| normal | `docs/C3_FSM_VS_MTC_PROTOCOL.md` | 3/3 · 3/3 | 15.704 s | 19.297 s | **+3.593 s（+22.9%）** |
+| dual_object | `docs/C4_PREREGISTRATION.md` | 3/3 · 3/3 | 28.549 s | 34.368 s | **+5.819 s（+20.4%）** |
+| recovery_once | `docs/C5_PREREGISTRATION.md` | 3/3 · 3/3 | 14.267 s | 16.330 s | **+2.063 s（+14.5%）** |
+
+证据目录：`setup/acceptance/{c3_fsm_vs_mtc_20261109,c4_dual_fsm_vs_mtc_20261109,c5_recovery_fsm_vs_mtc_20261109}/`。
+
+## 2. 一致观察
+1. **成功率无差异**：三个场景两臂均 3/3；
+2. **MTC 的 wall 时间更高**：+14.5% ~ +22.9%，方向一致；
+3. **恢复行为相同**：recovery_once 中两臂都是 1 次 `REOBSERVE+RETRY`；
+4. 三个场景的 fingerprint 各自稳定（同臂同配置一致），说明条件可复现。
+
+## 3. 不能说明什么
+- 不能说 MTC 工程上更差：wall 差异可能来自规划器初始化、stage 搜索开销，未做 profile 归因；
+- 不能说 FSM 更优：n=3、单机、单仿真环境；
+- 不能外推到真实机器人（M3-R 未达）。
+
+## 4. 若要推翻当前方向，需要什么证据
+- 更大 n（≥9/臂）出现成功率差异；
+- 或 wall 差异在多次重复后消失/反向；
+- 或在 MTC 上观察到 FSM 无法完成的场景（MTC 独特能力）。
+
+## 5. 下一步（Track C）
+- C6 预注册：n=9/臂（normal）以检验 wall 差异稳定性；
+- 或引入 MTC 独特能力场景（如需要 cost-based 方案选择的任务）；
+- 在此之前不写最终结论。

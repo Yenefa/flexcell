@@ -16,6 +16,7 @@
 - A6 ✅ 组合任务 T-G4：**3/3 成功**（`runs/p1.4-tg4-20261109/`）。
 - W6 ✅ 迁移 3+3：Cold **0/3**、Warm **2/3**（`runs/p1.5-w6-transfer-20261109/`）；Cold 均未写 plan；n=3 探索性。
 - W7 📝 设计（M0）：`docs/W7_CROSS_EMBODIMENT_DESIGN.md`；无第二本体 → BLOCKED。
+- W5 📝 设计（M0）：`docs/W5_SELF_IMPROVEMENT_DESIGN.md`（合成层 W5-E1，待实现）。
 
 **Task Queue**
 1. T-G3 重复 2 次（补 n=3）。
@@ -88,7 +89,7 @@
 
 **Blocker**：C3 需要先冻结协议；MTC 运行成本较高。
 
-**Next Action**：C5 已完成；下一阶段 C6 需先预注册（扩 n=9 或换场景），并开始汇总 C3–C5 的 substrate 结论。
+**Next Action**：C3–C5 汇总已写（`docs/C_SUBSTRATE_SYNTHESIS.md`）；C6 需先预注册（n=9 或 MTC 独特能力场景）。
 
 ---
 
