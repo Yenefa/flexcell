@@ -58,6 +58,7 @@ from flexcell_skills.contracts.composite_checkpoint import (
 
 from flexcell_skills.contracts.episode import EpisodeRecorder, EpisodeStore
 from flexcell_skills.contracts.benchmark_protocol import load_protocol
+from flexcell_skills.contracts.decision_record import decision_record
 from flexcell_skills.contracts.safety_gate import (
     destination_clear, metrics as safety_metrics,
     rejection_canonical_code, sanitize as sanitize_decision, validate)
@@ -1041,26 +1042,16 @@ class TaskFsmServer(Node):
                     # distinguishable for the caller and for the decision log.
                     rejection_code = rejection_canonical_code(gate_reason)
                     rejection_kind = str(gate_reason or '').split(':', 1)[0]
-                    self._decision_log.write({
-                        'run_id': run_id, 'scenario_id': scenario,
-                        'seq': decision_seq,
-                        'previous_skill_result': prev,
-                        'recovery': recovery_audit,
-                        'action': decision.action, 'target': decision.target,
-                        'confidence': decision.confidence,
-                        'reason_code': decision.reason_code,
-                        'explanation': decision.explanation,
-                        'policy': self._policy.name,
-                        'policy_version': self._policy.version,
-                        'world_revision': last_world_revision,
-                        'observe_evidence_id': last_observe_evidence,
-                        'decide_latency_ms': d_ms,
-                        'policy_trace': decision.policy_trace,
-                        'dispatched': False,
-                        'safety_rejection': gate_reason,
-                        'rejection_kind': rejection_kind,
-                        'rejection_error_code': int(rejection_code),
-                    })
+                    self._decision_log.write(decision_record(
+                        run_id=run_id, scenario=scenario, seq=decision_seq,
+                        previous_skill_result=prev, recovery=recovery_audit,
+                        decision=decision, policy_name=self._policy.name,
+                        policy_version=self._policy.version,
+                        world_revision=last_world_revision,
+                        observe_evidence_id=last_observe_evidence,
+                        decide_latency_ms=d_ms, dispatched=False,
+                        rejection_kind=gate_reason,
+                        rejection_error_code=rejection_code))
                     episode.record_executor_result(
                         detail='safety rejection: %s' % gate_reason,
                         post_condition='SAFETY_REJECTED')
@@ -1083,24 +1074,14 @@ class TaskFsmServer(Node):
                 assert dispatch_view == {'action': decision.action,
                                          'target': decision.target}
                 # P1-F: recovery_audit is computed BEFORE the gate below, so a
-                self._decision_log.write({
-                    'run_id': run_id, 'scenario_id': scenario,
-                    'seq': decision_seq,
-                    'previous_skill_result': prev,
-                    'recovery': recovery_audit,
-                    'action': decision.action, 'target': decision.target,
-                    'confidence': decision.confidence,
-                    'reason_code': decision.reason_code,
-                    'explanation': decision.explanation,
-                    'policy': self._policy.name,
-                    'policy_version': self._policy.version,
-                    'world_revision': last_world_revision,
-                    'observe_evidence_id': last_observe_evidence,
-                    'decide_latency_ms': d_ms,
-                    'policy_trace': decision.policy_trace,
-                    'dispatched': True,
-                    'safety_rejection': None,
-                })
+                self._decision_log.write(decision_record(
+                    run_id=run_id, scenario=scenario, seq=decision_seq,
+                    previous_skill_result=prev, recovery=recovery_audit,
+                    decision=decision, policy_name=self._policy.name,
+                    policy_version=self._policy.version,
+                    world_revision=last_world_revision,
+                    observe_evidence_id=last_observe_evidence,
+                    decide_latency_ms=d_ms, dispatched=True))
 
                 if decision.target and tag_of(decision.target) != tag:
                     tag = tag_of(decision.target)   # leg transition
