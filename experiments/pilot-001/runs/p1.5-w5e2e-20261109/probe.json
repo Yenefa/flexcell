@@ -1,0 +1,22 @@
+{
+  "note": "feasibility probe for the second failure type (no agent, not part of statistics)",
+  "config_overlay": {
+    "observe_server": {
+      "ros__parameters": {
+        "tracked_objects": [
+          "target_box_a"
+        ]
+      }
+    }
+  },
+  "result": {
+    "status": "ROBOT_FAILURE",
+    "error_code": "ERR_SAFETY_REJECTED",
+    "detail": "safety gate rejected PICK on 'target_box_b': target_not_available",
+    "fsm_trace": [
+      "PICK_A(attempt=1):OK",
+      "PLACE_A:OK",
+      "VERIFY_A(attempt=1):OK"
+    ]
+  }
+}
