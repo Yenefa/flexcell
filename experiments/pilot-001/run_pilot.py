@@ -13,6 +13,12 @@ sys.path.insert(0, str(HERE))
 from pilot import fixtures, gazebo, gazebo_task, runner, tasks
 from pilot.manifest import load
 
+TASK_TG3C = ("The regrasp task fails. Diagnose the cause from the execution "
+             "telemetry and fix plan.json. Do not modify gate/.")
+TASK_TG3W = (TASK_TG3C + "\n\nPrior experience (transferred from an earlier task): PLACE "
+             "failures with ERR_MOTION_FAILED were caused by an unreachable "
+             "destination; 0.20 <= hypot(x, y) < 0.30 worked.")
+
 TASK_TG4 = ("The two-object task fails while placing the SECOND object because "
             "zone_2 is out of reach (arm reaches strictly below 0.30 m). The first "
             "object already succeeds. Use run_execution to see the failure, then fix "
@@ -204,6 +210,31 @@ def tc_run(manifest, out, arms, repo_src):
     return 0
 
 
+def tg3_transfer_run(manifest, out, arms, repo_src, warm):
+    from pilot.agent_fc import FCAgent
+    from pilot.llm import Chat
+    env = {"PILOT_P14_REPO": "/home/ros/flexcell-p14",
+           "PILOT_P14_WS": "/home/ros/flexcell-p14-ws",
+           "PILOT_P14_SRC": repo_src, "PYTHONPATH": str(HERE)}
+    task_id = "T-G3W" if warm else "T-G3C"
+    prompt = TASK_TG3W if warm else TASK_TG3C
+    rows = []
+    for arm in arms:
+        chat = Chat()
+        agent = FCAgent(chat, manifest["arms"][arm]["tools"], prompt)
+        res = runner.run_one(manifest, arm, agent,
+                             gazebo_task.build_tg3_transfer(out / ("tpl-" + task_id + "-" + arm), warm=warm),
+                             out / (task_id + "-" + arm),
+                             meta={"task": task_id, **chat.metadata()},
+                             protected=[],
+                             execution_factory=gazebo_task.GazeboTaskExecution,
+                             extra_env=env)
+        res["llm"] = {"calls": chat.calls, "tokens": chat.tokens}
+        rows.append(res)
+        print("ARM %s success=%s iters=%s tokens=%s" % (arm, res["success"], res["iterations"], chat.tokens))
+    (out / (task_id + "-runs.json")).write_text(json.dumps({"task": task_id, "rows": rows}, indent=2) + "\n", encoding="utf-8")
+    return 0
+
 def tg4_run(manifest, out, arms, repo_src):
     from pilot.agent_fc import FCAgent
     from pilot.llm import Chat
@@ -344,6 +375,8 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     manifest = load(a.manifest)
     arms = [x.strip() for x in a.arms.split(",") if x.strip()]
+    if a.llm and a.task in ("T-G3C", "T-G3W"):
+        return tg3_transfer_run(manifest, out, arms, a.repo_src, warm=(a.task == "T-G3W"))
     if a.llm and a.task == "T-G4":
         return tg4_run(manifest, out, arms, a.repo_src)
     if a.llm and a.task == "T-G3":
