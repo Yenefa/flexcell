@@ -7,10 +7,10 @@
 | --- | --- | --- | --- |
 | P0-A | FSM 超时停止确认 + QUARANTINE | **DONE** | `skill_lifecycle.py`、`test_skill_cancellation.py` 15 passed |
 | P0-B | 取消机制自动化回归 | **DONE** | 15 项新测试 + 全仓 1154 passed |
-| P0-C | 真机安全前置评估 | TODO | — |
-| P1-A | WorldState 新鲜度 | TODO | — |
-| P1-B | Safety Gate 错误码分类 | TODO | — |
-| P1-C | FSM 动作顺序约束 | TODO | — |
+| P0-C | 真机安全前置评估 | **BLOCKED**（缺硬件） | `P0C_PHYSICAL_SAFETY_READINESS.md` |
+| P1-A | WorldState 新鲜度 | **DONE** | `test_world_freshness.py` 6 passed |
+| P1-B | Safety Gate 错误码分类 | **DONE** | `test_rejection_typing.py` 5 passed |
+| P1-C | FSM 动作顺序约束 | **DONE** | `test_action_order.py` 11 passed |
 | P1-D | Gripper 反馈验证 | TODO | — |
 | P1-E | known_objects 状态解耦 | TODO | — |
 | P1-F | Episode 与日志完整性 | TODO | — |
@@ -26,3 +26,10 @@
 - 隔离时：**不释放租约、不发布 IDLE、拒绝新运动派发**；
 - `reset_motion_quarantine`（`std_srvs/Trigger`）仅在隔离目标已终止时才能清除；
 - 复用 MoveToPose 已有的五重停止证明（不重写底层取消）。
+
+## 提交记录
+| Commit | 内容 |
+| --- | --- |
+| `fefd628` | P0-A/P0-B 停止确认 + 隔离 |
+| `1dd4543` | P1-A 世界新鲜度 + P0-C 安全评估 |
+| `64136eb` | P1-B 拒绝码分类 |

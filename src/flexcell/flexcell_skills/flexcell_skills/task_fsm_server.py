@@ -967,7 +967,7 @@ class TaskFsmServer(Node):
                 world_dict = (json.loads(world_canonical)
                               if world_canonical is not None else None)
                 gate_ok, gate_reason = validate(decision, goal_obj, world_dict,
-                                                constraints)
+                                                constraints, history)
                 if gate_ok and decision.action == ACTION_PICK:
                     gate_ok, gate_reason = destination_clear(
                         world_dict, decision.target, zones[zone_of[decision.target]])

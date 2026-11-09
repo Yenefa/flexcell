@@ -37,7 +37,7 @@ def sanitize(decision):
     return {"action": decision.action, "target": decision.target}
 
 
-def validate(decision, goal, world_dict, constraints):
+def validate(decision, goal, world_dict, constraints, history=None):
     """Validate a policy proposal.  Returns (ok, reason).
 
     ok=True  -> the proposal is in contract; dispatch may proceed.
@@ -92,6 +92,45 @@ def validate(decision, goal, world_dict, constraints):
         if not carry.get('engaged') or carry.get('object_id') != decision.target:
             return False, 'not_carried'
 
+    # 7) action ORDER (P1-C): a legal-looking decision is still out of order
+    #    when its own history does not support it. Without this a policy could
+    #    PLACE an object it never picked, or VERIFY one it never placed.
+    if history is not None:
+        ok, reason = _order_ok(decision, tuple(history))
+        if not ok:
+            return False, reason
+
+    return True, None
+
+
+def _order_ok(decision, history):
+    """Precondition check against the executor-recorded history.
+
+    Typed reasons:
+      place_without_pick   - PLACE for an object whose PICK never succeeded
+      verify_without_place - VERIFY for an object whose PLACE never succeeded
+      pick_while_carried   - PICK while this task already carries an object
+    """
+    action, target = decision.action, decision.target
+    if action == 'PLACE':
+        if not any(h.action == 'PICK' and h.target == target and h.outcome == 0
+                   for h in history):
+            return False, 'place_without_pick'
+    elif action == 'VERIFY':
+        placed = any(h.action == 'PLACE' and h.target == target and h.outcome == 0
+                     for h in history)
+        # The resume shortcut may verify an object that a PREVIOUS session left
+        # at its goal (the executor accepted it through the resume receipt), so
+        # a successful OBSERVE for that target also justifies the check.
+        observed = any(h.action == 'OBSERVE' and h.outcome == 0 for h in history)
+        if not placed and not observed:
+            return False, 'verify_without_place'
+    elif action == 'PICK':
+        for h in reversed(history):
+            if h.action == 'PLACE' and h.outcome == 0:
+                break
+            if h.action == 'PICK' and h.target == target and h.outcome == 0:
+                return False, 'pick_while_carried'
     return True, None
 
 
@@ -160,6 +199,9 @@ def rejection_canonical_code(reason):
         'target_not_available': ERR_OBJECT_NOT_FOUND,
         'already_carried': ERR_SAFETY_REJECTED,
         'not_carried': ERR_NOT_CARRIED,
+        'place_without_pick': ERR_SAFETY_REJECTED,
+        'verify_without_place': ERR_SAFETY_REJECTED,
+        'pick_while_carried': ERR_SAFETY_REJECTED,
         'destination_occupied': ERR_SAFETY_REJECTED,
         'destination_geometry_unavailable': ERR_SAFETY_REJECTED,
     }.get((reason or '').split(':', 1)[0], ERR_INTERNAL)
