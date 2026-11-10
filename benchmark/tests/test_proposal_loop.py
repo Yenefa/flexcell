@@ -70,6 +70,40 @@ def test_a_real_proposal_passes_the_existing_gate():
     assert proposal["requires_human_approval"] is True
 
 
+def test_actuator_stall_proposal_is_new_work_not_retrospective():
+    """The first proposal describing UNFIXED work, derived from episode evidence.
+
+    The generator previously read only task*.out, which carries the policy wrapper
+    ("native terminal/verification unconfirmed") and never "gripper did not open", so
+    this class was invisible - the same wrapper-vs-record mistake that hid the root
+    cause for several rounds.
+    """
+    fs = [{"run": "x", "error_code": 50,
+           "detail": "gripper did not open (position=-0.011, requested=0.02, "
+                     "stalled=True)",
+           "completed_stage_ids": []}] * 4
+    proposal, why = generate.build_proposal("actuator_stall", fs)
+    assert proposal is not None, why
+    assert proposal["kind"] == "bounded_release_retry"
+    assert proposal["requires_human_approval"] is True
+    assert proposal["rollback"]
+    ok, reason = regress.gate(proposal, run_regressions=False)
+    assert ok, reason
+    label, det = check_applied.check_actuator_stall()
+    assert label in ("WOULD_FIX", "ALREADY_SATISFIED"), (label, det)
+
+
+def test_gripper_stall_is_clustered_from_its_own_signature():
+    buckets = generate.cluster([
+        {"error_code": 50, "detail": "gripper did not open (position=-0.011)",
+         "run": "a", "completed_stage_ids": []},
+        {"error_code": 62, "detail": "native terminal/verification unconfirmed",
+         "run": "b", "completed_stage_ids": []},
+    ])
+    assert len(buckets["actuator_stall"]) == 1
+    assert len(buckets["unconfirmed"]) == 1
+
+
 def test_generator_cannot_propose_touching_a_protected_path():
     fs = [_f("declared destination occupied")] * 5
     proposal, _ = generate.build_proposal("occupied_destination", fs)

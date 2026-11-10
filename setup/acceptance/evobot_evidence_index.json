@@ -1,10 +1,25 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 25,
-  "live": 18,
+  "batches": 26,
+  "live": 19,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
+    {
+      "batch": "evobot_actuator_proposal_20261111",
+      "verified": "PASS",
+      "rung": "Proposal generated + gated (WOULD_FIX; NOT applied, needing approval)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_FIRST_WOULD_FIX_PROPOSAL_VERIFIED",
+        "signature": "actuator_stall",
+        "evidence_occurrences": 24,
+        "behavioural_label": "WOULD_FIX",
+        "human_approval_required": true,
+        "applied": false,
+        "level5": "NOT ACHIEVED (proposal unapproved, unapplied, unmeasured)"
+      }
+    },
     {
       "batch": "evobot_actuator_rootcause_20261111",
       "verified": "PASS",
@@ -55,7 +70,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 17,
+        "live_batches": 18,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",

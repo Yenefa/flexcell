@@ -1,0 +1,12 @@
+measured failures across all archives: 55
+  SKIP  unconfirmed            n=26  no evidence-backed change for unconfirmed yet
+  GATE  actuator_stall         n=24  ACCEPTED
+         structure accepted (regressions skipped by caller), id=98127b6adc18
+         wrote /mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp/evolution/proposals/actuator_stall.json
+  GATE  occupied_destination   n=5   ACCEPTED
+         structure accepted (regressions skipped by caller), id=6e380bcd6d5b
+         wrote /mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp/evolution/proposals/occupied_destination.json
+
+proposals written: 2
+  - actuator_stall.json | occurrences: 24 | files: ['src/flexcell/flexcell_skills/flexcell_skills/place_server.py']
+  - occupied_destination.json | occurrences: 5 | files: ['experiments/baselines/spread_destinations.py']

@@ -22,7 +22,7 @@ python3 -m pytest benchmark/tests -q              # 116 个离线测试
 | 2 | Compose | **部分** | T05 中转 6/6；但只有一类组合任务 |
 | 3 | Recover | **部分** | `evobot_recover_n6` 1/2；`evobot_spacing_fix` 显示根因修复更有效 |
 | 4 | Develop | **未达成** | 没有 Agent 自行创建过新技能 |
-| 5 | Improve | **未达成** | 提案→门禁链条已打通（`evobot_proposal_loop`），但唯一提案是**事后重建**（`ALREADY_SATISFIED`） |
+| 5 | Improve | **未达成** | 循环已产出第一个 **`WOULD_FIX`** 提案（`evobot_actuator_proposal`，24 条证据，目标 `place_server.py`），但**未获人工批准、未应用、未测效果** |
 | 6 | Learn | **骨架** | `evobot_baseline_c_skeleton`：经验库+诊断+回归门，Unit Tested |
 | 7 | Transfer | **未观察到（机制已查明）** | `evobot_lesson_routing`（**仅计划层，未跑机器人**）：4 条教训仅 1 条属 planner，且 planner 本就满足；**16/16 计划字节相同，+3% token 纯开销** |
 | 8 | Generalize | **部分** | `evobot_unseen_n6`：未见任务类型上规划 6/6，干净完成 3/6 |
@@ -60,6 +60,16 @@ python3 -m pytest benchmark/tests -q              # 116 个离线测试
 | C Self-Evolving | **16/16** | 与 B 完全相同 |
 
 **A′ 在新任务上是 0，这正是 Agent 存在的理由；B 规划 16/16 说明瓶颈在执行层。**
+
+## 待人工决定
+
+`evolution/proposals/actuator_stall.json` 已生成并通过门禁，标注
+`requires_human_approval: true`，**尚未应用**：
+
+对 `place_server.py` 第 417 行的 `gripper_open` 增加**有界释放重试**。
+预期效果可 falsify：仅因首次 stall 失败的阶段会成功，持续 stall 仍必须失败。
+
+批准后流程：应用 → 重跑 16 例 → 证明 stall 率下降且 false success 仍为 0 → 方可宣称 Level 5。
 
 ## 三臂状态
 

@@ -15,6 +15,13 @@ sys.path.insert(0, os.path.join(WT, "evolution", "validation"))
 import generate
 import regress
 
+# The actuator stall is ONLY visible in the episode records: task*.out carries the
+# policy wrapper ("native terminal/verification unconfirmed"), never "gripper did not
+# open". Reading only the wrapper made this class invisible to the generator - the same
+# mistake that hid the root cause for several rounds.
+sys.path.insert(0, os.path.join(WT, "runtime", "recovery"))
+import execution_root_cause as ERC
+
 ACC = os.path.join(WT, "setup", "acceptance")
 
 
@@ -34,6 +41,17 @@ def all_failures():
                     "error_code": r.get("error_code"),
                     "detail": str(r.get("detail") or ""),
                     "completed_stage_ids": r.get("completed_stage_ids") or []})
+    # fold in executor-level evidence from episodes
+    for ep in glob.glob(os.path.join(ACC, "evobot*", "**", "episodes", "*.json"),
+                       recursive=True):
+        for f in ERC.episode_failures(ep):
+            label = ERC.classify(f["detail"])
+            if label == "OTHER":
+                continue
+            out.append({"run": os.path.relpath(ep, ACC),
+                        "error_code": f.get("error_code"),
+                        "detail": f["detail"],
+                        "completed_stage_ids": []})
     return out
 
 

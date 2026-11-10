@@ -1,0 +1,37 @@
+{
+  "kind": "bounded_release_retry",
+  "signature": "actuator_stall",
+  "files": [
+    "src/flexcell/flexcell_skills/flexcell_skills/place_server.py"
+  ],
+  "occurrences": 24,
+  "evidence": {
+    "signature": "actuator_stall",
+    "runs": [
+      "evobot_bc_pair_20261111/runs/HO-13c5efca228e_B/sim/episodes/pick_place_v1_pick_place_v1-8118320c.json",
+      "evobot_heldout_n6_20261111/runs/HO-13c5efca228e/sim/episodes/pick_place_v1_pick_place_v1-76011344.json",
+      "evobot_pair16_20261111/runs/HO-4911cf199a42/sim/episodes/pick_place_v1_pick_place_v1-9290f8f0.json",
+      "evobot_pair16_20261111/runs/HO-4c174b133d05/sim/episodes/pick_place_v1_pick_place_v1-eebb406c.json",
+      "evobot_pair16_20261111/runs/HO-b3bcb892cef6/sim/episodes/pick_place_v1_pick_place_v1-83849b66.json",
+      "evobot_pair16_20261111/runs/HO-bc8270332865/sim/episodes/pick_place_v1_pick_place_v1-ac22bb33.json",
+      "evobot_pair16_drift_20261111/runs/HO-1ca3385be0b3/sim/episodes/pick_place_v1_pick_place_v1-915be561.json",
+      "evobot_pair16_drift_20261111/runs/HO-1ca3385be0b3/sim/episodes/pick_place_v1_pick_place_v1-91860606.json",
+      "evobot_pair16_drift_20261111/runs/HO-71d5272a74a2/sim/episodes/pick_place_v1_pick_place_v1-ce6dd310.json",
+      "evobot_pair16_drift_20261111/runs/HO-bc8270332865/sim/episodes/pick_place_v1_pick_place_v1-eaae4368.json",
+      "evobot_pair16_drift_20261111/runs/HO-fc57a0a1d50d/sim/episodes/pick_place_v1_pick_place_v1-0cfe337b.json",
+      "evobot_pooled_n32_20261111/runs_batch2_fresh_seeds/HO-64d891889ad6/sim/episodes/pick_place_v1_pick_place_v1-ea7ef63d.json",
+      "evobot_pooled_n32_20261111/runs_batch2_fresh_seeds/HO-711efb5aab86/sim/episodes/pick_place_v1_pick_place_v1-57e4ffe0.json",
+      "evobot_pooled_n32_20261111/runs_batch2_fresh_seeds/HO-9aff2ed75348/sim/episodes/pick_place_v1_pick_place_v1-68400e76.json",
+      "evobot_pooled_n32_20261111/runs_batch2_fresh_seeds/HO-9aff2ed75348/sim/episodes/pick_place_v1_pick_place_v1-7c01eb2c.json",
+      "evobot_pooled_n32_20261111/runs_batch2_fresh_seeds/HO-b3fb07b48521/sim/episodes/pick_place_v1_pick_place_v1-5b3cad9d.json"
+    ],
+    "error_codes": [
+      25
+    ],
+    "sample_detail": "gripper did not open (position=-0.011000000000000036 requested=0.02 stalled=True)"
+  },
+  "change": "when the gripper reports stalled=True on the release command, retry the open a bounded number of times before declaring PLACE failed; the signal is observable and a re-issued open is a new attempt, not a longer wait",
+  "expected_effect": "phases that failed only because the first release stalled will succeed, while a stall that persists must still fail with the same error, so the change cannot turn a real failure into a pass",
+  "rollback": "git revert this commit; the single-attempt release returns",
+  "requires_human_approval": true
+}

@@ -30,6 +30,10 @@ import regress
 MIN_OCCURRENCES = 2
 
 CLASS_TARGETS = {
+    # A release stall is a SKILL-LAYER defect with a computable signature: the
+    # controller reports stalled=True on an OPEN command, place_server treats that as
+    # fatal on first occurrence, and no retry exists anywhere in that file.
+    "actuator_stall": ["src/flexcell/flexcell_skills/flexcell_skills/place_server.py"],
     "planning": ["experiments/baselines/spread_destinations.py"],
     "execution": ["runtime/recovery/recover.py"],
     "grasp": ["runtime/recovery/recover.py"],
@@ -66,7 +70,9 @@ def cluster(failures):
     buckets = {}
     for f in failures:
         d = f["detail"].lower()
-        if "occupied destination" in d or "destination occupied" in d:
+        if "gripper did not open" in d:
+            key = "actuator_stall"
+        elif "occupied destination" in d or "destination occupied" in d:
             key = "occupied_destination"
         elif "state drift" in d:
             key = "state_drift"
@@ -83,6 +89,28 @@ def build_proposal(signature, failures):
     if len(failures) < MIN_OCCURRENCES:
         return None, "only %d occurrence(s) of %s; need %d" % (
             len(failures), signature, MIN_OCCURRENCES)
+    if signature == "actuator_stall":
+        files = CLASS_TARGETS["actuator_stall"]
+        return {
+            "kind": "bounded_release_retry",
+            "signature": signature,
+            "files": list(files),
+            "occurrences": len(failures),
+            "evidence": {"signature": signature,
+                         "runs": [f["run"] for f in failures][:16],
+                         "error_codes": sorted({f["error_code"] for f in failures}),
+                         "sample_detail": failures[0]["detail"][:160]},
+            "change": ("when the gripper reports stalled=True on the release command, "
+                       "retry the open a bounded number of times before declaring "
+                       "PLACE failed; the signal is observable and a re-issued open "
+                       "is a new attempt, not a longer wait"),
+            "expected_effect": ("phases that failed only because the first release "
+                                "stalled will succeed, while a stall that persists "
+                                "must still fail with the same error, so the change "
+                                "cannot turn a real failure into a pass"),
+            "rollback": "git revert this commit; the single-attempt release returns",
+            "requires_human_approval": True,
+        }, None
     if signature not in ("occupied_destination",):
         return None, "no evidence-backed change for %s yet" % signature
     files = CLASS_TARGETS["planning"]

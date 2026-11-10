@@ -52,7 +52,30 @@ def check_occupied_destination():
                 gap if gap is not None else -1.0))
 
 
-CHECKS = {"occupied_destination": check_occupied_destination}
+def check_actuator_stall():
+    """Does the skill layer already retry a stalled release?
+
+    Answered by reading the code path, not the prose: a bounded retry means the open
+    command sits inside a loop that re-issues it, and place_server has no such loop.
+    """
+    target = os.path.join(WT, "src", "flexcell", "flexcell_skills", "flexcell_skills",
+                          "place_server.py")
+    if not os.path.exists(target):
+        return "REFUSED", "skill layer not present in this checkout"
+    src = open(target, encoding="utf-8", errors="replace").read()
+    # a re-issued open would appear as more than one call to the open command
+    calls = src.count("self._gripper.command(self._gripper_open)")
+    has_loop = ("for release_attempt" in src) or ("while release_attempt" in src)
+    if calls > 1 or has_loop:
+        return "ALREADY_SATISFIED", "release open is already retried (%d call site(s))" % calls
+    return ("WOULD_FIX",
+            "release open is issued exactly once (%d call site); a stall aborts PLACE"
+            % calls)
+
+
+CHECKS = {"occupied_destination": check_occupied_destination,
+          "actuator_stall": check_actuator_stall,
+          }
 
 
 def main():
