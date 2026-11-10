@@ -17,7 +17,7 @@ python3 -m pytest benchmark/tests -q              # 116 个离线测试
 | 2 | Compose | **部分** | T05 中转 6/6；但只有一类组合任务 |
 | 3 | Recover | **部分** | `evobot_recover_n6` 1/2；`evobot_spacing_fix` 显示根因修复更有效 |
 | 4 | Develop | **未达成** | 没有 Agent 自行创建过新技能 |
-| 5 | Improve | **未达成** | 没有 Agent 自行改动并过回归的记录 |
+| 5 | Improve | **未达成** | 提案→门禁链条已打通（`evobot_proposal_loop`），但唯一提案是**事后重建**（`ALREADY_SATISFIED`） |
 | 6 | Learn | **骨架** | `evobot_baseline_c_skeleton`：经验库+诊断+回归门，Unit Tested |
 | 7 | Transfer | **未观察到** | `evobot_unseen_bc`：计划字节全同，经验无效果 |
 | 8 | Generalize | **部分** | `evobot_unseen_n6`：未见任务类型上规划 6/6，干净完成 3/6 |
@@ -35,6 +35,16 @@ python3 -m pytest benchmark/tests -q              # 116 个离线测试
 | Level 3 恢复率 | **1/2** | `evobot_recover_n6`（分母仅 2） |
 | 间距修复后同箱任务 | **8/8** | `evobot_spacing_fix` |
 | v0.1 回归 | **6/6 → 6/6** | `evobot_regression_v01` |
+
+## 提案循环的诚实状态
+
+审计发现 `evolution/proposals/` **是空目录**：门禁能判提案，但没人生成提案。
+**这解释了为什么两轮 B/C 实验都测得「经验 0 效果」**——学习没有通向行为的路径。
+
+现已补上 `generate.py`（证据→聚类→提案→门禁）与 `check_applied.py`（用真实代码行为验证）。
+
+唯一生成的提案被标注为 `ALREADY_SATISFIED`：间距是我手工修的，提案只是事后重建。
+**这不是自进化成果，不能那样报。**
 
 ## 三臂状态
 

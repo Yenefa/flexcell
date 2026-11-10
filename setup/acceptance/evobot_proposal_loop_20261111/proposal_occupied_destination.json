@@ -1,0 +1,27 @@
+{
+  "kind": "spacing_policy",
+  "signature": "occupied_destination",
+  "files": [
+    "experiments/baselines/spread_destinations.py"
+  ],
+  "occurrences": 5,
+  "evidence": {
+    "signature": "occupied_destination",
+    "runs": [
+      "evobot_recover_n6_20261111/runs/HO-90899d657e68/task.out",
+      "evobot_recover_n6_20261111/runs/HO-90899d657e68/task_retry.out",
+      "evobot_spacing_fix_20261111/runs_prefix_n6/HO-90899d657e68/task.out",
+      "evobot_spacing_fix_20261111/runs_prefix_n6/HO-90899d657e68/task_retry.out",
+      "evobot_unseen_n6_20261111/runs/HO-b81a5ae02d6d_B/task.out"
+    ],
+    "error_codes": [
+      60,
+      61
+    ],
+    "sample_detail": "state drift or occupied destination before target_box_b-1"
+  },
+  "change": "when several objects share a bin, the spacing between landing points must exceed the clearance contract PLUS measured landing drift, and the spread axis must keep every destination clear of the other objects; refuse rather than emit an unholdable plan",
+  "expected_effect": "phases that failed with an occupied destination will either succeed or be refused at plan time; no verified task may regress",
+  "rollback": "git revert this commit; the previous spread policy is unchanged",
+  "requires_human_approval": true
+}

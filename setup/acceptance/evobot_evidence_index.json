@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 19,
-  "live": 12,
+  "batches": 20,
+  "live": 13,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -93,6 +93,21 @@
         "recovery_rate": "3/4",
         "false_success_rate": 0.0,
         "prior_batch_retained": true
+      }
+    },
+    {
+      "batch": "evobot_proposal_loop_20261111",
+      "verified": "PASS",
+      "rung": "Implemented + Unit Tested (loop wired; Level 5 NOT achieved)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_PROPOSAL_LOOP_WIRED_AND_HONESTLY_LABELLED",
+        "proposals_dir_was_empty": true,
+        "gate_accepts_evidence_backed_proposal": true,
+        "thin_evidence_refused": true,
+        "unknown_class_refused": true,
+        "behavioural_label": "ALREADY_SATISFIED",
+        "level5_improve": "NOT ACHIEVED (only retrospective proposal)"
       }
     },
     {

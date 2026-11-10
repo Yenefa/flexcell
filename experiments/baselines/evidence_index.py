@@ -54,6 +54,7 @@ RUNGS = {
     "evobot_regression_v01_20261111": "Regression (6/6 -> 6/6, no loss)",
     "evobot_pair16_20261111": "Independently Verified (paired B vs R, n=16)",
     "evobot_pair16_drift_20261111": "Independently Verified (paired n=16, recovery 3/4)",
+    "evobot_proposal_loop_20261111": "Implemented + Unit Tested (loop wired; Level 5 NOT achieved)",
 }
 
 
