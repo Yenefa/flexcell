@@ -1,0 +1,17 @@
+task                 B pass    C pass    B tok    C tok    plan same?
+HO-42109d30fa00      False     True      798      1112     True
+HO-90899d657e68      True      True      1033     1382     True
+HO-96e57334764a      True      True      1015     1154     True
+HO-b81a5ae02d6d      True      True      975      1143     True
+HO-b91d34102cdc      True      True      932      1038     True
+HO-fd5737f932db      True      True      897      1038     True
+
+pairs                : 6
+B independently PASS : 5
+C independently PASS : 6
+B clean PASS         : 5
+C clean PASS         : 5
+FALSE SUCCESS RATE   : 0/12 = 0.0%
+C lessons injected   : 6
+mean tokens B / C    : 942 / 1144
+plans that differed  : NONE
