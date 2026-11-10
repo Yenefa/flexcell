@@ -282,10 +282,28 @@ class MoveToPoseServer(Node):
         validate_arm_trajectory(trajectory.joint_trajectory)
         joints, age = self._joint_state()
         positions = dict(zip(joints.name, joints.position)) if joints is not None else {}
+        # Diagnostic: the guard compares the MEASURED arm state against the
+        # HANDOFF TRAJECTORY START, and the trajectory start was never logged, so a
+        # failure could not be explained from archived evidence. Record both sides
+        # so the next failure is attributable instead of guessable.
+        names = list(trajectory.joint_trajectory.joint_names)
+        start = list(trajectory.joint_trajectory.points[0].positions)
+        measured = [positions.get(n) for n in names]
+        deltas = [None if m is None else abs(m - w)
+                  for m, w in zip(measured, start)]
+        self._last_start_state = dict(
+            names=names, planned=start, measured=measured, deltas=deltas,
+            age=age, tolerance=.03)
         if joints is None or age is None or age > .5 or any(
-                name not in positions or abs(positions[name] - trajectory.joint_trajectory.points[0].positions[i]) > .03
-                for i, name in enumerate(trajectory.joint_trajectory.joint_names)):
-            raise ValueError('measured start state differs from planned trajectory')
+                d is None or d > .03 for d in deltas):
+            detail = ", ".join(
+                "%s measured=%s planned=%s delta=%s" % (
+                    n, None if m is None else round(m, 5), round(w, 5),
+                    None if d is None else round(d, 5))
+                for n, m, w, d in zip(names, measured, start, deltas))
+            raise ValueError(
+                'measured start state differs from planned trajectory: '
+                + detail + " (tolerance 0.03 rad)")
         return trajectory
 
     def _on_js(self, msg):

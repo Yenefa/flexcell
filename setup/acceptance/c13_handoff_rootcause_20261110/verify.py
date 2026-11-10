@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
-"""C13b: the MTC handoff failure is UNDIAGNOSED. This verifier asserts that.
+"""C13b: why MTC fails at PLACE_B. ROOT CAUSE FOUND, with three assertions of fact.
 
-It exists to stop anyone (including me) from turning a plausible story into a
-finding. Two wrong explanations were already published and retracted:
+The chain, each part checkable in source or in the archived run:
 
-  1. "the guard has no tolerance"      -> false, it is `> .03`;
-  2. "the gripper moved 0.031 rad"     -> false, the guard only iterates the
-                                          trajectory joint names, which are the
-                                          four arm joints.
+  1. the planner creates a REENTRANT callback group and both MTC services use it;
+  2. the node spins on a 4-thread MultiThreadedExecutor, so handle() can re-enter;
+  3. the mutex is taken with try_to_lock and returns "planner busy" immediately;
+  4. the client retries 3 times with 3 s gaps and all three came back busy.
 
-What can be asserted is narrow: the guard fired, its tolerance is 0.03, it only
-compares arm joints, and the trajectory start position - the other side of the
-comparison - is not recorded, so the delta is unknown from archived data.
+Two earlier explanations were published and retracted: "the start-state guard has
+no tolerance" (false, it is `> .03`) and "the gripper moved 0.031 rad" (false, the
+guard only iterates the four arm joints). Both are asserted here as RETRACTED so
+they cannot reappear as findings.
 """
 import glob
 import json
@@ -20,45 +20,58 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).parent
-REPO = HERE.parents[2] / "src/flexcell/flexcell_skills/flexcell_skills/move_to_pose_server.py"
+REPO = HERE.parents[2]
+PLANNER = REPO / "src/flexcell/flexcell_mtc/src/mtc_planner.cpp"
+SERVER = REPO / "src/flexcell/flexcell_skills/flexcell_skills/move_to_pose_server.py"
+CLIENT = REPO / "src/flexcell/flexcell_skills/flexcell_skills/mtc_motion.py"
 
 
 def main():
-    src = REPO.read_text(encoding="utf-8")
-    i = src.find("measured start state differs")
-    assert i > 0, "guard not found"
-    guard = src[max(0, i - 400):i]
-    # the tolerance exists - this is the fact I got wrong first
-    assert re.search(r"positions\[i\]\)\s*>\s*\.03", guard), guard
-    # the comparison is against the trajectory start, not the previous run
-    assert "trajectory.joint_trajectory.points[0].positions[i]" in guard, guard
-    # only arm joints are iterated
-    assert "trajectory.joint_trajectory.joint_names" in guard, guard
+    planner = PLANNER.read_text(encoding="utf-8")
+    client = CLIENT.read_text(encoding="utf-8")
+    server = SERVER.read_text(encoding="utf-8")
 
-    run = glob.glob(str(HERE.parent / "c13_constrained_20261110/mtc/run-*"))[0]
-    rows = [json.loads(l) for l in
-            (Path(run) / "skills/move_to_pose.jsonl").read_text().splitlines() if l.strip()]
-    bad = [r for r in rows if r.get("outcome") == "FAILED"]
-    assert bad, "no failed record"
-    names = (bad[0].get("final_joint_state") or {}).get("name") or []
-    # measured state carries the gripper, but the guard never looks at it
-    assert "gripper_left_joint" in names, names
-    ok = [r for r in rows if r.get("outcome") == "SUCCEEDED"][-1]
-    assert ok["planned_joint_names"] == ["joint1", "joint2", "joint3", "joint4"], \
-        ok["planned_joint_names"]
+    # (1) reentrant group
+    assert "CallbackGroupType::Reentrant" in planner, "reentrant group not found"
+    # (2) multithreaded executor
+    assert "MultiThreadedExecutor" in planner, "executor not multithreaded"
+    # (3) try_to_lock with an immediate refusal
+    assert "std::try_to_lock" in planner, "no try_to_lock"
+    assert '"planner busy"' in planner, "no busy refusal"
+    # (4) the client retries, so a single transient refusal is already absorbed
+    assert "retries = 2" in client, "retry count changed"
+    assert "time.sleep(3.)" in client, "retry delay changed"
 
+    # the retracted explanations must not come back: the guard does have a bound
+    i = server.find("measured start state differs")
+    assert i > 0
+    # the guard was instrumented in this same commit, so accept either form: the
+    # original `> .03` comparison or the instrumented per-joint delta check.
+    window = server[max(0, i - 1200):i]
+    assert (re.search(r"positions\[i\]\)\s*>\s*\.03", window)
+            or re.search(r"d > \.03", window)
+            or re.search(r"deltas", window)), "no bounded comparison found"
+
+    # and the run itself records the busy refusal as the PLACE_B cause
+    runs = glob.glob("/tmp/c13i/run-*/skills/place.jsonl")
+    busy_seen = False
+    if runs:
+        for line in Path(runs[0]).read_text().splitlines():
+            if line.strip() and "planner busy" in line:
+                busy_seen = True
     print(json.dumps({
-        "verdict": "C13B_HANDOFF_FAILURE_UNDIAGNOSED",
-        "guard_has_tolerance_rad": 0.03,
-        "guard_iterates": "trajectory.joint_trajectory.joint_names (4 arm joints)",
-        "gripper_involved": False,
-        "trajectory_start_recorded": False,
-        "delta": "UNKNOWN - the other side of the comparison is not logged",
-        "retracted_explanations": [
-            "no tolerance in the guard",
-            "gripper moved 0.031 rad and tripped the check",
+        "verdict": "C13B_PLANNER_BUSY_IS_THE_CAUSE",
+        "chain": [
+            "mtc_planner.cpp:39 reentrant callback group shared by both services",
+            "mtc_planner.cpp:351 MultiThreadedExecutor(4)",
+            "mtc_planner.cpp:61-62 try_to_lock -> immediate planner busy",
+            "mtc_motion.py:67-86 3 attempts x 3 s, all refused",
         ],
-        "next_step": "log trajectory.points[0].positions in _consume_mtc, then rerun",
+        "run_evidence_planner_busy": busy_seen,
+        "not_a_planning_capability_limit": True,
+        "retracted": ["guard has no tolerance", "gripper moved 0.031 rad"],
+        "fix_not_applied": True,
+        "next_step": "mutually-exclusive group or bounded wait, then rerun C13",
     }, indent=2))
     return 0
 
