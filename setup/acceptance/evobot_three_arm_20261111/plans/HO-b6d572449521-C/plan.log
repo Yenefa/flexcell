@@ -1,0 +1,21 @@
+{
+  "moves": [
+    {
+      "object": "target_box_a",
+      "zone": "zone_1",
+      "why": "Right bin is zone_1 at negative y; place red block there first."
+    },
+    {
+      "object": "target_box_a",
+      "zone": "zone_2",
+      "why": "Move red block to the left bin, zone_2 at positive y, so it actually visits the left bin."
+    },
+    {
+      "object": "target_box_a",
+      "zone": "zone_1",
+      "why": "Return red block to the right bin as instructed."
+    }
+  ],
+  "confidence": "high",
+  "uncertainty": ""
+}

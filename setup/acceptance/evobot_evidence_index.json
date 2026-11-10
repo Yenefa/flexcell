@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 21,
-  "live": 14,
+  "batches": 22,
+  "live": 15,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -367,6 +367,22 @@
         "instances": 6,
         "independently_verified": 6,
         "self_assessments_recorded": 5,
+        "false_success_rate": 0.0
+      }
+    },
+    {
+      "batch": "evobot_three_arm_20261111",
+      "verified": "PASS",
+      "rung": "Plan-level three-arm comparison (NO robot run)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_THREE_ARM_PLANNING_COMPARISON_VERIFIED",
+        "instances": 16,
+        "A_prime_parsed": "0/16 (refuses unseen instructions)",
+        "B_plan_correct": "16/16",
+        "C_plan_correct": "16/16",
+        "C_vs_B": "identical",
+        "robot_run_this_round": false,
         "false_success_rate": 0.0
       }
     },

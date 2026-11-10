@@ -1,0 +1,38 @@
+{
+  "agent_plan": {
+    "moves": [
+      {
+        "object": "target_box_a",
+        "zone": "zone_1",
+        "why": "Put the red block in the right bin"
+      },
+      {
+        "object": "target_box_a",
+        "zone": "zone_2",
+        "why": "Move it to the left bin so it actually visits there"
+      },
+      {
+        "object": "target_box_a",
+        "zone": "zone_1",
+        "why": "Put the red block back in the right bin"
+      }
+    ],
+    "unmoved": [
+      "target_box_b"
+    ],
+    "confidence": "high",
+    "uncertainty": ""
+  },
+  "problems": [],
+  "raw_reply": "{\"moves\":[{\"object\":\"target_box_a\",\"zone\":\"zone_1\",\"why\":\"Put the red block in the right bin\"},{\"object\":\"target_box_a\",\"zone\":\"zone_2\",\"why\":\"Move it to the left bin so it actually visits there\"},{\"object\":\"target_box_a\",\"zone\":\"zone_1\",\"why\":\"Put the red block back in the right bin\"}],\"unmoved\":[\"target_box_b\"],\"confidence\":\"high\",\"uncertainty\":\"\"}",
+  "usage": {
+    "tokens": 935,
+    "seconds": 2.767,
+    "model": "deepseek-flash"
+  },
+  "requested_model": "deepseek-flash",
+  "base_url": "https://api.deepseek.com",
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "key_fingerprint": "2caaf9b9"
+}

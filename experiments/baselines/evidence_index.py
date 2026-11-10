@@ -56,6 +56,7 @@ RUNGS = {
     "evobot_pair16_drift_20261111": "Independently Verified (paired n=16, recovery 3/4)",
     "evobot_proposal_loop_20261111": "Implemented + Unit Tested (loop wired; Level 5 NOT achieved)",
     "evobot_lesson_routing_20261111": "Plan-level analysis (mechanism found; NO robot run; transfer NOT observed)",
+    "evobot_three_arm_20261111": "Plan-level three-arm comparison (NO robot run)",
 }
 
 

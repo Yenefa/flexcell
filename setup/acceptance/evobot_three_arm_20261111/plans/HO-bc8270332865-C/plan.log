@@ -1,0 +1,21 @@
+{
+  "moves": [
+    {
+      "object": "target_box_a",
+      "zone": "zone_1",
+      "why": "Put red block in the right bin (negative y)"
+    },
+    {
+      "object": "target_box_a",
+      "zone": "zone_2",
+      "why": "Move red block to the left bin (positive y) as required"
+    },
+    {
+      "object": "target_box_a",
+      "zone": "zone_1",
+      "why": "Return red block to the right bin"
+    }
+  ],
+  "confidence": "high",
+  "uncertainty": "Bin left/right mapping inferred from y-coordinates: zone_1 is right, zone_2 is left."
+}
