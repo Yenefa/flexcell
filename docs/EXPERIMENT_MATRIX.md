@@ -218,15 +218,16 @@ agent 在**定向成本**上耗尽预算，尚未进入 `run_execution`。
 离线路由测试 69 项**全部通过**（本轮实跑，RC=0）。
 **结论：Hybrid 可运行，但没有任何一个维度优于 FSM。**
 
-## Track C — C13 受约束世界 FSM/MTC 对照
+## Track C — C13 受约束世界 FSM/MTC 对照（**结论被自己推翻**）
 
-| 臂 | 状态 | 通过阶段 | 错误码 |
-| --- | --- | --- | --- |
-| legacy | ROBOT_FAILURE | `PICK_A:OK` | `ERR_SKILL_FAILED` |
-| **MTC** | ROBOT_FAILURE | `PICK_A:OK`、**`PLACE_A:OK`**、**`VERIFY_A:OK`** | `ERR_RECOVERY_EXHAUSTED` |
+| 顶板 | legacy | MTC |
+| --- | --- | --- |
+| 0.30×0.30 m（**我的 bug**，挡住 box B） | ROBOT_FAILURE @ `PLACE_A` | ROBOT_FAILURE @ `PICK_B` |
+| **0.12×0.12 m（公平）** | **PASS 6/6，29.6 s** | ROBOT_FAILURE @ `PLACE_B` |
 
-两臂 `world_sha256` 相同（`2ebf1148…c9aa90`）。**new scene 是增量改动**，
-默认世界哈希实测 `f78a469d…bb187` **未变**。
+**判定：`C13_NO_MTC_ADVANTAGE_REVERSES_THE_ARTEFACT`**
 
-**判定：`C13_MTC_REACHES_A_PLACE_PHASE_LEGACY_CANNOT`** — 部分能力差异，两臂均未完成；
-MTC 在 PICK_B 的失败疑为顶板尺寸挡住了 box B（场景设计缺陷，非 MTC 边界）。n=1/臂。
+第一次"看起来 MTC 更强"是**场景 bug**：两者都撞在同一块过大的板子上，只是 legacy 先撞。
+尺寸正确后方向反转：**legacy 完成，MTC 未完成**。
+
+**Track C 机制问题（MTC 是否有 FSM 缺失的能力）：本场景下答案为否定。** n=1/臂，单一场景。

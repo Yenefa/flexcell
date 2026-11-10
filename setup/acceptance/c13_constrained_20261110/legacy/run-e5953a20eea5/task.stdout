@@ -1,0 +1,26 @@
+SENDING action=demo object=target_box_a pose=[0.12, -0.15, 0.0175]
+GOAL_UUID 2b478c8875bb409888b209815ca39df3
+RESULT {
+  "action": "demo",
+  "goal_uuid": "2b478c8875bb409888b209815ca39df3",
+  "outcome": "OUTCOME_SUCCEEDED",
+  "outcome_val": 0,
+  "error_code": "ERR_NONE",
+  "detail": "task done: all assignments verified",
+  "evidence_id": "week1_demo_v1-8f32cb0f",
+  "wall_seconds": 29.616,
+  "fsm_trace": [
+    "PICK_A(attempt=1):OK",
+    "PLACE_A:OK",
+    "VERIFY_A(attempt=1):OK",
+    "PICK_B(attempt=1):OK",
+    "PLACE_B:OK",
+    "VERIFY_B(attempt=1):OK"
+  ],
+  "object_a_at_zone": true,
+  "object_b_at_zone": true,
+  "zone_a_error_m": 0.0022711688377529335,
+  "zone_b_error_m": 0.006108113996843364,
+  "run_id": "week1_demo_v1-77e8d45d",
+  "scenario_id": "week1_demo_v1"
+}

@@ -1,13 +1,13 @@
 {
   "schema_version": 1,
-  "status": "ROBOT_FAILURE",
+  "status": "PASS",
   "backend": "velocity_servo",
   "skill_backend": "legacy",
   "physical_tasks_dispatched": 1,
   "qualification": "FUNCTIONAL_SMOKE_ONLY",
   "case": "dual_object",
   "object": "target_box_a",
-  "out": "/tmp/c13-legacy/run-a915cba2c302",
+  "out": "/tmp/c13-legacy/run-e5953a20eea5",
   "decision_policy": "fsm",
   "hybrid_threshold": null,
   "resume_completed": false,
@@ -19,10 +19,10 @@
     "FLEXCELL_JEV_MODEL": null,
     "FLEXCELL_JEV_BACKEND": null
   },
-  "world_sha256": "2ebf1148b7f975569564661f6d78e5c007e75a4dcb52fc9b4c172d6981c9aa90",
+  "world_sha256": "5c03dcf5fb75bf5b7c48ce6cb294f53b4914383b8f6e71272d11bc10b90b1140",
   "semantic_config_sha256": "2e4906170d7755c6966d5dab71a5d101b3cf0fd0279ce22134e8e36be04f2bc1",
-  "runtime_fingerprint": "a4dddc8a1749ea6df4cd5fd6814770dec5d1a1880e67289c50c255f9deff633b",
-  "task_start_monotonic_ns": 25184262662743,
+  "runtime_fingerprint": "ff944ff86025a953cbd1444be2c8a5be09282255f792a2df33d740cd443da455",
+  "task_start_monotonic_ns": 25421101420667,
   "goal_pose": [
     0.12,
     -0.15,
@@ -30,34 +30,38 @@
   ],
   "zone_2_pose": null,
   "config_override": null,
-  "task_end_monotonic_ns": 25198054992505,
+  "task_end_monotonic_ns": 25451271298338,
   "task": {
     "action": "demo",
-    "goal_uuid": "830a723aca49495e8a106efb7be5999e",
-    "outcome": "OUTCOME_FAILED",
-    "outcome_val": 1,
-    "error_code": "ERR_SKILL_FAILED",
-    "detail": "policy abort (NON_RECOVERABLE): place failed (ERR_PLACE_FAILED, carried box is not retried) (trace=PICK_A(attempt=1):OK,PLACE_A:FAIL); previous_skill=PLACE cause=ERR_PLACE_FAILED legacy_error_code=25",
-    "evidence_id": "week1_demo_v1-df8dfa24",
-    "wall_seconds": 13.14,
+    "goal_uuid": "2b478c8875bb409888b209815ca39df3",
+    "outcome": "OUTCOME_SUCCEEDED",
+    "outcome_val": 0,
+    "error_code": "ERR_NONE",
+    "detail": "task done: all assignments verified",
+    "evidence_id": "week1_demo_v1-8f32cb0f",
+    "wall_seconds": 29.616,
     "fsm_trace": [
       "PICK_A(attempt=1):OK",
-      "PLACE_A:FAIL"
+      "PLACE_A:OK",
+      "VERIFY_A(attempt=1):OK",
+      "PICK_B(attempt=1):OK",
+      "PLACE_B:OK",
+      "VERIFY_B(attempt=1):OK"
     ],
-    "object_a_at_zone": false,
-    "object_b_at_zone": false,
-    "zone_a_error_m": null,
-    "zone_b_error_m": null,
-    "run_id": "week1_demo_v1-c1c1dd10",
+    "object_a_at_zone": true,
+    "object_b_at_zone": true,
+    "zone_a_error_m": 0.0022711688377529335,
+    "zone_b_error_m": 0.006108113996843364,
+    "run_id": "week1_demo_v1-77e8d45d",
     "scenario_id": "week1_demo_v1"
   },
   "actual_routing": {
-    "decisions": 4,
+    "decisions": 8,
     "sources": {
-      "fsm": 4
+      "fsm": 8
     },
     "leaves": {
-      "fsm": 4
+      "fsm": 8
     },
     "fallbacks": 0,
     "models": [],
@@ -70,11 +74,8 @@
   "model_calls": 0,
   "fast_calls": 0,
   "slow_calls": 0,
-  "error": "typed task failure retained; no replacement task",
+  "expectation_met": true,
   "recorder_exit": 0,
   "owned_launch_exit": 0,
-  "unavailable_numeric_fields": {
-    "task.zone_a_error_m": "nan",
-    "task.zone_b_error_m": "nan"
-  }
+  "unavailable_numeric_fields": {}
 }

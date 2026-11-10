@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
-"""C13: under one constrained world, does MTC reach a phase the legacy stack cannot?
+"""C13: does MTC show a planning capability the legacy dispatch path lacks?
 
-Both arms ran the SAME generated world (identical sha256), same case (dual_object),
-same backend, decision policy fsm; only skill_backend differs. So any difference in
-how far the task gets is attributable to the planner, not to the scene.
+THIS RECORD CONTAINS A REVERSAL, and the verifier enforces both halves so neither
+can be quoted alone:
 
-The honest verdict is deliberately narrow: MTC is NOT shown to solve the scene.
-It is shown to complete one object where legacy fails at the first place, and then
-to fail on the second pick - the ceiling was sized for box A and obstructs box B.
+  plate 0.30 m (too wide, obstructed box B):
+      legacy stops at PLACE_A;  MTC reaches PLACE_A + VERIFY_A
+  plate 0.12 m (covers box A only, fair):
+      legacy PASSES the whole task;  MTC fails at PLACE_B
+
+The first result was an artefact of my own scene bug. The fair scene reverses it.
+So the answer to the mechanism question here is NEGATIVE for MTC: on the one
+properly sized constrained scene, the legacy stack completes and MTC does not.
 """
 import glob
-import hashlib
 import json
 import sys
 from pathlib import Path
@@ -27,33 +30,39 @@ def load(arm):
 
 
 def main():
-    legacy, mtc = load("legacy"), load("mtc")
-    # the whole point only holds if both arms saw the SAME obstacle layout
-    assert legacy["world"] == mtc["world"], (legacy["world"], mtc["world"])
-    assert legacy["world"], "world hash missing"
-    # neither arm is allowed to have succeeded - this is not a capability win
-    assert legacy["status"] != "PASS" and mtc["status"] != "PASS"
-    # legacy cannot place the first object at all
-    assert legacy["trace"] == ["PICK_A(attempt=1):OK", "PLACE_A:FAIL"], legacy["trace"]
-    assert legacy["error_code"] == "ERR_SKILL_FAILED"
-    # MTC places and verifies the first object, then dies on the second pick
-    assert mtc["trace"][:3] == ["PICK_A(attempt=1):OK", "PLACE_A:OK",
-                                "VERIFY_A(attempt=1):OK"], mtc["trace"]
-    assert any("PICK_B" in s and "FAIL" in s for s in mtc["trace"]), mtc["trace"]
-    # so the phases reached differ, and the difference is exactly the place/verify
-    # pair that legacy never gets to
-    legacy_ok = [s for s in legacy["trace"] if s.endswith(":OK")]
-    mtc_ok = [s for s in mtc["trace"] if s.endswith(":OK")]
-    assert len(mtc_ok) > len(legacy_ok)
+    fair_l, fair_m = load("legacy"), load("mtc")
+    wide_l, wide_m = load("plate030-legacy"), load("plate030-mtc")
+    # each pair really ran the same world
+    assert fair_l["world"] == fair_m["world"], (fair_l["world"], fair_m["world"])
+    assert wide_l["world"] == wide_m["world"], (wide_l["world"], wide_m["world"])
+    # the two plate sizes are genuinely different worlds
+    assert fair_l["world"] != wide_l["world"], "plate change did not change the world"
+
+    # --- wide plate: the artefact ---
+    assert wide_l["trace"] == ["PICK_A(attempt=1):OK", "PLACE_A:FAIL"], wide_l["trace"]
+    assert wide_m["trace"][:3] == ["PICK_A(attempt=1):OK", "PLACE_A:OK",
+                                   "VERIFY_A(attempt=1):OK"], wide_m["trace"]
+    assert wide_l["status"] != "PASS" and wide_m["status"] != "PASS"
+
+    # --- fair plate: the reversal ---
+    assert fair_l["status"] == "PASS", fair_l["status"]
+    assert len(fair_l["trace"]) == 6 and all(s.endswith(":OK") for s in fair_l["trace"]), \
+        fair_l["trace"]
+    assert fair_m["status"] != "PASS", fair_m["status"]
+    assert fair_m["trace"][-1] == "PLACE_B:FAIL", fair_m["trace"]
+
     print(json.dumps({
-        "verdict": "C13_MTC_REACHES_A_PLACE_PHASE_LEGACY_CANNOT",
-        "same_world": legacy["world"],
-        "legacy": {"status": legacy["status"], "error": legacy["error_code"],
-                   "phases_ok": legacy_ok},
-        "mtc": {"status": mtc["status"], "error": mtc["error_code"],
-                "phases_ok": mtc_ok},
-        "neither_completed": True,
-        "scene_limitation": "ceiling sized for box A also obstructs box B",
+        "verdict": "C13_NO_MTC_ADVANTAGE_REVERSES_THE_ARTEFACT",
+        "wide_plate_0_30m": {
+            "legacy": wide_l["status"], "mtc": wide_m["status"],
+            "note": "plate obstructed box B; MTC looked further ahead only because "
+                    "legacy died earlier on the same obstruction",
+        },
+        "fair_plate_0_12m": {
+            "legacy": fair_l["status"], "mtc": fair_m["status"],
+            "legacy_phases": fair_l["trace"], "mtc_phases": fair_m["trace"],
+        },
+        "mechanism_question": "MTC does NOT show a capability FSM lacks here",
         "n_per_arm": 1,
     }, indent=2))
     return 0

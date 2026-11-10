@@ -177,11 +177,14 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
         col = ET.SubElement(link, "collision", name="col")
         geom = ET.SubElement(col, "geometry")
         box = ET.SubElement(geom, "box")
-        ET.SubElement(box, "size").text = "0.30 0.30 0.010"
+        # Sized to cover box A only. A 0.30 m plate also obstructed target_box_b,
+        # which made the first C13 run unattributable on the second object - the
+        # PICK_B failure was my scene bug, not the planner's limit.
+        ET.SubElement(box, "size").text = "0.12 0.12 0.010"
         vis = ET.SubElement(link, "visual", name="vis")
         vgeom = ET.SubElement(vis, "geometry")
         vbox = ET.SubElement(vgeom, "box")
-        ET.SubElement(vbox, "size").text = "0.30 0.30 0.010"
+        ET.SubElement(vbox, "size").text = "0.12 0.12 0.010"
     if physics_step_s is not None:
         if backend != 'detachable_joint' or physics_step_s != .002:
             raise ValueError('only the declared 2 ms joint qualification step is supported')
