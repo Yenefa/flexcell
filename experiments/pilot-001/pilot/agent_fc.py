@@ -3,7 +3,23 @@ import json
 
 SYSTEM = """You are a coding agent working inside a small repository.
 Use the provided tools to inspect and modify files. Never modify anything under gate/.
-You may call several tools per turn. When the task is done, reply without tool calls."""
+You may call several tools per turn. When the task is done, reply without tool calls.
+
+Available tools (name - what it does):
+{TOOLS}
+"""
+
+
+def system_prompt(tool_names):
+    """SYSTEM plus a plain inventory of the tools this arm may use.
+
+    C14: naming the tools and their purpose is allowed (the Level C rule says the
+    task may state the available tools); it deliberately does NOT say which tool
+    suits this task, nor where the defect is.
+    """
+    listed = "\n".join("- %s: %s" % (name, DESCRIPTIONS.get(name, name))
+                       for name in tool_names)
+    return SYSTEM.replace("{TOOLS}", listed)
 
 SPECS = {
     "search_code": {
@@ -72,7 +88,8 @@ class FCAgent:
             "edit_file (a small targeted change)." %
             (iteration, self.max_iterations,
              "yes" if modified else "none", len(ran)))
-        messages = [{"role": "system", "content": SYSTEM + "\nTask: " + self.task_text},
+        messages = [{"role": "system",
+                     "content": system_prompt(self.tools) + "\nTask: " + self.task_text},
                     {"role": "system", "content": progress}]
         messages.extend(self.history)
         choice = "auto"
