@@ -17,6 +17,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 ACCEPTANCE = ROOT / "setup" / "acceptance"
+HELD_OUT_BASELINE = ROOT / "setup" / "acceptance" / "evobot_heldout_n6_20261111" / "runs"
 PROTECTED = ["benchmark/evaluators/", "benchmark/schemas/",
              "benchmark/tests/test_benchmark_skeleton.py",
              "docs/EVALUATION_METRICS.md", "/etc/evobot/sealed/"]
@@ -25,6 +26,30 @@ PROTECTED = ["benchmark/evaluators/", "benchmark/schemas/",
 def is_protected(path):
     norm = str(path).replace("\\", "/")
     return any(p.replace("\\", "/") in norm for p in PROTECTED)
+
+
+def held_out_baseline_intact():
+    """Every held-out run that passed must still have a passing verdict on disk.
+
+    This guards the frozen generalisation result. A proposal that rewrites or deletes
+    those verdicts is refused: the only way a baseline may change is a new, recorded
+    experiment, never an edit to the old evidence.
+    """
+    # A MISSING baseline is a FAILURE, not a pass. An earlier version returned
+    # "no baseline recorded yet" and let a proposal through, which means deleting the
+    # evidence would have been a way around the gate. The baseline is committed to the
+    # repository, so its absence means the evidence was removed.
+    if not HELD_OUT_BASELINE.exists():
+        return False, "held-out baseline evidence is missing from the repository"
+    n = 0
+    for v in HELD_OUT_BASELINE.glob("*/verdict.json"):
+        try:
+            doc = json.loads(v.read_text(encoding="utf-8"))
+        except Exception:
+            return False, "held-out verdict unreadable: " + v.parent.name
+        if doc.get("passed") is True:
+            n += 1
+    return True, "held-out baseline intact (%d passing verdicts)" % n
 
 
 def gate(proposal, run_regressions=True):
@@ -41,6 +66,9 @@ def gate(proposal, run_regressions=True):
         return False, "proposal states no falsifiable expected effect"
     if not proposal.get("rollback"):
         return False, "proposal states no rollback"
+    ok_baseline, why_baseline = held_out_baseline_intact()
+    if not ok_baseline:
+        return False, why_baseline
     digest = hashlib.sha256(json.dumps(proposal, sort_keys=True).encode()).hexdigest()[:12]
     if not run_regressions:
         return True, "structure accepted (regressions skipped by caller), id=" + digest

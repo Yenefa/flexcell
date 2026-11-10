@@ -1,0 +1,48 @@
+{
+  "evaluator_version": "0.1.0",
+  "task_id": "HO-38e7aabc1d67",
+  "template_id": "T04_duplicates",
+  "passed": true,
+  "clauses": [
+    {
+      "clause": "placement:target_box_a",
+      "ok": true,
+      "evidence": {
+        "zone": "zone_2",
+        "distance_m": 0.00447,
+        "radius_m": 0.06,
+        "inside_zone": true,
+        "height_error_m": 0.0,
+        "resting": true,
+        "final_pose": [
+          0.24991,
+          0.05447,
+          0.0175,
+          0.0
+        ]
+      }
+    },
+    {
+      "clause": "placement:target_box_b",
+      "ok": true,
+      "evidence": {
+        "zone": "zone_1",
+        "distance_m": 0.01002,
+        "radius_m": 0.06,
+        "inside_zone": true,
+        "height_error_m": 0.0,
+        "resting": true,
+        "final_pose": [
+          0.12995,
+          -0.15113,
+          0.0175,
+          0.0
+        ]
+      }
+    }
+  ],
+  "failed_clauses": [],
+  "agent_claimed_success": false,
+  "false_success": false,
+  "false_failure": true
+}

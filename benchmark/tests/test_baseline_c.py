@@ -83,6 +83,27 @@ def test_diagnosis_uses_measured_evidence_not_a_story():
     assert diag.classify({})[0] == "UNKNOWN"
 
 
+def test_held_out_baseline_guard_reports_intact():
+    ok, why = regress.held_out_baseline_intact()
+    assert ok is True, why
+    assert "held-out" in why
+
+
+def test_deleting_the_held_out_baseline_is_refused(monkeypatch, tmp_path):
+    """Regression: a missing baseline used to pass the guard, which made evidence
+    deletion a way around the gate."""
+    monkeypatch.setattr(regress, "HELD_OUT_BASELINE", tmp_path / "gone")
+    ok, why = regress.held_out_baseline_intact()
+    assert ok is False
+    assert "missing" in why
+    accepted, reason = regress.gate(
+        {"files": ["runtime/planner/agent_planner.py"], "evidence": {"e": 1},
+         "expected_effect": "x", "rollback": "revert"}, run_regressions=False)
+    assert accepted is False
+    assert "missing" in reason
+
+
+
 def test_regression_gate_refuses_protected_paths():
     for f in ["benchmark/evaluators/evaluate.py",
               "benchmark/schemas/taskspec.schema.json",
