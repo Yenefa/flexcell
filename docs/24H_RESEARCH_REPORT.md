@@ -161,7 +161,7 @@ Level C（无文件名、无行号、无修复方向，由失败证据自带定�
 
 **三条主线都没有"没做"**：A 有结论，B 有审计结论，**C 有明确的否定性结论**（并附带一次自我更正）。
 
-## 6. 本地提交（**42 个，已推送到 origin 分支，未合并**）
+## 6. 本地提交（**49 个，已推送到 origin 分支，未合并**）
 
 分支 `autonomous/flexcell-remediation`，基线 `ebe27f07881200ab0fc74dfaa5490208023bf9d9`。
 **远端可见**（按用户要求推送，未合并、未开 PR）：
@@ -213,6 +213,13 @@ Level C（无文件名、无行号、无修复方向，由失败证据自带定�
 | `c7dd831` | docs: record the measured token total instead of an estimate carried over from earlier |
 | `4c81581` | research(track-c): unblock the mechanism experiment with an additive scene, and get the first real FSM/MTC difference |
 | `1bb8cb5` | research(track-c): shrinking my own over-sized plate reverses the result - MTC is worse, not better |
+| `2db1c21` | docs: record the third self-correction and refresh the commit table from git |
+| `2e40bec` | research(track-c): the control I was missing - MTC passes the default world, so the constrained scene really does separate them, and the separation goes against MTC |
+| `323cb7f` | correct(track-c): the "missing tolerance" defect I reported does not exist - I misread a line my own terminal had truncated |
+| `143e627` | research(track-c): the MTC handoff failure is UNDIAGNOSED, and I published two wrong causes for it before admitting that |
+| `0c5f581` | fix(diagnostics): log both sides of the MTC start-state guard, and the real cause turns out to be the planner refusing concurrent work |
+| `51ec7ed` | fix(mtc): wait briefly for the planner instead of dropping the caller, and MTC now places the object before failing on the retreat |
+| `4075e02` | research(track-c): the retreat fails because three stages are planned as one batch, and why I did not just widen the tolerance |
 
 > 本表由 `git log origin/main..HEAD` 生成，非手工抄写。
 
@@ -414,7 +421,7 @@ agent 修复时**自己写了注释**，指出"用固定对象会让第二个对
 每个证据目录都带独立 `verify.py`，**不依赖本报告的叙述**。一条命令跑完全部：
 
 ```bash
-bash ci-public-window/scripts/verify_all.sh
+bash ci-public-window/scripts/verify_all2.sh  # 15 个 verifier
 ```
 
 | 证据目录 | verdict | rc |
@@ -429,6 +436,11 @@ bash ci-public-window/scripts/verify_all.sh
 | `p2_reuse_20261110`（旧） | `P2_OLD_RUN_VOID_NO_ARTEFACTS_AND_BUDGET_TRUNCATED` | 0 |
 | `w5_e2_flash_20261110` | `E2_FLASH_REPRODUCED` | 0 |
 | `p0a_quarantine_20261110` | `P0A_QUARANTINE_ENGAGED_AND_CLEARED` | 0 |
+| `p2_agent_authored_20261110` | `P2_AGENT_DID_NOT_AUTHOR_ITS_OWN_EXPERIENCE` | 0 |
+| `c13_constrained_20261110` | `C13_NO_MTC_ADVANTAGE_...` | 0 |
+| `c13_handoff_rootcause_20261110` | `C13B_ADMISSION_DEFECT_DOCUMENTED_AND_FIXED` | 0 |
+| `c13c_admission_20261110` | `C13C_ADMISSION_FIXED_..._FAILS_ON_RETREAT` | 0 |
+| `c13d_retreat_rootcause_20261110` | `C13D_RETREAT_BATCH_PLANNING_PREDICTION_GAP` | 0 |
 
 **注意最后两行**：旧 P2 目录的 verifier **断言它是无效的**，而不是假装它有结论——
 这样任何人都不能把作废的运行当成证据。
@@ -697,3 +709,55 @@ planned, message = mtc.prepare('PLACE', goal.object_name, planning_object,
 **不能说 MTC 有优势**（它没跑完，legacy 跑完了 6/6）。
 **但"MTC 做不到受约束场景"已经不成立**——它完成了抓取、搬运、放置，
 只差最后一步撤回，而那是**架构级容差问题**，不是规划能力问题。
+
+---
+
+## 19. 收口状态（2026-11-10 20:45）
+
+### 全量回归（改动后复测）
+| 项 | 结果 |
+| --- | --- |
+| 全仓离线套件 | **RC=0，0 failed** |
+| Gazebo `normal` | **PASS** 14.0 s |
+| Gazebo `dual_object` | **PASS** 28.9 s |
+| Gazebo `regrasp` | **PASS** 14.3 s |
+| **15 个独立 verifier** | **全部 rc=0** |
+| 默认世界哈希 | `f78a469d…bb187` **未变** |
+| 工作区 | **干净** |
+
+### 本轮修复的真实缺陷（都有对照验证）
+| 缺陷 | 状态 |
+| --- | --- |
+| planner 并发准入静默拒绝 | **已修复**（`try_to_lock` → `try_lock_for(10s)`），MTC 从 0 次成功规划变为 11/12 |
+| 工具链 6 项（root cause 等） | 已修复 |
+| 13/14 整改项 | DONE |
+
+### 已定位但**未修**的缺陷（需预注册）
+| 缺陷 | 原因 |
+| --- | --- |
+| 批量规划阶段间起点偏差 | `place_server.py:309` 一次规划 `[hover, descend, retreat]`，第 3 阶段起点是第 2 阶段的**预测**终点 |
+| 真机安全链 | 无硬件，P0-C **BLOCKED** |
+
+### 我拒绝做的事
+- **没有调大 0.03 rad 容差**去让 MTC 通过（`c13d/verify.py` 断言容差仍是 0.03，谁调大谁失败）；
+- **没有修改** `gate/acceptance.py`、测试断言或成功阈值；
+- **没有**把 NOT_RUN 写成 PASS。
+
+### 本轮我犯并公开更正的 6 个错误
+| # | 错误 | 更正 |
+| --- | --- | --- |
+| 1 | Level C 失败归因为"能力边界" | 实为 40k 预算截断 |
+| 2 | 同上（第二次） | P3 实验推翻 |
+| 3 | P2 第 1 次"agent 不愿写" | harness 在 PASS 后立即 break |
+| 4 | C13"MTC 更强" | 顶板太大挡住 box B |
+| 5 | "guard 没有容差" | 代码是 `> .03`，读取时截断显示 |
+| 6 | "夹爪差 0.031 触发" | 只比较 4 个手臂关节，且比错了对象 |
+
+**共同模式：在把证据看全之前下结论。** 第 4-6 次之后新增规则：
+先加日志取真实数据，再解释原因。这条规则让 C13c/C13d 的根因在**一次运行**内定位。
+
+### 待人工批准（4 项）
+1. **合并 / 开 PR**（分支已推送可见，未合并）；
+2. 按方案 (b) 修批量阶段起点比对；
+3. canonical 错误码写入 Action 契约；
+4. 真机安全链（需硬件）。

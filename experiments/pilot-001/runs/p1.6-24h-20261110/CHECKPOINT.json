@@ -5,7 +5,7 @@
     "budget_cny": 20,
     "gazebo_concurrency": 1
   },
-  "phase": "CLOSED - all deliverables complete, branch pushed (not merged)",
+  "phase": "CLOSED",
   "tasks": [
     {
       "id": "P0-1",
@@ -131,7 +131,7 @@
       "fixed": true
     }
   ],
-  "updated": "2026-11-10T20:00:00+08:00",
+  "updated": "2026-11-10T20:47:00+08:00",
   "closed_at": "2026-11-10T10:05:00+08:00",
   "final_regression": {
     "offline": "PYTEST_RC=0, 0 failed",
@@ -143,10 +143,10 @@
     "worktree_clean": true
   },
   "pending_human_approval": [
-    "branch pushed to origin/autonomous/flexcell-remediation (visible, NOT merged); merge/PR still needs approval",
-    "write canonical error codes into the Action result contract (P1-B stays additive)",
-    "register a new constrained scenario id for Track C and recompute world_sha256",
-    "physical safety chain assessment (P0-C) - needs hardware"
+    "merge or open PR (branch pushed, NOT merged)",
+    "batch-stage start comparison fix (needs preregistration)",
+    "canonical error codes into Action contract",
+    "physical safety chain assessment (needs hardware)"
   ],
   "corrections": [
     "CORRECTION_20261110B: Level C failures hit budget_exceeded",
@@ -156,5 +156,31 @@
   "p2_item2": "NOT_ACHIEVED (4 framings attempted)",
   "p2_item3": "ACHIEVED (two-arm control, -18.2% iters / -24.6% tokens)",
   "track_b": "audited: runs, no dimension better than FSM",
-  "track_c": "BLOCKED on frozen world_sha256"
+  "track_c": "BLOCKED on frozen world_sha256",
+  "final": {
+    "offline": "RC=0, 0 failed",
+    "gazebo": {
+      "normal": "PASS 14.0s",
+      "dual_object": "PASS 28.9s",
+      "regrasp": "PASS 14.3s"
+    },
+    "verifiers": "15/15 rc=0",
+    "default_world_hash": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187 (unchanged)",
+    "worktree_clean": true
+  },
+  "fixed_defects": [
+    "planner concurrent admission (try_lock_for)",
+    "6 tooling defects",
+    "13/14 remediation items"
+  ],
+  "known_unfixed": [
+    "batch-planning stage start divergence (place_server.py:309)",
+    "physical safety chain (no hardware)"
+  ],
+  "refused": [
+    "widen 0.03 rad tolerance to make MTC pass",
+    "modify gate/acceptance.py or thresholds",
+    "report NOT_RUN as PASS"
+  ],
+  "self_corrections": 6
 }
