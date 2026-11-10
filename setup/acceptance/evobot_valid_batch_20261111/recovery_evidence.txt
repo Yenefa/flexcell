@@ -1,0 +1,23 @@
+=== recovery evidence (the point of this batch) ===
+--- HO-47afdffad81a
+{
+ "action": "resume",
+ "failure_class": "grasp",
+ "measured_reason": "native place stage failed: ['PICK_A(attempt=1):OK', 'PLACE_A:FAIL']",
+ "attempt": 1,
+ "budget": 1,
+ "committed_stages": [
+  "target_box_b-0",
+  "target_box_b-1"
+ ],
+ "why": "stages already committed; replay would contradict the measured world state. A resumable plan is needed and is not implemented."
+}
+--- HO-5a96f3eb4fae
+{
+ "action": "resume",
+ "failure_class": "grasp",
+ "measured_reason": "native place stage failed: ['PICK_A(attempt=1):OK', 'PLACE_A:FAIL']",
+ "attempt": 1,
+ "budget": 1,
+ "why": "measured state no longer matches the declared plan"
+}

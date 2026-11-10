@@ -1,0 +1,11 @@
+{
+  "runs": 16,
+  "b_failed": 2,
+  "recovery_ran": 2,
+  "claims": 16,
+  "retried": 2
+}
+
+Batch structure OK: every failed first attempt has a recorded recovery decision,
+every run carries a measured claim, and the retry mechanism demonstrably fired.
+rc=0

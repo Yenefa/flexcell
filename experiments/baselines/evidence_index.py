@@ -68,6 +68,7 @@ RUNGS = {
     "evobot_native_honesty_20261111": "Independently Verified (fresh seeds; claims measured at run time; false success 0/16)",
     "evobot_batch_validity_20261111": "Retraction + validator (a batch must prove its steps ran; R arm was inert)",
     "evobot_unified_runner_20261111": "Infrastructure (4 runners merged into 1; absolute paths; smoke-tested end to end)",
+    "evobot_valid_batch_20261111": "Simulation Tested (FIRST structurally valid batch: recovery fired 2x, gained 2 lost 0, false success 0/16)",
 }
 
 

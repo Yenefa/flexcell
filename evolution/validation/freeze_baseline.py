@@ -113,6 +113,19 @@ def freeze(force=False):
             "self_assessment_accuracy": "28/32 = 87.5%",
             "mission_requirement": "False Success Rate MUST be 0 -> MET on n=32, but a zero alone is gameable, so accuracy is reported with it",
         },
+        "first_valid_batch": {
+            "batch": "evobot_valid_batch_20261111 (16 instances, seeds 7500/7600)",
+            "why_valid": ("validate_batch.py rc=0: 2 failed first attempts, 2 recovery "
+                          "decisions, 2 retries, 16/16 claims measured"),
+            "arm_B": "14/16 = 87.5% (64.0-96.5%)",
+            "arm_R": "16/16 = 100% (80.6-100%)",
+            "paired": "gained 2, lost 0",
+            "false_success": "0/16",
+            "false_failure": "1/16",
+            "assess_accuracy": "15/16 = 93.8% (71.7-98.9%)",
+            "do_not_overclaim": ("only 2 instances exercised recovery, so R=16/16 is NOT "
+                                 "a 100% claim and does not measure recovery efficacy"),
+        },
         "invalid_results_retracted": {
             "pair48_arm_R": "INERT - recovery never ran (cwd trap); B and R identical on 16/16",
             "pair48_three_failures": "TRANSIENT - 0/3 reproduced on re-run with the same plan",

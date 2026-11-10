@@ -1,0 +1,39 @@
+{
+  "runs": 16,
+  "b_failed": 2,
+  "recovery_ran": 2,
+  "claims": 16,
+  "retried": 2
+}
+
+Batch structure OK: every failed first attempt has a recorded recovery decision,
+every run carries a measured claim, and the retry mechanism demonstrably fired.
+
+run                  B      R      claim    retry   flags
+HO-198a4b2688d0      True   True   True     False   
+HO-38ce6531a597      True   True   True     False   
+HO-3a19766a4104      True   True   True     False   
+HO-3bfb9643b7b6      True   True   False    False   false_failure
+HO-4499501c2043      True   True   True     False   
+HO-47afdffad81a      False  True   True     True    
+HO-4f197a0997af      True   True   True     False   
+HO-5a96f3eb4fae      False  True   True     True    
+HO-5d21b382e781      True   True   True     False   
+HO-68f800add5fc      True   True   True     False   
+HO-72553754ef3a      True   True   True     False   
+HO-78b746f47443      True   True   True     False   
+HO-b7bd62621f05      True   True   True     False   
+HO-de2741728c69      True   True   True     False   
+HO-e2580e718ecd      True   True   True     False   
+HO-fb31a8cd4a66      True   True   True     False   
+
+instances        : 16
+arm B (first try): 14/16 = 87.5% (64.0-96.5%)
+arm R (final)    : 16/16 = 100.0% (80.6-100.0%)
+paired           : gained 2 ['HO-47afdffad81a', 'HO-5a96f3eb4fae'] | lost 0 
+retries issued   : 2
+
+FALSE SUCCESS     0/16 =   0.0% (0.0-19.4%)
+FALSE FAILURE     1/16 =   6.2% (1.1-28.3%)
+ASSESS ACCURACY  15/16 =  93.8% (71.7-98.9%)
+

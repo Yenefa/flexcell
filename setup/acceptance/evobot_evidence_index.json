@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 33,
-  "live": 26,
+  "batches": 34,
+  "live": 27,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -122,7 +122,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 25,
+        "live_batches": 27,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",
@@ -592,6 +592,26 @@
         "clean_pass": "3/6",
         "false_success_rate": 0.0,
         "bottleneck": "execution, not planning"
+      }
+    },
+    {
+      "batch": "evobot_valid_batch_20261111",
+      "verified": "PASS",
+      "rung": "Simulation Tested (FIRST structurally valid batch: recovery fired 2x, gained 2 lost 0, false success 0/16)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_FIRST_VALID_BATCH",
+        "batch_validation": "rc=0 (structure proven, not assumed)",
+        "instances": 16,
+        "arm_B": "14/16 = 87.5% (64.0-96.5%)",
+        "arm_R": "16/16 = 100% (80.6-100%)",
+        "paired": "gained 2, lost 0",
+        "retries_demonstrably_fired": 2,
+        "claims_measured": "16/16",
+        "false_success": "0/16",
+        "false_failure": "1/16",
+        "caveat": "only 2 instances exercised recovery; R=16/16 is not a 100% claim",
+        "evaluator_touched": false
       }
     }
   ]
