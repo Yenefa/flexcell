@@ -1,0 +1,32 @@
+run                  B      R      claimed claim_src flags
+HO-198a4b2688d0      True   True   True    measured  
+HO-38ce6531a597      False  False  False   measured  
+HO-3a19766a4104      True   True   True    measured  
+HO-3bfb9643b7b6      True   True   False   measured  false_failure
+HO-4499501c2043      True   True   True    measured  
+HO-47afdffad81a      True   True   True    measured  
+HO-4f197a0997af      False  False  False   measured  
+HO-5a96f3eb4fae      True   True   True    measured  
+HO-5d21b382e781      True   True   True    measured  
+HO-68f800add5fc      True   True   True    measured  
+HO-72553754ef3a      False  False  False   measured  
+HO-78b746f47443      True   True   False   measured  false_failure
+HO-b7bd62621f05      True   True   True    measured  
+HO-de2741728c69      True   True   True    measured  
+HO-e2580e718ecd      True   True   True    measured  
+HO-fb31a8cd4a66      True   True   True    measured  
+
+instances                 : 16
+no verdict                : 0
+B pass (first try)        : 13/16
+R pass (final)            : 13/16
+paired gained/lost        : 0/0
+claims measured           : 16/16 (0 absent)
+agent CLAIMED success     : 11/16
+
+FALSE SUCCESS           0/16 =   0.0% (0.0-19.4%)
+FALSE FAILURE           2/16 =  12.5% (3.5-36.0%)
+SELF-ASSESS ACCURACY   14/16 =  87.5% (64.0-96.5%)
+
+NATIVE means the claim existed at grading time. A missing claim shows as
+absent and is NOT counted as a failure claim.

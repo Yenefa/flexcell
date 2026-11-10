@@ -1,0 +1,38 @@
+{
+  "agent_plan": {
+    "moves": [
+      {
+        "object": "target_box_a",
+        "zone": "zone_1",
+        "why": "right bin is zone_1 at negative y"
+      },
+      {
+        "object": "target_box_a",
+        "zone": "zone_2",
+        "why": "left bin is zone_2 at positive y"
+      },
+      {
+        "object": "target_box_a",
+        "zone": "zone_1",
+        "why": "return red block to right bin"
+      }
+    ],
+    "unmoved": [
+      "target_box_b"
+    ],
+    "confidence": "high",
+    "uncertainty": ""
+  },
+  "problems": [],
+  "raw_reply": "{\"moves\":[{\"object\":\"target_box_a\",\"zone\":\"zone_1\",\"why\":\"right bin is zone_1 at negative y\"},{\"object\":\"target_box_a\",\"zone\":\"zone_2\",\"why\":\"left bin is zone_2 at positive y\"},{\"object\":\"target_box_a\",\"zone\":\"zone_1\",\"why\":\"return red block to right bin\"}],\"unmoved\":[\"target_box_b\"],\"confidence\":\"high\",\"uncertainty\":\"\"}",
+  "usage": {
+    "tokens": 966,
+    "seconds": 2.906,
+    "model": "deepseek-flash"
+  },
+  "requested_model": "deepseek-flash",
+  "base_url": "https://api.deepseek.com",
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "key_fingerprint": "2caaf9b9"
+}

@@ -1,0 +1,48 @@
+{
+  "evaluator_version": "0.1.0",
+  "task_id": "HO-5d21b382e781",
+  "template_id": "T13_geometric_conditional",
+  "passed": true,
+  "clauses": [
+    {
+      "clause": "placement:target_box_a",
+      "ok": true,
+      "evidence": {
+        "zone": "zone_1",
+        "distance_m": 0.04804,
+        "radius_m": 0.06,
+        "inside_zone": true,
+        "height_error_m": 0.0,
+        "resting": true,
+        "final_pose": [
+          0.07196,
+          -0.15003,
+          0.0175,
+          0.0
+        ]
+      }
+    },
+    {
+      "clause": "placement:target_box_b",
+      "ok": true,
+      "evidence": {
+        "zone": "zone_1",
+        "distance_m": 0.05438,
+        "radius_m": 0.06,
+        "inside_zone": true,
+        "height_error_m": 0.0,
+        "resting": true,
+        "final_pose": [
+          0.17407,
+          -0.14421,
+          0.0175,
+          0.0
+        ]
+      }
+    }
+  ],
+  "failed_clauses": [],
+  "agent_claimed_success": true,
+  "false_success": false,
+  "false_failure": false
+}

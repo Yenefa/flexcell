@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp/runtime/verifier/self_assess.py", line 133, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp/runtime/verifier/self_assess.py", line 122, in main
+    verdict = parse(raw)
+              ^^^^^^^^^^
+  File "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp/runtime/verifier/self_assess.py", line 93, in parse
+    raise ValueError("no JSON in reply")
+ValueError: no JSON in reply

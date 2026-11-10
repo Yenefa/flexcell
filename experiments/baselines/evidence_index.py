@@ -65,6 +65,7 @@ RUNGS = {
     "evobot_honesty_retraction_20261111": "Retraction (false-success zero was vacuous; measured 1/32)",
     "evobot_assess_v4_20261111": "Honesty fix verified (false success 0/32 with 87.5% accuracy; 4 prompt versions compared)",
     "evobot_freeze_change_20261111": "Formal change to a pinned file (claim plumbing; grading proven unchanged)",
+    "evobot_native_honesty_20261111": "Independently Verified (fresh seeds; claims measured at run time; false success 0/16)",
 }
 
 
