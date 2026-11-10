@@ -260,3 +260,18 @@ differs from planned trajectory`。
 
 剩余失败：撤回轨迹起点 `joint3=0.41343` vs 实测 `0.36051`，差 **0.0529 rad > 0.03 容差**。
 根因未定位，不得猜测。离线套件仍 RC=0。
+
+## C13d — 撤回失败的根因（**已定位，未修**）
+
+`place_server.py:309` 把 `[hover, descend, retreat]` **一次性批量规划**：
+
+- `hover` 起点 = 规划时**实测**；
+- `descend` 起点 = `hover` 的**预测终点**；
+- **`retreat` 起点 = `descend` 的预测终点**。
+
+守卫要求实测 ≈ 轨迹起点（0.03 rad），而下降+释放后实测偏差 **0.0529 rad**，撤回被拒。
+
+**判定：`C13D_RETREAT_BATCH_PLANNING_PREDICTION_GAP`**
+
+**我特意没有调大容差**——那是"为通过而放宽检查"。正确修法是每阶段从实测重规划、
+或把后续阶段改为比对"上一阶段预测终点"。需预注册。
