@@ -190,6 +190,9 @@ def main():
                                            'gate_refusal'], default='normal')
     parser.add_argument('--false-attach', default='',
                         help='declared live false-attach spec, object:offset_m[:hold_s]')
+    parser.add_argument('--scene', choices=['three_boxes', 'tagged_three_boxes',
+                                             'constrained_approach'],
+                        help='declared world variant; constrained_approach adds a ceiling')
     parser.add_argument('--config-override', help='yaml overlay merged into the generated config')
     parser.add_argument('--zone-2-pose', nargs=3, type=float, metavar=('X', 'Y', 'Z'),
                         help='override zone_2 (the second object) for dual_object tasks')
@@ -207,6 +210,8 @@ def main():
     if args.zone_2_pose is not None: options['zone_2_pose'] = list(args.zone_2_pose)
     if args.config_override is not None: options['config_override'] = args.config_override
     if args.hybrid_threshold is not None: options['hybrid_threshold'] = args.hybrid_threshold
+    if args.scene is not None:
+        options['scene'] = args.scene
     if args.level_release_tolerance_deg is not None:
         options['level_release_tolerance_deg'] = args.level_release_tolerance_deg
     params, world = profile(out, args.backend, args.camera, args.skill_backend,

@@ -19,7 +19,10 @@ DECISION_POLICIES = ('fsm', 'jev', 'llm', 'hybrid')
 # Opt-in scenes keep the shipped two-box world and every historical profile
 # byte-compatible. A scene adds same-spec models and declares the object set;
 # it does not generalize shape, size or perception.
-SCENES = ('three_boxes', 'tagged_three_boxes')
+# 'constrained_approach' is ADDITIVE: it appends one static ceiling model to the
+# velocity_servo world. No existing scene changes, so every declared world_sha256
+# for the other scenes stays valid.
+SCENES = ('three_boxes', 'tagged_three_boxes', 'constrained_approach')
 THREE_OBJECTS = ('target_box_a', 'target_box_b', 'target_box_c')
 TAGGED_CAMERA_POSE = [.30, -.30, .40, 0., .98, 2.09]
 
@@ -162,6 +165,23 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
                 carry.remove(item)
             for name in tracked:
                 ET.SubElement(carry, 'allowed_model').text = name
+    if scene == "constrained_approach":
+        # A static plate above the pick area: the arm cannot descend vertically
+        # with the gripper body level, so the approach has to be planned around
+        # an obstacle instead of straight down. Position is derived from
+        # target_box_a at (0.22, 0, 0.0175) plus gripper clearance.
+        ceiling = ET.SubElement(world, "model", name="approach_ceiling")
+        ET.SubElement(ceiling, "static").text = "true"
+        ET.SubElement(ceiling, "pose").text = "0.22 0.0 0.155 0 0 0"
+        link = ET.SubElement(ceiling, "link", name="link")
+        col = ET.SubElement(link, "collision", name="col")
+        geom = ET.SubElement(col, "geometry")
+        box = ET.SubElement(geom, "box")
+        ET.SubElement(box, "size").text = "0.30 0.30 0.010"
+        vis = ET.SubElement(link, "visual", name="vis")
+        vgeom = ET.SubElement(vis, "geometry")
+        vbox = ET.SubElement(vgeom, "box")
+        ET.SubElement(vbox, "size").text = "0.30 0.30 0.010"
     if physics_step_s is not None:
         if backend != 'detachable_joint' or physics_step_s != .002:
             raise ValueError('only the declared 2 ms joint qualification step is supported')

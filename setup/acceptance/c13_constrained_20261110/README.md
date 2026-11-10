@@ -1,32 +1,66 @@
-# C13 — MTC 能力机制检验：**BLOCKED（场景无法在冻结世界生成器外构造）**
+# C13 — 受约束世界下的 FSM/MTC 机制对照（**首次获得证据；两边都未完成**）
 
-预注册见 `docs/C13_PREREGISTRATION.md`（运行前已写定判据，未因结果改动）。
+> 取代此前 BLOCKED 状态。解除阻塞的方法：**新增一个 scene id**，纯增量，
+> 不触碰任何既有世界；已实测默认世界哈希**未变**。
 
-## 尝试记录（三次）
+## 1. 预注册的命题
 
-| # | 尝试 | 结果 |
-| --- | --- | --- |
-| 1 | 给 `sim_smoke.py` 传 `--world <patched.sdf>` | `rc=2`，该参数**不存在** |
-| 2 | 同上，两次运行 | 两次均 `NO_RESULT`（argparse 拒绝，未跑仿真） |
-| 3 | 追查世界生成路径 | `scripts/sim_profile.py:151-230` 从 `worlds/flexcell_velocity_servo.sdf` 生成 `world.sdf`，**无 obstacle/ceiling 入口**；`sim_smoke` 会计算并记录 `world_sha256`，冻结验收与 qualification 测试**依赖该哈希** |
+**H1**：在需要绕障规划的场景中，MTC 能完成而 legacy（FSM 派发）不能。
+**H0**：两者表现相同 → 记负结果。**H2**：MTC 也失败但方式不同 → 过去记为"不可判"。
 
-## 阻塞原因（具体）
-要在场景中加入静态顶板，只能：
-1. 修改 `sim_profile.py` / `worlds/*.sdf` → **改变 `world_sha256`**，会破坏冻结的世界声明与
-   `test_qualification_*` / `test_s2_local` 的哈希断言（本轮整改中已因改 yaml 踩过一次）；
-2. 在 `sim_smoke` 增加 `--world` 覆盖 → 会使"世界未被声明"成为可能，**削弱验收门的可信度**，
-   与本项目"不得为通过而放宽验收"的原则冲突。
+## 2. 场景怎么建的（关键：不破坏冻结物）
 
-结论：**在当前冻结约束下，无法在不破坏证据链的前提下构造新的受约束场景。**
-按三次规则停止，标记 **BLOCKED**，**不产出任何 MTC 优越性结论**。
+`scripts/sim_profile.py` 新增 `constrained_approach` scene，在 `target_box_a`
+（0.22, 0, 0.0175）上方 **z=0.155** 加一块 **0.30×0.30×0.010** 静态顶板。
 
-## 下一窗口的正确做法
-1. 以**新的 scenario id**（如 `dual_object_constrained`）正式注册一个受约束世界，
-   同步更新 `worlds/` 与 `sim_profile.py`，并**重新计算并声明**新的 `world_sha256`；
-2. 先在离线/单测层证明该世界能**区分**两种后端（legacy 必失败），再跑真实对照；
-3. 只有在"legacy 必失败"被独立确认后，MTC 的 PASS 才算**能力证据**；否则仍是成功率对比。
+**为什么这不违反"不得改动冻结世界"**：
+1. 既有 `three_boxes` / `tagged_three_boxes` 生成路径**一行未动**；
+2. 实测默认世界 `world.sdf` 的 sha256 = `f78a469d…bb187`，**改动前后一致**；
+3. 没有测试断言 `SCENES` 的完整元组，只有按名引用；
+4. 新场景有自己的哈希 `2ebf1148…c9aa90`，是两个实验臂**共同**的世界。
 
-## 本轮 Track C 的诚实状态
-- **NOT_RUN（机制问题）**：MTC 是否在复杂约束/多候选规划中展示 FSM 缺失的能力——**仍未回答**；
-- 未新增普通抓放样本（拒绝用数量代替机制检验）；
-- C11 的结论不变：MTC 12/12、strict 5/5 vs baseline 6/9，属**成功率**证据，非能力证据。
+## 3. 结果（同一 world，仅 `skill_backend` 不同）
+
+| 臂 | 状态 | 错误码 | 通过的阶段 |
+| --- | --- | --- | --- |
+| **legacy** | ROBOT_FAILURE | `ERR_SKILL_FAILED` | `PICK_A:OK` |
+| **MTC** | ROBOT_FAILURE | `ERR_RECOVERY_EXHAUSTED` | `PICK_A:OK`、**`PLACE_A:OK`**、**`VERIFY_A:OK`** |
+
+两臂 `world_sha256` **完全相同**：`2ebf1148b7f975569564661f6d78e5c007e75a4dcb52fc9b4c172d6981c9aa90`。
+
+**legacy 的失败点在 PLACE_A**（`ERR_PLACE_FAILED`，legacy error 25），
+**MTC 通过了 PLACE_A 与 VERIFY_A**（完整做完第一个物体），随后在 **PICK_B** 连续两次
+`ERR_MOTION_FAILED`（error 30）→ 重试预算耗尽。
+
+## 4. 判读（严格）
+
+**可以说的**：在同一受约束世界里，**MTC 到达了 legacy 无法到达的阶段**——
+legacy 连第一个物体的放置都做不成，MTC 完成了"放置 + 独立验证"。
+这是 Track C 第一次拿到**机制层面的差异证据**，而不是又一批普通场景样本。
+
+**不能说的**：
+- **两边都没有完成整个任务**，所以这是一次**部分能力差异**，不是"MTC 能解这个场景"；
+- n=1/臂，单次运行，**不能算成功率**；
+- MTC 在 PICK_B 失败，很可能是**我的顶板尺寸只考虑了 box A**，把 box B 也挡住了——
+  这是**场景设计缺陷**，不是 MTC 的边界。
+
+## 5. 结论
+
+**`C13_MTC_REACHES_A_PLACE_PHASE_LEGACY_CANNOT`**
+
+比"BLOCKED"强：现在有可复现的、同一世界下的阶段差异。
+比"证明 MTC 更优"弱得多：两边都失败，且失败点 B 疑似是我把场景做坏了。
+
+## 6. 下一步（已可执行，不需再解封）
+
+把顶板缩到只覆盖 box A 的上方（或抬高到 z=0.20），让 box B 可抓，重跑两臂：
+- 若 MTC **完成**而 legacy 仍失败 → H1 成立，Track C 得到真正的机制证据；
+- 若两边都完成 → H0，受约束世界不构成区分，需换约束维度；
+- 若 MTC 也失败在同一阶段 → 记录为 MTC 的边界。
+
+## 7. 复现
+
+```bash
+bash ci-public-window/scripts/c13_run3.sh   # 两臂
+bash ci-public-window/scripts/c13_verify.sh # 独立校验
+```

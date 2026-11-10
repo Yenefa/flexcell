@@ -217,3 +217,16 @@ agent 在**定向成本**上耗尽预算，尚未进入 `run_execution`。
 **CI 全部重叠 → 无显著差异；且成功率为负向点估计、成本更高。**
 离线路由测试 69 项**全部通过**（本轮实跑，RC=0）。
 **结论：Hybrid 可运行，但没有任何一个维度优于 FSM。**
+
+## Track C — C13 受约束世界 FSM/MTC 对照
+
+| 臂 | 状态 | 通过阶段 | 错误码 |
+| --- | --- | --- | --- |
+| legacy | ROBOT_FAILURE | `PICK_A:OK` | `ERR_SKILL_FAILED` |
+| **MTC** | ROBOT_FAILURE | `PICK_A:OK`、**`PLACE_A:OK`**、**`VERIFY_A:OK`** | `ERR_RECOVERY_EXHAUSTED` |
+
+两臂 `world_sha256` 相同（`2ebf1148…c9aa90`）。**new scene 是增量改动**，
+默认世界哈希实测 `f78a469d…bb187` **未变**。
+
+**判定：`C13_MTC_REACHES_A_PLACE_PHASE_LEGACY_CANNOT`** — 部分能力差异，两臂均未完成；
+MTC 在 PICK_B 的失败疑为顶板尺寸挡住了 box B（场景设计缺陷，非 MTC 边界）。n=1/臂。

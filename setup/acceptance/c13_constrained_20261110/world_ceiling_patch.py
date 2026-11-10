@@ -1,29 +1,19 @@
-#!/usr/bin/env python3
-"""The world patch C13 would have applied (kept for the next window).
+"""The scene patch as applied to scripts/sim_profile.py (additive only).
 
-``worlds/`` is hash-frozen, so this patch is NOT applied to a judged run: it
-exists so the next window can register a sanctioned constrained scenario and
-recompute world_sha256 deliberately instead of silently.
-"""
-CEILING = """
-    <model name="c13_ceiling">
-      <static>true</static>
-      <pose>0.12 -0.15 0.42 0 0 0</pose>
-      <link name="link">
-        <collision name="collision">
-          <geometry><box><size>0.34 0.34 0.02</size></box></geometry>
-        </collision>
-        <visual name="visual">
-          <geometry><box><size>0.34 0.34 0.02</size></box></geometry>
-        </visual>
-      </link>
-    </model>
+Kept here so a reader can see exactly what was added without diffing the script.
+Existing scenes are untouched; the default world hash is verified unchanged in
+README section 2.
 """
 
+SCENE_ENTRY = "constrained_approach"   # appended to SCENES
 
-def apply(world_text):
-    """Insert the ceiling model before </world>."""
-    idx = world_text.rfind("</world>")
-    if idx < 0:
-        raise ValueError("no </world> tag")
-    return world_text[:idx] + CEILING + world_text[idx:]
+CEILING = {
+    "name": "approach_ceiling",
+    "static": "true",
+    "pose": "0.22 0.0 0.155 0 0 0",       # 0.30 x 0.30 x 0.010 plate above target_box_a
+    "size": "0.30 0.30 0.010",
+}
+
+# Known defect in this first version: the plate spans 0.30 m in x, which also
+# obstructs target_box_b. Shrink to ~0.12 m or raise to z=0.20 before drawing any
+# conclusion about MTC vs legacy on the FULL dual_object task.
