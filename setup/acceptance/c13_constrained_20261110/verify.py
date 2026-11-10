@@ -78,8 +78,9 @@ def main():
         "mtc_failure_is_not_a_timeout": "measured start state differs from planned "
                                         "trajectory (move_to_pose_server._consume_mtc)",
         "mechanism_question": "MTC does NOT show a capability FSM lacks here",
-        "side_finding": "the start-state guard compares abs(delta) without a "
-                        "tolerance, so it demands exact float equality",
+        "start_state_guard": "has a real 0.03 rad tolerance; it fired because the "
+                             "handoff went stale between planning and consumption, "
+                             "NOT because the comparison lacks a bound",
         "n_per_arm": 1,
     }, indent=2))
     return 0

@@ -30,20 +30,41 @@ detail: ValueError: measured start state differs from planned trajectory
         (move_to_pose_server.py:288, _consume_mtc)
 ```
 
-### 这是一个独立的真实缺陷（本轮顺带发现）
+### ⚠️ 更正：我一开始说"这里没有容差"是错的
 
+我先读到的是：
 ```python
-if joints is None or age is None or age > .5 or any(
-        name not in positions or abs(positions[name] - trajectory...points[0].positions[i])
-        for i, name in enumerate(...)):
-    raise ValueError("measured start state differs from planned trajectory")
+abs(positions[name] - trajectory...positions[i])
+```
+并据此断言"没有和任何容差比较，要求精确浮点相等"。**这是误判。**
+
+真实代码是：
+```python
+abs(positions[name] - trajectory...points[0].positions[i]) > .03
 ```
 
-`abs(...)` **没有和任何容差比较**——非零即真。也就是说这里要求
-**实测关节角与规划起点精确浮点相等**。这在真实硬件上不可能成立。
+**容差存在，是 0.03 rad（约 1.7°）。** 我漏掉 `> .03` 的原因很蠢：
+我读取时用了 `slice(0, 115)` 截断显示，而 `> .03` 正好在截断点之后。
+**我基于一行被自己截断的输出，发布了"缺陷发现"。**
 
-**我没有在实验中改它**，因为那会污染 C13 的结果。它被记录为待修缺陷。
+这条已推送的记录现在更正。**代码本身没有被改过**（`git status src/` 干净）。
 
+### 那 MTC 为什么还是失败
+`_consume_mtc` 是在**消费**一个先前注册的轨迹；规划时快照、消费时实测，
+中间有时间差。失败说明**这个间隙里实测状态漂移超过了 0.03 rad**。
+这仍然是一个真实问题，但性质是**"轨迹交接的时效性"**，不是"比较逻辑写错"。
+
+## 2b. 这是本轮第四次同类型错误
+
+| # | 我读错了什么 | 真实情况 |
+| --- | --- | --- |
+| 更正 B/C | "预算截断" → "能力边界" | 预算不够，不是做不到 |
+| P2 第 1 次 | "agent 不写" → "agent 不愿写" | harness 提前 break |
+| C13 第一次 | "MTC 走得更远" → "MTC 更强" | 顶板太大挡住 box B |
+| **C13 本次** | **"没有容差" → "缺陷"** | **有 `> .03`，被我截断显示误导** |
+
+共同点仍然是同一个：**在把证据看全之前就下了结论。**
+新增规则：**任何"代码缺少某个检查"的判断，必须在看到完整表达式之后才能下。**
 ## 3. 被我自己推翻的那一半
 
 第一次跑用 **0.30×0.30 m** 顶板，把 box B 也挡住了。当时我看到"MTC 到 `VERIFY_A`、
