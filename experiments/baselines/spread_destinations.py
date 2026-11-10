@@ -14,9 +14,21 @@ expected_goal, so it cannot leak an answer.
 """
 import math
 
-# Two 35 mm boxes need >= 50 mm centre separation under the plan clearance contract.
-# +/-28 mm keeps both inside a 60 mm bin radius and 56 mm apart.
-SPREAD_STEP_M = 0.056
+# Separation between two objects placed in the SAME bin.
+#
+# HISTORY, because this number was wrong twice:
+#   clearance contract        = 50 mm  (unchanged)
+#   bin radius                = 60 mm  (unchanged)
+#   0.056 was chosen to sit 6 mm above clearance and fit inside the radius.
+#   MEASURED on the robot: boxes drift about 7-10 mm from their planned landing
+#   point, so the effective gap fell to 0.049 m - BELOW clearance - and the composite
+#   rejected the second stage with "declared destination occupied". Four T13 runs
+#   failed this way for exactly this reason.
+#
+# 0.090 leaves 40 mm of margin over clearance, more than twice the observed drift, and
+# +/-45 mm still fits inside the 60 mm bin radius. This WIDENS separation; it does not
+# relax any threshold.
+SPREAD_STEP_M = 0.090
 
 
 def spread(stages, bin_radius=0.06):
@@ -41,8 +53,14 @@ def spread(stages, bin_radius=0.06):
             # Spread along x, which is the arm-forward axis in this cell.
             candidate = [centre[0] + offset, centre[1], key[2]]
             if math.hypot(candidate[0] - centre[0], candidate[1] - centre[1]) > bin_radius:
-                raise ValueError("cannot fit %d objects inside a %.3f m bin"
-                                 % (len(idxs), bin_radius))
+                # Refuse instead of quietly shrinking the spacing. A plan that
+                # violates the clearance contract would be rejected by the composite
+                # anyway, and squeezing it silently would yield a plan that looks
+                # valid and then fails on the robot.
+                raise ValueError(
+                    "cannot place %d objects in a %.3f m bin while keeping the "
+                    "%.3f m separation the clearance contract needs"
+                    % (len(idxs), bin_radius, SPREAD_STEP_M))
             result[i]["place_pose"] = candidate
             result[i]["spread_offset_m"] = round(offset, 5)
     return result

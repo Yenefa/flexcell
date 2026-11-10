@@ -1,0 +1,24 @@
+{
+  "record_kind": "RECOVERY_DECISION",
+  "source_run": "/tmp/evobot-recover/HO-b81a5ae02d6d",
+  "original_evidence": {
+    "outcome": 1,
+    "error_code": 62,
+    "detail": "native terminal/verification unconfirmed for target_box_b-1",
+    "completed_stage_ids": [
+      "target_box_a-0"
+    ]
+  },
+  "decision": {
+    "action": "resume",
+    "failure_class": "UNKNOWN",
+    "measured_reason": "component failed (code 62); no discriminator",
+    "attempt": 1,
+    "budget": 1,
+    "committed_stages": [
+      "target_box_a-0"
+    ],
+    "why": "stages already committed; replay would contradict the measured world state. A resumable plan is needed and is not implemented."
+  },
+  "original_failure_preserved": true
+}

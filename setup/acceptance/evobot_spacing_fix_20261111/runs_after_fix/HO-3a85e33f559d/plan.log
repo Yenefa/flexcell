@@ -1,0 +1,16 @@
+{
+  "moves": [
+    {
+      "object": "target_box_a",
+      "zone": "zone_2",
+      "why": "Condition sends both blocks to the left bin; zone_2 is the left bin by +y position."
+    },
+    {
+      "object": "target_box_b",
+      "zone": "zone_2",
+      "why": "Blue block is closer to the right bin than the left bin, so the else branch puts both blocks in the left bin."
+    }
+  ],
+  "confidence": "high",
+  "uncertainty": ""
+}

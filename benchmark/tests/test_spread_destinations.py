@@ -50,7 +50,26 @@ def test_spread_is_deterministic_and_does_not_mutate_input():
     assert json.dumps(stages, sort_keys=True) == before
 
 
-def test_three_objects_still_fit_inside_one_bin():
+def test_spacing_survives_measured_drift_above_clearance():
+    """Regression for 4 real failures: spacing must exceed clearance + drift."""
+    CLEARANCE = 0.05      # plan clearance contract
+    DRIFT = 0.010         # observed landing drift on the robot
+    assert sd.SPREAD_STEP_M > CLEARANCE + DRIFT, sd.SPREAD_STEP_M
+    assert sd.SPREAD_STEP_M / 2.0 < 0.06, "offsets must stay inside the bin radius"
+
+
+def test_two_object_offsets_stay_inside_the_bin_radius():
+    import math
+    stages = [{"object_name": "a", "place_pose": list(Z1)},
+              {"object_name": "b", "place_pose": list(Z1)}]
+    for s in sd.spread(stages):
+        assert math.hypot(s["place_pose"][0] - Z1[0], s["place_pose"][1] - Z1[1]) <= 0.06
+
+
+def test_three_objects_in_one_bin_are_refused_not_squeezed():
+    """0.09 m separation cannot fit 3 objects in a 60 mm bin. Refuse, do not squeeze."""
+    import pytest
     stages = [{"object_name": n, "place_pose": list(Z1)} for n in "abc"]
-    out = sd.spread(stages)
-    assert len({tuple(s["place_pose"]) for s in out}) == 3
+    with pytest.raises(ValueError) as exc:
+        sd.spread(stages)
+    assert "cannot place 3 objects" in str(exc.value)
