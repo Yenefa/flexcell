@@ -5,7 +5,7 @@
     "budget_cny": 20,
     "gazebo_concurrency": 1
   },
-  "phase": "CLOSED - Level C 3/3, P2 two-arm reuse, corrections applied, final regression green",
+  "phase": "CLOSED - all deliverables complete, branch pushed (not merged)",
   "tasks": [
     {
       "id": "P0-1",
@@ -131,7 +131,7 @@
       "fixed": true
     }
   ],
-  "updated": "2026-11-10T18:05:00+08:00",
+  "updated": "2026-11-10T20:00:00+08:00",
   "closed_at": "2026-11-10T10:05:00+08:00",
   "final_regression": {
     "offline": "PYTEST_RC=0, 0 failed",
@@ -151,5 +151,10 @@
   "corrections": [
     "CORRECTION_20261110B: Level C failures hit budget_exceeded",
     "CORRECTION_20261110C: P3 proves they were truncation, not capability"
-  ]
+  ],
+  "final_tokens_archived": 721798,
+  "p2_item2": "NOT_ACHIEVED (4 framings attempted)",
+  "p2_item3": "ACHIEVED (two-arm control, -18.2% iters / -24.6% tokens)",
+  "track_b": "audited: runs, no dimension better than FSM",
+  "track_c": "BLOCKED on frozen world_sha256"
 }
