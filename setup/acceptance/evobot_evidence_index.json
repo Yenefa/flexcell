@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 18,
-  "live": 11,
+  "batches": 19,
+  "live": 12,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -76,6 +76,23 @@
         "paired_lost": 0,
         "false_success_rate": 0.0,
         "recovery_triggers": 2
+      }
+    },
+    {
+      "batch": "evobot_pair16_drift_20261111",
+      "verified": "PASS",
+      "rung": "Independently Verified (paired n=16, recovery 3/4)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_PAIRED_N16_WITH_DIAGNOSTICS_VERIFIED",
+        "instances": 16,
+        "B_first_try_pass": 12,
+        "R_after_retry_pass": 15,
+        "paired_gained": 3,
+        "paired_lost": 0,
+        "recovery_rate": "3/4",
+        "false_success_rate": 0.0,
+        "prior_batch_retained": true
       }
     },
     {

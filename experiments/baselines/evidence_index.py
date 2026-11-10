@@ -53,6 +53,7 @@ RUNGS = {
     "evobot_spacing_fix_20261111": "Independently Verified (root-cause fix, 8/8)",
     "evobot_regression_v01_20261111": "Regression (6/6 -> 6/6, no loss)",
     "evobot_pair16_20261111": "Independently Verified (paired B vs R, n=16)",
+    "evobot_pair16_drift_20261111": "Independently Verified (paired n=16, recovery 3/4)",
 }
 
 

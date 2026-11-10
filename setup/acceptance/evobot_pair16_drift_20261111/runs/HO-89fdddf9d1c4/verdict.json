@@ -1,0 +1,68 @@
+{
+  "evaluator_version": "0.1.0",
+  "task_id": "HO-89fdddf9d1c4",
+  "template_id": "T12_triple_revisit",
+  "passed": true,
+  "clauses": [
+    {
+      "clause": "placement:target_box_a",
+      "ok": true,
+      "evidence": {
+        "zone": "zone_1",
+        "distance_m": 0.03911,
+        "radius_m": 0.06,
+        "inside_zone": true,
+        "height_error_m": 0.0,
+        "resting": true,
+        "final_pose": [
+          0.12386,
+          -0.11108,
+          0.0175,
+          0.0
+        ]
+      }
+    },
+    {
+      "clause": "unmoved:target_box_b",
+      "ok": true,
+      "evidence": {
+        "distance_m": 0.0,
+        "tolerance_m": 0.015
+      }
+    },
+    {
+      "clause": "visit:target_box_a",
+      "ok": true,
+      "evidence": {
+        "required": [
+          "zone_2"
+        ],
+        "observed": [
+          "zone_1",
+          "zone_2",
+          "zone_1"
+        ]
+      }
+    },
+    {
+      "clause": "visit_sequence:target_box_a",
+      "ok": true,
+      "evidence": {
+        "required": [
+          "zone_1",
+          "zone_2",
+          "zone_1"
+        ],
+        "observed": [
+          "zone_1",
+          "zone_2",
+          "zone_1"
+        ]
+      }
+    }
+  ],
+  "failed_clauses": [],
+  "agent_claimed_success": false,
+  "false_success": false,
+  "false_failure": true
+}

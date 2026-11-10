@@ -1,0 +1,7 @@
+Baseline B (first attempt, NO recovery) on the SAME 16 instances,
+measured in successive batches as fixes landed:
+  pre-avoid-fix (9/16)       9/16 (recorded in the previous round)
+  after-avoid-fix            13/16
+
+The spread across batches is the execution-layer variance. Any single-batch
+comparison smaller than that spread is not a result.

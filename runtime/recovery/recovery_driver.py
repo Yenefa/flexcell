@@ -19,6 +19,7 @@ from pathlib import Path
 WT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(WT / "runtime" / "recovery"))
 import recover
+import diagnostics
 
 
 def execution_evidence(task_out):
@@ -40,6 +41,8 @@ def main(argv=None):
     args = ap.parse_args(argv)
     run = Path(args.run)
     ev = execution_evidence(run / "task.out")
+    # fold in per-stage native results so a generic err 62 becomes attributable
+    ev = diagnostics.enrich(ev, run)
     (run / "failure_evidence.json").write_text(json.dumps(ev, indent=2) + "\n",
                                                encoding="utf-8")
 
@@ -52,6 +55,35 @@ def main(argv=None):
 
     decision = recover.decide(ev, attempt=args.attempt)
     action = decision["action"]
+
+    # A stage that FAILED can still have moved the world: pick succeeds, place fails,
+    # the box ends up somewhere else, and completed_stage_ids stays EMPTY. Keying
+    # "world changed" on committed stages alone therefore misses exactly the case that
+    # matters - two runs replayed their original plan and were rejected with
+    # "state drift or occupied destination" because initial_objects no longer held.
+    # So when measured positions disagree with the declared ones, prefer a resume plan
+    # rebuilt from the measurement.
+    world_drifted = False
+    if args.ground_truth:
+        try:
+            gt = json.loads(Path(args.ground_truth).read_text(encoding="utf-8"))
+            plan_now = json.loads((run / "plan.json").read_text(encoding="utf-8"))
+            measured = gt.get("objects") or {}
+            for obj in plan_now.get("initial_objects", []):
+                name = obj["object_name"]
+                if name not in measured:
+                    continue
+                dx = float(measured[name][0]) - float(obj["position"][0])
+                dy = float(measured[name][1]) - float(obj["position"][1])
+                if (dx * dx + dy * dy) ** 0.5 > 0.02:
+                    world_drifted = True
+                    break
+        except (ValueError, OSError, KeyError):
+            world_drifted = False
+    if world_drifted and action in ("redispatch", "reobserve", "respread"):
+        decision = dict(decision, action="resume_required",
+                        why="measured state no longer matches the declared plan")
+        action = "resume_required"
 
     if action == "resume_required" and args.ground_truth:
         try:

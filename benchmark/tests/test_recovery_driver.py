@@ -97,6 +97,59 @@ def test_resume_refuses_when_measured_state_is_missing(tmp_path):
     assert not (tmp_path / "plan_retry.json").exists()
 
 
+def _place_failure_journal(tmp_path):
+    d = tmp_path / "sim" / "skills" / "composites"
+    d.mkdir(parents=True, exist_ok=True)
+    p = d / "composite-test.jsonl"
+    p.write_text(json.dumps({"event": "NATIVE_TERMINAL", "stage_id": "a-0",
+                             "component": {"outcome": 1, "error_code": 50,
+                                           "detail": "place failed",
+                                           "final_state": {"fsm_trace":
+                                               ["PICK_A:OK", "PLACE_A:FAIL"]}}}) + "\n",
+                 encoding="utf-8")
+
+
+def test_failed_stage_that_moved_the_world_forces_resume_not_replay(tmp_path):
+    """Regression for 2 real err 61 failures: a FAILED place still moved the box.
+
+    completed_stage_ids was empty, so the driver chose redispatch and replayed the
+    original plan - which the composite rejected because initial_objects no longer held.
+    """
+    _w(tmp_path / "task.out", _result(outcome=1, error_code=62,
+                                      detail="native terminal/verification unconfirmed",
+                                      completed_stage_ids=[]))
+    _w(tmp_path / "plan.json", json.dumps({
+        "initial_objects": [{"object_name": "a", "position": [0.22, 0.0, 0.0175]}],
+        "stages": [{"stage_id": "a-0", "object_name": "a",
+                    "place_pose": [0.12, -0.15, 0.0175]}],
+        "clearance_m": 0.05, "position_tolerance_m": 0.02}))
+    _place_failure_journal(tmp_path)
+    gt = tmp_path / "gt.json"
+    # the box really moved, even though no stage committed
+    _w(gt, json.dumps({"objects": {"a": [0.116, -0.20, 0.0175, 0.0]}}))
+    assert rd.main(["--run", str(tmp_path), "--ground-truth", str(gt)]) == 0
+    retry = json.loads((tmp_path / "plan_retry.json").read_text())
+    assert retry["initial_objects"][0]["position"] == [0.116, -0.20, 0.0175]
+    rec = json.loads((tmp_path / "recovery_decision.json").read_text())
+    assert rec["decision"]["action"] == "resume"
+
+
+def test_unchanged_world_still_allows_a_plain_redispatch(tmp_path):
+    _w(tmp_path / "task.out", _result(outcome=1, error_code=62,
+                                      detail="native terminal/verification unconfirmed",
+                                      completed_stage_ids=[]))
+    _w(tmp_path / "plan.json", json.dumps({
+        "initial_objects": [{"object_name": "a", "position": [0.22, 0.0, 0.0175]}],
+        "stages": [{"stage_id": "a-0", "object_name": "a",
+                    "place_pose": [0.12, -0.15, 0.0175]}]}))
+    _place_failure_journal(tmp_path)
+    gt = tmp_path / "gt.json"
+    _w(gt, json.dumps({"objects": {"a": [0.22, 0.0, 0.0175, 0.0]}}))
+    assert rd.main(["--run", str(tmp_path), "--ground-truth", str(gt)]) == 0
+    rec = json.loads((tmp_path / "recovery_decision.json").read_text())
+    assert rec["decision"]["action"] == "redispatch"
+
+
 def test_original_failure_files_are_not_overwritten(tmp_path):
     original = _result(outcome=1, error_code=62, detail="unconfirmed",
                        completed_stage_ids=[])

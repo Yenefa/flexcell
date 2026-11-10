@@ -16,6 +16,22 @@ def classify(evidence):
     """Return (class, measured_reason). evidence is the verifier/run evidence dict."""
     if not isinstance(evidence, dict) or not evidence:
         return "UNKNOWN", "no evidence supplied"
+    # Prefer the NATIVE stage result when it is available. A composite err 62 only says
+    # "something failed"; the journal carries the actual stage outcome, e.g.
+    # ["PICK_A(attempt=1):OK", "PLACE_A:FAIL"], which is attributable. Without this the
+    # classifier can only answer UNKNOWN, which is correct but useless.
+    native_trace = evidence.get("native_fsm_trace") or []
+    native_detail = str(evidence.get("native_detail") or "").lower()
+    trace_text = " ".join(str(s) for s in native_trace).upper()
+    if "PLACE" in trace_text and "FAIL" in trace_text:
+        return "grasp", "native place stage failed: " + str(native_trace)
+    if "PICK" in trace_text and "FAIL" in trace_text:
+        return "grasp", "native pick stage failed: " + str(native_trace)
+    if "place failed" in native_detail or "err_place_failed" in native_detail:
+        return "grasp", "native place stage reported ERR_PLACE_FAILED"
+    if "grasp" in native_detail and "fail" in native_detail:
+        return "grasp", "native grasp stage failed"
+
     err = str(evidence.get("error_code", ""))
     detail = str(evidence.get("detail", "")).lower()
     outcome = evidence.get("outcome")
