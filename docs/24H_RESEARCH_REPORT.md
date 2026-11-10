@@ -47,7 +47,17 @@
 
 证据：`setup/acceptance/w5_levelc_20261110/`、`w5_levelc_n2_20261110/`。
 
-### 1.3 工程整改（FLEXCELL-REMEDIATION-2026-01）
+### 1.3 P0-2 — E2d / E2e 的 Flash 独立复现（已完成）
+
+| 实验 | 模型 | 迭代 | Token | 三门 | `false_success` |
+| --- | --- | --- | --- | --- | --- |
+| E2d（可达性配置） | deepseek-flash | 2 | 2,573 | PASS/PASS/PASS | false |
+| E2e（对象注册） | deepseek-flash | 5 | 6,952 | PASS/PASS/PASS | false |
+
+证据：`setup/acceptance/w5_e2_flash_20261110/`。两项均为**新模型下的独立复现**，
+与历史 chat4/v4pro 运行分开记录，不合并统计。
+
+### 1.4 工程整改（FLEXCELL-REMEDIATION-2026-01）
 
 **13/14 DONE，1 BLOCKED（缺硬件）**。详见 `docs/remediation/FINAL_REMEDIATION_REPORT.md`。
 
@@ -57,7 +67,7 @@
 
 新增测试 **13 文件 / 119 项**，全仓 **0 failed**；真实栈三场景多次 PASS。
 
-### 1.4 工具链缺陷（解释此前"只读不写"的真正原因）
+### 1.5 工具链缺陷（解释此前"只读不写"的真正原因）
 
 | # | 缺陷 | 后果 |
 | --- | --- | --- |
@@ -81,7 +91,7 @@
 | --- | --- | --- |
 | Level C（2 次） | **FAIL** | 探索成本耗尽预算，未进入"运行→证据"阶段 |
 | Level C′（2 次） | **INVALID** | 判分 `HARNESS_ERROR`，仿真栈未启动；按三次规则停止，标记 BLOCKED（判分工具链） |
-| E2d / E2e 的 Flash 独立复现 | **NOT_RUN** | 预算与时间投入 Level B 主线 |
+
 | Track B Hybrid 新实验 | **NOT_RUN** | 优先级低于 W5 |
 | Track C 机制问题（C11 之后） | **NOT_RUN** | 未新增样本，避免用数量代替机制检验 |
 | 真机安全 | **NOT_RUN** | 无硬件 |

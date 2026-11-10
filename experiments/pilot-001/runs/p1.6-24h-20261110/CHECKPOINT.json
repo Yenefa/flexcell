@@ -5,7 +5,7 @@
     "budget_cny": 20,
     "gazebo_concurrency": 1
   },
-  "phase": "H9-H15 (tooling root causes found; Level B verified twice)",
+  "phase": "H20-H24 (close-out: Level B x2, Level C x2 negative, E2d/E2e reproduced)",
   "tasks": [
     {
       "id": "P0-1",
@@ -15,8 +15,11 @@
     {
       "id": "P0-2",
       "title": "E2d/E2e flash independent reproduction",
-      "status": "pending",
-      "note": "E2d/E2e flash reproduction still not run (budget spent on Level B)"
+      "status": "done",
+      "note": "E2d 2 iters / 2573 tok PASS; E2e 5 iters / 6952 tok PASS; three gates each",
+      "evidence": [
+        "setup/acceptance/w5_e2_flash_20261110"
+      ]
     },
     {
       "id": "P0-3",
@@ -41,8 +44,11 @@
     {
       "id": "P1-3",
       "title": "Level C less-guided (no answer leakage)",
-      "status": "running",
-      "note": "Level C task text written (no file/function/fix hints); first run in progress"
+      "status": "blocked",
+      "note": "Level C 0/2 (exploration cost). Level C' 0/2 INVALID: judge HARNESS_ERROR in WSL; Windows python cannot spawn wsl (WinError 5)",
+      "evidence": [
+        "setup/acceptance/w5_levelcprime_invalid_20261110"
+      ]
     },
     {
       "id": "P2",
@@ -52,12 +58,12 @@
     {
       "id": "P3-B",
       "title": "Track B hybrid runtime deeper check",
-      "status": "pending"
+      "status": "not_run"
     },
     {
       "id": "P3-C",
       "title": "Track C MTC capability question",
-      "status": "pending"
+      "status": "not_run"
     },
     {
       "id": "W5E3-prereg",
@@ -119,5 +125,5 @@
       "fixed": true
     }
   ],
-  "updated": "2026-11-10T06:45:00+08:00"
+  "updated": "2026-11-10T09:45:00+08:00"
 }

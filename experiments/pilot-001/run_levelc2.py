@@ -9,8 +9,17 @@ import os, sys, json
 from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-with open(os.path.expanduser("~/.config/flexcell/deepseek_api_key")) as fh:
-    os.environ["FLEXCELL_PILOT_API_KEY"] = fh.read().strip()
+if not os.environ.get("FLEXCELL_PILOT_API_KEY"):
+    key_path = os.path.expanduser("~/.config/flexcell/deepseek_api_key")
+    if os.path.exists(key_path):
+        with open(key_path) as fh:
+            os.environ["FLEXCELL_PILOT_API_KEY"] = fh.read().strip()
+    else:
+        import subprocess as _sp
+        out = _sp.run(["wsl", "-d", "Ubuntu-24.04", "--", "bash", "-lc",
+                       "cat ~/.config/flexcell/deepseek_api_key"],
+                      capture_output=True, text=True)
+        os.environ["FLEXCELL_PILOT_API_KEY"] = (out.stdout or "").strip()
 from pilot.agent_fc import FCAgent
 from pilot.llm import Chat
 from pilot import runner, w5s, w5sc

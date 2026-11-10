@@ -7,6 +7,8 @@
 | 实验 | 模型 | 任务 | 缺陷类型 | 引导级别 | n | 成功 | 迭代 | Token | 证据 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | W5-E2d | deepseek-flash | 可达性配置 | 配置值 | 明确 | 6（历史） | 6/6 | — | — | 历史归档 |
+| **E2d-Flash 复现** | deepseek-flash | T-W5E2D | 配置值 | 明确 | 1 | **PASS** | 2 | 2,573 | `setup/acceptance/w5_e2_flash_20261110/e2d_result.json` |
+| **E2e-Flash 复现** | deepseek-flash | T-W5E2E | 配置值 | 明确 | 1 | **PASS** | 5 | 6,952 | `setup/acceptance/w5_e2_flash_20261110/e2e_result.json` |
 | W5-E2e | deepseek-flash | 对象注册 | 配置值 | 明确 | 3（历史） | 3/3 | — | — | 历史归档 |
 | **W5-E3B #1** | deepseek-flash | T-W5S dual_object | **源码：阶段/目标选择** | 明确（点名文件） | 1 | **PASS** | 5 | 23,754 | `setup/acceptance/w5_levelb_20261110` |
 | **W5-E3B #2** | deepseek-flash | T-W5S dual_object | 同上 | 明确 | 1 | **PASS** | 6 | 31,586 | `setup/acceptance/w5_levelb_n2_20261110` |

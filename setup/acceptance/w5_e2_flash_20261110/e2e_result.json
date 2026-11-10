@@ -1,0 +1,68 @@
+{
+  "arm": "W5A",
+  "meta": {
+    "task": "T-W5E2E",
+    "requested_model": "deepseek-flash",
+    "base_url": "https://api.deepseek.com",
+    "temperature": 0.0,
+    "max_tokens": 2048,
+    "key_fingerprint": "2caaf9b9"
+  },
+  "success": true,
+  "first_pass": false,
+  "iterations": 5,
+  "claim_success": false,
+  "false_success": false,
+  "violation": null,
+  "cost": {
+    "tokens": 6952,
+    "agent_s": 65.1771,
+    "execution_s": 59.7286
+  },
+  "evidence": {
+    "items": {
+      "verdict.json": {
+        "present": true,
+        "bytes": 486,
+        "sha256": "51c1891741de411fc1fc2fa23c97e54616714c9de49b1fe7bacab1ce9b5409f5"
+      },
+      "telemetry/execution.log": {
+        "present": true,
+        "bytes": 814,
+        "sha256": "a85a1806062ba215722c86443a9f1758cdae111bb8c6d9d1ef8383b002a8a1cc"
+      },
+      "episode.json": {
+        "present": true,
+        "bytes": 773,
+        "sha256": "9cca80555f98a4160a6ba262f973a676c6368dd959199db816864b2e03a48b08"
+      },
+      "fingerprint.json": {
+        "present": true,
+        "bytes": 254,
+        "sha256": "5e804a5026e5282d1e7a3fc60f1f99af5cecb0ed5e1afb15cdcb9fd7d4ed96ed"
+      }
+    },
+    "present": 4,
+    "required": 4,
+    "completeness": 1.0
+  },
+  "verdict": {
+    "passed": true,
+    "returncode": 0,
+    "stdout": "{\"passed\": true, \"target\": {\"status\": \"PASS\", \"returncode\": 0}, \"regression_normal\": {\"status\": \"PASS\", \"returncode\": 0}, \"regression_regrasp\": {\"status\": \"PASS\", \"returncode\": 0}}\n",
+    "stderr": "",
+    "target": {
+      "status": "PASS",
+      "returncode": 0
+    },
+    "regression_normal": {
+      "status": "PASS",
+      "returncode": 0
+    },
+    "regression_regrasp": {
+      "status": "PASS",
+      "returncode": 0
+    }
+  },
+  "run_dir": "/tmp/e2e-flash-1/w5e2e-W5A"
+}
