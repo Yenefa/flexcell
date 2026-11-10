@@ -110,6 +110,19 @@ def run_smoke(repo_src, repo, ws, out, case="normal", distro="Ubuntu-24.04",
     proc = subprocess.run(_bash(wsl_path),
                           capture_output=True, text=True, encoding="utf-8",
                           errors="replace", timeout=timeout_s + 300)
+    # Inside WSL there is no VM to reset (no `wsl --shutdown`), so stale ROS /
+    # Gazebo processes from an earlier execution survive and the next launch
+    # returns HARNESS_ERROR with physical_tasks_dispatched=0. Clean BEFORE too.
+    if not shutil.which("wsl"):
+        subprocess.run(_bash("-lc",
+                        "pkill -9 -f '[g]z sim' 2>/dev/null; "
+                        "pkill -9 -f '[m]ove_group' 2>/dev/null; "
+                        "pkill -9 -f '[t]ask_fsm_server' 2>/dev/null; "
+                        "pkill -9 -f '[r]os2 launch' 2>/dev/null; "
+                        "sleep 2"),
+                       capture_output=True, text=True, encoding="utf-8",
+                       errors="replace", timeout=60)
+
     # A gate may leave a simulator or node behind; the next gate must start clean.
     subprocess.run(_bash("-lc",
                     "pkill -9 -f '[g]z sim' 2>/dev/null; pkill -9 -f '[m]ove_group' 2>/dev/null; "
