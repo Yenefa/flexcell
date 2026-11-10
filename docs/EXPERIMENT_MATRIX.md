@@ -15,8 +15,8 @@
 | **W5-E3C #1** | deepseek-flash | T-W5SC dual_object | 同上 | **无位置提示** | 1 | **FAIL** | 8 | 40,307 | `setup/acceptance/w5_levelc_20261110` |
 | **W5-E3C #2** | deepseek-flash | T-W5SC dual_object | 同上 | 无位置提示 | 1 | **FAIL** | 8 | 43,135 | `setup/acceptance/w5_levelc_n2_20261110` |
 | W5-E3C′（作废 3 次） | deepseek-flash | T-W5SC2 dual_object | 同上 | 无位置提示 + "先运行" | 3 | **INVALID（判分 HARNESS_ERROR）** | 9 / 11 / — | 40,310 / 40,007 / — | `setup/acceptance/w5_levelcprime_invalid_20261110` |
-| **W5-E3C′（有效）** | deepseek-flash | T-W5SC2 dual_object | 同上 | 无位置提示 + "先运行" | 1 | **FAIL**（有效判分） | 10 | 51,395 | `setup/acceptance/w5_levelcprime_20261110` |
-| **C14（工具清单）** | deepseek-flash | T-W5SC2 dual_object | 同上 | 无提示 + 工具清单可见 | 1 | **FAIL**（H0 成立） | 9 | 53,045 | `setup/acceptance/c14_tool_inventory_20261110` |
+| **W5-E3C′（有效）** | deepseek-flash | T-W5SC2 dual_object | 同上 | 无位置提示 + "先运行" | 1 | **FAIL**（**预算耗尽截断**） | 10 | 51,395（+28%） | `setup/acceptance/w5_levelcprime_20261110` |
+| **C14（工具清单）** | deepseek-flash | T-W5SC2 dual_object | 同上 | 无提示 + 工具清单可见 | 1 | **FAIL**（H0，**预算耗尽截断**） | 9 | 53,045（+33%） | `setup/acceptance/c14_tool_inventory_20261110` |
 | C15 run A | deepseek-flash | T-W5SC2 dual_object | 同上 | 无提示 + **证据自带定位**（被截断） | 1 | **PASS** | 5 | 25,380 | 原始产物丢失（WSL 重启），**不作证据** |
 | **C15 run B** | deepseek-flash | T-W5SC2 dual_object | 同上 | 无提示 + **证据自带定位** | 1 | **PASS** | **4** | **16,937** | `setup/acceptance/w5_levelc_evidence_20261110/run_b_regions_visible` |
 | **C15 run C1（重复）** | deepseek-flash | T-W5SC2 dual_object | 同上 | 同上 | 1 | **PASS** | **5** | **22,077** | `setup/acceptance/w5_levelc_evidence_20261110/run_c1` |
@@ -130,15 +130,21 @@ agent 在**定向成本**上耗尽预算，尚未进入 `run_execution`。
 | `edit_file` | **0** |
 
 即使系统提示明写 `search_code` 的用途，agent 仍一次未用；默认策略是**目录遍历 + 分段读**，
-在 1436 行文件上必然失败。**工具清单不足以改变工具选择。**
+在 1436 行文件上耗尽 40k 预算（**+33%**）仍未到达编辑。**工具清单不足以改变工具选择。**
 与 Level B（点名文件 → 2/2、5–6 轮）对比：**提示实际上替代了搜索**。
 
-### 三个负结果的机制区分（重要）
-| 实验 | 是否看到证据 | 是否探索 | 是否编辑 | 失败机制 |
+### 三个负结果的机制区分（已按 `budget_exceeded` 更正）
+
+| 实验 | 看到证据 | 编辑 | **终止原因** | 失败机制 |
 | --- | --- | --- | --- | --- |
-| Level C | 否（未运行场景） | 不足 | 否 | 探索成本耗尽预算 |
-| Level C′ | **是（9 次）** | 充分 | 否 | 证据 → 定位的转换 |
-| C14 | **是（8 次）** | 充分 + 工具清单可见 | 否 | **工具选择**：不用搜索，只遍历 |
+| Level C | 否 | 否 | 预算耗尽 | 探索成本 |
+| Level C′ | **是（9 次）** | 否 | **预算耗尽（+28%）** | 定位成本吃光预算 |
+| C14 | **是（8 次）** | 否 | **预算耗尽（+33%）** | 工具选择：不用搜索，只遍历 |
+| **C15（对照）** | 是（4–5 次） | **是** | 正常结束（用 42–55%） | 定位信息把成本降到 1/3–1/2 |
+
+> **更正（2026-11-10 晚）**：此前写"agent 看到证据但选择不编辑"是**解释**，不是事实。
+> 事实是三次失败均被 40k token 预算**强制截断**（`runner.py:107`），因此**不能**推断
+> "再多给预算也修不好"。详见 `docs/experiments/CORRECTION_20261110B.md`。
 
 ## C15 — 失败证据自带定位（**Level C 首次达成**）
 

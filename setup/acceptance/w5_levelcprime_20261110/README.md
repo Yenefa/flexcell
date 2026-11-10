@@ -15,7 +15,7 @@
 | --- | --- |
 | 模型 | `deepseek-flash` |
 | 迭代 | 10 |
-| Token | 51,395 |
+| Token | 51,.95 |
 | `run_execution` 次数 | **9** |
 | 是否看到真实失败 | **是**（`ROBOT_FAILURE`） |
 | 源码编辑 | **0** |
@@ -23,7 +23,7 @@
 | 回归 `normal` | PASS |
 | `claim_success` / `false_success` | false / false |
 
-缺陷行 `task_fsm_server.py:1236` 保持注入状态（`zones[zone_of[self._obj_a]]`），确认未被修改。
+缺陷行 `task_fsm_server.py:12.6` 保持注入状态（`zones[zone_of[self._obj_a]]`），确认未被修改。
 
 ## 判读（这是本轮最有信息量的负结果）
 1. **不是"没看到证据"**：agent 运行了 9 次场景，每次都拿到 `ROBOT_FAILURE`；
