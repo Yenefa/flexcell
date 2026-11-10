@@ -114,14 +114,24 @@ def run_smoke(repo_src, repo, ws, out, case="normal", distro="Ubuntu-24.04",
     # Gazebo processes from an earlier execution survive and the next launch
     # returns HARNESS_ERROR with physical_tasks_dispatched=0. Clean BEFORE too.
     if not shutil.which("wsl"):
+        # Deeper than the first attempt: after a long agent session the judge
+        # launch still failed (HARNESS_ERROR, physical_tasks_dispatched=0).
+        # The likely leftovers are not just gz sim - the gz ruby launcher, the
+        # ROS daemon cache and stale FAST-DDS shared-memory segments survive too,
+        # and a dead daemon makes the next launch see no nodes.
         subprocess.run(_bash("-lc",
-                        "pkill -9 -f '[g]z sim' 2>/dev/null; "
+                        "pkill -9 -f '[g]z ' 2>/dev/null; "
+                        "pkill -9 -f '[r]uby.*gz' 2>/dev/null; "
                         "pkill -9 -f '[m]ove_group' 2>/dev/null; "
                         "pkill -9 -f '[t]ask_fsm_server' 2>/dev/null; "
                         "pkill -9 -f '[r]os2 launch' 2>/dev/null; "
-                        "sleep 2"),
+                        "pkill -9 -f '[r]obot_state_publisher' 2>/dev/null; "
+                        "pkill -9 -f '[c]ontroller_manager' 2>/dev/null; "
+                        "ros2 daemon stop >/dev/null 2>&1; "
+                        "rm -rf /dev/shm/fastrtps_* /dev/shm/sem.fastrtps_* 2>/dev/null; "
+                        "sleep 3"),
                        capture_output=True, text=True, encoding="utf-8",
-                       errors="replace", timeout=60)
+                       errors="replace", timeout=90)
 
     # A gate may leave a simulator or node behind; the next gate must start clean.
     subprocess.run(_bash("-lc",

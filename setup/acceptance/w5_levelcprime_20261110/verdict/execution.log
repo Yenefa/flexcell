@@ -1,0 +1,25 @@
+{
+  "build": {
+    "returncode": 0,
+    "tail": "BUILD_OK\n"
+  },
+  "status": "ROBOT_FAILURE",
+  "case": "dual_object",
+  "runtime_fingerprint": "dc397403dcb474c1f36098b22b6de57b6a3c0bf331bb589c9bc4b4b3fe9ad7e5",
+  "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+  "semantic_config_sha256": "2e4906170d7755c6966d5dab71a5d101b3cf0fd0279ce22134e8e36be04f2bc1",
+  "physical_tasks_dispatched": 1,
+  "window_id": null,
+  "goal_pose": [
+    0.12,
+    -0.15,
+    0.0175
+  ],
+  "task": {
+    "outcome": "OUTCOME_FAILED",
+    "error_code": "ERR_RECOVERY_EXHAUSTED",
+    "detail": "policy abort (VERIFY_BUDGET_EXHAUSTED): verify still mismatched after budget (trace=PICK_A(attempt=1):OK,PLACE_A:OK,VERIFY_A(attempt=1):OK,PICK_B(attempt=1):OK,PLACE_B:OK,VERIFY_B(attempt=1):FAIL,RECOVERY:REOBSERVE+REVERIFY(after VERIFY_B(attempt=1)),VERIFY_B(attempt=2):FAIL); previous_skill=VERIFY cause=ERR_VERIFY_FAILED legacy_error_code=0",
+    "final_position_error_m": null
+  },
+  "smoke_returncode": 1
+}

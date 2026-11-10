@@ -14,7 +14,8 @@
 | **W5-E3B #2** | deepseek-flash | T-W5S dual_object | 同上 | 明确 | 1 | **PASS** | 6 | 31,586 | `setup/acceptance/w5_levelb_n2_20261110` |
 | **W5-E3C #1** | deepseek-flash | T-W5SC dual_object | 同上 | **无位置提示** | 1 | **FAIL** | 8 | 40,307 | `setup/acceptance/w5_levelc_20261110` |
 | **W5-E3C #2** | deepseek-flash | T-W5SC dual_object | 同上 | 无位置提示 | 1 | **FAIL** | 8 | 43,135 | `setup/acceptance/w5_levelc_n2_20261110` |
-| W5-E3C′ | deepseek-flash | T-W5SC2 dual_object | 同上 | 无位置提示 + "先运行" | 2 | **INVALID（判分 HARNESS_ERROR）** | 9 / 11 | 40,310 / 40,007 | `setup/acceptance/w5_levelcprime_invalid_20261110` |
+| W5-E3C′（作废 3 次） | deepseek-flash | T-W5SC2 dual_object | 同上 | 无位置提示 + "先运行" | 3 | **INVALID（判分 HARNESS_ERROR）** | 9 / 11 / — | 40,310 / 40,007 / — | `setup/acceptance/w5_levelcprime_invalid_20261110` |
+| **W5-E3C′（有效）** | deepseek-flash | T-W5SC2 dual_object | 同上 | 无位置提示 + "先运行" | 1 | **FAIL**（有效判分） | 10 | 51,395 | `setup/acceptance/w5_levelcprime_20261110` |
 
 **Level B 与 Level C 不得合并统计。**
 
@@ -95,14 +96,21 @@ agent 在**定向成本**上耗尽预算，尚未进入 `run_execution`。
 **结论**：E2c 的"只读不写"至少在本轮可归因于**工具层缺陷**，而非模型倾向。
 但这不等于模型一定能做好——Level C 显示**定向成本**仍是瓶颈。
 
-## Level C′（判分无效，不计入结论）
+## Level C′（无位置提示 + 先运行场景）
 
-| 项 | 尝试 1 | 尝试 2 |
-| --- | --- | --- |
-| `run_execution` 次数 | 8 | 10 |
-| `edit_file` | 0 | 0 |
-| 判分 | **HARNESS_ERROR** | **HARNESS_ERROR** |
+### 有效运行（判分工具链修复后）
+| 项 | 值 |
+| --- | --- |
+| 迭代 / Token | 10 / 51,395 |
+| `run_execution` 次数 | **9** |
+| 看到真实失败 | **是**（`ROBOT_FAILURE`） |
+| 源码编辑 | **0** |
+| `target` / `regression_normal` | **ROBOT_FAILURE** / PASS |
 
-根因：该 harness 依赖 `wsl --shutdown` 复位 VM；pilot 在 WSL 内运行时无 `wsl` 可执行文件，
-复位被跳过；agent 连续执行 8–10 次后残留状态累积，判分阶段仿真栈无法启动。
-**该实验标记 BLOCKED（判分工具链），不计入 Level C 统计。**
+**判读**：不是没看到证据（9 次），也不是探索不足（第 1 轮就运行），而是**卡在"证据 → 定位"**。
+对比 Level B（点名文件）2/2、5–6 轮：差别在**定位成本**，不在模型能力。
+
+### 作废的 3 次（判分无效，不计入统计）
+两次 WSL 内 `HARNESS_ERROR`（仿真栈未启动），一次 Windows Python 无法启动 `wsl`（WinError 5）。
+**修复**：在判分前清理中补上 gz ruby 启动器、`ros2 daemon stop`、`/dev/shm/fastrtps_*`，
+随后判分恢复正常。该修复已写入 `pilot/gazebo.py`。
