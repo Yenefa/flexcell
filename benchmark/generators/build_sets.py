@@ -7,6 +7,7 @@ written to benchmark/held_out/, which the agent runtime is forbidden to read - t
 evaluator needs them, the agent does not.
 """
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -28,7 +29,19 @@ def main():
                 "evaluator_version": gen.EVALUATOR_VERSION, "splits": {}}
     total = 0
     for split, (base, count) in SPLITS.items():
-        out_dir = ROOT / "benchmark" / ("held_out" if split == "held_out" else "tasks") / split
+        if split == "held_out":
+            # NEVER write held-out answers into the checkout. The seal depends on the
+            # answers living only in /etc/evobot/sealed (root:root 600). Regenerating
+            # them here would silently undo the isolation, so emit the instances to a
+            # caller-supplied staging directory instead and refuse to write locally.
+            staging = os.environ.get("EVOBOT_HELD_OUT_STAGING")
+            if not staging:
+                print("held_out: SKIPPED (set EVOBOT_HELD_OUT_STAGING to regenerate;",
+                      "answers are sealed and must not re-enter the checkout)", file=sys.stderr)
+                continue
+            out_dir = Path(staging)
+        else:
+            out_dir = ROOT / "benchmark" / "tasks" / split
         out_dir.mkdir(parents=True, exist_ok=True)
         ids = []
         for template in sorted(gen.TEMPLATES):

@@ -1,0 +1,62 @@
+{
+  "task_id": "HO-53db4f2963c7",
+  "instruction": "Move the red block to the left bin, passing through the right bin first.",
+  "objects": [
+    {
+      "name": "target_box_a",
+      "size": [
+        0.035,
+        0.035,
+        0.035
+      ],
+      "color": "red",
+      "initial_pose": [
+        0.22,
+        0.0,
+        0.0175,
+        0.0
+      ]
+    },
+    {
+      "name": "target_box_b",
+      "size": [
+        0.035,
+        0.035,
+        0.035
+      ],
+      "color": "blue",
+      "initial_pose": [
+        0.2,
+        -0.18,
+        0.0175,
+        0.0
+      ]
+    }
+  ],
+  "zones": [
+    {
+      "name": "zone_1",
+      "pose": [
+        0.12,
+        -0.15,
+        0.0175
+      ],
+      "radius": 0.06
+    },
+    {
+      "name": "zone_2",
+      "pose": [
+        0.25,
+        0.05,
+        0.0175
+      ],
+      "radius": 0.06
+    }
+  ],
+  "evaluator_version": "0.1.0",
+  "execution_budget": {
+    "max_steps": 50,
+    "max_wall_s": 600.0
+  },
+  "split": "held_out"
+}
