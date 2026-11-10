@@ -1,0 +1,13 @@
+run          claimed   graded   because
+s1000-a1     True      True     target_box_b ended at [0.2479, 0.0407, 0.0175], within zone_2's radius, and was 
+s1001-a1     False     True     target_box_a ended at [0.2528, 0.0491, 0.0175] in zone_2 rather than the left bi
+s1002-a1     True      True     target_box_b ended at [0.2524, 0.0519], inside zone_2 (centre [0.25, 0.05], radi
+s1004-a1     True      True     target_box_b was released into zone_1 then zone_2, and its measured final positi
+s1005-a1     False     True     target_box_b ended at [0.2425, 0.0401, 0.0175], which is inside zone_2 (the righ
+
+graded runs           : 5
+agent claimed success : 3
+FALSE SUCCESS RATE    : 0/3 = 0.0%
+false failure (safe)  : 2
+  -> the agent under-claims; it is unreliable at judging its own work,
+     which is exactly why the independent evaluator decides.

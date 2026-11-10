@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  CycloneDDS configuration for EvoBot / FlexCell runs.
+
+  WHY THIS FILE EXISTS: the trusted_sim launch starts about a dozen ROS processes in
+  one domain (move_group, six skill servers, robot_state_publisher, the gz bridge, the
+  task FSM). CycloneDDS allocates each node a participant index from a small default
+  pool, and once that pool is exhausted node creation fails with:
+
+    Failed to find a free participant index for domain N
+    rmw_create_node: failed to create domain, error Error
+
+  That failure then surfaces far away as a motion error ("POSE_NOT_REACHED"), which is
+  how it fooled me for two rounds. Raising the pool is the actual fix; a unique
+  ROS_DOMAIN_ID per run only reduced the collision rate.
+-->
+<CycloneDDS xmlns="https://cdds.io/config">
+  <Domain id="any">
+    <General>
+      <Interfaces>
+        <NetworkInterface autodetermine="true" />
+      </Interfaces>
+      <AllowMulticast>spdp</AllowMulticast>
+      <MaxMessageSize>65500B</MaxMessageSize>
+    </General>
+    <Discovery>
+      <ParticipantIndex>auto</ParticipantIndex>
+      <MaxAutoParticipantIndex>120</MaxAutoParticipantIndex>
+      <Peers>
+        <Peer address="localhost" />
+      </Peers>
+    </Discovery>
+    <Internal>
+      <Watermarks>
+        <WhcHigh>500kB</WhcHigh>
+      </Watermarks>
+    </Internal>
+  </Domain>
+</CycloneDDS>
