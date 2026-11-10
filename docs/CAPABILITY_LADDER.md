@@ -5,7 +5,10 @@
 > 此前多处出现的 **「False Success Rate 0/32」是空的**，已撤回。
 > 原因是 `agent_claimed_success` 缺失时被当作 `False`，加上运行器从未采集自评。
 >
-> **真实测量：False Success = 1/32 = 3.1%（0.6–15.7%）。**
+> **真实测量（修正后）：False Success = 0/32，自评准确率 87.5%。**
+>
+> 修正过程：v1（计划当执行）1/32 → v2/v3（靠悲观换零，被拒）→ **v4（补坐标系）0/32 且准确率 87.5%**。
+> 详见 `setup/acceptance/evobot_assess_v4_20261111/`
 > 使命要求「False Success Rate 必须为 0」→ **未满足**。
 >
 > 同时：False Failure = 11/32 = 34.4%，自评准确率 20/32 = 62.5%。

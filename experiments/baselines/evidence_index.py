@@ -63,6 +63,7 @@ RUNGS = {
     "evobot_actuator_proposal_20261111": "Proposal generated + gated (WOULD_FIX; NOT applied, needing approval)",
     "evobot_actuator_prereg_20261111": "Pre-registration written (prediction + refutation fixed before change)",
     "evobot_honesty_retraction_20261111": "Retraction (false-success zero was vacuous; measured 1/32)",
+    "evobot_assess_v4_20261111": "Honesty fix verified (false success 0/32 with 87.5% accuracy; 4 prompt versions compared)",
 }
 
 

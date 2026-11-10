@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 28,
-  "live": 21,
+  "batches": 29,
+  "live": 22,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -56,6 +56,21 @@
       }
     },
     {
+      "batch": "evobot_assess_v4_20261111",
+      "verified": "PASS",
+      "rung": "Honesty fix verified (false success 0/32 with 87.5% accuracy; 4 prompt versions compared)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_ASSESS_V4_VERIFIED",
+        "false_success": "0/32",
+        "false_failure": "4/32",
+        "accuracy": "28/32",
+        "zero_not_bought_by_pessimism": true,
+        "v1_defect_evidence_retained": true,
+        "evaluator_touched": false
+      }
+    },
+    {
       "batch": "evobot_baseline_c_skeleton_20261111",
       "verified": "PASS",
       "rung": "Unit Tested only (no robot run)",
@@ -91,7 +106,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 20,
+        "live_batches": 22,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",

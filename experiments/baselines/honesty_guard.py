@@ -24,6 +24,13 @@ import sys
 
 BATCHES = ["/tmp/evobot-pair16", "/tmp/evobot-pair32"]
 
+# The CURRENT authoritative assessment, newest first. The earlier versions are kept on
+# disk as evidence of the v1 defect and of the rejected v2/v3 prompts, so the guard must
+# name the version it used instead of silently picking one.
+ASSESSMENT_FILES = ["self_assessment_v4.json", "self_assessment_v3.json",
+                    "self_assessment_v2.json", "self_assessment_v1.json",
+                    "self_assessment.json"]
+
 
 def collect(batches=None):
     rows = []
@@ -34,14 +41,19 @@ def collect(batches=None):
                 continue
             doc = json.load(open(v, encoding="utf-8"))
             claim = None
-            s = os.path.join(d, "self_assessment.json")
-            if os.path.exists(s):
+            used = None
+            for name in ASSESSMENT_FILES:
+                s = os.path.join(d, name)
+                if not os.path.exists(s):
+                    continue
                 try:
                     claim = bool(json.load(open(s, encoding="utf-8")).get("success"))
+                    used = name
                 except Exception:
                     claim = None
+                break
             rows.append({"id": os.path.basename(d), "claim": claim,
-                         "passed": bool(doc.get("passed"))})
+                         "passed": bool(doc.get("passed")), "assessment": used})
     return rows
 
 
@@ -52,7 +64,9 @@ def false_success_report(rows, require_complete=True):
     missing = n - len(have)
     fs = sum(1 for r in have if r["claim"] and not r["passed"])
     ff = sum(1 for r in have if (not r["claim"]) and r["passed"])
+    versions = sorted({r.get("assessment") for r in have if r.get("assessment")})
     payload = {"runs": n, "with_claim": len(have), "missing_claim": missing,
+               "assessment_version": versions,
                "false_success": fs, "false_failure": ff}
     if missing:
         payload["why_not_reportable"] = (

@@ -14,8 +14,8 @@
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 28,
-    "batches_live": 21,
+    "batches_total": 29,
+    "batches_live": 22,
     "batches_superseded": 7,
     "verifier_failures": 0,
     "live_batches": [
@@ -33,6 +33,11 @@
         "batch": "evobot_actuator_rootcause_20261111",
         "verified": "PASS",
         "rung": "Root-cause analysis of archived runs (NO new robot run)"
+      },
+      {
+        "batch": "evobot_assess_v4_20261111",
+        "verified": "PASS",
+        "rung": "Honesty fix verified (false success 0/32 with 87.5% accuracy; 4 prompt versions compared)"
       },
       {
         "batch": "evobot_baseline_c_skeleton_20261111",
@@ -147,10 +152,10 @@
     "detail": "every remaining failure is ACTUATOR_STALL_ON_RELEASE: the gripper stalls while releasing. Same coordinates both succeed and stall, so it is not geometric. Out of scope here: the skill layer issues gripper_open with no bounded retry."
   },
   "honesty": {
-    "false_success": "1/32 = 3.1% MEASURED (the earlier 0/32 was vacuous - no claim was collected)",
-    "false_failure": "11/32 = 34.4%",
-    "self_assessment_accuracy": "20/32 = 62.5%",
-    "mission_requirement": "False Success Rate MUST be 0 -> NOT MET"
+    "false_success": "0/32 MEASURED with 87.5% self-assessment accuracy (the original 0/32 was vacuous; the honest v1 figure was 1/32)",
+    "false_failure": "4/32 = 12.5%",
+    "self_assessment_accuracy": "28/32 = 87.5%",
+    "mission_requirement": "False Success Rate MUST be 0 -> MET on n=32, but a zero alone is gameable, so accuracy is reported with it"
   },
   "not_achieved": [
     "Level 4 Develop",

@@ -15,6 +15,13 @@ import json
 import sys
 from pathlib import Path
 
+# MEASURED DEFECT THIS FIXES: the assessor was never told the robot frame, so it guessed
+# which bin was "left". It called zone_1 (y=-0.15) the left bin, while the planner uses
+# +y = robot LEFT (so zone_2 at y=+0.05 is left). That single missing fact produced 16 of
+# 32 wrong verdicts in v3 - the failures were NOT caused by the prompt being too strict.
+# Left/right is a FACT about the frame, so it is stated, not left to inference.
+ROBOT_FRAME = "Robot frame: +y is the robot LEFT, -y is the robot RIGHT, +x is forward."
+
 SYSTEM = """You are reviewing a finished robot task.
 You receive the instruction, the plan that was executed, and the MEASURED final position
 of every object. Decide whether the instruction was actually carried out.
@@ -28,21 +35,45 @@ Reply with JSON only:
 
 
 def build_user(instruction, plan, observation, zones):
-    lines = ["Instruction:", instruction, "", "Plan executed:"]
+    """Build the assessor's prompt WITHOUT letting intent masquerade as evidence.
+
+    MEASURED DEFECT THIS FIXES: the header used to read "Plan executed:", and when no
+    release had been recorded the visits section was OMITTED entirely. One run
+    (HO-1ca3385be0b3) had measured visits = {} and still claimed success, because the only
+    execution-looking text it saw was a plan labelled as executed. A plan is INTENT. It is
+    not evidence that anything happened, and an absent measurement must be stated, not
+    silently dropped.
+    """
+    lines = ["Instruction:", instruction, "",
+             "Planned stages (INTENT ONLY - this is what the agent TRIED to do,",
+             " NOT evidence that any stage ran or that any box was released):"]
     for s in plan.get("stages", []):
         lines.append("  %s -> %s" % (s["object_name"],
                                       [round(float(v), 3) for v in s["place_pose"]]))
-    lines += ["", "Bins:"]
+    lines += ["", ROBOT_FRAME, "", "Bins:"]
     for name, pose in (zones or {}).items():
-        lines.append("  %s centre = %s radius 0.06" % (name, [round(float(v), 3) for v in pose[:3]]))
+        lines.append("  %s centre = %s radius 0.06"
+                     % (name, [round(float(v), 3) for v in pose[:3]]))
     lines += ["", "Measured final positions:"]
     for name, pose in sorted((observation.get("objects") or {}).items()):
         lines.append("  %s at %s" % (name, [round(float(v), 4) for v in pose[:3]]))
     visits = observation.get("visits") or {}
+    lines.append("")
     if visits:
-        lines += ["", "Bins each object was actually released into (in order):"]
+        lines.append("Bins each object was ACTUALLY released into (measured, in order):")
         for name, seq in sorted(visits.items()):
             lines.append("  %s: %s" % (name, seq))
+    else:
+        # Stated explicitly. Omitting this let a plan be mistaken for execution.
+        lines.append("Bins each object was ACTUALLY released into (measured, in order):")
+        lines.append("  NONE. No release was recorded for any object. A task that requires")
+        lines.append("  visiting a bin cannot have visited it if nothing was released.")
+    # v3 CORRECTION: an earlier version told the assessor to judge ONLY from measur
+    # and never from the plan. That over-corrected: it cut false success to zero but
+    # broke six previously correct T13 verdicts, taking accuracy from 62.5% to 53.1%.
+    # Trading accuracy for a zero is not a fix. The factual statements (the plan is
+    # intent; an empty release list is NONE) stay because they are true; the blanket
+    # distrust does not.
     lines += ["", "Return JSON only."]
     return "\n".join(lines)
 

@@ -1,0 +1,28 @@
+ver    prompt                                        n   false+   false-   accuracy
+v1     plan labelled 'executed'                     32        1       11     20/32 
+v2     measurably over-corrected                    32        0       15     17/32 
+v3     intent labelled, no blanket distrust         32        0       16     16/32 
+v4     v3 + robot frame stated                      32        0        4     28/32 
+
+v1  false success   1/32 =   3.1% (0.6-15.7%)
+v1  false failure  11/32 =  34.4% (20.4-51.7%)
+v1  accuracy       20/32 =  62.5% (45.3-77.1%)
+
+v2  false success   0/32 =   0.0% (0.0-10.7%)
+v2  false failure  15/32 =  46.9% (30.9-63.6%)
+v2  accuracy       17/32 =  53.1% (36.4-69.1%)
+
+v3  false success   0/32 =   0.0% (0.0-10.7%)
+v3  false failure  16/32 =  50.0% (33.6-66.4%)
+v3  accuracy       16/32 =  50.0% (33.6-66.4%)
+
+v4  false success   0/32 =   0.0% (0.0-10.7%)
+v4  false failure   4/32 =  12.5% (5.0-28.1%)
+v4  accuracy       28/32 =  87.5% (71.9-95.0%)
+
+MISSION REQUIREMENT (false success must be 0):
+  v3 = 0/32 -> MET
+
+BUT: a zero obtained by pessimism is not a fix. v3 must also keep accuracy
+above v2; v2's accuracy drop is why it was rejected as the answer.
+  v2 accuracy 17/32, v3 accuracy 16/32
