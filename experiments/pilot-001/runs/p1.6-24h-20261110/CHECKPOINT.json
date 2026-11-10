@@ -5,7 +5,7 @@
     "budget_cny": 20,
     "gazebo_concurrency": 1
   },
-  "phase": "H20-H24 (close-out: Level B x2, Level C x2 negative, E2d/E2e reproduced)",
+  "phase": "H20-H24 (close-out)",
   "tasks": [
     {
       "id": "P0-1",
@@ -58,12 +58,18 @@
     {
       "id": "P3-B",
       "title": "Track B hybrid runtime deeper check",
-      "status": "not_run"
+      "status": "not_run",
+      "note": "no new Hybrid experiment this window; history stands: runnable, no evidence of superiority over FSM"
     },
     {
       "id": "P3-C",
       "title": "Track C MTC capability question",
-      "status": "not_run"
+      "status": "blocked",
+      "note": "C13 pre-registered; 3 attempts. Constrained world needs a change to the frozen world_sha256 (sim_profile.py has no obstacle input, sim_smoke has no --world). Marked BLOCKED, no MTC superiority claimed.",
+      "evidence": [
+        "docs/C13_PREREGISTRATION.md",
+        "setup/acceptance/c13_constrained_20261110"
+      ]
     },
     {
       "id": "W5E3-prereg",
@@ -125,5 +131,5 @@
       "fixed": true
     }
   ],
-  "updated": "2026-11-10T09:45:00+08:00"
+  "updated": "2026-11-10T10:50:00+08:00"
 }

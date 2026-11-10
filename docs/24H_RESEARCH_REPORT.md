@@ -93,7 +93,7 @@
 | Level C′（2 次） | **INVALID** | 判分 `HARNESS_ERROR`，仿真栈未启动；按三次规则停止，标记 BLOCKED（判分工具链） |
 
 | Track B Hybrid 新实验 | **NOT_RUN** | 优先级低于 W5 |
-| Track C 机制问题（C11 之后） | **NOT_RUN** | 未新增样本，避免用数量代替机制检验 |
+| Track C 机制问题（C11 之后） | **BLOCKED** | C13 已预注册并尝试 3 次：受约束世界需改动冻结的 `world_sha256`，与"不放宽验收"原则冲突 |
 | 真机安全 | **NOT_RUN** | 无硬件 |
 | 隔离态仿真实测 | **NOT_RUN** | 需故障注入 |
 

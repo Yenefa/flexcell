@@ -76,8 +76,10 @@ agent 在**定向成本**上耗尽预算，尚未进入 `run_execution`。
 
 ## Track C（FSM / MTC）
 
-**NOT_RUN（本轮）** —— C11 之后的机制问题（MTC 是否在复杂约束/多候选规划中展示 FSM 缺失的能力）
-**仍未回答**。本轮未新增样本，避免用普通场景数量代替机制检验。
+**C13 已预注册并尝试，结果 BLOCKED** —— 受约束世界无法在不动冻结 `world_sha256` 的前提下构造
+（`sim_profile.py` 无 obstacle 入口；加 `--world` 覆盖会削弱验收门）。**机制问题仍未回答。**
+**仍未回答**。预注册与待应用的 world patch 见 `docs/C13_PREREGISTRATION.md`、
+`setup/acceptance/c13_constrained_20261110/`。本轮**未新增普通样本**，拒绝用数量代替机制检验。
 
 ## 工具链缺陷（影响所有实验的解释）
 
