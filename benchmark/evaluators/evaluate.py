@@ -108,6 +108,16 @@ def evaluate(spec, final_state):
         clauses.append(_clause(
             "visit:" + name, ok, required=required_zones, observed=seen))
 
+    # Ordered route clause. The set-based "visit" clause cannot distinguish a real
+    # three-move chain from a two-move shortcut that happens to end in the right bin.
+    # This is STRICTER (new clause), never a relaxation of an existing one.
+    for name, required_seq in sorted((goal.get("visit_sequence") or {}).items()):
+        observed = list((final_state.get("visits") or {}).get(name, []))
+        ok = observed == list(required_seq)
+        clauses.append(_clause(
+            "visit_sequence:" + name, ok,
+            required=list(required_seq), observed=observed))
+
     min_tiers = goal.get("min_tiers")
     if min_tiers:
         heights = sorted(pose[n][2] for n in goal.get("placement", {}) if n in pose)

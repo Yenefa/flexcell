@@ -1,0 +1,88 @@
+{
+  "verdict": "EVOBOT_UNSEEN_HELD_OUT_B",
+  "instances": 6,
+  "agent_plans_correct": 6,
+  "independently_verified": 4,
+  "clean_pass": 3,
+  "disputed_pass": 1,
+  "graded_fail": 2,
+  "false_success": 0,
+  "rows": [
+    {
+      "task": "HO-42109d30fa00",
+      "template": "T12_triple_revisit",
+      "plan_ok": true,
+      "outcome": 0,
+      "error_code": 0,
+      "passed": true,
+      "clean": true,
+      "disputed": false,
+      "false_success": false,
+      "failed": []
+    },
+    {
+      "task": "HO-90899d657e68",
+      "template": "T13_geometric_conditional",
+      "plan_ok": true,
+      "outcome": 1,
+      "error_code": 62,
+      "passed": true,
+      "clean": false,
+      "disputed": true,
+      "false_success": false,
+      "failed": []
+    },
+    {
+      "task": "HO-96e57334764a",
+      "template": "T13_geometric_conditional",
+      "plan_ok": true,
+      "outcome": 0,
+      "error_code": 0,
+      "passed": true,
+      "clean": true,
+      "disputed": false,
+      "false_success": false,
+      "failed": []
+    },
+    {
+      "task": "HO-b81a5ae02d6d",
+      "template": "T13_geometric_conditional",
+      "plan_ok": true,
+      "outcome": 1,
+      "error_code": 61,
+      "passed": false,
+      "clean": false,
+      "disputed": false,
+      "false_success": false,
+      "failed": [
+        "placement:target_box_b"
+      ]
+    },
+    {
+      "task": "HO-b91d34102cdc",
+      "template": "T12_triple_revisit",
+      "plan_ok": true,
+      "outcome": 0,
+      "error_code": 0,
+      "passed": true,
+      "clean": true,
+      "disputed": false,
+      "false_success": false,
+      "failed": []
+    },
+    {
+      "task": "HO-fd5737f932db",
+      "template": "T12_triple_revisit",
+      "plan_ok": true,
+      "outcome": 1,
+      "error_code": 62,
+      "passed": false,
+      "clean": false,
+      "disputed": false,
+      "false_success": false,
+      "failed": [
+        "visit_sequence:target_box_b"
+      ]
+    }
+  ]
+}

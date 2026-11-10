@@ -177,6 +177,17 @@
             }
           },
           "description": "bins an object must actually pass through, checked against the place history"
+        },
+        "visit_sequence": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^zone_[0-9]+$"
+            }
+          },
+          "description": "exact ordered sequence of bins an object must be released into"
         }
       }
     },
