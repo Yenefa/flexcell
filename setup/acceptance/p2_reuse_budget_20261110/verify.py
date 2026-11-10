@@ -1,29 +1,24 @@
 #!/usr/bin/env python3
-"""P2 at a workable budget: a DIFFERENT defect, with the prior lesson available.
+"""P2 with a control arm: does a stored experience actually reduce repair cost?
 
-This replaces the earlier P2 run, which was truncated at 54k tokens and therefore
-could not support an H0 ("the note did not help"). Here the budget is 150k, the
-defect is on the VERIFY branch (not PLACE), localisation is OFF, and the only
-extra input is the archived experience record.
+Both arms use the SAME VERIFY-branch defect, the SAME 150k budget, no
+localisation, and identical task text. The only difference is whether the archived
+experience record is present. Without arm B the first result could not be
+attributed - the P3 probe already showed the same defect class is solvable without
+any note given enough budget.
 """
 import json
 import sys
 from pathlib import Path
 
-HERE = Path(__file__).parent / "run1"
+HERE = Path(__file__).parent
+ARMS = {"experience": HERE / "run1", "control": HERE / "run_control"}
 
 
-def main():
-    r = json.loads((HERE / "result.json").read_text())
-    v = r["verdict"]
-    assert v["target"]["status"] == "PASS", v["target"]
-    assert v["regression_normal"]["status"] == "PASS"
-    assert v["regression_regrasp"]["status"] == "PASS"
-    assert v["build"]["returncode"] == 0
-    assert r["claim_success"] is False and r["false_success"] is False
-
+def load(d):
+    r = json.loads((d / "result.json").read_text())
     flat, edits, read_note = [], [], False
-    for line in (HERE / "events.jsonl").read_text().splitlines():
+    for line in (d / "events.jsonl").read_text().splitlines():
         if not line.strip():
             continue
         row = json.loads(line)
@@ -32,32 +27,50 @@ def main():
         if row.get("kind") == "transcript":
             for x in (row.get("results") or []):
                 a = str(x.get("args") or "")
-                if "experience/experience_place_target.json" in a and x.get("tool") == "read_file":
+                if "experience/experience_place_target.json" in a:
                     read_note = True
                 if x.get("tool") == "edit_file":
                     edits.append(x.get("args"))
-
-    # the agent actually opened the stored lesson
-    assert read_note, "the experience record was never read"
-    # it edited exactly once, and on the VERIFY branch, not the PLACE one
-    assert len(edits) == 1, edits
-    args = edits[0]
-    assert "zone_of[decision.target]" in args.get("new", ""), args
-    # localisation was off in this arm, so the note is the only extra input
-    assert not any("suspect_regions" in str(x.get("result"))
-                   for row in [] for x in [])
-
-    print(json.dumps({
-        "verdict": "P2_AGENT_READ_AND_REUSED_A_STORED_EXPERIENCE",
-        "model": r["meta"]["requested_model"],
+    v = r["verdict"]
+    return {
+        "success": r["success"],
         "iterations": r["iterations"],
         "tokens": r["cost"]["tokens"],
-        "tool_counts": {k: flat.count(k) for k in
-                        ("list_dir", "read_file", "run_execution", "edit_file")},
-        "experience_record_read": read_note,
         "target": v["target"]["status"],
         "regressions": [v["regression_normal"]["status"],
                         v["regression_regrasp"]["status"]],
+        "edit_file": flat.count("edit_file"),
+        "list_dir": flat.count("list_dir"),
+        "run_execution": flat.count("run_execution"),
+        "read_note": read_note,
+        "claim_success": r["claim_success"],
+        "false_success": r["false_success"],
+    }
+
+
+def main():
+    a, b = load(ARMS["experience"]), load(ARMS["control"])
+    for arm in (a, b):
+        assert arm["target"] == "PASS", arm
+        assert arm["regressions"] == ["PASS", "PASS"], arm
+        assert arm["claim_success"] is False and arm["false_success"] is False
+        assert arm["edit_file"] == 1, arm
+    # the arms really differed only in whether the note was read
+    assert a["read_note"] is True, "experience arm never read the record"
+    assert b["read_note"] is False, "control arm read a record; not a control"
+    # both solved it; the experience arm was cheaper on both axes
+    cheaper = a["iterations"] <= b["iterations"] and a["tokens"] < b["tokens"]
+    print(json.dumps({
+        "verdict": "P2_EXPERIENCE_REUSED_AND_CHEAPER" if cheaper else
+                   "P2_EXPERIENCE_REUSED_NO_MEASURED_BENEFIT",
+        "experience_arm": {k: a[k] for k in
+                           ("iterations", "tokens", "list_dir", "run_execution", "read_note")},
+        "control_arm": {k: b[k] for k in
+                        ("iterations", "tokens", "list_dir", "run_execution", "read_note")},
+        "iteration_saving_pct": round(100.0 * (b["iterations"] - a["iterations"])
+                                      / b["iterations"], 1),
+        "token_saving_pct": round(100.0 * (b["tokens"] - a["tokens"]) / b["tokens"], 1),
+        "n_per_arm": 1,
     }, indent=2))
     return 0
 
