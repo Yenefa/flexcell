@@ -363,3 +363,32 @@ agent 修复时**自己写了注释**，指出"用固定对象会让第二个对
 - 两臂都成功，所以证明的是**成本收益**，不是**可行性差异**；
 - 经验的生产者仍是人（第 ② 项未达成）；
 - 对照臂是看到实验臂结果后补的，已在预注册中声明。
+
+---
+
+## 15. 第三方复核入口（全部实测通过）
+
+每个证据目录都带独立 `verify.py`，**不依赖本报告的叙述**。一条命令跑完全部：
+
+```bash
+bash ci-public-window/scripts/verify_all.sh
+```
+
+| 证据目录 | verdict | rc |
+| --- | --- | --- |
+| `w5_levelb_20261110` | `W5_LEVELB_REAL_SOURCE_REPAIR` | 0 |
+| `w5_levelb_n2_20261110` | `W5_LEVELB_REAL_SOURCE_REPAIR` | 0 |
+| `w5_levelc_evidence_20261110` | `W5_LEVELC_ACHIEVED_WITH_EVIDENCE_LOCALISATION` | 0 |
+| `w5_levelcprime_20261110` | `LEVEL_C_PRIME_VALID_NEGATIVE` | 0 |
+| `c14_tool_inventory_20261110` | `C14_H0_TOOL_CHOICE_NOT_FIXED_BY_INVENTORY` | 0 |
+| `p3_budget_noloc_20261110` | `P3_BUDGET_NOT_CAPABILITY_LEVEL_C_FAILURES_WERE_TRUNCATION` | 0 |
+| `p2_reuse_budget_20261110` | `P2_EXPERIENCE_REUSED_AND_CHEAPER` | 0 |
+| `p2_reuse_20261110`（旧） | `P2_OLD_RUN_VOID_NO_ARTEFACTS_AND_BUDGET_TRUNCATED` | 0 |
+| `w5_e2_flash_20261110` | `E2_FLASH_REPRODUCED` | 0 |
+| `p0a_quarantine_20261110` | `P0A_QUARANTINE_ENGAGED_AND_CLEARED` | 0 |
+
+**注意最后两行**：旧 P2 目录的 verifier **断言它是无效的**，而不是假装它有结论——
+这样任何人都不能把作废的运行当成证据。
+
+另外两个仅作历史保留、**不参与结论**的目录已在各自 `README.md` 标注：
+`w5_levelc_20261110`、`w5_levelc_n2_20261110`（均为 40k 预算截断）。
