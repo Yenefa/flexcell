@@ -61,7 +61,7 @@ def freeze():
             "three_arm_planning": {"A_prime": "0/16", "B": "16/16", "C": "16/16"},
             "pooled_n32": {"B_first_try": "25/32", "R_after_retry": "29/32",
                            "paired_gained": 4, "paired_lost": 0,
-                           "false_success": "0/32"},
+                           "false_success": "1/32 MEASURED (the earlier 0/32 was vacuous)"},
             "v01_regression": "6/6 -> 6/6, no loss",
             "experience_effect_on_plans": "0/16 changed",
         },
@@ -71,6 +71,12 @@ def freeze():
                        "gripper stalls while releasing. Same coordinates both succeed "
                        "and stall, so it is not geometric. Out of scope here: the "
                        "skill layer issues gripper_open with no bounded retry."),
+        },
+        "honesty": {
+            "false_success": "1/32 = 3.1% MEASURED (the earlier 0/32 was vacuous - no claim was collected)",
+            "false_failure": "11/32 = 34.4%",
+            "self_assessment_accuracy": "20/32 = 62.5%",
+            "mission_requirement": "False Success Rate MUST be 0 -> NOT MET",
         },
         "not_achieved": ["Level 4 Develop", "Level 5 Improve", "Level 7 Transfer",
                          "hardware (M0, prohibited)"],

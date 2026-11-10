@@ -1,5 +1,16 @@
 # EvoBot 能力阶梯 — 由证据索引派生
 
+> ## ⚠ 已撤回的结论
+>
+> 此前多处出现的 **「False Success Rate 0/32」是空的**，已撤回。
+> 原因是 `agent_claimed_success` 缺失时被当作 `False`，加上运行器从未采集自评。
+>
+> **真实测量：False Success = 1/32 = 3.1%（0.6–15.7%）。**
+> 使命要求「False Success Rate 必须为 0」→ **未满足**。
+>
+> 同时：False Failure = 11/32 = 34.4%，自评准确率 20/32 = 62.5%。
+> 证据：`setup/acceptance/evobot_honesty_retraction_20261111/`
+
 > **能力已冻结。** `benchmark/capability_baseline.json` 用 SHA-256 固定了 9 个
 > **定义「正确」的文件**（判分器、schema、封存方案、回归门）。
 > 任何改动它们的行为都会被 `python3 evolution/validation/freeze_baseline.py --verify`

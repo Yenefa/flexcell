@@ -1,0 +1,21 @@
+runs                      : 32
+self-assessment available : 32
+still missing             : 0
+
+agent CLAIMED success     : 19/32
+ACTUALLY passed           : 29/32
+
+FALSE SUCCESS             : 1/32 = 3.1% (0.6-15.7%)
+FALSE FAILURE             : 11/32 = 34.4% (20.4-51.7%)
+SELF-ASSESSMENT ACCURACY  : 20/32 = 62.5% (45.3-77.1%)
+
+Sample false-failure reasons (agent said FAILED, world said PASSED):
+  HO-09db00012311      target_box_a was released into zone_1, zone_2, then zone_1 and ended at [0.1204, -0.1107, 
+  HO-4c174b133d05      target_box_b ended at [0.1556, -0.1467, 0.0175], inside zone_1 (left bin), while the right
+  HO-963e884e5c6a      target_box_b ended at [0.1695, -0.1555] inside zone_1 (the left bin, x≈0.12) rather than t
+  HO-bc8270332865      target_box_a ended at [0.1174, -0.1073] inside zone_1 and was released into zone_1, zone_2
+  HO-da078a68af49      target_box_a was released into zone_1, zone_2, zone_1 and ended at [0.1095, -0.1104] insid
+  HO-1d4d99a464e4      Both target_box_a at [0.0825, -0.1576, 0.0175] and target_box_b at [0.1681, -0.147, 0.0175
+
+FALSE SUCCESSES (dangerous direction):
+  HO-1ca3385be0b3      target_box_a ends at [0.1248, -0.1951] inside zone_1, the right bin, after the executed pa
