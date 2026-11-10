@@ -17,6 +17,8 @@
 | W5-E3C′（作废 3 次） | deepseek-flash | T-W5SC2 dual_object | 同上 | 无位置提示 + "先运行" | 3 | **INVALID（判分 HARNESS_ERROR）** | 9 / 11 / — | 40,310 / 40,007 / — | `setup/acceptance/w5_levelcprime_invalid_20261110` |
 | **W5-E3C′（有效）** | deepseek-flash | T-W5SC2 dual_object | 同上 | 无位置提示 + "先运行" | 1 | **FAIL**（有效判分） | 10 | 51,395 | `setup/acceptance/w5_levelcprime_20261110` |
 | **C14（工具清单）** | deepseek-flash | T-W5SC2 dual_object | 同上 | 无提示 + 工具清单可见 | 1 | **FAIL**（H0 成立） | 9 | 53,045 | `setup/acceptance/c14_tool_inventory_20261110` |
+| C15 run A | deepseek-flash | T-W5SC2 dual_object | 同上 | 无提示 + **证据自带定位**（被截断） | 1 | **PASS** | 5 | 25,380 | 原始产物丢失（WSL 重启），**不作证据** |
+| **C15 run B** | deepseek-flash | T-W5SC2 dual_object | 同上 | 无提示 + **证据自带定位（可见）** | 1 | **PASS** | **4** | **16,937** | `setup/acceptance/w5_levelc_evidence_20261110` |
 
 **Level B 与 Level C 不得合并统计。**
 
@@ -136,3 +138,23 @@ agent 在**定向成本**上耗尽预算，尚未进入 `run_execution`。
 | Level C | 否（未运行场景） | 不足 | 否 | 探索成本耗尽预算 |
 | Level C′ | **是（9 次）** | 充分 | 否 | 证据 → 定位的转换 |
 | C14 | **是（8 次）** | 充分 + 工具清单可见 | 否 | **工具选择**：不用搜索，只遍历 |
+
+## C15 — 失败证据自带定位（**Level C 首次达成**）
+
+| | run B（regions 可见） |
+| --- | --- |
+| `suspect_regions` 送达 | **是** |
+| `list_dir` | **0**（C14 为 28） |
+| 迭代 / Token | **4 / 16,937** |
+| `dual_object` / `normal` / `regrasp` | **PASS / PASS / PASS** |
+| 编辑 | `zones[zone_of[self._obj_a]]` → `zones[zone_of[decision.target]]`（正确） |
+
+**这是本项目第一次在"无文件名、无行号、无修复方向"的条件下完成真实源码修复并通过三门。**
+与 Level B 的区别：Level B 用**提示**替代搜索；C15 用**证据**替代搜索。
+
+### 方法演进（同一任务、同一缺陷、同一预算）
+| 条件 | 结果 | 关键行为 |
+| --- | --- | --- |
+| Level C′ | FAIL | 运行 9 次，0 编辑 |
+| C14 工具清单 | FAIL | 运行 8 次，`list_dir` 28 次，0 编辑 |
+| **C15 证据定位** | **PASS** | 运行 4 次，**`list_dir` 0 次**，1 次正确编辑 |

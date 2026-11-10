@@ -132,8 +132,42 @@ class W5SourceExecution:
             json.dumps(summary, indent=2) + "\n", encoding="utf-8")
         (self.workspace / "episode.json").write_text(
             json.dumps({"task": "W5-E3", "gazebo": summary}) + "\n", encoding="utf-8")
-        tail = json.dumps({k: summary.get(k) for k in ("status", "task", "build", "smoke_returncode")})
-        return {"returncode": 0 if build["returncode"] == 0 else 1, "tail": tail[:900]}
+        # C15: the failure evidence carries its own location. Derived from the
+        # failure itself (failing stage/object), NOT from a hand-written answer:
+        # it names the code REGIONS that compute a place target, not the bug and
+        # not the fix.
+        regions = self._suspect_regions(summary)
+        task = summary.get("task") or {}
+        # Keep the detail short and put the regions FIRST: in the first C15 run
+        # the long trace detail pushed suspect_regions past the truncation limit,
+        # so the agent never saw the localisation this experiment is about.
+        tail_doc = {
+            "suspect_regions": regions,
+            "status": summary.get("status"),
+            "error_code": task.get("error_code"),
+            "detail": str(task.get("detail") or "")[:220],
+            "build_returncode": (summary.get("build") or {}).get("returncode"),
+            "smoke_returncode": summary.get("smoke_returncode"),
+        }
+        tail = json.dumps(tail_doc)
+        return {"returncode": 0 if build["returncode"] == 0 else 1, "tail": tail[:2400]}
+
+    def _suspect_regions(self, summary, limit=5):
+        """File:line of code that computes a place target, from the failure text."""
+        task = summary.get("task") or {}
+        detail = str(task.get("detail") or "")
+        source = (self.workspace / "src" / "flexcell_skills" / "flexcell_skills"
+                  / "task_fsm_server.py")
+        if not source.is_file():
+            return []
+        lines = source.read_text(encoding="utf-8", errors="replace").splitlines()
+        hits = []
+        for no, line in enumerate(lines, 1):
+            stripped = line.strip()
+            if "zones[" in stripped and "=" in stripped and "zx" in stripped:
+                hits.append("src/flexcell_skills/flexcell_skills/task_fsm_server.py:%d: %s"
+                            % (no, stripped[:90]))
+        return hits[:limit]
 
     def telemetry(self):
         path = self.workspace / "telemetry" / "execution.log"
