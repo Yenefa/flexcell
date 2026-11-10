@@ -29,6 +29,23 @@ def test_both_destinations_stay_inside_the_bin_radius():
         assert math.hypot(s["place_pose"][0] - Z1[0], s["place_pose"][1] - Z1[1]) <= 0.06
 
 
+def test_spread_avoids_walking_into_another_object():
+    """Regression for 6 real err 60 failures: offset direction must dodge obstacles.
+
+    zone_1 revisits with box_b parked at (0.20, -0.18). Spreading along +x pushed the
+    second landing spot to 0.165, only 46 mm from box_b - below the 50 mm clearance.
+    """
+    Z1c = [0.12, -0.15, 0.0175]
+    stages = [{"object_name": "a", "place_pose": list(Z1c)},
+              {"object_name": "a", "place_pose": list(Z1c)}]
+    avoid = [[0.20, -0.18]]
+    out = sd.spread(stages, avoid=avoid)
+    import math
+    for s in out:
+        d = math.hypot(s["place_pose"][0] - 0.20, s["place_pose"][1] + 0.18)
+        assert d >= 0.05, (s["place_pose"], d)
+
+
 def test_single_object_plan_is_untouched():
     stages = [{"object_name": "a", "place_pose": list(Z1)}]
     assert sd.spread(stages)[0]["place_pose"] == Z1

@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 17,
-  "live": 10,
+  "batches": 18,
+  "live": 11,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -58,8 +58,24 @@
         "public_tasks": 36,
         "public_tasks_with_answers": 0,
         "agent_uid_read_blocked": true,
-        "sealed_answers": 50,
+        "sealed_answers": 58,
         "isolation_kind": "OS permissions; not a kernel namespace"
+      }
+    },
+    {
+      "batch": "evobot_pair16_20261111",
+      "verified": "PASS",
+      "rung": "Independently Verified (paired B vs R, n=16)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_PAIRED_N16_VERIFIED",
+        "instances": 16,
+        "B_first_try_pass": 13,
+        "R_after_retry_pass": 14,
+        "paired_gained": 1,
+        "paired_lost": 0,
+        "false_success_rate": 0.0,
+        "recovery_triggers": 2
       }
     },
     {

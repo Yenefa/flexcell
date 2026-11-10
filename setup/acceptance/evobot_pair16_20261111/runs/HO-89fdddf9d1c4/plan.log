@@ -1,0 +1,21 @@
+{
+  "moves": [
+    {
+      "object": "target_box_a",
+      "zone": "zone_1",
+      "why": "Red block starts by going to the right bin (negative y)."
+    },
+    {
+      "object": "target_box_a",
+      "zone": "zone_2",
+      "why": "Then move the red block to the left bin (positive y), satisfying the required visit."
+    },
+    {
+      "object": "target_box_a",
+      "zone": "zone_1",
+      "why": "Finally return the red block to the right bin."
+    }
+  ],
+  "confidence": "high",
+  "uncertainty": ""
+}

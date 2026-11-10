@@ -16,17 +16,23 @@ WT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(WT / "benchmark" / "generators"))
 import unseen_tasks as U
 
-SEEDS = [7100, 7101, 7102, 7103, 7104, 7105, 7106, 7107]
+# T13 stresses same-bin placement; T12 stresses a 3-stage chain. Both are execution-
+# heavy, which is where the failures actually occur, so both belong in the set.
+T13_SEEDS = [7100, 7101, 7102, 7103, 7104, 7105, 7106, 7107]
+T12_SEEDS = [7200, 7201, 7202, 7203, 7204, 7205, 7206, 7207]
 
 
 def main(argv=None):
     out = Path(sys.argv[1])
     out.mkdir(parents=True, exist_ok=True)
-    for seed in SEEDS:
-        spec = U.generate("T13_geometric_conditional", seed, "held_out")
-        spec.pop("_branch_note", None)
-        (out / (spec["task_id"] + ".json")).write_text(
-            json.dumps(spec, indent=2) + "\n", encoding="utf-8")
+    pairs = [("T13_geometric_conditional", T13_SEEDS),
+             ("T12_triple_revisit", T12_SEEDS)]
+    for template, seeds in pairs:
+        for seed in seeds:
+            spec = U.generate(template, seed, "held_out")
+            spec.pop("_branch_note", None)
+            (out / (spec["task_id"] + ".json")).write_text(
+                json.dumps(spec, indent=2) + "\n", encoding="utf-8")
     print("staged", len(list(out.glob("*.json"))), "recovery-set specs")
     return 0
 

@@ -31,8 +31,20 @@ import math
 SPREAD_STEP_M = 0.090
 
 
-def spread(stages, bin_radius=0.06):
-    """Return a new stage list with distinct destinations for same-bin groups."""
+def spread(stages, bin_radius=0.06, avoid=None, clearance=0.05):
+    """Return a new stage list with distinct destinations for same-bin groups.
+
+    `avoid` lists positions of other objects. Every produced destination must stay at
+    least `clearance` away from each of them.
+
+    WHY THE AVOIDANCE EXISTS, measured on the robot: T12 revisits zone_1 twice. Spreading
+    along +x pushed the second landing spot to x=0.165, which is only 46 mm from box_b
+    spawn at (0.20, -0.18) - BELOW the 50 mm clearance - so the composite rejected it
+    with "declared destination occupied" and six runs failed identically. Spreading along
+    one fixed axis is not enough; the axis has to be chosen so the offsets do not walk
+    into another object.
+    """
+    own = [[float(a), float(b)] for a, b in (avoid or [])]
     groups = {}
     order = []
     for i, s in enumerate(stages):
@@ -42,25 +54,49 @@ def spread(stages, bin_radius=0.06):
             order.append(key)
         groups[key].append(i)
 
+    def offsets(n):
+        return [(r - (n - 1) / 2.0) * SPREAD_STEP_M for r in range(n)]
+
+    def along(centre, offs, axis):
+        pts = []
+        for o in offs:
+            pts.append([centre[0], centre[1] + o] if axis == 1
+                       else [centre[0] + o, centre[1]])
+        return pts
+
+    def margin(pts):
+        """Smallest distance from any produced point to any avoided object."""
+        if not own:
+            return float("inf")
+        return min(math.hypot(px - ax, py - ay)
+                   for px, py in pts for ax, ay in own)
+
     result = [dict(s, place_pose=list(s["place_pose"])) for s in stages]
     for key in order:
         idxs = groups[key]
         if len(idxs) < 2:
             continue
         centre = (key[0], key[1])
+        offs = offsets(len(idxs))
+        best_axis, best_pts = 0, along(centre, offs, 0)
+        if own:
+            for axis in (0, 1):
+                pts = along(centre, offs, axis)
+                if margin(pts) > margin(best_pts):
+                    best_axis, best_pts = axis, pts
         for rank, i in enumerate(idxs):
-            offset = (rank - (len(idxs) - 1) / 2.0) * SPREAD_STEP_M
-            # Spread along x, which is the arm-forward axis in this cell.
-            candidate = [centre[0] + offset, centre[1], key[2]]
-            if math.hypot(candidate[0] - centre[0], candidate[1] - centre[1]) > bin_radius:
-                # Refuse instead of quietly shrinking the spacing. A plan that
-                # violates the clearance contract would be rejected by the composite
-                # anyway, and squeezing it silently would yield a plan that looks
-                # valid and then fails on the robot.
+            cand = list(best_pts[rank]) + [key[2]]
+            if math.hypot(cand[0] - centre[0], cand[1] - centre[1]) > bin_radius:
                 raise ValueError(
                     "cannot place %d objects in a %.3f m bin while keeping the "
                     "%.3f m separation the clearance contract needs"
                     % (len(idxs), bin_radius, SPREAD_STEP_M))
-            result[i]["place_pose"] = candidate
-            result[i]["spread_offset_m"] = round(offset, 5)
+            if margin([best_pts[rank]]) < clearance:
+                raise ValueError(
+                    "no spread direction keeps every destination %.3f m clear of the "
+                    "other objects; refusing rather than emitting a plan that will be "
+                    "rejected on the robot" % clearance)
+            result[i]["place_pose"] = cand
+            result[i]["spread_offset_m"] = round(offs[rank], 5)
+            result[i]["spread_axis"] = "y" if best_axis == 1 else "x"
     return result

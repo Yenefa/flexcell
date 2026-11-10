@@ -88,7 +88,12 @@ def main(argv=None):
         "initial_objects": [{"object_name": o["name"],
                              "position": list(o["initial_pose"][:3])}
                             for o in spec["objects"]],
-        "stages": sd.spread(comp["stages"]),
+                "stages": sd.spread(
+            comp["stages"],
+            # stay clear of the other objects' declared start poses
+            avoid=[[o["initial_pose"][0], o["initial_pose"][1]]
+                   for o in spec["objects"]
+                   if o["name"] not in {s["object_name"] for s in comp["stages"]}]),
         "final_empty_positions": [],
         "position_tolerance_m": 0.02,
         "clearance_m": min(CLEARANCE_MAX, max(CLEARANCE_MIN, round(

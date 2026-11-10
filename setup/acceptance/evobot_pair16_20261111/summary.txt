@@ -1,0 +1,27 @@
+task                 B        R        a1err    a2err    action
+HO-09db00012311      True     True     0        None     no_recovery
+HO-0a6658bc8f5a      True     True     0        None     no_recovery
+HO-1ca3385be0b3      True     True     0        None     no_recovery
+HO-3a85e33f559d      True     True     0        None     no_recovery
+HO-4911cf199a42      False    False    62       None     no_recovery
+HO-4c174b133d05      False    True     62       0        resume
+HO-5b17da564d79      True     True     0        None     no_recovery
+HO-71d5272a74a2      True     True     0        None     no_recovery
+HO-89fdddf9d1c4      True     True     0        None     no_recovery
+HO-963e884e5c6a      True     True     0        None     no_recovery
+HO-b3bcb892cef6      True     True     62       0        resume
+HO-b6d572449521      True     True     0        None     no_recovery
+HO-bc8270332865      False    False    62       None     no_recovery
+HO-da078a68af49      True     True     0        None     no_recovery
+HO-edddb4f656b9      True     True     0        None     no_recovery
+HO-fc57a0a1d50d      True     True     0        None     no_recovery
+
+instances            : 16
+usable runs          : 16
+harness failures     : 0
+B pass (first try)   : 13/16
+R pass (after retry) : 14/16
+paired transitions   : both=13 gained=1 lost=0 neither=2
+retries attempted    : 2
+RECOVERY RATE        : 1/2 = 50%
+FALSE SUCCESS RATE   : 0/16
