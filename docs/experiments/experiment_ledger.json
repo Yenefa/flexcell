@@ -1,0 +1,822 @@
+{
+  "schema": "flexcell.experiment_ledger/1",
+  "source": "/mnt/c/Users/fuker/Desktop/workspace/_egm-review/_origin_main_EXPERIMENTS.md",
+  "source_note": "extracted from docs/EXPERIMENTS.md; no field is hand-written",
+  "counts": {
+    "records": 27,
+    "no_entry_body": 3,
+    "with_caution": 8
+  },
+  "integrity": {
+    "ids_in_index_without_body": [
+      "E-012",
+      "E-019",
+      "E-020"
+    ],
+    "ids_with_outcome_caution": {
+      "E-009": [
+        "SUPERSEDED",
+        "NOT CITABLE"
+      ],
+      "E-012": [
+        "FROZEN",
+        "PARTIAL"
+      ],
+      "E-013": [
+        "FROZEN",
+        "PARTIAL"
+      ],
+      "E-014": [
+        "MECHANISM",
+        "NOT BENCHMARK"
+      ],
+      "E-016": [
+        "NOT BENCHMARK"
+      ],
+      "E-017": [
+        "NOT BENCHMARK"
+      ],
+      "E-019": [
+        "FROZEN",
+        "n>=50",
+        "TRUNCATED"
+      ],
+      "E-020": [
+        "FROZEN",
+        "n>=50"
+      ]
+    },
+    "ids_without_acceptance": [
+      "E-008",
+      "E-009",
+      "E-011",
+      "E-012",
+      "E-014",
+      "E-019",
+      "E-020",
+      "E-022",
+      "E-023",
+      "E-024",
+      "E-025",
+      "E-026",
+      "E-027"
+    ],
+    "ids_without_evidence": [
+      "E-009",
+      "E-010",
+      "E-011",
+      "E-026",
+      "E-027"
+    ]
+  },
+  "records": [
+    {
+      "id": "E-001",
+      "title": "Day-1 environment verification",
+      "outcome": "PASS",
+      "has_entry_body": true,
+      "acceptance": "PLAN/EXECUTE error_code=1; MOTION_DETECTED=True; link poses move in physics; `/joint_states` consistent with the plan.",
+      "purpose": "prove the ROS 2 Jazzy + Gazebo Harmonic + MoveIt 2 + OpenMANIPULATOR-X stack end-to-end on the target machine.",
+      "scenario": "Plan & Execute to a joint target; verify real motion in Gazebo physics.",
+      "configuration": "WSL2 Ubuntu-24.04; Gazebo Harmonic 8.15.0; MoveIt 2; 6 colcon packages; 3 Gazebo controllers.",
+      "change": null,
+      "stated_limits": [],
+      "fields_present": [
+        "purpose",
+        "scenario",
+        "configuration",
+        "result",
+        "evidence"
+      ],
+      "evidence": {
+        "link": "../DAY1_REPORT.md",
+        "label": "DAY1_REPORT.md",
+        "entry_text": "acceptance/day1/ (delivery host); [DAY1_REPORT.md](../DAY1_REPORT.md)."
+      },
+      "known_limitations": []
+    },
+    {
+      "id": "E-002",
+      "title": "Day-2 MoveToPose acceptance",
+      "outcome": "PASS 10/10",
+      "has_entry_body": true,
+      "acceptance": "10/10. Happy-path measured pose error 6-9 mm; timeout/cancel truly interrupt with `stop_confirmed`; IK fast-fail ≈ 1.06 s.",
+      "purpose": "validate the agent-callable MoveToPose skill contract (typed request → MoveIt → Gazebo → measured result).",
+      "scenario": "10 cases — happy paths, timeout, cancel, IK-unreachable.",
+      "configuration": null,
+      "change": null,
+      "stated_limits": [],
+      "fields_present": [
+        "purpose",
+        "scenario",
+        "result",
+        "evidence"
+      ],
+      "evidence": {
+        "link": "DAY2_MOVETOPOSE.md",
+        "label": "DAY2_MOVETOPOSE.md",
+        "entry_text": "acceptance/day2/; [DAY2_MOVETOPOSE.md](DAY2_MOVETOPOSE.md)."
+      },
+      "known_limitations": []
+    },
+    {
+      "id": "E-003",
+      "title": "Week-1 deterministic skills battery",
+      "outcome": "PASS",
+      "has_entry_body": true,
+      "acceptance": "full chain OBSERVE→PICK→PLACE→VERIFY SUCCEEDED with ground-truth error 4.9-6.5 mm across runs; OBJECT_UNKNOWN / NOT_CARRIED / IK_UNREACHABLE / RESOURCE_BUSY all typed; Day-2 regression 10/10 (zero degradation).",
+      "purpose": "observe/pick/place/verify + strict FSM with measured-not-inherited success; typed negative paths.",
+      "scenario": null,
+      "configuration": "conveyor-servo magnetic carry backend (see [ADR-001](ADR/ADR-001-simulation-manipulation-backend.md)); ground-truth truth loop.",
+      "change": null,
+      "stated_limits": [],
+      "fields_present": [
+        "purpose",
+        "configuration",
+        "result",
+        "evidence"
+      ],
+      "evidence": {
+        "link": null,
+        "label": "acceptance/week1",
+        "entry_text": "acceptance/week1/ (18 artifacts)."
+      },
+      "known_limitations": []
+    },
+    {
+      "id": "E-004",
+      "title": "Week-1.5 demo hardening — delivery acceptance (att3)",
+      "outcome": "PASS",
+      "has_entry_body": true,
+      "acceptance": "cold-machine run fully green — precheck 12 patterns all zero → start 34 s → happy demo 5.9/8.7 mm → double injection recovered → stop zero residue → poststop all zero. 5/5 repeats 2.5-10.6 mm; budget exhaustion → `ERR_RECOVERY_EXHAUSTED`; Day-2 regression 10/10. att1/att2 servo-starvation failures were honestly caught (measured rise ≈ 0, zero false successes) — environment race, not code regression.",
+      "purpose": "lifecycle CLI + strict health gate; dual-object A/B scenario; bounded recovery + fixed failure injection; repeatability.",
+      "scenario": null,
+      "configuration": "recovery budget=1 (REOBSERVE+RETRY; recoverable = GRASP / MOTION / WORLD_STATE failures; otherwise typed abort); `/flexcell/inject` (`scenario:once\\|always`); WorldState v1.5 frozen (`source=SIMULATION_GROUND_TRUTH`).",
+      "change": null,
+      "stated_limits": [],
+      "fields_present": [
+        "purpose",
+        "configuration",
+        "result",
+        "evidence"
+      ],
+      "evidence": {
+        "link": null,
+        "label": "acceptance/week15/delivery_20260926/",
+        "entry_text": "acceptance/week15/delivery_20260926/ (incl. `att1_att2/`)."
+      },
+      "known_limitations": []
+    },
+    {
+      "id": "E-005",
+      "title": "Week-1.5 cold-start re-verification",
+      "outcome": "PASS",
+      "has_entry_body": true,
+      "acceptance": "run_id `week1_demo_v1-201be3fa`, 10.4/12.8 mm.",
+      "purpose": null,
+      "scenario": null,
+      "configuration": null,
+      "change": null,
+      "stated_limits": [],
+      "fields_present": [
+        "result",
+        "evidence",
+        "note"
+      ],
+      "evidence": {
+        "link": null,
+        "label": "acceptance/week15/cs_20260926/",
+        "entry_text": "acceptance/week15/cs_20260926/."
+      },
+      "known_limitations": []
+    },
+    {
+      "id": "E-006",
+      "title": "M2.3 audit remediation — runtime acceptance",
+      "outcome": "PASS (gated)",
+      "has_entry_body": true,
+      "acceptance": "- offline 86/86 (6 suites incl. new `test_runtime_guards`) and `colcon test` 86/0/0; - happy demo SUCCEEDED; measured parity vs `66_run_record_happy.jsonl` PASS; - exhaust → typed `ERR_RECOVERY_EXHAUSTED` (audit P1-2 acceptance); recovery → REOBSERVE+RETRY; invalid → typed negative (no catch-all wording); - mutex: second concurrent task → `ERR_RESOURCE_BUSY`; mid-pick cancel → `OUTCOME_CANCELED` + joint velocities ~0 after the stop; - battery 32: all 10 gates green (timeout/cancel details carry \"preempted; stop confirmed\"; MOTION_DETECTED=True); - referee: **zone_error agrees with the servers to ≤0.2 mm in every run** across all rounds; box_rise exposed a real mechanics finding — the teleport servo's set_pose requests succeed but the box reaches its pinned plateau seconds after the lift (carry engage unconfirmed; audit P2). The referee was re-scoped as an INTEGRITY check (overclaim / fake-grasp detection) with the catch-up delta logged as the D4 monitoring metric; two INCONSISTENT verdicts in the final round were genuine demo failures (natural carry flake → typed BUDGET_EXHAUSTED policy abort, exercising the P0-2 path end-to-end) — detected, not masked.",
+      "purpose": "verify the audit P0 fixes (ghost-trajectory guard, typed policy abort, cancel propagation, atomic admission) and the P1 acceptance infrastructure (colcon test, hard gates, independent referee, measured parity) under the live stack, headless.",
+      "scenario": "happy demo + measured parity vs the frozen delivery baseline; referee ×5 (independent gz-truth recompute of box_rise / zone_error cross-checked against the servers' jsonl); battery 61 (happy/recovery/exhaust/invalid) and battery 32 (10 cases) under hard gates; mutex probe (concurrent RunDemo+RunPickPlace); mid-pick cancel probe.",
+      "configuration": "WSL2 Ubuntu-24.04 (headless: gz `-s`, no RViz), flexcell world; versioned `sessions/` dirs for artifacts.",
+      "change": null,
+      "stated_limits": [
+        {
+          "field": "open",
+          "text": "box_rise two-sided referee agreement is blocked by the carry-servo catch-up variance — contact grasping (D4) is the structural fix; the demo result detail prints `zone_%s_error_m` as 0.0000 while verify measures mm-scale (verify sampling moment to be checked in hardening)."
+        }
+      ],
+      "fields_present": [
+        "purpose",
+        "scenario",
+        "configuration",
+        "result",
+        "evidence",
+        "open"
+      ],
+      "evidence": {
+        "link": null,
+        "label": "acceptance/sessions/ (FLEXCELL_STAGE) + ~/.ros/flexcell/referee.jsonl",
+        "entry_text": "`$FLEXCELL_STAGE/setup/acceptance/sessions/` (versioned session dirs); `~/.ros/flexcell/referee.jsonl`."
+      },
+      "known_limitations": []
+    },
+    {
+      "id": "E-007",
+      "title": "Scenario runner batch (S1×2 + S2 + S5), episode replay",
+      "outcome": "PASS",
+      "has_entry_body": true,
+      "acceptance": "SCENARIO RUNNER PASS — S1 2/2 SUCCEEDED (CI95 [0.34, 1.00]), S2 (injected first-attempt failure, recovered) 1/1 SUCCEEDED, S5 (retry exhaustion) FAILED as expected with the typed abort; **all 4 episodes replayed with 0 diverged decisions** (8/10/12/5 steps). Batch summary: `~/.ros/flexcell/episodes/batch_20260928_051219.jsonl`.",
+      "purpose": "close issue #7 — the scenario runner orchestrates reset → injection → demo/task → episode collection → offline policy-input replay → batch summary, with Wilson-CI success reporting (metric #1).",
+      "scenario": null,
+      "configuration": "headless stack, flexcell world; batch `S1:2 S2:1 S5:1`; policy = FSMPolicy (replay of every recorded decision).",
+      "change": null,
+      "stated_limits": [],
+      "fields_present": [
+        "purpose",
+        "configuration",
+        "result",
+        "evidence"
+      ],
+      "evidence": {
+        "link": null,
+        "label": "~/.ros/flexcell/episodes/batch_20260928_051219.jsonl",
+        "entry_text": "batch summary jsonl + the episode files it references."
+      },
+      "known_limitations": []
+    },
+    {
+      "id": "E-008",
+      "title": "Metrics report over real store + S7 adaptation probe",
+      "outcome": "PASS",
+      "has_entry_body": true,
+      "acceptance": null,
+      "purpose": "close issues #8 (metrics report generator) and #9 (S7 perturbation builder).",
+      "scenario": null,
+      "configuration": null,
+      "change": null,
+      "stated_limits": [],
+      "fields_present": [
+        "purpose",
+        "#8",
+        "#9",
+        "evidence"
+      ],
+      "evidence": {
+        "link": null,
+        "label": "~/.ros/flexcell/episodes/batch_20260928_124615.jsonl",
+        "entry_text": "episode store + both batch summaries; report text in the issue comments."
+      },
+      "known_limitations": []
+    },
+    {
+      "id": "E-009",
+      "title": "New-machine (RTX 4060 laptop) bring-up + first official benchmark batch",
+      "outcome": "SUPERSEDED (not citable)",
+      "has_entry_body": true,
+      "acceptance": null,
+      "purpose": "bring the RTX 4060 laptop to a verified workcell per [REPRODUCE.md](../REPRODUCE.md) and produce the **first M3-seed benchmark numbers** on a real store (S1/S2/S5/S7 × 20/20/20/10, policy = FSMPolicy, `decision_policy=fsm` verified from the live startup banner).",
+      "scenario": null,
+      "configuration": null,
+      "change": null,
+      "stated_limits": [],
+      "fields_present": [
+        "purpose",
+        "machine",
+        "build/test baseline reproduced",
+        "three real defects found and fixed** (all in-repo, all blocking):\n  1. `setup/flexcell_admin.py` used `os.environ` without ever importing `os`\n     (missing since `d3c2d04`) → every `health`/`reset` died with `nameerror`,\n     so the cli's skill-fleet readiness gate could **never** pass and\n     `flexcell start` always failed. the working copy only existed in the\n     delivery host's f: staging, which is now unreachable. after the one-line\n     fix: strict health **17 checks `ok: true`, `hard_fail: []`**.\n  2. `95_metrics_report.py` had no `s7_perturb_v1 → s7` mapping, so the s7 cell\n     silently degraded into a `dev/*` bucket. mapping added; the report now emits\n     a real `## cell s7`.\n  3. `94_scenario_runner.py::arm_inject` guarded on `if payload:`, which made the\n     **empty** payload a no-op — so the runner's post-episode \"always clear\" never\n     reached the client and an armed `once`/`always` injection stayed live for\n     every later episode of the batch. measured effect: with s5 before s7, all 10\n     s7 episodes were pre-failed by the leftover `exhaust_demo_v1:always`\n     injection (0.52 s episodes, `err=23`, no motion). now `if payload is none:\nreturn`, and the pick server log shows the clear landing\n     (`failure injection disabled`). this is why the delivery-host batches never\n     caught it: e-007 put s5 last, e-008 ran s7 alone.\n- **first batch (superseded, kept as defect evidence)** —\n  `setup/acceptance/m3_seed_batch_20260929/`: s1 16/20 = 0.80\n  ci95 [0.58, 0.92] · s2 13/20 = 0.65 [0.43, 0.82] · s5 0/20 succeeded\n  (= 20/20 correctly failed, typed) · **s7 0/10 = 0.00 [0.00, 0.28] — invalid,\n  pre-failed by defect 3**. `report: pass (70 episodes, 0 replay-dirty)` — note\n  the reporter's verdict is _replay integrity_, not outcome correctness; the\n  runner's own verdict was `fail (21)`.\n- **clean batch** — `setup/acceptance/m3_seed_batch_20260929_clean/`, run as four\n  independently resumable per-cell segments (the wsl vm restarted twice mid-batch\n  and killed the detached runner, so the batch was re-planned into\n  s1/s2/s5/s7 segments whose row files merge into one `batch_merged.jsonl`;\n  partial attempts sit in the store but in no row file, so they cannot enter the\n  report). every number below is regenerated by `95_metrics_report.py` from the\n  replay store over `batch_merged.jsonl` (70 rows); the report is committed\n  verbatim as `95_metrics_report.md`.\n\n  | cell | scenario                        | success (metric 1)                                                       | wilson 95% ci       | replay integrity |\n  | ---- | ------------------------------- | ------------------------------------------------------------------------ | ------------------- | ---------------- |\n  | s1   | canonical happy demo            | 18/20 = **0.90**                                                         | [0.70, 0.97]        | 20/20 clean      |\n  | s2   | injected failure, first attempt | 8/20 = **0.40**                                                          | [0.22, 0.61]        | 20/20 clean      |\n  | s5   | retry exhaustion                | 1/20 succeeded → 19/20 correctly failed (typed `err_recovery_exhausted`) | [0.01, 0.24]        | 20/20 clean      |\n  | s7   | off-canonical placement         | 6/10 = **0.60**                                                          | [0.31, 0.83] ⚠ n<20 | 10/10 clean      |\n\n  `report: pass (70 episodes, 0 replay-dirty)`, 0 `dev/*` buckets (s7 is a real\n  cell again). row-level: 70 rows, 19 outcome mismatches, **0 replay-dirty**.\n  runner verdict per segment: `s1 fail (2)`, and s2/s5/s7 likewise non-zero\n  because the deterministic baseline missed the expected outcome — that is the\n  measurement, not a harness fault.\n\n- **s7 recovered from 0/10 to 6/10 once defect 3 was fixed** — direct evidence\n  that the first batch's s7 collapse was the leftover injection, not the\n  perturbation: the deterministic baseline does adapt to off-canonical placement\n  (the expected s7 outcome per ratified ⑥), it just has to survive the same\n  intermittent servo failure as s1.\n- **s2 is the weak cell and the reason is physical",
+        "one s5 episode succeeded when it should have exhausted** (run 20,\n  `dabdd93d`): its `fsm_trace` is\n  `pick_a(attempt=1):ok, place_a:ok, verify_a:ok, pick_b:ok, place_b:ok,\nverify_b:ok` with `error_code 0` — i.e. **the `always` injection was never\n  armed for that episode**, not a policy error. the arming rides a transient\n  topic publisher (`w1_client` publishes 5× over ~1 s then exits) and the client\n  _does_ print `inject warning: no subscriber matched; payload may be lost`, but\n  `arm_inject` uses `capture_output=true` and never checks it, so a lost arm is\n  silent. consequence for the numbers: s5's failure path is n=19, and injection\n  arming is currently **unverified by construction** — worth a follow-up (assert\n  on the client's warning, or make arming an action/服务 call instead of a topic).\n- **environment caveat that applies to every number above",
+        "dominant failure mode of the machine (not a code defect)",
+        "not_run / explicitly out of this session's scope"
+      ],
+      "evidence": {
+        "link": null,
+        "label": "setup/acceptance/m3_seed_batch_20260929*/",
+        "entry_text": null
+      },
+      "known_limitations": [
+        {
+          "token": "SUPERSEDED",
+          "meaning": "superseded by a later experiment; not citable"
+        },
+        {
+          "token": "NOT CITABLE",
+          "meaning": "not citable"
+        }
+      ]
+    },
+    {
+      "id": "E-010",
+      "title": "T6 hardening: gate_flood + injection lifecycle + reset determinism",
+      "outcome": "PASS",
+      "has_entry_body": true,
+      "acceptance": "the stranded box was restored to canonical `[0.2200, 0.0000, 0.0175]`, and **3× abort-while-carrying → reset plus 3 plain resets all `ok=true`** with both boxes canonical, `scene_cleared: true`, carry disengaged (previously `ok=false` + DRIFT every time).",
+      "purpose": "chief ruling 2026-09-29 — _\"otherwise stop citing benchmark numbers\"_. Three P0 items had to be fixed and measured before any cell number could be quoted: the never-green `gate_flood`, the unverified injection lifecycle, and the non-restoring reset. E-009 is demoted to **not citable** because all three measurement-path defects were live during it.",
+      "scenario": null,
+      "configuration": null,
+      "change": "publish the carry stop **unconditionally** and confirm it; decide `carry_disengaged` on **behaviour** (a pinning servo cannot let a box hold a commanded pose) with the latched state as corroboration only; retry the stop and the pose once when a box refuses its commanded pose; decide `scene_cleared` by **re-querying the scene** instead of trusting the `ApplyPlanningScene` response flag (a REMOVE naming an already-absent id makes move_group answer `success=false`); and widen the `task_idle` wait from 5 s to 15 s while distinguishing \"never received\" (DDS discovery; measured 1.54 s) from a genuinely busy task.",
+      "stated_limits": [],
+      "fields_present": [
+        "purpose",
+        "offline baseline",
+        "what it was",
+        "root cause work",
+        "fix",
+        "result — same 4-reset baseline: flood 954/895/896/899 → 0/0/0/0, exit\n  139×3 → 0×4, stdout 407–433 kb → 623 b and now parseable json.** a bonus\n  effect: the admin's \"json\" output was never valid json before, because the\n  tracebacks shared the stream.\n\n#### ② injection lifecycle — requested / armed / applied / cleared\n\n- **what it was",
+        "result (live)",
+        "result",
+        "not done here"
+      ],
+      "evidence": {
+        "link": null,
+        "label": "this entry (measurements inline)",
+        "entry_text": null
+      },
+      "known_limitations": []
+    },
+    {
+      "id": "E-011",
+      "title": "First M3-baseline candidate batch, n=20 per cell (2026-09-30)",
+      "outcome": null,
+      "has_entry_body": true,
+      "acceptance": null,
+      "purpose": null,
+      "scenario": null,
+      "configuration": null,
+      "change": null,
+      "stated_limits": [
+        {
+          "field": "open",
+          "text": "this is a _candidate_ baseline. Freezing it as the M3 baseline is a human decision; nothing here is tagged or released. Evidence: `setup/acceptance/m3_baseline_t6_20260929/` (per-cell `seg_*.jsonl`, `batch_merged.jsonl`, `95_metrics_report.md`, `gate_reset.json`, `baseline_rerun.log`). Copied off the execution host and md5-verified."
+        }
+      ],
+      "fields_present": [
+        "what moved and why it is believable",
+        "s5 stays 0/20 by design",
+        "not_run — decision latency (metric 3)",
+        "open"
+      ],
+      "evidence": {
+        "link": null,
+        "label": null,
+        "entry_text": null
+      },
+      "known_limitations": []
+    },
+    {
+      "id": "E-012",
+      "title": "Shared task policy seam + distinct models + protocol v2 online smoke",
+      "outcome": "ONLINE PARTIAL; BASELINE FROZEN",
+      "has_entry_body": false,
+      "acceptance": null,
+      "purpose": null,
+      "scenario": null,
+      "configuration": null,
+      "change": null,
+      "stated_limits": [],
+      "fields_present": [],
+      "evidence": {
+        "link": "MAINLINE_20260930.md",
+        "label": "MAINLINE_20260930.md",
+        "entry_text": null
+      },
+      "known_limitations": [
+        {
+          "token": "FROZEN",
+          "meaning": "sample-size threshold unmet; frozen"
+        },
+        {
+          "token": "PARTIAL",
+          "meaning": "partial only"
+        }
+      ],
+      "gaps": [
+        "index row without an entry body"
+      ]
+    },
+    {
+      "id": "E-013",
+      "title": "Official DeepSeek policy + persistent RMB 5 budget + action handoff",
+      "outcome": "ONLINE PARTIAL; S1 3/5; BASELINE FROZEN",
+      "has_entry_body": true,
+      "acceptance": "one accepted single-object success (8.95 mm). An independent S1:5 batch completed all five tasks: 3 succeeded, 2 failed (servo grasp and skill reply/motion discovery failures). After the internal result-read fix, S3:1 succeeded with B-only injected recovery, and S4:1 produced the expected actual PLACE/NO_IK_SOLUTION failure. S4's model abort reason was imprecise; expected task failure does not validate every model rationale.",
+      "purpose": "make the remote slow policy exercise actual Gazebo skills through both task APIs; keep the user's RMB 5 allowance across processes and restarts.",
+      "scenario": null,
+      "configuration": "protocol v2; teleport-servo; official `deepseek-flash`, JSON object, thinking disabled, output cap 512, production timeout 30 s; persistent overlay and Cyclone DDS. Different runtime fingerprints remain separate. The previous OpenCode gateway attempt returned HTTP 402 and is not counted as a model decision.",
+      "change": "persistent client executor and same-goal GetResult retries; acknowledged carry release before PLACE detach/open; the same result-read recovery at task/skill/motion boundaries. No repeated physical SendGoal.",
+      "stated_limits": [
+        {
+          "field": "limits",
+          "text": "online smoke, not statistical comparison; S3/S4 each n=1; model replay NOT_RUN, so metrics reports INCOMPLETE. MTC, Jev/APUS and calibrated Hybrid remain open; large sample plan stays frozen. Offline executor checks validate contracts/control flow, not grasp reliability."
+        }
+      ],
+      "fields_present": [
+        "purpose",
+        "configuration",
+        "change",
+        "result",
+        "cost",
+        "limits",
+        "evidence"
+      ],
+      "evidence": {
+        "link": "DEEPSEEK_20261001.md",
+        "label": "DEEPSEEK_20261001.md",
+        "entry_text": "[implementation and handoff](DEEPSEEK_20261001.md), [full artifact manifest](../setup/acceptance/m3_deepseek_20261001/manifest.json)."
+      },
+      "known_limitations": [
+        {
+          "token": "FROZEN",
+          "meaning": "sample-size threshold unmet; frozen"
+        },
+        {
+          "token": "PARTIAL",
+          "meaning": "partial only"
+        }
+      ]
+    },
+    {
+      "id": "E-014",
+      "title": "DDS fragment-path diagnosis + servo velocity controls",
+      "outcome": "MECHANISM PROBES; NOT BENCHMARK",
+      "has_entry_body": true,
+      "acceptance": null,
+      "purpose": null,
+      "scenario": null,
+      "configuration": null,
+      "change": null,
+      "stated_limits": [],
+      "fields_present": [
+        "scope",
+        "dds",
+        "servo",
+        "inference",
+        "evidence"
+      ],
+      "evidence": {
+        "link": "MECHANISM_20261001.md",
+        "label": "MECHANISM_20261001.md",
+        "entry_text": "[report](MECHANISM_20261001.md), [manifest](../setup/acceptance/mechanism_20261001/manifest.json)."
+      },
+      "known_limitations": [
+        {
+          "token": "MECHANISM",
+          "meaning": "mechanism evidence, not a baseline"
+        },
+        {
+          "token": "NOT BENCHMARK",
+          "meaning": "not a benchmark result"
+        }
+      ]
+    },
+    {
+      "id": "E-015",
+      "title": "Leased velocity carry + engage receipt + PLACE dependency readiness",
+      "outcome": "DEPLOYED; FINAL SINGLE PASS; SMOKE INCOMPLETE",
+      "has_entry_body": true,
+      "acceptance": "native/interface/skills builds; eight carry contract tests; final reset RC=0 / ok=true, health 19 checks / IDLE, native carry off.",
+      "purpose": null,
+      "scenario": null,
+      "configuration": null,
+      "change": "native Gazebo pose/velocity command constraints with a 500 ms lease, session ownership and release after a physics step. Typed engage receipt blocks lift until acknowledged; PLACE exposes its own release discovery readiness.",
+      "stated_limits": [
+        {
+          "field": "limits",
+          "text": "magnetic simulation, final-fingerprint dual-object batch pending; model replay NOT_RUN; no statistical baseline or large batch. Historical DDS result-loss, reset139, rosdep and MTC gaps retain their prior status."
+        }
+      ],
+      "fields_present": [
+        "change",
+        "online evidence",
+        "validation",
+        "limits",
+        "budget",
+        "evidence"
+      ],
+      "evidence": {
+        "link": "CARRY_VELOCITY_20261001.md",
+        "label": "CARRY_VELOCITY_20261001.md",
+        "entry_text": "[report](CARRY_VELOCITY_20261001.md), [manifest](../setup/acceptance/carry_velocity_20261001/manifest.json)."
+      },
+      "known_limitations": []
+    },
+    {
+      "id": "E-016",
+      "title": "Lifecycle paths + authoritative carry + local calibration/replay",
+      "outcome": "FSM CONTROL PASS; HYBRID/REPLAY FAIL; NOT BENCHMARK",
+      "has_entry_body": true,
+      "acceptance": "193 skills tests pass; 5 targeted carry tests pass including two new reply-loss cases; build passes; actual crashing admin child is rejected. Historical evidence 454 manifest items retain exact Git/worktree bytes.",
+      "purpose": null,
+      "scenario": null,
+      "configuration": null,
+      "change": "workspace lifecycle paths, typed controller readiness, authoritative carry query checked against native ownership; bounded status reply retries, isolated pose worker, and admin success contingent on child exit.",
+      "stated_limits": [
+        {
+          "field": "budget/limits",
+          "text": "same RMB 5 ledger, 163 records / RMB 1.168980 conservative upper bound, including 6 unknown reservations. Minimal official completion requests time out through proxy and direct. Historical reset/flood roots remain UNKNOWN; large batch NOT_STARTED, rosdep NOT_VERIFIED, MTC pending. Local commits, no push."
+        }
+      ],
+      "fields_present": [
+        "change",
+        "online",
+        "models",
+        "validation",
+        "budget/limits",
+        "evidence"
+      ],
+      "evidence": {
+        "link": "HARDENING_20261002.md",
+        "label": "HARDENING_20261002.md",
+        "entry_text": "[report](HARDENING_20261002.md), [manifest](../setup/acceptance/hardening_20261002/manifest.json)."
+      },
+      "known_limitations": [
+        {
+          "token": "NOT BENCHMARK",
+          "meaning": "not a benchmark result"
+        }
+      ]
+    },
+    {
+      "id": "E-017",
+      "title": "Desktop revival; hybrid online n=5 at one fingerprint",
+      "outcome": "5/5 SUCCEEDED; E-016 hybrid hang modes absent on the NAT host; NOT BENCHMARK",
+      "has_entry_body": true,
+      "acceptance": "`102 cold hybrid` DEPLOYED — fingerprint `20261004_194901`, protocol v2, slow arm = official deepseek-flash. Single-object episodes **n=5/5 SUCCEEDED** (errors 10.2 / 1.3 / 6.3 / 10.2 / 1.4 mm; wall 16.3–30.1 s); strict health 19/19 `hard_fail=[]` afterwards. **None of the four E-016 hybrid hang modes reproduced** (planning service unavailable / client 150 s timeout / carry query timeout / official request timeout) on the same code and the same API with a different network stack (NAT vs the laptop's mirrored mode). Environment attribution is supported, not proven.",
+      "purpose": null,
+      "scenario": null,
+      "configuration": "the original delivery desktop (RX 6800 / Ryzen 5 5600 / 32 GB) was revived to `main` `424ad43` following ONBOARDING, with one deliberate deviation: **NAT, not mirrored** networking — under mirrored mode both gz transport and the DDS mesh broke on this host (see issue #25). `rmw_cyclonedds_cpp` was installed (the 9/30 mainline requirement). Sha-pinned local models were provisioned via `118` (Qwen2.5-1.5B/3B Q4_K_M + llama.cpp b11284; fast:18081 / slow:18082), and calibration was reproduced on-machine from the recorded inputs: reported confidence sits at 0.9–1.0 while FSM-action agreement stays far below any sweep τ, so the router **bypasses the fast route by design** (`calibration_unavailable_or_threshold_unattainable`).",
+      "change": null,
+      "stated_limits": [
+        {
+          "field": "budget/limits",
+          "text": "desktop ledger ¥5 limit; ¥0.066 committed upper bound total (1 wiring probe outside the ledger + 3 LLM-arm decisions + the n=5 decisions). τ sweep deferred: with the current fast arm every τ ∈ {0.5, 0.7, 0.9} bypasses fast, so a sweep would degenerate to LLM-only. The #12 critical path is fast-arm qualification: the 160-token output cap truncates/derails parsing, and FSM-action agreement is 4/30."
+        }
+      ],
+      "fields_present": [
+        "setup",
+        "result",
+        "validation",
+        "budget/limits",
+        "evidence"
+      ],
+      "evidence": {
+        "link": null,
+        "label": "staging `hybrid_n5_desktop_20261004/`",
+        "entry_text": "staging `hybrid_n5_desktop_20261004/`; ledger on the desktop machine."
+      },
+      "known_limitations": [
+        {
+          "token": "NOT BENCHMARK",
+          "meaning": "not a benchmark result"
+        }
+      ]
+    },
+    {
+      "id": "E-018",
+      "title": "Clef-flash fast arm — offline calibration on the desktop",
+      "outcome": "GPU: 17/30, TOP BIN 8/8 (LB 0.676), 1.9 s, 35/35 SUCCESS; τ=0.5 ELIGIBLE",
+      "has_entry_body": true,
+      "acceptance": "calibration over the same 35 recorded inputs: **12/20 calibration agreement (Qwen1.5B baseline: 4/30, Wilson lower 0.053)** and the bins are MONOTONE — [0,0.5): 1/8 (LB 0.02), [0.5,0.8): 3/4 (LB 0.30), **[0.8,1.0): 8/8 (Wilson lower 0.676)**; heldout 2/5. Reported confidence is a usable routing signal for the first time: low-confidence picks fail, the top bin is clean. `output_tokens: 0` on every call — the no-generation no-parse claim is real, so E-016's truncation/parse failure mode is structurally absent.",
+      "purpose": null,
+      "scenario": null,
+      "configuration": "Cloudflare's open decision model `clef-flash` (9B, Apache-2.0, base Qwen3.5-9B) served by **Ollama 0.35.1 Linux inside WSL**. The Windows 0.35.1 build fails every `/v1/systemone` request with `Clef: non-finite logit` on CUDA, ROCm, Vulkan AND CPU (upstream issue ollama#18769; the Linux build works — the issue reporter measured 0.1-0.3 s on GPU). Model blobs were reused from the Windows pull (no re-download). New `ClefBackend` (typed `/v1/systemone`: `questions={type: choice, instructions, criteria}`; response `answers.<id>. {choice, probabilities}`) + `make_backend('clef')` + `119 --backend clef`; the routing signal is the chosen option's own probability — the API's `confidence` field is probability-mass CONCENTRATION, not accuracy. Full test suite green.",
+      "change": null,
+      "stated_limits": [
+        {
+          "field": "next",
+          "text": "(1) scale the sweep to the S-cell runner for n≥50 per-τ statistics (#12 AC), (2) S7 differentiation track at τ=0.7 (hybrid vs FSM where the deterministic baseline is weakest), (3) land the feat branch docs."
+        }
+      ],
+      "fields_present": [
+        "setup",
+        "result",
+        "limits (cpu interlude, superseded the same day)",
+        "result (gpu, final)",
+        "τ sweep, first pass (2026-10-05, single-object task, n=5 per τ)",
+        "prompt v2 + q8_0 (2026-10-05 evening)",
+        "⚠ correction (2026-10-05, chief counter-audit)",
+        "τ=0.7 live run (as-measured, no τ attribution)",
+        "next",
+        "evidence"
+      ],
+      "evidence": {
+        "link": null,
+        "label": "desktop `jev_calibration_clef_gpu.json`; code pending feat branch",
+        "entry_text": "desktop `~/.config/flexcell/jev_calibration_clef{,_gpu,_v2,_fresh,_q8,_q8_fresh}.json` (Q8 digest `8754b06f…b05593d9`); ClefBackend + harness changes on the `feat/clef-fast-arm` branch (pushed)."
+      },
+      "known_limitations": []
+    },
+    {
+      "id": "E-019",
+      "title": "Q8 per-decision provenance + two-regime pilot",
+      "outcome": "215 TESTS PASS; HIGH 14/17 + RESET ERROR; LOW SMOKE TRUNCATED; n>=50 FROZEN",
+      "has_entry_body": false,
+      "acceptance": null,
+      "purpose": null,
+      "scenario": null,
+      "configuration": null,
+      "change": null,
+      "stated_limits": [],
+      "fields_present": [],
+      "evidence": {
+        "link": "Q8_PILOT_20261005.md",
+        "label": "Q8_PILOT_20261005.md",
+        "entry_text": null
+      },
+      "known_limitations": [
+        {
+          "token": "FROZEN",
+          "meaning": "sample-size threshold unmet; frozen"
+        },
+        {
+          "token": "n>=50",
+          "meaning": "sample-size threshold unmet; frozen"
+        },
+        {
+          "token": "TRUNCATED",
+          "meaning": "batch truncated"
+        }
+      ],
+      "gaps": [
+        "index row without an entry body"
+      ]
+    },
+    {
+      "id": "E-020",
+      "title": "Pose callback finalization barrier + bounded fresh-process reset RPC",
+      "outcome": "226 TESTS PASS; LIFECYCLE 100/100; RESET 20/20 EACH; LOW 18/20; HIGH SMOKE 4/5; n>=50 FROZEN",
+      "has_entry_body": false,
+      "acceptance": null,
+      "purpose": null,
+      "scenario": null,
+      "configuration": null,
+      "change": null,
+      "stated_limits": [],
+      "fields_present": [],
+      "evidence": {
+        "link": "Q8_TEARDOWN_20261005.md",
+        "label": "Q8_TEARDOWN_20261005.md",
+        "entry_text": null
+      },
+      "known_limitations": [
+        {
+          "token": "FROZEN",
+          "meaning": "sample-size threshold unmet; frozen"
+        },
+        {
+          "token": "n>=50",
+          "meaning": "sample-size threshold unmet; frozen"
+        }
+      ],
+      "gaps": [
+        "index row without an entry body"
+      ]
+    },
+    {
+      "id": "E-021",
+      "title": "Three-arm S1 comparison, same machine, same night, unattended",
+      "outcome": "FSM 19/20 · hybrid τ=0.03 18/20 · hybrid τ=0.85 17/20; CIs OVERLAP; grasp-physics noise ~15% cross-arm",
+      "has_entry_body": true,
+      "acceptance": "| arm | S1 n=20 | Wilson 95% CI | paid slow fraction | cost ceiling | | --- | ------- | ------------- | ------------------ | ------------ | | FSM control | 19/20 (0.95) | [0.76, 0.99] | 0/163 = 0% | ¥0 | | hybrid τ=0.03 | 18/20 (0.90) | [0.69, 0.98] | 5/156 = 3.2% | ~¥0.02 | | hybrid τ=0.85 | 17/20 (0.85) | [0.64, 0.95] | 26/159 = 16.4% | ~¥0.3 | All CIs overlap: **no significant success-rate difference at n=20**. Every model decision was reported as passing the routing provenance audit in the archived summaries (139 decisions in the τ=0.85 baseline, zero reported violations). The 60 referenced native episodes were recovered from the execution host on 2026-10-24 and now live in [`setup/acceptance/e021_native_recovery_20261024/`](../setup/acceptance/e021_native_recovery_20261024/README.md) with SHA256-verified bytes and an explicit origin mapping. Recomputing from those native records (not from the summaries) reproduces **139 fast-arm proposals with 0 gate failures** in the τ=0.85 baseline, a single weight identity `clef-flash-q8_0@8754b06f…` and a single calibration digest across both hybrid arms, and reconciles every escalation: 21 `fast_unavailable_or_below_threshold` + 5 `uncalibrated_fast_confidence` = the 26 paid decisions at τ=0.85, 5 of 5 at τ=0.03. Paid spend stays an upper bound because every paid proposal settled at `USAGE_SETTLED_AT_PEAK_UNCACHED_CEILING`. Night total ¥0.576 / ¥5 upper bound. What recovery does not add: no episode records `initial_world_state`, so physics cannot be re-executed, only decisions can be re-audited against the recorded `policy_input`/`policy_output` pairs.",
+      "purpose": null,
+      "scenario": null,
+      "configuration": "desktop as the only fully-qualified executor (shutdown race repaired, per-decision routing gates live, 7-day unattended hardening: updates disabled at three layers, sleep structurally impossible on this firmware, Storage Sense off — service snapshot + rollback script on `F:\\flexcell-models\\`). Three arms, S1 dual-object `RunDemo`, n=20 each, sequential deployments (one fingerprint per arm; no pooling across arms). τ=0.85 unlock used the runner's fingerprint-scoped smoke rule: attempt 1 (3/5, two grasp-physics failures) + attempt 2 (5/5, all routing audits green) = **10 attempts: 8 SUCCEEDED and 2 FAILED**. The historical runner selected the eight successful rows for admission; both batch files and the unfiltered pooled summary remain archived. This is not a fixed five-attempt smoke qualification.",
+      "change": null,
+      "stated_limits": [
+        {
+          "field": "next",
+          "text": "B-grasp root cause (the single highest-value open item), batch-level fast-arm presence gate for unattended batches, S7 differentiation design, n≥50 freeze maintained."
+        }
+      ],
+      "fields_present": [
+        "setup",
+        "result",
+        "the dominant confounder",
+        "reading (cost hypothesis)",
+        "next",
+        "evidence",
+        "2026-10-24 correction / #31"
+      ],
+      "evidence": {
+        "link": null,
+        "label": "`setup/acceptance/tau_sweep_desktop_20261005/`",
+        "entry_text": "`setup/acceptance/tau_sweep_desktop_20261005/` (12 batch files incl. both τ=0.85 smoke attempts, pooled summary, two hybrid deployments, campaign log `F:\\flexcell-models\\campaign_20261005.log`); `setup/acceptance/e021_native_recovery_20261024/` (all 60 native episodes with per-file SHA256, offline verifier and recomputed decision audit)."
+      },
+      "known_limitations": []
+    },
+    {
+      "id": "E-022",
+      "title": "Class-scoped static attribute scan and effective CI failure exit (#24)",
+      "outcome": "LOCAL 172 PASS (20 NEW); ROS CI 246 PASS; SCAN 35/0; GAZEBO NOT_RUN",
+      "has_entry_body": true,
+      "acceptance": null,
+      "purpose": null,
+      "scenario": null,
+      "configuration": null,
+      "change": null,
+      "stated_limits": [],
+      "fields_present": [],
+      "evidence": {
+        "link": "STATIC_SCAN_20261007.md",
+        "label": "STATIC_SCAN_20261007.md",
+        "entry_text": null
+      },
+      "known_limitations": []
+    },
+    {
+      "id": "E-023",
+      "title": "Hybrid batch fast-arm gate + smoke qualification (#8/#12)",
+      "outcome": "LOCAL 194 PASS (22 NEW); SCAN 35/0; ROBOT/MODEL NOT_RUN",
+      "has_entry_body": true,
+      "acceptance": null,
+      "purpose": null,
+      "scenario": null,
+      "configuration": null,
+      "change": null,
+      "stated_limits": [],
+      "fields_present": [],
+      "evidence": {
+        "link": "HYBRID_BATCH_GATE_20261007.md",
+        "label": "HYBRID_BATCH_GATE_20261007.md",
+        "entry_text": null
+      },
+      "known_limitations": []
+    },
+    {
+      "id": "E-024",
+      "title": "Grasp-probe action/result boundaries and trial evidence",
+      "outcome": "LOCAL 227 PASS (33 NEW); THREE SYNTHETIC CLI REPRODUCTIONS PASS; LIVE NOT_RUN",
+      "has_entry_body": true,
+      "acceptance": null,
+      "purpose": null,
+      "scenario": null,
+      "configuration": null,
+      "change": null,
+      "stated_limits": [],
+      "fields_present": [],
+      "evidence": {
+        "link": "GRASP_PROBE_20261008.md",
+        "label": "GRASP_PROBE_20261008.md",
+        "entry_text": null
+      },
+      "known_limitations": []
+    },
+    {
+      "id": "E-025",
+      "title": "GRASP-B-001 per-trial observation gate and source-log replay (#32)",
+      "outcome": "LOCAL 112 PASS; #50 COMPAT 137 PASS; SCAN 37/0; LIVE NOT_RUN",
+      "has_entry_body": true,
+      "acceptance": null,
+      "purpose": null,
+      "scenario": null,
+      "configuration": null,
+      "change": null,
+      "stated_limits": [],
+      "fields_present": [],
+      "evidence": {
+        "link": "GRASP_PHASE3_GATE_20261026.md",
+        "label": "GRASP_PHASE3_GATE_20261026.md",
+        "entry_text": null
+      },
+      "known_limitations": []
+    },
+    {
+      "id": "E-026",
+      "title": "Shared level-release profiles (#124, 2026-11-07)",
+      "outcome": null,
+      "has_entry_body": true,
+      "acceptance": null,
+      "purpose": null,
+      "scenario": null,
+      "configuration": null,
+      "change": null,
+      "stated_limits": [],
+      "fields_present": [],
+      "evidence": {
+        "link": null,
+        "label": null,
+        "entry_text": null
+      },
+      "known_limitations": []
+    },
+    {
+      "id": "E-027",
+      "title": "Visual region clear/restore plans (#126, 2026-11-07)",
+      "outcome": null,
+      "has_entry_body": true,
+      "acceptance": null,
+      "purpose": null,
+      "scenario": null,
+      "configuration": null,
+      "change": null,
+      "stated_limits": [],
+      "fields_present": [],
+      "evidence": {
+        "link": null,
+        "label": null,
+        "entry_text": null
+      },
+      "known_limitations": []
+    }
+  ]
+}

@@ -172,3 +172,60 @@ class W5SourceExecution:
     def telemetry(self):
         path = self.workspace / "telemetry" / "execution.log"
         return path.read_text(encoding="utf-8") if path.is_file() else "(no telemetry)"
+
+# ---------------------------------------------------------------------------
+# P2 second task: a DIFFERENT defect class in the same file. PLACE is left
+# correct; VERIFY is made to check the object against the OTHER object's zone,
+# so the symptom (VERIFY_B mismatched after a successful PLACE_B) looks the same
+# but the defect lives in a different branch. This is what makes the reuse test
+# about a transferable lesson rather than about one memorised line.
+# ---------------------------------------------------------------------------
+DEFECT2_FROM = ("                    zx, zy, zz = zones[zone_of[decision.target]]\n"
+                "                    zone_pose = PoseStamped()\n"
+                "                    zone_pose.header.frame_id = 'world'\n"
+                "                    zone_pose.pose.position.x = zx\n"
+                "                    zone_pose.pose.position.y = zy\n"
+                "                    zone_pose.pose.position.z = zz\n"
+                "                    zone_pose.pose.orientation.w = 1.0\n"
+                "                    vg = VerifyObject.Goal()")
+DEFECT2_TO = DEFECT2_FROM.replace("zones[zone_of[decision.target]]",
+                                  "zones[zone_of[self._obj_a]]", 1)
+
+TASK2 = (
+    "# W5-E3 - the two-object demo fails at final verification\n\n"
+    "The workcell configuration is correct. The two-object demo fails: both\n"
+    "objects are picked and placed, but the final verification reports the\n"
+    "second object away from where it was just put. The normal task and the\n"
+    "regrasp task still pass.\n\n"
+    "The defect is in the task FSM implementation\n"
+    "(src/flexcell_skills/flexcell_skills/task_fsm_server.py); the workcell config\n"
+    "is correct. You may read and edit files there; every run rebuilds the package\n"
+    "before launching Gazebo. gate/ is read-only and does not need to be inspected.\n\n"
+    "A previous investigation left a note in the experience/ directory. Read it if\n"
+    "you think it helps. Run the target scenario once, find the implementation\n"
+    "defect, edit task_fsm_server.py to fix it, and make all three gates pass.\n")
+
+
+def build_t_w5s2(target, package_src, config_source, experience_note=None):
+    """Same skeleton as build_t_w5s, but injects the VERIFY-side defect."""
+    target = Path(target)
+    if target.exists():
+        shutil.rmtree(target)
+    (target / "gate").mkdir(parents=True)
+    (target / "config").mkdir()
+    (target / "telemetry").mkdir()
+    pkg = target / "src" / "flexcell_skills"
+    shutil.copytree(package_src, pkg)
+    module = pkg / "flexcell_skills" / "task_fsm_server.py"
+    text = module.read_text(encoding="utf-8")
+    if DEFECT2_FROM not in text:
+        raise RuntimeError("verify-side defect anchor missing")
+    module.write_text(text.replace(DEFECT2_FROM, DEFECT2_TO, 1), encoding="utf-8")
+    shutil.copyfile(config_source, target / "config" / "week1.yaml")
+    (target / "gate" / "acceptance.py").write_text(ACCEPT, encoding="utf-8")
+    (target / "task.md").write_text(TASK2, encoding="utf-8")
+    if experience_note is not None:
+        (target / "experience").mkdir()
+        shutil.copyfile(experience_note,
+                        target / "experience" / "experience_place_target.json")
+    return target
