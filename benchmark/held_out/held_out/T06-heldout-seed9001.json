@@ -1,0 +1,96 @@
+{
+  "task_id": "T06-heldout-seed9001",
+  "template_id": "T06_revisit",
+  "random_seed": 9001,
+  "instruction": "Two-step: put the red block in the left bin, then move it on to the right bin. Only the final position counts.",
+  "objects": [
+    {
+      "name": "target_box_a",
+      "size": [
+        0.035,
+        0.035,
+        0.035
+      ],
+      "color": "red",
+      "initial_pose": [
+        0.22,
+        0.0,
+        0.0175,
+        0.0
+      ]
+    },
+    {
+      "name": "target_box_b",
+      "size": [
+        0.035,
+        0.035,
+        0.035
+      ],
+      "color": "blue",
+      "initial_pose": [
+        0.2,
+        -0.18,
+        0.0175,
+        0.0
+      ]
+    },
+    {
+      "name": "target_box_c",
+      "size": [
+        0.035,
+        0.035,
+        0.035
+      ],
+      "color": "green",
+      "initial_pose": [
+        0.15,
+        -0.05,
+        0.0175,
+        0.0
+      ]
+    }
+  ],
+  "zones": [
+    {
+      "name": "zone_1",
+      "pose": [
+        0.12,
+        -0.15,
+        0.0175
+      ],
+      "radius": 0.06
+    },
+    {
+      "name": "zone_2",
+      "pose": [
+        0.25,
+        0.05,
+        0.0175
+      ],
+      "radius": 0.06
+    }
+  ],
+  "constraints": {
+    "order": [],
+    "must_not_move": [
+      "target_box_b",
+      "target_box_c"
+    ]
+  },
+  "expected_goal": {
+    "placement": {
+      "target_box_a": "zone_1"
+    },
+    "unmoved": [
+      "target_box_b",
+      "target_box_c"
+    ]
+  },
+  "evaluator_version": "0.1.0",
+  "execution_budget": {
+    "max_steps": 60,
+    "max_wall_s": 600.0
+  },
+  "split": "held_out",
+  "instance_sha256": "71bf4fa3d2a60fe2f2f0bdfef8cebddb5dc54ac1606d356a7fa47d353acf5133"
+}

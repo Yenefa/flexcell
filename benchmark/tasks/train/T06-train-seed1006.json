@@ -1,0 +1,96 @@
+{
+  "task_id": "T06-train-seed1006",
+  "template_id": "T06_revisit",
+  "random_seed": 1006,
+  "instruction": "Two-step: put the blue block in the left bin, then move it on to the right bin. Only the final position counts.",
+  "objects": [
+    {
+      "name": "target_box_a",
+      "size": [
+        0.035,
+        0.035,
+        0.035
+      ],
+      "color": "red",
+      "initial_pose": [
+        0.22,
+        0.0,
+        0.0175,
+        0.0
+      ]
+    },
+    {
+      "name": "target_box_b",
+      "size": [
+        0.035,
+        0.035,
+        0.035
+      ],
+      "color": "blue",
+      "initial_pose": [
+        0.2,
+        -0.18,
+        0.0175,
+        0.0
+      ]
+    },
+    {
+      "name": "target_box_c",
+      "size": [
+        0.035,
+        0.035,
+        0.035
+      ],
+      "color": "green",
+      "initial_pose": [
+        0.15,
+        -0.05,
+        0.0175,
+        0.0
+      ]
+    }
+  ],
+  "zones": [
+    {
+      "name": "zone_1",
+      "pose": [
+        0.12,
+        -0.15,
+        0.0175
+      ],
+      "radius": 0.06
+    },
+    {
+      "name": "zone_2",
+      "pose": [
+        0.25,
+        0.05,
+        0.0175
+      ],
+      "radius": 0.06
+    }
+  ],
+  "constraints": {
+    "order": [],
+    "must_not_move": [
+      "target_box_a",
+      "target_box_c"
+    ]
+  },
+  "expected_goal": {
+    "placement": {
+      "target_box_b": "zone_1"
+    },
+    "unmoved": [
+      "target_box_a",
+      "target_box_c"
+    ]
+  },
+  "evaluator_version": "0.1.0",
+  "execution_budget": {
+    "max_steps": 60,
+    "max_wall_s": 600.0
+  },
+  "split": "train",
+  "instance_sha256": "3cef0937b10d6e7a7282983156bec487444fd9bbbb6dc8f89a77ac12c7ee2c89"
+}

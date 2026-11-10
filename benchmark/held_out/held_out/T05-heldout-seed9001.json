@@ -1,0 +1,96 @@
+{
+  "task_id": "T05-heldout-seed9001",
+  "template_id": "T05_relay",
+  "random_seed": 9001,
+  "instruction": "Move the red block to the left bin, passing through the right bin first.",
+  "objects": [
+    {
+      "name": "target_box_a",
+      "size": [
+        0.035,
+        0.035,
+        0.035
+      ],
+      "color": "red",
+      "initial_pose": [
+        0.22,
+        0.0,
+        0.0175,
+        0.0
+      ]
+    },
+    {
+      "name": "target_box_b",
+      "size": [
+        0.035,
+        0.035,
+        0.035
+      ],
+      "color": "blue",
+      "initial_pose": [
+        0.2,
+        -0.18,
+        0.0175,
+        0.0
+      ]
+    },
+    {
+      "name": "target_box_c",
+      "size": [
+        0.035,
+        0.035,
+        0.035
+      ],
+      "color": "green",
+      "initial_pose": [
+        0.15,
+        -0.05,
+        0.0175,
+        0.0
+      ]
+    }
+  ],
+  "zones": [
+    {
+      "name": "zone_1",
+      "pose": [
+        0.12,
+        -0.15,
+        0.0175
+      ],
+      "radius": 0.06
+    },
+    {
+      "name": "zone_2",
+      "pose": [
+        0.25,
+        0.05,
+        0.0175
+      ],
+      "radius": 0.06
+    }
+  ],
+  "constraints": {
+    "order": [],
+    "must_not_move": [
+      "target_box_b",
+      "target_box_c"
+    ]
+  },
+  "expected_goal": {
+    "placement": {
+      "target_box_a": "zone_2"
+    },
+    "unmoved": [
+      "target_box_b",
+      "target_box_c"
+    ]
+  },
+  "evaluator_version": "0.1.0",
+  "execution_budget": {
+    "max_steps": 50,
+    "max_wall_s": 600.0
+  },
+  "split": "held_out",
+  "instance_sha256": "c9605fbd03916bf442c5ec41fc410946200049a6b988187b3a7ea14bed29b3e5"
+}

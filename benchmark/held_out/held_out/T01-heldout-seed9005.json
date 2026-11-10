@@ -1,0 +1,95 @@
+{
+  "task_id": "T01-heldout-seed9005",
+  "template_id": "T01_multi_object_sorting",
+  "random_seed": 9005,
+  "instruction": "Put the blue block in the right bin and the green block in the left bin.",
+  "objects": [
+    {
+      "name": "target_box_a",
+      "size": [
+        0.035,
+        0.035,
+        0.035
+      ],
+      "color": "red",
+      "initial_pose": [
+        0.22,
+        0.0,
+        0.0175,
+        0.0
+      ]
+    },
+    {
+      "name": "target_box_b",
+      "size": [
+        0.035,
+        0.035,
+        0.035
+      ],
+      "color": "blue",
+      "initial_pose": [
+        0.2,
+        -0.18,
+        0.0175,
+        0.0
+      ]
+    },
+    {
+      "name": "target_box_c",
+      "size": [
+        0.035,
+        0.035,
+        0.035
+      ],
+      "color": "green",
+      "initial_pose": [
+        0.15,
+        -0.05,
+        0.0175,
+        0.0
+      ]
+    }
+  ],
+  "zones": [
+    {
+      "name": "zone_1",
+      "pose": [
+        0.12,
+        -0.15,
+        0.0175
+      ],
+      "radius": 0.06
+    },
+    {
+      "name": "zone_2",
+      "pose": [
+        0.25,
+        0.05,
+        0.0175
+      ],
+      "radius": 0.06
+    }
+  ],
+  "constraints": {
+    "order": [],
+    "must_not_move": [
+      "target_box_a"
+    ]
+  },
+  "expected_goal": {
+    "placement": {
+      "target_box_b": "zone_1",
+      "target_box_c": "zone_2"
+    },
+    "unmoved": [
+      "target_box_a"
+    ]
+  },
+  "evaluator_version": "0.1.0",
+  "execution_budget": {
+    "max_steps": 40,
+    "max_wall_s": 600.0
+  },
+  "split": "held_out",
+  "instance_sha256": "b5018e5a425024068b8195b008497ee54248e10a7c4f910acd641d19b793e45a"
+}
