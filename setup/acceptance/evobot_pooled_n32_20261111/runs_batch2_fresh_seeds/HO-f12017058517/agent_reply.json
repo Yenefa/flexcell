@@ -1,0 +1,38 @@
+{
+  "agent_plan": {
+    "moves": [
+      {
+        "object": "target_box_b",
+        "zone": "zone_1",
+        "why": "blue block first goes to the right bin"
+      },
+      {
+        "object": "target_box_b",
+        "zone": "zone_2",
+        "why": "then move it to the left bin so it actually visits left"
+      },
+      {
+        "object": "target_box_b",
+        "zone": "zone_1",
+        "why": "finally put it back in the right bin"
+      }
+    ],
+    "unmoved": [
+      "target_box_a"
+    ],
+    "confidence": "high",
+    "uncertainty": ""
+  },
+  "problems": [],
+  "raw_reply": "{\"moves\":[{\"object\":\"target_box_b\",\"zone\":\"zone_1\",\"why\":\"blue block first goes to the right bin\"},{\"object\":\"target_box_b\",\"zone\":\"zone_2\",\"why\":\"then move it to the left bin so it actually visits left\"},{\"object\":\"target_box_b\",\"zone\":\"zone_1\",\"why\":\"finally put it back in the right bin\"}],\"unmoved\":[\"target_box_a\"],\"confidence\":\"high\",\"uncertainty\":\"\"}",
+  "usage": {
+    "tokens": 875,
+    "seconds": 2.864,
+    "model": "deepseek-flash"
+  },
+  "requested_model": "deepseek-flash",
+  "base_url": "https://api.deepseek.com",
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "key_fingerprint": "2caaf9b9"
+}

@@ -1,0 +1,62 @@
+{
+  "task_id": "HO-7abe2c3d5305",
+  "instruction": "Put the red block in the right bin, then move it to the left bin, then put it back in the right bin. It must actually visit the left bin. Leave the other block exactly where it is.",
+  "objects": [
+    {
+      "name": "target_box_a",
+      "size": [
+        0.035,
+        0.035,
+        0.035
+      ],
+      "color": "red",
+      "initial_pose": [
+        0.22,
+        0.0,
+        0.0175,
+        0.0
+      ]
+    },
+    {
+      "name": "target_box_b",
+      "size": [
+        0.035,
+        0.035,
+        0.035
+      ],
+      "color": "blue",
+      "initial_pose": [
+        0.2,
+        -0.18,
+        0.0175,
+        0.0
+      ]
+    }
+  ],
+  "zones": [
+    {
+      "name": "zone_1",
+      "pose": [
+        0.12,
+        -0.15,
+        0.0175
+      ],
+      "radius": 0.06
+    },
+    {
+      "name": "zone_2",
+      "pose": [
+        0.25,
+        0.05,
+        0.0175
+      ],
+      "radius": 0.06
+    }
+  ],
+  "evaluator_version": "0.1.0",
+  "execution_budget": {
+    "max_steps": 70,
+    "max_wall_s": 900.0
+  },
+  "split": "held_out"
+}

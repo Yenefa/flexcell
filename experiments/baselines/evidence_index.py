@@ -58,6 +58,7 @@ RUNGS = {
     "evobot_lesson_routing_20261111": "Plan-level analysis (mechanism found; NO robot run; transfer NOT observed)",
     "evobot_three_arm_20261111": "Plan-level three-arm comparison (NO robot run)",
     "evobot_actuator_rootcause_20261111": "Root-cause analysis of archived runs (NO new robot run)",
+    "evobot_pooled_n32_20261111": "Independently Verified (pooled n=32, robot runs, intervals)",
 }
 
 

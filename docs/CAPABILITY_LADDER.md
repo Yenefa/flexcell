@@ -77,6 +77,18 @@ python3 -m pytest benchmark/tests -q              # 116 个离线测试
 | 4 | T04 能区分两臂 | A′ 用一次 `hypot` 就解了 |
 | 5 | Baseline A 是公平基线 | A 直接读 `expected_goal`，**是开卷预言机** |
 
+## 合并 n=32 的结果（`evobot_pooled_n32`，Wilson 95% 区间）
+
+| 指标 | 值 |
+| --- | --- |
+| B 首试通过 | **25/32 = 78% (61–89%)** |
+| R 最终通过 | **29/32 = 91% (76–97%)** |
+| 配对转移 | gained=4, lost=0 |
+| stall 出现 | 9/32 = 28% (16–45%) |
+| **False Success Rate** | **0/32 = 0.0%** |
+
+全部 3 例剩余失败的根因**都是** `ACTUATOR_STALL_ON_RELEASE`。
+
 ## 剩余失败的唯一根因（`evobot_actuator_rootcause`）
 
 16 例未见过任务中，**全部剩余失败同一个原因**：

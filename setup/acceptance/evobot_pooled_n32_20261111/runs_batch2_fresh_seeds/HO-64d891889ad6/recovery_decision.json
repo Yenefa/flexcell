@@ -1,0 +1,33 @@
+{
+  "record_kind": "RECOVERY_DECISION",
+  "source_run": "/tmp/evobot-pair32/HO-64d891889ad6",
+  "original_evidence": {
+    "outcome": 1,
+    "error_code": 62,
+    "detail": "native terminal/verification unconfirmed for target_box_b-2",
+    "completed_stage_ids": [
+      "target_box_b-0",
+      "target_box_b-1"
+    ],
+    "native_detail": "policy abort (NON_RECOVERABLE): place failed (ERR_PLACE_FAILED, carried box is not retried) (trace=PICK_A(attempt=1):OK,PLACE_A:FAIL); previous_skill=PLACE cause=ERR_PLACE_FAILED legacy_error_code=25",
+    "native_fsm_trace": [
+      "PICK_A(attempt=1):OK",
+      "PLACE_A:FAIL"
+    ],
+    "native_error_code": 50,
+    "failed_stage": "target_box_b-2"
+  },
+  "decision": {
+    "action": "resume",
+    "failure_class": "grasp",
+    "measured_reason": "native place stage failed: ['PICK_A(attempt=1):OK', 'PLACE_A:FAIL']",
+    "attempt": 1,
+    "budget": 1,
+    "committed_stages": [
+      "target_box_b-0",
+      "target_box_b-1"
+    ],
+    "why": "stages already committed; replay would contradict the measured world state. A resumable plan is needed and is not implemented."
+  },
+  "original_failure_preserved": true
+}

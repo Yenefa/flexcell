@@ -1,0 +1,190 @@
+observe_server:
+  ros__parameters:
+    use_sim_time: true
+    tracked_objects:
+    - target_box_a
+    - target_box_b
+    object_target_box_a_size:
+    - 0.035
+    - 0.035
+    - 0.035
+    object_target_box_b_size:
+    - 0.035
+    - 0.035
+    - 0.035
+    move_epsilon_m: 0.002
+    base_frame: world
+    end_effector_link: end_effector_link
+    joint_states_topic: /joint_states
+    world_state_topic: /flexcell/world_state
+    carry_state_topic: /flexcell/carry_state
+    zones:
+    - zone_1
+    - zone_2
+    zone_zone_1_x: 0.12
+    zone_zone_1_y: -0.15
+    zone_zone_1_z: 0.0175
+    zone_zone_1_radius: 0.06
+    zone_zone_2_x: 0.25
+    zone_zone_2_y: 0.05
+    zone_zone_2_z: 0.0175
+    zone_zone_2_radius: 0.06
+    source: SIMULATION_GROUND_TRUTH
+    log_dir: /tmp/evobot-pair32/HO-dc7ab84ab6e0/sim/skills
+    log_file: observe.jsonl
+pick_server:
+  ros__parameters:
+    use_sim_time: true
+    move_to_pose_action: /move_to_pose
+    gripper_action: /gripper_controller/gripper_cmd
+    gripper_open_position: 0.02
+    gripper_close_position: -0.011
+    approach_hover_m: 0.22
+    grasp_dz_m: 0.16
+    grasp_raise_m: 0.1
+    attach_radius_m: 0.2
+    carry_start_topic: /flexcell/carry_start
+    carry_stop_topic: /flexcell/carry_stop
+    inject_topic: /flexcell/inject
+    box_follow_min_m: 0.03
+    object_size:
+    - 0.035
+    - 0.035
+    - 0.035
+    base_frame: world
+    end_effector_link: end_effector_link
+    default_deadline_ms: 30000
+    motion_profile_names:
+    - demo_veryslow
+    - demo_slow
+    - demo_default
+    default_motion_profile: demo_slow
+    log_dir: /tmp/evobot-pair32/HO-dc7ab84ab6e0/sim/skills
+    log_file: pick.jsonl
+    carry_backend: velocity_servo
+    skill_backend: legacy
+    record_execution_commands: false
+place_server:
+  ros__parameters:
+    use_sim_time: true
+    move_to_pose_action: /move_to_pose
+    gripper_action: /gripper_controller/gripper_cmd
+    gripper_open_position: 0.02
+    release_hover_m: 0.1
+    release_clearance_m: 0.012
+    carry_offset_m: 0.16
+    place_tolerance_m: 0.06
+    settle_time_s: 1.0
+    retreat_m: 0.1
+    carry_stop_topic: /flexcell/carry_stop
+    object_size:
+    - 0.035
+    - 0.035
+    - 0.035
+    default_deadline_ms: 30000
+    motion_profile_names:
+    - demo_veryslow
+    - demo_slow
+    - demo_default
+    default_motion_profile: demo_slow
+    log_dir: /tmp/evobot-pair32/HO-dc7ab84ab6e0/sim/skills
+    log_file: place.jsonl
+    carry_backend: velocity_servo
+    skill_backend: legacy
+    record_execution_commands: false
+verify_server:
+  ros__parameters:
+    use_sim_time: true
+    default_tolerance_m: 0.05
+    log_dir: /tmp/evobot-pair32/HO-dc7ab84ab6e0/sim/skills
+    log_file: verify.jsonl
+carry_server:
+  ros__parameters:
+    use_sim_time: true
+    world: empty
+    carry_period_s: 0.1
+    base_frame: world
+    end_effector_link: end_effector_link
+    start_topic: /flexcell/carry_start
+    stop_topic: /flexcell/carry_stop
+    state_topic: /flexcell/carry_state
+    log_dir: /tmp/evobot-pair32/HO-dc7ab84ab6e0/sim/skills
+    log_file: carry.jsonl
+    carry_backend: velocity_servo
+task_fsm_server:
+  ros__parameters:
+    use_sim_time: true
+    observe_action: /observe
+    pick_action: /pick_object
+    place_action: /place_object
+    verify_action: /verify_object
+    default_place_tolerance_m: 0.06
+    skill_wait_s: 90.0
+    log_dir: /tmp/evobot-pair32/HO-dc7ab84ab6e0/sim/skills
+    log_file: task_fsm.jsonl
+    object_a: target_box_a
+    object_b: target_box_b
+    zone_1_x: 0.12
+    zone_1_y: -0.15
+    zone_1_z: 0.0175
+    zone_2_x: 0.25
+    zone_2_y: 0.05
+    zone_2_z: 0.0175
+    recovery_budget: 1
+    demo_verify_tolerance_m: 0.06
+    demo_log_file: demo_runs.jsonl
+    task_state_topic: /flexcell/task_state
+    decision_policy: fsm
+    jev_backend: clef
+    hybrid_threshold: 0.7
+    decision_log_file: decisions.jsonl
+    episode_dir: /tmp/evobot-pair32/HO-dc7ab84ab6e0/sim/episodes
+move_to_pose_server:
+  ros__parameters:
+    use_sim_time: true
+    planning_group: arm
+    end_effector_link: end_effector_link
+    base_frame: world
+    planning_service: /plan_kinematic_path
+    ik_service: /compute_ik
+    execute_action: /execute_trajectory
+    execution_backend: controller_action
+    controller_action: /arm_controller/follow_joint_trajectory
+    joint_states_topic: /joint_states
+    default_deadline_ms: 20000
+    max_deadline_ms: 60000
+    planning_timeout_s: 5.0
+    ik_timeout_s: 1.0
+    execution_timeout_s: 25.0
+    tf_timeout_s: 1.0
+    stop_confirm_timeout_s: 4.0
+    stop_result_timeout_s: 12.0
+    cut_short_threshold_rad: 0.02
+    stop_velocity_epsilon: 0.02
+    joint_state_max_age_s: 1.0
+    position_tolerance_m: 0.02
+    orientation_tolerance_rad: 0.35
+    enforce_orientation: false
+    planning_constraint_radius_m: 0.008
+    workspace_min:
+    - -0.45
+    - -0.45
+    - -0.15
+    workspace_max:
+    - 0.45
+    - 0.45
+    - 0.75
+    motion_profile_names:
+    - demo_veryslow
+    - demo_slow
+    - demo_default
+    motion_profile_demo_veryslow_max_velocity: 0.05
+    motion_profile_demo_veryslow_max_acceleration: 0.05
+    motion_profile_demo_slow_max_velocity: 0.2
+    motion_profile_demo_slow_max_acceleration: 0.2
+    motion_profile_demo_default_max_velocity: 0.5
+    motion_profile_demo_default_max_acceleration: 0.5
+    default_motion_profile: demo_slow
+    log_dir: /tmp/evobot-pair32/HO-dc7ab84ab6e0/sim/skills
+    log_file: move_to_pose.jsonl
+    enable_mtc_handoff: false

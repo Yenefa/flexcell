@@ -1,0 +1,31 @@
+{
+  "agent_plan": {
+    "moves": [
+      {
+        "object": "target_box_a",
+        "zone": "zone_1",
+        "why": "Red block is closer to left bin (zone_2), so both go to right bin (zone_1)."
+      },
+      {
+        "object": "target_box_b",
+        "zone": "zone_1",
+        "why": "Condition puts both blocks in the right bin (zone_1)."
+      }
+    ],
+    "unmoved": [],
+    "confidence": "high",
+    "uncertainty": ""
+  },
+  "problems": [],
+  "raw_reply": "{\"moves\":[{\"object\":\"target_box_a\",\"zone\":\"zone_1\",\"why\":\"Red block is closer to left bin (zone_2), so both go to right bin (zone_1).\"},{\"object\":\"target_box_b\",\"zone\":\"zone_1\",\"why\":\"Condition puts both blocks in the right bin (zone_1).\"}],\"unmoved\":[],\"confidence\":\"high\",\"uncertainty\":\"\"}",
+  "usage": {
+    "tokens": 905,
+    "seconds": 2.753,
+    "model": "deepseek-flash"
+  },
+  "requested_model": "deepseek-flash",
+  "base_url": "https://api.deepseek.com",
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "key_fingerprint": "2caaf9b9"
+}

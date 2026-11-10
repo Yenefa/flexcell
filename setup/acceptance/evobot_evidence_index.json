@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 23,
-  "live": 16,
+  "batches": 24,
+  "live": 17,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -72,7 +72,7 @@
         "public_tasks": 36,
         "public_tasks_with_answers": 0,
         "agent_uid_read_blocked": true,
-        "sealed_answers": 58,
+        "sealed_answers": 74,
         "isolation_kind": "OS permissions; not a kernel namespace"
       }
     },
@@ -123,6 +123,24 @@
         "recovery_rate": "3/4",
         "false_success_rate": 0.0,
         "prior_batch_retained": true
+      }
+    },
+    {
+      "batch": "evobot_pooled_n32_20261111",
+      "verified": "PASS",
+      "rung": "Independently Verified (pooled n=32, robot runs, intervals)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_POOLED_N32_VERIFIED",
+        "instances": 32,
+        "B_first_try": "25/32 (78%, 61-89%)",
+        "R_after_retry": "29/32 (91%, 76-97%)",
+        "paired_gained": 4,
+        "paired_lost": 0,
+        "stalls_seen": "9/32",
+        "still_failing": 3,
+        "root_cause_of_all_remaining": "ACTUATOR_STALL_ON_RELEASE",
+        "false_success_rate": 0.0
       }
     },
     {
