@@ -99,6 +99,15 @@ def evaluate(spec, final_state):
             "order", ok, required=required_order, observed=observed,
             matched=cursor, out_of_order=violations))
 
+    # Relay clause: a template that says "pass through bin X first" must be checked on
+    # the ROUTE, not only the final position. Without this a direct move would pass and
+    # the template would not be testing what its instruction asks for.
+    for name, required_zones in sorted((goal.get("visit") or {}).items()):
+        seen = [v for v in (final_state.get("visits") or {}).get(name, [])]
+        ok = all(z in seen for z in required_zones)
+        clauses.append(_clause(
+            "visit:" + name, ok, required=required_zones, observed=seen))
+
     min_tiers = goal.get("min_tiers")
     if min_tiers:
         heights = sorted(pose[n][2] for n in goal.get("placement", {}) if n in pose)

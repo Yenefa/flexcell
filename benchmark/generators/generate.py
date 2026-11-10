@@ -84,12 +84,15 @@ def _label(zone):
 
 
 def _spec(template, seed, split, instruction, names, zone_names, placement,
-          unmoved=None, order=None, min_tiers=None, max_steps=40, max_wall_s=600):
+          unmoved=None, order=None, min_tiers=None, visit=None,
+          max_steps=40, max_wall_s=600):
     goal = {"placement": placement, "unmoved": list(unmoved or [])}
     if order:
         goal["order"] = list(order)
     if min_tiers:
         goal["min_tiers"] = int(min_tiers)
+    if visit:
+        goal["visit"] = {k: list(v) for k, v in visit.items()}
     return {
         "task_id": "%s-%s-seed%04d" % (template.split("_")[0], split.replace("_", ""), seed),
         "template_id": template,
@@ -175,8 +178,12 @@ def t05_relay(seed, split):
     placement = {name: "zone_2"}
     instruction = "Move the %s block to the %s bin, passing through the %s bin first." % (
         OBJECTS[name]["color"], _label("zone_2"), _label("zone_1"))
+    # The relay is only a relay if the route is graded, so the required intermediate
+    # bin is part of the goal, not just of the wording.
+    visit = {name: ["zone_1"]}
     return _spec("T05_relay", seed, split, instruction, _scene_objects(split),
-                 ["zone_1", "zone_2"], placement, unmoved=others, max_steps=50)
+                 ["zone_1", "zone_2"], placement, unmoved=others, visit=visit,
+                 max_steps=50)
 
 
 def t06_revisit(seed, split):

@@ -108,9 +108,13 @@ def validate_plan(reply, observation):
     unmoved = reply.get("unmoved")
     if unmoved is not None and not isinstance(unmoved, list):
         problems.append("unmoved must be a list")
+    # Repeated object names are DELIBERATELY allowed: RunComposite documents support
+    # for them, and a relay task is exactly the case where one object is moved twice.
+    # An earlier version of this validator rejected such plans, which would have made a
+    # correct relay plan look like a malformed one.
     moved = [c["object"] for c in clean]
-    if len(set(moved)) != len(moved):
-        problems.append("the same object is planned more than once")
+    if not moved:
+        problems.append("no valid moves after validation")
     return {"moves": clean, "unmoved": list(unmoved or []),
             "confidence": reply.get("confidence"),
             "uncertainty": str(reply.get("uncertainty", ""))[:300]}, problems

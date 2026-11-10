@@ -103,11 +103,17 @@ def test_more_than_eight_moves_is_rejected():
     assert any("allows 8" in p for p in problems), problems
 
 
-def test_duplicate_object_is_rejected():
+def test_a_relay_plan_that_moves_one_object_twice_is_accepted():
+    """RunComposite allows repeated object names; a relay needs them.
+
+    An earlier validator rejected the same object twice, which would have turned a
+    correct relay plan into a malformed one and made T05 unplannable.
+    """
     reply = {"moves": [{"object": "target_box_a", "zone": "zone_1"},
                        {"object": "target_box_a", "zone": "zone_2"}], "unmoved": []}
     plan_obj, problems, _ = ap.plan(_obs(), StubChat(reply))
-    assert any("more than once" in p for p in problems)
+    assert problems == [], problems
+    assert [m["zone"] for m in plan_obj["moves"]] == ["zone_1", "zone_2"]
 
 
 def test_json_inside_a_code_fence_is_parsed():

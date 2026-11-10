@@ -166,6 +166,17 @@
         "min_tiers": {
           "type": "integer",
           "minimum": 1
+        },
+        "visit": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^zone_[0-9]+$"
+            }
+          },
+          "description": "bins an object must actually pass through, checked against the place history"
         }
       }
     },

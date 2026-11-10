@@ -45,8 +45,19 @@ def _xy_z_yaw(pose):
     return [round(float(pose[0]), 6), round(float(pose[1]), 6), round(float(pose[2]), 6), 0.0]
 
 
+def _nearest_zone_name(pose, zones, tolerance=0.06):
+    if not zones:
+        return None
+    best, best_d = None, None
+    for name, zpose in zones.items():
+        d = ((pose[0] - zpose[0]) ** 2 + (pose[1] - zpose[1]) ** 2) ** 0.5
+        if best_d is None or d < best_d:
+            best, best_d = name, d
+    return best if best_d is not None and best_d <= tolerance else None
+
+
 def build_observation(run_dir, declared_objects, agent_claimed_success=False,
-                      ground_truth=None):
+                      ground_truth=None, zones=None):
     """Return the observation dict the evaluator consumes."""
     run = Path(run_dir)
     skills = run / "skills"
@@ -94,6 +105,18 @@ def build_observation(run_dir, declared_objects, agent_claimed_success=False,
         else:
             absent.append(name)
 
+    # Route history: every release position this object passed through, mapped back to
+    # the bin it landed in. This is what makes a relay template checkable.
+    visits = {}
+    for row in place:
+        name = row.get("object_name")
+        pose = _xy_z_yaw(row.get("box_after"))
+        if not name or not pose or not row.get("released", True):
+            continue
+        zone_name = _nearest_zone_name(pose, zones or {})
+        if zone_name:
+            visits.setdefault(name, []).append(zone_name)
+
     sequence, picked = [], set()
     for row in pick:
         name = row.get("object_name")
@@ -111,11 +134,13 @@ def build_observation(run_dir, declared_objects, agent_claimed_success=False,
         "_ever_seen": sorted(seen),
         "_run_dir": str(run),
         "_ground_truth_used": sorted(gt_used),
+        "visits": visits,
     }
 
 
 def strip_diagnostics(observation):
-    return {k: v for k, v in observation.items() if not k.startswith("_")}
+    keep = {"objects", "move_sequence", "agent_claimed_success", "visits"}
+    return {k: v for k, v in observation.items() if not k.startswith("_") and k in keep}
 
 
 def main(argv=None):
@@ -130,7 +155,16 @@ def main(argv=None):
         gt_path = argv[argv.index("--ground-truth") + 1]
         names = [n for n in names if n != "--ground-truth" and n != gt_path]
         gt = json.loads(Path(gt_path).read_text(encoding="utf-8"))
-    obs = build_observation(run_dir, names, ground_truth=gt)
+    zones = None
+    if "--zones" in argv:
+        zpath = argv[argv.index("--zones") + 1]
+        try:
+            zones = json.loads(zpath)
+            names = [n for n in names if n not in ("--zones", zpath)]
+        except json.JSONDecodeError:
+            zones = json.loads(Path(zpath).read_text(encoding="utf-8"))
+            names = [n for n in names if n not in ("--zones", zpath)]
+    obs = build_observation(run_dir, names, ground_truth=gt, zones=zones)
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     Path(out_path).write_text(json.dumps(obs, indent=2) + "\n", encoding="utf-8")
     print("objects observed: %d/%d, absent: %s" % (

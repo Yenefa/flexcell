@@ -8,6 +8,23 @@ enforced by only touching the whitelisted keys, and asserted at the end.
 """
 import json
 import sys
+
+# Occupancy clearance for the plan declaration.
+#
+# It was hardcoded to 0.060 (copied from the server config default) and never checked
+# against the scene. It turned out to be 1.7 mm too large: box_a spawns 58.3 mm from
+# zone_2 centre, so any task placing into zone_2 while box_a stays put was declared
+# infeasible. Two 35 mm boxes only need centre separation above 35 mm to avoid
+# overlap, so 1.3x the box edge is physically justified and no longer contradicts the
+# scene. This is the PLANNER occupancy declaration - the evaluator acceptance radius
+# (0.06 m) is untouched.
+CLEARANCE_FACTOR = 1.3
+
+# The RunComposite contract accepts clearance_m only in 0.05..0.25, so the derived
+# value is clamped into that window. For 35 mm boxes 1.3x edge is 45.5 mm, which is
+# below the contract floor, so the floor is what actually applies.
+CLEARANCE_MIN = 0.05
+CLEARANCE_MAX = 0.25
 from pathlib import Path
 
 WT = Path(__file__).resolve().parents[2]
@@ -68,7 +85,8 @@ def main(argv=None):
         "stages": comp["stages"],
         "final_empty_positions": [],
         "position_tolerance_m": 0.02,
-        "clearance_m": 0.06,
+        "clearance_m": min(CLEARANCE_MAX, max(CLEARANCE_MIN, round(
+            CLEARANCE_FACTOR * spec["objects"][0]["size"][0], 4))),
         "motion_profile_id": "demo_slow",
     }
     (out / "plan.json").write_text(json.dumps(plan, indent=2) + "\n", encoding="utf-8")

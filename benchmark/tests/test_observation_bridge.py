@@ -61,7 +61,9 @@ def test_bridge_does_not_read_the_spec_so_it_cannot_bias_the_observation():
 def test_strip_diagnostics_leaves_exactly_the_evaluator_contract():
     obs = bridge.build_observation(REAL_RUN, ["target_box_b"])
     clean = bridge.strip_diagnostics(obs)
-    assert set(clean) == {"objects", "move_sequence", "agent_claimed_success"}
+    # The contract grew by "visits" when relay grading was added: a template that asks
+    # for an intermediate stop cannot be graded from final positions alone.
+    assert set(clean) == {"objects", "move_sequence", "agent_claimed_success", "visits"}
     # and the evaluator accepts it
     spec = gen.generate("T01_multi_object_sorting", 3)
     verdict = ev.evaluate(spec, clean)

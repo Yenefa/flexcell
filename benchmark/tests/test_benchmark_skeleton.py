@@ -93,6 +93,41 @@ def test_t04_no_longer_claims_the_blocks_look_alike():
     assert "look alike" not in spec["instruction"].lower()
 
 
+def test_t05_declares_the_relay_route_as_part_of_the_goal():
+    spec = gen.generate("T05_relay", 1000)
+    visit = spec["expected_goal"].get("visit")
+    assert visit, "T05 must grade the route, not only the destination"
+    name = list(spec["expected_goal"]["placement"])[0]
+    assert name in visit
+    assert visit[name] == ["zone_1"]
+
+
+def test_t05_direct_move_fails_even_with_the_right_destination():
+    """The whole point of T05: skipping the intermediate bin must be caught."""
+    spec = gen.generate("T05_relay", 1000)
+    name = list(spec["expected_goal"]["placement"])[0]
+    dest = spec["expected_goal"]["placement"][name]
+    objects = {n: list(gen.OBJECTS[n]["pose"]) for n in gen.OBJECTS}
+    objects[name] = _at(dest)
+    state = _state(objects, sequence=[name])
+    state["visits"] = {name: [dest]}          # went straight there
+    verdict = ev.evaluate(spec, state)
+    assert verdict["passed"] is False
+    assert any(c.startswith("visit:") for c in verdict["failed_clauses"]), verdict["failed_clauses"]
+
+
+def test_t05_relay_route_passes_when_the_intermediate_bin_was_visited():
+    spec = gen.generate("T05_relay", 1000)
+    name = list(spec["expected_goal"]["placement"])[0]
+    dest = spec["expected_goal"]["placement"][name]
+    objects = {n: list(gen.OBJECTS[n]["pose"]) for n in gen.OBJECTS}
+    objects[name] = _at(dest)
+    state = _state(objects, sequence=[name])
+    state["visits"] = {name: ["zone_1", dest]}
+    verdict = ev.evaluate(spec, state)
+    assert verdict["passed"] is True, verdict["failed_clauses"]
+
+
 def test_evaluator_and_generator_versions_agree():
     assert ev.EVALUATOR_VERSION == gen.EVALUATOR_VERSION
 
