@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 32,
-  "live": 25,
+  "batches": 33,
+  "live": 26,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -122,7 +122,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 24,
+        "live_batches": 25,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",
@@ -548,6 +548,23 @@
         "C_vs_B": "identical",
         "robot_run_this_round": false,
         "false_success_rate": 0.0
+      }
+    },
+    {
+      "batch": "evobot_unified_runner_20261111",
+      "verified": "PASS",
+      "rung": "Infrastructure (4 runners merged into 1; absolute paths; smoke-tested end to end)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_UNIFIED_RUNNER_VERIFIED",
+        "runners_before": 4,
+        "runners_now": 1,
+        "helper_paths": "absolute under $W",
+        "self_validating": true,
+        "set_u_removed": "ROS setup.bash is not set -u clean",
+        "smoke_test": "1 instance, every stage executed",
+        "archived_copies_keep_the_defect": true,
+        "evaluator_touched": false
       }
     },
     {

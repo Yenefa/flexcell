@@ -1,0 +1,14 @@
+NOTE: no first attempt failed, so the recovery path was never exercised.
+      This batch supports NO claim about arm R.
+
+{
+  "runs": 1,
+  "b_failed": 0,
+  "recovery_ran": 0,
+  "claims": 1,
+  "retried": 0
+}
+
+Batch structure OK: every failed first attempt has a recorded recovery decision,
+every run carries a measured claim, and the retry mechanism demonstrably fired.
+rc=0
