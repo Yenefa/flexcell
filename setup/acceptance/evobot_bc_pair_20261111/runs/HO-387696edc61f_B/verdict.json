@@ -1,0 +1,38 @@
+{
+  "evaluator_version": "0.1.0",
+  "task_id": "HO-387696edc61f",
+  "template_id": "T06_revisit",
+  "passed": true,
+  "clauses": [
+    {
+      "clause": "placement:target_box_b",
+      "ok": true,
+      "evidence": {
+        "zone": "zone_1",
+        "distance_m": 0.00619,
+        "radius_m": 0.06,
+        "inside_zone": true,
+        "height_error_m": 0.0,
+        "resting": true,
+        "final_pose": [
+          0.11623,
+          -0.14509,
+          0.0175,
+          0.0
+        ]
+      }
+    },
+    {
+      "clause": "unmoved:target_box_a",
+      "ok": true,
+      "evidence": {
+        "distance_m": 0.0,
+        "tolerance_m": 0.015
+      }
+    }
+  ],
+  "failed_clauses": [],
+  "agent_claimed_success": false,
+  "false_success": false,
+  "false_failure": true
+}

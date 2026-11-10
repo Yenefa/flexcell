@@ -84,14 +84,14 @@ def test_valid_plan_is_accepted():
     reply = {"moves": [{"object": "target_box_a", "zone": "zone_1", "why": "right bin"},
                        {"object": "target_box_b", "zone": "zone_2", "why": "left bin"}],
              "unmoved": [], "confidence": "high", "uncertainty": ""}
-    plan_obj, problems, _ = ap.plan(_obs(), StubChat(reply))
+    plan_obj, problems, _, usage = ap.plan(_obs(), StubChat(reply))
     assert problems == []
     assert [m["object"] for m in plan_obj["moves"]] == ["target_box_a", "target_box_b"]
 
 
 def test_unknown_object_or_bin_is_rejected():
     reply = {"moves": [{"object": "target_box_c", "zone": "zone_9"}], "unmoved": []}
-    plan_obj, problems, _ = ap.plan(_obs(), StubChat(reply))
+    plan_obj, problems, _, usage = ap.plan(_obs(), StubChat(reply))
     assert problems
     assert any("unknown object" in p for p in problems)
     assert any("unknown bin" in p for p in problems)
@@ -99,7 +99,7 @@ def test_unknown_object_or_bin_is_rejected():
 
 def test_more_than_eight_moves_is_rejected():
     reply = {"moves": [{"object": "target_box_a", "zone": "zone_1"}] * 9, "unmoved": []}
-    plan_obj, problems, _ = ap.plan(_obs(), StubChat(reply))
+    plan_obj, problems, _, usage = ap.plan(_obs(), StubChat(reply))
     assert any("allows 8" in p for p in problems), problems
 
 
@@ -111,7 +111,7 @@ def test_a_relay_plan_that_moves_one_object_twice_is_accepted():
     """
     reply = {"moves": [{"object": "target_box_a", "zone": "zone_1"},
                        {"object": "target_box_a", "zone": "zone_2"}], "unmoved": []}
-    plan_obj, problems, _ = ap.plan(_obs(), StubChat(reply))
+    plan_obj, problems, _, usage = ap.plan(_obs(), StubChat(reply))
     assert problems == [], problems
     assert [m["zone"] for m in plan_obj["moves"]] == ["zone_1", "zone_2"]
 
@@ -119,7 +119,7 @@ def test_a_relay_plan_that_moves_one_object_twice_is_accepted():
 def test_json_inside_a_code_fence_is_parsed():
     fenced = "```json\n" + json.dumps(
         {"moves": [{"object": "target_box_a", "zone": "zone_1"}], "unmoved": []}) + "\n```"
-    plan_obj, problems, _ = ap.plan(_obs(), StubChat(fenced))
+    plan_obj, problems, _, usage = ap.plan(_obs(), StubChat(fenced))
     assert problems == [], problems
     assert plan_obj["moves"][0]["object"] == "target_box_a"
 

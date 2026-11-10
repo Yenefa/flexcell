@@ -67,10 +67,10 @@ def main(argv=None):
 
     from pilot.llm import Chat
     chat = Chat()
-    agent_plan, problems, raw = ap.plan(obs, chat)
+    agent_plan, problems, raw, usage = ap.plan(obs, chat)
     (out / "agent_reply.json").write_text(json.dumps({
         "agent_plan": agent_plan, "problems": problems, "raw_reply": raw,
-        **chat.metadata()}, indent=2) + "\n", encoding="utf-8")
+        "usage": usage, **chat.metadata()}, indent=2) + "\n", encoding="utf-8")
 
     if problems or agent_plan is None:
         print(json.dumps({"stage": "planning", "problems": problems}, indent=2))

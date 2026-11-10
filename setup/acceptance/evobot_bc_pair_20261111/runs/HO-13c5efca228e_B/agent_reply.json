@@ -1,0 +1,31 @@
+{
+  "agent_plan": {
+    "moves": [
+      {
+        "object": "target_box_b",
+        "zone": "zone_1",
+        "why": "blue block moved first into the right-side bin"
+      },
+      {
+        "object": "target_box_a",
+        "zone": "zone_1",
+        "why": "red block moved second into the right-side bin"
+      }
+    ],
+    "unmoved": [],
+    "confidence": "medium",
+    "uncertainty": "Assumed 'right bin' means the spatial right bin zone_1; no explicit color-to-bin mapping was given."
+  },
+  "problems": [],
+  "raw_reply": "{\"moves\":[{\"object\":\"target_box_b\",\"zone\":\"zone_1\",\"why\":\"blue block moved first into the right-side bin\"},{\"object\":\"target_box_a\",\"zone\":\"zone_1\",\"why\":\"red block moved second into the right-side bin\"}],\"unmoved\":[],\"confidence\":\"medium\",\"uncertainty\":\"Assumed 'right bin' means the spatial right bin zone_1; no explicit color-to-bin mapping was given.\"}",
+  "usage": {
+    "tokens": 1810,
+    "seconds": 7.916,
+    "model": "deepseek-flash"
+  },
+  "requested_model": "deepseek-flash",
+  "base_url": "https://api.deepseek.com",
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "key_fingerprint": "2caaf9b9"
+}

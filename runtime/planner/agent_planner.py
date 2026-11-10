@@ -56,6 +56,16 @@ def describe(observation):
         x, y = z["position"][0], z["position"][1]
         lines.append("  %s  at x=%.3f y=%.3f  radius=%.3f" % (z["name"], x, y, z["radius"]))
     lines.append("Skills available: " + ", ".join(observation["skills"]))
+    # Baseline C only. Experience is a list of VALIDATED planner-level lessons
+    # retrieved from archived failures. It contains no task answer: the scope guard
+    # in the experience store rejects any lesson naming an evaluator, tolerance or
+    # grading rule, and a test asserts the enriched observation has no answer fields.
+    lessons = observation.get("experience") or []
+    if lessons:
+        lines.append("Validated lessons from earlier failures (process hints, not answers):")
+        for item in lessons:
+            lines.append("  - [%s] %s" % (item.get("failure_class", "UNKNOWN"),
+                                          item.get("lesson", "")))
     return "\n".join(lines)
 
 
@@ -121,22 +131,25 @@ def validate_plan(reply, observation):
 
 
 def plan(observation, chat):
-    """Ask the model for a plan and validate it. Returns (plan, problems, raw)."""
+    """Ask the model for a plan. Returns (plan, problems, raw, usage)."""
     system, user = build_prompt(observation)
     messages = [{"role": "system", "content": system},
                 {"role": "user", "content": user}]
     response = chat.chat(messages)
-    # The client returns (content, usage-ish dict); accept both shapes so a change
-    # in the client does not silently produce an empty plan.
-    if isinstance(response, tuple):
-        raw = response[0]
-    elif isinstance(response, dict):
+    # The client returns a dict with content AND usage. Keep the usage: resource cost
+    # must be reported per arm, otherwise a budget advantage can masquerade as a
+    # capability advantage (experiment protocol rule 1).
+    if isinstance(response, dict):
         raw = response.get("content") or ""
+    elif isinstance(response, tuple):
+        raw = response[0]
     else:
         raw = str(response)
     reply = parse_reply(raw)
     plan_obj, problems = validate_plan(reply, observation)
-    return plan_obj, problems, raw
+    usage = {k: response.get(k) for k in ("tokens", "seconds", "model")} \
+        if isinstance(response, dict) else {}
+    return plan_obj, problems, raw, usage
 
 
 def to_composite_plan(spec_for_poses, agent_plan):

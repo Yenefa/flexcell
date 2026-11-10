@@ -19,8 +19,13 @@ import json
 from pathlib import Path
 
 STORE_VERSION = "0.1.0"
+# Two distinct leak channels: grading machinery, and the ANSWER itself. A test caught
+# that "expected_goal says zone_2" slipped through the original list, so answer-shaped
+# words are blocked here too. A lesson may say HOW to plan, never WHAT the plan is.
 FORBIDDEN_TOPICS = ["evaluator", "tolerance", "threshold", "acceptance", "world_sha",
-                    "verifier", "grading", "pass_threshold"]
+                    "verifier", "grading", "pass_threshold",
+                    "expected_goal", "placement", "unmoved", "instance_sha256",
+                    "random_seed", "min_tiers", "put box_", "to zone_", "-> zone_"]
 
 FAILURE_CLASSES = ["perception", "planning", "kinematics", "control", "grasp",
                    "state", "tooling", "runtime", "model", "environment", "UNKNOWN"]

@@ -1,0 +1,31 @@
+{
+  "agent_plan": {
+    "moves": [
+      {
+        "object": "target_box_b",
+        "zone": "zone_1",
+        "why": "Farther from base; zone_1 is on the right (-y)"
+      },
+      {
+        "object": "target_box_a",
+        "zone": "zone_2",
+        "why": "Nearer to base; zone_2 is on the left (+y)"
+      }
+    ],
+    "unmoved": [],
+    "confidence": "high",
+    "uncertainty": ""
+  },
+  "problems": [],
+  "raw_reply": "{\"moves\":[{\"object\":\"target_box_b\",\"zone\":\"zone_1\",\"why\":\"Farther from base; zone_1 is on the right (-y)\"},{\"object\":\"target_box_a\",\"zone\":\"zone_2\",\"why\":\"Nearer to base; zone_2 is on the left (+y)\"}],\"unmoved\":[],\"confidence\":\"high\",\"uncertainty\":\"\"}",
+  "usage": {
+    "tokens": 738,
+    "seconds": 2.232,
+    "model": "deepseek-flash"
+  },
+  "requested_model": "deepseek-flash",
+  "base_url": "https://api.deepseek.com",
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "key_fingerprint": "2caaf9b9"
+}
