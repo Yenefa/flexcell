@@ -275,3 +275,20 @@ differs from planned trajectory`。
 
 **我特意没有调大容差**——那是"为通过而放宽检查"。正确修法是每阶段从实测重规划、
 或把后续阶段改为比对"上一阶段预测终点"。需预注册。
+
+## C13e — 拆分撤回规划的尝试：**失败并已回退**
+
+预注册（`docs/C13E_PREREGISTRATION.md`）：把 `[hover, descend, retreat]` 拆成 2+1。
+
+| 臂 | 修改前 | 修改后 |
+| --- | --- | --- |
+| `mtc-constrained` | `PLACE_B` 失败 | `PLACE_A` 失败（更早） |
+| `mtc-default` | **PASS 6/6** | **失败（回归）** |
+| `legacy-constrained` | PASS 6/6 | PASS 6/6 |
+
+原因：planner 要求 PLACE **固定 3 阶段**，传 2 个被拒（`invalid ... stage count`）。
+
+**判定：`C13E_STAGE_SPLIT_REJECTED_AND_REVERTED`** — 按预注册第 6 条**立即回退**，
+`git checkout` 恢复、重新 build、三场景复测 **全部 PASS**，无残留。
+
+**含义**：C13d 根因不变，但"每阶段重规划"需要改 planner C++ 契约本身。

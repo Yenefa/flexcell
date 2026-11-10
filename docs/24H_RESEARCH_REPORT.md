@@ -761,3 +761,42 @@ planned, message = mtc.prepare('PLACE', goal.object_name, planning_object,
 2. 按方案 (b) 修批量阶段起点比对；
 3. canonical 错误码写入 Action 契约；
 4. 真机安全链（需硬件）。
+
+---
+
+## 20. C13e — 最后一次尝试：失败，并已按预注册回退
+
+### 预注册在改代码之前写
+`docs/C13E_PREREGISTRATION.md`：H1 断言"把 `[hover, descend, retreat]` 拆成 2+1，
+撤回起点就来自实测状态，MTC 应能完成"。**第 6 条写明：失败即回退。**
+
+### 结果：H0 + 回归
+| 臂 | 修改前 | 修改后 |
+| --- | --- | --- |
+| `mtc-constrained` | `PLACE_B` 失败 | `PLACE_A` 失败（**更早**） |
+| `mtc-default` | **PASS 6/6** | **失败（回归）** |
+| `legacy-constrained` | PASS 6/6 | PASS 6/6 |
+
+原因明确且可查：
+```
+MTC planning failed before execution:
+  invalid operation, object, profile or stage count
+```
+**planner 契约要求 PLACE 必须是 3 个阶段**，传 2 个被直接拒绝。
+
+### 处置
+```bash
+git checkout -- .../place_server.py    # 立即回退
+colcon build --packages-select flexcell_skills   # 重新构建
+```
+- 工作区回到修改前（`git status` 只剩预注册文档）；
+- 三场景复测：**normal 14.3 s / dual_object 28.9 s / regrasp 14.4 s 全部 PASS**；
+- **没有留下半成品**。
+
+### 这次失败的三点价值
+1. 确认 **planner 阶段数契约是硬的**，不能靠拆分绕过；
+2. 因此 C13d 方案 (a)"每阶段重规划"**需要改 C++ 契约本身**，是更大的改动；
+3. **我按预注册回退了**——没有把失败的改动留在代码里换取"看起来修好了"。
+
+### 这是本轮第 7 次失败/更正，也是收口前最后一次
+与之前不同：这次**预注册写清了失败怎么办**，所以处理是机械的、不用临场判断。
