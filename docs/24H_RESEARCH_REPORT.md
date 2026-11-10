@@ -143,18 +143,50 @@
 
 ---
 
-## 6. 本地提交（未推送，需人工批准）
+## 6. 本地提交（21 个，**未推送，需人工批准**）
 
-本轮整改与研究的本地提交（分支 `autonomous/flexcell-remediation`，基线 `ebe27f0`）：
+分支 `autonomous/flexcell-remediation`，基线 `ebe27f07881200ab0fc74dfaa5490208023bf9d9`；
+工作区**干净**（0 处未提交）。
 
-`70d7dc0` → `fefd628`(P0-A/B) → `1dd4543`(P1-A,P0-C) → `64136eb`(P1-B) → `ec2ee41`(P1-C) →
-`da06b2a`(P1-D) → `43f5e27`(集成) → `3273a65`(P0-A 取消集成) → `81a4c47`(P1-E) →
-`25c3216`(P1-F) → `1ba8db8`(P2-A) → `5f1eec9`(P2-D) → `4e3577e`(P2-E) → `768e54b`(P2-B) →
-`72963a5`(P2-C+最终报告) → `f6a074d`(Level B 成功)
+| SHA | 内容 |
+| --- | --- |
+| `70d7dc0` | 24h sprint：Flash 默认、Level B harness、工具根因、C12 |
+| `fefd628` | P0-A 停止确认 + 运动隔离 |
+| `1dd4543` | P1-A 世界新鲜度 + P0-C 安全评估 |
+| `64136eb` | P1-B 拒绝码分类 |
+| `ec2ee41` | P1-C 动作顺序约束 |
+| `da06b2a` | P1-D 夹爪反馈 |
+| `43f5e27` | P1 集成验证 + 世界刷新 |
+| `3273a65` | P0-A 取消契约集成验证 |
+| `81a4c47` | P1-E 对象注册表解耦 |
+| `25c3216` | P1-F 日志完整性 + M2 收口 |
+| `1ba8db8` | P2-A 预算生命周期 |
+| `5f1eec9` | P2-D 时间域规范 |
+| `4e3577e` | P2-E 感知边界 |
+| `768e54b` | P2-B 决策日志统一 |
+| `72963a5` | P2-C 几何工具 + 最终整改报告 |
+| `f6a074d` | **Level B 首次真实源码修复** + 工具缺陷 |
+| `d091d53` | Level B 复现 + Level C 负结果 + 24H 报告 |
+| `18d406f` | Level C′ 两次判分无效 |
+| `2c35b29` | **E2d/E2e Flash 复现** |
+| `29c4cf6` | **隔离态真实触发** |
+| `49a19c1` | C13 预注册 + Track C 标记 BLOCKED |
 
-**待人工批准**：推送分支、创建 PR、把 canonical 错误码写入 Action 契约。
+### 待人工批准（PENDING_APPROVAL）
+1. **推送分支** 与 **创建 PR**（本轮全部为本地提交）；
+2. 把 canonical 错误码写入 **Action 结果契约**（P1-B 目前只进日志与 detail，Action 码保持兼容）；
+3. 为 Track C 注册**新的受约束场景 id** 并重算 `world_sha256`（C13 的前置条件）；
+4. 真机安全链评估（P0-C）——需硬件。
 
----
+## 6b. 最终回归（窗口收口时实测）
+
+| 项 | 结果 |
+| --- | --- |
+| 全仓离线套件（排除 `test_parity_report.py`） | **0 failed** |
+| 真实 Gazebo `normal` | **PASS** 13.9 s |
+| 真实 Gazebo `dual_object` | **PASS** 28.3 s（两条腿 6 步） |
+| 真实 Gazebo `regrasp` | **PASS** 14.3 s |
+| Git 工作区 | **干净** |
 
 ## 7. 资源与合规
 
