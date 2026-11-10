@@ -1,0 +1,47 @@
+[
+  {
+    "task_id": "T01-train-seed1000",
+    "failure_class": "planning",
+    "evidence": {
+      "error_code": 64,
+      "detail": "plan must declare every observed object",
+      "observed_objects": 2,
+      "declared_objects": 3
+    },
+    "lesson": "Declare exactly the objects present in the world. An asset that exists elsewhere is not an object in this scene.",
+    "source_run": "setup/acceptance/evobot_t01_baseline_a_20261111",
+    "outcome": "failed"
+  },
+  {
+    "task_id": "T05-train-seed1000",
+    "failure_class": "runtime",
+    "evidence": {
+      "error_code": 41,
+      "detail": "another pick goal is active"
+    },
+    "lesson": "When one object is moved twice in a chain, the next stage arrives before the previous skill goal is released; allow a bounded admission wait.",
+    "source_run": "setup/acceptance/evobot_t05_batch_20261111",
+    "outcome": "failed"
+  },
+  {
+    "task_id": "T05-train-seed1004",
+    "failure_class": "runtime",
+    "evidence": {
+      "failure": "Failed to find a free participant index for domain 213"
+    },
+    "lesson": "Give each stacked run a valid distinct domain id; reusing one domain exhausts participant slots and looks like a motion failure.",
+    "source_run": "setup/acceptance/evobot_t05_n6_20261111",
+    "outcome": "failed"
+  },
+  {
+    "task_id": "T03-heldout-seed9000",
+    "failure_class": "planning",
+    "evidence": {
+      "error_code": 60,
+      "detail": "declared destination occupied"
+    },
+    "lesson": "Two objects sent to the same bin need distinct landing spots inside it, not the same centre point.",
+    "source_run": "setup/acceptance/evobot_heldout_n6_20261111",
+    "outcome": "failed"
+  }
+]

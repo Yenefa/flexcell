@@ -30,8 +30,8 @@
 | Baseline A executor | yes | yes | yes | **1 instance** | **1 instance** | no |
 | RunComposite client | yes | yes | — | yes | — | — |
 | Baseline B (runtime agent) | yes | **no** | — | — | — | — |
-| Baseline C (self-evolving) | yes | **no** | — | — | — | — |
-| Experience store | yes | **no** | — | — | — | — |
+| Baseline C (self-evolving) | yes | yes (skeleton) | **yes (75 tests)** | no | no | no |
+| Experience store | yes | yes | **yes** | — | — | — |
 
 ## What was proven today
 
@@ -75,3 +75,13 @@ it measures the stack, so that a later agent advantage can be attributed to the 
   process is sandboxed).
 - Physical safety chain still BLOCKED: no hardware, and nothing here has run on a real
   arm.
+
+## 2026-11-11 增补（round 11）
+
+- **首次真实泛化测量**：6 个 held-out、5 类模板，强制隔离下干净通过 5/6 = 83%，
+  另有 1 例执行器/验收器分歧单列；False Success Rate 0.0%。
+  见 `setup/acceptance/evobot_heldout_n6_20261111/`。
+- **held-out 隔离已强制**：公开任务 / 封存答案（root:root 600）+ 隔离 UID。
+- **Baseline C 骨架**：经验库、诊断、检索、回归门，75 个离线测试。
+  **仍未在 Gazebo 上运行**，不宣称 Level 5/6。
+- **三臂仍有缺口**：C 未配对执行，未证明经验迁移有效。
