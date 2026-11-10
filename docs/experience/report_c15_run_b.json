@@ -1,0 +1,28 @@
+{
+  "schema": "flexcell.failure_report/1",
+  "run": "run_b_regions_visible",
+  "model": "deepseek-flash",
+  "outcome": {
+    "success": true,
+    "target_status": "PASS",
+    "claim_success": false,
+    "false_success": false
+  },
+  "cost": {
+    "iterations": 4,
+    "tokens": 16937
+  },
+  "behaviour": {
+    "tool_calls": 11,
+    "by_tool": {
+      "edit_file": 1,
+      "read_file": 3,
+      "read_telemetry": 3,
+      "run_execution": 4
+    },
+    "edited_source": 1,
+    "ran_scenario": 4
+  },
+  "detail": "",
+  "run_key": "c15_run_b"
+}

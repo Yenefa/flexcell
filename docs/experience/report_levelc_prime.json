@@ -1,0 +1,28 @@
+{
+  "schema": "flexcell.failure_report/1",
+  "run": "w5_levelcprime_20261110",
+  "model": "deepseek-flash",
+  "outcome": {
+    "success": false,
+    "target_status": "ROBOT_FAILURE",
+    "claim_success": false,
+    "false_success": false
+  },
+  "cost": {
+    "iterations": 10,
+    "tokens": 51395
+  },
+  "behaviour": {
+    "tool_calls": 67,
+    "by_tool": {
+      "list_dir": 33,
+      "read_file": 17,
+      "read_telemetry": 8,
+      "run_execution": 9
+    },
+    "edited_source": 0,
+    "ran_scenario": 9
+  },
+  "detail": "",
+  "run_key": "levelc_prime"
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "flexcell.failure_report/1",
+  "run": "c14_tool_inventory_20261110",
+  "model": "deepseek-flash",
+  "outcome": {
+    "success": false,
+    "target_status": "ROBOT_FAILURE",
+    "claim_success": false,
+    "false_success": false
+  },
+  "cost": {
+    "iterations": 9,
+    "tokens": 53045
+  },
+  "behaviour": {
+    "tool_calls": 54,
+    "by_tool": {
+      "list_dir": 28,
+      "read_file": 11,
+      "read_telemetry": 7,
+      "run_execution": 8
+    },
+    "edited_source": 0,
+    "ran_scenario": 8
+  },
+  "detail": "",
+  "run_key": "c14_inventory"
+}

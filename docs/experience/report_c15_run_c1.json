@@ -1,0 +1,28 @@
+{
+  "schema": "flexcell.failure_report/1",
+  "run": "run_c1",
+  "model": "deepseek-flash",
+  "outcome": {
+    "success": true,
+    "target_status": "PASS",
+    "claim_success": false,
+    "false_success": false
+  },
+  "cost": {
+    "iterations": 5,
+    "tokens": 22077
+  },
+  "behaviour": {
+    "tool_calls": 16,
+    "by_tool": {
+      "edit_file": 1,
+      "read_file": 6,
+      "read_telemetry": 4,
+      "run_execution": 5
+    },
+    "edited_source": 1,
+    "ran_scenario": 5
+  },
+  "detail": "",
+  "run_key": "c15_run_c1"
+}

@@ -1,0 +1,28 @@
+{
+  "schema": "flexcell.experience/1",
+  "defect_class": "stage-transition / target-object selection (place target)",
+  "observed": {
+    "success": true,
+    "iterations": 4,
+    "tokens": 16937,
+    "behaviour": {
+      "tool_calls": 11,
+      "by_tool": {
+        "edit_file": 1,
+        "read_file": 3,
+        "read_telemetry": 3,
+        "run_execution": 4
+      },
+      "edited_source": 1,
+      "ran_scenario": 4
+    }
+  },
+  "lesson": "When the failure evidence carries the code regions involved, the agent edits them without directory traversal: list_dir fell from 12-28 to 0 and the same defect was repaired in 4-5 iterations instead of never. Naming the file in the task text achieves the same thing, so the cost being removed is LOCALISATION, not reasoning.",
+  "evidence": [
+    "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp/setup/acceptance/w5_levelc_evidence_20261110/run_b_regions_visible/result.json",
+    "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp/setup/acceptance/w5_levelc_evidence_20261110/run_b_regions_visible/events.jsonl",
+    "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp/setup/acceptance/w5_levelc_evidence_20261110/run_c1/result.json",
+    "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp/setup/acceptance/w5_levelc_evidence_20261110/run_c1/events.jsonl"
+  ],
+  "provenance": "derived from the run above; not hand-written"
+}
