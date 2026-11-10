@@ -56,7 +56,7 @@ res = runner.run_one(manifest, arm, agent,
                      w5s.build_t_w5s2(out / ("tpl-p2-" + arm), pkg, cfg,
                                       experience_note=note),
                      out / ("p2-" + arm),
-                     meta={"task": "T-W5SC2", **chat.metadata()},
+                     meta={"task": "T-W5SC2-BUDGET", **chat.metadata()},
                      protected=["gate/acceptance.py"],
                      execution_factory=P2Execution,
                      extra_env=env)
