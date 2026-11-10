@@ -2,7 +2,7 @@
   "task_id": "T06-val-seed2001",
   "template_id": "T06_revisit",
   "random_seed": 2001,
-  "instruction": "Two-step: put the green block in the left bin, then move it on to the right bin. Only the final position counts.",
+  "instruction": "Two-step: put the red block in the left bin, then move it on to the right bin. Only the final position counts.",
   "objects": [
     {
       "name": "target_box_a",
@@ -33,21 +33,6 @@
         0.0175,
         0.0
       ]
-    },
-    {
-      "name": "target_box_c",
-      "size": [
-        0.035,
-        0.035,
-        0.035
-      ],
-      "color": "green",
-      "initial_pose": [
-        0.15,
-        -0.05,
-        0.0175,
-        0.0
-      ]
     }
   ],
   "zones": [
@@ -73,16 +58,14 @@
   "constraints": {
     "order": [],
     "must_not_move": [
-      "target_box_a",
       "target_box_b"
     ]
   },
   "expected_goal": {
     "placement": {
-      "target_box_c": "zone_1"
+      "target_box_a": "zone_1"
     },
     "unmoved": [
-      "target_box_a",
       "target_box_b"
     ]
   },
@@ -92,5 +75,5 @@
     "max_wall_s": 600.0
   },
   "split": "val",
-  "instance_sha256": "36ae04d3fa985fc9405fee186886083b3f2f533980a3d30d2fd0ded0c8d8ced2"
+  "instance_sha256": "5cc2912db0f1777747dceb76ae9df215e8db6eb1ebe15e7787cc49433f5cac6a"
 }

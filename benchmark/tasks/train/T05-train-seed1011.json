@@ -33,21 +33,6 @@
         0.0175,
         0.0
       ]
-    },
-    {
-      "name": "target_box_c",
-      "size": [
-        0.035,
-        0.035,
-        0.035
-      ],
-      "color": "green",
-      "initial_pose": [
-        0.15,
-        -0.05,
-        0.0175,
-        0.0
-      ]
     }
   ],
   "zones": [
@@ -73,8 +58,7 @@
   "constraints": {
     "order": [],
     "must_not_move": [
-      "target_box_a",
-      "target_box_c"
+      "target_box_a"
     ]
   },
   "expected_goal": {
@@ -82,8 +66,7 @@
       "target_box_b": "zone_2"
     },
     "unmoved": [
-      "target_box_a",
-      "target_box_c"
+      "target_box_a"
     ]
   },
   "evaluator_version": "0.1.0",
@@ -92,5 +75,5 @@
     "max_wall_s": 600.0
   },
   "split": "train",
-  "instance_sha256": "a7bef1dbafe96cc7e3fb4f060cefda1157fa289820bf3102cfcf1ebae859b6b7"
+  "instance_sha256": "41d1f27615c16dca30d9a8b7c4ac0cb03ef3f8795e5fc5317992a611dcbbb09b"
 }

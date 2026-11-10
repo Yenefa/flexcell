@@ -2,7 +2,7 @@
   "task_id": "T03-heldout-seed9005",
   "template_id": "T03_ordered",
   "random_seed": 9005,
-  "instruction": "Move blocks into the right bin in this order: the green, then the red, then the blue.",
+  "instruction": "Move blocks into the right bin in this order: the blue, then the red.",
   "objects": [
     {
       "name": "target_box_a",
@@ -33,21 +33,6 @@
         0.0175,
         0.0
       ]
-    },
-    {
-      "name": "target_box_c",
-      "size": [
-        0.035,
-        0.035,
-        0.035
-      ],
-      "color": "green",
-      "initial_pose": [
-        0.15,
-        -0.05,
-        0.0175,
-        0.0
-      ]
     }
   ],
   "zones": [
@@ -63,23 +48,20 @@
   ],
   "constraints": {
     "order": [
-      "target_box_c",
-      "target_box_a",
-      "target_box_b"
+      "target_box_b",
+      "target_box_a"
     ],
     "must_not_move": []
   },
   "expected_goal": {
     "placement": {
       "target_box_a": "zone_1",
-      "target_box_b": "zone_1",
-      "target_box_c": "zone_1"
+      "target_box_b": "zone_1"
     },
     "unmoved": [],
     "order": [
-      "target_box_c",
-      "target_box_a",
-      "target_box_b"
+      "target_box_b",
+      "target_box_a"
     ]
   },
   "evaluator_version": "0.1.0",
@@ -88,5 +70,5 @@
     "max_wall_s": 600.0
   },
   "split": "held_out",
-  "instance_sha256": "7590abe82595444c839dfff78b0c1b2814c6640e5722c29d31ec66405e873fc5"
+  "instance_sha256": "fbccf396a528aa0ac05ceaec6eb9372f39b7663b1602dd4b611ef4e75f17ce48"
 }

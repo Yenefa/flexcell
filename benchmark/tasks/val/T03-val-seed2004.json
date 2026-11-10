@@ -2,7 +2,7 @@
   "task_id": "T03-val-seed2004",
   "template_id": "T03_ordered",
   "random_seed": 2004,
-  "instruction": "Move blocks into the right bin in this order: the green, then the red, then the blue.",
+  "instruction": "Move blocks into the right bin in this order: the red, then the blue.",
   "objects": [
     {
       "name": "target_box_a",
@@ -33,21 +33,6 @@
         0.0175,
         0.0
       ]
-    },
-    {
-      "name": "target_box_c",
-      "size": [
-        0.035,
-        0.035,
-        0.035
-      ],
-      "color": "green",
-      "initial_pose": [
-        0.15,
-        -0.05,
-        0.0175,
-        0.0
-      ]
     }
   ],
   "zones": [
@@ -63,7 +48,6 @@
   ],
   "constraints": {
     "order": [
-      "target_box_c",
       "target_box_a",
       "target_box_b"
     ],
@@ -72,12 +56,10 @@
   "expected_goal": {
     "placement": {
       "target_box_a": "zone_1",
-      "target_box_b": "zone_1",
-      "target_box_c": "zone_1"
+      "target_box_b": "zone_1"
     },
     "unmoved": [],
     "order": [
-      "target_box_c",
       "target_box_a",
       "target_box_b"
     ]
@@ -88,5 +70,5 @@
     "max_wall_s": 600.0
   },
   "split": "val",
-  "instance_sha256": "63261da57105d614030f722d4f5467b302664fe123e27b564d4ca42cb7233a63"
+  "instance_sha256": "0227e95b72e104260053588d00ecc6b0333dbc3a092948f0da89f7123bb2596d"
 }

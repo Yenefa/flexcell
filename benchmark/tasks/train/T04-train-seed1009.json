@@ -20,16 +20,16 @@
       ]
     },
     {
-      "name": "target_box_c",
+      "name": "target_box_b",
       "size": [
         0.035,
         0.035,
         0.035
       ],
-      "color": "green",
+      "color": "blue",
       "initial_pose": [
-        0.15,
-        -0.05,
+        0.2,
+        -0.18,
         0.0175,
         0.0
       ]
@@ -62,7 +62,7 @@
   "expected_goal": {
     "placement": {
       "target_box_a": "zone_1",
-      "target_box_c": "zone_2"
+      "target_box_b": "zone_2"
     },
     "unmoved": []
   },
@@ -72,5 +72,5 @@
     "max_wall_s": 600.0
   },
   "split": "train",
-  "instance_sha256": "30d28355a4877f21a919a12a48325892e750c3de8ca604ebff584e36f025305f"
+  "instance_sha256": "a3396644d1b075a68b249754e57b3b543f15255fa1e1c5966016f35e383b50ae"
 }

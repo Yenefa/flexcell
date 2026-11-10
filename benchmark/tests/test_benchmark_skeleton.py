@@ -43,6 +43,30 @@ def _full_state(spec, overrides=None, claimed=False, sequence=None):
     return _state(objects, claimed=claimed, sequence=sequence)
 
 
+def test_declared_objects_match_the_world_the_robot_actually_builds():
+    # Regression for a real failure: every RunComposite plan was rejected with
+    # "plan must declare every observed object", because the generator declared a
+    # third box that the default world does not contain. The scene composition is a
+    # property of the world, so the generator must draw from it.
+    scene = gen.SCENES[gen.DEFAULT_SCENE]
+    assert scene["objects"] == ["target_box_a", "target_box_b"]
+    for template in gen.TEMPLATES:
+        spec = gen.generate(template, 1000)
+        declared = [o["name"] for o in spec["objects"]]
+        assert declared == sorted(scene["objects"]), (template, declared)
+
+
+def test_no_template_depends_on_an_object_the_default_world_lacks():
+    allowed = set(gen.SCENES[gen.DEFAULT_SCENE]["objects"])
+    for template in gen.TEMPLATES:
+        for seed in range(8):
+            spec = gen.generate(template, seed)
+            used = {o["name"] for o in spec["objects"]}
+            used |= set(spec["expected_goal"].get("placement") or {})
+            used |= set(spec["expected_goal"].get("unmoved") or [])
+            assert used <= allowed, (template, seed, used - allowed)
+
+
 def test_evaluator_and_generator_versions_agree():
     assert ev.EVALUATOR_VERSION == gen.EVALUATOR_VERSION
 

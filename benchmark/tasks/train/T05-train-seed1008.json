@@ -2,7 +2,7 @@
   "task_id": "T05-train-seed1008",
   "template_id": "T05_relay",
   "random_seed": 1008,
-  "instruction": "Move the green block to the left bin, passing through the right bin first.",
+  "instruction": "Move the blue block to the left bin, passing through the right bin first.",
   "objects": [
     {
       "name": "target_box_a",
@@ -33,21 +33,6 @@
         0.0175,
         0.0
       ]
-    },
-    {
-      "name": "target_box_c",
-      "size": [
-        0.035,
-        0.035,
-        0.035
-      ],
-      "color": "green",
-      "initial_pose": [
-        0.15,
-        -0.05,
-        0.0175,
-        0.0
-      ]
     }
   ],
   "zones": [
@@ -73,17 +58,15 @@
   "constraints": {
     "order": [],
     "must_not_move": [
-      "target_box_a",
-      "target_box_b"
+      "target_box_a"
     ]
   },
   "expected_goal": {
     "placement": {
-      "target_box_c": "zone_2"
+      "target_box_b": "zone_2"
     },
     "unmoved": [
-      "target_box_a",
-      "target_box_b"
+      "target_box_a"
     ]
   },
   "evaluator_version": "0.1.0",
@@ -92,5 +75,5 @@
     "max_wall_s": 600.0
   },
   "split": "train",
-  "instance_sha256": "2565badc954595786ddc9e899ab82c7b3f718d1c76a41e6be587ad511f368bf7"
+  "instance_sha256": "812e7cddd845febeebecaa0f6af1f5d2a45874c9a3cd737cb2d6a508fd1ca096"
 }

@@ -2,7 +2,7 @@
   "task_id": "T06-train-seed1008",
   "template_id": "T06_revisit",
   "random_seed": 1008,
-  "instruction": "Two-step: put the green block in the left bin, then move it on to the right bin. Only the final position counts.",
+  "instruction": "Two-step: put the blue block in the left bin, then move it on to the right bin. Only the final position counts.",
   "objects": [
     {
       "name": "target_box_a",
@@ -33,21 +33,6 @@
         0.0175,
         0.0
       ]
-    },
-    {
-      "name": "target_box_c",
-      "size": [
-        0.035,
-        0.035,
-        0.035
-      ],
-      "color": "green",
-      "initial_pose": [
-        0.15,
-        -0.05,
-        0.0175,
-        0.0
-      ]
     }
   ],
   "zones": [
@@ -73,17 +58,15 @@
   "constraints": {
     "order": [],
     "must_not_move": [
-      "target_box_a",
-      "target_box_b"
+      "target_box_a"
     ]
   },
   "expected_goal": {
     "placement": {
-      "target_box_c": "zone_1"
+      "target_box_b": "zone_1"
     },
     "unmoved": [
-      "target_box_a",
-      "target_box_b"
+      "target_box_a"
     ]
   },
   "evaluator_version": "0.1.0",
@@ -92,5 +75,5 @@
     "max_wall_s": 600.0
   },
   "split": "train",
-  "instance_sha256": "90d163a6ee44b6805f581a397e8d8951dfce8f6e6cc52b4d84b5d91c00e63c8b"
+  "instance_sha256": "1cdb6d84c0d9e4e43d667abf910f636bc86b2040bff9ae5c0e431155616c8f61"
 }

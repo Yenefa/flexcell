@@ -2,7 +2,7 @@
   "task_id": "T02-train-seed1008",
   "template_id": "T02_exclusion",
   "random_seed": 1008,
-  "instruction": "Clear the table into the right bin, except the green block, which must stay put.",
+  "instruction": "Clear the table into the right bin, except the blue block, which must stay put.",
   "objects": [
     {
       "name": "target_box_a",
@@ -33,21 +33,6 @@
         0.0175,
         0.0
       ]
-    },
-    {
-      "name": "target_box_c",
-      "size": [
-        0.035,
-        0.035,
-        0.035
-      ],
-      "color": "green",
-      "initial_pose": [
-        0.15,
-        -0.05,
-        0.0175,
-        0.0
-      ]
     }
   ],
   "zones": [
@@ -64,16 +49,15 @@
   "constraints": {
     "order": [],
     "must_not_move": [
-      "target_box_c"
+      "target_box_b"
     ]
   },
   "expected_goal": {
     "placement": {
-      "target_box_a": "zone_1",
-      "target_box_b": "zone_1"
+      "target_box_a": "zone_1"
     },
     "unmoved": [
-      "target_box_c"
+      "target_box_b"
     ]
   },
   "evaluator_version": "0.1.0",
@@ -82,5 +66,5 @@
     "max_wall_s": 600.0
   },
   "split": "train",
-  "instance_sha256": "10e05014d3cd3a904e5ce63aef78af20c8a1a52109cfea867d9ccb81b5005cdc"
+  "instance_sha256": "910e8e374530f05da4768d5abd668c5acf1ab83de508948a064388b9f4f54fc2"
 }

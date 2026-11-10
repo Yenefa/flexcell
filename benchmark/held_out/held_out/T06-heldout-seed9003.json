@@ -2,7 +2,7 @@
   "task_id": "T06-heldout-seed9003",
   "template_id": "T06_revisit",
   "random_seed": 9003,
-  "instruction": "Two-step: put the green block in the left bin, then move it on to the right bin. Only the final position counts.",
+  "instruction": "Two-step: put the red block in the left bin, then move it on to the right bin. Only the final position counts.",
   "objects": [
     {
       "name": "target_box_a",
@@ -33,21 +33,6 @@
         0.0175,
         0.0
       ]
-    },
-    {
-      "name": "target_box_c",
-      "size": [
-        0.035,
-        0.035,
-        0.035
-      ],
-      "color": "green",
-      "initial_pose": [
-        0.15,
-        -0.05,
-        0.0175,
-        0.0
-      ]
     }
   ],
   "zones": [
@@ -73,16 +58,14 @@
   "constraints": {
     "order": [],
     "must_not_move": [
-      "target_box_a",
       "target_box_b"
     ]
   },
   "expected_goal": {
     "placement": {
-      "target_box_c": "zone_1"
+      "target_box_a": "zone_1"
     },
     "unmoved": [
-      "target_box_a",
       "target_box_b"
     ]
   },
@@ -92,5 +75,5 @@
     "max_wall_s": 600.0
   },
   "split": "held_out",
-  "instance_sha256": "4ec7d262de889982cdeed89b99136ceae25ecf1c91bbee67ce1fe52c69d74ac0"
+  "instance_sha256": "17b254e176fb0fc306093e1b93c0677734809834e9893e16d3dc87eeddfb3a04"
 }

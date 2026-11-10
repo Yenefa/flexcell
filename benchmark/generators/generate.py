@@ -20,12 +20,28 @@ from pathlib import Path
 GENERATOR_VERSION = "0.1.0"
 EVALUATOR_VERSION = "0.1.0"
 
-# Measured from worlds/*.sdf. Kept as data so a world change breaks tests loudly.
+# Measured from the worlds the smoke harness actually generates.
+#
+# IMPORTANT: the DEFAULT world contains only box_a and box_b. target_box_c exists
+# as a standalone asset (worlds/target_box_c.sdf) and only appears in the
+# three_boxes scene, which is a different profile. Declaring c here made every
+# RunComposite plan fail with "plan must declare every observed object", because the
+# robot observes two boxes and the plan claimed three. Scene composition is a
+# property of the WORLD, not of the task, so it is recorded per scene.
+SCENES = {
+    "default": {"objects": ["target_box_a", "target_box_b"],
+                "zones": ["zone_1", "zone_2"]},
+    "three_boxes": {"objects": ["target_box_a", "target_box_b", "target_box_c"],
+                    "zones": ["zone_1", "zone_2"]},
+}
+
 OBJECTS = {
     "target_box_a": {"color": "red", "pose": [0.220, 0.000, 0.0175, 0.0]},
     "target_box_b": {"color": "blue", "pose": [0.200, -0.180, 0.0175, 0.0]},
     "target_box_c": {"color": "green", "pose": [0.150, -0.050, 0.0175, 0.0]},
 }
+
+DEFAULT_SCENE = "default"
 BOX_SIZE = [0.035, 0.035, 0.035]
 # +y is the robot left (ROS REP-103), so zone_2 (y>0) is "left".
 ZONES = {
@@ -58,6 +74,10 @@ def _zones_for(names):
             for z in names]
 
 
+def _scene_objects(split):
+    return list(SCENES[DEFAULT_SCENE]["objects"])
+
+
 def _label(zone):
     return ZONES[zone]["label"]
 
@@ -86,20 +106,20 @@ def _spec(template, seed, split, instruction, names, zone_names, placement,
 
 def t01_multi_object_sorting(seed, split):
     rng = random.Random(seed)
-    names = sorted(rng.sample(sorted(OBJECTS), 2))
+    names = sorted(rng.sample(_scene_objects(split), 2))
     first, second = names
     placement = {first: "zone_1", second: "zone_2"}
     instruction = "Put the %s block in the %s bin and the %s block in the %s bin." % (
         OBJECTS[first]["color"], _label("zone_1"),
         OBJECTS[second]["color"], _label("zone_2"))
-    unmoved = [n for n in OBJECTS if n not in names]
+    unmoved = [n for n in _scene_objects(split) if n not in names]
     return _spec("T01_multi_object_sorting", seed, split, instruction,
-                 sorted(OBJECTS), ["zone_1", "zone_2"], placement, unmoved=unmoved)
+                 _scene_objects(split), ["zone_1", "zone_2"], placement, unmoved=unmoved)
 
 
 def t02_exclusion(seed, split):
     rng = random.Random(seed)
-    names = sorted(OBJECTS)
+    names = _scene_objects(split)
     keep = rng.choice(names)
     move = [n for n in names if n != keep]
     placement = {n: "zone_1" for n in move}
@@ -111,7 +131,7 @@ def t02_exclusion(seed, split):
 
 def t03_ordered(seed, split):
     rng = random.Random(seed)
-    names = sorted(rng.sample(sorted(OBJECTS), 3))
+    names = sorted(rng.sample(_scene_objects(split), min(3, len(_scene_objects(split)))))
     order = list(names)
     rng.shuffle(order)
     placement = {n: "zone_1" for n in names}
@@ -123,7 +143,7 @@ def t03_ordered(seed, split):
 
 
 def t04_duplicates(seed, split):
-    names = ["target_box_a", "target_box_c"]
+    names = ["target_box_a", "target_box_b"]
     first, second = names
     placement = {first: "zone_1", second: "zone_2"}
     instruction = "Two blocks look alike. Put the one further from the robot in the %s bin, the nearer one in the %s bin." % (
@@ -134,23 +154,23 @@ def t04_duplicates(seed, split):
 
 def t05_relay(seed, split):
     rng = random.Random(seed)
-    name = rng.choice(sorted(OBJECTS))
-    others = [n for n in OBJECTS if n != name]
+    name = rng.choice(_scene_objects(split))
+    others = [n for n in _scene_objects(split) if n != name]
     placement = {name: "zone_2"}
     instruction = "Move the %s block to the %s bin, passing through the %s bin first." % (
         OBJECTS[name]["color"], _label("zone_2"), _label("zone_1"))
-    return _spec("T05_relay", seed, split, instruction, sorted(OBJECTS),
+    return _spec("T05_relay", seed, split, instruction, _scene_objects(split),
                  ["zone_1", "zone_2"], placement, unmoved=others, max_steps=50)
 
 
 def t06_revisit(seed, split):
     rng = random.Random(seed)
-    name = rng.choice(sorted(OBJECTS))
-    others = [n for n in OBJECTS if n != name]
+    name = rng.choice(_scene_objects(split))
+    others = [n for n in _scene_objects(split) if n != name]
     placement = {name: "zone_1"}
     instruction = "Two-step: put the %s block in the %s bin, then move it on to the %s bin. Only the final position counts." % (
         OBJECTS[name]["color"], _label("zone_2"), _label("zone_1"))
-    return _spec("T06_revisit", seed, split, instruction, sorted(OBJECTS),
+    return _spec("T06_revisit", seed, split, instruction, _scene_objects(split),
                  ["zone_1", "zone_2"], placement, unmoved=others, max_steps=60)
 
 

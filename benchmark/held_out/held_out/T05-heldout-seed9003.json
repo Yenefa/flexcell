@@ -2,7 +2,7 @@
   "task_id": "T05-heldout-seed9003",
   "template_id": "T05_relay",
   "random_seed": 9003,
-  "instruction": "Move the green block to the left bin, passing through the right bin first.",
+  "instruction": "Move the red block to the left bin, passing through the right bin first.",
   "objects": [
     {
       "name": "target_box_a",
@@ -33,21 +33,6 @@
         0.0175,
         0.0
       ]
-    },
-    {
-      "name": "target_box_c",
-      "size": [
-        0.035,
-        0.035,
-        0.035
-      ],
-      "color": "green",
-      "initial_pose": [
-        0.15,
-        -0.05,
-        0.0175,
-        0.0
-      ]
     }
   ],
   "zones": [
@@ -73,16 +58,14 @@
   "constraints": {
     "order": [],
     "must_not_move": [
-      "target_box_a",
       "target_box_b"
     ]
   },
   "expected_goal": {
     "placement": {
-      "target_box_c": "zone_2"
+      "target_box_a": "zone_2"
     },
     "unmoved": [
-      "target_box_a",
       "target_box_b"
     ]
   },
@@ -92,5 +75,5 @@
     "max_wall_s": 600.0
   },
   "split": "held_out",
-  "instance_sha256": "70bae18d5bd1c7d7e669678a26e2e41df92cf5cad6d9db6d41c3c9212b11900e"
+  "instance_sha256": "7f9a527eb22c14f3d46a4c78ea3101b693a5a08f055b35c5b83327d3e7046481"
 }

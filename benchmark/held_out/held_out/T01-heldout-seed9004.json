@@ -2,7 +2,7 @@
   "task_id": "T01-heldout-seed9004",
   "template_id": "T01_multi_object_sorting",
   "random_seed": 9004,
-  "instruction": "Put the blue block in the right bin and the green block in the left bin.",
+  "instruction": "Put the red block in the right bin and the blue block in the left bin.",
   "objects": [
     {
       "name": "target_box_a",
@@ -33,21 +33,6 @@
         0.0175,
         0.0
       ]
-    },
-    {
-      "name": "target_box_c",
-      "size": [
-        0.035,
-        0.035,
-        0.035
-      ],
-      "color": "green",
-      "initial_pose": [
-        0.15,
-        -0.05,
-        0.0175,
-        0.0
-      ]
     }
   ],
   "zones": [
@@ -72,18 +57,14 @@
   ],
   "constraints": {
     "order": [],
-    "must_not_move": [
-      "target_box_a"
-    ]
+    "must_not_move": []
   },
   "expected_goal": {
     "placement": {
-      "target_box_b": "zone_1",
-      "target_box_c": "zone_2"
+      "target_box_a": "zone_1",
+      "target_box_b": "zone_2"
     },
-    "unmoved": [
-      "target_box_a"
-    ]
+    "unmoved": []
   },
   "evaluator_version": "0.1.0",
   "execution_budget": {
@@ -91,5 +72,5 @@
     "max_wall_s": 600.0
   },
   "split": "held_out",
-  "instance_sha256": "2eae81ebb97a785eb992441dcc4deec76a814a4cd21e8ef3190035c068248760"
+  "instance_sha256": "a06a47022c7d8f4fea5c46c905cbce3c4fed4cc62b7aae92049f0f23bcee1d3a"
 }

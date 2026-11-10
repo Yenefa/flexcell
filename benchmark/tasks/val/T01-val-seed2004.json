@@ -2,7 +2,7 @@
   "task_id": "T01-val-seed2004",
   "template_id": "T01_multi_object_sorting",
   "random_seed": 2004,
-  "instruction": "Put the red block in the right bin and the green block in the left bin.",
+  "instruction": "Put the red block in the right bin and the blue block in the left bin.",
   "objects": [
     {
       "name": "target_box_a",
@@ -33,21 +33,6 @@
         0.0175,
         0.0
       ]
-    },
-    {
-      "name": "target_box_c",
-      "size": [
-        0.035,
-        0.035,
-        0.035
-      ],
-      "color": "green",
-      "initial_pose": [
-        0.15,
-        -0.05,
-        0.0175,
-        0.0
-      ]
     }
   ],
   "zones": [
@@ -72,18 +57,14 @@
   ],
   "constraints": {
     "order": [],
-    "must_not_move": [
-      "target_box_b"
-    ]
+    "must_not_move": []
   },
   "expected_goal": {
     "placement": {
       "target_box_a": "zone_1",
-      "target_box_c": "zone_2"
+      "target_box_b": "zone_2"
     },
-    "unmoved": [
-      "target_box_b"
-    ]
+    "unmoved": []
   },
   "evaluator_version": "0.1.0",
   "execution_budget": {
@@ -91,5 +72,5 @@
     "max_wall_s": 600.0
   },
   "split": "val",
-  "instance_sha256": "741f5861d0c8e105b394a0fae497418c4c5c09495e04ce7e40841ac8126d3d8d"
+  "instance_sha256": "a0966000d3c643e69242fbc7d918dc8d978b0ec505bae5706a7ee5901a3ea85b"
 }
