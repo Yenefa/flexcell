@@ -84,6 +84,49 @@ class ToolBox:
         self.calls.append(("run_checks",))
         return self.execution.run_checks()
 
+    def record_experience(self, defect_class, symptom, lesson, evidence_path):
+        """Agent-authored lesson, validated mechanically before it is stored.
+
+        P2 item (2) needs the AGENT to derive the lesson. The risk is a plausible
+        but unsupported record, so this refuses rather than trusts: the cited
+        evidence must exist inside the workspace, the text fields must be
+        non-trivial, and the record is only accepted after a successful gate run.
+        """
+        self._need("record_experience")
+        self.calls.append(("record_experience", defect_class))
+        problems = []
+        if not str(defect_class or "").strip():
+            problems.append("defect_class is empty")
+        if len(str(lesson or "").strip()) < 20:
+            problems.append("lesson is too short to be transferable")
+        if not str(evidence_path or "").strip():
+            problems.append("no evidence_path given")
+        else:
+            try:
+                ev = self._inside(str(evidence_path))
+            except ToolPermissionError as exc:
+                problems.append(str(exc))
+                ev = None
+            if ev is not None and not ev.exists():
+                problems.append("evidence_path does not exist: %s" % evidence_path)
+        if problems:
+            self.calls.append(("record_experience", "REFUSED"))
+            return {"accepted": False, "problems": problems}
+        record = {
+            "schema": "flexcell.experience/2",
+            "authored_by": "agent",
+            "defect_class": str(defect_class).strip(),
+            "symptom": " ".join(str(symptom or "").split()),
+            "lesson": " ".join(str(lesson).split()),
+            "evidence_path": str(evidence_path),
+        }
+        dest = self.workspace / "experience"
+        dest.mkdir(exist_ok=True)
+        (dest / "agent_authored.json").write_text(
+            __import__("json").dumps(record, indent=2) + "\n", encoding="utf-8")
+        self.calls.append(("record_experience", "ACCEPTED"))
+        return {"accepted": True, "path": "experience/agent_authored.json"}
+
     def run_execution(self, episode=True):
         self._need("run_execution")
         self.calls.append(("run_execution", bool(episode)))

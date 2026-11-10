@@ -44,6 +44,16 @@ SPECS = {
     "read_telemetry": {"type": "object", "properties": {}},
     "read_verification": {"type": "object", "properties": {}}
     ,"read_diagnosis": {"type": "object", "properties": {}},
+    "record_experience": {
+        "type": "object",
+        "properties": {
+            "defect_class": {"type": "string"},
+            "symptom": {"type": "string"},
+            "lesson": {"type": "string"},
+            "evidence_path": {"type": "string"},
+        },
+        "required": ["defect_class", "symptom", "lesson", "evidence_path"],
+    },
 }
 
 
@@ -60,6 +70,10 @@ DESCRIPTIONS = {
     "read_telemetry": "Read the telemetry of the most recent execution.",
     "read_verification": "Read the independent judge verdict of the last execution.",
     "read_diagnosis": "Read the recorded failure diagnosis of the last execution.",
+    "record_experience": "Store the lesson you learned, so a later task can reuse it. "
+                         "Give the DEFECT CLASS (not a line number), the SYMPTOM you "
+                         "observed, the transferable LESSON, and the EVIDENCE path you "
+                         "are basing it on. A record citing missing evidence is refused.",
 }
 
 class FCAgent:
@@ -133,6 +147,10 @@ class FCAgent:
                     result = str(toolbox.read_telemetry())
                 elif name == "read_verification":
                     result = str(toolbox.read_verification())
+                elif name == "record_experience":
+                    result = str(toolbox.record_experience(
+                        args.get("defect_class", ""), args.get("symptom", ""),
+                        args.get("lesson", ""), args.get("evidence_path", "")))
                 else:
                     result = "unknown tool: " + name
             except Exception as exc:

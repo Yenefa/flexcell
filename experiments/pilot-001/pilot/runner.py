@@ -55,7 +55,7 @@ class Execution:
 
 
 def run_one(manifest, arm, agent, template, out_dir, meta=None, protected=None,
-            execution_factory=None, extra_env=None):
+            execution_factory=None, extra_env=None, post_pass=None):
     out = Path(out_dir)
     if out.exists():
         shutil.rmtree(out)
@@ -121,6 +121,15 @@ def run_one(manifest, arm, agent, template, out_dir, meta=None, protected=None,
         rec.emit("verdict", index=it, passed=verdict["passed"])
         if verdict["passed"]:
             first_pass = it == 1
+            if post_pass is not None:
+                # Opt-in only: some experiments need one more turn AFTER the gates
+                # pass (P2 asks the agent to write down the lesson). Without this
+                # the loop exits the instant the verdict flips, so "the agent
+                # recorded nothing" would be a harness artefact, not a finding.
+                try:
+                    post_pass(agent, toolbox, rec, it)
+                except Exception as exc:
+                    rec.emit("post_pass_error", error=str(exc))
             break
         if claim.get("done"):
             break
