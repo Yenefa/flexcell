@@ -104,10 +104,19 @@ def build_proposal(signature, failures):
                        "retry the open a bounded number of times before declaring "
                        "PLACE failed; the signal is observable and a re-issued open "
                        "is a new attempt, not a longer wait"),
-            "expected_effect": ("phases that failed only because the first release "
-                                "stalled will succeed, while a stall that persists "
-                                "must still fail with the same error, so the change "
-                                "cannot turn a real failure into a pass"),
+            # CORRECTED after measuring the base rate: my first wording claimed phases
+            # "will succeed", but the existing plan-level retry ALREADY recovers 6 of 9
+            # stalls (67%). So the honest increment is NOT final pass rate - it is
+            # first-attempt success and cost: today a stall costs a whole-stage re-run
+            # (median 13.0 s, and re-picking the box), not a re-issued open.
+            "expected_effect": ("first-attempt pass rate rises by at most the 4 runs the "
+                                "plan-level retry currently rescues; FINAL pass rate is "
+                                "expected to be UNCHANGED at 29/32, because the existing "
+                                "retry already reaches those end states; and a stall "
+                                "that persists (3 of 9) MUST still fail with the same "
+                                "error, so the change cannot turn a real failure into "
+                                "a pass"),
+            "increment_is": "latency and risk, not final pass rate",
             "rollback": "git revert this commit; the single-attempt release returns",
             "requires_human_approval": True,
         }, None

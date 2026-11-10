@@ -1,0 +1,10 @@
+runs with a release stall: 9
+
+  resolved by the EXISTING bounded retry (B fail -> R pass): 4
+  resolved inside the run (B already passed)            : 2
+  still failing (never resolved)                        : 3
+
+ALREADY recovered by existing mechanisms: 6/9 = 67%
+So a NEW skill-layer retry cannot add that share; it can only
+change HOW FAST a stall is resolved, or reach stalls the plan-level
+retry cannot, since that retry re-runs the whole stage.

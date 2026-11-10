@@ -61,6 +61,7 @@ RUNGS = {
     "evobot_pooled_n32_20261111": "Independently Verified (pooled n=32, robot runs, intervals)",
     "evobot_capability_freeze_20261111": "P0 capability freeze (hash-pinned ruler; drift tested)",
     "evobot_actuator_proposal_20261111": "Proposal generated + gated (WOULD_FIX; NOT applied, needing approval)",
+    "evobot_actuator_prereg_20261111": "Pre-registration written (prediction + refutation fixed before change)",
 }
 
 

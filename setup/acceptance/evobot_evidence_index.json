@@ -1,10 +1,31 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 26,
-  "live": 19,
+  "batches": 27,
+  "live": 20,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
+    {
+      "batch": "evobot_actuator_prereg_20261111",
+      "verified": "PASS",
+      "rung": "Pre-registration written (prediction + refutation fixed before change)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_ACTUATOR_RETRY_PREREGISTERED_NOT_APPLIED",
+        "baseline": {
+          "n": 32,
+          "b_pass": 25,
+          "r_pass": 29,
+          "stalls_absorbed": 6,
+          "stalls_persistent": 3
+        },
+        "predicted_final_pass": "UNCHANGED at 29/32",
+        "increment": "latency and risk, not final pass rate",
+        "overclaim_corrected": true,
+        "applied": false,
+        "refutation_conditions": 3
+      }
+    },
     {
       "batch": "evobot_actuator_proposal_20261111",
       "verified": "PASS",
@@ -70,7 +91,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 18,
+        "live_batches": 19,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",

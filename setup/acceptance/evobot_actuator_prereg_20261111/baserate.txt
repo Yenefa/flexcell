@@ -1,0 +1,20 @@
+run                  stalls B      R      outcome
+HO-1ca3385be0b3      2      False  False  persistent
+HO-71d5272a74a2      1      False  True   absorbed
+HO-bc8270332865      1      False  True   absorbed
+HO-fc57a0a1d50d      1      False  True   absorbed
+HO-64d891889ad6      1      False  True   absorbed
+HO-711efb5aab86      1      True   True   absorbed
+HO-9aff2ed75348      2      False  False  persistent
+HO-b3fb07b48521      1      True   True   absorbed
+HO-b6d9e15b2431      2      False  False  persistent
+
+runs where a release stall appeared : 9
+resolved on a later execution      : 6
+persistent (stalled again)          : 3
+BASE RATE a bounded retry can reach : 67% (35-88% Wilson 95%)
+
+PRE-REGISTERED PREDICTION for a bounded release retry:
+  - it can recover at most the absorbed fraction, 67%
+  - a persistent stall MUST still fail; if it passes, the retry is
+    converting real failures into passes and must be reverted

@@ -1,0 +1,29 @@
+{
+  "record_kind": "EVOBOT_PREREGISTRATION",
+  "proposal": "actuator_stall",
+  "registered_before_change": true,
+  "baseline": {
+    "n": 32,
+    "b_pass": 25,
+    "r_pass": 29,
+    "stalls_absorbed": 6,
+    "stalls_persistent": 3
+  },
+  "prediction": {
+    "final_pass_rate": "UNCHANGED at 29/32",
+    "first_attempt_pass_rate": "may rise by at most 6",
+    "persistent_stalls_still_fail": 3
+  },
+  "success_criteria": [
+    "final pass count must NOT fall below 29/32",
+    "final pass count is expected to stay EQUAL; a rise needs separate proof, not silent acceptance",
+    "every run whose stall persisted across attempts must STILL fail",
+    "false success rate must remain 0"
+  ],
+  "refutation_criteria": [
+    "any persistent-stall run passes -> the retry converts real failures into passes and MUST be reverted",
+    "final pass count drops -> regression, MUST be reverted",
+    "false success becomes non-zero -> MUST be reverted"
+  ],
+  "notes": "Written before any source change. The existing plan-level retry already recovers 6 of 9 stall runs, so the honest increment of a skill-layer retry is latency and risk, not final pass rate."
+}
