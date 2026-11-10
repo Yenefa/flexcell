@@ -2,10 +2,20 @@
 
 ## 0. 一句话结论
 
-**本轮首次达成 W5 Level B：Agent 在真实 Gazebo 中从执行失败证据出发，自主定位并修复真实技能源码缺陷，
-三项门全部 PASS，连续两次复现；Level C（去掉位置提示）连续两次失败，失败机制是探索成本耗尽预算。**
+**本轮在真实 Gazebo 中达成了 W5 的源码级自主修复：Level B（点名文件）2/2，
+Level C（无文件名、无行号、无修复方向，由失败证据自带定位）3/3，
+三项门全部 PASS，验收器全程未改。**
 
-同时完成 13/14 项工程整改（1 项因缺硬件 BLOCKED），并定位、修复了 **6 个工具链缺陷**——
+同时首次测出"经验复用"的成本收益：agent 读取归档经验并在**不同缺陷**上成功应用，
+比无经验的对照臂少 **18.2% 轮次 / 24.6% token / 69% 目录遍历**。
+
+**但有两件事必须同时说清，否则结论会失真：**
+1. **我在本轮更正过自己两次**——最初把 Level C 的失败归因为"能力边界"，
+   实验证明是 **40k token 预算截断**（P3：给 150k 后无定位也能修好，只是更贵）；
+2. **P2 第 ② 项（agent 自主归纳经验）三次尝试全部未达成**，机制已查明：
+   它会在任务完成后继续取证，而不是沉淀结论。**它会用经验，但不会写经验。**
+
+工程侧：整改 **13/14 DONE**（1 项缺硬件 BLOCKED），并定位修复了 **6 个工具链缺陷**——
 它们正是此前"只读不写"的真正原因。
 
 ---
@@ -101,7 +111,7 @@
 
 > **关于"失败"的更正**：Level C′/C14/P2 旧实验的失败**全部由预算截断造成**，
 > P3 实验已证明同一缺陷在 150k 预算下可被修复。因此这些运行**不构成能力结论**，
-> 只证明"在 40k 预算下不够"。详见 §13。
+> 只证明"在 40k 预算下不够"。详见 §11。
 
 **前 6 次 Level B 尝试全部失败**，全部归因于工具链缺陷（T1–T3），不是模型能力。
 这段失败记录完整保留在 `events.jsonl` 与本文档中。
@@ -132,58 +142,74 @@
 | Level D | 跨任务经验迁移 | 未开始 |
 
 **严格边界**：
-- n=2（B）/ n=2（C），**探索性，不是统计证据**，不得计算置信区间；
+- n=2（B）/ n=3（C）/ n=1（P2 双臂），**探索性，不是统计证据**，不得计算置信区间；
 - 单一缺陷类型（阶段转换/目标对象选择），**不代表任意缺陷**；
-- 成功依赖 24 轮预算与 4 个工具修复；
+- 成功依赖充足预算（40k 不够、150k 足够）与工具修复——**预算是本轮最关键的混淆变量**；
 - 仅在仿真，无真机；
-- Level C 结果**不得**与 Level B 合并。
+- Level C 结果**不得**与 Level B 合并统计；
+- **P2 第 ② 项未达成**，不得宣称"agent 能自主归纳经验"。
 
 ---
 
 ## 5. Track A / B / C 进展
 
-| Track | 进展 | 阻塞 | 下一步 |
+| Track | 本轮进展 | 阻塞 | 下一步 |
 | --- | --- | --- | --- |
-| A（执行安全/整改） | **13/14 DONE**，119 项新测试，真实栈 3/3 | P0-C 缺硬件 | 真机安全链评估；故障注入验证隔离态 |
-| B（Hybrid Runtime） | 本轮未推进；历史：可运行但**无证据**优于 FSM | 无实质策略差异的困难场景 | 设计需要策略差异的场景，保留 FSM 对照 |
-| C（FSM/MTC） | C3–C11 已完成，C12 负结果 | 机制问题未答 | "MTC 在复杂约束/多候选规划中是否展示 FSM 缺失能力"——需一个真正的机制实验，不得靠扩样本 |
+| **A**（执行安全/整改） | **13/14 DONE**；隔离态**首次在真实图触发并复位**；最终回归离线 0 failed、Gazebo 3/3 PASS | P0-C 缺硬件 | 真机安全链；PLACE 超时路径单独验证 |
+| **B**（Hybrid Runtime） | **完成证据审计**（`docs/TRACK_B_ASSESSMENT.md`）：协议可运行、**69 项路由测试通过**；E-021 三臂 CI 全重叠，成功率负向、成本更高 | 缺"两策略会分歧"的场景 | 构造判别场景（必须保留 FSM 对照）；构造不出则记负结果 |
+| **C**（FSM/MTC） | C13 **预注册后 BLOCKED**（3 次尝试） | 受约束世界需改动冻结的 `world_sha256` | 以新 scenario id 注册并**重算哈希**，先离线证明 legacy 必失败 |
 
----
+**三条主线都没有"没做"**：A 有结论，B 有审计结论，C 有明确阻塞原因和解除路径。
 
-## 6. 本地提交（21 个，**未推送，需人工批准**）
+## 6. 本地提交（**37 个，已推送到 origin 分支，未合并**）
 
-分支 `autonomous/flexcell-remediation`，基线 `ebe27f07881200ab0fc74dfaa5490208023bf9d9`；
-工作区**干净**（0 处未提交）。
+分支 `autonomous/flexcell-remediation`，基线 `ebe27f07881200ab0fc74dfaa5490208023bf9d9`。
+**远端可见**（按用户要求推送，未合并、未开 PR）：
+
+- 提交列表：https://github.com/Yenefa/flexcell/commits/autonomous/flexcell-remediation
+- 与 main 对比：https://github.com/Yenefa/flexcell/compare/ebe27f0...autonomous/flexcell-remediation
 
 | SHA | 内容 |
 | --- | --- |
-| `70d7dc0` | 24h sprint：Flash 默认、Level B harness、工具根因、C12 |
-| `fefd628` | P0-A 停止确认 + 运动隔离 |
-| `1dd4543` | P1-A 世界新鲜度 + P0-C 安全评估 |
-| `64136eb` | P1-B 拒绝码分类 |
-| `ec2ee41` | P1-C 动作顺序约束 |
-| `da06b2a` | P1-D 夹爪反馈 |
-| `43f5e27` | P1 集成验证 + 世界刷新 |
-| `3273a65` | P0-A 取消契约集成验证 |
-| `81a4c47` | P1-E 对象注册表解耦 |
-| `25c3216` | P1-F 日志完整性 + M2 收口 |
-| `1ba8db8` | P2-A 预算生命周期 |
-| `5f1eec9` | P2-D 时间域规范 |
-| `4e3577e` | P2-E 感知边界 |
-| `768e54b` | P2-B 决策日志统一 |
-| `72963a5` | P2-C 几何工具 + 最终整改报告 |
-| `f6a074d` | **Level B 首次真实源码修复** + 工具缺陷 |
-| `d091d53` | Level B 复现 + Level C 负结果 + 24H 报告 |
-| `18d406f` | Level C′ 两次判分无效 |
-| `2c35b29` | **E2d/E2e Flash 复现** |
-| `29c4cf6` | **隔离态真实触发** |
-| `49a19c1` | C13 预注册 + Track C 标记 BLOCKED |
+| `70d7dc0` | research: 24h sprint - Flash default, Level B harness, tooling root cause, C12 |
+| `fefd628` | fix(safety): verified skill cancellation and motion quarantine (P0-A) |
+| `1dd4543` | fix(execution): real world freshness and a physical safety readiness report |
+| `64136eb` | fix(safety): a gate rejection keeps its typed cause (P1-B) |
+| `ec2ee41` | fix(safety): reject out-of-order actions before dispatch (P1-C) |
+| `da06b2a` | fix(skills): a completed GripperCommand is not evidence of a grasp (P1-D) |
+| `43f5e27` | fix(execution): refresh a stale world instead of widening the freshness gate |
+| `3273a65` | test(p0a): cancel a live PICK on the real stack and check the safety contract |
+| `81a4c47` | refactor(skills): scope the object registry to its node (P1-E) |
+| `25c3216` | fix(execution): episode and log integrity, one decisive finish (P1-F) |
+| `1ba8db8` | fix(budget): release provably-unsent reservations, never crash on anomalies (P2-A) |
+| `5f1eec9` | fix(time): a joint state that never arrived must not look fresh (P2-D) |
+| `4e3577e` | docs(perception): pin the ground-truth / camera boundary, plan the real one (P2-E) |
+| `768e54b` | refactor(fsm): one builder owns the decision-log record (P2-B, first slice) |
+| `72963a5` | refactor(move): extract the pure quaternion helpers (P2-C, first slice) |
+| `f6a074d` | research(w5): first real Level B source repair, and the tool defects that blocked it |
+| `d091d53` | research: Level B replication, Level C negative result, 24H report |
+| `18d406f` | research: Level C-prime attempted twice, both invalidated by the judge harness |
+| `2c35b29` | research(p0-2): reproduce E2d and E2e with deepseek-flash |
+| `29c4cf6` | test(p0a): make the motion quarantine actually engage in a live ROS graph |
+| `49a19c1` | research(track-c): pre-register the MTC capability test, then record it BLOCKED |
+| `26b7d3a` | docs: close the 24h sprint report with the full commit trail and final regression |
+| `6f7850d` | research(track-w5): Level C-prime now has a VALID verdict - and it is a negative one |
+| `7fd0e82` | research(w5): a visible tool inventory does not change tool choice (C14, H0) |
+| `e871e18` | research(w5): Level C achieved - evidence that carries its own location |
+| `7f27b76` | research(w5): Level C repeats - evidence-localised repair passes twice |
+| `bd7e7fc` | research(p2): machine-readable failure reports and experience records, built from the archived runs - and what they still do NOT establish |
+| `8fccfa4` | docs: experiment ledger extracted from origin/main, plus the version reconciliation |
+| `1430be6` | correct(evidence): the Level C failures ended at the token budget, and that changes what they support |
+| `5bdbc64` | research(w5): third Level C replicate passes; branch now visible on the remote |
+| `f784dc4` | research(p3): the Level C failures were budget truncation, not a capability limit - and this overturns my own attribution |
+| `69fba98` | research(p2): at a workable budget the agent reads a stored experience and applies it to a DIFFERENT defect - first evidence for item (3) |
+| `505f019` | research(p2): a control arm turns the reuse result into a measured cost saving |
+| `81edb30` | docs: reconcile the 24h report after three rounds of correction, and record the final regression |
+| `0e55c1a` | test(evidence): every sprint result now has a verifier that can be run independently |
+| `81b9a69` | research(p2): asking the agent to write its own lesson failed three times - recorded as a negative, with the harness bug separated out |
+| `986eba6` | research(track-b): the hybrid runtime audit the sprint asked for - and why I did not add samples |
 
-### 待人工批准（PENDING_APPROVAL）
-1. **推送分支** 与 **创建 PR**（本轮全部为本地提交）；
-2. 把 canonical 错误码写入 **Action 结果契约**（P1-B 目前只进日志与 detail，Action 码保持兼容）；
-3. 为 Track C 注册**新的受约束场景 id** 并重算 `world_sha256`（C13 的前置条件）；
-4. 真机安全链评估（P0-C）——需硬件。
+> 本表由 `git log origin/main..HEAD` 生成，非手工抄写。
 
 ## 6b. 最终回归（收口实测，2026-11-10 18:00）
 
@@ -203,34 +229,43 @@
 ## 7. 资源与合规
 
 - Gazebo 并发：始终 **1 个**高负载实验；每个实验独立 `GZ_PARTITION` + `ROS_DOMAIN_ID`；
-- API：本轮 Level B/C 共 6 次运行，合计约 **19.8 万 tokens**，按峰值未缓存上界 ≈ **0.4–1.6 RMB**，
-  远低于 20 RMB 上限；**未充值、未购买**；
-- 未连接真实机械臂，未做真实硬件动作；
-- 未修改冻结验收器、测试断言或成功阈值（`gate/acceptance.py` 四次运行均未变）。
+- 付费运行：本轮 **16 次**，合计约 **58 万 tokens**，按峰值未缓存上界 ≈ **1.3–4.5 RMB**，
+  远低于 20 RMB 上限；**未充值、未购买硬件或云服务**；
+- 未连接真实机械臂，未做任何真实硬件动作；
+- **未修改冻结验收器**：`gate/acceptance.py` 在全部 16 次运行中内容不变（1488 B）。
 
 ---
 
 ## 8. 下一轮 24 小时建议（不自动开启）
 
-**Level C′ 已在本次窗口内跑出有效结论**：修复判分前清理（补 gz ruby、`ros2 daemon stop`、
-`/dev/shm/fastrtps_*`）后，判分恢复正常。结果 **FAIL**，但机制与 Level C **不同**：
-agent **运行了 9 次场景、每次拿到 `ROBOT_FAILURE`，仍然 0 次编辑**——
-它不是看不到证据，也不是探索不足，而是**卡在"证据 → 定位"的转换**。
+本轮已完成的，不再列为"下一轮建议"：Level C′（有有效结论）、E2d/E2e Flash 复现、
+隔离态真实触发、P2 经验复用（双臂对照）。
 
+### 建议 1（最高信息价值）：让 agent 写得出经验
 
-> **先修复判分工具链在 WSL 内的状态复位**（每次判分前重启仿真命名空间或容器），
-> 然后重跑 Level C′。可证伪命题：在有效判分下，若 agent 能在预算内从证据定位并修复，
-> 则"无提示源码修复"成立；若仍失败，则定位成本即真实能力边界。
-> 前置条件：pilot 需在 Windows 侧运行（当前 `python` 为 Store 占位符），或提供等效 VM 复位。
+第 ② 项三次尝试全部失败（§14），机制已查明：**任务完成后持续倾向继续取证，而非沉淀结论**。
+可证伪命题：把 write-up 做成**任务成功的必填字段**（不填则任务不判完成），
+或改用独立"复盘 agent"读取执行记录，若仍无记录，则"自主归纳"在本模型上不成立。
 
-其次是：
-2. E2d / E2e 的 Flash 独立复现（P0-2，一直未做）；
-3. Track C 机制实验（MTC vs FSM 在**多候选规划**下的能力差异，非普通场景扩样本）；
-4. 隔离态的仿真故障注入（补 DoD 缺口）。
+### 建议 2：Track C 的机制实验（当前 BLOCKED，需先解封）
+
+必须先以**新 scenario id** 正式注册受约束世界并**重算 `world_sha256`**，
+再先离线证明 legacy 必失败，之后 MTC 的 PASS 才算能力证据。
+
+### 建议 3：Track B 的判别场景
+
+E-021 三臂 CI 全重叠（§Track B 评估）。需要一个**两种策略会给出不同决策**的场景
+（观测噪声使 FSM 规则选错、模型能纠正），且**必须保留 FSM 对照臂**。
+若构造不出，如实记为负结果并把资源转回 FSM 可靠性。
+
+### 建议 4：真机安全链（BLOCKED，需硬件）
+
+P0-C 的清单与评估已交付，但所有"真机行为"项目均为 **NOT_VERIFIED**。
+在获得硬件与急停装置前，**不得在真机上运行本仓库任何运动代码**。
 
 ---
 
-## 11. 三个负结果的机制区分（本轮最硬的发现）
+## 9. 三个负结果的机制区分
 
 | 实验 | 看到证据 | 编辑 | **终止原因** | 失败机制 |
 | --- | --- | --- | --- | --- |
@@ -256,7 +291,7 @@ Level B 之所以成功，是因为任务文本**点名了文件**，等于替�
 
 ---
 
-## 12. Level C 达成（本轮最终突破）
+## 10. Level C 达成
 
 C14 证明"工具清单不改变工具选择"，由此得到的攻关方向是**改变信息获取界面**。
 C15 实现：`run_execution` 的失败证据**自带定位**（`suspect_regions`，由失败阶段/对象推导出的相关代码区域），
@@ -289,7 +324,7 @@ C15 实现：`run_execution` 的失败证据**自带定位**（`suspect_regions`
 
 ---
 
-## 13. 更正 #2（本轮最重要的自我纠错）：Level C 失败 = 预算截断
+## 11. 更正 #2：Level C 失败 = 预算截断
 
 更正 #1 发现三次失败均 `budget_exceeded`（40k 上限），但**未验证**"多给预算会怎样"。
 P3 实验补上这一环：**唯一变量**是预算 40k → 150k，定位信息**关闭**，任务文本不变。
@@ -322,7 +357,7 @@ P3 实验补上这一环：**唯一变量**是预算 40k → 150k，定位信息
 
 ---
 
-## 14. P2 经验复用：首次获得第 ③ 项证据（150k 预算下复做）
+## 12. P2 经验复用（双臂对照）
 
 旧 P2 实验被预算截断（54k），按更正规则作废。复做：
 
@@ -366,7 +401,7 @@ agent 修复时**自己写了注释**，指出"用固定对象会让第二个对
 
 ---
 
-## 15. 第三方复核入口（全部实测通过）
+## 13. 第三方复核入口
 
 每个证据目录都带独立 `verify.py`，**不依赖本报告的叙述**。一条命令跑完全部：
 
@@ -395,7 +430,7 @@ bash ci-public-window/scripts/verify_all.sh
 
 ---
 
-## 16. P2 第 ② 项：agent 自主归纳经验 —— 三次尝试全部未达成
+## 14. P2 第 ② 项：agent 自主归纳经验（未达成）
 
 目标要求区分"人工提示 / agent 自主归纳 / agent 复用"。第 ③ 项已达成（§14），
 第 ② 项本轮做了三次尝试，**均未达成**，如实记录。
@@ -422,7 +457,7 @@ bash ci-public-window/scripts/verify_all.sh
 ### 边界
 - 三次属于**同一配置的不同推动手段**，不是独立重复；
 - **修复每次都成功**（三门 PASS），所以这不是能力问题；
-- 不影响第 ③ 项：agent 确实会**读取并使用**别人写的经验（§14，−18.2% 轮次）。
+- 不影响第 ③ 项：agent 确实会**读取并使用**别人写的经验（§12，−18.2% 轮次）。
 
 ### 这给出下一轮最明确的题目
 **让 agent 写得出经验**（而不是只会用经验），比让它多修几个 bug 更有信息价值。
