@@ -1,0 +1,337 @@
+{
+  "record_kind": "EVOBOT_EVIDENCE_INDEX",
+  "batches": 17,
+  "live": 10,
+  "superseded": 7,
+  "verifier_failures": 0,
+  "rows": [
+    {
+      "batch": "evobot_baseline_c_skeleton_20261111",
+      "verified": "PASS",
+      "rung": "Unit Tested only (no robot run)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_BASELINE_C_SKELETON_VERIFIED",
+        "stage": "Unit Tested only",
+        "experience_records": 4,
+        "chain": "chain intact (4 records)",
+        "regression_gate_blocks_evaluator": true,
+        "retrieved_lessons": 1,
+        "simulation_tested": false,
+        "independently_verified": false
+      }
+    },
+    {
+      "batch": "evobot_bc_pair_20261111",
+      "verified": "PASS",
+      "rung": "Generalization Tested at ceiling (superseded)",
+      "superseded_by": "evobot_unseen_bc_20261111 (ceiling removed)",
+      "verdict": {
+        "verdict": "EVOBOT_BC_PAIR_AT_CEILING_VERIFIED",
+        "pairs": 6,
+        "byte_identical_plans": 6,
+        "why_superseded": "v0.1 held-out was at ceiling; ceiling removed in unseen batch"
+      }
+    },
+    {
+      "batch": "evobot_heldout_n6_20261111",
+      "verified": "PASS",
+      "rung": "Generalization Tested (first held-out, superseded baseline)",
+      "superseded_by": "evobot_regression_v01_20261111 (post-spacing-fix baseline)",
+      "verdict": {
+        "verdict": "EVOBOT_FIRST_HELDOUT_VERIFIED",
+        "instances": 6,
+        "independent_pass": 6,
+        "clean_pass": 5,
+        "disputed_pass": 1,
+        "status": "superseded by evobot_regression_v01_20261111",
+        "false_success_rate": 0.0
+      }
+    },
+    {
+      "batch": "evobot_heldout_seal_20261111",
+      "verified": "PASS",
+      "rung": "Implemented + Unit Tested (isolation enforced)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_HELDOUT_ISOLATION_ENFORCED",
+        "public_tasks": 36,
+        "public_tasks_with_answers": 0,
+        "agent_uid_read_blocked": true,
+        "sealed_answers": 50,
+        "isolation_kind": "OS permissions; not a kernel namespace"
+      }
+    },
+    {
+      "batch": "evobot_recover_n6_20261111",
+      "verified": "PASS",
+      "rung": "Independently Verified (Level 3, n=2 denominator)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_LEVEL3_RECOVERY_VERIFIED",
+        "recovery_rate": "1/2",
+        "grading_unchanged": true,
+        "false_success_rate": 0.0,
+        "graded_runs": 6
+      }
+    },
+    {
+      "batch": "evobot_regression_v01_20261111",
+      "verified": "PASS",
+      "rung": "Regression (6/6 -> 6/6, no loss)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_NO_REGRESSION_AFTER_SPACING_FIX",
+        "before_pass": "6/6",
+        "after_pass": "6/6",
+        "regressions": 0,
+        "newly_clean": [
+          "HO-13c5efca228e (outcome 1 -> 0)"
+        ],
+        "false_success_rate": 0.0
+      }
+    },
+    {
+      "batch": "evobot_spacing_fix_20261111",
+      "verified": "PASS",
+      "rung": "Independently Verified (root-cause fix, 8/8)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_SAME_BIN_SPACING_ROOT_CAUSE_FIXED",
+        "before": "4/8 pass, recovery 0/4",
+        "after": "8/8 first-try pass, recovery not needed",
+        "false_success_rate": 0.0,
+        "pre_fix_failures_retained": 1,
+        "thresholds_unchanged": {
+          "clearance_m": 0.05,
+          "bin_radius_m": 0.06
+        }
+      }
+    },
+    {
+      "batch": "evobot_t01_baseline_a_20261111",
+      "verified": "PASS",
+      "rung": "Simulation Tested (superseded: single arm, n=1)",
+      "superseded_by": "evobot_t02_ab_20261111 (paired arms, same instance)",
+      "verdict": {
+        "verdict": "EVOBOT_T01_BASELINE_A_INDEPENDENTLY_VERIFIED",
+        "task_id": "T01-train-seed1000",
+        "template_id": "T01_multi_object_sorting",
+        "instruction": "Put the red block in the right bin and the blue block in the left bin.",
+        "arm": "A_deterministic_composite",
+        "agent_planned": false,
+        "stages_completed": [
+          "target_box_a-0",
+          "target_box_b-1"
+        ],
+        "placement_errors_m": {
+          "placement:target_box_a": 0.00926,
+          "placement:target_box_b": 0.00439
+        },
+        "tolerance_m": 0.06,
+        "false_success": false,
+        "false_failure": true,
+        "capability_level_claimed": "LEVEL_1_EXECUTE (Baseline A only)"
+      }
+    },
+    {
+      "batch": "evobot_t01_baseline_b_20261111",
+      "verified": "PASS",
+      "rung": "Simulation Tested (superseded: single arm, n=1)",
+      "superseded_by": "evobot_t02_ab_20261111 (paired arms, same instance)",
+      "verdict": {
+        "verdict": "EVOBOT_T01_BASELINE_B_AGENT_PLANNED_AND_VERIFIED",
+        "task_id": "T01-train-seed1000",
+        "instruction": "Put the red block in the right bin and the blue block in the left bin.",
+        "arm": "B_runtime_agent",
+        "agent_planned": true,
+        "agent_mapping": {
+          "target_box_a": "zone_1",
+          "target_box_b": "zone_2"
+        },
+        "agent_reasons": [
+          "Red block goes to the right bin (negative y).",
+          "Blue block goes to the left bin (positive y)."
+        ],
+        "agent_confidence": "high",
+        "same_mapping_as_baseline_a": true,
+        "placement_errors_m": {
+          "placement:target_box_a": 0.01034,
+          "placement:target_box_b": 0.00555
+        },
+        "false_success": false
+      }
+    },
+    {
+      "batch": "evobot_t02_ab_20261111",
+      "verified": "PASS",
+      "rung": "Independently Verified (paired arms on one instance)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_T02_EXCLUSION_BOTH_ARMS_VERIFIED",
+        "task_id": "T02-train-seed1000",
+        "instruction": "Clear the table into the right bin, except the blue block, which must stay put.",
+        "protected": [
+          "target_box_b"
+        ],
+        "arm_a": {
+          "passed": true,
+          "protected_moved_m": 0.0,
+          "ground_truth_used": [
+            "target_box_a",
+            "target_box_b"
+          ],
+          "clauses": 2
+        },
+        "arm_b": {
+          "passed": true,
+          "protected_moved_m": 0.0,
+          "ground_truth_used": [
+            "target_box_a",
+            "target_box_b"
+          ],
+          "clauses": 2
+        },
+        "both_arms_moved_only": [
+          "target_box_a"
+        ],
+        "agent_uncertainty": "Interpreting 'right bin' spatially as zone_1 on the robot's right side.",
+        "false_success_rate": 0.0
+      }
+    },
+    {
+      "batch": "evobot_t04_b_20261111",
+      "verified": "PASS",
+      "rung": "Independently Verified (geometric discrimination)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_T04_GEOMETRIC_DISCRIMINATION_VERIFIED",
+        "task_id": "T04-train-seed1000",
+        "instruction": "The colours are misleading, ignore them. Put the block that is FURTHER from the robot base into the right bin, and the nearer block into the left bin.",
+        "arm": "B_runtime_agent",
+        "agent_mapping": {
+          "target_box_b": "zone_1",
+          "target_box_a": "zone_2"
+        },
+        "distances_m": {
+          "target_box_a": 0.22,
+          "target_box_b": 0.2691
+        },
+        "agent_reasons": [
+          "Farther from base; zone_1 is on robot right (-y)",
+          "Nearer to base; zone_2 is on robot left (+y)"
+        ],
+        "passed": true,
+        "false_success": false
+      }
+    },
+    {
+      "batch": "evobot_t05_b_20261111",
+      "verified": "PASS",
+      "rung": "Simulation Tested (superseded: n=1)",
+      "superseded_by": "evobot_t05_n6_20261111 (n=6, not n=1)",
+      "verdict": {
+        "verdict": "EVOBOT_T05_RELAY_AGENT_ONLY_VERIFIED",
+        "task_id": "T05-train-seed1000",
+        "instruction": "Move the blue block to the left bin, passing through the right bin first.",
+        "arm_a_prime": {
+          "planned": false,
+          "refusal": "no rule matches this instruction"
+        },
+        "arm_b": {
+          "planned": true,
+          "route": [
+            [
+              "target_box_b",
+              "zone_1"
+            ],
+            [
+              "target_box_b",
+              "zone_2"
+            ]
+          ],
+          "confidence": "high"
+        },
+        "executed_stages": [
+          "target_box_b-0",
+          "target_box_b-1"
+        ],
+        "visit_clause": {
+          "required": [
+            "zone_1"
+          ],
+          "observed": [
+            "zone_1",
+            "zone_2"
+          ]
+        },
+        "discriminates_arms": true,
+        "false_success": false
+      }
+    },
+    {
+      "batch": "evobot_t05_batch_20261111",
+      "verified": "PASS",
+      "rung": "Simulation Tested, attribution corrected (superseded)",
+      "superseded_by": "evobot_t05_n6_clean_20261111 (padding failures fixed)",
+      "verdict": {
+        "verdict": "EVOBOT_T05_BATCH_SUPERSEDED_AND_CORRECTED",
+        "archived_verdicts": 6,
+        "correction_retained": true,
+        "status": "superseded by evobot_t05_n6_clean_20261111"
+      }
+    },
+    {
+      "batch": "evobot_t05_n6_20261111",
+      "verified": "PASS",
+      "rung": "Simulation Tested, found the DDS bug (superseded)",
+      "superseded_by": "evobot_t05_n6_clean_20261111 (harness failures fixed)",
+      "verdict": {
+        "verdict": "EVOBOT_T05_N6_DDS_FINDING_VERIFIED",
+        "attempts_archived": 8,
+        "graded": 4,
+        "status": "superseded by evobot_t05_n6_clean_20261111"
+      }
+    },
+    {
+      "batch": "evobot_t05_n6_clean_20261111",
+      "verified": "PASS",
+      "rung": "Independently Verified (n=6 relay)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_T05_RELAY_N6_VERIFIED",
+        "instances": 6,
+        "independently_verified": 6,
+        "self_assessments_recorded": 5,
+        "false_success_rate": 0.0
+      }
+    },
+    {
+      "batch": "evobot_unseen_bc_20261111",
+      "verified": "PASS",
+      "rung": "Generalization Tested (B/C pair, negative result)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_BC_NULL_RESULT_VERIFIED",
+        "pairs": 6,
+        "byte_identical_plans": 6,
+        "lessons_injected_into_C": 6,
+        "experience_effect": "none observed",
+        "false_success_rate": 0.0
+      }
+    },
+    {
+      "batch": "evobot_unseen_n6_20261111",
+      "verified": "PASS",
+      "rung": "Generalization Tested (unseen task types)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_UNSEEN_HEADROOM_VERIFIED",
+        "agent_plans_correct": "6/6",
+        "clean_pass": "3/6",
+        "false_success_rate": 0.0,
+        "bottleneck": "execution, not planning"
+      }
+    }
+  ]
+}
