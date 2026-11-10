@@ -161,7 +161,7 @@ Level C（无文件名、无行号、无修复方向，由失败证据自带定�
 
 **三条主线都没有"没做"**：A 有结论，B 有审计结论，**C 有明确的否定性结论**（并附带一次自我更正）。
 
-## 6. 本地提交（**37 个，已推送到 origin 分支，未合并**）
+## 6. 本地提交（**42 个，已推送到 origin 分支，未合并**）
 
 分支 `autonomous/flexcell-remediation`，基线 `ebe27f07881200ab0fc74dfaa5490208023bf9d9`。
 **远端可见**（按用户要求推送，未合并、未开 PR）：
@@ -208,6 +208,11 @@ Level C（无文件名、无行号、无修复方向，由失败证据自带定�
 | `0e55c1a` | test(evidence): every sprint result now has a verifier that can be run independently |
 | `81b9a69` | research(p2): asking the agent to write its own lesson failed three times - recorded as a negative, with the harness bug separated out |
 | `986eba6` | research(track-b): the hybrid runtime audit the sprint asked for - and why I did not add samples |
+| `5c13efc` | docs: bring the 24h report back in line with what was actually measured |
+| `d7b9ceb` | research(p2): fourth framing for agent-authored experience also fails - and this one is the most informative |
+| `c7dd831` | docs: record the measured token total instead of an estimate carried over from earlier |
+| `4c81581` | research(track-c): unblock the mechanism experiment with an additive scene, and get the first real FSM/MTC difference |
+| `1bb8cb5` | research(track-c): shrinking my own over-sized plate reverses the result - MTC is worse, not better |
 
 > 本表由 `git log origin/main..HEAD` 生成，非手工抄写。
 
@@ -217,7 +222,7 @@ Level C（无文件名、无行号、无修复方向，由失败证据自带定�
 | --- | --- |
 | `flexcell_interfaces` 构建 | **OK** |
 | `flexcell_skills` 构建 | **OK** |
-| 全仓离线套件（排除 `test_parity_report.py`） | **PYTEST_RC=0，0 failed** |
+| 全仓离线套件（排除 `test_parity_report.py`） | **PYTEST_RC=0，0 failed**（含新增 scene 改动后复测） |
 | 真实 Gazebo `normal` | **PASS** 14.2 s |
 | 真实 Gazebo `dual_object` | **PASS** 28.9 s（两条腿 6 步） |
 | 真实 Gazebo `regrasp` | **PASS** 14.3 s |
@@ -471,3 +476,39 @@ bash ci-public-window/scripts/verify_all.sh
 **让 agent 写得出经验**（而不是只会用经验），比让它多修几个 bug 更有信息价值。
 可能方向：把 write-up 做成**任务成功的必填字段**（不填则任务不算完成），
 或用独立的"复盘 agent"读取执行记录来生成经验。
+
+---
+
+## 15. Track C 的自我更正（第三次同类型错误）
+
+### 我报了什么
+第一次 C13 后我写："**同一受约束世界里，MTC 到达了 legacy 无法到达的阶段**"，
+并称这是"Track C 第一次拿到机制层面的差异证据"。
+
+### 为什么是错的
+顶板我做成了 **0.30×0.30 m**，而 box B 就在旁边——**它也被挡住了**。
+两臂都撞在同一块板上，只是 legacy 先撞（`PLACE_A`），MTC 后撞（`PICK_B`）。
+**"走得更远"不等于"能力更强"**，而我在报告里把两者等同了。
+
+### 修正后的事实
+
+| 顶板 | legacy | MTC |
+| --- | --- | --- |
+| 0.30 m（**我的 bug**） | FAIL @ `PLACE_A` | FAIL @ `PICK_B` |
+| **0.12 m（公平）** | **PASS 6/6，29.6 s** | **FAIL @ `PLACE_B`** |
+
+**方向完全反转：公平场景下 legacy 完成，MTC 未完成。**
+
+### 这是本轮第三次同类型错误
+1. **更正 B/C**：把"预算截断"读成"能力边界"；
+2. **P2 第 1 次**：把"agent 没写"读成"agent 不愿写"（实际是 harness 在 PASS 后立即 break）；
+3. **本次**：把"阶段走得更远"读成"能力更强"。
+
+共同点：**我用了一个未经检验的代理指标，并在数据支持它之前就下了结论。**
+
+### 写死的规则（第三条）
+> **任何"MTC/新方法走得更远"的观察，在确认场景本身对两臂都公平之前，不得作为能力证据。**
+
+### 这个负结果的价值
+24H 目标要求：MTC 若不能展示 FSM 缺失的能力，**记录负结果**。
+现在有可复现的负结果，且 `verify.py` **同时断言两轮**，任何人都不能只引用有利的那半段。
