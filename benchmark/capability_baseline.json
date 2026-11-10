@@ -15,8 +15,8 @@
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 31,
-    "batches_live": 24,
+    "batches_total": 32,
+    "batches_live": 25,
     "batches_superseded": 7,
     "verifier_failures": 0,
     "live_batches": [
@@ -44,6 +44,11 @@
         "batch": "evobot_baseline_c_skeleton_20261111",
         "verified": "PASS",
         "rung": "Unit Tested only (no robot run)"
+      },
+      {
+        "batch": "evobot_batch_validity_20261111",
+        "verified": "PASS",
+        "rung": "Retraction + validator (a batch must prove its steps ran; R arm was inert)"
       },
       {
         "batch": "evobot_capability_freeze_20261111",

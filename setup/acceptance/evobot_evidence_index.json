@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 31,
-  "live": 24,
+  "batches": 32,
+  "live": 25,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -87,6 +87,22 @@
       }
     },
     {
+      "batch": "evobot_batch_validity_20261111",
+      "verified": "PASS",
+      "rung": "Retraction + validator (a batch must prove its steps ran; R arm was inert)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_INVALID_BATCH_RETRACTED",
+        "original_recovery_decisions": 0,
+        "original_plan_retry": 0,
+        "arm_R_valid": false,
+        "failures_that_reproduced": "0/3",
+        "B_13_of_16": "one sample of a noisy process",
+        "honesty_metrics_unaffected": true,
+        "batch_validator": "rejects a batch whose steps did not run"
+      }
+    },
+    {
       "batch": "evobot_bc_pair_20261111",
       "verified": "PASS",
       "rung": "Generalization Tested at ceiling (superseded)",
@@ -106,7 +122,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 23,
+        "live_batches": 24,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",

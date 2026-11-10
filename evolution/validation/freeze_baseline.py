@@ -113,6 +113,12 @@ def freeze(force=False):
             "self_assessment_accuracy": "28/32 = 87.5%",
             "mission_requirement": "False Success Rate MUST be 0 -> MET on n=32, but a zero alone is gameable, so accuracy is reported with it",
         },
+        "invalid_results_retracted": {
+            "pair48_arm_R": "INERT - recovery never ran (cwd trap); B and R identical on 16/16",
+            "pair48_three_failures": "TRANSIENT - 0/3 reproduced on re-run with the same plan",
+            "consequence": "B=13/16 in that batch is one sample of a noisy process, not a",
+            "               property of the instances; B-vs-R from it is void",
+        },
         "not_achieved": ["Level 4 Develop", "Level 5 Improve", "Level 7 Transfer",
                          "hardware (M0, prohibited)"],
     }

@@ -1,0 +1,14 @@
+{
+  "runs": 16,
+  "b_failed": 3,
+  "recovery_ran": 0,
+  "claims": 16,
+  "retried": 0
+}
+
+BATCH INVALID:
+  - HO-38ce6531a597: first attempt FAILED but no recovery decision was recorded (recovery never ran). log: python3: can't open file '/home/ros/flexcell-p14/runtime/recovery/recovery_driver.py': [Errno 2] No such file or directory
+  - HO-4f197a0997af: first attempt FAILED but no recovery decision was recorded (recovery never ran). log: python3: can't open file '/home/ros/flexcell-p14/runtime/recovery/recovery_driver.py': [Errno 2] No such file or directory
+  - HO-72553754ef3a: first attempt FAILED but no recovery decision was recorded (recovery never ran). log: python3: can't open file '/home/ros/flexcell-p14/runtime/recovery/recovery_driver.py': [Errno 2] No such file or directory
+  - BATCH: 3 first attempts failed and NOT ONE retry was issued - arm R is not a recovery arm, and any B-vs-R comparison from this batch is meaningless
+rc=1

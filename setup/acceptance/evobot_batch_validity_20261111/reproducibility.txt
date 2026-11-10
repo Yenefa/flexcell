@@ -1,0 +1,18 @@
+ORIGINAL batch (recovery never ran):
+  B pass: 13/16
+  R pass: 13/16  <- IDENTICAL to B; arm R is NOT a recovery arm
+
+RE-RUN of the 3 instances that failed (same plan, cwd fixed):
+  HO-38ce6531a597      B=True   R=True   action=no_recovery
+  HO-4f197a0997af      B=True   R=True   action=no_recovery
+  HO-72553754ef3a      B=True   R=True   action=no_recovery
+
+  failures that REPRODUCED: 0/3
+
+CONCLUSION: the original 3 failures were TRANSIENT. They did not reproduce on
+a re-run with an identical plan, and all 3 passed on the first attempt, so
+recovery was never needed. Any 'B vs R' comparison from the original batch is
+void: recovery never executed, and on re-run there was nothing to recover.
+
+This also means the original B=13/16 is ONE SAMPLE of a noisy process, not a
+property of the instances.
