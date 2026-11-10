@@ -1,0 +1,13 @@
+seed      A_prime    layer         tries  detail
+s1000     False      PASS          1      all clauses ok
+s1001     False      EXECUTION     1      err 62: native terminal/verification unconfirmed for target_box_a-0
+s1002     False      EXECUTION     1      err 62: native terminal/verification unconfirmed for target_box_b-0
+s1003     False      HARNESS       1      stack unavailable
+s1004     False      HARNESS       1      stack unavailable
+s1005     False      HARNESS       1      stack unavailable
+
+instances            : 6
+A_prime planned      : 0 / 6
+layer counts         : {'PASS': 1, 'EXECUTION': 2, 'HARNESS': 3}
+executed (non-harness): 3
+PASS among executed   : 1/3 = 33%

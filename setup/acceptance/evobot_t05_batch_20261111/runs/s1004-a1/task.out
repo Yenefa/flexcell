@@ -1,0 +1,17 @@
+1794329750.890904 [213]    python3: Failed to find a free participant index for domain 213
+[ERROR] [1794329750.890980283] [rmw_cyclonedds_cpp]: rmw_create_node: failed to create domain, error Error
+/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/node.py:188: RuntimeWarning: Failed to fini rosout publisher: rcl node implementation is invalid, at ./src/rcl/node.c:390
+  self.__node = _rclpy.Node(
+Traceback (most recent call last):
+  File "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp/experiments/baselines/composite_client.py", line 107, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp/experiments/baselines/composite_client.py", line 96, in main
+    node = CompositeClient()
+           ^^^^^^^^^^^^^^^^^
+  File "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp/experiments/baselines/composite_client.py", line 28, in __init__
+    super().__init__("evobot_composite_client")
+  File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/node.py", line 188, in __init__
+    self.__node = _rclpy.Node(
+                  ^^^^^^^^^^^^
+rclpy._rclpy_pybind11.RCLError: error creating node: error not set, at ./src/rcl/node.c:252

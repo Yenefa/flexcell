@@ -1,0 +1,51 @@
+{
+  "evaluator_version": "0.1.0",
+  "task_id": "T05-train-seed1002",
+  "template_id": "T05_relay",
+  "passed": false,
+  "clauses": [
+    {
+      "clause": "placement:target_box_b",
+      "ok": false,
+      "evidence": {
+        "zone": "zone_2",
+        "distance_m": 0.23537,
+        "radius_m": 0.06,
+        "inside_zone": false,
+        "height_error_m": 0.0,
+        "resting": true,
+        "final_pose": [
+          0.2,
+          -0.18,
+          0.0175,
+          0.0
+        ]
+      }
+    },
+    {
+      "clause": "unmoved:target_box_a",
+      "ok": true,
+      "evidence": {
+        "distance_m": 0.0,
+        "tolerance_m": 0.015
+      }
+    },
+    {
+      "clause": "visit:target_box_b",
+      "ok": false,
+      "evidence": {
+        "required": [
+          "zone_1"
+        ],
+        "observed": []
+      }
+    }
+  ],
+  "failed_clauses": [
+    "placement:target_box_b",
+    "visit:target_box_b"
+  ],
+  "agent_claimed_success": false,
+  "false_success": false,
+  "false_failure": false
+}

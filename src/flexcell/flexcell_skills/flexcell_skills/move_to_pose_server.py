@@ -182,6 +182,8 @@ class MoveToPoseServer(Node):
         # NEVER arrived look fresh on a freshly booted host.
         self._js_monotonic = None
         self._admission = threading.Lock()
+        self.declare_parameter('admission_wait_s', 5.0)
+        self._admission_wait_s = float(self.get_parameter('admission_wait_s').value)
         self._motion_blocked = False
         self._motion_blocked_reason = ''
         self._terminal_uncertain = False
@@ -243,8 +245,12 @@ class MoveToPoseServer(Node):
     def _register_planned(self, request, response, prefix):
         # Registration has no physical effect and shares the same admission lock
         # as EVERY MoveToPose goal, including legacy/reset motions.
-        if not self._admission.acquire(blocking=False):
-            response.detail = 'motion executor busy'
+        # Bounded wait for the same reason as pick_server: a composite chain hands over
+        # from one native stage to the next within milliseconds, and an instant refusal
+        # turned a valid plan into ERR_MOTION_BUSY ("another MoveToPose goal is active").
+        if not self._admission.acquire(timeout=self._admission_wait_s):
+            response.detail = ('motion executor busy (waited %.1fs)'
+                               % self._admission_wait_s)
             return response
         try:
             if self._motion_blocked or self._terminal_uncertain:
@@ -486,9 +492,14 @@ class MoveToPoseServer(Node):
         # ---------- admission: single-arm mutual exclusion ----------
         # atomic lock (audit P1-3): the old check-then-set flag was a TOCTOU
         # race under the multithreaded executor
-        if not self._admission.acquire(blocking=False):
+        # Bounded WAIT, not an instant refusal (same reasoning as _register_planned and
+        # pick_server). A composite chain dispatches the next stage milliseconds after
+        # the previous one returns; a non-blocking acquire reported ERR_RESOURCE_BUSY
+        # on a plan that was entirely valid. The deadline still refuses.
+        if not self._admission.acquire(timeout=self._admission_wait_s):
             res = self._result(R.OUTCOME_FAILED, R.ERR_RESOURCE_BUSY,
-                               detail='another MoveToPose goal is active')
+                               detail=('another MoveToPose goal is active (waited %.1fs)'
+                                       % self._admission_wait_s))
             res.evidence_id = evidence
             rec.update(outcome='RESOURCE_BUSY', error_code=R.ERR_RESOURCE_BUSY)
             self._log(rec)

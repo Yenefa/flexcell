@@ -1,0 +1,40 @@
+{
+  "evaluator_version": "0.1.0",
+  "task_id": "T05-train-seed1004",
+  "template_id": "T05_relay",
+  "passed": false,
+  "clauses": [
+    {
+      "clause": "placement:target_box_b",
+      "ok": false,
+      "evidence": {
+        "reason": "object missing"
+      }
+    },
+    {
+      "clause": "unmoved:target_box_a",
+      "ok": false,
+      "evidence": {
+        "reason": "object missing"
+      }
+    },
+    {
+      "clause": "visit:target_box_b",
+      "ok": false,
+      "evidence": {
+        "required": [
+          "zone_1"
+        ],
+        "observed": []
+      }
+    }
+  ],
+  "failed_clauses": [
+    "placement:target_box_b",
+    "unmoved:target_box_a",
+    "visit:target_box_b"
+  ],
+  "agent_claimed_success": false,
+  "false_success": false,
+  "false_failure": false
+}

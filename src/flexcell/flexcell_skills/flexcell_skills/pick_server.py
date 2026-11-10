@@ -161,6 +161,8 @@ class PickServer(Node):
         self._tf_listener = TransformListener(self._tf_buffer, self, spin_thread=False)
 
         self._admission = threading.Lock()
+        self.declare_parameter('admission_wait_s', 5.0)
+        self._admission_wait_s = float(self.get_parameter('admission_wait_s').value)
         self._seq = 0
 
         self._server = ActionServer(
@@ -375,9 +377,20 @@ class PickServer(Node):
             return res
 
         # ---------- admission ----------
-        if not self._admission.acquire(blocking=False):
+        # Bounded WAIT, not an instant refusal.
+        #
+        # A composite chain dispatches the next native stage immediately after the
+        # previous one reports its terminal result. The previous goal handle is released
+        # a moment later, so a non-blocking acquire failed with ERR_RESOURCE_BUSY
+        # ("another pick goal is active") on a plan that was entirely valid - a relay
+        # task failed at its second stage for this reason in three of six runs.
+        #
+        # Waiting is bounded and still refuses: if the lock is genuinely held by a
+        # different task, the caller gets the same typed error after the deadline.
+        if not self._admission.acquire(timeout=self._admission_wait_s):
             return finish(R.OUTCOME_FAILED, R.ERR_RESOURCE_BUSY,
-                          'another pick goal is active')
+                          'another pick goal is active (waited %.1fs)'
+                          % self._admission_wait_s)
         try:
             # ---------- VALIDATING ----------
             self._feedback(goal_handle, 'VALIDATING', t0)
