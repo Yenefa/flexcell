@@ -59,6 +59,7 @@ RUNGS = {
     "evobot_three_arm_20261111": "Plan-level three-arm comparison (NO robot run)",
     "evobot_actuator_rootcause_20261111": "Root-cause analysis of archived runs (NO new robot run)",
     "evobot_pooled_n32_20261111": "Independently Verified (pooled n=32, robot runs, intervals)",
+    "evobot_capability_freeze_20261111": "P0 capability freeze (hash-pinned ruler; drift tested)",
 }
 
 

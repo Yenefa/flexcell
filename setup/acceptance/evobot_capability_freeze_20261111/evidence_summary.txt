@@ -1,0 +1,34 @@
+record_kind: EVOBOT_CAPABILITY_BASELINE
+pinned files: 9
+   benchmark/evaluators/capture_ground_truth.py
+   benchmark/evaluators/evaluate.py
+   benchmark/evaluators/observe_from_run.py
+   benchmark/evaluators/sealed_evaluate.py
+   benchmark/generators/generate.py
+   benchmark/generators/seal_held_out.py
+   benchmark/generators/unseen_tasks.py
+   benchmark/schemas/taskspec.schema.json
+   evolution/validation/regress.py
+
+live batches: 17
+verifier failures: 0
+
+headline: {
+  "three_arm_planning": {
+    "A_prime": "0/16",
+    "B": "16/16",
+    "C": "16/16"
+  },
+  "pooled_n32": {
+    "B_first_try": "25/32",
+    "R_after_retry": "29/32",
+    "paired_gained": 4,
+    "paired_lost": 0,
+    "false_success": "0/32"
+  },
+  "v01_regression": "6/6 -> 6/6, no loss",
+  "experience_effect_on_plans": "0/16 changed"
+}
+
+known bottleneck: actuator
+not achieved: ['Level 4 Develop', 'Level 5 Improve', 'Level 7 Transfer', 'hardware (M0, prohibited)']

@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 24,
-  "live": 17,
+  "batches": 25,
+  "live": 18,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -45,6 +45,26 @@
         "pairs": 6,
         "byte_identical_plans": 6,
         "why_superseded": "v0.1 held-out was at ceiling; ceiling removed in unseen batch"
+      }
+    },
+    {
+      "batch": "evobot_capability_freeze_20261111",
+      "verified": "PASS",
+      "rung": "P0 capability freeze (hash-pinned ruler; drift tested)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
+        "pinned_files": 9,
+        "live_batches": 17,
+        "verifier_failures": 0,
+        "drift_detection": "tested by mutation and deletion",
+        "false_success_rate": "0/32",
+        "not_achieved": [
+          "Level 4 Develop",
+          "Level 5 Improve",
+          "Level 7 Transfer",
+          "hardware (M0, prohibited)"
+        ]
       }
     },
     {

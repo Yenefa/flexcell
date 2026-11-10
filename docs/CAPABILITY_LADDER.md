@@ -1,5 +1,10 @@
 # EvoBot 能力阶梯 — 由证据索引派生
 
+> **能力已冻结。** `benchmark/capability_baseline.json` 用 SHA-256 固定了 9 个
+> **定义「正确」的文件**（判分器、schema、封存方案、回归门）。
+> 任何改动它们的行为都会被 `python3 evolution/validation/freeze_baseline.py --verify`
+> 立即检出，并要求重跑实验。这把「不许改验收器制造成功」从纪律变成了机制。
+
 **这份文档不是手写状态表。** 每一行的依据都能用一条命令重跑：
 
 ```bash
