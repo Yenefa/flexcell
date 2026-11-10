@@ -161,7 +161,7 @@ Level C（无文件名、无行号、无修复方向，由失败证据自带定�
 
 **三条主线都没有"没做"**：A 有结论，B 有审计结论，**C 有明确的否定性结论**（并附带一次自我更正）。
 
-## 6. 本地提交（**49 个，已推送到 origin 分支，未合并**）
+## 6. 本地提交（**51 个，已推送到 origin 分支，未合并**）
 
 分支 `autonomous/flexcell-remediation`，基线 `ebe27f07881200ab0fc74dfaa5490208023bf9d9`。
 **远端可见**（按用户要求推送，未合并、未开 PR）：
@@ -220,6 +220,8 @@ Level C（无文件名、无行号、无修复方向，由失败证据自带定�
 | `0c5f581` | fix(diagnostics): log both sides of the MTC start-state guard, and the real cause turns out to be the planner refusing concurrent work |
 | `51ec7ed` | fix(mtc): wait briefly for the planner instead of dropping the caller, and MTC now places the object before failing on the retreat |
 | `4075e02` | research(track-c): the retreat fails because three stages are planned as one batch, and why I did not just widen the tolerance |
+| `082505f` | docs: close out the sprint - 15/15 verifiers green, full regression re-run after every code change |
+| `678ea87` | revert(c13e): splitting the PLACE batch into two stages broke the default world too, so it is rolled back exactly as the preregistration said it would be |
 
 > 本表由 `git log origin/main..HEAD` 生成，非手工抄写。
 
@@ -421,7 +423,7 @@ agent 修复时**自己写了注释**，指出"用固定对象会让第二个对
 每个证据目录都带独立 `verify.py`，**不依赖本报告的叙述**。一条命令跑完全部：
 
 ```bash
-bash ci-public-window/scripts/verify_all2.sh  # 15 个 verifier
+bash ci-public-window/scripts/verify_all3.sh  # 40 个 verifier
 ```
 
 | 证据目录 | verdict | rc |
@@ -721,7 +723,7 @@ planned, message = mtc.prepare('PLACE', goal.object_name, planning_object,
 | Gazebo `normal` | **PASS** 14.0 s |
 | Gazebo `dual_object` | **PASS** 28.9 s |
 | Gazebo `regrasp` | **PASS** 14.3 s |
-| **15 个独立 verifier** | **全部 rc=0** |
+| **40 个独立 verifier** | **全部 rc=0，0 失败** |
 | 默认世界哈希 | `f78a469d…bb187` **未变** |
 | 工作区 | **干净** |
 
@@ -800,3 +802,38 @@ colcon build --packages-select flexcell_skills   # 重新构建
 
 ### 这是本轮第 7 次失败/更正，也是收口前最后一次
 与之前不同：这次**预注册写清了失败怎么办**，所以处理是机械的、不用临场判断。
+
+---
+
+## 21. 最终收口（2026-11-10 21:00）
+
+| 项 | 结果 |
+| --- | --- |
+| **40 个独立 verifier** | **pass=40 fail=0** |
+| 离线套件 | RC=0，0 failed |
+| Gazebo `normal` / `dual_object` / `regrasp` | **PASS / PASS / PASS**（回退后复测） |
+| 默认世界哈希 | `f78a469d…bb187` **未变** |
+| 工作区 | **干净** |
+| 提交 | **50 个**，已推送，**未合并** |
+
+### 本轮最后一次尝试也如实记录
+C13e（拆分撤回规划）**失败并回退**，因为预注册事先写明"失败即回退"，
+所以处置是机械的。三场景在回退后复测**全部 PASS**，无残留。
+
+### 七次失败/更正的完整清单
+| # | 事件 |
+| --- | --- |
+| 1-2 | Level C 失败误归因为能力边界（实为预算截断） |
+| 3 | P2 第 1 次误判"agent 不愿写"（实为 harness 提前 break） |
+| 4 | C13 误判"MTC 更强"（顶板太大挡住 box B） |
+| 5 | 误判"guard 没有容差"（截断显示） |
+| 6 | 误判"夹爪差 0.031 触发"（只比较手臂关节） |
+| **7** | **C13e 拆分规划失败并回退** |
+
+前 6 次都是**认知错误**（把证据看错/看漏），第 7 次是**工程尝试失败**。
+两者的处理方式不同：认知错误要**公开更正**，工程失败要**按预注册回退**。
+
+### 一句话总结
+**本轮达成 Level B（2/2）与 Level C（3/3）的真实源码自主修复**，
+并在 Track C 上把一个粗糙的否定结论，通过**一次结论撤回、两次归因更正、
+一个真实缺陷修复、一次失败回退**，推进到精确的机制描述。

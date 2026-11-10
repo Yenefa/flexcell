@@ -131,7 +131,7 @@
       "fixed": true
     }
   ],
-  "updated": "2026-11-10T20:47:00+08:00",
+  "updated": "2026-11-10T21:00:00+08:00",
   "closed_at": "2026-11-10T10:05:00+08:00",
   "final_regression": {
     "offline": "PYTEST_RC=0, 0 failed",
@@ -164,9 +164,11 @@
       "dual_object": "PASS 28.9s",
       "regrasp": "PASS 14.3s"
     },
-    "verifiers": "15/15 rc=0",
+    "verifiers": "40/40 rc=0, 0 failed",
     "default_world_hash": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187 (unchanged)",
-    "worktree_clean": true
+    "worktree_clean": true,
+    "commits": 51,
+    "c13e": "attempted, failed, reverted per preregistration; 3 scenarios re-verified PASS after revert"
   },
   "fixed_defects": [
     "planner concurrent admission (try_lock_for)",
@@ -182,5 +184,6 @@
     "modify gate/acceptance.py or thresholds",
     "report NOT_RUN as PASS"
   ],
-  "self_corrections": 6
+  "self_corrections": 6,
+  "failures_and_corrections": 7
 }
