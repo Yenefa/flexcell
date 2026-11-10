@@ -24,8 +24,24 @@ def classify(evidence):
         return "runtime", "DDS participant/domain creation failed"
     if "another" in detail and "goal is active" in detail:
         return "runtime", "a skill goal was still active at handover"
-    if "declared destination occupied" in detail or "invalid clearance" in detail:
-        return "planning", "plan declared an occupied or out-of-contract destination"
+    # The composite contract raises TWO different wordings for the same condition:
+    #   prepare_plan  -> "declared destination occupied at <stage>"
+    #   pre-stage snap-> "state drift or occupied destination before <stage>"
+    # The second is what the unseen task runs actually hit (err 61), so the classifier
+    # must recognise it; otherwise every real same-bin conflict is reported UNKNOWN.
+    # The composite contract uses THREE wordings for the same occupancy condition:
+    #   prepare_plan  -> "declared destination occupied at <stage>"
+    #   pre-stage snap-> "state drift or occupied destination before <stage>"  (err 61)
+    # The unseen-task runs hit the second, and a naive "destination occupied" match
+    # misses it because the words are reversed. Match BOTH orders, and check the
+    # combined phrase BEFORE the bare "state drift" so a real same-bin conflict is not
+    # misfiled as a state problem.
+    if "occupied destination" in detail or "destination occupied" in detail:
+        return "planning", "plan declared an occupied destination"
+    if "invalid clearance" in detail:
+        return "planning", "plan declared an out-of-contract clearance"
+    if "state drift" in detail:
+        return "state", "measured state drifted from the expected chain position"
     if "plan must declare every observed object" in detail:
         return "planning", "plan omitted an object present in the scene"
     if "another task owns the arm" in detail:

@@ -1,0 +1,14 @@
+task                 outcome     action      a1err  a2err  graded
+HO-42109d30fa00      FIRST_TRY   no_recovery 0      None   True
+HO-90899d657e68      STILL_FAIL  resume      61     60     False
+HO-96e57334764a      FIRST_TRY   no_recovery 0      None   True
+HO-b81a5ae02d6d      RECOVERED   resume      62     0      True
+HO-b91d34102cdc      FIRST_TRY   no_recovery 0      None   True
+HO-fd5737f932db      FIRST_TRY   no_recovery 0      None   True
+
+instances              : 6
+outcome counts         : {'FIRST_TRY': 4, 'STILL_FAIL': 1, 'RECOVERED': 1}
+first-attempt failures : 2
+RECOVERY RATE          : 1/2 = 50%
+FINAL PASS RATE        : 5/6 = 83%
+FALSE SUCCESS RATE     : 0/6

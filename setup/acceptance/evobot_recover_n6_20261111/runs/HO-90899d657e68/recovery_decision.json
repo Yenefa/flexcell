@@ -1,0 +1,24 @@
+{
+  "record_kind": "RECOVERY_DECISION",
+  "source_run": "/tmp/evobot-recover/HO-90899d657e68",
+  "original_evidence": {
+    "outcome": 1,
+    "error_code": 61,
+    "detail": "state drift or occupied destination before target_box_b-1",
+    "completed_stage_ids": [
+      "target_box_a-0"
+    ]
+  },
+  "decision": {
+    "action": "resume",
+    "failure_class": "planning",
+    "measured_reason": "plan declared an occupied destination",
+    "attempt": 1,
+    "budget": 1,
+    "committed_stages": [
+      "target_box_a-0"
+    ],
+    "why": "stages already committed; replay would contradict the measured world state. A resumable plan is needed and is not implemented."
+  },
+  "original_failure_preserved": true
+}
