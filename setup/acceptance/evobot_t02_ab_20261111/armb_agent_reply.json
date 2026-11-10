@@ -1,0 +1,23 @@
+{
+  "agent_plan": {
+    "moves": [
+      {
+        "object": "target_box_a",
+        "zone": "zone_1",
+        "why": "red block must be cleared into the right-side bin"
+      }
+    ],
+    "unmoved": [
+      "target_box_b"
+    ],
+    "confidence": "high",
+    "uncertainty": "Interpreting 'right bin' spatially as zone_1 on the robot's right side."
+  },
+  "problems": [],
+  "raw_reply": "{\"moves\":[{\"object\":\"target_box_a\",\"zone\":\"zone_1\",\"why\":\"red block must be cleared into the right-side bin\"}],\"unmoved\":[\"target_box_b\"],\"confidence\":\"high\",\"uncertainty\":\"Interpreting 'right bin' spatially as zone_1 on the robot's right side.\"}",
+  "requested_model": "deepseek-flash",
+  "base_url": "https://api.deepseek.com",
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "key_fingerprint": "2caaf9b9"
+}

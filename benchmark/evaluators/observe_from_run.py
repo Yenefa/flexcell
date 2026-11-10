@@ -45,7 +45,8 @@ def _xy_z_yaw(pose):
     return [round(float(pose[0]), 6), round(float(pose[1]), 6), round(float(pose[2]), 6), 0.0]
 
 
-def build_observation(run_dir, declared_objects, agent_claimed_success=False):
+def build_observation(run_dir, declared_objects, agent_claimed_success=False,
+                      ground_truth=None):
     """Return the observation dict the evaluator consumes."""
     run = Path(run_dir)
     skills = run / "skills"
@@ -69,6 +70,17 @@ def build_observation(run_dir, declared_objects, agent_claimed_success=False):
         if name and pose:
             measured[name] = pose
             provenance[name] = "verify.measured"
+
+    # Ground truth wins: it covers objects the robot never touched, which is exactly
+    # what a "must not move" clause needs. It comes from the live gz pose stream, the
+    # same source the skill servers use, so it is not a second opinion invented here.
+    gt_used = []
+    if ground_truth:
+        for name, pose in (ground_truth.get("objects") or {}).items():
+            if name in declared_objects and pose:
+                measured[name] = [float(v) for v in pose]
+                provenance[name] = "gz.ground_truth"
+                gt_used.append(name)
 
     seen = set()
     for row in observe:
@@ -98,6 +110,7 @@ def build_observation(run_dir, declared_objects, agent_claimed_success=False):
         "_absent": absent,
         "_ever_seen": sorted(seen),
         "_run_dir": str(run),
+        "_ground_truth_used": sorted(gt_used),
     }
 
 
@@ -112,7 +125,12 @@ def main(argv=None):
               file=sys.stderr)
         return 2
     run_dir, out_path, names = argv[0], argv[1], argv[2:]
-    obs = build_observation(run_dir, names)
+    gt = None
+    if "--ground-truth" in argv:
+        gt_path = argv[argv.index("--ground-truth") + 1]
+        names = [n for n in names if n != "--ground-truth" and n != gt_path]
+        gt = json.loads(Path(gt_path).read_text(encoding="utf-8"))
+    obs = build_observation(run_dir, names, ground_truth=gt)
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     Path(out_path).write_text(json.dumps(obs, indent=2) + "\n", encoding="utf-8")
     print("objects observed: %d/%d, absent: %s" % (
