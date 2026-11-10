@@ -58,8 +58,18 @@ class Planner : public rclcpp::Node {
   }
 
   void handle(Service::Request::SharedPtr q, Service::Response::SharedPtr r, bool point) {
-    std::unique_lock<std::mutex> lock(mutex_, std::try_to_lock);
-    if (!lock.owns_lock()) { r->detail = "planner busy"; return; }
+    // Admission: wait briefly instead of failing instantly. The Reentrant
+    // callback group plus a multi-threaded executor means handle() can be entered
+    // concurrently; with try_to_lock the loser was dropped on the spot, and since
+    // the caller retried only twice (3 s apart, see mtc_motion.py) three refusals
+    // in a row turned into a task failure attributed to planning. The bound is
+    // deliberately finite so a genuinely overloaded planner still refuses - it
+    // queues briefly, it does not pretend to succeed.
+    std::unique_lock<std::timed_mutex> lock(mutex_, std::defer_lock);
+    if (!lock.try_lock_for(std::chrono::seconds(10))) {
+      r->detail = "planner busy: admission wait exceeded 10 s";
+      return;
+    }
     std::unique_ptr<flexcell::PlanningSnapshot> snapshot;
     auto fail = [&](const std::exception& e) {
       r->success = false; r->detail = e.what();
@@ -339,7 +349,8 @@ class Planner : public rclcpp::Node {
                   " min_err=" + std::to_string(level->last_min_position_error_m());
     }
   }
-  std::mutex mutex_;
+  // timed_mutex so admission can wait briefly instead of dropping the caller.
+  std::timed_mutex mutex_;
   uint64_t snapshot_sequence_{0};
   rclcpp::CallbackGroup::SharedPtr group_;
   rclcpp::Client<moveit_msgs::srv::GetPlanningScene>::SharedPtr scene_;

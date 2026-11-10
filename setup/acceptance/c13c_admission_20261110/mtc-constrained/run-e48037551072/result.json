@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "status": "ROBOT_FAILURE",
+  "backend": "velocity_servo",
+  "skill_backend": "mtc",
+  "physical_tasks_dispatched": 1,
+  "qualification": "FUNCTIONAL_SMOKE_ONLY",
+  "case": "dual_object",
+  "object": "target_box_a",
+  "out": "/tmp/c13c-mtc-constrained/run-e48037551072",
+  "decision_policy": "fsm",
+  "hybrid_threshold": null,
+  "resume_completed": false,
+  "model_env": {
+    "FLEXCELL_LLM_ENDPOINT": null,
+    "FLEXCELL_LLM_MODEL": null,
+    "FLEXCELL_LLM_BACKEND": null,
+    "FLEXCELL_JEV_ENDPOINT": null,
+    "FLEXCELL_JEV_MODEL": null,
+    "FLEXCELL_JEV_BACKEND": null
+  },
+  "world_sha256": "5c03dcf5fb75bf5b7c48ce6cb294f53b4914383b8f6e71272d11bc10b90b1140",
+  "semantic_config_sha256": "0270524818f89d87dba178d59bef51cfe5fac160e583163b27c8818f31fc6aaa",
+  "runtime_fingerprint": "587aaa5d7f75a78c26500cdba3e1ff9c8bbe56e494ae928d16d9fd932a4aed00",
+  "task_start_monotonic_ns": 26917327665790,
+  "goal_pose": [
+    0.12,
+    -0.15,
+    0.0175
+  ],
+  "zone_2_pose": null,
+  "config_override": null,
+  "task_end_monotonic_ns": 26952114784362,
+  "task": {
+    "action": "demo",
+    "goal_uuid": "eaf12a8de57b4459b28e0d451f9e9cb7",
+    "outcome": "OUTCOME_FAILED",
+    "outcome_val": 1,
+    "error_code": "ERR_SKILL_FAILED",
+    "detail": "policy abort (NON_RECOVERABLE): place failed (ERR_MOTION_FAILED, carried box is not retried) (trace=PICK_A(attempt=1):OK,PLACE_A:OK,VERIFY_A(attempt=1):OK,PICK_B(attempt=1):OK,PLACE_B:FAIL); previous_skill=PLACE cause=ERR_MOTION_FAILED legacy_error_code=30",
+    "evidence_id": "week1_demo_v1-88c91e73",
+    "wall_seconds": 34.165,
+    "fsm_trace": [
+      "PICK_A(attempt=1):OK",
+      "PLACE_A:OK",
+      "VERIFY_A(attempt=1):OK",
+      "PICK_B(attempt=1):OK",
+      "PLACE_B:FAIL"
+    ],
+    "object_a_at_zone": true,
+    "object_b_at_zone": false,
+    "zone_a_error_m": 0.0001454331545796739,
+    "zone_b_error_m": null,
+    "run_id": "week1_demo_v1-1e4cd1aa",
+    "scenario_id": "week1_demo_v1"
+  },
+  "actual_routing": {
+    "decisions": 8,
+    "sources": {
+      "fsm": 8
+    },
+    "leaves": {
+      "fsm": 8
+    },
+    "fallbacks": 0,
+    "models": [],
+    "backends": [],
+    "fast_calls": 0,
+    "slow_calls": 0,
+    "model_calls": 0,
+    "calls_without_identity": 0
+  },
+  "model_calls": 0,
+  "fast_calls": 0,
+  "slow_calls": 0,
+  "error": "typed task failure retained; no replacement task",
+  "recorder_exit": 0,
+  "owned_launch_exit": 0,
+  "unavailable_numeric_fields": {
+    "task.zone_b_error_m": "nan"
+  }
+}

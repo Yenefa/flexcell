@@ -602,3 +602,46 @@ legacy 走 MoveIt `MoveGroup` 规划，**不经过这个服务**，
 | 2 | "夹爪关节差 0.031 触发检查" | 只比较 4 个手臂关节；且比错了对象 |
 
 **这次之所以能对，是因为先加了日志再判断，而不是先编故事再找证据。**
+
+---
+
+## 17. C13c — 修复 planner 准入后，MTC 走到了哪一步
+
+### 预注册跑了三种可能，实际是 H2
+`docs/C13C_PREREGISTRATION.md` 写于改代码之前，判定标准事先写死。
+
+### 改动（一处）
+```cpp
+std::unique_lock<std::mutex> lock(mutex_, std::try_to_lock);          // 之前
+std::unique_lock<std::timed_mutex> lock(mutex_, std::defer_lock);     // 之后
+if (!lock.try_lock_for(std::chrono::seconds(10))) { ...busy... }
+```
+**未改**回调组、线程数、重试次数、任何验收门。
+
+### 效果
+| | 修复前 | 修复后 |
+| --- | --- | --- |
+| `planner busy` 拒绝 | 有（3 次重试全拒） | **0 次** |
+| MTC 移动成功数 | 9 | **11 / 12** |
+| 物体是否放下 | 否 | **是，`place_err=0.000 m`** |
+| 最终结果 | `PLACE_B` 失败 | `PLACE_B` 失败（**换了个原因**） |
+
+### 剩下的是另一个问题
+```
+object dropped (place_err=0.000) but retreat failed:
+  joint3 measured=0.36051 planned=0.41343 delta=0.05292  (> 0.03)
+```
+**撤回轨迹的规划起点与实测不符。** 这是规划快照与执行状态的偏差，与并发无关。
+
+### 关键：这次数据是加了日志才有的
+上一轮同一个 guard 触发时，**连差多少都不知道**，只能记 UNKNOWN。
+加日志后立刻得到 `joint3 delta=0.0529`。**这就是"先取数据再解释"的价值。**
+
+### 对 Track C 结论的影响
+| 之前 | 现在 |
+| --- | --- |
+| "MTC 在这个场景失败" | **"MTC 完成放置，卡在撤回"** |
+| 归因：并发准入 | 归因：**撤回轨迹起点偏差** |
+
+**"MTC 无优势"要弱化**：它不是做不到，而是收尾有另一个缺陷。
+**但也不能说 MTC 有优势**：它仍未完成，而 legacy 完成了 6/6。

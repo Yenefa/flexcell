@@ -1,0 +1,25 @@
+SENDING action=demo object=target_box_a pose=[0.12, -0.15, 0.0175]
+GOAL_UUID eaf12a8de57b4459b28e0d451f9e9cb7
+RESULT {
+  "action": "demo",
+  "goal_uuid": "eaf12a8de57b4459b28e0d451f9e9cb7",
+  "outcome": "OUTCOME_FAILED",
+  "outcome_val": 1,
+  "error_code": "ERR_SKILL_FAILED",
+  "detail": "policy abort (NON_RECOVERABLE): place failed (ERR_MOTION_FAILED, carried box is not retried) (trace=PICK_A(attempt=1):OK,PLACE_A:OK,VERIFY_A(attempt=1):OK,PICK_B(attempt=1):OK,PLACE_B:FAIL); previous_skill=PLACE cause=ERR_MOTION_FAILED legacy_error_code=30",
+  "evidence_id": "week1_demo_v1-88c91e73",
+  "wall_seconds": 34.165,
+  "fsm_trace": [
+    "PICK_A(attempt=1):OK",
+    "PLACE_A:OK",
+    "VERIFY_A(attempt=1):OK",
+    "PICK_B(attempt=1):OK",
+    "PLACE_B:FAIL"
+  ],
+  "object_a_at_zone": true,
+  "object_b_at_zone": false,
+  "zone_a_error_m": 0.0001454331545796739,
+  "zone_b_error_m": NaN,
+  "run_id": "week1_demo_v1-1e4cd1aa",
+  "scenario_id": "week1_demo_v1"
+}

@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "status": "PASS",
+  "backend": "velocity_servo",
+  "skill_backend": "legacy",
+  "physical_tasks_dispatched": 1,
+  "qualification": "FUNCTIONAL_SMOKE_ONLY",
+  "case": "dual_object",
+  "object": "target_box_a",
+  "out": "/tmp/c13c-legacy-constrained/run-2f1d13a5a98c",
+  "decision_policy": "fsm",
+  "hybrid_threshold": null,
+  "resume_completed": false,
+  "model_env": {
+    "FLEXCELL_LLM_ENDPOINT": null,
+    "FLEXCELL_LLM_MODEL": null,
+    "FLEXCELL_LLM_BACKEND": null,
+    "FLEXCELL_JEV_ENDPOINT": null,
+    "FLEXCELL_JEV_MODEL": null,
+    "FLEXCELL_JEV_BACKEND": null
+  },
+  "world_sha256": "5c03dcf5fb75bf5b7c48ce6cb294f53b4914383b8f6e71272d11bc10b90b1140",
+  "semantic_config_sha256": "2e4906170d7755c6966d5dab71a5d101b3cf0fd0279ce22134e8e36be04f2bc1",
+  "runtime_fingerprint": "17c1bedfde52e6af0dbc3a9eafef44ccc295a3b2ab8deb25161c31a32ed626af",
+  "task_start_monotonic_ns": 26991586042672,
+  "goal_pose": [
+    0.12,
+    -0.15,
+    0.0175
+  ],
+  "zone_2_pose": null,
+  "config_override": null,
+  "task_end_monotonic_ns": 27021367702857,
+  "task": {
+    "action": "demo",
+    "goal_uuid": "2cea75a0365b4e2bb5053978631805b2",
+    "outcome": "OUTCOME_SUCCEEDED",
+    "outcome_val": 0,
+    "error_code": "ERR_NONE",
+    "detail": "task done: all assignments verified",
+    "evidence_id": "week1_demo_v1-f91b2719",
+    "wall_seconds": 29.026,
+    "fsm_trace": [
+      "PICK_A(attempt=1):OK",
+      "PLACE_A:OK",
+      "VERIFY_A(attempt=1):OK",
+      "PICK_B(attempt=1):OK",
+      "PLACE_B:OK",
+      "VERIFY_B(attempt=1):OK"
+    ],
+    "object_a_at_zone": true,
+    "object_b_at_zone": true,
+    "zone_a_error_m": 0.004407296780584754,
+    "zone_b_error_m": 0.0033956473706699764,
+    "run_id": "week1_demo_v1-1e54aff2",
+    "scenario_id": "week1_demo_v1"
+  },
+  "actual_routing": {
+    "decisions": 8,
+    "sources": {
+      "fsm": 8
+    },
+    "leaves": {
+      "fsm": 8
+    },
+    "fallbacks": 0,
+    "models": [],
+    "backends": [],
+    "fast_calls": 0,
+    "slow_calls": 0,
+    "model_calls": 0,
+    "calls_without_identity": 0
+  },
+  "model_calls": 0,
+  "fast_calls": 0,
+  "slow_calls": 0,
+  "expectation_met": true,
+  "recorder_exit": 0,
+  "owned_launch_exit": 0,
+  "unavailable_numeric_fields": {}
+}

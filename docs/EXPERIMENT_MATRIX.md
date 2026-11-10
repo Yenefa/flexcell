@@ -244,3 +244,19 @@ differs from planned trajectory`。
 > 我此前两次给出的解释（"guard 没有容差"、"夹爪差 0.031 触发"）**均已撤回**。
 
 **机制问题：本场景下 MTC 无优势。** n=1/臂；单一场景；不能推广到多候选/窄通道。
+
+## C13c — planner 准入修复后的对照（预注册：`docs/C13C_PREREGISTRATION.md`）
+
+| 臂 | 结果 |
+| --- | --- |
+| `mtc-constrained` | ROBOT_FAILURE @ `PLACE_B`，但**失败点后移**：放置成功（err 0.000 m），卡在**撤回** |
+| `legacy-constrained` | **PASS 6/6**（对照，未受影响） |
+| `mtc-default` | **PASS 6/6**（对照，未受影响） |
+
+`try_to_lock` → `try_lock_for(10s)`（`std::timed_mutex`）之后：
+**12 次 MTC 移动 11 次成功，`planner busy` 彻底消失**。
+
+**判定：`C13C_ADMISSION_FIXED_MTC_NOW_PLACES_AND_FAILS_ON_RETREAT`**（预注册判定为 H2）
+
+剩余失败：撤回轨迹起点 `joint3=0.41343` vs 实测 `0.36051`，差 **0.0529 rad > 0.03 容差**。
+根因未定位，不得猜测。离线套件仍 RC=0。

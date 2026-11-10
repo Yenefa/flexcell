@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "frames": 0,
+  "valid_frames": 0,
+  "errors": [],
+  "image_writer": {
+    "frames_written": 0,
+    "valid_frames": 0,
+    "queue_capacity": 64,
+    "queue_high_watermark": 0,
+    "drain_completed": true,
+    "errors": [],
+    "rejected_frames": []
+  },
+  "physics_writer": {
+    "lines_written": 3172,
+    "queue_capacity": 200000,
+    "queue_high_watermark": 1,
+    "drain_completed": true,
+    "errors": []
+  },
+  "reconcile": null,
+  "rosbag_exit": 0,
+  "joints": [
+    "joint1",
+    "joint2",
+    "joint3",
+    "joint4",
+    "gripper_left_joint"
+  ],
+  "action_semantics": "arm controller reference positions + held accepted gripper position target",
+  "synchronization": "causal source stamps; state/reference age <=50ms; backfilled rows from bag",
+  "observation_source": "SIMULATION_GROUND_TRUTH; camera is data-only"
+}
