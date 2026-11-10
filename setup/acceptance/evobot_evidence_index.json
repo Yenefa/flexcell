@@ -1,10 +1,24 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 22,
-  "live": 15,
+  "batches": 23,
+  "live": 16,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
+    {
+      "batch": "evobot_actuator_rootcause_20261111",
+      "verified": "PASS",
+      "rung": "Root-cause analysis of archived runs (NO new robot run)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_ACTUATOR_ROOT_CAUSE_VERIFIED",
+        "actuator_stalls": 4,
+        "recovered_by_bounded_retry": 3,
+        "unrelated_failures": 12,
+        "finding": "gripper stalled while RELEASING; not a planning or experience problem",
+        "evaluator_touched": false
+      }
+    },
     {
       "batch": "evobot_baseline_c_skeleton_20261111",
       "verified": "PASS",
