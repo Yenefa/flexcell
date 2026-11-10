@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 29,
-  "live": 22,
+  "batches": 30,
+  "live": 23,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -116,6 +116,20 @@
           "Level 7 Transfer",
           "hardware (M0, prohibited)"
         ]
+      }
+    },
+    {
+      "batch": "evobot_freeze_change_20261111",
+      "verified": "PASS",
+      "rung": "Formal change to a pinned file (claim plumbing; grading proven unchanged)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_CLAIM_PLUMBING_ADDED_WITH_CHANGE_CONTROL",
+        "claim_entry_point": "--agent-claim (previously absent)",
+        "default_is_now": "None (explicit unknown)",
+        "grading_independent_of_claim": true,
+        "refreeze_requires_changelog": true,
+        "evaluate_py_modified": false
       }
     },
     {

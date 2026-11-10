@@ -56,7 +56,7 @@ def _nearest_zone_name(pose, zones, tolerance=0.06):
     return best if best_d is not None and best_d <= tolerance else None
 
 
-def build_observation(run_dir, declared_objects, agent_claimed_success=False,
+def build_observation(run_dir, declared_objects, agent_claimed_success=None,
                       ground_truth=None, zones=None):
     """Return the observation dict the evaluator consumes."""
     run = Path(run_dir)
@@ -127,7 +127,13 @@ def build_observation(run_dir, declared_objects, agent_claimed_success=False,
     return {
         "objects": objects,
         "move_sequence": sequence,
-        "agent_claimed_success": bool(agent_claimed_success),
+        # EXPOSED AS UNKNOWN, NOT False. The old default of False made a missing claim
+        # indistinguishable from a measured failure claim, which is what let
+        # false_success sit at a structural zero for many rounds.
+        "agent_claimed_success": (None if agent_claimed_success is None
+                                  else bool(agent_claimed_success)),
+        "agent_claim_source": ("absent" if agent_claimed_success is None
+                               else "measured"),
         # Diagnostics for the analyst, ignored by the evaluator contract.
         "_provenance": provenance,
         "_absent": absent,
@@ -139,7 +145,8 @@ def build_observation(run_dir, declared_objects, agent_claimed_success=False,
 
 
 def strip_diagnostics(observation):
-    keep = {"objects", "move_sequence", "agent_claimed_success", "visits"}
+    keep = {"objects", "move_sequence", "agent_claimed_success", "agent_claim_source",
+            "visits"}
     return {k: v for k, v in observation.items() if not k.startswith("_") and k in keep}
 
 
@@ -155,6 +162,12 @@ def main(argv=None):
         gt_path = argv[argv.index("--ground-truth") + 1]
         names = [n for n in names if n != "--ground-truth" and n != gt_path]
         gt = json.loads(Path(gt_path).read_text(encoding="utf-8"))
+    claim = None
+    if "--agent-claim" in argv:
+        i = argv.index("--agent-claim")
+        raw = argv[i + 1]
+        names = [n for n in names if n not in ("--agent-claim", raw)]
+        claim = raw.strip().lower() in ("1", "true", "success", "yes")
     zones = None
     if "--zones" in argv:
         zpath = argv[argv.index("--zones") + 1]
@@ -164,7 +177,8 @@ def main(argv=None):
         except json.JSONDecodeError:
             zones = json.loads(Path(zpath).read_text(encoding="utf-8"))
             names = [n for n in names if n not in ("--zones", zpath)]
-    obs = build_observation(run_dir, names, ground_truth=gt, zones=zones)
+    obs = build_observation(run_dir, names, agent_claimed_success=claim,
+                            ground_truth=gt, zones=zones)
     Path(out_path).parent.mkdir(parents=True, exist_ok=True)
     Path(out_path).write_text(json.dumps(obs, indent=2) + "\n", encoding="utf-8")
     print("objects observed: %d/%d, absent: %s" % (

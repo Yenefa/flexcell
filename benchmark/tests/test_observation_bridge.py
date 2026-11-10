@@ -63,7 +63,8 @@ def test_strip_diagnostics_leaves_exactly_the_evaluator_contract():
     clean = bridge.strip_diagnostics(obs)
     # The contract grew by "visits" when relay grading was added: a template that asks
     # for an intermediate stop cannot be graded from final positions alone.
-    assert set(clean) == {"objects", "move_sequence", "agent_claimed_success", "visits"}
+    assert set(clean) == {"objects", "move_sequence", "agent_claimed_success",
+                      "agent_claim_source", "visits"}
     # and the evaluator accepts it
     spec = gen.generate("T01_multi_object_sorting", 3)
     verdict = ev.evaluate(spec, clean)

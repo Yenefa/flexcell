@@ -1,10 +1,11 @@
 {
   "record_kind": "EVOBOT_CAPABILITY_BASELINE",
+  "changes_since_previous": [],
   "why": "Pins the contract that DEFINES correctness, so archived numbers stay comparable. Changing any pinned file requires re-running the experiments, not just editing this file.",
   "pinned_files": {
     "benchmark/evaluators/evaluate.py": "c75eaf781ca6ea7298c1298a12d86e19026e43708ededf825186a13e94ac8a6d",
     "benchmark/evaluators/sealed_evaluate.py": "fa330e69ac6a35aec4b1313638b458885e93c8877ea5dc53f642859783e3acad",
-    "benchmark/evaluators/observe_from_run.py": "ba905ea60a86d34a2f5087429a717d5c7ef2baf1939e29496f74e61dfdbdf1dc",
+    "benchmark/evaluators/observe_from_run.py": "c9b910cde2b93da9c5dae1760c1e731d7679eb20b52b3b5fc19b9028973c5250",
     "benchmark/evaluators/capture_ground_truth.py": "faec24ae921acdbef25114fbd20e7c435453fd8d7bdf8190f9cacecbd59cb608",
     "benchmark/schemas/taskspec.schema.json": "29aae267b157efc2f91d48578ed849c4427e79b629cb3fdea7f892dc7a57563e",
     "benchmark/generators/generate.py": "17e15d4e320b7d3285058bf7eafd389f0ef34eed7345c45a1e536243c6e414ac",
@@ -14,8 +15,8 @@
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 29,
-    "batches_live": 22,
+    "batches_total": 30,
+    "batches_live": 23,
     "batches_superseded": 7,
     "verifier_failures": 0,
     "live_batches": [
@@ -48,6 +49,11 @@
         "batch": "evobot_capability_freeze_20261111",
         "verified": "PASS",
         "rung": "P0 capability freeze (hash-pinned ruler; drift tested)"
+      },
+      {
+        "batch": "evobot_freeze_change_20261111",
+        "verified": "PASS",
+        "rung": "Formal change to a pinned file (claim plumbing; grading proven unchanged)"
       },
       {
         "batch": "evobot_heldout_seal_20261111",

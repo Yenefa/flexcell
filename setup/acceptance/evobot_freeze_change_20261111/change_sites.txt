@@ -1,0 +1,6 @@
+59:def build_observation(run_dir, declared_objects, agent_claimed_success=None,
+135:        "agent_claim_source": ("absent" if agent_claimed_success is None
+148:    keep = {"objects", "move_sequence", "agent_claimed_success", "agent_claim_source",
+166:    if "--agent-claim" in argv:
+167:        i = argv.index("--agent-claim")
+169:        names = [n for n in names if n not in ("--agent-claim", raw)]

@@ -18,6 +18,7 @@ from pathlib import Path
 
 WT = Path(__file__).resolve().parents[2]
 BASELINE = WT / "benchmark" / "capability_baseline.json"
+REQUIRED_REASON = WT / "docs" / "FREEZE_CHANGELOG.md"
 
 PINNED = [
     "benchmark/evaluators/evaluate.py",
@@ -38,12 +39,46 @@ def sha(path):
     return h.hexdigest()
 
 
-def freeze():
+def _changelog():
+    """Return the documented reasons, newest first. Empty if none recorded."""
+    if not REQUIRED_REASON.exists():
+        return ""
+    return REQUIRED_REASON.read_text(encoding="utf-8")
+
+
+def changed_pinned():
+    """Pinned files whose hash no longer matches the frozen baseline."""
+    if not BASELINE.exists():
+        return []
+    doc = json.loads(BASELINE.read_text(encoding="utf-8"))
+    out = []
+    for p, want in (doc.get("pinned_files") or {}).items():
+        full = WT / p
+        if not full.exists():
+            out.append((p, "deleted", want, None))
+        else:
+            now = sha(full)
+            if now != want:
+                out.append((p, "changed", want, now))
+    return out
+
+
+def freeze(force=False):
     idx = json.loads((WT / "setup" / "acceptance" / "evobot_evidence_index.json")
                      .read_text(encoding="utf-8"))
     live = [r for r in idx["rows"] if not r.get("superseded_by")]
+    changes = changed_pinned()
+    if changes and not force:
+        log = _changelog()
+        missing = [p for p, _, _, _ in changes if p not in log]
+        if missing:
+            raise SystemExit(
+                "REFUSING to re-freeze: these pinned files changed with no entry in "
+                "docs/FREEZE_CHANGELOG.md: %s" % missing)
     doc = {
         "record_kind": "EVOBOT_CAPABILITY_BASELINE",
+        "changes_since_previous": [{"file": p, "kind": k, "was": w, "now": n}
+                                   for p, k, w, n in changes],
         "why": ("Pins the contract that DEFINES correctness, so archived numbers stay "
                 "comparable. Changing any pinned file requires re-running the "
                 "experiments, not just editing this file."),

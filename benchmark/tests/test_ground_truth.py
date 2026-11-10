@@ -64,5 +64,6 @@ def test_strip_diagnostics_still_yields_the_contract_only():
     gt = {"objects": {"target_box_a": [0.22, 0.0, 0.0175, 0.0]}}
     obs = bridge.build_observation(REAL_RUN, ["target_box_a"], ground_truth=gt)
     clean = bridge.strip_diagnostics(obs)
-    assert set(clean) == {"objects", "move_sequence", "agent_claimed_success", "visits"}
+    assert set(clean) == {"objects", "move_sequence", "agent_claimed_success",
+                      "agent_claim_source", "visits"}
 

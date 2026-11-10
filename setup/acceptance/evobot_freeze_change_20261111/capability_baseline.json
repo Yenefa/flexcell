@@ -1,0 +1,174 @@
+{
+  "record_kind": "EVOBOT_CAPABILITY_BASELINE",
+  "changes_since_previous": [
+    {
+      "file": "benchmark/evaluators/observe_from_run.py",
+      "kind": "changed",
+      "was": "ba905ea60a86d34a2f5087429a717d5c7ef2baf1939e29496f74e61dfdbdf1dc",
+      "now": "c9b910cde2b93da9c5dae1760c1e731d7679eb20b52b3b5fc19b9028973c5250"
+    }
+  ],
+  "why": "Pins the contract that DEFINES correctness, so archived numbers stay comparable. Changing any pinned file requires re-running the experiments, not just editing this file.",
+  "pinned_files": {
+    "benchmark/evaluators/evaluate.py": "c75eaf781ca6ea7298c1298a12d86e19026e43708ededf825186a13e94ac8a6d",
+    "benchmark/evaluators/sealed_evaluate.py": "fa330e69ac6a35aec4b1313638b458885e93c8877ea5dc53f642859783e3acad",
+    "benchmark/evaluators/observe_from_run.py": "c9b910cde2b93da9c5dae1760c1e731d7679eb20b52b3b5fc19b9028973c5250",
+    "benchmark/evaluators/capture_ground_truth.py": "faec24ae921acdbef25114fbd20e7c435453fd8d7bdf8190f9cacecbd59cb608",
+    "benchmark/schemas/taskspec.schema.json": "29aae267b157efc2f91d48578ed849c4427e79b629cb3fdea7f892dc7a57563e",
+    "benchmark/generators/generate.py": "17e15d4e320b7d3285058bf7eafd389f0ef34eed7345c45a1e536243c6e414ac",
+    "benchmark/generators/seal_held_out.py": "b4c63360db75a603e798e44a614baeedde0e5086b0f4aae2be65355e98d53a8f",
+    "benchmark/generators/unseen_tasks.py": "4d9248eed866cb43b859db13f655fa4a8dae49f354b68733c1990ceff4299144",
+    "evolution/validation/regress.py": "a3d8bf5246a95695a37ddf0a25f2565b6198f2acc132f84ec1e3dbae7d107d9b"
+  },
+  "missing_pinned_files": [],
+  "evidence": {
+    "batches_total": 29,
+    "batches_live": 22,
+    "batches_superseded": 7,
+    "verifier_failures": 0,
+    "live_batches": [
+      {
+        "batch": "evobot_actuator_prereg_20261111",
+        "verified": "PASS",
+        "rung": "Pre-registration written (prediction + refutation fixed before change)"
+      },
+      {
+        "batch": "evobot_actuator_proposal_20261111",
+        "verified": "PASS",
+        "rung": "Proposal generated + gated (WOULD_FIX; NOT applied, needing approval)"
+      },
+      {
+        "batch": "evobot_actuator_rootcause_20261111",
+        "verified": "PASS",
+        "rung": "Root-cause analysis of archived runs (NO new robot run)"
+      },
+      {
+        "batch": "evobot_assess_v4_20261111",
+        "verified": "PASS",
+        "rung": "Honesty fix verified (false success 0/32 with 87.5% accuracy; 4 prompt versions compared)"
+      },
+      {
+        "batch": "evobot_baseline_c_skeleton_20261111",
+        "verified": "PASS",
+        "rung": "Unit Tested only (no robot run)"
+      },
+      {
+        "batch": "evobot_capability_freeze_20261111",
+        "verified": "PASS",
+        "rung": "P0 capability freeze (hash-pinned ruler; drift tested)"
+      },
+      {
+        "batch": "evobot_heldout_seal_20261111",
+        "verified": "PASS",
+        "rung": "Implemented + Unit Tested (isolation enforced)"
+      },
+      {
+        "batch": "evobot_honesty_retraction_20261111",
+        "verified": "PASS",
+        "rung": "Retraction (false-success zero was vacuous; measured 1/32)"
+      },
+      {
+        "batch": "evobot_lesson_routing_20261111",
+        "verified": "PASS",
+        "rung": "Plan-level analysis (mechanism found; NO robot run; transfer NOT observed)"
+      },
+      {
+        "batch": "evobot_pair16_20261111",
+        "verified": "PASS",
+        "rung": "Independently Verified (paired B vs R, n=16)"
+      },
+      {
+        "batch": "evobot_pair16_drift_20261111",
+        "verified": "PASS",
+        "rung": "Independently Verified (paired n=16, recovery 3/4)"
+      },
+      {
+        "batch": "evobot_pooled_n32_20261111",
+        "verified": "PASS",
+        "rung": "Independently Verified (pooled n=32, robot runs, intervals)"
+      },
+      {
+        "batch": "evobot_proposal_loop_20261111",
+        "verified": "PASS",
+        "rung": "Implemented + Unit Tested (loop wired; Level 5 NOT achieved)"
+      },
+      {
+        "batch": "evobot_recover_n6_20261111",
+        "verified": "PASS",
+        "rung": "Independently Verified (Level 3, n=2 denominator)"
+      },
+      {
+        "batch": "evobot_regression_v01_20261111",
+        "verified": "PASS",
+        "rung": "Regression (6/6 -> 6/6, no loss)"
+      },
+      {
+        "batch": "evobot_spacing_fix_20261111",
+        "verified": "PASS",
+        "rung": "Independently Verified (root-cause fix, 8/8)"
+      },
+      {
+        "batch": "evobot_t02_ab_20261111",
+        "verified": "PASS",
+        "rung": "Independently Verified (paired arms on one instance)"
+      },
+      {
+        "batch": "evobot_t04_b_20261111",
+        "verified": "PASS",
+        "rung": "Independently Verified (geometric discrimination)"
+      },
+      {
+        "batch": "evobot_t05_n6_clean_20261111",
+        "verified": "PASS",
+        "rung": "Independently Verified (n=6 relay)"
+      },
+      {
+        "batch": "evobot_three_arm_20261111",
+        "verified": "PASS",
+        "rung": "Plan-level three-arm comparison (NO robot run)"
+      },
+      {
+        "batch": "evobot_unseen_bc_20261111",
+        "verified": "PASS",
+        "rung": "Generalization Tested (B/C pair, negative result)"
+      },
+      {
+        "batch": "evobot_unseen_n6_20261111",
+        "verified": "PASS",
+        "rung": "Generalization Tested (unseen task types)"
+      }
+    ]
+  },
+  "verified_headline": {
+    "three_arm_planning": {
+      "A_prime": "0/16",
+      "B": "16/16",
+      "C": "16/16"
+    },
+    "pooled_n32": {
+      "B_first_try": "25/32",
+      "R_after_retry": "29/32",
+      "paired_gained": 4,
+      "paired_lost": 0,
+      "false_success": "1/32 MEASURED (the earlier 0/32 was vacuous)"
+    },
+    "v01_regression": "6/6 -> 6/6, no loss",
+    "experience_effect_on_plans": "0/16 changed"
+  },
+  "known_bottleneck": {
+    "layer": "actuator",
+    "detail": "every remaining failure is ACTUATOR_STALL_ON_RELEASE: the gripper stalls while releasing. Same coordinates both succeed and stall, so it is not geometric. Out of scope here: the skill layer issues gripper_open with no bounded retry."
+  },
+  "honesty": {
+    "false_success": "0/32 MEASURED with 87.5% self-assessment accuracy (the original 0/32 was vacuous; the honest v1 figure was 1/32)",
+    "false_failure": "4/32 = 12.5%",
+    "self_assessment_accuracy": "28/32 = 87.5%",
+    "mission_requirement": "False Success Rate MUST be 0 -> MET on n=32, but a zero alone is gameable, so accuracy is reported with it"
+  },
+  "not_achieved": [
+    "Level 4 Develop",
+    "Level 5 Improve",
+    "Level 7 Transfer",
+    "hardware (M0, prohibited)"
+  ]
+}
