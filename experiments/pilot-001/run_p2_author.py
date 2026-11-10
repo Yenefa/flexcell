@@ -38,10 +38,16 @@ manifest = json.loads((HERE / "manifest.json").read_text())
 pkg = Path(repo_src) / "src/flexcell/flexcell_skills"
 cfg = pkg / "config/week1.yaml"
 
-TASK_AUTHOR = (w5s.TASK + "\nAfter the gates pass, write the lesson you learned with\n"
-               "record_experience: state the DEFECT CLASS (not the line), the SYMPTOM\n"
-               "you observed, the transferable LESSON, and the EVIDENCE path. A record\n"
-               "that cites evidence which does not exist will be rejected.\n")
+# Fourth hypothesis: telling the agent to write up AFTER finishing did not work three
+# times. So make the write-up part of the DELIVERABLE itself, stated in the task from
+# the start, and have the harness refuse to treat the run as complete until a record
+# exists. Same information, different framing: a required output rather than a
+# follow-up chore.
+TASK_AUTHOR = (w5s.TASK + "\nThe task is NOT complete until you have called\n"
+               "record_experience once. Deliverables: (1) the three gates pass, and\n"
+               "(2) an experience record with the DEFECT CLASS (not the line), the\n"
+               "SYMPTOM observed, the transferable LESSON, and the EVIDENCE path.\n"
+               "A record citing evidence that does not exist is refused.\n")
 
 tools = list(manifest["arms"][arm]["tools"])
 if "record_experience" not in tools:
@@ -52,36 +58,34 @@ agent = FCAgent(chat, tools, TASK_AUTHOR)
 
 
 def ask_for_record(agent, toolbox, rec, iteration):
-    """One extra agent turn AFTER the gates pass: write the lesson down.
-
-    The runner breaks the moment the verdict flips, so without this hook the agent
-    never gets the opportunity - an earlier run "succeeded" with zero
-    record_experience calls purely because the loop had already exited.
+    """Extra turns until a record exists (max 3), because the task declares the
+    record a deliverable. If it never appears, the run is reported as not meeting
+    its deliverables rather than quietly passing on gates alone.
     """
-    prompt = ("Writing-up phase. The repair is done and verified; do not run the "
-              "scenario again. Call record_experience exactly once with the DEFECT "
-              "CLASS (not a line number), the SYMPTOM you observed, the transferable "
-              "LESSON, and the EVIDENCE path you are basing it on (for example "
-              "\"telemetry/execution.log\"). A record citing evidence that does not "
-              "exist is refused.")
-    # Third hypothesis: in a normal turn the agent re-runs the scenario instead of
-    # writing up (two runs showed exactly that). So narrow the toolbox for the
-    # write-up phase: only the recorder and a read remains. This is a phase change,
-    # not a hint - the agent still has to derive every field itself.
-    saved = set(toolbox.allowed)
-    toolbox.allowed = {"record_experience", "read_file"}
-    agent.history.append({"role": "user", "content": prompt})
-    try:
-        claim = agent.step(toolbox, iteration + 1) or {}
-    finally:
-        toolbox.allowed = saved
-    rec.emit("post_pass", calls=[list(c) for c in toolbox.calls if c],
-             tokens=claim.get("tokens"))
-    if claim.get("results"):
-        rec.emit("transcript", index=iteration + 100,
-                 assistant=claim.get("assistant_text", ""),
-                 results=claim.get("results", []))
-
+    for attempt in range(1, 4):
+        has = (toolbox.workspace / "experience" / "agent_authored.json").exists()
+        if has:
+            rec.emit("post_pass", attempt=attempt, recorded=True)
+            return
+        prompt = ("Deliverable 2 is still missing: no experience record exists. "
+                  "Call record_experience now with defect_class, symptom, lesson and "
+                  "an evidence_path that exists in this workspace.")
+        agent.history.append({"role": "user", "content": prompt})
+        saved = set(toolbox.allowed)
+        toolbox.allowed = {"record_experience", "read_file"}
+        try:
+            claim = agent.step(toolbox, iteration + attempt) or {}
+        finally:
+            toolbox.allowed = saved
+        rec.emit("post_pass", attempt=attempt,
+                 calls=[list(c) for c in toolbox.calls if c],
+                 tokens=claim.get("tokens"))
+        if claim.get("results"):
+            rec.emit("transcript", index=iteration + 100 + attempt,
+                     assistant=claim.get("assistant_text", ""),
+                     results=claim.get("results", []))
+    rec.emit("post_pass", attempt="exhausted",
+             recorded=(toolbox.workspace / "experience" / "agent_authored.json").exists())
 
 res = runner.run_one(manifest, arm, agent,
                      w5s.build_t_w5s(out / ("tpl-auth-" + arm), pkg, cfg),
