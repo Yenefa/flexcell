@@ -5,7 +5,7 @@
     "budget_cny": 20,
     "gazebo_concurrency": 1
   },
-  "phase": "CLOSED — final regression green, reports delivered",
+  "phase": "CLOSED - Level C 3/3, P2 two-arm reuse, corrections applied, final regression green",
   "tasks": [
     {
       "id": "P0-1",
@@ -131,21 +131,25 @@
       "fixed": true
     }
   ],
-  "updated": "2026-11-10T10:05:00+08:00",
+  "updated": "2026-11-10T18:05:00+08:00",
   "closed_at": "2026-11-10T10:05:00+08:00",
   "final_regression": {
-    "offline_failed": 0,
+    "offline": "PYTEST_RC=0, 0 failed",
     "gazebo": {
-      "normal": "PASS",
-      "dual_object": "PASS",
-      "regrasp": "PASS"
+      "normal": "PASS 14.2s",
+      "dual_object": "PASS 28.9s",
+      "regrasp": "PASS 14.3s"
     },
     "worktree_clean": true
   },
   "pending_human_approval": [
-    "push branch autonomous/flexcell-remediation and open PR",
-    "write canonical error codes into the Action result contract (P1-B stays additive for now)",
+    "branch pushed to origin/autonomous/flexcell-remediation (visible, NOT merged); merge/PR still needs approval",
+    "write canonical error codes into the Action result contract (P1-B stays additive)",
     "register a new constrained scenario id for Track C and recompute world_sha256",
     "physical safety chain assessment (P0-C) - needs hardware"
+  ],
+  "corrections": [
+    "CORRECTION_20261110B: Level C failures hit budget_exceeded",
+    "CORRECTION_20261110C: P3 proves they were truncation, not capability"
   ]
 }
