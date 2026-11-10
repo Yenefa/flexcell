@@ -1,0 +1,20 @@
+{
+  "experiment": "quarantine_injection",
+  "method": "stop_cancel_timeout_s=0.0 (documented 'cancel request timed out' branch); no skill code modified",
+  "stack": "ROS 2 Jazzy + Gazebo Harmonic, trusted_sim.launch.py, domain 175, partition p0a-quar2",
+  "observed": {
+    "outcome": 2,
+    "error_code": 32,
+    "detail": "canceled during PICK_A(attempt=1) (trace=PICK_A(attempt=1):FAIL:PICK_A(attempt=1) canceled: stop unconfirmed (goal terminated but the cancel was not accepted))",
+    "saw_quarantined": true,
+    "second_task": {
+      "outcome": 1,
+      "error_code": 50,
+      "detail": "motion quarantine active (goal terminated but the cancel was not accepted): no new motion may be dispatched until a verified reset"
+    },
+    "reset": {
+      "success": true,
+      "message": "quarantine cleared by reset_motion_quarantine"
+    }
+  }
+}

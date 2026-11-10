@@ -67,6 +67,7 @@ agent 在**定向成本**上耗尽预算，尚未进入 `run_execution`。
 | 时间域（P2-D） | 5 项 PASS | `test_time_domain.py` |
 | 感知边界（P2-E） | 9 项 PASS | `test_perception_boundary.py` |
 | 真实栈三场景 | 3/3 PASS（多次复跑） | `p1_integration_20261110` |
+| **隔离态真实触发** | **ENGAGED_AND_CLEARED** | `p0a_quarantine_20261110` |
 
 ## Track B（Hybrid Runtime）
 

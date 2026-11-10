@@ -73,13 +73,24 @@
 
 ---
 
+## 5b. 隔离态已在真实图中验证（本轮补齐）
+
+通过把 `stop_cancel_timeout_s` 设为 `0.0`（代码中已文档化的"取消请求超时"分支，**未改 skill 代码**）
+在真实 ROS 图中触发隔离：`saw_quarantined=true`、第二个任务被拒（`error_code=50`，
+"motion quarantine active ... until a verified reset"）、`reset_motion_quarantine` 成功清空。
+证据：`setup/acceptance/p0a_quarantine_20261110/`（`verify.py` → `P0A_QUARANTINE_ENGAGED_AND_CLEARED`）。
+
+附带发现：`stop_result_timeout_s=0.2` 没有触发隔离——真实 skill 的停止确认约 50 ms 完成，
+说明隔离是**最后手段**而非日常路径。
+
 ## 6. 剩余风险清单
 
 | 风险 | 严重度 | 说明 |
 | --- | --- | --- |
-| 隔离态未在仿真实测 | 中 | 需故障注入才能制造"停止未确认"；当前由 15 项离线测试覆盖 |
+
 | PLACE 超时、控制器拒绝取消未测 | 中 | NOT_RUN |
 | 真机安全链完全未验证 | **高** | 无急停/STO/安全 PLC；**禁止上真机** |
+| PLACE 超时路径未单独验证 | 低 | 隔离已由 cancel-timeout 路径验证 |
 | 相机闭环未接入 | 中 | 无硬件；仅完成边界与计划 |
 | `max_effort` 固定 10.0 | 低 | 未按物体标定 |
 | 模块化仅完成 2 个切片 | 低 | `TaskWorld` / `SkillDispatcher` 仍 DEFERRED（受 FSM-P0-1 约束） |
