@@ -218,16 +218,22 @@ agent 在**定向成本**上耗尽预算，尚未进入 `run_execution`。
 离线路由测试 69 项**全部通过**（本轮实跑，RC=0）。
 **结论：Hybrid 可运行，但没有任何一个维度优于 FSM。**
 
-## Track C — C13 受约束世界 FSM/MTC 对照（**结论被自己推翻**）
+## Track C — C13 受约束世界 FSM/MTC 对照（含对照臂）
 
-| 顶板 | legacy | MTC |
+| 运行 | 世界 | 结果 |
 | --- | --- | --- |
-| 0.30×0.30 m（**我的 bug**，挡住 box B） | ROBOT_FAILURE @ `PLACE_A` | ROBOT_FAILURE @ `PICK_B` |
-| **0.12×0.12 m（公平）** | **PASS 6/6，29.6 s** | ROBOT_FAILURE @ `PLACE_B` |
+| **`mtc-default`（对照）** | 默认 | **PASS 6/6** |
+| `legacy` | 0.12 m 顶板 | **PASS 6/6，29.6 s** |
+| `mtc` | 0.12 m 顶板 | **FAIL @ `PLACE_B`** |
+| `plate030-*` | 0.30 m 顶板（我的 bug） | 均 FAIL |
 
-**判定：`C13_NO_MTC_ADVANTAGE_REVERSES_THE_ARTEFACT`**
+**判定：`C13_NO_MTC_ADVANTAGE_CONTROL_CONFIRMS_THE_SCENE_SEPARATES_THEM`**
 
-第一次"看起来 MTC 更强"是**场景 bug**：两者都撞在同一块过大的板子上，只是 legacy 先撞。
-尺寸正确后方向反转：**legacy 完成，MTC 未完成**。
+对照臂证明 MTC **不是**做不了 dual_object（默认世界 PASS 6/6），
+所以受约束场景**确实**区分了两者——但方向与假设相反。
 
-**Track C 机制问题（MTC 是否有 FSM 缺失的能力）：本场景下答案为否定。** n=1/臂，单一场景。
+**MTC 失败原因不是规划超时**，而是 `_consume_mtc` 的 `ValueError: measured start state
+differs from planned trajectory`：`abs(delta)` **未与容差比较**，等价于要求精确浮点相等。
+这是本轮顺带发现的**独立真实缺陷**，未在实验中修改（避免污染结果）。
+
+**机制问题：本场景下 MTC 无优势。** n=1/臂；单一场景；不能推广到多候选/窄通道。
