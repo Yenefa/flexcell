@@ -13,6 +13,7 @@ rather than emitted with invented expectations.
 import argparse
 import hashlib
 import json
+import math
 import random
 import sys
 from pathlib import Path
@@ -143,11 +144,26 @@ def t03_ordered(seed, split):
 
 
 def t04_duplicates(seed, split):
+    """Discriminate two objects by MEASURED GEOMETRY, not by colour.
+
+    The first version of this template was broken: its instruction said "put the one
+    further from the robot in the right bin" while its expected_goal said the
+    opposite, so an agent that read the instruction correctly would be graded FAIL.
+    It also claimed the two blocks look alike when they are red and blue.
+
+    The placement is now COMPUTED from the same rule the instruction states, so the
+    two cannot disagree. Colour is explicitly declared misleading, which is the whole
+    point: the agent has to use distance.
+    """
     names = ["target_box_a", "target_box_b"]
-    first, second = names
-    placement = {first: "zone_1", second: "zone_2"}
-    instruction = "Two blocks look alike. Put the one further from the robot in the %s bin, the nearer one in the %s bin." % (
-        _label("zone_1"), _label("zone_2"))
+    dist = {n: math.hypot(OBJECTS[n]["pose"][0], OBJECTS[n]["pose"][1]) for n in names}
+    further = max(names, key=lambda n: dist[n])
+    nearer = min(names, key=lambda n: dist[n])
+    assert further != nearer
+    placement = {further: "zone_1", nearer: "zone_2"}
+    instruction = ("The colours are misleading, ignore them. Put the block that is "
+                   "FURTHER from the robot base into the %s bin, and the nearer block "
+                   "into the %s bin." % (_label("zone_1"), _label("zone_2")))
     return _spec("T04_duplicates", seed, split, instruction, names,
                  ["zone_1", "zone_2"], placement)
 

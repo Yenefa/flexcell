@@ -2,7 +2,7 @@
   "task_id": "T04-heldout-seed9005",
   "template_id": "T04_duplicates",
   "random_seed": 9005,
-  "instruction": "Two blocks look alike. Put the one further from the robot in the right bin, the nearer one in the left bin.",
+  "instruction": "The colours are misleading, ignore them. Put the block that is FURTHER from the robot base into the right bin, and the nearer block into the left bin.",
   "objects": [
     {
       "name": "target_box_a",
@@ -61,8 +61,8 @@
   },
   "expected_goal": {
     "placement": {
-      "target_box_a": "zone_1",
-      "target_box_b": "zone_2"
+      "target_box_b": "zone_1",
+      "target_box_a": "zone_2"
     },
     "unmoved": []
   },
@@ -72,5 +72,5 @@
     "max_wall_s": 600.0
   },
   "split": "held_out",
-  "instance_sha256": "e46ce93cc2634c32ba8eb21ec39eb4f9e553fc7bb738bfaf66a4b749f9c09950"
+  "instance_sha256": "bdfda2c301fea30adc19c14e6a0d53cafc8979d5c0734f6c497e6530cbbacc08"
 }

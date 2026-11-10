@@ -67,6 +67,32 @@ def test_no_template_depends_on_an_object_the_default_world_lacks():
             assert used <= allowed, (template, seed, used - allowed)
 
 
+def test_t04_instruction_and_expected_goal_agree():
+    """Regression: the instruction once said the OPPOSITE of expected_goal.
+
+    An agent that read the instruction correctly would have been graded FAIL. A task
+    whose stated rule contradicts its own success condition is not a hard task, it is
+    an impossible one.
+    """
+    import math
+    spec = gen.generate("T04_duplicates", 1000)
+    poses = {o["name"]: o["initial_pose"] for o in spec["objects"]}
+    dist = {n: math.hypot(p[0], p[1]) for n, p in poses.items()}
+    placement = spec["expected_goal"]["placement"]
+    to_right = [n for n, z in placement.items() if z == "zone_1"][0]
+    to_left = [n for n, z in placement.items() if z == "zone_2"][0]
+    # the instruction sends the FURTHER block to the right bin
+    assert dist[to_right] > dist[to_left], (dist, placement)
+    # and it must warn that colour is misleading
+    assert "colour" in spec["instruction"].lower()
+
+
+def test_t04_no_longer_claims_the_blocks_look_alike():
+    # They are red and blue; claiming otherwise made the instruction false.
+    spec = gen.generate("T04_duplicates", 1000)
+    assert "look alike" not in spec["instruction"].lower()
+
+
 def test_evaluator_and_generator_versions_agree():
     assert ev.EVALUATOR_VERSION == gen.EVALUATOR_VERSION
 

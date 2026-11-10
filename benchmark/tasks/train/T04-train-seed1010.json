@@ -2,7 +2,7 @@
   "task_id": "T04-train-seed1010",
   "template_id": "T04_duplicates",
   "random_seed": 1010,
-  "instruction": "Two blocks look alike. Put the one further from the robot in the right bin, the nearer one in the left bin.",
+  "instruction": "The colours are misleading, ignore them. Put the block that is FURTHER from the robot base into the right bin, and the nearer block into the left bin.",
   "objects": [
     {
       "name": "target_box_a",
@@ -61,8 +61,8 @@
   },
   "expected_goal": {
     "placement": {
-      "target_box_a": "zone_1",
-      "target_box_b": "zone_2"
+      "target_box_b": "zone_1",
+      "target_box_a": "zone_2"
     },
     "unmoved": []
   },
@@ -72,5 +72,5 @@
     "max_wall_s": 600.0
   },
   "split": "train",
-  "instance_sha256": "7878e0183e659a25449094817343abec714e8d77cb1e9abe8cfd003d43f622a4"
+  "instance_sha256": "d2ef45baaeb94e083598d42bbdc10124bd52a0e30ffad7e7f8e9a49572d8cfd9"
 }

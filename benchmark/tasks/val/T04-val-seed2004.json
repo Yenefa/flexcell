@@ -2,7 +2,7 @@
   "task_id": "T04-val-seed2004",
   "template_id": "T04_duplicates",
   "random_seed": 2004,
-  "instruction": "Two blocks look alike. Put the one further from the robot in the right bin, the nearer one in the left bin.",
+  "instruction": "The colours are misleading, ignore them. Put the block that is FURTHER from the robot base into the right bin, and the nearer block into the left bin.",
   "objects": [
     {
       "name": "target_box_a",
@@ -61,8 +61,8 @@
   },
   "expected_goal": {
     "placement": {
-      "target_box_a": "zone_1",
-      "target_box_b": "zone_2"
+      "target_box_b": "zone_1",
+      "target_box_a": "zone_2"
     },
     "unmoved": []
   },
@@ -72,5 +72,5 @@
     "max_wall_s": 600.0
   },
   "split": "val",
-  "instance_sha256": "3a60c0d4a88a37e7b9b7dd9455f2e07efa106ca2db15bea3ea49ec4faabd0f47"
+  "instance_sha256": "b0226bfec20b442b1d6a4aa635013767429749efd7e17b7aec1aa74ffc275171"
 }
