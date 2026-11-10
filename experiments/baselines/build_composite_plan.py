@@ -32,6 +32,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import baseline_a_composite as ba
+import spread_destinations as sd
 
 MAX_STAGES = 8
 
@@ -40,7 +41,7 @@ def build_plan(spec, clearance_m=None, tolerance_m=0.02):
     if clearance_m is None:
         edge = spec["objects"][0]["size"][0]
         clearance_m = min(CLEARANCE_MAX, max(CLEARANCE_MIN, round(CLEARANCE_FACTOR * edge, 4)))
-    stages = ba.plan_from_spec(spec)
+    stages = sd.spread(ba.plan_from_spec(spec))
     if not stages:
         raise ValueError("template produced no stages")
     if len(stages) > MAX_STAGES:

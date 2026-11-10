@@ -1,0 +1,28 @@
+{
+  "agent_plan": {
+    "moves": [
+      {
+        "object": "target_box_b",
+        "zone": "zone_2",
+        "why": "left bin in robot frame (+y left)"
+      },
+      {
+        "object": "target_box_b",
+        "zone": "zone_1",
+        "why": "then move blue block to right bin (-y right), final position"
+      }
+    ],
+    "unmoved": [
+      "target_box_a"
+    ],
+    "confidence": "high",
+    "uncertainty": ""
+  },
+  "problems": [],
+  "raw_reply": "{\"moves\":[{\"object\":\"target_box_b\",\"zone\":\"zone_2\",\"why\":\"left bin in robot frame (+y left)\"},{\"object\":\"target_box_b\",\"zone\":\"zone_1\",\"why\":\"then move blue block to right bin (-y right), final position\"}],\"unmoved\":[\"target_box_a\"],\"confidence\":\"high\",\"uncertainty\":\"\"}",
+  "requested_model": "deepseek-flash",
+  "base_url": "https://api.deepseek.com",
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "key_fingerprint": "2caaf9b9"
+}

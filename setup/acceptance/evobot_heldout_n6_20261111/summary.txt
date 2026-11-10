@@ -1,0 +1,18 @@
+id                   template                     outcome   stages   passed failed_clauses
+HO-008a467cde3f      T02_exclusion                0         1        True   
+HO-13c5efca228e      T03_ordered                  1         1        True   
+HO-3654cf0ad144      T01_multi_object_sorting     0         2        True   
+HO-387696edc61f      T06_revisit                  0         2        True   
+HO-38e7aabc1d67      T04_duplicates               0         2        True   
+HO-3bd4abddd259      T01_multi_object_sorting     0         2        True   
+
+held-out instances        : 6
+attempted                 : 6
+INDEPENDENTLY VERIFIED    : 6/6 (graded on measured state)
+  clean PASS              : 5
+  DISPUTED PASS           : 1 - executor reported failure
+       HO-13c5efca228e T03_ordered outcome= 1
+graded success rate       : 100%
+CLEAN success rate        : 83%
+FALSE SUCCESS RATE        : 0/6 = 0.0%
+templates tested          : ['T01_multi_object_sorting', 'T02_exclusion', 'T03_ordered', 'T04_duplicates', 'T06_revisit']

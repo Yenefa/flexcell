@@ -32,6 +32,8 @@ sys.path.insert(0, str(WT / "runtime" / "planner"))
 sys.path.insert(0, str(WT / "experiments" / "pilot-001"))
 
 import agent_planner as ap
+sys.path.insert(0, str(WT / "experiments" / "baselines"))
+import spread_destinations as sd
 
 SCENE_FILE = WT / "benchmark" / "generators" / "generate.py"
 
@@ -82,7 +84,7 @@ def main(argv=None):
         "initial_objects": [{"object_name": o["name"],
                              "position": list(o["initial_pose"][:3])}
                             for o in spec["objects"]],
-        "stages": comp["stages"],
+        "stages": sd.spread(comp["stages"]),
         "final_empty_positions": [],
         "position_tolerance_m": 0.02,
         "clearance_m": min(CLEARANCE_MAX, max(CLEARANCE_MIN, round(
