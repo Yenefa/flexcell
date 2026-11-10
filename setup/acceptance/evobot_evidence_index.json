@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 20,
-  "live": 13,
+  "batches": 21,
+  "live": 14,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -60,6 +60,22 @@
         "agent_uid_read_blocked": true,
         "sealed_answers": 58,
         "isolation_kind": "OS permissions; not a kernel namespace"
+      }
+    },
+    {
+      "batch": "evobot_lesson_routing_20261111",
+      "verified": "PASS",
+      "rung": "Plan-level analysis (mechanism found; NO robot run; transfer NOT observed)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_LESSON_ROUTING_MECHANISM_VERIFIED",
+        "pairs": 16,
+        "byte_identical_plans": 16,
+        "c_received_a_lesson": 16,
+        "planner_actionable_lessons": "1 of 4",
+        "token_overhead": "+3%",
+        "transfer": "NOT OBSERVED",
+        "false_success_rate": 0.0
       }
     },
     {

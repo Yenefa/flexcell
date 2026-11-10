@@ -1,0 +1,16 @@
+PLANNER_ACTIONABLE Declare exactly the objects present in the world. An asset that exists elsewhere is not an o
+                   -> maps onto a field the planner controls
+HARNESS            When one object is moved twice in a chain, the next stage arrives before the previous skill 
+                   -> describes a runtime/harness concern outside the planner entirely
+HARNESS            Give each stacked run a valid distinct domain id; reusing one domain exhausts participant sl
+                   -> describes a runtime/harness concern outside the planner entirely
+DOWNSTREAM_CODE    Two objects sent to the same bin need distinct landing spots inside it, not the same centre 
+                   -> describes a landing/spread detail computed AFTER planning; the planner emits zone names only, so this cannot change a plan
+
+validated lessons: 4
+  DOWNSTREAM_CODE        1
+  HARNESS                2
+  PLANNER_ACTIONABLE     1
+
+ACTIONABLE FRACTION: 1/4
+At most 1 of 4 lessons could ever move a plan.

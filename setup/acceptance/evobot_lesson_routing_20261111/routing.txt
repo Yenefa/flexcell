@@ -1,0 +1,12 @@
+CONSUMER       DONE  LESSON
+planner        yes   Declare exactly the objects present in the world. An asset that exists elsewhe
+harness        yes   When one object is moved twice in a chain, the next stage arrives before the p
+harness        yes   Give each stacked run a valid distinct domain id; reusing one domain exhausts 
+spread_policy  yes   Two objects sent to the same bin need distinct landing spots inside it, not th
+
+  harness        2
+  planner        1
+  spread_policy  1
+
+lessons that belong in the PLANNER PROMPT: 1/4
+The rest are already implemented in code, where they can actually act.

@@ -19,7 +19,7 @@ python3 -m pytest benchmark/tests -q              # 116 个离线测试
 | 4 | Develop | **未达成** | 没有 Agent 自行创建过新技能 |
 | 5 | Improve | **未达成** | 提案→门禁链条已打通（`evobot_proposal_loop`），但唯一提案是**事后重建**（`ALREADY_SATISFIED`） |
 | 6 | Learn | **骨架** | `evobot_baseline_c_skeleton`：经验库+诊断+回归门，Unit Tested |
-| 7 | Transfer | **未观察到** | `evobot_unseen_bc`：计划字节全同，经验无效果 |
+| 7 | Transfer | **未观察到（机制已查明）** | `evobot_lesson_routing`（**仅计划层，未跑机器人**）：4 条教训仅 1 条属 planner，且 planner 本就满足；**16/16 计划字节相同，+3% token 纯开销** |
 | 8 | Generalize | **部分** | `evobot_unseen_n6`：未见任务类型上规划 6/6，干净完成 3/6 |
 
 ## 关键数字（全部来自归档证据）
