@@ -89,6 +89,7 @@ RUNGS = {
     "evobot_plan_judge_20261111": "Negative (judge 100% in-sample, 71.9% held-out; not adopted as the missing gate)",
     "evobot_libero_official_20261111": "External benchmark OFFICIAL (LIBERO pinned 8f1084e, MIT; loads+steps+grades in its own env; no agent control yet)",
     "evobot_libero_adapter_20261111": "LIBERO adapter (pose->delta; all phases run; grasp fails - object never moves; reach probe rules out reach limit)",
+    "evobot_libero_solved_20261111": "OFFICIAL EXTERNAL TASK COMPLETED (LIBERO check_success=True; scripted controller; oracle perception)",
 }
 
 

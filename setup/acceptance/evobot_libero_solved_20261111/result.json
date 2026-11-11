@@ -1,0 +1,26 @@
+{
+  "task": "pick_up_the_alphabet_soup_and_place_it_in_the_basket",
+  "suite": "libero_object",
+  "index": 0,
+  "phase_success": true,
+  "official_success": true,
+  "log": [
+    "goal region basket_1_contain_region at [0.015, 0.252, 0.107]",
+    "object alphabet_soup_1_main at [-0.12, -0.24, 0.015]",
+    "target basket_1_main at [0.015, 0.252, 0.107]",
+    "approach reached in 19 steps (err 0.012)",
+    "descend reached in 5 steps (err 0.035)",
+    "close gripper: 20 steps at gripper +1.0",
+    "lift reached in 12 steps (err 0.011)",
+    "transport reached in 39 steps (err 0.009)",
+    "lower reached in 6 steps (err 0.030)",
+    "object while carried at [0.018, 0.258, 0.118]",
+    "open gripper: 20 steps at gripper -1.0",
+    "settle trace: [{\"step\": 0, \"obj_xy_z\": [0.021, 0.26, 0.055], \"success\": true}, {\"step\": 20, \"obj_xy_z\": [0.021, 0.26, 0.055], \"success\": true}, {\"step\": 40, \"obj_xy_z\": [0.021, 0.26, 0.055], \"success\": true}, {\"step\": 60, \"obj_xy_z\": [0.021, 0.26, 0.055], \"success\": true}, {\"step\": 80, \"obj_xy_z\": [0.021, 0.26, 0.055], \"success\": true}, {\"step\": 100, \"obj_xy_z\": [0.021, 0.26, 0.055], \"success\": true}]",
+    "success first true at settle step: 0",
+    "retreat reached in 14 steps (err 0.009)",
+    "object final at [0.021, 0.26, 0.055] ; distance to basket_1_main = 0.052 m"
+  ],
+  "perception": "ORACLE (simulator state), not camera",
+  "policy": "scripted phase controller over the OSC delta adapter"
+}

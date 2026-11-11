@@ -15,8 +15,8 @@
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 54,
-    "batches_live": 47,
+    "batches_total": 55,
+    "batches_live": 48,
     "batches_superseded": 7,
     "verifier_failures": 2,
     "live_batches": [
@@ -139,6 +139,11 @@
         "batch": "evobot_libero_official_20261111",
         "verified": "PASS",
         "rung": "External benchmark OFFICIAL (LIBERO pinned 8f1084e, MIT; loads+steps+grades in its own env; no agent control yet)"
+      },
+      {
+        "batch": "evobot_libero_solved_20261111",
+        "verified": "PASS",
+        "rung": "OFFICIAL EXTERNAL TASK COMPLETED (LIBERO check_success=True; scripted controller; oracle perception)"
       },
       {
         "batch": "evobot_native_honesty_20261111",

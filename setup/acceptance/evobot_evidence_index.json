@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 54,
-  "live": 47,
+  "batches": 55,
+  "live": 48,
   "superseded": 7,
   "verifier_failures": 2,
   "rows": [
@@ -161,7 +161,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 46,
+        "live_batches": 47,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",
@@ -465,6 +465,36 @@
         "success_with_idle_policy": false,
         "proves": "official task loads in the official environment and grades with the official predicate",
         "does_not_prove": "that EvoBot controls this environment"
+      }
+    },
+    {
+      "batch": "evobot_libero_solved_20261111",
+      "verified": "PASS",
+      "rung": "OFFICIAL EXTERNAL TASK COMPLETED (LIBERO check_success=True; scripted controller; oracle perception)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_OFFICIAL_EXTERNAL_TASK_COMPLETED",
+        "benchmark": "LIBERO",
+        "classification": {
+          "official": true,
+          "adapted": false,
+          "native": false
+        },
+        "task": "pick_up_the_alphabet_soup_and_place_it_in_the_basket",
+        "official_success": true,
+        "object_moved_across_the_table": true,
+        "grasp_heights_that_work": [
+          0.02,
+          0.04,
+          0.06
+        ],
+        "root_causes_found_by_experiment": [
+          "gripper sign convention (+1 closes, not opens)",
+          "aimed at basket body z=0.035 instead of the official contain region z=0.1068"
+        ],
+        "policy": "scripted phase controller - NOT an LLM planner result",
+        "perception": "ORACLE",
+        "evobot_gazebo_stack_touched": false
       }
     },
     {
