@@ -103,3 +103,82 @@ the evidence all along: it was held, which is only possible if something was sti
 This does not change the finding. The server is genuinely absent, the wait loop genuinely cannot
 succeed, and the smoke test would have timed out regardless. But the diagnosis cost a healthy run,
 and that is worth recording next to the error it was supposed to explain.
+---
+
+# RETRACTION: the server exists — this document's central claim is WRONG
+
+**The independent audit refuted this in full and it is right. The `run_composite` action server
+exists. Nothing is missing.** I verified the refutation myself before accepting it.
+
+## The error
+
+I grepped for a component named `composite_server`. There is none — so I concluded the server was
+missing. **The server is `task_fsm_server`, and it registers `RunComposite`:**
+
+```python
+# src/flexcell/flexcell_skills/flexcell_skills/task_fsm_server.py:288-293
+self._composite_server = ActionServer(
+    self, RunComposite, 'run_composite',
+    execute_callback=self._execute_composite, ...)
+```
+
+I read these lines myself and confirmed they exist. So:
+
+| My check | What it actually established |
+| --- | --- |
+| executables list has no `composite_server` | nothing — the node is named `task_fsm_server` |
+| `trusted_sim.launch.py` mentions `composite` 0 times | nothing — the launch starts `task_fsm_server`, so the *attribute* name never appears |
+| live stack advertised 7 actions, no `/run_composite` | **that my sampling was wrong**, not that the action was absent |
+
+The third is the one that should have stopped me. The auditor started a stack and saw `/run_composite`
+advertised **within 2 seconds**, alongside 13 actions, with node `/task_fsm_server`. My snapshot listed 7.
+**I treated a name-matching failure as evidence about the world, three times in a row, and never once
+asked the interface who implements it.**
+
+## The archive corroborates the auditor
+
+`HO-0dcde4dc0f5a/task.out` records:
+
+```
+RESULT {"ok": true, "outcome": 0, "error_code": 0, "run_id": "composite-8336b65a86ac4792",
+        "completed_stage_ids": ["target_box_b-0","target_box_a-1"], ...}
+```
+
+`run_id` prefix `composite-` and `completed_stage_ids` are produced only by `_execute_composite`. So the
+16 archived runs genuinely went through `RunComposite` — which also means my §1 claim that they are arm
+B is compatible with them having used the same executor A-prime would use. **Fairness condition 3 holds**
+for the comparison; I had it right and then broke it myself.
+
+## What actually killed the run
+
+**Not a missing server. I killed it.** I misjudged the batch as dead (§7), started killing simulator
+nodes, and the auditor — reading my stop order — killed its own stack too. The smoke test did not fail
+because of infrastructure. It failed because two operators killed it.
+
+## Status of A-prime execution
+
+| Claim | Status |
+| --- | --- |
+| A-prime execution blocked by missing infrastructure | **FALSE — WITHDRAWN** |
+| A-prime execution | **NOT RUN — blocked only by our own kills; re-run authorised** |
+| Plan-level results (16/16 equivalence) | **UNAFFECTED** |
+
+## The fifth error, and the corrective that would have caught four of five
+
+| # | Error | Shape |
+| --- | --- | --- |
+| 1 | "four heights stall" | read a value without reading the field that contradicted it |
+| 2 | "H0150 is face engagement" | read a z-coordinate without reading the block pose |
+| 3 | "A-prime is vacuous" | enumerated `benchmark/tasks/` and concluded about the repo |
+| 4 | "the batch died" | matched a process name and concluded about liveness |
+| 5 | "the server is missing" | matched a file name and concluded about capability |
+
+**#4 and #5 are the same error twice: I resolved labels and inferred capabilities.** The corrective
+that catches both, and would have caught #3 as well:
+
+> **Resolve the capability, not the label.** Ask *"who implements RunComposite?"* — one grep for
+> `ActionServer.*RunComposite` finds `task_fsm_server.py:289`. Ask *"is anything holding the lock?"* —
+> `fuser` names the pid. Never ask *"is there a file called X?"* and conclude about the system.
+
+This document is left in place, unedited above this line, because a retraction that deletes its own
+error is worth nothing.
