@@ -1,0 +1,441 @@
+{
+  "index": 1,
+  "task": "pick_up_the_cream_cheese_and_place_it_in_the_basket",
+  "suite": "libero_object",
+  "obj": "cream_cheese_1",
+  "region": "basket_1_contain_region",
+  "obj_body": "cream_cheese_1_main",
+  "table_top_z": null,
+  "closing_axis_xy": [
+    -0.3518,
+    -0.9361,
+    0.0
+  ],
+  "gripper": {
+    "finger_joints": [
+      {
+        "name": "gripper0_finger_joint1",
+        "range": [
+          0.0,
+          0.04
+        ]
+      },
+      {
+        "name": "gripper0_finger_joint2",
+        "range": [
+          -0.04,
+          0.0
+        ]
+      }
+    ],
+    "max_opening_m": 0.08
+  },
+  "init_pose": {
+    "obj_body_pos": [
+      0.04607,
+      -0.10265,
+      0.0
+    ],
+    "visual": {
+      "vertex_derived": true,
+      "n_verts": 48711,
+      "z": [
+        -0.04172,
+        0.0415
+      ],
+      "height_m": 0.08321,
+      "outer_diameter_m": 0.04659,
+      "outer_radius_m": 0.0233,
+      "rim_radius_top_band_m": [
+        0.00011,
+        0.02321
+      ],
+      "radial_profile": [
+        {
+          "z": -0.03652,
+          "r_min": 0.00021,
+          "r_max": 0.0233,
+          "r_mean": 0.01666,
+          "n": 10230
+        },
+        {
+          "z": -0.02611,
+          "r_min": 0.00912,
+          "r_max": 0.02291,
+          "r_mean": 0.01691,
+          "n": 4304
+        },
+        {
+          "z": -0.01571,
+          "r_min": 0.00922,
+          "r_max": 0.0227,
+          "r_mean": 0.01695,
+          "n": 4647
+        },
+        {
+          "z": -0.00531,
+          "r_min": 0.00922,
+          "r_max": 0.02237,
+          "r_mean": 0.01726,
+          "n": 5493
+        },
+        {
+          "z": 0.00509,
+          "r_min": 0.00922,
+          "r_max": 0.02234,
+          "r_mean": 0.01722,
+          "n": 5578
+        },
+        {
+          "z": 0.01549,
+          "r_min": 0.00924,
+          "r_max": 0.02254,
+          "r_mean": 0.01673,
+          "n": 4969
+        },
+        {
+          "z": 0.0259,
+          "r_min": 0.00921,
+          "r_max": 0.0228,
+          "r_mean": 0.01712,
+          "n": 4533
+        },
+        {
+          "z": 0.0363,
+          "r_min": 0.00011,
+          "r_max": 0.02321,
+          "r_mean": 0.01614,
+          "n": 8957
+        }
+      ]
+    },
+    "collision": {
+      "n_geoms": 1,
+      "axis_clearance_bands": [
+        {
+          "band": "top_4mm",
+          "n": 1,
+          "axis_clearance_m": 0.0,
+          "max_axis_clearance_m": 0.0
+        },
+        {
+          "band": "top_10mm",
+          "n": 1,
+          "axis_clearance_m": 0.0,
+          "max_axis_clearance_m": 0.0
+        },
+        {
+          "band": "mid_10mm",
+          "n": 1,
+          "axis_clearance_m": 0.0,
+          "max_axis_clearance_m": 0.0
+        }
+      ],
+      "z": [
+        -0.00894,
+        0.00894
+      ],
+      "height_m": 0.01788,
+      "top_rim_z": 0.00894,
+      "n_top_plates": 1,
+      "top_plate_radius_m": 0.0,
+      "top_plate_radius_range_m": [
+        0.04587,
+        0.04587
+      ],
+      "top_plate_thickness_m": 0.00894,
+      "outer_diameter_m": 0.09174,
+      "contype_any": [
+        1
+      ],
+      "conaffinity_any": [
+        1
+      ],
+      "boxes": [
+        {
+          "geom": 74,
+          "z": [
+            -0.00894,
+            0.00894
+          ],
+          "radius_center": 0.0,
+          "radius_range": [
+            0.04587,
+            0.04587
+          ],
+          "size": [
+            0.00894,
+            0.02134,
+            0.04061
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        }
+      ]
+    },
+    "controller": {
+      "z_lo": -0.04791,
+      "z_hi": 0.04769,
+      "implied_height_m": 0.09559,
+      "grasp_z": -0.00011
+    },
+    "pads": {
+      "pad_z_range_world": [
+        0.27168,
+        0.28831
+      ],
+      "pad_z_offset_from_eef": [
+        -0.00471,
+        0.01191
+      ],
+      "pad_half_height": 0.00831,
+      "pad_gap_m": 0.03991,
+      "n_geoms": 2
+    },
+    "sites": [
+      {
+        "name": "cream_cheese_1_default_site",
+        "local": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "world": [
+          0.04607,
+          -0.10265,
+          0.0
+        ]
+      }
+    ],
+    "gripper_open_qpos_gap": 0.04167,
+    "eef": [
+      -0.13332,
+      0.00042,
+      0.2764
+    ]
+  },
+  "settled": {
+    "obj_body_pos": [
+      0.04607,
+      -0.10265,
+      0.00892
+    ],
+    "visual": {
+      "vertex_derived": true,
+      "n_verts": 48711,
+      "z": [
+        -0.0328,
+        0.05042
+      ],
+      "height_m": 0.08321,
+      "outer_diameter_m": 0.04659,
+      "outer_radius_m": 0.0233,
+      "rim_radius_top_band_m": [
+        0.00011,
+        0.02321
+      ],
+      "radial_profile": [
+        {
+          "z": -0.02759,
+          "r_min": 0.00021,
+          "r_max": 0.0233,
+          "r_mean": 0.01666,
+          "n": 10230
+        },
+        {
+          "z": -0.01719,
+          "r_min": 0.00912,
+          "r_max": 0.02291,
+          "r_mean": 0.01691,
+          "n": 4304
+        },
+        {
+          "z": -0.00679,
+          "r_min": 0.00922,
+          "r_max": 0.0227,
+          "r_mean": 0.01695,
+          "n": 4647
+        },
+        {
+          "z": 0.00361,
+          "r_min": 0.00922,
+          "r_max": 0.02237,
+          "r_mean": 0.01726,
+          "n": 5493
+        },
+        {
+          "z": 0.01401,
+          "r_min": 0.00922,
+          "r_max": 0.02234,
+          "r_mean": 0.01722,
+          "n": 5578
+        },
+        {
+          "z": 0.02442,
+          "r_min": 0.00924,
+          "r_max": 0.02254,
+          "r_mean": 0.01673,
+          "n": 4969
+        },
+        {
+          "z": 0.03482,
+          "r_min": 0.00921,
+          "r_max": 0.0228,
+          "r_mean": 0.01712,
+          "n": 4533
+        },
+        {
+          "z": 0.04522,
+          "r_min": 0.00011,
+          "r_max": 0.02321,
+          "r_mean": 0.01614,
+          "n": 8957
+        }
+      ]
+    },
+    "collision": {
+      "n_geoms": 1,
+      "axis_clearance_bands": [
+        {
+          "band": "top_4mm",
+          "n": 1,
+          "axis_clearance_m": 0.0,
+          "max_axis_clearance_m": 0.0
+        },
+        {
+          "band": "top_10mm",
+          "n": 1,
+          "axis_clearance_m": 0.0,
+          "max_axis_clearance_m": 0.0
+        },
+        {
+          "band": "mid_10mm",
+          "n": 1,
+          "axis_clearance_m": 0.0,
+          "max_axis_clearance_m": 0.0
+        }
+      ],
+      "z": [
+        -1e-05,
+        0.01786
+      ],
+      "height_m": 0.01787,
+      "top_rim_z": 0.01786,
+      "n_top_plates": 1,
+      "top_plate_radius_m": 0.0,
+      "top_plate_radius_range_m": [
+        0.04587,
+        0.04587
+      ],
+      "top_plate_thickness_m": 0.00894,
+      "outer_diameter_m": 0.09174,
+      "contype_any": [
+        1
+      ],
+      "conaffinity_any": [
+        1
+      ],
+      "boxes": [
+        {
+          "geom": 74,
+          "z": [
+            -1e-05,
+            0.01786
+          ],
+          "radius_center": 0.0,
+          "radius_range": [
+            0.04587,
+            0.04587
+          ],
+          "size": [
+            0.00894,
+            0.02134,
+            0.04061
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        }
+      ]
+    },
+    "controller": {
+      "z_lo": -0.03899,
+      "z_hi": 0.05661,
+      "implied_height_m": 0.09559,
+      "grasp_z": 0.00881
+    },
+    "pads": {
+      "pad_z_range_world": [
+        0.26649,
+        0.28342
+      ],
+      "pad_z_offset_from_eef": [
+        -0.00487,
+        0.01206
+      ],
+      "pad_half_height": 0.00846,
+      "pad_gap_m": 0.06775,
+      "n_geoms": 2
+    },
+    "sites": [
+      {
+        "name": "cream_cheese_1_default_site",
+        "local": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "world": [
+          0.04607,
+          -0.10265,
+          0.00892
+        ]
+      }
+    ],
+    "eef": [
+      -0.13857,
+      0.00047,
+      0.27136
+    ],
+    "contacts": [
+      0,
+      4
+    ],
+    "obj_geoms_note": [
+      {
+        "geom": 73,
+        "type": "mesh",
+        "contype": 0,
+        "conaffinity": 0,
+        "rbound": 0.0478
+      }
+    ]
+  },
+  "drop_m": 0.00892,
+  "drop_xy_m": 0.0,
+  "verdict_numbers": {
+    "ctrl_grasp_z_at_init_pose": -0.00011,
+    "settled_collision_rim_z": 0.01786,
+    "settled_visual_rim_z": 0.05042,
+    "ctrl_grasp_z_minus_settled_collision_rim_m": -0.01797,
+    "ctrl_grasp_z_minus_settled_visual_rim_m": -0.05053,
+    "max_opening_minus_collision_outer_diameter_m": -0.01174,
+    "max_opening_minus_visual_outer_diameter_m": 0.03341,
+    "ctrl_implied_height_minus_true_collision_height_m": 0.07772,
+    "bound_extends_below_table_at_init": true,
+    "bound_extends_below_table_at_settled": true,
+    "jaw_half_clearance_m": 0.03388,
+    "axis_clearance_top_4mm_m": 0.0,
+    "axis_clearance_mid_10mm_m": 0.0,
+    "centred_grasp_reaches_material_top_band": true,
+    "centred_grasp_reaches_material_mid_band": true,
+    "top_band_min_radius_m": 0.04587,
+    "top_band_is_ring": true,
+    "collision_outer_diameter_m": 0.09174,
+    "collision_height_m": 0.01787
+  },
+  "eef_pose_at_init": [
+    -0.13332,
+    0.00042,
+    0.2764
+  ]
+}

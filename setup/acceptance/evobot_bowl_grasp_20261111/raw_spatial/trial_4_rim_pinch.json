@@ -1,0 +1,117 @@
+{
+  "index": 4,
+  "task": "pick_up_the_black_bowl_in_the_top_drawer_of_the_wooden_cabinet_and_place_it_on_the_plate",
+  "config": "rim_pinch",
+  "obj": "akita_black_bowl_1",
+  "obj_body": "akita_black_bowl_1_main",
+  "z_target": 1.10669,
+  "eef_at_grasp": [
+    0.08061,
+    -0.17639,
+    1.137
+  ],
+  "eef_z_minus_target_m": 0.03031,
+  "xy_target": [
+    0.06868,
+    -0.17415
+  ],
+  "rim_offset_m": 0.04712,
+  "closing_axis_xy": [
+    -0.3494,
+    -0.937,
+    0.0
+  ],
+  "gap_open_m": 0.08007,
+  "gap_after_close_m": 0.00168,
+  "gap_during_lift_m": 0.001,
+  "pad_gap_open_m": 0.06885,
+  "pad_gap_after_close_m": 0.00454,
+  "pad_z_range_world_at_grasp": [
+    1.13176,
+    1.14942
+  ],
+  "contacts_obj_finger_after_close": 0,
+  "contacts_obj_other_after_close": 20,
+  "contacts_obj_finger_during_lift": 0,
+  "contacts_obj_other_during_lift": 20,
+  "obj_before": [
+    0.08514,
+    -0.13,
+    1.06256
+  ],
+  "obj_after_close": [
+    0.08514,
+    -0.13,
+    1.06256
+  ],
+  "obj_after": [
+    0.08514,
+    -0.13,
+    1.06256
+  ],
+  "obj_xy_displacement_m": 0.0,
+  "lift_m": 0.0,
+  "peak_lift_m": 0.0,
+  "carried": false,
+  "obj_z_trace": [
+    1.06256,
+    1.06256,
+    1.06256,
+    1.06256,
+    1.06256,
+    1.06256,
+    1.06256,
+    1.06256,
+    1.06256,
+    1.06256
+  ],
+  "place": null,
+  "geom": {
+    "ctrl_at_init": {
+      "z_lo": 1.09502,
+      "z_hi": 1.26313,
+      "implied_height_m": 0.16812,
+      "grasp_z": 1.17907
+    },
+    "ctrl_at_settled": {
+      "z_lo": 1.00695,
+      "z_hi": 1.17506,
+      "implied_height_m": 0.16812,
+      "grasp_z": 1.091
+    },
+    "settled_collision": {
+      "z": [
+        1.06415,
+        1.11469
+      ],
+      "height_m": 0.05054,
+      "top_rim_z": 1.11469,
+      "n_top_plates": 19,
+      "top_plate_radius_m": 0.04712,
+      "top_plate_thickness_m": 0.00125,
+      "outer_diameter_m": 0.1079
+    },
+    "settled_visual": {
+      "z": [
+        1.03551,
+        1.14734
+      ],
+      "height_m": 0.11183,
+      "outer_diameter_m": 0.15245
+    },
+    "pads_at_settle": {
+      "pad_z_range_world": [
+        1.16802,
+        1.18494
+      ],
+      "pad_z_offset_from_eef": [
+        -0.00487,
+        0.01205
+      ],
+      "pad_half_height": 0.00846,
+      "pad_gap_m": 0.06784,
+      "n_geoms": 2
+    }
+  },
+  "terminated": false
+}

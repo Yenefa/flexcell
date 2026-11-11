@@ -1,0 +1,139 @@
+{
+  "task": "pick_up_the_cream_cheese_and_place_it_in_the_basket",
+  "index": 1,
+  "init_idx": 2,
+  "clearance": 0.04,
+  "settle": {
+    "dz": 0.0089,
+    "dxy": 0.0
+  },
+  "landmarks": {
+    "extent_true": [
+      -0.0,
+      0.0179
+    ],
+    "height_true": 0.0179,
+    "extent_rbound": [
+      -0.039,
+      0.0566
+    ],
+    "grasp_z_rbound_frac0.5": 0.0088,
+    "grasp_z_true_mid": 0.0089,
+    "hand_clearance_below_grip_m": 0.0363,
+    "tall_object": false,
+    "neck_z": 0.0089,
+    "neck_width_xy": [
+      0.0812,
+      0.0427
+    ],
+    "neck_slab": [
+      0.01,
+      0.015
+    ],
+    "grasp_rule": "true_mid (object shorter than 2x hand clearance: no neck to reach)",
+    "centre": [
+      0.0521,
+      -0.1013,
+      0.0089
+    ]
+  },
+  "descent": {
+    "reached": false,
+    "eef_z": 0.0423,
+    "target_z": 0.0089,
+    "gap_m": 0.0334
+  },
+  "grasp_pose": {
+    "eef": [
+      0.0727,
+      -0.1033,
+      0.0423
+    ],
+    "target_z": 0.0089,
+    "obj": [
+      0.0521,
+      -0.1013,
+      0.0089
+    ],
+    "basket": {
+      "body_pos": [
+        0.00603,
+        0.25571,
+        -0.00458
+      ],
+      "aabb": [
+        [
+          -0.07529,
+          0.16971,
+          -0.00429
+        ],
+        [
+          0.0869,
+          0.3431,
+          0.14263
+        ]
+      ],
+      "rim_z": 0.14263,
+      "centre_xy": [
+        0.0058,
+        0.2564
+      ]
+    }
+  },
+  "lift": {
+    "dz": 0.0,
+    "carried": false,
+    "hang_below_grip_m": -0.1703,
+    "obj_after": [
+      0.0521,
+      -0.1013,
+      0.0089
+    ]
+  },
+  "official_success": false,
+  "note": "grasp did not carry",
+  "predicate_final": {
+    "site": [
+      0.00603,
+      0.25605,
+      0.06727
+    ],
+    "site_size": [
+      0.06108,
+      0.06108,
+      0.06949
+    ],
+    "lb": [
+      -0.05505,
+      0.1953,
+      -0.01252
+    ],
+    "ub": [
+      0.06711,
+      0.3168,
+      0.13705
+    ],
+    "obj_body_pos": [
+      0.05209,
+      -0.10132,
+      0.00892
+    ],
+    "inside": false,
+    "margin": [
+      0.01503,
+      -0.29663,
+      0.02144
+    ],
+    "basket_pos": [
+      0.00603,
+      0.25571,
+      -0.00458
+    ],
+    "check_success": false,
+    "eef": [
+      0.07176,
+      -0.10314,
+      0.17926
+    ]
+  }
+}

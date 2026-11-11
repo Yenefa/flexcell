@@ -1,0 +1,271 @@
+{
+  "variant": "rbound_mid",
+  "index": 4,
+  "task": "pick_up_the_ketchup_and_place_it_in_the_basket",
+  "obj": "ketchup_1",
+  "settle": {
+    "t0_aabb": [
+      [
+        -0.1376,
+        -0.2677,
+        -0.0374
+      ],
+      [
+        -0.1009,
+        -0.2114,
+        0.1082
+      ]
+    ],
+    "settled_aabb": [
+      [
+        -0.1376,
+        -0.2677,
+        -0.0
+      ],
+      [
+        -0.1009,
+        -0.2114,
+        0.1456
+      ]
+    ],
+    "t0_center": [
+      -0.12,
+      -0.24,
+      0.035
+    ],
+    "settled_center": [
+      -0.12,
+      -0.24,
+      0.0724
+    ],
+    "settle_dz": 0.0374,
+    "settle_dxy": 0.0,
+    "trace": [
+      {
+        "k": 1,
+        "dz": 0.0559,
+        "dxy": 0.0,
+        "aabb_z": [
+          0.0185,
+          0.1641
+        ]
+      },
+      {
+        "k": 2,
+        "dz": 0.0926,
+        "dxy": 0.0,
+        "aabb_z": [
+          0.0551,
+          0.2008
+        ]
+      },
+      {
+        "k": 3,
+        "dz": 0.1046,
+        "dxy": 0.0,
+        "aabb_z": [
+          0.0672,
+          0.2128
+        ]
+      },
+      {
+        "k": 4,
+        "dz": 0.0921,
+        "dxy": 0.0,
+        "aabb_z": [
+          0.0547,
+          0.2003
+        ]
+      },
+      {
+        "k": 6,
+        "dz": 0.0362,
+        "dxy": 0.0,
+        "aabb_z": [
+          -0.0012,
+          0.1444
+        ]
+      },
+      {
+        "k": 9,
+        "dz": 0.0374,
+        "dxy": 0.0,
+        "aabb_z": [
+          -0.0,
+          0.1456
+        ]
+      },
+      {
+        "k": 13,
+        "dz": 0.0374,
+        "dxy": 0.0,
+        "aabb_z": [
+          -0.0,
+          0.1456
+        ]
+      },
+      {
+        "k": 25,
+        "dz": 0.0374,
+        "dxy": 0.0,
+        "aabb_z": [
+          -0.0,
+          0.1456
+        ]
+      }
+    ]
+  },
+  "landmarks": {
+    "extent_true": [
+      -0.0,
+      0.1456
+    ],
+    "height_true": 0.1456,
+    "extent_rbound": [
+      -0.032,
+      0.1552
+    ],
+    "grasp_z_rbound_frac0.5": 0.0616,
+    "grasp_z_true_mid": 0.0728,
+    "neck_z": 0.1125,
+    "neck_width_xy": [
+      0.0363,
+      0.033
+    ],
+    "neck_slab": [
+      0.11,
+      0.115
+    ],
+    "centre": [
+      -0.12,
+      -0.24,
+      0.0724
+    ]
+  },
+  "plan": {
+    "approach": "top",
+    "pregrasp": [
+      -0.12,
+      -0.24,
+      0.2656
+    ],
+    "grasp": [
+      -0.12,
+      -0.24,
+      0.0616
+    ],
+    "yaw_deg": 0.0,
+    "pitch_y_deg": 0.0
+  },
+  "events": [
+    {
+      "ev": "pregrasp",
+      "ok": true,
+      "eef": [
+        -0.1211,
+        -0.2293,
+        0.2654
+      ]
+    },
+    {
+      "ev": "grasp_pose",
+      "reached": false,
+      "eef": [
+        -0.0848,
+        -0.2527,
+        0.108
+      ],
+      "target": [
+        -0.12,
+        -0.24,
+        0.0616
+      ],
+      "obj": [
+        -0.1076,
+        -0.2497,
+        0.0695
+      ],
+      "gcon": [
+        [
+          "ketchup_1_g4",
+          "gripper0_hand_collision",
+          -0.00203
+        ],
+        [
+          "ketchup_1_g5",
+          "gripper0_hand_collision",
+          -0.0017
+        ],
+        [
+          "ketchup_1_g6",
+          "gripper0_hand_collision",
+          -0.00174
+        ],
+        [
+          "ketchup_1_g9",
+          "gripper0_hand_collision",
+          -0.00049
+        ],
+        [
+          "ketchup_1_g10",
+          "gripper0_hand_collision",
+          -0.00204
+        ],
+        [
+          "ketchup_1_g11",
+          "gripper0_hand_collision",
+          -0.002
+        ],
+        [
+          "ketchup_1_g12",
+          "gripper0_hand_collision",
+          -0.00036
+        ]
+      ]
+    },
+    {
+      "ev": "release_check",
+      "obj_xy_err": 0.0297,
+      "obj": [
+        -0.024,
+        0.2519,
+        0.1668
+      ]
+    },
+    {
+      "ev": "release_check",
+      "obj_xy_err": 0.0031,
+      "obj": [
+        0.0039,
+        0.268,
+        0.121
+      ]
+    }
+  ],
+  "lift": {
+    "obj_before": [
+      -0.1076,
+      -0.2497,
+      0.0695
+    ],
+    "obj_after": [
+      -0.1061,
+      -0.2518,
+      0.208
+    ],
+    "dz": 0.1384,
+    "dxy": 0.0026,
+    "carried": true,
+    "obj_aabb_z": [
+      0.1333,
+      0.2833
+    ]
+  },
+  "release_xy_err_m": 0.0031,
+  "official_success": false,
+  "final_obj": [
+    -0.0,
+    0.2557,
+    0.0724
+  ]
+}

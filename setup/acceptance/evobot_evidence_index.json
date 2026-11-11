@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 61,
-  "live": 54,
+  "batches": 64,
+  "live": 57,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -154,6 +154,13 @@
       }
     },
     {
+      "batch": "evobot_bowl_grasp_20261111",
+      "verified": "PASS",
+      "rung": "Bowl grasp mechanism (stale pre-settle pose, rbound inflation 1.503x, ring rim vs jaw width; rim-offset grasp works, guarded)",
+      "superseded_by": null,
+      "verdict": null
+    },
+    {
       "batch": "evobot_capability_freeze_20261111",
       "verified": "PASS",
       "rung": "P0 capability freeze (hash-pinned ruler; drift tested)",
@@ -161,7 +168,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 53,
+        "live_batches": 54,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",
@@ -398,8 +405,8 @@
       "verdict": {
         "verdict": "EVOBOT_LADDER_DERIVED_AND_CURRENT",
         "regenerated_identically": true,
-        "batches_live": 53,
-        "verifier_failures": 0,
+        "batches_live": 57,
+        "verifier_failures": 1,
         "reports_both_directions": true,
         "zero_is_qualified": true,
         "v01_regression": "6/6 -> 6/6, NONE",
@@ -770,6 +777,21 @@
       }
     },
     {
+      "batch": "evobot_redteam_20261111",
+      "verified": "PASS",
+      "rung": "Zero-context audit of my own work (2 blockers, 8 major; falsified the grasp-approach narrative)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_REDTEAM_AUDIT_REPRODUCIBLE",
+        "blockers": 2,
+        "major": 8,
+        "B9_B10_fixed_and_still_fixed": true,
+        "B2_still_present_in_runners": true,
+        "note": "if B2 is fixed, this check fails on purpose so the audit is re-issued",
+        "evaluator_touched": false
+      }
+    },
+    {
       "batch": "evobot_regression_v01_20261111",
       "verified": "PASS",
       "rung": "Regression (6/6 -> 6/6, no loss)",
@@ -1097,6 +1119,13 @@
         "self_assessments_recorded": 5,
         "false_success_rate": 0.0
       }
+    },
+    {
+      "batch": "evobot_tall_bottles_20261111",
+      "verified": "PASS",
+      "rung": "Tall bottle grasp (teammate, in progress)",
+      "superseded_by": null,
+      "verdict": null
     },
     {
       "batch": "evobot_three_arm_20261111",

@@ -28,7 +28,13 @@ def main():
     assert min(bad_err) > 0.3, bad_err
 
     for i in range(5):
-        assert "episode terminated" in " ".join(side[i]["log"]) or True
+        # This was `assert ... or True`, which cannot fail. Replacing it exposed that this
+        # batch never recorded per-attempt lift data at all - the runner of that round had no
+        # attempt list. So the honest check is on what the artefacts DO contain: a mode, a
+        # release error, and a log. Claiming more than that would be the same mistake again.
+        assert side[i]["mode"] in ("top", "side_x", "side_y"), side[i]["mode"]
+        assert isinstance(side[i]["release_xy_error_m"], (int, float)), i
+        assert side[i]["log"], "empty log for task %d" % i
     print(json.dumps({
         "verdict": "EVOBOT_LIBERO_TWO_APPROACHES_DISJOINT",
         "top_mode_solved": top_ok,

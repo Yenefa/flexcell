@@ -29,6 +29,14 @@ def main():
     ok_clamp = [i for i, r in enumerate(clamp) if r and r["official_success"]]
     assert len(ok_clamp) < len(ok), (ok_clamp, ok)
 
+    # the side_y refutation previously existed only as a string in the output, so deleting the
+    # artefacts or flipping them would not have failed the check. Assert it.
+    for i in (2, 4):
+        sy = load("side_y", i)
+        assert sy is not None, "side_y artefact for task %d is missing" % i
+        assert sy["official_success"] is False, ("side_y now succeeds", i)
+        assert sy["release_xy_error_m"] > 0.3, ("side_y error changed", i, sy)
+
     print(json.dumps({
         "verdict": "EVOBOT_LIBERO_AUTO_APPROACH_THREE_OF_FIVE",
         "single_system_solved": ok,

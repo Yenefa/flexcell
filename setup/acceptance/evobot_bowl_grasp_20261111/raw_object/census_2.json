@@ -1,0 +1,973 @@
+{
+  "index": 2,
+  "task": "pick_up_the_salad_dressing_and_place_it_in_the_basket",
+  "suite": "libero_object",
+  "obj": "salad_dressing_1",
+  "region": "basket_1_contain_region",
+  "obj_body": "salad_dressing_1_main",
+  "table_top_z": null,
+  "closing_axis_xy": [
+    -0.3527,
+    -0.9357,
+    0.0
+  ],
+  "gripper": {
+    "finger_joints": [
+      {
+        "name": "gripper0_finger_joint1",
+        "range": [
+          0.0,
+          0.04
+        ]
+      },
+      {
+        "name": "gripper0_finger_joint2",
+        "range": [
+          -0.04,
+          0.0
+        ]
+      }
+    ],
+    "max_opening_m": 0.08
+  },
+  "init_pose": {
+    "obj_body_pos": [
+      0.05,
+      -0.1,
+      0.035
+    ],
+    "visual": {
+      "vertex_derived": true,
+      "n_verts": 58830,
+      "z": [
+        0.00151,
+        0.04555
+      ],
+      "height_m": 0.04403,
+      "outer_diameter_m": 0.15181,
+      "outer_radius_m": 0.0759,
+      "rim_radius_top_band_m": [
+        0.00134,
+        0.07467
+      ],
+      "radial_profile": [
+        {
+          "z": 0.00427,
+          "r_min": 0.00151,
+          "r_max": 0.07352,
+          "r_mean": 0.03825,
+          "n": 10629
+        },
+        {
+          "z": 0.00977,
+          "r_min": 0.01314,
+          "r_max": 0.07476,
+          "r_mean": 0.04755,
+          "n": 8473
+        },
+        {
+          "z": 0.01527,
+          "r_min": 0.01888,
+          "r_max": 0.07557,
+          "r_mean": 0.05011,
+          "n": 4880
+        },
+        {
+          "z": 0.02078,
+          "r_min": 0.02095,
+          "r_max": 0.07588,
+          "r_mean": 0.05794,
+          "n": 6165
+        },
+        {
+          "z": 0.02628,
+          "r_min": 0.02131,
+          "r_max": 0.0759,
+          "r_mean": 0.05866,
+          "n": 6790
+        },
+        {
+          "z": 0.03179,
+          "r_min": 0.01895,
+          "r_max": 0.07562,
+          "r_mean": 0.05167,
+          "n": 5158
+        },
+        {
+          "z": 0.03729,
+          "r_min": 0.01521,
+          "r_max": 0.07516,
+          "r_mean": 0.04884,
+          "n": 6601
+        },
+        {
+          "z": 0.04279,
+          "r_min": 0.00134,
+          "r_max": 0.07419,
+          "r_mean": 0.04307,
+          "n": 10134
+        }
+      ]
+    },
+    "collision": {
+      "n_geoms": 15,
+      "axis_clearance_bands": [
+        {
+          "band": "top_4mm",
+          "n": 9,
+          "axis_clearance_m": 0.0,
+          "max_axis_clearance_m": 0.0138
+        },
+        {
+          "band": "top_10mm",
+          "n": 9,
+          "axis_clearance_m": 0.0,
+          "max_axis_clearance_m": 0.0138
+        },
+        {
+          "band": "mid_10mm",
+          "n": 3,
+          "axis_clearance_m": 0.0,
+          "max_axis_clearance_m": 0.0
+        }
+      ],
+      "z": [
+        -0.03772,
+        0.10785
+      ],
+      "height_m": 0.14557,
+      "top_rim_z": 0.10785,
+      "n_top_plates": 9,
+      "top_plate_radius_m": 0.01344,
+      "top_plate_radius_range_m": [
+        0.0139,
+        0.01986
+      ],
+      "top_plate_thickness_m": 0.00208,
+      "outer_diameter_m": 0.06498,
+      "contype_any": [
+        1
+      ],
+      "conaffinity_any": [
+        1
+      ],
+      "boxes": [
+        {
+          "geom": 74,
+          "z": [
+            0.07055,
+            0.10785
+          ],
+          "radius_center": 0.00045,
+          "radius_range": [
+            0.0174,
+            0.01817
+          ],
+          "size": [
+            0.01237,
+            0.01277,
+            0.01865
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 75,
+          "z": [
+            -0.01735,
+            0.02459
+          ],
+          "radius_center": 0.00099,
+          "radius_range": [
+            0.03063,
+            0.03249
+          ],
+          "size": [
+            0.01733,
+            0.02097,
+            0.02637
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 76,
+          "z": [
+            0.01605,
+            0.07081
+          ],
+          "radius_center": 0.00053,
+          "radius_range": [
+            0.01928,
+            0.02025
+          ],
+          "size": [
+            0.01294,
+            0.01494,
+            0.02738
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 77,
+          "z": [
+            0.07055,
+            0.10785
+          ],
+          "radius_center": 0.01366,
+          "radius_range": [
+            0.0139,
+            0.01762
+          ],
+          "size": [
+            0.00208,
+            0.0078,
+            0.01865
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 78,
+          "z": [
+            0.07055,
+            0.10785
+          ],
+          "radius_center": 0.01479,
+          "radius_range": [
+            0.01485,
+            0.01864
+          ],
+          "size": [
+            0.00208,
+            0.0078,
+            0.01865
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 79,
+          "z": [
+            0.07055,
+            0.10785
+          ],
+          "radius_center": 0.01511,
+          "radius_range": [
+            0.01485,
+            0.01914
+          ],
+          "size": [
+            0.00208,
+            0.0078,
+            0.01865
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 80,
+          "z": [
+            0.07055,
+            0.10785
+          ],
+          "radius_center": 0.01449,
+          "radius_range": [
+            0.01427,
+            0.01861
+          ],
+          "size": [
+            0.00208,
+            0.0078,
+            0.01865
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 81,
+          "z": [
+            0.07055,
+            0.10785
+          ],
+          "radius_center": 0.01562,
+          "radius_range": [
+            0.01519,
+            0.01968
+          ],
+          "size": [
+            0.00208,
+            0.0078,
+            0.01865
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 82,
+          "z": [
+            0.07055,
+            0.10785
+          ],
+          "radius_center": 0.01589,
+          "radius_range": [
+            0.01563,
+            0.01977
+          ],
+          "size": [
+            0.00208,
+            0.0078,
+            0.01865
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 83,
+          "z": [
+            0.07055,
+            0.10785
+          ],
+          "radius_center": 0.0157,
+          "radius_range": [
+            0.01513,
+            0.01986
+          ],
+          "size": [
+            0.00208,
+            0.0078,
+            0.01865
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 84,
+          "z": [
+            0.07055,
+            0.10785
+          ],
+          "radius_center": 0.01522,
+          "radius_range": [
+            0.01515,
+            0.01909
+          ],
+          "size": [
+            0.00208,
+            0.0078,
+            0.01865
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 85,
+          "z": [
+            -0.03772,
+            -0.03122
+          ],
+          "radius_center": 0.00099,
+          "radius_range": [
+            0.02364,
+            0.02533
+          ],
+          "size": [
+            0.00325,
+            0.01729,
+            0.01733
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 86,
+          "z": [
+            -0.0278,
+            -0.01664
+          ],
+          "radius_center": 0.00099,
+          "radius_range": [
+            0.02724,
+            0.02904
+          ],
+          "size": [
+            0.00558,
+            0.01733,
+            0.02217
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 87,
+          "z": [
+            0.02508,
+            0.03624
+          ],
+          "radius_center": 0.00099,
+          "radius_range": [
+            0.02782,
+            0.02963
+          ],
+          "size": [
+            0.00558,
+            0.01733,
+            0.0229
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 88,
+          "z": [
+            0.03661,
+            0.04777
+          ],
+          "radius_center": 0.00099,
+          "radius_range": [
+            0.02353,
+            0.0252
+          ],
+          "size": [
+            0.00558,
+            0.01712,
+            0.01733
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        }
+      ]
+    },
+    "controller": {
+      "z_lo": -0.06945,
+      "z_hi": 0.11728,
+      "implied_height_m": 0.18673,
+      "grasp_z": 0.02391
+    },
+    "pads": {
+      "pad_z_range_world": [
+        0.25513,
+        0.27296
+      ],
+      "pad_z_offset_from_eef": [
+        -0.00532,
+        0.01251
+      ],
+      "pad_half_height": 0.00892,
+      "pad_gap_m": 0.0298,
+      "n_geoms": 2
+    },
+    "sites": [
+      {
+        "name": "salad_dressing_1_default_site",
+        "local": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "world": [
+          0.05,
+          -0.1,
+          0.035
+        ]
+      }
+    ],
+    "gripper_open_qpos_gap": 0.04167,
+    "eef": [
+      -0.14787,
+      0.00644,
+      0.26045
+    ]
+  },
+  "settled": {
+    "obj_body_pos": [
+      0.05,
+      -0.09999,
+      0.07271
+    ],
+    "visual": {
+      "vertex_derived": true,
+      "n_verts": 58830,
+      "z": [
+        0.03922,
+        0.08325
+      ],
+      "height_m": 0.04403,
+      "outer_diameter_m": 0.15181,
+      "outer_radius_m": 0.0759,
+      "rim_radius_top_band_m": [
+        0.00134,
+        0.07467
+      ],
+      "radial_profile": [
+        {
+          "z": 0.04197,
+          "r_min": 0.00151,
+          "r_max": 0.07352,
+          "r_mean": 0.03825,
+          "n": 10623
+        },
+        {
+          "z": 0.04747,
+          "r_min": 0.01314,
+          "r_max": 0.07476,
+          "r_mean": 0.04753,
+          "n": 8479
+        },
+        {
+          "z": 0.05298,
+          "r_min": 0.01888,
+          "r_max": 0.07557,
+          "r_mean": 0.05011,
+          "n": 4880
+        },
+        {
+          "z": 0.05848,
+          "r_min": 0.02095,
+          "r_max": 0.07588,
+          "r_mean": 0.05794,
+          "n": 6165
+        },
+        {
+          "z": 0.06399,
+          "r_min": 0.02131,
+          "r_max": 0.0759,
+          "r_mean": 0.05866,
+          "n": 6790
+        },
+        {
+          "z": 0.06949,
+          "r_min": 0.01895,
+          "r_max": 0.07562,
+          "r_mean": 0.05171,
+          "n": 5160
+        },
+        {
+          "z": 0.075,
+          "r_min": 0.01521,
+          "r_max": 0.07516,
+          "r_mean": 0.04881,
+          "n": 6599
+        },
+        {
+          "z": 0.0805,
+          "r_min": 0.00134,
+          "r_max": 0.07419,
+          "r_mean": 0.04307,
+          "n": 10134
+        }
+      ]
+    },
+    "collision": {
+      "n_geoms": 15,
+      "axis_clearance_bands": [
+        {
+          "band": "top_4mm",
+          "n": 9,
+          "axis_clearance_m": 0.0,
+          "max_axis_clearance_m": 0.0138
+        },
+        {
+          "band": "top_10mm",
+          "n": 9,
+          "axis_clearance_m": 0.0,
+          "max_axis_clearance_m": 0.0138
+        },
+        {
+          "band": "mid_10mm",
+          "n": 3,
+          "axis_clearance_m": 0.0,
+          "max_axis_clearance_m": 0.0
+        }
+      ],
+      "z": [
+        -1e-05,
+        0.14556
+      ],
+      "height_m": 0.14557,
+      "top_rim_z": 0.14556,
+      "n_top_plates": 9,
+      "top_plate_radius_m": 0.01344,
+      "top_plate_radius_range_m": [
+        0.01389,
+        0.01986
+      ],
+      "top_plate_thickness_m": 0.00208,
+      "outer_diameter_m": 0.06498,
+      "contype_any": [
+        1
+      ],
+      "conaffinity_any": [
+        1
+      ],
+      "boxes": [
+        {
+          "geom": 74,
+          "z": [
+            0.10826,
+            0.14556
+          ],
+          "radius_center": 0.00045,
+          "radius_range": [
+            0.01739,
+            0.01817
+          ],
+          "size": [
+            0.01237,
+            0.01277,
+            0.01865
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 75,
+          "z": [
+            0.02035,
+            0.0623
+          ],
+          "radius_center": 0.00099,
+          "radius_range": [
+            0.03063,
+            0.03249
+          ],
+          "size": [
+            0.01733,
+            0.02097,
+            0.02637
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 76,
+          "z": [
+            0.05376,
+            0.10852
+          ],
+          "radius_center": 0.00053,
+          "radius_range": [
+            0.01928,
+            0.02025
+          ],
+          "size": [
+            0.01294,
+            0.01494,
+            0.02738
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 77,
+          "z": [
+            0.10826,
+            0.14556
+          ],
+          "radius_center": 0.01366,
+          "radius_range": [
+            0.01389,
+            0.01762
+          ],
+          "size": [
+            0.00208,
+            0.0078,
+            0.01865
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 78,
+          "z": [
+            0.10826,
+            0.14556
+          ],
+          "radius_center": 0.01479,
+          "radius_range": [
+            0.01485,
+            0.01864
+          ],
+          "size": [
+            0.00208,
+            0.0078,
+            0.01865
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 79,
+          "z": [
+            0.10826,
+            0.14556
+          ],
+          "radius_center": 0.01511,
+          "radius_range": [
+            0.01485,
+            0.01914
+          ],
+          "size": [
+            0.00208,
+            0.0078,
+            0.01865
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 80,
+          "z": [
+            0.10826,
+            0.14556
+          ],
+          "radius_center": 0.01448,
+          "radius_range": [
+            0.01427,
+            0.01861
+          ],
+          "size": [
+            0.00208,
+            0.0078,
+            0.01865
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 81,
+          "z": [
+            0.10826,
+            0.14556
+          ],
+          "radius_center": 0.01562,
+          "radius_range": [
+            0.01519,
+            0.01968
+          ],
+          "size": [
+            0.00208,
+            0.0078,
+            0.01865
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 82,
+          "z": [
+            0.10825,
+            0.14556
+          ],
+          "radius_center": 0.01589,
+          "radius_range": [
+            0.01563,
+            0.01977
+          ],
+          "size": [
+            0.00208,
+            0.0078,
+            0.01865
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 83,
+          "z": [
+            0.10826,
+            0.14556
+          ],
+          "radius_center": 0.0157,
+          "radius_range": [
+            0.01513,
+            0.01986
+          ],
+          "size": [
+            0.00208,
+            0.0078,
+            0.01865
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 84,
+          "z": [
+            0.10826,
+            0.14556
+          ],
+          "radius_center": 0.01522,
+          "radius_range": [
+            0.01514,
+            0.01909
+          ],
+          "size": [
+            0.00208,
+            0.0078,
+            0.01865
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 85,
+          "z": [
+            -1e-05,
+            0.00649
+          ],
+          "radius_center": 0.00099,
+          "radius_range": [
+            0.02364,
+            0.02533
+          ],
+          "size": [
+            0.00325,
+            0.01729,
+            0.01733
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 86,
+          "z": [
+            0.0099,
+            0.02107
+          ],
+          "radius_center": 0.00099,
+          "radius_range": [
+            0.02724,
+            0.02904
+          ],
+          "size": [
+            0.00558,
+            0.01733,
+            0.02217
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 87,
+          "z": [
+            0.06278,
+            0.07395
+          ],
+          "radius_center": 0.00099,
+          "radius_range": [
+            0.02782,
+            0.02963
+          ],
+          "size": [
+            0.00558,
+            0.01733,
+            0.0229
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        },
+        {
+          "geom": 88,
+          "z": [
+            0.07432,
+            0.08548
+          ],
+          "radius_center": 0.00099,
+          "radius_range": [
+            0.02353,
+            0.0252
+          ],
+          "size": [
+            0.00558,
+            0.01712,
+            0.01733
+          ],
+          "contype": 1,
+          "conaffinity": 1
+        }
+      ]
+    },
+    "controller": {
+      "z_lo": -0.03174,
+      "z_hi": 0.15498,
+      "implied_height_m": 0.18673,
+      "grasp_z": 0.06162
+    },
+    "pads": {
+      "pad_z_range_world": [
+        0.25668,
+        0.2736
+      ],
+      "pad_z_offset_from_eef": [
+        -0.00487,
+        0.01206
+      ],
+      "pad_half_height": 0.00846,
+      "pad_gap_m": 0.06769,
+      "n_geoms": 2
+    },
+    "sites": [
+      {
+        "name": "salad_dressing_1_default_site",
+        "local": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "world": [
+          0.05,
+          -0.09999,
+          0.07271
+        ]
+      }
+    ],
+    "eef": [
+      -0.14695,
+      0.00432,
+      0.26155
+    ],
+    "contacts": [
+      0,
+      4
+    ],
+    "obj_geoms_note": [
+      {
+        "geom": 73,
+        "type": "mesh",
+        "contype": 0,
+        "conaffinity": 0,
+        "rbound": 0.09336
+      }
+    ]
+  },
+  "drop_m": 0.03771,
+  "drop_xy_m": 1e-05,
+  "verdict_numbers": {
+    "ctrl_grasp_z_at_init_pose": 0.02391,
+    "settled_collision_rim_z": 0.14556,
+    "settled_visual_rim_z": 0.08325,
+    "ctrl_grasp_z_minus_settled_collision_rim_m": -0.12165,
+    "ctrl_grasp_z_minus_settled_visual_rim_m": -0.05934,
+    "max_opening_minus_collision_outer_diameter_m": 0.01502,
+    "max_opening_minus_visual_outer_diameter_m": -0.07181,
+    "ctrl_implied_height_minus_true_collision_height_m": 0.04116,
+    "bound_extends_below_table_at_init": true,
+    "bound_extends_below_table_at_settled": true,
+    "jaw_half_clearance_m": 0.03384,
+    "axis_clearance_top_4mm_m": 0.0,
+    "axis_clearance_mid_10mm_m": 0.0,
+    "centred_grasp_reaches_material_top_band": true,
+    "centred_grasp_reaches_material_mid_band": true,
+    "top_band_min_radius_m": 0.01389,
+    "top_band_is_ring": false,
+    "collision_outer_diameter_m": 0.06498,
+    "collision_height_m": 0.14557
+  },
+  "eef_pose_at_init": [
+    -0.14787,
+    0.00644,
+    0.26045
+  ]
+}

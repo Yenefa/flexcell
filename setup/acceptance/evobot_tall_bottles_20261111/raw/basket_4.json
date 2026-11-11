@@ -1,0 +1,188 @@
+{
+  "task": "pick_up_the_ketchup_and_place_it_in_the_basket",
+  "index": 4,
+  "goal": [
+    0.00085,
+    0.26821,
+    0.10685
+  ],
+  "goal_kind": "site",
+  "basket_body": "basket_1_main",
+  "basket_pos": [
+    0.00085,
+    0.26821,
+    0.035
+  ],
+  "geoms": [
+    {
+      "name": "basket_1_g0",
+      "kind": "mesh",
+      "collision": false,
+      "lo": [
+        -0.08048,
+        0.18155,
+        0.03498
+      ],
+      "hi": [
+        0.08171,
+        0.35496,
+        0.18259
+      ]
+    },
+    {
+      "name": "basket_1_g1",
+      "kind": "box",
+      "collision": true,
+      "lo": [
+        -0.07155,
+        0.1941,
+        0.03921
+      ],
+      "hi": [
+        0.07325,
+        0.34734,
+        0.05695
+      ]
+    },
+    {
+      "name": "basket_1_g2",
+      "kind": "box",
+      "collision": true,
+      "lo": [
+        -0.07155,
+        0.1841,
+        0.04757
+      ],
+      "hi": [
+        0.07325,
+        0.20702,
+        0.17557
+      ]
+    },
+    {
+      "name": "basket_1_g3",
+      "kind": "box",
+      "collision": true,
+      "lo": [
+        0.05942,
+        0.19622,
+        0.05285
+      ],
+      "hi": [
+        0.07937,
+        0.34114,
+        0.18069
+      ]
+    },
+    {
+      "name": "basket_1_g4",
+      "kind": "box",
+      "collision": true,
+      "lo": [
+        -0.07797,
+        0.19559,
+        0.05285
+      ],
+      "hi": [
+        -0.05852,
+        0.34044,
+        0.18069
+      ]
+    },
+    {
+      "name": "basket_1_g5",
+      "kind": "box",
+      "collision": true,
+      "lo": [
+        -0.07155,
+        0.33394,
+        0.04764
+      ],
+      "hi": [
+        0.07325,
+        0.35362,
+        0.1755
+      ]
+    }
+  ],
+  "aabb": [
+    [
+      -0.07797,
+      0.1841,
+      0.03921
+    ],
+    [
+      0.07937,
+      0.35362,
+      0.18069
+    ]
+  ],
+  "rim_z": 0.18069,
+  "mouth_xy": [
+    0.15734,
+    0.16952
+  ],
+  "centre_xy": [
+    0.0007,
+    0.26886
+  ],
+  "floor_z": 0.03921,
+  "object_states": [
+    "alphabet_soup_1",
+    "basket_1",
+    "basket_1_contain_region",
+    "bbq_sauce_1",
+    "cream_cheese_1",
+    "floor_bin_region",
+    "floor_other_object_region_0",
+    "floor_other_object_region_1",
+    "floor_other_object_region_2",
+    "floor_other_object_region_3",
+    "floor_other_object_region_4",
+    "floor_target_object_region",
+    "ketchup_1",
+    "milk_1",
+    "salad_dressing_1"
+  ],
+  "goal_state": [
+    [
+      "in",
+      "ketchup_1",
+      "basket_1_contain_region"
+    ]
+  ],
+  "drop_plan": [
+    {
+      "above_rim": 0.2,
+      "target": [
+        0.00085,
+        0.26821,
+        0.4535
+      ]
+    },
+    {
+      "above_rim": 0.12,
+      "target": [
+        0.00085,
+        0.26821,
+        0.3735
+      ]
+    },
+    {
+      "above_rim": 0.06,
+      "target": [
+        0.00085,
+        0.26821,
+        0.3135
+      ]
+    },
+    {
+      "above_rim": 0.02,
+      "target": [
+        0.00085,
+        0.26821,
+        0.2735
+      ]
+    }
+  ]
+}

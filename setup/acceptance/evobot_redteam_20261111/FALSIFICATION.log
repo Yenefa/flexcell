@@ -1,0 +1,39 @@
+mutation                                                       expect rc     verifier message
+official: action_dim 7->6                                      FAIL   1      AssertionError
+official: noop success false->true                             FAIL   1      AssertionError
+official: init_note says init NOT loaded                       FAIL   1      AssertionError: not used
+official: stepped 5->999 (fabricated step count)               PASS?  0      
+adapter: official_success false->true                          FAIL   1      AssertionError
+adapter: reach probe 0.02->0.09                                FAIL   1      AssertionError: {'lowest_eef_z_in_free_space': 0.09, 'reading': 'reach is fine - the can blocked it'}
+adapter: log says object MOVED to basket (contradicts claim)   PASS?  1      AssertionError: object final [0.02,0.25,0.10] - moved into the basket   <== interesting
+adapter: phase_success true->false                             FAIL   1      AssertionError
+solved: official_success true->false                           FAIL   1      AssertionError: False
+solved: object did not move                                    FAIL   1      AssertionError: ('object did not move', 'object final at [-0.12, -0.24, 0.015] ; distance to basket_1_main = 0.51 m')
+solved: rewritten log says basket z=0.035 (README's number)    PASS?  0      
+solved: strip lift_above_control (the 'control arm')           FAIL   1      AssertionError: [{'descend_target': 0.02, 'reached_target': False, 'eef_z_before_descend': 0.1343, 'eef_z_after_descend': 0.0437, 'object_dz': 0.1371,
+transfer: failed task t1 flips to success                      FAIL   1      AssertionError: ('the transfer picture changed', [0, 1])
+transfer: parsed_region loses _contain_region                  FAIL   1      AssertionError: basket_1
+transfer: parsed_object changed to a different object          PASS?  1      AssertionError: cream_cheese_2   <== interesting
+transfer: t1 log now says it WAS carried (contradicts 'not grasped') PASS?  0      
+geometry: mid_2 flips to success                               FAIL   1      AssertionError: [0, 1, 2]
+geometry: delete all top_*.json (the 0.85 arm)                 FAIL   1      AssertionError: []
+geometry: salad log now says it descended to 0.030             PASS?  1      AssertionError: descended to eef z 0.030 (target 0.024)   <== interesting
+geometry: top_0 claims frac 0.70 (README's third arm)          PASS?  0      
+side: side_1 success true->false                               FAIL   1      AssertionError: [3]
+side: erase 'episode terminated' from every log                PASS?  0      
+side: a 'successful' release error -> 0.5 m                    FAIL   1      AssertionError: [0.5, 0.00367]
+auto: auto_3 success true->false                               FAIL   1      AssertionError: [0, 1]
+auto: delete side_y_2/4 (the 'side_y' refutation)              PASS?  0      
+auto: side_y runs flip to success 0.0 mm error                 PASS?  0      
+auto: clamped arm now 5/5                                      FAIL   1      AssertionError: ([0, 1, 2, 3, 4], [0, 1, 3])
+auto: auto_3 reports mode=top                                  FAIL   1      AssertionError: {0: 'top', 1: 'top', 2: 'side_x', 3: 'top', 4: 'side_x'}
+holdout: one task flips to success                             FAIL   1      AssertionError: ('the held-out suite now passes; rewrite the conclusion', 1)
+holdout: one task claims mode=top                              FAIL   1      AssertionError: ['top', 'side_x', 'side_x', 'side_x', 'side_x', 'side_x', 'side_x', 'side_x', 'side_x', 'side_x']
+holdout: release error 0.48->0.05                              FAIL   1      AssertionError: [0.05, 0.29354, 0.23637, 0.16632, 0.34099, 0.28537, 0.26666, 0.46583, 0.11938, 0.47997]
+holdout: log 'measured height 0.168' -> 0.090                  PASS?  0      
+closed-loop: obj_3 success -> false                            FAIL   1      AssertionError: [0, 1]
+closed-loop: obj_3 loses the retry attempt                     FAIL   1      AssertionError: [{'mode': 'top', 'grasp_z': 0.0265, 'extent': [-0.0456, 0.0987], 'lift_m': 0.0, 'carried': False}]
+closed-loop: spa_0 claims carried=True                         FAIL   1      AssertionError: pick_up_the_black_bowl_between_the_plate_and_the_ramekin_and_place_it_on_the_plate
+closed-loop: obj_2 claims both attempts carried                PASS?  0      
+
+cases: 36 surprises: 3
