@@ -105,3 +105,47 @@ python3 setup/acceptance/evobot_lead_p0_aprime_vacuity_20261112/scan_aprime_cove
 
 Runs offline against the task specs; no simulator, no model calls. The script refuses (exit 1) if it
 finds zero specs, so a path error cannot be mistaken for a clean result.
+
+---
+
+## 7. Is A-prime at least *blind* to the answer? Yes — with one latent hole
+
+A-prime being vacuous (§1–2) and A-prime being honest are separate questions, and the second one
+matters independently: if the rules could see the answer, then fixing them would produce an oracle,
+not a baseline. That is exactly the defect that sank Baseline A.
+
+`check_aprime_blindness.py` tests it structurally rather than trusting the docstring:
+
+| Check | Result |
+| --- | --- |
+| `reduce_to_public()` strips `expected_goal`, `constraints`, `template_id`, `random_seed`, verdict keys | **PASS** — reduced keys are exactly `evaluator_version, execution_budget, instruction, objects, split, task_id, zones` |
+| Corrupting `expected_goal` cannot change the plan | **PASS** — four corruptions (`{'x':1}`, `None`, `'GARBAGE'`, a plausible fake goal) all leave the plan byte-identical |
+| The caller applies the reducer **unconditionally** | **CONDITIONAL — latent hole** |
+
+`run_baseline_a_prime.py:40-41` reads:
+
+```python
+task_public = (po.reduce_to_public(raw_task)
+               if 'expected_goal' in raw_task else raw_task)
+```
+
+If a spec ever lacks `expected_goal`, the **raw** task is used unfiltered — carrying `constraints`
+and `template_id`. `template_id` is precisely the key that would let a rule planner special-case a
+template instead of reading the instruction.
+
+**It is harmless today:** 0 of 114 specs lack `expected_goal`. And applying the reducer
+unconditionally would change nothing — I checked, the resulting observation is identical.
+
+**Not fixed here**, because it is a P0 entry point shared with other baselines and the fix belongs
+with the rule work (task-10), which touches the same file. Recorded rather than silently patched.
+
+## 8. Reproduce
+
+```bash
+python3 setup/acceptance/evobot_lead_p0_aprime_vacuity_20261112/scan_aprime_coverage.py
+python3 setup/acceptance/evobot_lead_p0_aprime_vacuity_20261112/check_aprime_blindness.py
+```
+
+Both offline, no simulator, no model calls. The coverage scanner refuses on zero specs; the
+blindness checker refuses if the sample spec lacks `expected_goal`, since the test would otherwise
+be vacuous itself.
