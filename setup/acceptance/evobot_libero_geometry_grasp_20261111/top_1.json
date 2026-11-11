@@ -1,0 +1,21 @@
+{
+  "task": "pick_up_the_cream_cheese_and_place_it_in_the_basket",
+  "index": 1,
+  "official_success": true,
+  "object_extent_z": [
+    -0.0479,
+    0.0477
+  ],
+  "grasp_z": 0.0333,
+  "log": [
+    "parsed goal cream_cheese_1 -> basket_1_contain_region",
+    "object extent z -0.048..0.048 -> grasp at 0.033 (frac 0.85 of the measured extent)",
+    "descended to eef z 0.023 (target -0.000)",
+    "object displacement after close+lift prep: [-0.0002, 0.0062, 0.0099]",
+    "object while carried at [0.044, -0.096, 0.142]",
+    "success trace: [True, True, True, True]",
+    "object final at [-0.006, 0.272, 0.026]"
+  ],
+  "perception": "ORACLE",
+  "policy": "grasp height from measured extent"
+}

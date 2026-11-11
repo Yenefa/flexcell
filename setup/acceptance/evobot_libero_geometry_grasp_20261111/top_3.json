@@ -1,0 +1,21 @@
+{
+  "task": "pick_up_the_bbq_sauce_and_place_it_in_the_basket",
+  "index": 3,
+  "official_success": false,
+  "object_extent_z": [
+    -0.0456,
+    0.0987
+  ],
+  "grasp_z": 0.077,
+  "log": [
+    "parsed goal bbq_sauce_1 -> basket_1_contain_region",
+    "object extent z -0.046..0.099 -> grasp at 0.077 (frac 0.85 of the measured extent)",
+    "descended to eef z 0.060 (target 0.027)",
+    "object displacement after close+lift prep: [0.0078, -0.0014, 0.0225]",
+    "object while carried at [0.049, -0.091, 0.189]",
+    "success trace: [False, False, False, False]",
+    "object final at [-0.014, 0.232, 0.055]"
+  ],
+  "perception": "ORACLE",
+  "policy": "grasp height from measured extent"
+}

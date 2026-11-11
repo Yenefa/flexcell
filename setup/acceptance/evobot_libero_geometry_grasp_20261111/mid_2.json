@@ -1,0 +1,21 @@
+{
+  "task": "pick_up_the_salad_dressing_and_place_it_in_the_basket",
+  "index": 2,
+  "official_success": false,
+  "object_extent_z": [
+    -0.0694,
+    0.1173
+  ],
+  "grasp_z": 0.0239,
+  "log": [
+    "parsed goal salad_dressing_1 -> basket_1_contain_region",
+    "object extent z -0.069..0.117 -> grasp at 0.024 (midpoint)",
+    "descended to eef z 0.107 (target 0.024)",
+    "object displacement after close+lift prep: [-0.0088, -0.0022, 0.0377]",
+    "object while carried at [0.041, -0.102, 0.073]",
+    "success trace: [False, False, False, False]",
+    "object final at [0.041, -0.102, 0.073]"
+  ],
+  "perception": "ORACLE",
+  "policy": "grasp height from measured extent"
+}

@@ -1,0 +1,21 @@
+{
+  "task": "pick_up_the_ketchup_and_place_it_in_the_basket",
+  "index": 4,
+  "official_success": false,
+  "object_extent_z": [
+    -0.0694,
+    0.1178
+  ],
+  "grasp_z": 0.0242,
+  "log": [
+    "parsed goal ketchup_1 -> basket_1_contain_region",
+    "object extent z -0.069..0.118 -> grasp at 0.024 (midpoint)",
+    "descended to eef z 0.093 (target 0.024)",
+    "object displacement after close+lift prep: [0.0112, -0.0086, 0.032]",
+    "object while carried at [-0.106, -0.248, 0.193]",
+    "success trace: [False, False, False, False]",
+    "object final at [-0.077, 0.161, 0.072]"
+  ],
+  "perception": "ORACLE",
+  "policy": "grasp height from measured extent"
+}

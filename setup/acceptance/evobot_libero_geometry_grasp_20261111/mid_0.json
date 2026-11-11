@@ -1,0 +1,21 @@
+{
+  "task": "pick_up_the_alphabet_soup_and_place_it_in_the_basket",
+  "index": 0,
+  "official_success": true,
+  "object_extent_z": [
+    -0.0506,
+    0.0805
+  ],
+  "grasp_z": 0.015,
+  "log": [
+    "parsed goal alphabet_soup_1 -> basket_1_contain_region",
+    "object extent z -0.051..0.081 -> grasp at 0.015 (midpoint)",
+    "descended to eef z 0.043 (target 0.015)",
+    "object displacement after close+lift prep: [0.0004, 0.0008, 0.0235]",
+    "object while carried at [-0.121, -0.237, 0.172]",
+    "success trace: [True, True, True, True]",
+    "object final at [0.024, 0.259, 0.055]"
+  ],
+  "perception": "ORACLE",
+  "policy": "grasp height from measured extent"
+}
