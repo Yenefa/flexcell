@@ -487,7 +487,9 @@ LIBERO (Panda) never folded into OpenMANIPULATOR-X capability.
 | Fact | State | Evidence |
 | --- | --- | --- |
 | The ~30–37 % false-failure rate on both P0 arms | **ONE DEFECT, root-caused.** `place_server.py:424-432` uses **gripper aperture** as the release predicate: fails when `aperture_error > 0.005` **and** `not reached_goal`, with `gripper_open_position = 0.02` | `evobot_lead_place_release_predicate_20261112/` |
-| Why that predicate is wrong on this robot | **CONFIRMED.** The transport is a `velocity_servo` **pin** with offset z = **−163.8 mm** (`carry.jsonl`), so the fingers never touch the object. Aperture is not evidence about an object the gripper is not holding. Same quantity as T04's `attach_gap_m = 0.1646 m`, found independently | same |
+| Why that predicate is wrong on this robot | **CONFIRMED, and the decisive test needs no geometry.** Count the actual pin releases: **releases = 2 → pass (13/13), releases = 1 → fail (3/3) = 16/16 perfect separation.** If the gripper held the box, a gripper that fails to open would *retain* it; it does not. The aperture verdict predicts nothing | independent audit, verified by me |
+| The carry offset | **≈ 160 mm, not a single value.** n=29 `start` events: min −167.1, max −155.1, **mean −161.5, spread 12.0 mm**. My earlier "−163.8 mm" was **one sample** and must not be quoted as the offset. Same quantity as T04's `attach_gap_m = 0.1646 m` | `analyse_place_failures.py` |
+| The transport mechanism | **CONFIRMED with one limit.** 2642/2642 pins `confirmed:true`, backend `velocity_servo` 102/102, **zero** gripper-contact records in any skill log. **No physics-engine contact trace exists**, so "the fingers never touch the box" rests on the causal test, not on direct contact evidence | independent audit |
 | The aperture band is narrower than the actuator's own shortfall | **CONFIRMED.** G1 measured free-space open at **0.0104** against a 0.02 target → `aperture_error = 0.0096 m`, nearly **2× the 0.005 m tolerance**. The check passes only because `reached_goal` rescues it; it is one flag from rejecting every placement | G1 calibration + `place_server.py:68-69` |
 | The object is released anyway | **CONFIRMED.** `place` returns `released: false`, while `carry.jsonl` records `{'event':'stop','cause':'release','engaged':true}`. The pin releases on abort and drops the box at the destination — which is why 4 of A-prime's 7 "failures" still pass evaluation | same |
 | Frequency | **12 of 63 place attempts (19 %); 12 of 32 runs (37.5 %)** — A-prime 7/16, B 5/16 | `analyse_place_failures.py` |
@@ -496,5 +498,31 @@ LIBERO (Panda) never folded into OpenMANIPULATOR-X capability.
 | Who is the better arm | **NOT ESTABLISHED.** Every run separating A-prime (13/16 one-shot) from B (14/16 first, 16/16 with retries) fails for this defect. The comparison cannot distinguish them | same |
 | Every execution-based success rate in project history | **AN UNDERESTIMATE**, by 5–24 % of place attempts depending on the batch. Task-level evaluation figures are **unaffected** — they read the world, not the verdict | same |
 | The general lesson | **On this robot, gripper telemetry is not evidence about objects.** The same mistake appears twice: T08's push gate uses aperture travel to detect *a grasp* (refuted round 2), `place` uses aperture position to detect *a release* (refuted now). Both use a gripper-state proxy for an object-level event | both refutations |
+
+### The general rule this round produced, which outranks any single fix
+
+Audit pushback accepted: this is **not one bug in one file**. It is one instance of a pattern — **a
+self-declared internal quantity standing in for evidence about the world.** Six instances tabulated:
+
+| # | gate | internal quantity | standing in for | refuted by |
+| --- | --- | --- | --- | --- |
+| 1 | `place_server` release | gripper aperture | the object was released | this round, 16/16 causal test |
+| 2 | T08 push gate | aperture travel | a grasp occurred | round 2, 0.42 mm separation |
+| 3 | T08 push gate | `rest_height_m` self-declared | the effector's height | round 2, bypass proven |
+| 4 | T08 push gate | `pusher_links` self-declared | which links touched the block | round 2 |
+| 5 | `verify.py` gate set | `max_z_m` taken from the producer | the true maximum height | round 2 |
+| 6 | `recovery_decision.json` | `failure_class` label | what actually failed | this round: labels a `PLACE` failure `grasp` |
+
+> **A gate may only pass judgement on a quantity it measures itself, and that quantity must be causally
+> connected to the thing being judged. A self-report from the component being judged is not evidence
+> about the world; it is evidence about the component's opinion of itself.**
+
+Fixing `place_server` alone fixes one instance. The rule implies binding every gate to an observable
+causally connected to the outcome, with self-declared values demoted to diagnostics.
+
+Also from the audit: **B's retry re-picks the object** (`pick.jsonl` shows the same object picked twice
+in both recovered runs), so it is a full stage re-execution, not a checkpoint resume — and attempt 1 had
+**already delivered the box** to within 44 mm of zone centre. The retry picked it *out of* the correct
+destination. Recovery did not rescue a task; it undid one.
 
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
