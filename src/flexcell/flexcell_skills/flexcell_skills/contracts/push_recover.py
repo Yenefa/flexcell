@@ -61,6 +61,10 @@ def choose_next_request(target_m, achieved_m, attempted_m, remaining_attempts,
                     "attempt": attempted_m + 1}
 
 
+def made_contact(result):
+    return bool(result.get("contact_made"))
+
+
 def classify_attempt(result):
     """Map one PushObject result onto (made_contact, advanced, carry_engaged, code).
 
@@ -70,11 +74,23 @@ def classify_attempt(result):
         return False, 0.0, False, "unreadable result"
     if result.get("carry_engaged_during"):
         return True, 0.0, True, "carry engaged"
-    moved = result.get("displacement_m")
+    # SIGNED displacement, not magnitude.
+    #
+    # A real run caught this: the policy used displacement_m, which is the unsigned
+    # magnitude of the object's motion, so a block flicked BACKWARD counted as progress.
+    # Three of five trials kept "recovering" while the block moved away from the target,
+    # ending at x=0.29, 0.36 and 0.41 against a start of 0.22 and a target of roughly 0.13.
+    # displacement_along_direction_m is the projection onto the commanded direction and
+    # carries its sign, which is the only field that can answer "did it move toward the goal".
+    moved = result.get("displacement_along_direction_m")
+    if moved is None:
+        moved = result.get("displacement_m")
     if not isinstance(moved, (int, float)) or isinstance(moved, bool):
         return False, 0.0, False, "displacement missing"
-    if not math.isfinite(moved) or moved < 0:
+    if not math.isfinite(moved):
         return False, 0.0, False, "displacement not finite"
+    if moved < 0:
+        return made_contact(result), 0.0, False, "object moved backwards"
     made = bool(result.get("contact_made"))
     return made, float(moved), False, None
 

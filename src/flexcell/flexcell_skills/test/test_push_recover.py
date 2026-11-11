@@ -80,11 +80,15 @@ def test_a_non_finite_displacement_is_refused():
 
 
 def test_a_negative_displacement_is_refused():
-    """A backward move must not count toward the target."""
+    """A backward move must not count toward the target.
+
+    The reason is now specific rather than generic: a negative signed projection means the
+    object went the wrong way, which is a different diagnosis from an unreadable value.
+    """
     _made, moved, _carry, problem = R.classify_attempt({"displacement_m": -0.002,
                                                         "contact_made": True})
     assert moved == 0.0
-    assert problem == "displacement not finite"
+    assert problem == "object moved backwards"
 
 
 # ------------------------------------------------------- request shaping
@@ -127,6 +131,40 @@ def test_nan_is_not_progress():
 
 
 # ------------------------------------------------------- the whole point
+
+def test_a_backward_move_is_not_counted_as_progress():
+    """The bug a real run exposed.
+
+    displacement_m is an unsigned magnitude, so a block flicked backwards looks like motion.
+    The policy must read the signed projection. Three of five live trials regressed because
+    it did not: the block ended at x=0.29, 0.36 and 0.41 from a start of 0.22.
+    """
+    made, moved, carry, problem = R.classify_attempt({
+        "displacement_along_direction_m": -0.0735,
+        "displacement_m": 0.0735,
+        "contact_made": True,
+    })
+    assert moved == 0.0
+    assert problem == "object moved backwards"
+    assert made is True, "contact did happen; the object simply went the wrong way"
+
+
+def test_the_signed_field_is_preferred_over_the_magnitude():
+    made, moved, _c, problem = R.classify_attempt({
+        "displacement_along_direction_m": 0.0310,
+        "displacement_m": 0.0312,
+        "contact_made": True,
+    })
+    assert moved == 0.0310, "the projection, not the magnitude"
+    assert problem is None
+
+
+def test_a_backward_move_does_not_accumulate_toward_the_target():
+    verdict = R.accumulate([{"displacement_along_direction_m": -0.05,
+                             "displacement_m": 0.05, "contact_made": True}], 0.030)
+    assert verdict["outcome"] == R.OUTCOME_BUDGET_EXHAUSTED
+    assert verdict["achieved_m"] == 0.0
+
 
 def test_recovery_converts_the_measured_failure_into_a_pass():
     """The end-to-end claim, stated as a test.

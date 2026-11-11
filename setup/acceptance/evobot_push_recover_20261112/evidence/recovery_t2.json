@@ -1,0 +1,70 @@
+{
+  "verdict": {
+    "outcome": 2,
+    "achieved_m": 0.028092597485272566,
+    "attempts": 3,
+    "detail": "short by 0.0619 m after 3 attempts"
+  },
+  "attempts": [
+    {
+      "outcome": 1,
+      "error_code": 27,
+      "status": 2,
+      "displacement_m": 0.0028481729502990234,
+      "displacement_along_direction_m": 0.0011040226622751614,
+      "direction_cos": 0.38762486742922425,
+      "lateral_m": 0.002625494809551507,
+      "delta_z_m": -3.4787354772497503e-07,
+      "requested_distance_m": 0.09,
+      "ee_travel_m": 0.16000000000000003,
+      "reach_error_m": 0.004814138637311568,
+      "contact_made": false,
+      "contact_lost": false,
+      "increments_executed": 5,
+      "contact_lost_at_increment": 0,
+      "carry_engaged_during": false,
+      "evidence_id": "recover-target_box_a-66ec9517",
+      "detail": "object moved 0.0028m (< contact floor 0.0050); no contact was made at height 0.0200"
+    },
+    {
+      "outcome": 1,
+      "error_code": 28,
+      "status": 2,
+      "displacement_m": 0.025244424534973543,
+      "displacement_along_direction_m": -0.025148393983718487,
+      "direction_cos": -0.9961959698815073,
+      "lateral_m": 0.0016578960990609745,
+      "delta_z_m": -0.001445901333550926,
+      "requested_distance_m": 0.08715182704970097,
+      "ee_travel_m": 0.07486073081988043,
+      "reach_error_m": 0.006239634277547825,
+      "contact_made": true,
+      "contact_lost": true,
+      "increments_executed": 2,
+      "contact_lost_at_increment": 2,
+      "carry_engaged_during": false,
+      "evidence_id": "recover-target_box_a-f98d7e32",
+      "detail": "contact lost at increment 2: object moved 0.0252m of 0.0872m requested while the arm kept advancing"
+    },
+    {
+      "outcome": 1,
+      "error_code": 30,
+      "status": 2,
+      "displacement_m": 0.0,
+      "displacement_along_direction_m": 0.0,
+      "direction_cos": 0.0,
+      "lateral_m": 0.0,
+      "delta_z_m": 0.0,
+      "requested_distance_m": 0.0,
+      "ee_travel_m": 0.0,
+      "reach_error_m": 0.0,
+      "contact_made": false,
+      "contact_lost": false,
+      "increments_executed": 0,
+      "contact_lost_at_increment": 0,
+      "carry_engaged_during": false,
+      "evidence_id": "recover-target_box_a-2d126ef3",
+      "detail": "approach failed: IK pre-check failed: NO_IK_SOLUTION for link end_effector_link"
+    }
+  ]
+}
