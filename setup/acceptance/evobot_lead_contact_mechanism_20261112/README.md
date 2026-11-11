@@ -158,3 +158,40 @@ That is ~6 short runs with existing tooling, and it is the difference between an
 face push. **Until that calibration exists, no amount of retry budgeting, threshold discussion or
 extra trials will change the outcome**, which is consistent with everything this round measured:
 5/5 forwards, 5/5 backwards, same geometry, same command.
+
+---
+
+## 9. The URDF confirms it — this is not an inference from behaviour
+
+§8 traced the offset to code. `check_ee_frame_geometry.py` checks the **robot description**, which is
+the primary source and does not depend on any run:
+
+| link | visual | collision | collision mesh |
+| --- | --- | --- | --- |
+| `gripper_left_link` | yes | **yes** | `gripper_left_palm.stl` |
+| `gripper_right_link` | yes | **yes** | `gripper_right_palm.stl` |
+| `end_effector_link` | yes (box 0.01³) | **NONE** | — |
+
+| joint | type | origin from `link5` |
+| --- | --- | --- |
+| `gripper_left_joint` | prismatic | (0.0817, +0.021, 0) |
+| `gripper_right_joint` | prismatic | (0.0817, −0.021, 0) |
+| `end_effector_joint` | fixed | (0.126, 0, 0) |
+
+Three facts follow, and none of them requires a simulation:
+
+1. **`end_effector_link` has no collision geometry.** A pose commanded for it cannot be a statement
+   about where the robot touches anything. `push.py` commands exactly that frame
+   (`contact_pose` → `move_to` → `push_targets`), all at constant z = `contact_height_m`.
+2. **The contacting bodies are the palms**, and their meshes are named `*_palm`, not `*_finger`. The
+   frame the skill positions is **44.3 mm forward** of the palm origins along `link5` x
+   (0.126 − 0.0817), so there is a fixed, unmodelled geometric relationship between
+   `contact_height_m` and the height at which anything actually touches the block.
+3. Therefore **`contact_height_m` is a bookkeeping parameter, not a contact parameter.** The
+   measured +15 mm offset is the symptom; this is the cause.
+
+**This is why §2's refutation of the geometry hypotheses matters and does not contradict §8–9.** The
+flick is not caused by *where on the block* contact happens (refuted, §3); it is caused by the
+contact being an **edge grazing** rather than a face push, which follows from the frame mismatch
+established here. Two different claims, both true: contact *position* does not predict the flick,
+and the *frame mismatch* guarantees the contact is a graze.
