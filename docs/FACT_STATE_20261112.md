@@ -713,4 +713,18 @@ destination. Recovery did not rescue a task; it undid one.
 | Still wrong, stated plainly | (1) `validated: True` on the four legacy records still does not mean reviewed, so **two conventions coexist under a misleading name**; (2) **no independent reviewer has signed either new record** — `reviewed_by`/`review_verdict`/`review_ref` are `None`, and **provenance verification is not review**; (3) `source_run` still names a run **directory**, not a single artifact | same |
 | Seeder capability added | `--append` mode, justified because append is inherently safe (dedup by `record_sha256`, never rewrites, never deletes) and without it the store could never gain a record after the old seeder's first run | — |
 
+---
+
+## ADDENDUM — goal round 16 (2026-11-12): provenance now verifies NUMBERS, and still cannot catch a false lesson
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| The round-15 hole | **CLOSED.** `evidence_strings()` skipped every number, so `error_code 99` passed in place of 60 — demonstrated by the reviewer. Numeric and boolean facts are now checked **structurally**: they must match a **typed field value in a parsed JSON object** | `evobot_lead_numeric_provenance_20261112/` |
+| Why not a substring test | `60` occurs in timestamps, coordinates and ports, so a text search proves nothing. `_matches` also refuses `True == 1` | same |
+| Tests | **11/11**, two of them built from the reviewer's own corruptions: `error_code 99` → REJECT, and `error_code 0` present only as a substring of `60` → REJECT | `evolution/experience/test_verify_provenance.py` |
+| Against the six real records | the 2 genuine ones still **PASS with their error codes verified**; the 4 legacy ones still **FAIL** | same |
+| **The reviewer's fix 4 remains OPEN and it is the one that matters** | provenance proves **the failure happened and its code**; it does **not** prove the lesson follows. **Both rejected records would still pass every check in the verifier — real evidence, real error codes, false lessons.** What caught them was a human-readable review, **not a check**, and no check yet written would have caught them | same |
+| A test had to change | *"evidence is all numbers -> REJECT"* asserted the **old, wrong** behaviour. Numbers are verifiable now, so its premise was obsolete, not its expectation | same |
+| Did NOT add a corrected record | The reviewer supplied the true finding (a control/tooling fact about ±28 mm spread vs 50 mm clearance). **Not added** — authoring another lesson before the check exists that catches false ones is exactly how round 14 produced two wrong records. Store stays at 6 records, 2 provenance-verified, **0 review-grade**, retrieval 0 lessons | — |
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**

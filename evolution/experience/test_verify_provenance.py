@@ -41,9 +41,24 @@ def run():
         ok, files, why = vp.verify_provenance(os.path.join(tmp, 'nope'), ev)
         results.append(('source_run missing -> REJECT', ok is False, why))
 
-        # 4. evidence is all numbers -> reject: nothing is checkable
+        # 4. a NUMBER is now verified structurally, not skipped. This was the reviewer's
+        #    demonstration: error_code 99 passed the old check because numbers were ignored.
         ok, files, why = vp.verify_provenance(d1, {'error_code': 60})
-        results.append(('evidence has no verifiable string -> REJECT', ok is False, why))
+        results.append(('correct error_code 60 -> ACCEPT', ok is True, why))
+
+        ok, files, why = vp.verify_provenance(d1, {'error_code': 99})
+        results.append(('CORRUPTED error_code 99 -> REJECT', ok is False, why))
+
+        ok, files, why = vp.verify_provenance(d1, {'outcome': 0})
+        results.append(('CORRUPTED outcome 0 (not in file) -> REJECT', ok is False, why))
+
+        # a number that only appears as a SUBSTRING elsewhere must not satisfy the check
+        ok, files, why = vp.verify_provenance(d1, {'error_code': 0})
+        results.append(('error_code 0 as substring only -> REJECT', ok is False, why))
+
+        # type matters: the string '60' is not the integer 60
+        ok, files, why = vp.verify_provenance(d1, {'error_code': '60'})
+        results.append(('error_code as STRING not int -> REJECT', ok is False, why))
 
         # 5. partial: one string found, one missing -> reject
         ok, files, why = vp.verify_provenance(d1, {'detail': 'declared destination occupied',

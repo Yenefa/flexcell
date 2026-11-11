@@ -33,25 +33,29 @@ DEFAULT_STORE = WT / "evolution" / "experience" / "records.jsonl"
 LEDGER = "review_ledger.jsonl"
 
 
-def _rejected_shas(store_path):
-    """record_sha256 values an independent reviewer rejected. Absent ledger = nothing rejected."""
+def _review_verdicts(store_path):
+    """record_sha256 -> latest independent verdict. Absent ledger means NOTHING is approved."""
     import json as _json
     import os as _os
     path = _os.path.join(_os.path.dirname(str(store_path)), LEDGER)
     if not _os.path.exists(path):
-        return set()
-    out = set()
+        return {}
+    out = {}
     try:
         for line in open(path, encoding="utf-8"):
             line = line.strip()
             if not line:
                 continue
             entry = _json.loads(line)
-            if entry.get("verdict") == "REJECT":
-                out.add(entry.get("record_sha256"))
+            out[entry.get("record_sha256")] = entry.get("verdict")
     except (OSError, ValueError):
-        return set()
+        return {}
     return out
+
+
+def _rejected_shas(store_path):
+    """Kept for callers that only need the rejected set."""
+    return {k for k, v in _review_verdicts(store_path).items() if v == "REJECT"}
 
 
 def retrieve(observation, store_path=DEFAULT_STORE, limit=3):
@@ -89,10 +93,14 @@ def retrieve(observation, store_path=DEFAULT_STORE, limit=3):
     # false - the plan was correct in both and a 9.65 mm placement error inside the accepted 20 mm
     # tolerance broke the next stage. A wrong lesson that passes provenance is WORSE than a record
     # that fails provenance, because this path would act on it.
-    rejected = _rejected_shas(store_path)
+    # FAIL-CLOSED ON REVIEW (round 16). A record needs an explicit independent ACCEPT before it may
+    # influence a plan. Merely "not yet rejected" is not enough: in round 14 two provenance-verified
+    # records were retrievable BEFORE anyone reviewed them, and the review then found both lessons
+    # false. Provenance proves the evidence exists; it says nothing about whether the lesson follows.
+    verdicts = _review_verdicts(store_path)
     verified = [r for r in all_rows
                 if r.get("provenance_verified") is True
-                and r.get("record_sha256") not in rejected]
+                and verdicts.get(r.get("record_sha256")) == "ACCEPT"]
     if any(r.get("provenance_verified") is True for r in all_rows):
         # This store uses provenance. Do NOT fall back to unverified records just because every
         # verified one was rejected - an empty retrieval is the honest answer.
