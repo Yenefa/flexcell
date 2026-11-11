@@ -1,0 +1,173 @@
+# The ~30% false-failure rate is one defect: `place` uses gripper aperture to decide whether an object was released
+
+**Date** 2026-11-12 · **Found by** the Lead, following the audit's observation that both P0 arms fail ~30% of runs on a world-correct outcome
+**Status: CONFIRMED. Root cause identified with a single mechanism. Fix NOT applied — needs human approval.**
+
+---
+
+## 1. The observation being explained
+
+Both P0 arms show the executor reporting failure on runs where the world ended correct:
+
+| | A-prime | B (archived) |
+| --- | --- | --- |
+| `execution_succeeded` | 9/16 | 11/16 |
+| `independent_evaluation_passed` | 13/16 | 14/16 |
+| gap | **4** | **3** |
+
+Four A-prime runs and three B runs have a **failed executor verdict on a world-correct outcome**. That
+is not noise; it is a measurement system reporting a false failure on both arms.
+
+## 2. Every failure is the same failure
+
+All seven A-prime execution failures carry the identical chain:
+
+```
+composite : error_code=62  "native terminal/verification unconfirmed for <stage>"
+  ← pick_place_v1 : outcome=1  error_code=50 (ERR_SKILL_FAILED)
+    ← place : error_code=25  detail="gripper did not open (position=-0.011 requested=0.02 stalled=True)"
+    ← episode final_state: "policy abort (NON_RECOVERABLE): place failed (ERR_PLACE_FAILED,
+       carried box is not retried) (trace=PICK_A(attempt=1):OK, PLACE_A:FAIL)"
+```
+
+`PICK_A:OK` — **the pick succeeded every time.** The failure is always at `PLACE_A`, always for the
+same reason, and always the gripper."
+
+Frequency, from the `place.jsonl` of every run in both arms:
+
+| arm | place attempts | `gripper did not open` | rate |
+| --- | --- | --- | --- |
+| A-prime (16 runs) | 29 | **7** | 24 % |
+| B archived (16 runs) | 34 | **5** | 15 % |
+| **total** | **63** | **12** | **19 %** |
+
+And at **run** level, which is what any per-run verdict sees:
+
+| arm | runs | runs with a false release denial | rate |
+| --- | --- | --- | --- |
+| A-prime | 16 | **7** | 44 % |
+| B archived | 16 | **5** | 31 % |
+| **total** | **32** | **12** | **37.5 %** |
+
+**Between a third and a half of runs on both arms have `place` denying a release that the carry backend performed.** Every one of those run verdicts is wrong about the world.
+
+## 3. The mechanism
+
+### 3.1 The trigger, read from the code
+
+`place_server.py:424-432`:
+
+```python
+if (open_state["position"] is not None
+        and open_state["aperture_error"] is not None
+        and open_state["aperture_error"] > self._release_aperture_tolerance_m
+        and not open_state["reached_goal"]):
+    return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED, 'gripper did not open (...)')
+res.released = True
+```
+
+With `gripper_open_position = 0.02` and `release_aperture_tolerance_m = 0.005` (`:68-69`).
+
+### 3.2 The aperture band is narrower than the actuator's own shortfall
+
+The G1 calibration measured the gripper's **free-space** open position: **0.010434** against a
+request of **0.02**. So even with nothing between the fingers, `aperture_error = 0.0096 m` —
+**nearly twice the 0.005 m tolerance**.
+
+**The check therefore passes only because `reached_goal` rescues it.** It is one flag away from
+rejecting every single placement. That is a fragile predicate, and it is now measured rather than
+suspected.
+
+### 3.3 The gripper has nothing to do with whether the box is held
+
+From the same run's `carry.jsonl`, the carry is a **`velocity_servo` pin**:
+
+```
+{"event": "start", "object": "target_box_b", "backend": "velocity_servo",
+ "offset": [0.0049, -0.0052, -0.1638], ...}
+```
+
+The offset's z component is **−163.8 mm** — the box is pinned kinematically, a sixth of a metre from
+the tool frame. **The fingers never touch the box.** This is the same quantity as T04's
+`pick.attach_gap_m = 0.1646 m`, reached here from a completely different direction.
+
+**So the gripper aperture cannot be evidence about the object.** It reports the state of a mechanism
+that is not participating in the transport.
+
+### 3.4 And the object IS released — the record says it is not
+
+`place_server` returns `released: false`. The carry log for the same run:
+
+```
+{"event": "stop", "object": "target_box_a", "cause": "release", "engaged": true, ...}
+```
+
+**`cause: release`.** The pin is released on abort, dropping the box exactly where it was carried —
+which is the destination. That is why four of the seven A-prime "failures" still evaluate as passes:
+the task was completed and the skill denied it.
+
+## 4. The claim, stated exactly
+
+> `place_server` treats **gripper aperture** as its release predicate. On this stack the object is
+> transported by a `velocity_servo` **pin**, not by the fingers, so aperture is not evidence about the
+> object. When the gripper misses its 20 mm target — which it does even in free space, reaching 10.4 mm —
+> the check depends entirely on `reached_goal`. When that is also false, `place` reports
+> `ERR_PLACE_FAILED` and `released: false` **while the carry pin releases the box at the correct
+> destination**. The world is right and the verdict is wrong.
+
+**This is a False Failure mechanism, and the goal requires False Failure to be reported.**
+
+## 5. The same mistake, twice in this project
+
+| where | aperture used to detect | refuted by |
+| --- | --- | --- |
+| **T08 push gate** (`verify.py:302`) | "the fingers stop against the object's width" → a grasp | round 2: closing on a block and closing on air differ by **0.42 mm**; the gate measures drive completion |
+| **place release** (`place_server.py:424`) | "gripper reached open" → the object was released | this round: the pin carries the box 164 mm from the tool; `cause: release` fires regardless of aperture |
+
+**Both use a gripper-state proxy for an object-level event, and on this stack both are wrong for the
+same reason: the object is moved by a carry mechanism the gripper does not participate in.**
+
+That is worth stating as a project-level lesson rather than two separate bugs: **on this robot,
+gripper telemetry is not evidence about objects.**
+
+## 6. The fix, and why I am not applying it
+
+The predicate should read the **carry state**, which already exists and is already logged:
+
+```
+carry.jsonl -> {"event": "stop", "cause": "release", "engaged": true}
+```
+
+`released` should be set from the carry backend's release confirmation, not from the gripper. The
+gripper check can remain as a *diagnostic* — it just must not be the **release predicate**, and its
+failure must not override a released carry.
+
+**Not applied**, because `place_server.py` is a frozen skill contract and this is a behaviour change
+to a release predicate. It is the **same item** I raised in round 1 and it is still awaiting approval:
+
+> round 1: "`place_server.py` release predicate — fix location = `place_server.py`, NOT the contract;
+> the contract exposes `released` and the skill discards it"
+
+Round 1 identified the location. This round identifies the **mechanism and its cost**: 19 % of place
+attempts on both P0 arms, 7 of 16 A-prime run verdicts, and every T04-style "place failed but the box
+is where it should be" case.
+
+## 7. What this changes about every number measured so far
+
+| measurement | effect |
+| --- | --- |
+| A-prime 13/16 evaluation vs B 14/16 | **task-level numbers are unaffected** — they read the world, not the verdict |
+| A-prime 9/16 execution vs B 11/16 | **these are the contaminated numbers.** They count verdicts, and 19 % of place attempts produce a false failure |
+| T08 numbers | unaffected — push does not go through `place` |
+| Any future "success rate" quoting execution verdicts | must be read as a **lower bound** until this is fixed |
+
+**Practical consequence: every execution-based failure rate this project has reported is an
+overestimate, by an amount that this defect sets at roughly one run in five.**
+
+## 8. Reproduce
+
+```bash
+python3 setup/acceptance/evobot_lead_place_release_predicate_20261112/analyse_place_failures.py
+```
+
+Reads the committed `place.jsonl`, `carry.jsonl` and episodes from both arms. Offline, no simulator.
