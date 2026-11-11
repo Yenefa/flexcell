@@ -613,4 +613,22 @@ destination. Recovery did not rescue a task; it undid one.
 | What is NOT claimed | T08 is **not** solved (one run, one seed, one configuration); the skill is **not** broken (it correctly refused a push beyond what was asked); the recorded 0/6 was **not** false | — |
 | **T08 skill-level** | **unchanged at 0/6** by the mission's skill-level definition (the skill self-certified nothing). What changed is `execution_succeeded` against the task criterion: **1/1 on dev**, versus 1/7 previously observed on unseen at the wrong height | — |
 
+---
+
+## ADDENDUM — goal round 9 (2026-11-12): the round-8 result does NOT generalise. 2 of 6.
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| Round 8's "working configuration" | **OVER-READ — CORRECTED.** Six instances frozen by sha256 **before any run** (`t08_fresh_zone_20261112/freeze_manifest.json`), pre-registered prediction **6 of 6**, measured **2 of 6**. The prediction is **FALSIFIED** | `evobot_lead_t08_fresh_unseen_20261112/` |
+| **The push is not repeatable** | **CONFIRMED.** Identical commands (`contact_height_m = 0.0175`, `overdrive_m = 0.005`, `distance_m = 0.09`, same direction) produced displacements **0.000, 0.013, 0.036, 0.041, 0.082, 0.102 m** — a spread of **0 to 102 mm from one command** | same |
+| What round 8 actually was | **one draw from a wide distribution**, not a configuration that works. The correct reading of 0.1058 m is a lucky sample, not evidence of capability | same |
+| What the contact-height change bought | **a higher ceiling, not reliability.** Max observed rose 69.9 mm (at 0.0200) → **101.8 mm** (at 0.0175); contact was still lost in **4 of 6** runs. **Necessary and not sufficient** | same |
+| T08's remaining blocker | **CONTACT REPEATABILITY — a control problem, not geometry.** Not reach (rounds 6–7 were wrong), not contact height alone (round 8 was over-read) | same |
+| Task-clause satisfaction at the corrected height | **2 of 6 fresh unseen = 33 %.** Previously 0 of the recorded runs at 0.0200 | same |
+| `unmoved: target_box_b` | **UNMEASURED** in this experiment — the push action measures only the pushed object. A pass here is a **push-clause pass**, not a whole-task pass | same |
+| Failure attribution | 4 runs **Control** (contact lost partway, measured). `seed5002` `ec=30 ERR_MOTION_FAILED` with 0 mm recorded **UNKNOWN** — one sample cannot separate control, transient and harness causes | same |
+| T08 skill-level | **0/6, unchanged** — the skill certified nothing on any of the six | same |
+| **Generalisation** | **NOT CLAIMED.** The instances are spent; re-tuning on them and re-running would be the manufactured-success pattern the freeze manifest exists to prevent | — |
+| A first instance set (seeds 4000–4005) | **GENERATED AND DISCARDED UNRUN.** `/home/ros/flexcell-p14/scripts/sim_profile.py` always spawns `target_box_a` at **(0.22, 0.0)** — it cannot place an arbitrary box pose — so those instances would have graded against a zone while the simulator put the block elsewhere. Replaced by a set that varies the **zone** only, which narrows the claim to **generalisation over zone placement** | same |
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
