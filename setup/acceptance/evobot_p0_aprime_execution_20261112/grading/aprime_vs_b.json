@@ -1,0 +1,456 @@
+{
+  "n": 16,
+  "aprime": {
+    "planning": 16,
+    "execution": 9,
+    "eval_first": 9,
+    "eval_after_recovery": null,
+    "model_calls": 0
+  },
+  "b": {
+    "planning": 16,
+    "execution": 11,
+    "eval_first": 14,
+    "eval_after_recovery": 16,
+    "model_calls": 16
+  },
+  "rows": [
+    {
+      "task_id": "HO-0dcde4dc0f5a",
+      "planning_correct": true,
+      "plan_sequence": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "required_order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "outcome": 0,
+      "error_code": 0,
+      "detail": "all native stages and fresh joint conditions confirmed",
+      "completed_stage_ids": [
+        "target_box_b-0",
+        "target_box_a-1"
+      ],
+      "execution_succeeded": true,
+      "gt_source": "GZ_GROUND_TRUTH",
+      "evaluation_passed": true,
+      "failed_clauses": [],
+      "observed_sequence": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "evaluator_version": "0.5.0"
+    },
+    {
+      "task_id": "HO-128c6a231c34",
+      "planning_correct": true,
+      "plan_sequence": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "required_order": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "outcome": 0,
+      "error_code": 0,
+      "detail": "all native stages and fresh joint conditions confirmed",
+      "completed_stage_ids": [
+        "target_box_a-0",
+        "target_box_b-1"
+      ],
+      "execution_succeeded": true,
+      "gt_source": "GZ_GROUND_TRUTH",
+      "evaluation_passed": true,
+      "failed_clauses": [],
+      "observed_sequence": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "evaluator_version": "0.5.0"
+    },
+    {
+      "task_id": "HO-2efba46248da",
+      "planning_correct": true,
+      "plan_sequence": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "required_order": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "outcome": 0,
+      "error_code": 0,
+      "detail": "all native stages and fresh joint conditions confirmed",
+      "completed_stage_ids": [
+        "target_box_a-0",
+        "target_box_b-1"
+      ],
+      "execution_succeeded": true,
+      "gt_source": "GZ_GROUND_TRUTH",
+      "evaluation_passed": true,
+      "failed_clauses": [],
+      "observed_sequence": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "evaluator_version": "0.5.0"
+    },
+    {
+      "task_id": "HO-40348a081df6",
+      "planning_correct": true,
+      "plan_sequence": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "required_order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "outcome": 1,
+      "error_code": 62,
+      "detail": "native terminal/verification unconfirmed for target_box_b-0",
+      "completed_stage_ids": [],
+      "execution_succeeded": false,
+      "gt_source": "GZ_GROUND_TRUTH",
+      "evaluation_passed": false,
+      "failed_clauses": [
+        "order"
+      ],
+      "observed_sequence": [],
+      "evaluator_version": "0.5.0"
+    },
+    {
+      "task_id": "HO-4dafd8d17858",
+      "planning_correct": true,
+      "plan_sequence": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "required_order": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "outcome": 0,
+      "error_code": 0,
+      "detail": "all native stages and fresh joint conditions confirmed",
+      "completed_stage_ids": [
+        "target_box_a-0",
+        "target_box_b-1"
+      ],
+      "execution_succeeded": true,
+      "gt_source": "GZ_GROUND_TRUTH",
+      "evaluation_passed": true,
+      "failed_clauses": [],
+      "observed_sequence": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "evaluator_version": "0.5.0"
+    },
+    {
+      "task_id": "HO-4dbb21d087ae",
+      "planning_correct": true,
+      "plan_sequence": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "required_order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "outcome": 1,
+      "error_code": 62,
+      "detail": "native terminal/verification unconfirmed for target_box_a-1",
+      "completed_stage_ids": [
+        "target_box_b-0"
+      ],
+      "execution_succeeded": false,
+      "gt_source": "GZ_GROUND_TRUTH",
+      "evaluation_passed": false,
+      "failed_clauses": [
+        "order"
+      ],
+      "observed_sequence": [
+        "target_box_b"
+      ],
+      "evaluator_version": "0.5.0"
+    },
+    {
+      "task_id": "HO-51600cf21179",
+      "planning_correct": true,
+      "plan_sequence": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "required_order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "outcome": 1,
+      "error_code": 62,
+      "detail": "native terminal/verification unconfirmed for target_box_a-1",
+      "completed_stage_ids": [
+        "target_box_b-0"
+      ],
+      "execution_succeeded": false,
+      "gt_source": "GZ_GROUND_TRUTH",
+      "evaluation_passed": false,
+      "failed_clauses": [
+        "order"
+      ],
+      "observed_sequence": [
+        "target_box_b"
+      ],
+      "evaluator_version": "0.5.0"
+    },
+    {
+      "task_id": "HO-60679893327a",
+      "planning_correct": true,
+      "plan_sequence": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "required_order": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "outcome": 0,
+      "error_code": 0,
+      "detail": "all native stages and fresh joint conditions confirmed",
+      "completed_stage_ids": [
+        "target_box_a-0",
+        "target_box_b-1"
+      ],
+      "execution_succeeded": true,
+      "gt_source": "GZ_GROUND_TRUTH",
+      "evaluation_passed": true,
+      "failed_clauses": [],
+      "observed_sequence": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "evaluator_version": "0.5.0"
+    },
+    {
+      "task_id": "HO-6173170d8c47",
+      "planning_correct": true,
+      "plan_sequence": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "required_order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "outcome": 0,
+      "error_code": 0,
+      "detail": "all native stages and fresh joint conditions confirmed",
+      "completed_stage_ids": [
+        "target_box_b-0",
+        "target_box_a-1"
+      ],
+      "execution_succeeded": true,
+      "gt_source": "GZ_GROUND_TRUTH",
+      "evaluation_passed": true,
+      "failed_clauses": [],
+      "observed_sequence": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "evaluator_version": "0.5.0"
+    },
+    {
+      "task_id": "HO-675c07e900e7",
+      "planning_correct": true,
+      "plan_sequence": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "required_order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "outcome": 1,
+      "error_code": 62,
+      "detail": "native terminal/verification unconfirmed for target_box_a-1",
+      "completed_stage_ids": [
+        "target_box_b-0"
+      ],
+      "execution_succeeded": false,
+      "gt_source": "GZ_GROUND_TRUTH",
+      "evaluation_passed": false,
+      "failed_clauses": [
+        "order"
+      ],
+      "observed_sequence": [
+        "target_box_b"
+      ],
+      "evaluator_version": "0.5.0"
+    },
+    {
+      "task_id": "HO-884ea68a42ca",
+      "planning_correct": true,
+      "plan_sequence": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "required_order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "outcome": 0,
+      "error_code": 0,
+      "detail": "all native stages and fresh joint conditions confirmed",
+      "completed_stage_ids": [
+        "target_box_b-0",
+        "target_box_a-1"
+      ],
+      "execution_succeeded": true,
+      "gt_source": "GZ_GROUND_TRUTH",
+      "evaluation_passed": true,
+      "failed_clauses": [],
+      "observed_sequence": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "evaluator_version": "0.5.0"
+    },
+    {
+      "task_id": "HO-b3fb8b1de2db",
+      "planning_correct": true,
+      "plan_sequence": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "required_order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "outcome": 0,
+      "error_code": 0,
+      "detail": "all native stages and fresh joint conditions confirmed",
+      "completed_stage_ids": [
+        "target_box_b-0",
+        "target_box_a-1"
+      ],
+      "execution_succeeded": true,
+      "gt_source": "GZ_GROUND_TRUTH",
+      "evaluation_passed": true,
+      "failed_clauses": [],
+      "observed_sequence": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "evaluator_version": "0.5.0"
+    },
+    {
+      "task_id": "HO-c79ebfe5c9e6",
+      "planning_correct": true,
+      "plan_sequence": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "required_order": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "outcome": 1,
+      "error_code": 62,
+      "detail": "native terminal/verification unconfirmed for target_box_a-0",
+      "completed_stage_ids": [],
+      "execution_succeeded": false,
+      "gt_source": "GZ_GROUND_TRUTH",
+      "evaluation_passed": false,
+      "failed_clauses": [
+        "placement:target_box_b",
+        "order"
+      ],
+      "observed_sequence": [],
+      "evaluator_version": "0.5.0"
+    },
+    {
+      "task_id": "HO-d3ab212142de",
+      "planning_correct": true,
+      "plan_sequence": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "required_order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "outcome": 0,
+      "error_code": 0,
+      "detail": "all native stages and fresh joint conditions confirmed",
+      "completed_stage_ids": [
+        "target_box_b-0",
+        "target_box_a-1"
+      ],
+      "execution_succeeded": true,
+      "gt_source": "GZ_GROUND_TRUTH",
+      "evaluation_passed": true,
+      "failed_clauses": [],
+      "observed_sequence": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "evaluator_version": "0.5.0"
+    },
+    {
+      "task_id": "HO-da7c04bdece5",
+      "planning_correct": true,
+      "plan_sequence": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "required_order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "outcome": 1,
+      "error_code": 62,
+      "detail": "native terminal/verification unconfirmed for target_box_a-1",
+      "completed_stage_ids": [
+        "target_box_b-0"
+      ],
+      "execution_succeeded": false,
+      "gt_source": "GZ_GROUND_TRUTH",
+      "evaluation_passed": false,
+      "failed_clauses": [
+        "order"
+      ],
+      "observed_sequence": [
+        "target_box_b"
+      ],
+      "evaluator_version": "0.5.0"
+    },
+    {
+      "task_id": "HO-dcf52d233154",
+      "planning_correct": true,
+      "plan_sequence": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "required_order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "outcome": 1,
+      "error_code": 62,
+      "detail": "native terminal/verification unconfirmed for target_box_b-0",
+      "completed_stage_ids": [],
+      "execution_succeeded": false,
+      "gt_source": "GZ_GROUND_TRUTH",
+      "evaluation_passed": false,
+      "failed_clauses": [
+        "order"
+      ],
+      "observed_sequence": [],
+      "evaluator_version": "0.5.0"
+    }
+  ]
+}
