@@ -73,6 +73,37 @@ acceptance dir).
 | T08 unseen instances 3000–3002 | **NOT_RUN** — zero runs | `benchmark/tasks/t08_unseen/` |
 | T08 as a usable robot capability | **NOT ACQUIRED** | `passed` false everywhere; unseen unrun; mechanism of the variance UNKNOWN |
 
+### 4.0d **FIRST T08 `passed=true` IN PROJECT HISTORY** — and it is the single-shot arm
+
+| Fact | State |
+| --- | --- |
+| `S/t3` passed with a complete same-run bundle | **CONFIRMED** — all 9 gates True, `evidence_status=COMPLETE`, `physical_outcome=PUSHED` |
+| It is a genuine push, not a carry | **CONFIRMED by Lead re-derivation**: displacement 117.32 mm in the commanded direction (cos 0.99833), gripper travel **0.0133 mm**, max lift **0.1017 mm**, 0 attachment events, max step 1.63 mm, trajectory last sample matches `gt_after` to **1 µm** |
+| Bundle bound to the run | **CONFIRMED** — `run_id t08loop-S-t3`, `rest_height_m 0.0175 == spec 0.0175` (F1/F2 bypass not in play) |
+| Arm | **S = single-shot**, one attempt, no recovery |
+| Capability level | **Simulation Tested (1 instance, 1/5)** — NOT `SINGLE-INSTANCE SUCCESS`, NOT Independently Verified, NOT Generalization Tested |
+
+**This reverses the previous round's headline.** This batch, with full bundles:
+
+| Arm | terminal | passed |
+| --- | --- | --- |
+| R (closed-loop recovery) | 1/5 | **0/5** |
+| S (single-shot) | 2/5 | **1/5** |
+
+Fisher exact on passed, valid trials only: **p = 1.0000**. On terminal: **p = 1.0000**.
+**Neither arm is distinguishable at n=5.** The correct reading is not "recovery is worse" — it is that
+**both arms are dominated by run-to-run variance** and last round's 4/5 was itself inside that variance
+(the Lead's audit already put 4/5 vs 2/5 at p=0.5238). n≈9.5 per arm would be needed to detect 80 % vs 20 %.
+
+**Dominant failure mode, both arms, 9 valid trials:** `FAIL_DIRECTION` **4** (cos ≈ −1, block driven
+*backwards*), `FAIL_LIFT` 1, `FAIL_ZONE` 1, `FAIL_OVERSHOOT` 1, `GATE_GRIPPER` 1, **PASSED 1**.
+Mechanism **UNKNOWN**; shape established (contact face not maintained; a retry cannot fix contact geometry,
+consistent with R scoring 0/5).
+
+**Incidental evidence FOR the gripper gate**, from real runs rather than a fixture: passing trial travel
+**0.0133 mm** vs rejected trials **3.057 mm** and **4.824 mm** — three orders of magnitude of separation.
+This partially answers the open calibration question in §4.0b without touching the limit.
+
 ### 4.0a The first T08 runs with a complete evidence bundle (sim lane, this round)
 
 These are the first T08 trials where `passed` is a **decidable** question rather than permanently false
