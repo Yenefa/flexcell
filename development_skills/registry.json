@@ -1,0 +1,82 @@
+{
+  "schema": "evobot-development-skills/1.0",
+  "role": "Skill Curator (permanent, event-driven)",
+  "updated": "2026-11-12",
+  "promotion_rule": "A skill is VERIFIED only with revisit data showing it reduced the targeted failure. Tests passing is necessary, not sufficient.",
+  "skills": [
+    {
+      "name": "ros2-interface-preflight",
+      "status": "PROPOSED",
+      "incidents": 6,
+      "trigger": "writing any script that builds a ROS 2 action goal or reads a message field",
+      "evidence": ["references/failure-cases.md"],
+      "entrypoints": ["scripts/preflight.py"],
+      "tests": "tests/test_preflight.py :: 11 passed, 3 mutants caught",
+      "revisit_metrics": [
+        "interface failures still occurring: NOT MEASURED",
+        "agents actually running preflight: NOT MEASURED"
+      ],
+      "related": ["benchmark/tools/check_ros_interfaces.py"]
+    },
+    {
+      "name": "simulation-process-lifecycle",
+      "status": "PROPOSED",
+      "incidents": 2,
+      "trigger": "writing or changing any process cleanup for a simulator run",
+      "evidence": ["references/failure-cases.md"],
+      "entrypoints": ["scripts/safe_pattern.py"],
+      "tests": "tests/test_safe_pattern.py :: 8 passed, 2 mutants caught",
+      "revisit_metrics": [
+        "cleanup misfires recurring: NOT MEASURED",
+        "load_after stability between batches: NOT MEASURED"
+      ]
+    },
+    {
+      "name": "evidence-level-audit",
+      "status": "PROPOSED",
+      "incidents": 2,
+      "trigger": "about to claim a verifier works, or a batch passed",
+      "evidence": ["references/failure-cases.md"],
+      "entrypoints": ["scripts/call_path_check.py"],
+      "tests": "tests/test_call_path_check.py :: 6 passed",
+      "revisit_metrics": [
+        "test-green-with-no-caller recurring: NOT MEASURED",
+        "report numbers matching reality: NOT MEASURED"
+      ]
+    },
+    {
+      "name": "effect-verification",
+      "status": "PROPOSED",
+      "incidents": 3,
+      "trigger": "after editing a file with a script, or after running a check whose output you will trust",
+      "evidence": ["references/failure-cases.md"],
+      "entrypoints": ["scripts/effect_check.py"],
+      "tests": "tests/test_effect_check.py :: 17 passed, 3 mutants caught",
+      "revisit_metrics": [
+        "empty output read as success: NOT MEASURED",
+        "mutations verified by hash: NOT MEASURED"
+      ]
+    }
+  ],
+  "rejected_as_skills": [
+    {
+      "incident": "T08 zone radius covered the starting pose",
+      "decision": "bug fix only",
+      "reason": "one-time defect, no reusable workflow"
+    },
+    {
+      "incident": "push clause graded a carry as a push",
+      "decision": "bug fix only",
+      "reason": "one-time defect"
+    },
+    {
+      "incident": "commanded contact height is not the physical contact point",
+      "decision": "case retained, no skill",
+      "reason": "single instance; mechanism still UNKNOWN"
+    }
+  ],
+  "open_questions": [
+    "All four skills are PROPOSED. None has revisit data, so none may be marked VERIFIED.",
+    "Team slot for a dedicated Skill Curator could not be created: member limit 8 reached and there is no delete-member tool available to the Lead."
+  ]
+}
