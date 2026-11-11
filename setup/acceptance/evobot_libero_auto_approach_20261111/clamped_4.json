@@ -1,0 +1,23 @@
+{
+  "task": "pick_up_the_ketchup_and_place_it_in_the_basket",
+  "index": 4,
+  "mode": "top",
+  "official_success": false,
+  "release_xy_error_m": 0.06012,
+  "log": [
+    "mode top, grasp frac 0.50, extent z 0.000..0.118, grasp z 0.059",
+    "goal ketchup_1 -> basket_1_contain_region",
+    "auto: measured height 0.118 vs threshold 0.140 -> top",
+    "grasp pose reached at eef [-0.081, -0.251, 0.105] (target z 0.059)",
+    "object after lift: [-0.111, -0.25, 0.204]",
+    "release attempt 0: object xy error 0.0415 m",
+    "release attempt 1: object xy error 0.0658 m",
+    "release attempt 2: object xy error 0.0590 m",
+    "release attempt 3: object xy error 0.0601 m",
+    "releasing at object xy error 0.0601 m",
+    "episode terminated during run: False",
+    "success trace: [False, False, False, False]",
+    "object final [-0.008, 0.209, 0.072]"
+  ],
+  "perception": "ORACLE"
+}

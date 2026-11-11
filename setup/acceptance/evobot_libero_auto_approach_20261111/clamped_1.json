@@ -1,0 +1,23 @@
+{
+  "task": "pick_up_the_cream_cheese_and_place_it_in_the_basket",
+  "index": 1,
+  "mode": "top",
+  "official_success": false,
+  "release_xy_error_m": 0.3732,
+  "log": [
+    "mode top, grasp frac 0.50, extent z 0.000..0.048, grasp z 0.024",
+    "goal cream_cheese_1 -> basket_1_contain_region",
+    "auto: measured height 0.048 vs threshold 0.140 -> top",
+    "grasp pose reached at eef [0.046, -0.103, 0.03] (target z 0.024)",
+    "object after lift: [0.046, -0.102, 0.009]",
+    "release attempt 0: object xy error 0.3732 m",
+    "release attempt 1: object xy error 0.3732 m",
+    "release attempt 2: object xy error 0.3732 m",
+    "release attempt 3: object xy error 0.3732 m",
+    "releasing at object xy error 0.3732 m",
+    "episode terminated during run: True",
+    "success trace: [False, False, False, False]",
+    "object final [0.046, -0.102, 0.009]"
+  ],
+  "perception": "ORACLE"
+}

@@ -15,8 +15,8 @@
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 58,
-    "batches_live": 51,
+    "batches_total": 59,
+    "batches_live": 52,
     "batches_superseded": 7,
     "verifier_failures": 0,
     "live_batches": [
@@ -134,6 +134,11 @@
         "batch": "evobot_libero_adapter_20261111",
         "verified": "PASS",
         "rung": "LIBERO adapter (pose->delta; all phases run; grasp fails - object never moves; reach probe rules out reach limit)"
+      },
+      {
+        "batch": "evobot_libero_auto_approach_20261111",
+        "verified": "PASS",
+        "rung": "Auto approach from geometry: single system 3/5 (each fixed policy was 2/5); two alternatives refuted"
       },
       {
         "batch": "evobot_libero_geometry_grasp_20261111",

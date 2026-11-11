@@ -1,0 +1,24 @@
+{
+  "task": "pick_up_the_salad_dressing_and_place_it_in_the_basket",
+  "index": 2,
+  "mode": "side_x",
+  "official_success": false,
+  "release_xy_error_m": 0.37302,
+  "log": [
+    "mode side_x, grasp frac 0.50, extent z -0.069..0.117, grasp z 0.024",
+    "goal salad_dressing_1 -> basket_1_contain_region",
+    "auto: measured height 0.187 vs threshold 0.140 -> side_x",
+    "lateral standoff reached at eef [0.166, -0.101, 0.03]",
+    "grasp pose reached at eef [0.117, -0.108, 0.051] (target z 0.024)",
+    "object after lift: [0.05, -0.1, 0.073]",
+    "release attempt 0: object xy error 0.3730 m",
+    "release attempt 1: object xy error 0.3730 m",
+    "release attempt 2: object xy error 0.3730 m",
+    "release attempt 3: object xy error 0.3730 m",
+    "releasing at object xy error 0.3730 m",
+    "episode terminated during run: True",
+    "success trace: [False, False, False, False]",
+    "object final [0.05, -0.1, 0.073]"
+  ],
+  "perception": "ORACLE"
+}

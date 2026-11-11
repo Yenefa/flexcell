@@ -1,0 +1,21 @@
+{
+  "task": "pick_up_the_alphabet_soup_and_place_it_in_the_basket",
+  "index": 0,
+  "mode": "top",
+  "official_success": true,
+  "release_xy_error_m": 0.00394,
+  "log": [
+    "mode top, grasp frac 0.50, extent z -0.051..0.081, grasp z 0.015",
+    "goal alphabet_soup_1 -> basket_1_contain_region",
+    "auto: measured height 0.131 vs threshold 0.140 -> top",
+    "grasp pose reached at eef [-0.102, -0.249, 0.044] (target z 0.015)",
+    "object after lift: [-0.114, -0.243, 0.171]",
+    "release attempt 0: object xy error 0.0130 m",
+    "release attempt 1: object xy error 0.0039 m",
+    "releasing at object xy error 0.0039 m",
+    "episode terminated during run: True",
+    "success trace: [True, True, True, True]",
+    "object final [0.019, 0.255, 0.135]"
+  ],
+  "perception": "ORACLE"
+}

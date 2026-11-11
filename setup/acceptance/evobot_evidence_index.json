@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 58,
-  "live": 51,
+  "batches": 59,
+  "live": 52,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -161,7 +161,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 50,
+        "live_batches": 51,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",
@@ -398,7 +398,7 @@
       "verdict": {
         "verdict": "EVOBOT_LADDER_DERIVED_AND_CURRENT",
         "regenerated_identically": true,
-        "batches_live": 50,
+        "batches_live": 51,
         "verifier_failures": 0,
         "reports_both_directions": true,
         "zero_is_qualified": true,
@@ -442,6 +442,37 @@
           "native": false
         },
         "evobot_gazebo_stack_touched": false
+      }
+    },
+    {
+      "batch": "evobot_libero_auto_approach_20261111",
+      "verified": "PASS",
+      "rung": "Auto approach from geometry: single system 3/5 (each fixed policy was 2/5); two alternatives refuted",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_LIBERO_AUTO_APPROACH_THREE_OF_FIVE",
+        "single_system_solved": [
+          0,
+          1,
+          3
+        ],
+        "top_alone": [
+          0,
+          1
+        ],
+        "side_alone": [
+          1,
+          3
+        ],
+        "rule": "measured height <= 0.140 m -> top, else side_x",
+        "refuted_alternatives": {
+          "clamp_geometry_to_table": "1/5, worse",
+          "side_y_on_tall_bottles": "both still fail, 504 and 651 mm release error"
+        },
+        "remaining_failures": "the two tallest bottles (0.186/0.187 m); mechanism located, not fixed",
+        "llm_involvement": "none - this is a deterministic geometry rule, i.e. the strong baseline",
+        "perception": "ORACLE",
+        "evaluator_touched": false
       }
     },
     {
