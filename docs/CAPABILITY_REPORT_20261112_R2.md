@@ -3,11 +3,12 @@
 **按 goal §20A：明确区分 Existing / Newly Acquired / Failed / Unverified / Requires Human Approval。**
 等级阶梯不越级：Designed → Implemented → Unit Tested → Simulation Tested → Independently Verified → Generalization Tested。
 
-> **一句话结论**：本轮把 T08 从「不可判定」推进到「可判定」，并拿到了**项目史上第一个 `passed=true`**——
-> 但它来自**单发臂**（S/t3，117.32 mm，九门全过，已由 Lead 独立复核），而**闭环恢复臂 0/5**。
-> 这**反转了上一轮「恢复 4/5 优于基线 2/5」的叙事**：两个臂都被 run-to-run 方差主导（Fisher p=1.0），
-> n=5 无法给两臂排序。同时发现验收器**不能抵抗伪造的产出方**，记录器还有一个会静默摧毁有效结果的缺陷。
-> **Level 4 Develop 仍未跨过；T08 仍未成为可用能力。**
+> **一句话结论**：本轮把 T08 从「不可判定」推进到「可判定」，拿到了**项目史上第一个 `passed=true`**
+> （S/t3，117.32 mm，九门全过，Lead 独立复核），**然后证明它不迁移**——三个未见实例、两个臂、共 6 次运行，
+> **0 次通过**。dev 上 9 个有效试次 1 次通过，未见上 6 次 0 次。这**反转了上一轮「恢复 4/5 优于基线 2/5」**
+> 的叙事（本轮 R 0/5、S 1/5，Fisher p=1.0），也确立了本轮的主失效模式：**15 个有效试次中 8 次方向余弦为负**，
+> 物体被推**向反方向**。另发现验收器**不能抵抗伪造的产出方**，记录器有一个会静默摧毁有效结果的缺陷
+> （本轮已实际发生两次）。**Level 4 Develop 仍未跨过；T08 的通过不可泛化。**
 
 | 项 | 值 |
 | --- | --- |
@@ -110,6 +111,31 @@ Fisher 精确检验（有效试次）：passed **p = 1.0000**，terminal **p = 1
 
 ---
 
+## 3.4 未见实例：**0/6** —— 本轮最具决定性的结果
+
+三个冻结未见实例（`t08_unseen` seeds 3000/3001/3002）上共 6 次运行，两个臂：
+
+| 臂 | seed | terminal | passed | 位移 | 失效类别 |
+| --- | --- | --- | --- | --- | --- |
+| U（恢复） | 3000 | false | false | 147.45 mm | FAIL_OVERSHOOT |
+| U（恢复） | 3001 | false | false | 166.21 mm | FAIL_DIRECTION |
+| U（恢复） | 3002 | false | false | 118.05 mm | EVIDENCE_INCOMPLETE |
+| U_shot（单发） | 3000 | false | false | 45.79 mm | FAIL_DIRECTION |
+| U_shot（单发） | 3001 | false | false | 76.41 mm | FAIL_DIRECTION |
+| U_shot（单发） | 3002 | false | false | 54.82 mm | FAIL_DIRECTION |
+
+**0/6。dev 上那唯一一次通过不迁移。**
+
+**这些失败是真实的，不是测量事故——已专门核查**：记录器零长区间缺陷确实在未见数据上复发（seed3000 有 3 个、
+seed3001 有 1 个、seed3002 有 0 个），**但没有摧毁任何一次通过**。三次运行的 `unmoved` 子句都独立失败
+（蓝块被移动 0.030 / 0.010 / 0.050 m，容差 0.015 m），而该子句不依赖证据包。所以：
+seed3000 与 seed3001 是「终态失败 **+** 证据无效」（两者皆真），**seed3002 是「终态失败 + 证据完全有效」**——
+一次完全可测的否定。
+
+**「我们测不了」和「我们测了，失败了」是两件事**：6 次中 4 次属于后者。
+
+详见 `evobot_lead_t08_unseen_20261112/`。
+
 ## 4. Unverified（代码/文档存在，无有效执行证据）
 
 | 项 | 状态 | 依据 |
@@ -117,7 +143,7 @@ Fisher 精确检验（有效试次）：passed **p = 1.0000**，terminal **p = 1
 | **真正的 A′/B 配对执行** | **NOT_RUN** | 归档的「A′」列实为 **oracle**（72/72 字节级复现）；`evobot_p0_paired.sh` 的 Python heredoc **无法编译**，全仓无 `paired.tsv` |
 | Baseline C 完整事件链 | **NOT_RUN** | 骨架 + 离线测试，从未在 Gazebo 跑完整链 |
 | Baseline D | **UNKNOWN（未定义）** | 全仓无定义；goal §7.5 仅为建议 |
-| T08 unseen 3000–3002 | **NOT_RUN** | 本轮 arm U 尚未开始 |
+| ~~T08 unseen 3000–3002~~ | **已运行 — 0/6（见 §3.4）** | `evobot_lead_t08_unseen_20261112/` |
 | T07 / T09 / T10 | **NOT_RUN（无 spec）** | |
 | 真机 | **BLOCKED** | 无硬件 |
 | 任何 Development Skill 的有效性 | **NOT_MEASURED** | 采用率 **0/4**；见 §6 |
@@ -172,16 +198,18 @@ Fisher 精确检验（有效试次）：passed **p = 1.0000**，terminal **p = 1
 | L1 Designed | ✅ | |
 | L2 Implemented | ✅ | |
 | L3 Unit Tested | ✅ | 75 + 6 passed/14 xfail |
-| **L4 Simulation Tested（T08）** | ⚠️ **部分** | 首次出现 `passed=true`（S/t3），但合并 1/9；单实例 |
+| **L4 Simulation Tested（T08）** | ⚠️ **部分** | 首次出现 `passed=true`（S/t3），合并 1/9；单 dev 实例 |
 | **L5 Independently Verified（T08）** | ❌ | 唯一的 `passed=true` 依赖产出方诚实，而非验证器抗伪造；且 1/5 |
-| **L6 Generalization Tested（T08）** | ❌ | unseen 未跑 |
+| **L6 Generalization Tested（T08）** | ❌ **已测且失败** | unseen 6 次运行 **0 通过**（§3.4） |
 | **L4 Develop** | ❌ | 无 agent 自建新技能 |
 
 ### 不得宣称
 
 - ❌ Level 4 Develop ／ T08 SINGLE-INSTANCE SUCCESS ／ T08 Independently Verified ／ Generalization Tested
 - ❌ 「恢复策略提升了 T08 通过率」（本轮 R 0/5、S 1/5，p=1.0；上轮 4/5 亦在方差别内）
-- ❌ 「T08 已解决」（1/9 通过，单实例，unseen 未跑）
+- ❌ 「T08 已解决」（dev 1/9，**unseen 0/6**）
+- ❌ 「dev 的通过说明方法可行」（它说明四个试过的位姿里有一个容许通过）
+- ❌ 「unseen 测不了 / 证据不足所以不算」（6 次中 4 次是完全可测的否定，2 次是终态失败+证据无效，两者皆真）
 - ❌ 「S/t3 证明系统可靠」（它是**一次性**成功，同臂另 4 次全失败）
 - ❌ 「恢复臂比单发臂差」（p=1.0，两臂不可区分；报告方向反转不等于证明方向反转）
 - ❌ 任何 T08 `passed=true`（本轮一个都没有；且验证器暂不可信）
@@ -193,9 +221,10 @@ Fisher 精确检验（有效试次）：passed **p = 1.0000**，terminal **p = 1
 
 ## 9. 本轮最重要的三条结论
 
-1. **T08 仍未获得，但第一次出现了真通过的证据。** 合并 9 个有效试次 **1 次** `passed=true`（S/t3，
-   单发臂，已独立复核为真实推动）。**上一轮「恢复 4/5 > 基线 2/5」在本轮反转**（R 0/5、S 1/5，p=1.0），
-   说明两臂都被方差主导。主失效仍是**物体被推向反方向**（4/9）。
+1. **T08 仍未获得 —— 本轮把它测到了底。** dev 9 个有效试次 **1 次** `passed=true`（S/t3，单发臂，
+   独立复核为真实推动）；**未见 6 次 0 次通过**。所以那条通过是**单一位姿的偶然**，不是能力。
+   上一轮「恢复 4/5 > 基线 2/5」在本轮反转（R 0/5、S 1/5，p=1.0）。主失效：**15 个有效试次中 8 次
+   方向余弦为负**，物体被推**向反方向**，且在未见实例上**更严重**。
 2. **验收器还不能认证任何东西。** 它挡得住诚实的坏记录器，挡不住伪造的产出方；
    且记录器自身有一个会静默摧毁有效结果的缺陷。**修复前不得用 T08 `passed` 下任何结论。**
 3. **基准有 16/72 的空转子句，A′ 标签是 oracle。** 既有数字没错，但「它们代表多少真实操作」

@@ -70,7 +70,9 @@ acceptance dir).
 | `passed` (full 9-gate) for any T08 run | **NOT_RUN / always false** — driver supplies trajectory only, no contact/joint/telemetry bundle | `verdict_t*.json`: `"failure_reason": "no evidence bundle was supplied…"` |
 | Statistical significance of 2/5 → 4/5 | **NOT SIGNIFICANT** — Fisher exact two-sided **p = 0.5238**; Wilson95 [0.376,0.964] vs [0.118,0.769]; n≈22/arm needed | `setup/acceptance/evobot_lead_statistical_audit_20261112/` |
 | Ceiling risk in the recovery arm | **CONFIRMED RISK** — max 145.58 mm against the frozen 150 mm ceiling = 4.4 mm margin; a fixed-step control already produced 156.77 mm | audit doc §3 + `FIXEDSTEP_CONTROL_RESULT.md` |
-| T08 unseen instances 3000–3002 | **NOT_RUN** — zero runs | `benchmark/tasks/t08_unseen/` |
+| T08 unseen instances 3000–3002 | **RUN — 0/6.** The first generalisation measurement, and it is negative | `evobot_lead_t08_unseen_20261112/` |
+| dev pass transfers to unseen | **REFUTED** — 1 pass in 9 valid dev trials, **0 in 6 unseen** | same |
+| Are U's failures measurement artifacts? | **NO.** seed3000/seed3001 = terminal failure **+** invalid bundle (2 of 3 hit the recorder defect — predicted then confirmed); seed3002 = terminal failure with a **valid** bundle. In all three the `unmoved` clause failed independently of the bundle (blue block moved 0.030/0.010/0.050 m vs 0.015 tol). **4 of 6 are fully measured negatives** | same §3 |
 | T08 as a usable robot capability | **NOT ACQUIRED** | `passed` false everywhere; unseen unrun; mechanism of the variance UNKNOWN |
 
 ### 4.0d **FIRST T08 `passed=true` IN PROJECT HISTORY** — and it is the single-shot arm
@@ -95,8 +97,10 @@ Fisher exact on passed, valid trials only: **p = 1.0000**. On terminal: **p = 1.
 **both arms are dominated by run-to-run variance** and last round's 4/5 was itself inside that variance
 (the Lead's audit already put 4/5 vs 2/5 at p=0.5238). n≈9.5 per arm would be needed to detect 80 % vs 20 %.
 
-**Dominant failure mode, both arms, 9 valid trials:** `FAIL_DIRECTION` **4** (cos ≈ −1, block driven
-*backwards*), `FAIL_LIFT` 1, `FAIL_ZONE` 1, `FAIL_OVERSHOOT` 1, `GATE_GRIPPER` 1, **PASSED 1**.
+**Dominant failure mode, all arms, 15 valid trials (dev + unseen):** `FAIL_DIRECTION` **8** (cos < 0, block
+driven *backwards*), `FAIL_ZONE`/`FAIL_OVERSHOOT` 3, `FAIL_LIFT` 1, `GATE_GRIPPER` 1, **PASSED 1**.
+It got **worse** on unseen, not better — the strategy is unreliable in the *same specific way* everywhere,
+not merely unreliable on one pose.
 Mechanism **UNKNOWN**; shape established (contact face not maintained; a retry cannot fix contact geometry,
 consistent with R scoring 0/5).
 
@@ -157,7 +161,48 @@ block; G2 = the T08 push (have it); G3 = closed-finger sweep with no object. If 
 data-justified threshold exists. **If they overlap, aperture travel cannot distinguish grasp from
 contact on this robot and the gate needs a different observable — not a different number.**
 
-### 4.0c Limits divergence is now a live false-rejection path
+### 4.0c Limits divergence — **corrected: it is a category error, not just strictness**
+
+R/t3 failed its terminal clause on `max_lift 0.0072 m vs allowed 0.005`. The first reading was
+"the terminal layer is stricter than the spec". **That was wrong**, and the validation lane caught its own
+patch reproducing the same defect. The correct reading:
+
+| Quantity | Definition | Where used |
+| --- | --- | --- |
+| `max_vertical_m` = 0.020 | bounds **`dz = end_z − start_z`** (net vertical change) | spec; terminal clause `max_dz` |
+| `max_lift_during_m` | bounds **`lift = max_z − start_z`** (peak height, catches lift-and-return) | nowhere in the spec |
+
+**The T08 spec does not declare `max_lift_during_m` at all** (verified: spec push keys are
+`min_displacement_m, max_displacement_m, max_vertical_m, direction, min_direction_cosine, zone`).
+So `evaluate.py:327` hands `max_vertical_m` to the evidence layer **as if it were
+`max_lift_during_m`** — a bound for a *different quantity*, which **relaxes** `no_lift`.
+The terminal clause silently falls back to a hardcoded `0.005`.
+
+**Both layers are wrong in opposite directions, and neither has a spec-declared value to use.**
+This is a **category error**, not merely a divergence. F13 stays **OPEN** as a task-design question
+(the spec should either declare `max_lift_during_m` or document `0.005` as intentional).
+
+### 4.0c-bis Gripper bound: measured false-rejection rate, and why the limit still is not changed
+
+Nine trials carry gripper telemetry (R/t4's bundle is invalid for §3.3, so it has none):
+
+```
+S/t3 0.0130 mm PASS | S/t5 0.0270 | R/t2 0.1320 | S/t2 0.2340 | S/t1 0.9700 | R/t5 1.0370 | R/t3 1.2870   (all gate-ok)
+R/t1 3.0570 mm GATE-FAIL  terminal_passed=true
+S/t4 4.8240 mm GATE-FAIL  terminal_passed=true
+```
+
+**2 of 9 exceed the 2 mm bound (22 % false-rejection), and both are terminal-passing trials that the
+gripper gate alone killed.** The one clean pass sits **154× below the limit** and **235× below the
+smallest exceeding trial**.
+
+**But the distribution is bimodal with a real gap**: seven trials at 0.013–1.287 mm, then 3.057 and
+4.824 mm, **with no measurement between 1.287 and 3.057 mm**. A threshold anywhere in that gap would
+separate these nine samples — and with zero measurements inside it, **any cut point is a post-hoc choice**.
+So the data proves the bound is **too tight** and simultaneously proves it **cannot say what the right
+value is**. The limit therefore **stays at 0.002** this round — not because 2 mm is defensible, but
+because the alternative would be a number chosen after seeing the failures. The correct response is the
+G1/G2/G3 calibration experiment (§4.0b), and the fix may not be a number at all.
 
 R/t3 failed its terminal clause on `max_lift 0.0072 m vs allowed 0.005` while its displacement,
 direction and zone all passed. But the spec's own `max_vertical_m` is **0.020**, and
