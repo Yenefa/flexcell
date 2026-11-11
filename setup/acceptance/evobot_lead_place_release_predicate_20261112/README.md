@@ -293,3 +293,63 @@ if not gripper_opened:                            # diagnostic only, never fatal
 **Not applied.** `place_server.py` is a frozen skill contract and this changes a release predicate.
 It is the same item raised in round 1, now with its mechanism, its frequency, its historical reach
 and its cost to the P0 conclusion attached.
+---
+
+## 15. Refinement: what B's retry actually did (checked, not assumed)
+
+§11 says B's recovery is a retry around its own bug. I checked the mechanism rather than leaving the
+claim at that level, and two details make it more precise — and one of them is uncomfortable for the
+headline number.
+
+### 15.1 It was a FULL re-run, not a resume from a checkpoint
+
+```
+plan.json        stages: ['target_box_a-0', 'target_box_b-1']
+plan_retry.json  stages: ['target_box_a-0', 'target_box_b-1']
+plan equal: True
+```
+
+The retry replays the **identical plan from the start**. There is no inherited-stage field, no
+checkpoint resume of the physical work. So B's recovery capability is a **plain re-run of the same
+plan** — which is exactly the behaviour a flaky step rewards and a genuinely hard task does not.
+
+### 15.2 The re-run's executor succeeded — but its OWN graded verdict still failed
+
+```
+task_retry.out    : outcome=0, completed_stage_ids=['target_box_a-0','target_box_b-1'],
+                    detail='all native stages and fresh joint conditions confirmed'
+verdict_after1.json: passed=False, failed_clauses=['placement:target_box_b','order']
+```
+
+**The retry's own evaluation says FAILED.** So B's reported 16/16 after recovery is not the retry's
+verdict — it is the **final world state** evaluated once. Three different measurements of one run:
+
+| measurement | value |
+| --- | --- |
+| first attempt's executor verdict | `error_code=62` (fail) |
+| retry's executor verdict | `outcome=0` (success) |
+| retry's own graded verdict | `passed=False` — `placement:target_box_b`, `order` |
+| final world state, graded once | **pass** — this is the "16/16 after recovery" figure |
+
+This does not weaken the main finding — the first-attempt failure is still this exact defect, and the
+retry is still a re-run of the same plan. But it means **the "16/16 after recovery" number is not a
+success rate of anything.** It counts final world states, and on at least one of the two recovered
+runs the retry itself was graded as a failure.
+
+### 15.3 A misclassification worth noting for the failure-attribution requirement
+
+`recovery_decision.json` records:
+
+```
+"failure_class": "grasp",
+"measured_reason": "native place stage failed: ['PICK_A(attempt=1):OK', 'PLACE_A:FAIL']",
+"why": "measured state no longer matches the declared plan"
+```
+
+**The failure class is `grasp`, but the failing step is `PLACE` and the pick succeeded** — the reason
+string right beside it says so. The goal requires 10-category failure attribution; a classifier that
+labelled this "grasp" would put every one of these 12 runs in the wrong category, and the recovery
+policy's choice of action is keyed on that label.
+
+That is a second, smaller defect found while checking the first, and it is recorded rather than folded
+in: **the failure classifier has a category error that misattributes place failures to grasp.**
