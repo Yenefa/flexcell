@@ -665,4 +665,22 @@ destination. Recovery did not rescue a task; it undid one.
 | False Success across **every** T08 run this session | **0** | all runs |
 | T08 skill-level on unseen | **0/6, unchanged.** `agent_claimed_success` = 1 (round 10 `seed5001`) | — |
 
+---
+
+## ADDENDUM — goal round 12 (2026-11-12): P3's seven-field records, audited and independently reviewed
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| P3's "seven-field experience records **with independent review**" | **NOW DELIVERED AS A REVIEW, AND IT FAILS.** 4 records exist, hash chain intact; no review existed before this round. My audit + `gate-auditor`'s independent review give: **0 ACCEPT / 1 ACCEPT-WITH-CORRECTION / 3 REJECT** | `evobot_lead_experience_review_20261112/` (README + REVIEW.md) |
+| **The systematic cause** | **The archive holds the POST-FIX run while the evidence describes the PRE-FIX failure.** The defect was fixed before the directory was archived, so **the cited source cannot contain the evidence by construction**. A reader doing what `source_run` invites finds a **PASSING run in 3 of 4 cases** | same |
+| Verified independently by me, not accepted on report | R1's cited run **passed** — `evobot_t01_baseline_a_20261111/task.out` = `{ok:true, outcome:0, error_code:0}` while the record says `outcome: failed`. R4's `task_id` `T03-heldout-seed9000` occurs **0 times** in its cited source | same |
+| `validated: true` | **DOES NOT MEAN REVIEWED.** `store.make_record` sets `False` (`store.py:56`); **`seed_from_evidence.py:31` overwrites it to `True`** before append. It records "the seeder ran", in a field name every reader will read as "a second party checked" | same |
+| The scope guard | **DOES NOT GUARD WHAT IT CLAIMS.** All **8/8** lesson/evidence blocks pass `_check_scope`, yet **3 of 4 lessons are not planner-level**. It is a keyword denylist against smuggling *the answer* — evadable by one synonym (R4 says "landing spots", not "placement"). **A denylist is not a boundary** | same |
+| Actionability | **1 of 4** lessons could move a plan (2 HARNESS, 1 DOWNSTREAM_CODE). The one actionable lesson addresses **`error_code 64`, which appears in NO machine-readable archive file** — only in 3 README narratives | `evolution/transfer/audit_actionability.py` + my audit |
+| Exact cited evidence found in a machine-readable file | **0 of 4** (all README prose) | my audit |
+| **A recorded disagreement** | The review states R3's evidence is real ("the only one whose evidence is in actual run logs"). **Not confirmed for the cited string:** "Failed to find a free participant index for domain **213**" appears only in that batch's `README.md:19`; `runs/s1004-a1/stack.log` shows the same **class** with **domain 233**. Its broader point has a basis; its specific claim does not hold on the record as written. **Both readings recorded rather than adopting the more flattering one** | same |
+| **P4 becomes answerable with a mechanism** | **EVOLUTION_ADVANTAGE_NOT_DEMONSTRATED** — and the reason is not merely "not measured": **1 of 4 lessons could act on a plan, that lesson addresses a failure absent from every machine-readable archive file, and 0 of 4 records are re-derivable from their own cited source.** A cross-task reuse arm has nothing to reuse. **P4 itself is still not complete** — D's definition remains unformalised (`§7.5` says it must not stay undefined while also calling itself a proposal pending North Star, which is `BLOCKED_MISSION_TEXT_MISSING`) | — |
+| The review's ranked fixes | **RECORDED, NONE APPLIED.** Highest value ≈10 lines: **make the seeder assert the evidence values actually appear under `source_run`** — that alone would have rejected 3 of 4. *"The difference between a claim and a check."* | REVIEW.md |
+| What the channel does have | The hash chain, append-only design and scope guard **all exist and work**; `audit_actionability.py` had already reached the same 1/4 conclusion and is simply **not wired into the write path**. These four records are evidence the channel can be **populated** and that its integrity machinery **runs** — not that it works | same |
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
