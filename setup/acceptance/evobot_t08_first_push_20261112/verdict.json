@@ -1,0 +1,41 @@
+{
+  "evaluator_version": "0.4.0",
+  "task_id": "T08-push-seed2000",
+  "template_id": "T08_push_manipulation",
+  "passed": false,
+  "clauses": [
+    {
+      "clause": "unmoved:target_box_b",
+      "ok": true,
+      "evidence": {
+        "distance_m": 0.0,
+        "tolerance_m": 0.015
+      }
+    },
+    {
+      "clause": "push:target_box_a",
+      "ok": false,
+      "evidence": {
+        "displacement_m": 0.02855,
+        "min_displacement_m": 0.03,
+        "max_displacement_m": 0.15,
+        "vertical_m": 0.00093,
+        "max_vertical_m": 0.02,
+        "direction_cosine": 0.99805,
+        "min_direction_cosine": 0.9,
+        "zone": "zone_push",
+        "distance_m": 0.03155,
+        "radius_m": 0.06,
+        "inside_zone": true,
+        "max_lift_m": 0.00226,
+        "max_lift_allowed_m": 0.005
+      }
+    }
+  ],
+  "failed_clauses": [
+    "push:target_box_a"
+  ],
+  "agent_claimed_success": false,
+  "false_success": false,
+  "false_failure": false
+}
