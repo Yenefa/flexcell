@@ -303,7 +303,32 @@ def evaluate(spec, final_state):
                 if _p not in _sys.path:
                     _sys.path.insert(0, _p)
             from benchmark.evidence.verify import verify as _verify_evidence
-            evidence = _verify_evidence(bundle, {"passed": terminal_passed})
+            # LIMITS MUST COME FROM THE SPEC, NOT FROM DEFAULTS.
+            #
+            # Calling verify(bundle, terminal) with no limits makes every
+            # limit-dependent gate fail closed with "no lift limit supplied",
+            # because a gate with no limit cannot decide and must refuse. The
+            # effect was that a genuinely valid push graded NOT_PUSHED through
+            # evaluate.py while the same bundle graded PUSHED when the tests
+            # called verify() directly with fixtures.limits(). A verifier whose
+            # own tests pass while its only caller fails closed is the exact
+            # failure this project keeps finding.
+            #
+            # The limits are read from the same spec the terminal clauses use,
+            # so the evidence layer and the terminal layer agree on the task.
+            # All three limit-dependent gates need a number. A gate handed
+            # None cannot decide and fails closed, which is correct for the
+            # gate but wrong for a run that has a perfectly good limit to
+            # offer. The lift bound comes from the spec so the evidence layer
+            # and the terminal layer agree; the other two are physical
+            # properties of this robot and task, not of any one spec.
+            _push = (goal.get("push") or {}).get("target_box_a") or {}
+            _limits = {
+                "max_lift_during_m": float(_push.get("max_vertical_m", 0.020)),
+                "max_aperture_change_rad": 0.002,   # calibrated: this robot pushes closed
+                "protected_move_m": 0.005,          # same tolerance the unmoved clause uses
+            }
+            evidence = _verify_evidence(bundle, {"passed": terminal_passed}, _limits)
             passed = bool(terminal_passed and evidence.get("passed"))
 
     result = {

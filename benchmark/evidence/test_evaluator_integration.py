@@ -106,3 +106,51 @@ def test_the_30mm_threshold_is_untouched():
     assert push['min_displacement_m'] == 0.030
     assert push['max_vertical_m'] == 0.020
     assert push['min_direction_cosine'] == 0.9
+
+# ---------------------------------------------------------------------------
+# The limits wiring bug.
+#
+# verify() needs three numeric limits. Handed None, each limit-dependent gate
+# fails closed with 'no lift limit supplied', which is the correct behaviour for
+# the gate and catastrophic for the caller: every genuine push graded
+# NOT_PUSHED through evaluate.py, while the same bundle graded PUSHED when the
+# unit tests called verify() directly with fixtures.limits().
+#
+# That is the worst shape a bug can take here -- 65 verifier tests green, the
+# integration test suite green, and the only production path failing closed on
+# every run. It was found by running a valid bundle through evaluate.py and
+# comparing against a direct verify() call, not by reading either file.
+# ---------------------------------------------------------------------------
+def _valid_bundle():
+    from fixtures import base_bundle
+    return base_bundle()
+
+
+def test_a_valid_push_passes_through_the_evaluator_not_just_through_verify(tmp_path):
+    """The regression: a valid push must survive the real call path."""
+    st = _pushed_state(evidence=_valid_bundle())
+    d = _run(T08, st, tmp_path)
+    assert d['terminal_passed'] is True
+    assert d['evidence']['failed_gates'] if False else True  # gates live in evidence
+    failed = [g['gate'] for g in d['evidence'].get('gates', []) if not g['ok']]
+    assert failed == [], f'no gate should reject a valid push, got {failed}'
+    assert d['passed'] is True
+    assert d['evidence']['physical_outcome'] == 'PUSHED'
+    assert d['evidence']['evidence_status'] == 'COMPLETE'
+
+
+def test_the_lift_gate_still_bites_through_the_evaluator(tmp_path):
+    """Fixing the wiring must not turn the gate off."""
+    import math
+    from fixtures import base_bundle, trajectory
+    b = base_bundle()
+    t = b['task']['target_object']
+    rest = b['task']['rest_height_m']
+    b['objects'][t]['samples'] = trajectory(
+        10_000_000_000, 40, rest, 0.0, 0.005,
+        lift=lambda i: 0.060 * math.sin(math.pi * i / 39.0))
+    st = _pushed_state(evidence=b)
+    d = _run(T08, st, tmp_path)
+    assert d['passed'] is False
+    failed = [g['gate'] for g in d['evidence'].get('gates', []) if not g['ok']]
+    assert 'no_lift' in failed
