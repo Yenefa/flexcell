@@ -15,8 +15,8 @@
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 39,
-    "batches_live": 32,
+    "batches_total": 40,
+    "batches_live": 33,
     "batches_superseded": 7,
     "verifier_failures": 0,
     "live_batches": [
@@ -89,6 +89,11 @@
         "batch": "evobot_honesty_retraction_20261111",
         "verified": "PASS",
         "rung": "Retraction (false-success zero was vacuous; measured 1/32)"
+      },
+      {
+        "batch": "evobot_ladder_generated_20261111",
+        "verified": "PASS",
+        "rung": "Documentation now DERIVED (ladder regenerated from the archive; drift tests added; no regression)"
       },
       {
         "batch": "evobot_lesson_routing_20261111",

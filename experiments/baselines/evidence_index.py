@@ -74,6 +74,7 @@ RUNGS = {
     "evobot_goal_check_20261111": "Implementation + Unit Tested (recovery now verifies the world before retrying; two self-caught bugs)",
     "evobot_goal_check_ab_20261111": "Simulation Tested A/B (pointless retries 2->0, gains 0->2, safety property proven)",
     "evobot_release_mechanism_20261111": "Root cause identified (9/9 uniform: carry confirmed, gripper stalled); corrected proposal pre-registered, NOT implemented)",
+    "evobot_ladder_generated_20261111": "Documentation now DERIVED (ladder regenerated from the archive; drift tests added; no regression)",
 }
 
 
