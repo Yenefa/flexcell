@@ -1,0 +1,24 @@
+{
+  "task": "pick_up_the_black_bowl_on_the_cookie_box_and_place_it_on_the_plate",
+  "index": 3,
+  "mode": "side_x",
+  "official_success": false,
+  "release_xy_error_m": 0.16632,
+  "log": [
+    "mode side_x, grasp frac 0.50, extent z 1.024..1.193, grasp z 1.108",
+    "goal akita_black_bowl_1 -> plate_1",
+    "auto: measured height 0.168 vs threshold 0.140 -> side_x",
+    "lateral standoff reached at eef [0.155, 0.023, 1.085]",
+    "grasp pose reached at eef [0.073, 0.024, 1.114] (target z 1.108)",
+    "object after lift: [0.068, 0.024, 0.917]",
+    "release attempt 0: object xy error 0.1663 m",
+    "release attempt 1: object xy error 0.1663 m",
+    "release attempt 2: object xy error 0.1663 m",
+    "release attempt 3: object xy error 0.1663 m",
+    "releasing at object xy error 0.1663 m",
+    "episode terminated during run: True",
+    "success trace: [False, False, False, False]",
+    "object final [0.068, 0.024, 0.917]"
+  ],
+  "perception": "ORACLE"
+}

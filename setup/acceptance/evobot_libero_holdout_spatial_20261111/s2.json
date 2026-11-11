@@ -1,0 +1,24 @@
+{
+  "task": "pick_up_the_black_bowl_from_table_center_and_place_it_on_the_plate",
+  "index": 2,
+  "mode": "side_x",
+  "official_success": false,
+  "release_xy_error_m": 0.23637,
+  "log": [
+    "mode side_x, grasp frac 0.50, extent z 0.914..1.083, grasp z 0.998",
+    "goal akita_black_bowl_1 -> plate_1",
+    "auto: measured height 0.168 vs threshold 0.140 -> side_x",
+    "lateral standoff reached at eef [0.031, 0.015, 1.005]",
+    "grasp pose reached at eef [-0.064, 0.015, 1.0] (target z 0.998)",
+    "object after lift: [-0.075, 0.015, 0.898]",
+    "release attempt 0: object xy error 0.2364 m",
+    "release attempt 1: object xy error 0.2364 m",
+    "release attempt 2: object xy error 0.2364 m",
+    "release attempt 3: object xy error 0.2364 m",
+    "releasing at object xy error 0.2364 m",
+    "episode terminated during run: True",
+    "success trace: [False, False, False, False]",
+    "object final [-0.075, 0.015, 0.898]"
+  ],
+  "perception": "ORACLE"
+}

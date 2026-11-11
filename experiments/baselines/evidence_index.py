@@ -94,6 +94,7 @@ RUNGS = {
     "evobot_libero_geometry_grasp_20261111": "Geometry-derived grasp (transfer 2/5 up from 1/3; height not the lever; two distinct failure mechanisms)",
     "evobot_libero_side_grasp_20261111": "Side grasp + verified release (top solves {0,1}, side solves {1,3}; disjoint - missing approach selection)",
     "evobot_libero_auto_approach_20261111": "Auto approach from geometry: single system 3/5 (each fixed policy was 2/5); two alternatives refuted",
+    "evobot_libero_holdout_spatial_20261111": "Held-out NEGATIVE (0/10 on libero_spatial with the threshold frozen; in-sample 3/5 was a fit)",
 }
 
 

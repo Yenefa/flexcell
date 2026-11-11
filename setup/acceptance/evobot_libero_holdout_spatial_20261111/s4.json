@@ -1,0 +1,24 @@
+{
+  "task": "pick_up_the_black_bowl_in_the_top_drawer_of_the_wooden_cabinet_and_place_it_on_the_plate",
+  "index": 4,
+  "mode": "side_x",
+  "official_success": false,
+  "release_xy_error_m": 0.34099,
+  "log": [
+    "mode side_x, grasp frac 0.50, extent z 1.095..1.263, grasp z 1.179",
+    "goal akita_black_bowl_1 -> plate_1",
+    "auto: measured height 0.168 vs threshold 0.140 -> side_x",
+    "lateral standoff reached at eef [0.159, -0.125, 1.135]",
+    "grasp pose reached at eef [0.094, -0.132, 1.187] (target z 1.179)",
+    "object after lift: [0.085, -0.13, 1.063]",
+    "release attempt 0: object xy error 0.3410 m",
+    "release attempt 1: object xy error 0.3410 m",
+    "release attempt 2: object xy error 0.3410 m",
+    "release attempt 3: object xy error 0.3410 m",
+    "releasing at object xy error 0.3410 m",
+    "episode terminated during run: True",
+    "success trace: [False, False, False, False]",
+    "object final [0.085, -0.13, 1.063]"
+  ],
+  "perception": "ORACLE"
+}

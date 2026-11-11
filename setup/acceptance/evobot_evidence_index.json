@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 59,
-  "live": 52,
+  "batches": 60,
+  "live": 53,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -161,7 +161,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 51,
+        "live_batches": 52,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",
@@ -398,7 +398,7 @@
       "verdict": {
         "verdict": "EVOBOT_LADDER_DERIVED_AND_CURRENT",
         "regenerated_identically": true,
-        "batches_live": 51,
+        "batches_live": 52,
         "verifier_failures": 0,
         "reports_both_directions": true,
         "zero_is_qualified": true,
@@ -499,6 +499,34 @@
         },
         "perception": "ORACLE",
         "policy": "scripted phase controller, grasp height from measured extent",
+        "evaluator_touched": false
+      }
+    },
+    {
+      "batch": "evobot_libero_holdout_spatial_20261111",
+      "verified": "PASS",
+      "rung": "Held-out NEGATIVE (0/10 on libero_spatial with the threshold frozen; in-sample 3/5 was a fit)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_LIBERO_HELDOUT_ZERO_OF_TEN",
+        "in_sample_object_suite": "3/5 (threshold chosen on these)",
+        "held_out_spatial_suite": "0/10 with the threshold frozen",
+        "selected_mode_all_tasks": "side_x",
+        "release_errors_mm": [
+          177.2,
+          293.5,
+          236.4,
+          166.3,
+          341.0,
+          285.4,
+          266.7,
+          465.8,
+          119.4,
+          480.0
+        ],
+        "mechanism": "objects knocked away, not mis-placed - same detector as last round",
+        "conclusion": "the 3/5 was a fit to five samples, not a capability",
+        "parser_extension_disclosed": true,
         "evaluator_touched": false
       }
     },
