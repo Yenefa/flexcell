@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 37,
-  "live": 30,
+  "batches": 38,
+  "live": 31,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -122,7 +122,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 29,
+        "live_batches": 30,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",
@@ -209,6 +209,26 @@
         "skill_layer_touched": false,
         "end_to_end_validated_on_new_batch": false,
         "caveat": "validated on archived data and unit tests only, not yet on a new batch"
+      }
+    },
+    {
+      "batch": "evobot_goal_check_ab_20261111",
+      "verified": "PASS",
+      "rung": "Simulation Tested A/B (pointless retries 2->0, gains 0->2, safety property proven)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_GOAL_CHECK_VALIDATED_END_TO_END",
+        "same_instances_before_and_after": 16,
+        "pointless_retries": "2 -> 0",
+        "paired_gains": "0 -> 2",
+        "paired_losses": "0 -> 0",
+        "skipped_as_already_met": 3,
+        "refused_for_ordering": 2,
+        "checked_and_not_met": 1,
+        "safety_property": "every measured gain came from a run the check REFUSED to skip",
+        "arm_B_change_is_world_noise": true,
+        "evaluator_touched": false,
+        "skill_layer_touched": false
       }
     },
     {

@@ -1,0 +1,36 @@
+BEFORE validation rc=0
+AFTER validation rc=0
+
+same instances in both batches: 16
+
+run                  BEFORE (no goal_check) AFTER (goal_check)    
+HO-036fc9b6e66f      B=True no retry        B=True no retry       
+HO-17a85f7d07cc      B=True no retry        B=True no retry       
+HO-2536264f2908      B=True no retry        B=True no retry       
+HO-274c7aaa6485      B=True no retry        B=False retry=resume  
+HO-285d9e53fbdd      B=True no retry        B=True no retry       
+HO-2f52569ef5ca      B=True no retry        B=False retry=resume  
+HO-50237b4714a9      B=True no retry        B=True no retry       
+HO-6323db167d30      B=True no retry        B=True no retry       
+HO-802d10c045aa      B=True no retry        B=True no retry       
+HO-a69ec651037a      B=True retry=resume    B=True no retry       
+HO-d905e198fb9d      B=True no retry        B=True no retry       
+HO-e2d3ed8c2437      B=True no retry        B=False retry=resume  
+HO-e736e485c14e      B=True no retry        B=True no retry       
+HO-ec89d144824f      B=True no retry        B=True no retry       
+HO-f17c4e053953      B=True no retry        B=True no retry       
+HO-f9431f8ef925      B=True retry=resume    B=True no retry       
+
+metric                     BEFORE       AFTER
+arm B pass                 16           13
+arm R pass                 16           15
+retries issued             2            3
+RETRY AFTER PASS (pointless) 2            0
+paired gains               0            2
+paired losses              0            0
+skipped: goal already met  0            3
+goal_check refused         0            2
+
+pointless retries eliminated : True
+productive retries preserved : True
+rc=0

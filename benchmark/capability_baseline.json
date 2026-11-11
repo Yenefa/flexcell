@@ -15,8 +15,8 @@
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 37,
-    "batches_live": 30,
+    "batches_total": 38,
+    "batches_live": 31,
     "batches_superseded": 7,
     "verifier_failures": 0,
     "live_batches": [
@@ -74,6 +74,11 @@
         "batch": "evobot_goal_check_20261111",
         "verified": "PASS",
         "rung": "Implementation + Unit Tested (recovery now verifies the world before retrying; two self-caught bugs)"
+      },
+      {
+        "batch": "evobot_goal_check_ab_20261111",
+        "verified": "PASS",
+        "rung": "Simulation Tested A/B (pointless retries 2->0, gains 0->2, safety property proven)"
       },
       {
         "batch": "evobot_heldout_seal_20261111",

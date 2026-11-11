@@ -1,0 +1,52 @@
+{
+  "task_id": "HO-2f52569ef5ca",
+  "initial_objects": [
+    {
+      "object_name": "target_box_a",
+      "position": [
+        0.207928,
+        0.040116,
+        0.017293
+      ]
+    },
+    {
+      "object_name": "target_box_b",
+      "position": [
+        0.2,
+        -0.18,
+        0.0175
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "stage_id": "target_box_a-0",
+      "object_name": "target_box_a",
+      "place_pose": [
+        0.20500000000000002,
+        0.05,
+        0.0175
+      ],
+      "spread_offset_m": -0.045,
+      "spread_axis": "x"
+    },
+    {
+      "stage_id": "target_box_b-1",
+      "object_name": "target_box_b",
+      "place_pose": [
+        0.295,
+        0.05,
+        0.0175
+      ],
+      "spread_offset_m": 0.045,
+      "spread_axis": "x"
+    }
+  ],
+  "final_empty_positions": [],
+  "position_tolerance_m": 0.02,
+  "clearance_m": 0.05,
+  "motion_profile_id": "demo_slow",
+  "resumed_from_stage_ids": [],
+  "recovered": true,
+  "recovery_kind": "resume_from_measured_state"
+}

@@ -1,0 +1,38 @@
+{
+  "agent_plan": {
+    "moves": [
+      {
+        "object": "target_box_b",
+        "zone": "zone_1",
+        "why": "Right bin is zone_1 at negative y; place blue block there first."
+      },
+      {
+        "object": "target_box_b",
+        "zone": "zone_2",
+        "why": "Left bin is zone_2 at positive y; move blue block there to satisfy visit."
+      },
+      {
+        "object": "target_box_b",
+        "zone": "zone_1",
+        "why": "Return blue block to the right bin as instructed."
+      }
+    ],
+    "unmoved": [
+      "target_box_a"
+    ],
+    "confidence": "high",
+    "uncertainty": ""
+  },
+  "problems": [],
+  "raw_reply": "{\"moves\":[{\"object\":\"target_box_b\",\"zone\":\"zone_1\",\"why\":\"Right bin is zone_1 at negative y; place blue block there first.\"},{\"object\":\"target_box_b\",\"zone\":\"zone_2\",\"why\":\"Left bin is zone_2 at positive y; move blue block there to satisfy visit.\"},{\"object\":\"target_box_b\",\"zone\":\"zone_1\",\"why\":\"Return blue block to the right bin as instructed.\"}],\"unmoved\":[\"target_box_a\"],\"confidence\":\"high\",\"uncertainty\":\"\"}",
+  "usage": {
+    "tokens": 880,
+    "seconds": 2.631,
+    "model": "deepseek-flash"
+  },
+  "requested_model": "deepseek-flash",
+  "base_url": "https://api.deepseek.com",
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "key_fingerprint": "2caaf9b9"
+}
