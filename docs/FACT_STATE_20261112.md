@@ -727,4 +727,20 @@ destination. Recovery did not rescue a task; it undid one.
 | A test had to change | *"evidence is all numbers -> REJECT"* asserted the **old, wrong** behaviour. Numbers are verifiable now, so its premise was obsolete, not its expectation | same |
 | Did NOT add a corrected record | The reviewer supplied the true finding (a control/tooling fact about ±28 mm spread vs 50 mm clearance). **Not added** — authoring another lesson before the check exists that catches false ones is exactly how round 14 produced two wrong records. Store stays at 6 records, 2 provenance-verified, **0 review-grade**, retrieval 0 lessons | — |
 
+---
+
+## ADDENDUM — goal round 17 (2026-11-12): P2's request-field avenue is closed by a MEASURED capability limit
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| **Arm pose repeatability at contact height** | **sd 3.44 mm, total spread 20.37 mm** over **n=197** successful archived moves (commanded z ≤ 0.06). Achieved z: mean 0.0237, range **0.0165–0.0369** | `evobot_lead_pose_repeatability_20261112/` — **zero Gazebo runs** |
+| **The cliff it must land on** | **2.5 mm wide** (69.92 mm → 6.32 mm displacement between achieved 0.02125 and 0.02125+). **The scatter is ~8× the feature** | same |
+| Where a single fixed command lands | across the **entire** sweep: 151 mm 2.0%, 69.92 mm 14.7%, 6.32 mm 43.1%, 3.55 mm 25.9%, 0.59 mm 14.2% | same |
+| Systematic offset vs height | drifts **−1.92 mm to +3.75 mm**; scatter is **~3.5 mm at every height**. A height-dependent calibration would remove the drift and leave the scatter | same |
+| `position_error_m` over 3,426 successes | **mean 6.53 mm, median 6.76, p95 9.16, max 19.43 mm** — against `position_tolerance_m` accepting 20 mm, the controller routinely runs near its own tolerance | same |
+| **Conclusion** | **No request-field value can fix T08.** Not because the right value is unknown, but because for any fixed command the arm lands somewhere in a 20 mm distribution several times wider than the behavioural feature. Choosing another command relocates the distribution; it does not narrow it | same |
+| What this retires | Round 10's *"the uncontrolled variable is tool attitude"* — **wrong**, attitude is repeatable, **position is not**. Round 11's 5 mm scatter — **understated by 4×** on the smaller sample | same |
+| What would actually work (all need approval) | (1) repeatability well under 2.5 mm; (2) remove the cliff; (3) **close the loop** — measure the achieved pose and act on it, in `contracts/push.py`/`push_server.py`, **both frozen** | — |
+| Thresholds | **none lowered, none proposed.** Sweep, evaluator and criteria unchanged. The claim is narrower than "too hard": the skill must resolve a 2.5 mm feature with a 20 mm actuator distribution | same |
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
