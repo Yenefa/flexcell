@@ -1,0 +1,80 @@
+{
+  "task_id": "T08-push-seed5005",
+  "template_id": "T08_push_manipulation",
+  "random_seed": 5005,
+  "instruction": "Push the red block into the marked zone without picking it up. Do not move the blue block.",
+  "objects": [
+    {
+      "name": "target_box_a",
+      "size": [
+        0.035,
+        0.035,
+        0.035
+      ],
+      "color": "red",
+      "initial_pose": [
+        0.22,
+        0.0,
+        0.0175,
+        0.0
+      ]
+    },
+    {
+      "name": "target_box_b",
+      "size": [
+        0.035,
+        0.035,
+        0.035
+      ],
+      "color": "blue",
+      "initial_pose": [
+        0.2,
+        -0.18,
+        0.0175,
+        0.0
+      ]
+    }
+  ],
+  "zones": [
+    {
+      "name": "zone_push",
+      "pose": [
+        0.09,
+        0.0,
+        0.0175
+      ],
+      "radius": 0.06
+    }
+  ],
+  "constraints": {
+    "order": [],
+    "must_not_move": [
+      "target_box_b"
+    ]
+  },
+  "expected_goal": {
+    "push": {
+      "target_box_a": {
+        "min_displacement_m": 0.03,
+        "max_displacement_m": 0.15,
+        "max_vertical_m": 0.02,
+        "direction": [
+          -1.0,
+          0.0
+        ],
+        "min_direction_cosine": 0.9,
+        "zone": "zone_push"
+      }
+    },
+    "unmoved": [
+      "target_box_b"
+    ]
+  },
+  "evaluator_version": "0.3.0",
+  "execution_budget": {
+    "max_steps": 40,
+    "max_wall_s": 600.0
+  },
+  "split": "t08_fresh_20261112",
+  "instance_sha256": "3a8ad1c8933315f034812871eee025d7d61f4371bb3c31f4e0f7e22f100c027b"
+}
