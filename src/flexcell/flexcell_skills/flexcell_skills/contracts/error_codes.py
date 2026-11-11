@@ -35,6 +35,13 @@ ERR_STALE_WORLD = 34               # vocabulary only; emission lands with the #6
 ERR_SAFETY_REJECTED = 35           # vocabulary only; emission lands with the #6 gate
 ERR_RESOURCE_BUSY = 41
 ERR_SKILL_CONTRACT_VIOLATION = 52  # executor post-condition rejection (M2.2-0)
+# T08 contact push. 27/28/29/31/36 are new concepts (a push fails differently
+# from a grasp); 30/32/41 are shared.
+ERR_CONTACT_NOT_MADE = 27          # the arm moved, the object never did
+ERR_CONTACT_LOST = 28              # it moved, then stopped following the arm
+ERR_DISPLACEMENT_OFF_AXIS = 29     # it moved, but not where it was sent
+ERR_PUSH_BLOCKED = 31              # the arm could not get through, or carry engaged
+ERR_DISPLACEMENT_OVERSHOOT = 36    # it moved further than asked: a shove
 
 # ---------------------------------------------------------------- status vocabulary
 STATUS_NONE = 0       # default-constructed result: never passed finish() - phantom fingerprint
@@ -75,7 +82,7 @@ def task_abort_error_code(reason_code):
             else TASK_ERR_SKILL_FAILED)
 
 
-_SKILLS = ('OBSERVE', 'PICK', 'PLACE', 'VERIFY')
+_SKILLS = ('OBSERVE', 'PICK', 'PLACE', 'VERIFY', 'PUSH')
 
 # (legacy error_code, outcome-or-None) -> canonical;  None outcome = any outcome.
 # Verify carries outcome context: (0, 0) is VERIFIED=OK while (0, 1) is MISMATCH
@@ -111,11 +118,31 @@ _VERIFY_MAP = {
     (22, None): ERR_WORLD_STATE_UNAVAILABLE,
     (32, None): ERR_CANCELED,      # OUTCOME_CANCELED=3 (audit P0-3 cancel semantics)
 }
+# A push has its own failure semantics: "the object did not move" and "the
+# object stopped following" are different defects, and neither is a grasp
+# failure. Mapping them onto PLACE would erase that distinction.
+_PUSH_MAP = {
+    (0, 0): ERR_OK,
+    (1, None): ERR_INVALID_GOAL,
+    (2, None): ERR_INTERNAL,
+    (10, None): ERR_IK_UNREACHABLE,
+    (21, None): ERR_OBJECT_NOT_FOUND,
+    (22, None): ERR_WORLD_STATE_UNAVAILABLE,
+    (27, None): ERR_CONTACT_NOT_MADE,
+    (28, None): ERR_CONTACT_LOST,
+    (29, None): ERR_DISPLACEMENT_OFF_AXIS,
+    (30, None): ERR_MOTION_FAILED,
+    (31, None): ERR_PUSH_BLOCKED,
+    (32, None): ERR_CANCELED,
+    (36, None): ERR_DISPLACEMENT_OVERSHOOT,
+    (41, None): ERR_RESOURCE_BUSY,
+}
 _MAPS = {
     'OBSERVE': _OBSERVE_MAP,
     'PICK': _PICK_MAP,
     'PLACE': _PLACE_MAP,
     'VERIFY': _VERIFY_MAP,
+    'PUSH': _PUSH_MAP,
 }
 
 

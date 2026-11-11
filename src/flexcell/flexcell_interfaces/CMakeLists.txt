@@ -31,6 +31,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "action/RunPickPlace.action"
   "action/RunDemo.action"
   "action/RunComposite.action"
+  "action/PushObject.action"
   DEPENDENCIES geometry_msgs std_msgs moveit_msgs
 )
 

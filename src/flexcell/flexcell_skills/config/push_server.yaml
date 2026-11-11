@@ -1,0 +1,36 @@
+# T08 contact push - OPT-IN overrides.
+#
+# WHY THIS IS A SEPARATE FILE AND NOT A BLOCK IN week1.yaml:
+#   week1.yaml is an input to sim_profile.profile(), and the resulting
+#   params.yaml is hashed in frozen qualification declarations
+#   (infra/joint-contact-ci-smoke.json, infra/joint-contact-position-goal.json)
+#   and in the S2 camera declarations. Adding any node to week1.yaml changes
+#   every one of those hashes - i.e. it would rewrite historical evidence to
+#   ship a new skill. So the defaults live in the node's code and this file
+#   carries only what an operator must decide.
+#
+# contact_height_m is .nan ON PURPOSE. The T08 Step-0 probe measured that at
+# end-effector z = 0.1775 the fingers pass 145 mm ABOVE a 35 mm box and the box
+# never moves, while at z = 0.030 the box is pushed 23 mm. 'nan' means "nobody
+# measured this stack's contact height yet", and the server refuses a push
+# rather than picking one of those two numbers for you.
+push_server:
+  ros__parameters:
+    contact_height_m: .nan
+    # Everything else defaults to contracts/push.py DEFAULTS; override only
+    # with a reason someone wrote down:
+    #   push_min_distance_m: 0.01
+    #   push_max_distance_m: 0.15
+    #   push_min_overdrive_m: 0.005
+    #   push_max_overdrive_m: 0.05
+    #   contact_floor_m: 0.005
+    #   increment_floor_m: 0.001
+    #   direction_cos_min: 0.9
+    #   lateral_max_m: 0.02
+    #   delta_z_max_m: 0.02
+    #   arm_reach_tolerance_m: 0.02
+    #   displacement_tolerance_m: 0.005
+    #   increments: 5
+    #   max_increments: 10
+    #   approach_clearance_m: 0.02
+    #   retreat_clearance_m: 0.03

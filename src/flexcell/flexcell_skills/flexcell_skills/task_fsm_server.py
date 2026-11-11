@@ -21,6 +21,7 @@ skills left it in and reports honestly.
 """
 
 import json
+import math
 import os
 import threading
 import time
@@ -40,7 +41,8 @@ from std_msgs.msg import String as StringMsg
 from std_srvs.srv import Trigger
 
 from flexcell_interfaces.action import (
-    Observe, PickObject, PlaceObject, RunComposite, RunDemo, RunPickPlace,
+    Observe, PickObject, PlaceObject, PushObject, RunComposite, RunDemo,
+    RunPickPlace,
     VerifyObject)
 from flexcell_interfaces.msg import ZoneState
 
@@ -52,7 +54,8 @@ from flexcell_skills.contracts.error_codes import task_abort_error_code
 from flexcell_skills.contracts.action_result import AcceptedGoalResult
 from flexcell_skills.skill_lifecycle import MotionQuarantine, confirm_stop
 from flexcell_skills.contracts.composite import (
-    CompositeError, Journal, execute as execute_composite, prepare_plan)
+    ACTION_PUSH, CompositeError, Journal, execute as execute_composite,
+    prepare_plan)
 from flexcell_skills.contracts.composite_checkpoint import (
     claim_checkpoint, load_checkpoint)
 
@@ -139,6 +142,7 @@ class TaskFsmServer(Node):
         self.declare_parameter('pick_action', '/pick_object')
         self.declare_parameter('place_action', '/place_object')
         self.declare_parameter('verify_action', '/verify_object')
+        self.declare_parameter('push_action', '/push_object')
         self.declare_parameter('default_place_tolerance_m', 0.05)
         self.declare_parameter('skill_wait_s', 90.0)
         self.declare_parameter('log_dir', '~/.ros/flexcell')
@@ -153,6 +157,8 @@ class TaskFsmServer(Node):
                                        callback_group=ReentrantCallbackGroup())
         self._cli_verify = ActionClient(self, VerifyObject, gp('verify_action').value,
                                         callback_group=ReentrantCallbackGroup())
+        self._cli_push = ActionClient(self, PushObject, gp('push_action').value,
+                                      callback_group=ReentrantCallbackGroup())
         self._tol = float(gp('default_place_tolerance_m').value)
         self._skill_wait = float(gp('skill_wait_s').value)
         self._log = JsonlLog(self, gp('log_dir').value, gp('log_file').value)
@@ -604,6 +610,35 @@ class TaskFsmServer(Node):
                         raise ValueError('duplicate initial objects')
                     stages = []
                     for stage in goal.stages:
+                        # getattr: a caller built against the pre-T08
+                        # CompositeStage simply has no action field, and must
+                        # keep meaning "place".
+                        if int(getattr(stage, 'action', 0)) == ACTION_PUSH:
+                            # Validated by the contract, not here: this function
+                            # only maps the wire representation. Anything the
+                            # contract would refuse is left to be refused there,
+                            # so there is exactly one validator.
+                            entry = dict(
+                                stage_id=stage.stage_id,
+                                object_name=stage.object_name,
+                                action=ACTION_PUSH,
+                                direction=[float(stage.push_direction.x),
+                                           float(stage.push_direction.y),
+                                           float(stage.push_direction.z)],
+                                distance_m=float(stage.push_distance_m))
+                            # NaN on the wire means "use the server parameter".
+                            # It is forwarded as NaN, not as 0.0: 0.0 is a real
+                            # height and would silently push at the table plane.
+                            for wire, key in (('contact_height_m', 'contact_height_m'),
+                                              ('overdrive_m', 'overdrive_m')):
+                                value = float(getattr(stage, wire, float('nan')))
+                                if not math.isnan(value):
+                                    entry[key] = value
+                            if int(getattr(stage, 'max_increments', 0)):
+                                entry['max_increments'] = int(
+                                    getattr(stage, 'max_increments'))
+                            stages.append(entry)
+                            continue
                         pose = stage.place_pose
                         q = pose.pose.orientation
                         if (pose.header.frame_id != 'world' or
@@ -678,6 +713,10 @@ class TaskFsmServer(Node):
                                      for o in ws.objects])
 
                     def native(stage, goal_uuid):
+                        if stage.get('action') == ACTION_PUSH:
+                            return self._native_push(stage, goal_uuid, res,
+                                                     goal_handle, started,
+                                                     plan, progress)
                         request = RunPickPlace.Goal()
                         request.object_name = stage['object_name']
                         request.motion_profile_id = plan['motion_profile_id']
@@ -749,6 +788,71 @@ class TaskFsmServer(Node):
         else:
             goal_handle.abort()
         return res
+
+    def _native_push(self, stage, goal_uuid, res, goal_handle, started, plan,
+                     progress):
+        """Dispatch one push stage as a native PushObject goal.
+
+        The component record is shaped exactly like a place component - same
+        keys the composite contract re-checks - plus the measured push fields.
+        That way push stages ride the existing chain machinery (journal,
+        ordering, independent postcondition) instead of a parallel path.
+        """
+        request = PushObject.Goal()
+        request.request_id = 'push-' + uuid.uuid4().hex
+        request.object_name = stage['object_name']
+        direction = stage['direction']
+        request.direction.x = float(direction[0])
+        request.direction.y = float(direction[1])
+        request.direction.z = float(direction[2])
+        request.distance_m = float(stage['distance_m'])
+        request.contact_height_m = float(stage.get('contact_height_m', float('nan')))
+        request.overdrive_m = float(stage.get('overdrive_m', float('nan')))
+        request.max_increments = int(stage.get('max_increments', 0))
+        request.motion_profile_id = plan['motion_profile_id']
+        context = dict(parent_run_id=res.run_id, stage_id=stage['stage_id'])
+        view = ComponentGoal(goal_handle, request, goal_uuid, stage['stage_id'],
+                             started, len(progress))
+        context.update(goal_uuid=goal_uuid)
+        skill_result, error = self._demo_call(
+            self._cli_push, request, 'PUSH_' + stage['stage_id'], view,
+            started, self._skill_wait)
+        self._active_task_run_id = res.run_id
+        if skill_result is None:
+            view.abort()
+            return dict(
+                context, terminal_status='FAILED', outcome=1,
+                error_code=2, detail=error or 'push transport failure',
+                final_state=dict(goal_uuid=goal_uuid, error_code=2))
+        # The ComponentGoal shares the parent's cancellation; its terminal
+        # status is what the composite contract reads back, so it must be set
+        # from the CHILD's reported outcome, never assumed.
+        if int(skill_result.outcome) == 0:
+            view.succeed()
+        elif int(skill_result.outcome) == 2:
+            view.canceled()
+        else:
+            view.abort()
+        final = dict(
+            goal_uuid=goal_uuid,
+            outcome=str(int(skill_result.outcome)),
+            error_code=int(skill_result.error_code))
+        return dict(
+            context,
+            terminal_status=view.terminal_status,
+            outcome=int(skill_result.outcome),
+            error_code=int(skill_result.error_code),
+            detail=skill_result.detail,
+            run_id=getattr(skill_result, 'run_id', '') or request.request_id,
+            evidence_id=getattr(skill_result, 'evidence_id', ''),
+            displacement_m=float(skill_result.displacement_m),
+            direction_cos=float(skill_result.direction_cos),
+            lateral_m=float(skill_result.lateral_m),
+            delta_z_m=float(skill_result.delta_z_m),
+            contact_made=bool(skill_result.contact_made),
+            contact_lost=bool(skill_result.contact_lost),
+            carry_engaged_during=bool(skill_result.carry_engaged_during),
+            final_state=final)
 
     def _execute_plan(self, goal_handle, single=False, admission_held=False,
                       component=None):

@@ -36,4 +36,9 @@ def generate_launch_description():
         Node(package='flexcell_skills', executable='carry_server',
              name='carry_server', output='screen',
              parameters=[LaunchConfiguration('params_file')]),
+        # T08: push runs its own node so a push goal cannot be silently served
+        # by a pick/place code path. It shares the same params file.
+        Node(package='flexcell_skills', executable='push_server',
+             name='push_server', output='screen',
+             parameters=[LaunchConfiguration('params_file')]),
     ])

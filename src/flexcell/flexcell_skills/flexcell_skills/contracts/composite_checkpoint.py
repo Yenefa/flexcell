@@ -10,7 +10,9 @@ import os
 from pathlib import Path
 import re
 
-from flexcell_skills.contracts.composite import CompositeError, matches, native_success, positions, vacant, validate_plan
+from flexcell_skills.contracts.composite import (
+    CompositeError, is_push, matches, native_success, positions,
+    push_native_success, vacant, validate_plan)
 from flexcell_skills.contracts.episode import _sanitize
 from flexcell_skills.contracts.receipt_json import loads, same_typed
 
@@ -27,6 +29,12 @@ def plan_digest(plan):
 def validate_paused(events, plan, fingerprint, read_episode):
     """Recompute the prefix from every native result and measured boundary."""
     plan = validate_plan(plan)
+    # Pause/resume of a chain containing a push stage is REFUSED, not silently
+    # approximated. A paused push prefix was measured against a derived
+    # expectation, and re-deriving it at resume time from a re-observed origin
+    # would silently accept a different push than the one that ran.
+    require(not any(is_push(stage) for stage in plan['stages']),
+            'checkpoint/resume is not defined for a plan containing push stages')
     require(type(events) is list and len(events) >= 7 and all(type(e) is dict for e in events), 'incomplete paused journal')
     first, terminal = events[0], events[-1]
     identity = ('record_kind', 'run_id', 'goal_uuid', 'runtime_fingerprint', 'policy', 'policy_version', 'contract_version')

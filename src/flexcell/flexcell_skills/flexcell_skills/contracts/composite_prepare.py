@@ -3,14 +3,17 @@ import hashlib
 from pathlib import Path
 import re
 
-from flexcell_skills.contracts.composite import CompositeError, prepare_plan
+from flexcell_skills.contracts.composite import (
+    CompositeError, is_push, prepare_plan, push_expectation)
 from flexcell_skills.contracts.composite_checkpoint import load_checkpoint, plan_digest
 from flexcell_skills.contracts.receipt_json import loads
 
 
 def plan_report(plan):
     plan=prepare_plan(plan);expected={k:v[:] for k,v in plan['initial_objects'].items()}
-    for stage in plan['stages']:expected[stage['object_name']]=stage['destination'][:]
+    for stage in plan['stages']:
+        expected[stage['object_name']]=(push_expectation(expected[stage['object_name']],stage)
+                                        if is_push(stage) else stage['destination'][:])
     return dict(ok=True,record_kind='COMPOSITE_PLAN_PRECHECK',plan_sha256=plan_digest(plan),stage_count=len(plan['stages']),
                 final_positions=expected,scope='declared center positions; no IK, motion or fresh observation',dispatch_authorized=False)
 

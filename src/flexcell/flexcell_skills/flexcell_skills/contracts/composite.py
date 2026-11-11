@@ -34,6 +34,69 @@ def clean(value):
     return None if type(value) is float and not math.isfinite(value) else value
 
 
+# --------------------------------------------------------------- stage kinds
+# BACKWARD COMPATIBILITY IS A HARD REQUIREMENT HERE.
+#
+# A place stage is EXACTLY {stage_id, object_name, destination} - the set every
+# archived plan in this repository uses, unchanged. A push stage is a different
+# field set that additionally requires an explicit action marker. There is no
+# overlap and no optional field on the place path, so an old plan validates
+# byte-identically and no place code path consults a push field.
+ACTION_PLACE = 0
+ACTION_PUSH = 1
+_PLACE_FIELDS = frozenset(('stage_id', 'object_name', 'destination'))
+_PUSH_REQUIRED = frozenset(('stage_id', 'object_name', 'action', 'direction',
+                            'distance_m'))
+_PUSH_OPTIONAL = frozenset(('contact_height_m', 'overdrive_m', 'max_increments'))
+
+
+def stage_action(stage):
+    """ACTION_PLACE or ACTION_PUSH. Absent action means PLACE (legacy)."""
+    return int(stage.get('action', ACTION_PLACE))
+
+
+def is_push(stage):
+    return stage_action(stage) == ACTION_PUSH
+
+
+def push_expectation(origin, stage):
+    """Where a push stage says the object must END UP, derived - not declared.
+
+    The plan declares a direction and a distance, never a destination: two
+    declarations of the same fact can disagree, and the one that would be
+    believed is the wrong one. Deriving the expectation from the measured
+    origin keeps a single source of truth.
+    """
+    d, dist = stage['direction'], float(stage['distance_m'])
+    return [float(origin[0]) + float(d[0]) * dist,
+            float(origin[1]) + float(d[1]) * dist,
+            float(origin[2]) + float(d[2]) * dist]
+
+
+def _stage_fields_ok(stage):
+    fields = frozenset(stage)
+    if fields == _PLACE_FIELDS:
+        return True
+    if fields == _PLACE_FIELDS | {'action'} and stage_action(stage) == ACTION_PLACE:
+        return True
+    if (stage_action(stage) == ACTION_PUSH
+            and _PUSH_REQUIRED <= fields
+            and fields <= _PUSH_REQUIRED | _PUSH_OPTIONAL):
+        return True
+    return False
+
+
+def _push_direction_ok(stage):
+    d = stage.get('direction')
+    if type(d) is not list or len(d) != 3:
+        return False
+    if not all(type(v) in (int, float) and math.isfinite(v) for v in d):
+        return False
+    if float(d[2]) != 0.0:
+        return False          # a push that lifts the object is a different action
+    return math.hypot(float(d[0]), float(d[1])) > 1e-9
+
+
 def validate_plan(plan):
     required = {'scenario_id', 'initial_objects', 'stages', 'final_empty_positions',
                 'position_tolerance_m', 'clearance_m', 'motion_profile_id'}
@@ -55,12 +118,34 @@ def validate_plan(plan):
         raise CompositeError(60, '1..8 stages required')
     seen = set()
     for stage in stages:
-        if type(stage) is not dict or set(stage) != {'stage_id', 'object_name', 'destination'}:
+        if type(stage) is not dict or not _stage_fields_ok(stage):
             raise CompositeError(60, 'invalid stage fields')
         sid = stage['stage_id']
         if type(sid) is not str or not re.fullmatch(r'[A-Za-z0-9_-]{1,64}', sid) or sid in seen:
             raise CompositeError(60, 'stage IDs must be unique')
-        if type(stage['object_name']) is not str or stage['object_name'] not in objects or not point(stage['destination']):
+        name = stage['object_name']
+        if type(name) is not str or name not in objects:
+            raise CompositeError(60, 'undeclared object or invalid destination')
+        if is_push(stage):
+            if not _push_direction_ok(stage):
+                raise CompositeError(60, 'invalid push direction at ' + sid)
+            distance = stage['distance_m']
+            if (type(distance) not in (int, float) or not math.isfinite(distance)
+                    or not 0 < distance <= .5):
+                raise CompositeError(60, 'invalid push distance at ' + sid)
+            for key, low, high in (('contact_height_m', -.05, .75),
+                                   ('overdrive_m', 0., .1)):
+                if key in stage:
+                    value = stage[key]
+                    if (type(value) not in (int, float) or not math.isfinite(value)
+                            or not low <= value <= high):
+                        raise CompositeError(60, 'invalid ' + key + ' at ' + sid)
+            increments = stage.get('max_increments')
+            if increments is not None and (
+                    type(increments) is not int or isinstance(increments, bool)
+                    or not 1 <= increments <= 10):
+                raise CompositeError(60, 'invalid max_increments at ' + sid)
+        elif not point(stage['destination']):
             raise CompositeError(60, 'undeclared object or invalid destination')
         seen.add(sid)
     empties = plan['final_empty_positions']
@@ -78,9 +163,14 @@ def prepare_plan(plan):
     """
     plan=validate_plan(plan);expected=copy.deepcopy(plan['initial_objects'])
     for stage in plan['stages']:
-        if not vacant(expected,stage['destination'],plan['clearance_m'],stage['object_name']):
+        # A push stage declares no destination; its expectation is derived from
+        # the origin this chain predicts for that object. Same pre-dispatch
+        # contradiction check, one source of truth for where the object lands.
+        target = (push_expectation(expected[stage['object_name']], stage)
+                  if is_push(stage) else stage['destination'])
+        if not vacant(expected,target,plan['clearance_m'],stage['object_name']):
             raise CompositeError(60,'declared destination occupied at '+stage['stage_id'])
-        expected[stage['object_name']]=list(stage['destination'])
+        expected[stage['object_name']]=list(target)
     if not all(vacant(expected,p,plan['clearance_m']) for p in plan['final_empty_positions']):
         raise CompositeError(60,'declared final empty position conflicts with the chain')
     return plan
@@ -134,6 +224,44 @@ def native_success(component, goal_uuid, tolerance):
             and type(final.get('error_code')) is int and final['error_code'] == 0
             and component.get('object_at_place') is True and final.get('object_at_place') is True
             and all(type(v) in (int, float) and math.isfinite(v) and 0 <= v <= tolerance for v in (error, final_error)))
+
+
+def push_native_success(component, goal_uuid, tolerance, stage):
+    """A push stage's terminal record, re-checked from its MEASURED fields.
+
+    The skill already decided its own verdict; this is the second, independent
+    gate the composite chain always applies, expressed only in quantities the
+    skill cannot fake: the object's measured displacement and its direction.
+    A component that reports SUCCEEDED while its own measured displacement is
+    missing, NaN, or off-axis is refused here rather than trusted.
+    """
+    if type(component) is not dict:
+        return False
+    final = component.get('final_state') or {}
+    moved = component.get('displacement_m')
+    cosine = component.get('direction_cos')
+    lateral = component.get('lateral_m')
+    dz = component.get('delta_z_m')
+    distance = float(stage['distance_m'])
+    return (component.get('terminal_status') == 'SUCCEEDED'
+            and type(component.get('outcome')) is int and component['outcome'] == 0
+            and type(component.get('error_code')) is int and component['error_code'] == 0
+            and type(component.get('run_id')) is str and bool(component['run_id'])
+            and component.get('goal_uuid') == final.get('goal_uuid') == goal_uuid
+            and type(final.get('error_code')) is int and final['error_code'] == 0
+            and component.get('contact_made') is True
+            and component.get('contact_lost') is not True
+            and component.get('carry_engaged_during') is not True
+            and all(type(v) in (int, float) and math.isfinite(v)
+                    for v in (moved, cosine, lateral, dz))
+            # Tightened deliberately below the plan's position tolerance: a
+            # push is graded on a DISPLACEMENT, and the plan tolerance (up to
+            # 0.06 m) is larger than the whole push request can be. Using it
+            # here would let a 10 mm push satisfy a 30 mm request.
+            and abs(float(moved) - distance) <= min(float(tolerance), .015)
+            and float(cosine) >= .9
+            and float(lateral) <= .02
+            and abs(float(dz)) <= .02)
 
 
 class Journal:
@@ -191,7 +319,14 @@ def execute(plan, observe, native, emit, cancelled=lambda: False, pause_after_st
             check_cancel()
             return positions(observation, expected)
         for stage in plan['stages'][inherited:]:
-            sid, name, dest = stage['stage_id'], stage['object_name'], stage['destination']
+            sid, name = stage['stage_id'], stage['object_name']
+            # A push stage has no declared destination; the chain's expectation
+            # for it is derived from the origin the chain already predicts. The
+            # alternative - trusting a declared destination - would let a plan
+            # declare a landing spot that contradicts its own direction and
+            # distance, and nothing would notice.
+            dest = (push_expectation(expected[name], stage) if is_push(stage)
+                    else stage['destination'])
             actual = snapshot(sid, 'before')
             if not matches(actual, expected, tolerance) or not vacant(actual, dest, clearance, name):
                 raise CompositeError(61, 'state drift or occupied destination before ' + sid)
@@ -203,7 +338,10 @@ def execute(plan, observe, native, emit, cancelled=lambda: False, pause_after_st
             if type(component) is dict and component.get('run_id'):
                 components.append(component['run_id']); goal_ids.append(goal_uuid)
             check_cancel()
-            if not native_success(component, goal_uuid, tolerance) or len(set(components)) != len(components):
+            confirmed = (push_native_success(component, goal_uuid, tolerance, stage)
+                         if is_push(stage)
+                         else native_success(component, goal_uuid, tolerance))
+            if not (confirmed and len(set(components)) == len(components)):
                 raise CompositeError(62, 'native terminal/verification unconfirmed for ' + sid)
             expected[name] = list(dest)
             actual = snapshot(sid, 'after')

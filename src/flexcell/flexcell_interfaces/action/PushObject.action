@@ -1,0 +1,147 @@
+# ============================================================================
+# FlexCell :: PushObject  (T08, contact push - no grasp)
+#
+# Push an object by end-effector contact along a declared world-frame
+# direction, with measured before/after object poses as the only evidence of
+# success. The gripper is never commanded: this skill holds the gripper in
+# whatever position it was in and moves the arm only.
+#
+# GROUND TRUTH IS THE VERDICT SOURCE. The result reports what the object did,
+# measured from the simulator pose stream, never what the arm believes it did.
+# An arm that travelled the full commanded distance and moved the object zero
+# metres is a FAILURE, and this action must say so.
+# ============================================================================
+
+# ------------------------------- Goal -------------------------------
+string request_id
+# Caller correlation id. Server generates one when empty.
+
+string object_name
+# Object to push. Must be in the node's tracked_objects registry.
+
+geometry_msgs/Vector3 direction
+# World-frame, horizontal (z == 0), non-zero. Server normalises it; a zero or
+# non-finite vector is ERR_INVALID_GOAL, never a silent default direction.
+
+float64 distance_m
+# Requested displacement of the OBJECT along direction, metres.
+# Server-enforced range: push_min_distance_m .. push_max_distance_m.
+
+float64 contact_height_m
+# End-effector target z that produces contact, metres. NaN = use the node's
+# declared contact_height_m parameter. This is a REQUEST-TIME declaration on
+# purpose: the correct height depends on the arm's current configuration
+# (this stack runs position-only IK, so the wrist attitude - and therefore
+# where the fingers sit relative to end_effector_link - is not fixed).
+
+float64 overdrive_m
+# Extra travel past the requested displacement. NaN = node default.
+# Makes the measured position error a contact signal (see PushObject.msg docs).
+
+string motion_profile_id
+# Server-side whitelist key. Callers may not supply raw velocity scaling.
+
+uint32 deadline_ms
+# 0 = server default. Clamped to the server's hard upper bound.
+
+uint32 max_increments
+# 0 = server default. The push is executed as a bounded number of increments
+# so that the point where contact is lost is measurable rather than inferred.
+
+---
+# ------------------------------ Result ------------------------------
+
+# ---- outcome ----
+uint8 OUTCOME_SUCCEEDED     = 0
+uint8 OUTCOME_FAILED        = 1
+uint8 OUTCOME_CANCELED      = 2
+uint8 OUTCOME_STATE_UNKNOWN = 3
+uint8 outcome
+
+# ---- error taxonomy (canonical values, see contracts/error_codes.py) ----
+uint16 ERR_NONE                     = 0
+uint16 ERR_INVALID_GOAL             = 1
+uint16 ERR_INTERNAL                 = 2
+uint16 ERR_IK_UNREACHABLE           = 10
+uint16 ERR_OBJECT_NOT_FOUND         = 21
+uint16 ERR_CONTACT_NOT_MADE         = 27
+uint16 ERR_CONTACT_LOST             = 28
+uint16 ERR_DISPLACEMENT_OFF_AXIS    = 29
+uint16 ERR_MOTION_FAILED            = 30
+uint16 ERR_PUSH_BLOCKED             = 31
+uint16 ERR_DISPLACEMENT_OVERSHOOT   = 36
+uint16 ERR_CANCELED                 = 32
+uint16 ERR_RESOURCE_BUSY            = 41
+# SkillResult v2 status - the same vocabulary PICK/PLACE/VERIFY report, so
+# the executor can consume a push result without a special case.
+uint8 STATUS_NONE=0
+uint8 STATUS_SUCCESS=1
+uint8 STATUS_FAILURE=2
+uint8 STATUS_SKIPPED=3
+uint8 STATUS_CANCELED=4
+uint16 error_code
+uint8 status
+
+# ---- measured evidence (all from simulator ground truth) ----
+geometry_msgs/Pose measured_before
+geometry_msgs/Pose measured_after
+float64 displacement_m
+# Magnitude of the measured object displacement.
+
+float64 displacement_along_direction_m
+# Signed projection of the displacement on the requested direction.
+
+float64 direction_cos
+# Cosine between measured displacement and requested direction.
+# NaN when the object did not move (direction undefined, not "zero").
+
+float64 lateral_m
+# Component of the displacement perpendicular to the requested direction.
+
+float64 delta_z_m
+# Signed vertical displacement. A push must not lift the object.
+
+float64 requested_distance_m
+# Echo of the goal, so the result is self-describing.
+
+float64 ee_travel_m
+# Total end-effector travel commanded during the push.
+
+float64 reach_error_m
+# Final measured end-effector position error of the last increment.
+
+bool contact_made
+# True when the measured displacement exceeds the declared contact floor.
+
+bool contact_lost
+# True when a later increment advanced the arm without advancing the object.
+# This is the measured 23 mm saturation signature: the arm kept moving, the
+# object did not. It is reported as a typed failure, never rounded up to
+# success.
+
+uint32 increments_executed
+uint32 contact_lost_at_increment
+# 1-based index of the first increment that lost contact; 0 = never lost.
+
+bool carry_engaged_during
+# True if the carry backend was ever engaged during this push. Must be false:
+# a push is not a grasp, and a carried object would invalidate the evidence.
+
+string evidence_id
+string detail
+
+---
+# ----------------------------- Feedback -----------------------------
+uint8 PHASE_VALIDATING = 0
+uint8 PHASE_OBSERVING  = 1
+uint8 PHASE_APPROACH   = 2
+uint8 PHASE_PUSHING    = 3
+uint8 PHASE_VERIFYING  = 4
+uint8 PHASE_RETREATING = 5
+uint8 phase
+
+uint32 elapsed_ms
+
+float64 displacement_m
+# Running measured displacement, so a caller can see saturation as it happens
+# instead of only at the end.
