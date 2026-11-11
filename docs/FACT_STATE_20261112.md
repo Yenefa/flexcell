@@ -597,4 +597,20 @@ destination. Recovery did not rescue a task; it undid one.
 | **T08's blocker is kinematic, not a verdict problem** | The `move_to_pose` action **does** accept a full `PoseStamped` with orientation, so the wrist attitude is commandable in principle — but the URDF analysis (round 2) puts the palm bodies ~82 mm along link5 x with the arm's reachable floor at the block's top edge (0.035). Reaching the side face at mid-height (0.0175) needs either a different tool or a robot change. **Needs approval; not attempted** | `evobot_lead_contact_mechanism_20261112/` |
 | P3 event chain | **STILL INCOMPLETE.** The guard is restored. No change has been applied and re-measured, and the **seven-field experience records with independent review are not delivered.** No round so far has achieved Baseline C end-to-end | — |
 
+---
+
+## ADDENDUM — goal round 8 (2026-11-12): T08 pushed into the zone. Rounds 6–7 were wrong about why it couldn't.
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| **My rounds 6–7 conclusion that T08's blocker was reach** | **WRONG — WITHDRAWN.** The arm *can* get its palm to the block's centre. I reasoned from a "first contact at z = 0.0350" figure without checking the contact-height sweep that was **already committed** in `evobot_t08_saturation_diagnosis_20261112/HEIGHT_SWEEP_RESULT.md`: 0.0175 → **151.14 mm**, 0.0200 → 69.92 mm, 0.0300 → 0.59 mm (no contact). **Fourth rediscovery of the session.** | `evobot_lead_t08_centre_height_20261112/` |
+| **T08 at the correct contact height** | **SIMULATION TESTED, n = 1, dev seed2000, PRE-REGISTERED.** `contact_height_m` 0.0200 → **0.0175**, `overdrive_m` → 0.005. Result: displacement **0.10576 m**, cosine **0.99914**, Δz **−0.0001 m**, **contact never lost**, block measured `[0.220,0.000] → [0.114,−0.004]` | `evidence/push.json` |
+| **Graded against the task's own criterion** | **ALL FOUR SUB-CLAUSES PASS.** displacement 0.1058 ∈ [0.030, 0.150] ✓; \|Δz\| 0.0001 ≤ 0.020 ✓; cosine 0.9991 ≥ 0.90 ✓; **zone distance 0.0072 ≤ 0.060 ✓** — the block stopped **7.2 mm from the zone centre** | same |
+| The skill's verdict on that same run | **FAILED, ec=36 ERR_DISPLACEMENT_OVERSHOOT** — it moved 15.8 mm beyond the **requested** 0.09 m against a 5 mm tolerance, while the task accepts a **120 mm band**. Both contracts are honest; they measure different things | same |
+| Where T08's recorded 0/6 came from | **`contact_height_m = 0.0200`** — `evobot_t08_evidence_loop_20261112/freeze_policy.py:75`, confirmed in that README §4. **A height later shown to lose contact.** The 0/6 was truly measured; it was measured at the wrong height | same |
+| My own prediction for this run | **FALSIFIED at its bound.** I predicted displacement 0.085–0.105 m; actual **0.10576 m**, outside by **0.8 mm**. Cause: I converted overdrive to travel assuming 1.00× when it is ≈1.11× because the block slides on after the push. Not claimed as a confirmation | same |
+| Evidence level | **Simulation Tested (n=1, dev).** **NOT generalisation.** Dev seed2000 was used for tuning; unseen seeds 3000–3002 were already spent and are not reusable after tuning. A generalisation measurement requires **fresh** instances generated after this configuration is fixed | — |
+| What is NOT claimed | T08 is **not** solved (one run, one seed, one configuration); the skill is **not** broken (it correctly refused a push beyond what was asked); the recorded 0/6 was **not** false | — |
+| **T08 skill-level** | **unchanged at 0/6** by the mission's skill-level definition (the skill self-certified nothing). What changed is `execution_succeeded` against the task criterion: **1/1 on dev**, versus 1/7 previously observed on unseen at the wrong height | — |
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
