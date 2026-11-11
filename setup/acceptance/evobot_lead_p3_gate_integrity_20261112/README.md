@@ -148,3 +148,68 @@ python3 setup/acceptance/evobot_lead_p3_gate_integrity_20261112/check_gate_integ
 
 Offline. Prints the gate call site, runs all 109 verifiers, and compares **every generation** of the pinned
 baseline against the actual files, so the live generation is distinguishable from the superseded ones.
+---
+
+## 10. Two findings that only appear when you actually run the gate
+
+### 10.1 The gate is not read-only — running it rewrites the archive it checks
+
+Running all 109 verifiers modified a committed evidence file:
+
+```
+ M setup/acceptance/evobot_p2_feasibility_20261111/verify_result.json
+```
+
+**108 of 109 `verify.py` write their own `verify_result.json`.** So enabling the regression gate would
+rewrite evidence across the acceptance archive as a side effect of gating a proposal. A gate that mutates
+the evidence it reads cannot certify that evidence is unchanged — and a verifier that rewrites its own
+result can never be used to prove a file was not tampered with.
+
+*(I reverted the modification with `git checkout`. Recording the effect, not keeping it.)*
+
+### 10.2 A verifier can fail because the world got better
+
+The diff also shows what `evobot_p2_feasibility_20261111` was actually asserting, and why it now fails:
+
+```
+claim B1: "the evaluator consumes exactly this goal vocabulary ... and none of it is a push clause"
+  recorded: true    goal keys = min_tiers,order,placement,relative,unmoved,visit,visit_sequence
+  now:      false   goal keys = min_tiers,order,placement,*** push ***,relative,unmoved,visit,visit_sequence
+
+claim B2: "no displacement/push clause: 'push' appears nowhere in the evaluator's goal handling"
+  recorded: true
+  now:      false   the push clause was ADDED by 0dc1245b
+```
+
+**This verifier fails because a later commit closed the gap it recorded.** `0dc1245b` — *"feat(evaluator):
+add the push clause, because a 60 mm push and no movement graded the same"* — fixed exactly the deficiency
+the feasibility pre-registration documented.
+
+So its red status is not a regression and not a defect in the code. It is a **stale premise**: a
+pre-registration that recorded "this cannot be graded yet" and was never retired once it could be.
+
+That is the third stale-record instance this round (freeze_check.txt, evidence_summary.txt, and this), and
+it has a general form worth stating:
+
+> **A verifier of the form "X is currently missing" becomes permanently false the moment X is added, and it
+> will then block every gate that includes it. Premise verifiers need a retirement date, not just a
+> creation date.**
+
+## 11. Corrected count of the four pre-existing failures
+
+| verifier | why it is red | is it a real problem? |
+| --- | --- | --- |
+| `evobot_capability_freeze_20261111` | validates the **oldest** baseline, superseded twice | **yes** — never retired, permanently red |
+| `evobot_p2_feasibility_20261111` | premise **fixed** by a later commit | **no** — stale premise, needs retirement |
+| `evobot_baseline_a_v0_20261111` | 1 failed | not investigated this round |
+| `evobot_t08_push_criterion_20261111` | 7 passed, 2 failed | not investigated this round |
+
+**Two of the four are stale records rather than live defects**, which means the all-green gate is closer to
+achievable than the raw failure count suggests — but only after the stale ones are retired, and retiring
+them is a human decision because they are committed evidence.
+
+## 12. Amendment to the recommendation
+
+Add to §8: **run the verify suite with a read-only guard** (or make verifiers write to a temp path), so that
+gating a proposal cannot alter the archive. Without that, "the gate ran and everything still passes" is not
+evidence — the run itself may have changed the thing being compared.
