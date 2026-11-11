@@ -1,0 +1,76 @@
+run                  agree  rule_n b_n      rule_ok  b_ok
+HO-198a4b2688d0      True   3      3        True     True
+HO-38ce6531a597      True   3      3        True     True
+HO-3a19766a4104      True   2      2        True     True
+HO-3bfb9643b7b6      True   2      2        True     True
+HO-4499501c2043      True   2      2        True     True
+HO-47afdffad81a      True   3      3        True     True
+HO-4f197a0997af      True   3      3        True     True
+HO-5a96f3eb4fae      True   3      3        True     True
+HO-5d21b382e781      True   2      2        True     True
+HO-68f800add5fc      True   3      3        True     True
+HO-72553754ef3a      True   2      2        True     True
+HO-78b746f47443      True   2      2        True     True
+HO-b7bd62621f05      True   3      3        True     True
+HO-de2741728c69      True   2      2        True     True
+HO-e2580e718ecd      True   3      3        True     True
+HO-fb31a8cd4a66      True   2      2        True     True
+HO-036fc9b6e66f      True   2      2        True     True
+HO-17a85f7d07cc      True   2      2        True     True
+HO-2536264f2908      True   3      3        True     True
+HO-274c7aaa6485      True   3      3        True     True
+HO-285d9e53fbdd      True   2      2        True     True
+HO-2f52569ef5ca      True   2      2        True     True
+HO-50237b4714a9      True   2      2        True     True
+HO-6323db167d30      True   3      3        True     True
+HO-802d10c045aa      True   3      3        True     True
+HO-a69ec651037a      True   2      2        True     True
+HO-d905e198fb9d      True   3      3        True     True
+HO-e2d3ed8c2437      True   3      3        True     True
+HO-e736e485c14e      True   3      3        True     True
+HO-ec89d144824f      True   2      2        True     True
+HO-f17c4e053953      True   3      3        True     True
+HO-f9431f8ef925      True   2      2        True     True
+HO-036fc9b6e66f      True   2      2        True     True
+HO-17a85f7d07cc      True   2      2        True     True
+HO-2536264f2908      True   3      3        True     True
+HO-274c7aaa6485      True   3      3        True     True
+HO-285d9e53fbdd      True   2      2        True     True
+HO-2f52569ef5ca      True   2      2        True     True
+HO-50237b4714a9      True   2      2        True     True
+HO-6323db167d30      True   3      3        True     True
+HO-802d10c045aa      True   3      3        True     True
+HO-a69ec651037a      True   2      2        True     True
+HO-d905e198fb9d      True   3      3        True     True
+HO-e2d3ed8c2437      True   3      3        True     True
+HO-e736e485c14e      True   3      3        True     True
+HO-ec89d144824f      False  2      2        True     True
+HO-f17c4e053953      True   3      3        True     True
+HO-f9431f8ef925      True   2      2        True     True
+HO-0dcde4dc0f5a      True   2      2        True     True
+HO-128c6a231c34      True   2      2        True     True
+HO-2efba46248da      True   2      2        True     True
+HO-40348a081df6      True   2      2        True     True
+HO-4dafd8d17858      True   2      2        True     True
+HO-4dbb21d087ae      True   2      2        True     True
+HO-51600cf21179      True   2      2        True     True
+HO-60679893327a      True   2      2        True     True
+HO-6173170d8c47      True   2      2        True     True
+HO-675c07e900e7      True   2      2        True     True
+HO-884ea68a42ca      True   2      2        True     True
+HO-b3fb8b1de2db      True   2      2        True     True
+HO-c79ebfe5c9e6      True   2      2        True     True
+HO-d3ab212142de      True   2      2        True     True
+HO-da7c04bdece5      True   2      2        True     True
+HO-dcf52d233154      True   2      2        True     True
+
+instances compared        : 64
+rule plan == LLM plan     : 63/64 = 98.4%
+rule planner correct       : 64/64
+LLM planner correct        : 64/64
+rule planner declined      : 0
+
+HOW TO READ THIS: if a fixed parser reproduces the LLM's plan on these templates,
+then on these templates the LLM's measurable contribution is zero, and a claim
+that the agent reasons about the task would be attributing to the agent what a
+regular expression did.

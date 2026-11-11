@@ -78,6 +78,7 @@ RUNGS = {
     "evobot_crosstype_20261111": "Generalization Tested across TASK TYPE (T14 order constraint: planning 16/16, wrong-order 0, R 16/16)",
     "evobot_failure_layer_20261111": "Attribution (0/64 failures are planner-caused; Level 7 boundary explained)",
     "evobot_abstention_20261111": "Calibration (impossible tasks: 0/8 confidently answered; controls correct)",
+    "evobot_rule_saturation_20261111": "Negative result: a deterministic parser scores 64/64, so the benchmark cannot show the LLM is needed",
 }
 
 

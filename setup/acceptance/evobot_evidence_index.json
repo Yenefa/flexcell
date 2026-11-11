@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 43,
-  "live": 36,
+  "batches": 44,
+  "live": 37,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -344,7 +344,7 @@
       "verdict": {
         "verdict": "EVOBOT_LADDER_DERIVED_AND_CURRENT",
         "regenerated_identically": true,
-        "batches_live": 36,
+        "batches_live": 37,
         "verifier_failures": 0,
         "reports_both_directions": true,
         "zero_is_qualified": true,
@@ -494,6 +494,24 @@
         "new_proposal": "release_confirmation_over_gripper_aperture",
         "status": "PROPOSED, awaiting human approval, NOT implemented",
         "mitigation_already_live": "goal_check",
+        "evaluator_touched": false,
+        "skill_layer_touched": false
+      }
+    },
+    {
+      "batch": "evobot_rule_saturation_20261111",
+      "verified": "PASS",
+      "rung": "Negative result: a deterministic parser scores 64/64, so the benchmark cannot show the LLM is needed",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_BENCHMARK_SATURATED_AT_PLANNING",
+        "instances": 64,
+        "deterministic_parser_correct": "64/64",
+        "llm_correct": "64/64",
+        "agreement": "63/64",
+        "meaning": "these three templates cannot show that the LLM is necessary; a regex matches it",
+        "not_claimed": "that the LLM is useless in general, or that the parser generalizes - it was written after the templates were known",
+        "level_8_effect": "must be downgraded: a saturatable benchmark cannot prove reasoning",
         "evaluator_touched": false,
         "skill_layer_touched": false
       }

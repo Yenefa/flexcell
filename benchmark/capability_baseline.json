@@ -15,8 +15,8 @@
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 43,
-    "batches_live": 36,
+    "batches_total": 44,
+    "batches_live": 37,
     "batches_superseded": 7,
     "verifier_failures": 0,
     "live_batches": [
@@ -154,6 +154,11 @@
         "batch": "evobot_release_mechanism_20261111",
         "verified": "PASS",
         "rung": "Root cause identified (9/9 uniform: carry confirmed, gripper stalled); corrected proposal pre-registered, NOT implemented)"
+      },
+      {
+        "batch": "evobot_rule_saturation_20261111",
+        "verified": "PASS",
+        "rung": "Negative result: a deterministic parser scores 64/64, so the benchmark cannot show the LLM is needed"
       },
       {
         "batch": "evobot_spacing_fix_20261111",
