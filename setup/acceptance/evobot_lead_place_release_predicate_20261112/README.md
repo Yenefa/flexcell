@@ -353,3 +353,138 @@ policy's choice of action is keyed on that label.
 
 That is a second, smaller defect found while checking the first, and it is recorded rather than folded
 in: **the failure classifier has a category error that misattributes place failures to grasp.**
+---
+
+# INDEPENDENT VERIFICATION: both claims confirmed, one number corrected, and a better argument than mine
+
+The audit verified this document independently. **Both claims hold.** It corrected one number, supplied
+a stronger argument than the one I used, and pushed back on scope in a way I accept.
+
+## V1. The offset number I quoted was a single sample
+
+I wrote **−163.8 mm** as "the" pin offset. It is **one record**, not the value. Measured over every
+`start` event in the A-prime batch:
+
+```
+start z-offsets  n = 29   min = -167.1 mm   max = -155.1 mm
+                         mean = -161.5 mm   spread = 12.0 mm
+```
+
+**The claim survives — the stand-off is ~160 mm either way — but the specific number must not be
+quoted as the offset.** Corrected here, and in §3.3 above the number should be read as "approximately
+160 mm, range −155 to −167".
+
+## V2. There is a decisive test that does not need the offset at all
+
+The audit's argument is better than mine and I am adopting it as the primary evidence:
+
+> **If the gripper were holding the box, a gripper that fails to open would *retain* it. It does not.**
+
+Count the actual pin releases per run and compare to the graded outcome:
+
+| task | place ec | pin releases | evaluation |
+| --- | --- | --- | --- |
+| HO-0dcde4dc0f5a | 0 | 2 | pass |
+| HO-128c6a231c34 | 0 | 2 | pass |
+| HO-2efba46248da | 0 | 2 | pass |
+| HO-40348a081df6 | 1 | **1** | **fail** |
+| HO-4dafd8d17858 | 0 | 2 | pass |
+| HO-4dbb21d087ae | 1 | 2 | **pass** |
+| HO-51600cf21179 | 1 | 2 | **pass** |
+| HO-60679893327a | 0 | 2 | pass |
+| HO-6173170d8c47 | 0 | 2 | pass |
+| HO-675c07e900e7 | 1 | 2 | **pass** |
+| HO-884ea68a42ca | 0 | 2 | pass |
+| HO-b3fb8b1de2db | 0 | 2 | pass |
+| HO-c79ebfe5c9e6 | 1 | **1** | **fail** |
+| HO-d3ab212142de | 0 | 2 | pass |
+| HO-da7c04bdece5 | 1 | 2 | **pass** |
+| HO-dcf52d233154 | 1 | **1** | **fail** |
+
+```
+pin releases = 2  ->  pass   (13 / 13,  no exceptions)
+pin releases = 1  ->  fail   ( 3 /  3,  no exceptions)
+                                 = 16 / 16 perfect separation
+```
+
+**The pin release count predicts the world state perfectly. The aperture verdict predicts nothing.**
+That is a causal test, and it is far stronger than a geometric argument about an offset:
+
+| argument | what it needs | strength |
+| --- | --- | --- |
+| my offset argument | that −160 mm means the fingers are not holding the box | **inferential** |
+| the retention test | that a gripper holding a box cannot release it by failing to open | **causal, 16/16** |
+
+I keep the offset as supporting context and demote it. **The retention test is now the primary
+evidence and it stands without any offset number at all.**
+
+## V3. The retry is worse than "retrying its own bug" — it undoes correct work
+
+§15 established the retry is a full re-run. The audit found the distinguishing evidence and the
+consequence, both of which I verified:
+
+**Distinguishing evidence — the object is picked TWICE:**
+
+```
+HO-2efba46248da  pick.jsonl: [0] target_box_a   [1] target_box_a   [2] target_box_b
+HO-d3ab212142de  pick.jsonl: [0] target_box_b   [1] target_box_b   [2] target_box_a
+```
+
+A checkpoint resume would continue from the failed place. This **re-picks the object**, so it
+re-executes the whole stage. (The audit checked and rejected the alternative: `completed_stage_ids=[]`
+means a checkpoint resume would also start at stage 0, so the composite log alone cannot distinguish
+them. The double pick is what does.)
+
+**Consequence — and this is the part that matters:**
+
+```
+intended destination      target_box_a -> [0.205, 0.050]
+after attempt-1 release   pinned at       [0.207, 0.046]   = 44 mm from zone_2 centre, INSIDE the zone
+carry.jsonl timeline      row 73  stop   cause=release  object=target_box_a  engaged=true
+                          row 74  stop   cause=replace                        (8.2 s later)
+                          row 76  start  object=target_box_a                <- picked back up
+```
+
+**The task was physically complete after attempt 1.** The retry then picked the box *out of the
+correct destination* and put it back 5–9 mm away. The recovery did not rescue a task; it **duplicated
+completed work and risked the result.** `HO-d3ab212142de` is the same shape (38 mm on attempt 1).
+
+So the correct description is not "B retries a bug until it works". It is: **B retries a bug, and on
+runs that had already succeeded the retry moves a correctly-placed box.**
+
+## V4. What is NOT verified, and must not be claimed
+
+| claim | status |
+| --- | --- |
+| "the fingers never touch the box" | **NOT directly observed.** No physics-engine contact trace exists for these runs. It rests on zero logged gripper-contact records, a ~160 mm stand-off, and the retention test. **The retention test is the strongest and stands alone**; the contact-trace claim does not |
+| the 51-of-539 historical figure | **measured by me and not re-derived by the audit.** It stands on my sweep, which is reproducible via `analyse_place_failures.py`; it is not independently confirmed |
+| the other B `err25` attempts | the audit did not trace all five individually |
+
+## V5. Scope pushback I accept: this is one instance of a pattern, not one bug
+
+The audit's point, and it is right:
+
+> This is the same pattern as six of the gates in the task-2 audit — **a self-declared internal
+> quantity standing in for evidence about the world.** If we fix only `place_server` we fix one
+> instance.
+
+The instances found so far, all the same shape:
+
+| # | gate | internal quantity | standing in for | refuted by |
+| --- | --- | --- | --- | --- |
+| 1 | `place_server` release | gripper aperture | the object was released | this round, 16/16 causal test |
+| 2 | T08 push gate | gripper aperture travel | a grasp occurred | round 2, 0.42 mm separation |
+| 3 | T08 push gate | `rest_height_m` self-declared | the effector's height | round 2, bypass proven |
+| 4 | T08 push gate | `pusher_links` self-declared | which links touched the block | round 2, 2 occurrences |
+| 5 | `verify.py` gate set | `max_z_m` from the producer | the true maximum height | round 2, 0 occurrences of independent recompute |
+| 6 | `recovery_decision.json` | `failure_class` label | what actually failed | this round: labels a `PLACE` failure as `grasp` |
+
+**So the general rule, which is worth more than any of the individual fixes:**
+
+> **A gate may only pass judgement on a quantity it measures itself, and that quantity must be
+> causally connected to the thing being judged.** A self-report from the same component being judged
+> is not evidence about the world; it is evidence about the component's opinion of itself.
+
+Under that rule the fix is not "change a threshold in `place_server`". It is: **bind every gate to an
+observable causally connected to the outcome, and demote self-declared values to diagnostics.**
+`place_server` is simply the instance with a measured cost attached (37.5 % of runs).
