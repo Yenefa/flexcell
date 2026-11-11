@@ -465,3 +465,15 @@ LIBERO (Panda) never folded into OpenMANIPULATOR-X capability.
 | 5 | "the server is missing" | matched a file name and concluded about capability | independent audit |
 
 **#4 and #5 are the same error twice: resolving labels and inferring capabilities.** The corrective now adopted: **resolve the capability, not the label** — ask *who implements `RunComposite`*, not *is there a file named `composite_server`*; ask *what holds the lock* via `fuser`, not *is there a process matching this name*. It would have caught #3 as well.
+### Goal round 2, P0 results (append-only)
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| A-prime has ever executed a task | **YES — first time in project history, this round.** `HO-0dcde4dc0f5a`: composite `outcome=0`, `error_code=0`, both stages completed, 36 s, **0 model calls** | `evobot_lead_p0_aprime_first_execution_20261112/` |
+| A-prime's first execution passed | **CONFIRMED, n=1** — frozen `evaluate.py` v0.5.0, all clauses: `placement:target_box_a`, `placement:target_box_b`, `order` → `passed=True`, `failed_clauses=[]` | same, `grade_first_execution.py` |
+| A-prime's executor plan vs B's | **CONFIRMED identical 16/16** on `stages`, `position_tolerance_m`, `clearance_m`, `motion_profile_id`, `initial_objects` — including `spread_destinations` destinations | `evobot_lead_p0_aprime_equivalence_20261112/` |
+| A-prime's pass RATE on T14 | **NOT ESTABLISHED** — 1 of 16 executed; n=1 supports no rate, and comparing 1/1 to B's 16 runs is meaningless | — |
+| B's measurable planning value on T14 | **ZERO** — a zero-cost rule parser reproduces its executable plan 16/16 | same |
+| `order` clause graded from a snapshot | **SILENTLY FAILS — harness defect.** It reads `final_state['move_sequence']`; given `{objects}` alone the sequence is empty and the clause fails by construction. I hit this and nearly recorded it as an A-prime failure | `evaluate.py` order clause |
+
+**The general lesson, worth carrying beyond P0:** *a clause that needs a time series must refuse to grade when given a snapshot, not silently fail.* This is the mirror of the vacuous-clause finding — there a clause passed for the wrong reason, here one failed for the wrong reason. Both are the harness, not the robot.
