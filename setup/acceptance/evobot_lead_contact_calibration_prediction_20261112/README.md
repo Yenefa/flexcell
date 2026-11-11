@@ -83,6 +83,7 @@ and compare. **A first-contact z that I cannot reproduce from the raw log is not
 | H0100 | 0.0100 | **0.0350** | 0.0286 | 0.0246–0.0350 | −0.0034 | 4.69 mm | 1.000 | no |
 | H0150 | 0.0150 | **0.0350** | 0.0157 | 0.0097–0.0784 | −0.0033 | 71.1 mm | **−0.998** | no |
 | H0200 | 0.0200 | **0.0350** | 0.0345 | 0.0324–0.0356 | +0.0170 | **144.13 mm** | 1.000 | **yes** |
+| HM0050 | **−0.0050** | **0.0350** | 0.0283 | 0.0161–0.0350 | +0.0077 | 5.89 mm | 0.849 | no |
 
 ## The prediction said
 
@@ -92,8 +93,8 @@ and compare. **A first-contact z that I cannot reproduce from the raw log is not
 
 ## What happened
 
-**First-contact z is 0.0349–0.0350 at every commanded height from 0.0000 to 0.0200.** A 20 mm change in
-the command moved the first contact by **0.1 mm**. My falsification criterion is met: at commanded
+**First-contact z is 0.0350 at every commanded height from −0.0050 to +0.0200** — a 25 mm span of
+commands, **six points, six identical first contacts to 0.1 mm.** My falsification criterion is met: at commanded
 0.0000 the contact z is 0.0350, which is **20 mm** away from the predicted 0.0149 — four times the
 ±5 mm tolerance.
 
@@ -156,3 +157,31 @@ where the contact sits.
   approach check failed. Recorded, not discarded.
 - The sweep may add points after this was written; if it does, this section gets a revision rather
   than a quiet edit.
+
+## Addendum: the sweep finished with a sixth point below zero
+
+`HM0050` (commanded **−0.0050**) also gives first-contact z **0.0350**. So the result covers a 25 mm
+span of commanded heights, six points, six identical first contacts.
+
+That completes the falsification with more force than the five points already had: there is no
+monotone trend, no threshold, and no height in the tested range at which the first touch happens
+anywhere other than the block's top surface.
+
+### One more pattern worth recording, with the same caveat
+
+| commanded | displacement | cos | passed |
+| --- | --- | --- | --- |
+| −0.0050 | 5.89 mm | 0.849 | no |
+| 0.0000 | 5.77 mm | 0.984 | no |
+| 0.0050 | 4.43 mm | 0.942 | no |
+| 0.0100 | 4.69 mm | 1.000 | no |
+| 0.0150 | 71.10 mm | **−0.998** | no |
+| 0.0200 | **144.13 mm** | 1.000 | **yes** |
+
+Four of six heights move the block only 4–6 mm — a **stall**, not a push — and the only height that
+moves it far is the **highest** one, which is the pure top-edge drag. The one intermediate height that
+engaged the face most deeply flicked it backwards.
+
+**Still n = 1 per height.** The stall-vs-push split at 0.0200 could be luck; the first-contact result
+cannot be. I am recording the pattern because it is the third independent line of evidence that
+**face engagement is not the fix**, not because it is established.
