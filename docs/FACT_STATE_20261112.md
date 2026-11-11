@@ -422,3 +422,27 @@ LIBERO (Panda) never folded into OpenMANIPULATOR-X capability.
 4. **Disclosed:** a test (`never touches a model that is not in the spec`) required narrowing because the zone-marker behaviour changed **on purpose**; the narrowing is documented in the test and the zone behaviour gained 3 tests of its own rather than losing coverage.
 5. **Disclosed:** I first read `calib_G1` while the lane was still re-running it and recorded "the grasp lifted 0.000000 m" as a confirmed fact. The final file (1257 samples, not 1171) shows a **97.4 mm lift** — the grasp succeeded. That row was corrected here rather than left standing, and it is a reminder that a file being present is not the same as a run being finished.
 6. **Disclosed by the lane, verified by me:** the lane found its own overstatement ("the block continued to slide on its own" — it was struck again: 104 of 465 motion steps in that phase had gripper contact). Same defect class as my 0.000000 m: describing a partly-observed trace as a complete one. Both are now recorded as such.
+---
+
+## ADDENDUM — goal round 2 (2026-11-12), supersedes any conflicting row above
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| `contact_height_m` positions the contact | **REFUTED.** Six commanded heights from −0.0050 to +0.0200 all give first-contact z = **0.0350**, 6/6, 0.1 mm spread. Fitted slope **0.0001** against a predicted 1.0 | `evobot_lead_contact_calibration_prediction_20261112/`, `evobot_t08_contact_calibration_20261112/runs/` |
+| Why the command cannot lower the contact | **CONFIRMED, collision-limited.** `cmd_h + approach_error` converges on the block top: 0.0346, 0.0339, 0.0335, 0.0349 — a 1.4 mm span, all within 1.5 mm of 0.0350, across four independent runs. The finger lands on the block and the arm **stops**; the target below is **unreachable**, not merely ineffective | same |
+| Lower commanded heights | **WITHDRAWN as "stalls".** Four of six (H0000, H0050, H0100, HM0050) have `increments_executed=0`, `contact_made=false`, `error_code=30` — they **never pushed**. Their 4.4–5.9 mm "displacement" is the block nudged by the descending arm | `push_00.json` per trial |
+| H0150 as "deepest face engagement" | **WITHDRAWN.** Measured against the block's own pose, its contact spans 68 mm of z reaching **43 mm above** a 35 mm block — tumbling contact, not a palm-on-face push | contact logs + block pose |
+| The contact frame | **CONFIRMED world frame** (was an unproven assumption). Contact reads 0.0350 = block top, not +0.0175 = local half-height | same |
+| The push skill can perform a face push | **NO — structurally blocked.** It must descend through the block's top face to reach the side, so the block physically prevents the approach. Fix is geometry (side-mounted pusher, single finger from the side, or a side approach), never a parameter | this round, 3 independent lines |
+| Baseline A-prime | **NOT VACUOUS — my claim was wrong and is withdrawn.** A-prime is **36/36 correct** on T12/T13/T14 (12/12 each, verified independently by me and by the auditor). Those templates exist as first-class generators in `benchmark/generators/unseen_tasks.py`; they are absent only from the task split | `evobot_lead_p0_aprime_vacuity_20261112/` §CORRECTION, `evobot_p0_aprime_independent_20261112/` |
+| P0's A-prime-vs-B comparison | **NOT_RUN — and the reason is a pairing defect, not a broken baseline.** B is pointed at T01–T06, A-prime at T12–T14. The baseline is real; the arms were pointed at different template families | same |
+| A-prime answer-blindness | **CONFIRMED structurally** — `reduce_to_public` strips the answer keys, and four corruptions of `expected_goal` leave the plan byte-identical. One latent hole: the reducer is applied **conditionally** (`run_baseline_a_prime.py:40-41`), harmless today (0 of 114 specs lack the key) | `check_aprime_blindness.py` |
+| The sweep's displacement ordering | **NOT INTERPRETABLE.** n=1 per height and four of six are descents, not pushes | this round |
+
+### Goal round 2 self-corrections
+
+1. **Pre-registered prediction falsified** by 20.1 mm, four times its own stated tolerance — recorded as falsification, not refitted.
+2. **"Four heights stall" withdrawn** — they never pushed at all; I had noticed this for one trial and failed to generalise it to three more.
+3. **"H0150 = deepest face engagement" withdrawn** — it is tumbling contact; the trial cannot support the claim.
+4. **"A-prime is vacuous" withdrawn** — refuted by the independent auditor and confirmed by my own reproduction. The narrower true statement is a template-family mismatch, and the difference changes the remedy from "rewrite the planner" to "run it on its own templates".
+5. **Evidence gap in my own analysis, fixed** — the sweep's full per-step contact logs were initially left uncommitted while my corrections were derived from them; now committed as 18 `.jsonl.gz` files so every claim above re-derives from disk.
