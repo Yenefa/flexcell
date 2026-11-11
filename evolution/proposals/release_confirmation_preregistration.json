@@ -1,0 +1,59 @@
+{
+  "record_kind": "EVOBOT_PROPOSAL_PREREGISTRATION",
+  "proposal_id": "release_confirmation_over_gripper_aperture",
+  "registered_before_change": true,
+  "registered_at": "2026-11-11",
+  "requires_human_approval": true,
+  "approved": false,
+  "supersedes": "actuator_stall / bounded_release_retry (basis found wrong; see its superseded_basis)",
+  "target_file": "src/flexcell/flexcell_skills/flexcell_skills/place_server.py",
+  "one_line": "Treat carry_release_confirmed as the success signal for release; do not fail the place on gripper aperture alone.",
+  "why_the_old_proposal_was_wrong": "bounded_release_retry assumed a failed release meant the object had NOT been released, so re-commanding the release could help. The logs contradict that: in all 9 observed release failures the carry layer had ALREADY confirmed the release (carry_release_confirmed=true) and the object ended up in the target zone. Re-commanding an already-completed release cannot change the outcome.",
+  "observed_mechanism": {
+    "signature_is_uniform_across_batches": true,
+    "cases": 9,
+    "batches": [
+      "evobot-batch2",
+      "evobot-batch3"
+    ],
+    "fields": {
+      "place.released": false,
+      "place.carry_release_confirmed": true,
+      "place.gripper_open.reached_goal": false,
+      "place.gripper_open.stalled": true,
+      "place.gripper_open.classification": "GRASP_STALLED",
+      "place.gripper_open.position": -0.011,
+      "place.requested_aperture": 0.02,
+      "place.detail": "gripper did not open (position=-0.011 requested=0.02 stalled=True)"
+    },
+    "interpretation": "The simulated carry layer detaches the object, so the box is released and falls into the zone. The physical jaw does not reach the commanded aperture (a real actuator stall). The skill decides the release FAILED from the aperture test alone, ignoring the carry confirmation it recorded in the same record."
+  },
+  "proposed_change": "Report release success when carry_release_confirmed is true, and surface the gripper stall as a degraded-but-successful attribute instead of a failure. The world measurement is unaffected; only the skill's own verdict changes.",
+  "prediction": {
+    "skill_layer_release_failures": "9 -> 0",
+    "task_level_false_failure_rate": "6.2% (2/32) -> 0% on the same instances",
+    "final_pass_rate": "UNCHANGED OR UP; it must not fall",
+    "pointless_retries": "0 (goal_check already prevents them; this removes the cause)",
+    "place_box_after_will_be_recorded": true,
+    "measurement_provenance": "place.box_after becomes available again as the primary measurement"
+  },
+  "success_criteria": [
+    "final pass count does not fall below the pre-change count on the same instances",
+    "task-level false failure count falls to 0",
+    "every run still graded by the unmodified evaluator",
+    "carry_release_confirmed=false cases still report failure"
+  ],
+  "refutation_criteria": [
+    "any run that reported failure is reported as success while the world does NOT satisfy the goal",
+    "final pass count falls",
+    "any non-zero false success appears",
+    "gripper aperture failures are hidden from the logs rather than reclassified"
+  ],
+  "anti_gaming": {
+    "evaluator_untouched": true,
+    "world_measurement_untouched": true,
+    "rationale": "The evaluator grades the world, not the skill's self-report. Reclassifying the self-report cannot make a failing world pass; it can only stop a succeeding world from being called a failure. The refutation criteria above detect any attempt to widen the success signal beyond what the carry layer confirms."
+  },
+  "evidence": "setup/acceptance/evobot_release_mechanism_20261111",
+  "status": "PROPOSED - awaiting human approval, not implemented"
+}

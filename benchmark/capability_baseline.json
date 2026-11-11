@@ -15,8 +15,8 @@
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 38,
-    "batches_live": 31,
+    "batches_total": 39,
+    "batches_live": 32,
     "batches_superseded": 7,
     "verifier_failures": 0,
     "live_batches": [
@@ -129,6 +129,11 @@
         "batch": "evobot_regression_v01_20261111",
         "verified": "PASS",
         "rung": "Regression (6/6 -> 6/6, no loss)"
+      },
+      {
+        "batch": "evobot_release_mechanism_20261111",
+        "verified": "PASS",
+        "rung": "Root cause identified (9/9 uniform: carry confirmed, gripper stalled); corrected proposal pre-registered, NOT implemented)"
       },
       {
         "batch": "evobot_spacing_fix_20261111",

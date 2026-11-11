@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 38,
-  "live": 31,
+  "batches": 39,
+  "live": 32,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -122,7 +122,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 30,
+        "live_batches": 31,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",
@@ -400,6 +400,24 @@
           "HO-13c5efca228e (outcome 1 -> 0)"
         ],
         "false_success_rate": 0.0
+      }
+    },
+    {
+      "batch": "evobot_release_mechanism_20261111",
+      "verified": "PASS",
+      "rung": "Root cause identified (9/9 uniform: carry confirmed, gripper stalled); corrected proposal pre-registered, NOT implemented)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_RELEASE_MECHANISM_IDENTIFIED",
+        "release_failures_examined": 9,
+        "uniform_signature": "carry_release_confirmed=True, gripper reached_goal=False",
+        "root_cause": "the skill decides release failure from the gripper aperture alone, ignoring the carry confirmation in the same record",
+        "old_proposal": "bounded_release_retry - premise refuted, basis marked superseded",
+        "new_proposal": "release_confirmation_over_gripper_aperture",
+        "status": "PROPOSED, awaiting human approval, NOT implemented",
+        "mitigation_already_live": "goal_check",
+        "evaluator_touched": false,
+        "skill_layer_touched": false
       }
     },
     {

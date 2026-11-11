@@ -1,0 +1,20 @@
+batch          run                  released  carry_conf  reached_goal classification position  detail
+evobot-batch2  HO-a69ec651037a      False     True        False        GRASP_STALLED  -0.011000000000000034 gripper did not open (position=-0.011000000000
+evobot-batch2  HO-f9431f8ef925      False     True        False        GRASP_STALLED  -0.011000000000000036 gripper did not open (position=-0.011000000000
+evobot-batch3  HO-274c7aaa6485      False     True        False        GRASP_STALLED  -0.01100000000000002 gripper did not open (position=-0.011000000000
+evobot-batch3  HO-285d9e53fbdd      False     True        False        GRASP_STALLED  -0.011000000000000024 gripper did not open (position=-0.011000000000
+evobot-batch3  HO-2f52569ef5ca      False     True        False        GRASP_STALLED  -0.011000000000000046 gripper did not open (position=-0.011000000000
+evobot-batch3  HO-2f52569ef5ca      False     True        False        GRASP_STALLED  -0.011000000000000046 gripper did not open (position=-0.011000000000
+evobot-batch3  HO-50237b4714a9      False     True        False        GRASP_STALLED  -0.011000000000000034 gripper did not open (position=-0.011000000000
+evobot-batch3  HO-e2d3ed8c2437      False     True        False        GRASP_STALLED  -0.011000000000000022 gripper did not open (position=-0.011000000000
+evobot-batch3  HO-f9431f8ef925      False     True        False        GRASP_STALLED  -0.01100000000000003 gripper did not open (position=-0.011000000000
+
+release failures observed            : 9
+every one had carry_confirmed = True : True
+
+READING: the carry layer detached the object (release happened) while the jaw
+did not reach the commanded aperture (a real stall). The skill fails on the
+aperture test alone, so a successful release is reported as a failure.
+
+CONSEQUENCE FOR THE OLD PROPOSAL: re-commanding the release cannot help when
+the release already happened. bounded_release_retry is therefore misdirected.
