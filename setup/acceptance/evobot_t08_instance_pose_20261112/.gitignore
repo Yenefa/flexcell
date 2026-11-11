@@ -1,0 +1,7 @@
+# evaluator_input.json is DERIVED: exactly {objects: gt_after, evidence: evidence_bundle.json},
+# both committed beside it. Same exclusion as the round-1 evidence dir.
+runs/**/evaluator_input.json
+
+# per-step logs are kept as .jsonl.gz (repo convention). The plain form duplicates them.
+runs/**/logs/*.jsonl
+
