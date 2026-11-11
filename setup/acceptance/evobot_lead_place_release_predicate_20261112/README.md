@@ -219,3 +219,77 @@ The last row is the one I would most want checked next, and I am flagging it rat
 it: B's recovery advantage may be an artifact of this defect rather than a genuine capability, which
 would change the P0 conclusion from "B's edge is architectural" to "B's edge is recovery from a
 bug in its own place step".
+---
+
+## 11. THE DECISIVE CONSEQUENCE: B's "recovery advantage" is recovery from this bug
+
+I flagged in §10 that B's recovery advantage needed re-checking rather than assuming. It has now been
+checked, and the answer changes the P0 conclusion.
+
+B's headline was: `evaluation_passed` 14/16 on first attempt → **16/16 after recovery**, i.e. a
+recovery layer that rescued two runs, described as B's surviving **architectural** edge over A-prime.
+
+Those are the only two recovered runs. **Both failed their first attempt with exactly this defect:**
+
+```
+HO-2efba46248da  failed_stage=target_box_a-0  completed_stage_ids=[]
+HO-d3ab212142de  failed_stage=target_box_b-0  completed_stage_ids=[]
+
+both: native_error_code=50
+      native_fsm_trace=['PICK_A(attempt=1):OK', 'PLACE_A:FAIL']
+      native_detail='... place failed (ERR_PLACE_FAILED, carried box is not retried)
+                     ... previous_skill=PLACE cause=ERR_PLACE_FAILED legacy_error_code=25'
+```
+
+**Identical to the A-prime failures. Same stage, same skill, same cause, same code.**
+
+So B's entire recovery advantage consists of **retrying its own place bug and succeeding on the
+retry** — because the second attempt's gripper happens to open. It rescued two runs from a defect, not
+two tasks from a hard situation.
+
+## 12. What the P0 conclusion becomes
+
+| | before this round | after |
+| --- | --- | --- |
+| B's edge over A-prime | "architectural: a recovery layer" | **"a retry loop for its own place defect"** |
+| A-prime's disadvantage | "run one-shot, no recovery" | **same, but the thing it lacks is a retry around a bug — not a capability** |
+| Comparable planning | 16/16 identical plans, zero model cost | unchanged |
+| Who is better | "roughly equal, B has recovery" | **not established either way, and the one difference is an artifact** |
+
+A-prime scores 13/16 one-shot. B scores 14/16 first attempt and 16/16 with retries. **Every single one
+of the runs separating them fails for this defect.** If A-prime were given the same retry loop, the
+expected outcome is that it reaches the same or a higher number, since its plans are identical.
+
+**I am not claiming A-prime would win.** I am claiming the comparison cannot distinguish them, because
+the only measured difference is a retry around a defect that both arms hit.
+
+## 13. What this means for the goal's own accounting
+
+The Master Goal requires `False Success` to be 0 and **`False Failure` to be reported**. This is a
+False Failure mechanism, and it has been inflating every execution-based failure rate in this project
+for its entire history — 51 of 539 place attempts across 21 archives.
+
+The honest position is not that the numbers are wrong. It is that **the executor's verdict is a
+measurement of the executor's self-report, not of the world**, and this project has repeatedly
+quoted it as if it were the latter. Task-level evaluation reads the world; execution verdicts read
+the skill's opinion of itself. They differ on 37.5 % of runs.
+
+## 14. The one-line fix, for human approval
+
+```python
+# place_server.py:424-432 - today
+if (aperture_error > self._release_aperture_tolerance_m and not reached_goal):
+    return finish(FAILED, ERR_PLACE_FAILED, 'gripper did not open')
+res.released = True
+
+# should be: released is a CARRY-BACKEND fact, not a gripper fact
+released = carry_backend.release_confirmed()      # carry.jsonl already records this
+if not released:
+    return finish(FAILED, ERR_PLACE_FAILED, 'carry release not confirmed')
+if not gripper_opened:                            # diagnostic only, never fatal
+    rec['gripper_diagnostic'] = open_state
+```
+
+**Not applied.** `place_server.py` is a frozen skill contract and this changes a release predicate.
+It is the same item raised in round 1, now with its mechanism, its frequency, its historical reach
+and its cost to the P0 conclusion attached.
