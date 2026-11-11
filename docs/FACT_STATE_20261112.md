@@ -772,4 +772,17 @@ destination. Recovery did not rescue a task; it undid one.
 | Synthesis | single draw lands across 20.4 mm with ~15% passing (r17) **+** recovery retries a short push and lifts the floor (prior audit) **→ a real but modest ~23-point effect**. That is why 4/5 vs 2/5 looked dramatic and is not | same |
 | Environment pre-flight | all 5 setup files present, no stray sim process, task spec present, lock free — **the run was feasible and I chose not to spend it** | `_r19_pre.sh` output |
 
+---
+
+## ADDENDUM — goal round 20 (2026-11-12): the recovery experiment already contains BOTH arms, paired — and it shows one trial changed
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| The published comparison | **WRONG COMPARISON, not merely underpowered.** 2/5 vs 4/5 crosses **two different experiments**. The recovery run **already contains a single-shot arm**: a trial with `attempts == 1` IS single-shot (first attempt = only attempt), and `attempts > 1` failed its first attempt **by construction** | `evobot_lead_paired_audit_20261112/` |
+| **The paired result** | first-attempt **3/5** → final **4/5**. **1 discordant pair improved, 0 regressed. McNemar exact p = 1.0.** *Within its own experiment, recovery changed exactly one trial out of five* | same |
+| Consequence for cost | pairing is the stronger design **and halves the runs** — round 19's n=53/arm estimate is **pessimistic in cost**; a paired design needs far fewer than 106 runs, though far more than 5 | same |
+| **The 2/5 baseline does not reproduce** | `repeats.tsv` graded on its **recorded** columns (displacement, cosine) gives **3/5**, not 2/5 — trials 1, 2, 3 all pass on both clauses. **NOT declared wrong**: the frozen clause has four sub-clauses and the other two (`|Δz| ≤ 0.020`, zone radius) are **absent from the artifact**. The finding is that **the baseline in the headline comparison cannot be verified from the archive that is supposed to support it** | same |
+| What stands | recovery lifts the distribution floor **2.6 mm → 74.0 mm** (prior audit) — real, and independent of pass rates. A single draw lands across **20.4 mm, ~15% passing** (round 17, n=197) | — |
+| **Net honest statement** | **the recovery mechanism is real and visible in the distribution; the pass-rate improvement is one trial in five.** That is what should be written down, not 2/5 → 4/5 | same |
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
