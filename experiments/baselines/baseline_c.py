@@ -46,7 +46,24 @@ def retrieve(observation, store_path=DEFAULT_STORE, limit=3):
     ok, _ = store.verify_chain(store_path)
     if not ok:
         raise RuntimeError("experience chain is broken; refusing to learn from it")
-    rows = [r for r in store.read(store_path) if r.get("validated")]
+    # WHICH RECORDS MAY INFLUENCE A PLAN (changed 2026-11-12, goal round 15).
+    #
+    # This used to be `if r.get("validated")`. That field is set BY THE SEEDER, and an
+    # independent review found 3 of 4 records carrying it cite evidence their own cited
+    # source cannot contain. Worse, after the provenance guard landed, a record that had
+    # actually been CHECKED carries validated=False and provenance_verified=True - so this
+    # filter hid the two trustworthy records and admitted the four that a reviewer rejected.
+    # The retrieval path was empty of trustworthy lessons by construction.
+    #
+    # A lesson may reach a plan only if its provenance was verified mechanically. Legacy
+    # stores with no provenance field fall back to the old field so their behaviour is
+    # unchanged - a fallback, not a preference.
+    all_rows = store.read(store_path)
+    verified = [r for r in all_rows if r.get("provenance_verified") is True]
+    if verified:
+        rows = verified
+    else:
+        rows = [r for r in all_rows if r.get("validated")]
     text = observation["instruction"].lower()
     scored = []
     for r in rows:
