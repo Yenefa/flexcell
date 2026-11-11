@@ -683,4 +683,18 @@ destination. Recovery did not rescue a task; it undid one.
 | The review's ranked fixes | **RECORDED, NONE APPLIED.** Highest value ≈10 lines: **make the seeder assert the evidence values actually appear under `source_run`** — that alone would have rejected 3 of 4. *"The difference between a claim and a check."* | REVIEW.md |
 | What the channel does have | The hash chain, append-only design and scope guard **all exist and work**; `audit_actionability.py` had already reached the same 1/4 conclusion and is simply **not wired into the write path**. These four records are evidence the channel can be **populated** and that its integrity machinery **runs** — not that it works | same |
 
+---
+
+## ADDENDUM — goal round 13 (2026-11-12): the seeder now checks evidence, and rejects all four records
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| **The provenance defect** | **FIXED in the write path.** `seed_from_evidence.py:26` was the only check (`if not source.exists()`); it **never opened the directory**, and set `validated = True` itself at line 31. New `verify_provenance.py` requires **every evidence string** to appear in a **machine-readable** file under `source_run` (prose excluded by suffix), and refuses `HARNESS`/`DOWNSTREAM_CODE`/`UNCLEAR` lessons at **write** time | `evobot_lead_provenance_fix_20261112/` |
+| Demonstration against the four real seeds | **0 accepted, 4 rejected.** The round-12 review predicted 3 of 4; the mechanical check tests the **exact cited string** and therefore rejects R3 too (record says domain **213**, `runs/s1004-a1/stack.log` says domain **233**). **The round-12 disagreement is now settled by a check rather than an argument, against the more generous reading** | same |
+| Tests | **7/7 pass**, including the three cases where a naive check passes: evidence only in a README (the actual historical defect), a missing source, and evidence with no verifiable string | `evolution/experience/test_verify_provenance.py` |
+| Schema, changed conservatively | `validated` is **no longer set by the seeder**; new fields `provenance_verified`, `evidence_files`, `reviewed_by`, `review_verdict`, `review_ref` record what was actually checked | same |
+| `records.jsonl` | **NOT rewritten, not reseeded.** The four records keep `validated: true` because that is now the historical fact that the old seeder ran — editing them would destroy evidence of the defect | `git diff` shows 0 changes |
+| **What this does NOT fix** | **The store cannot currently be reseeded from its own seed file**, because the seeds cite evidence the archives do not contain. Three of the review's five ranked fixes remain open: `source_run` pointing at the **run** not the batch, **archiving the failing run** when a defect is fixed, and reviewer-owned verdicts | same |
+| Net effect on P3 | **The channel is HONEST, not FUNCTIONAL.** An empty store that refuses bad records is a better foundation than a populated one that accepts them — but it is not experience reuse | — |
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
