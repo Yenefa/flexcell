@@ -10,6 +10,10 @@
 set -u
 OUT=${1:?output dir}
 LIMIT=${2:-6}
+# Optional explicit task list (space or comma separated). Used to execute the specific
+# instances where the A-prime and B plans differ, so the difference is tested on exactly
+# the cases that expose it rather than on whatever happens to sort first.
+ONLY=${3:-}
 WT=/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp
 PLANS=$WT/setup/acceptance/evobot_baseline_b_v2_20261111/plans
 mkdir -p "$OUT"
@@ -33,7 +37,12 @@ echo 'interface check: OK'
 printf 'task_id\tstages\tcomposite_outcome\tgraded\tpassed\tfalse_success\tfailed_clauses\n' > "$OUT/b_results.tsv"
 
 n=0
-for PD in $(ls -d "$PLANS"/*/ 2>/dev/null | head -$LIMIT); do
+if [ -n "$ONLY" ]; then
+  CAND=$(echo "$ONLY" | tr "," " " | tr " " "\n" | sed "/^$/d" | sed "s|^|$PLANS/|;s|$|/|")
+else
+  CAND=$(ls -d "$PLANS"/*/ 2>/dev/null | head -$LIMIT)
+fi
+for PD in $CAND; do
   TASK=$(basename "$PD")
   n=$((n+1)); echo "=== [$n] $TASK ==="
   SPEC="$WT/benchmark/tasks/train/$TASK.json"
