@@ -528,4 +528,20 @@ in both recovered runs), so it is a full stage re-execution, not a checkpoint re
 **already delivered the box** to within 44 mm of zone centre. The retry picked it *out of* the correct
 destination. Recovery did not rescue a task; it undid one.
 
+---
+
+## ADDENDUM — goal round 4 (2026-11-12): the fix was already pre-registered, and its own criteria are broken
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| Round 3 presented the `place` release defect as new | **FALSE — I rediscovered 2026-11-11's work.** The mechanism was established with 9 cases in `setup/acceptance/evobot_release_mechanism_20261111/`, the wrong earlier proposal (`bounded_release_retry`) was already superseded, and the correct fix was already **pre-registered and awaiting approval** in `evolution/proposals/release_confirmation_preregistration.json` | both dirs |
+| Corrective for the above | **Before diagnosing a defect, search `evolution/proposals/` and the acceptance archive for its signature.** I checked whether the code had the bug and never checked whether the project already knew | — |
+| Are the project's task-level RESULTS contaminated by the release defect? | **NO — and I nearly claimed otherwise.** Re-graded 238 archived runs: 47 (19.7 %) hit the defect; of the 11 recorded failures among them, **all 11 are GENUINE** — most with an object still at its initial pose. **Zero provable False Failures.** Only `execution_succeeded` is corrupted; `independent_evaluation_passed` is sound | `evobot_lead_historical_regrade_20261112/` |
+| The carry mechanism | **never failed to release — 0 stuck carries in 238 runs** (releases = starts everywhere) | same |
+| The pending proposal's task-level prediction | **UNSUPPORTED.** It predicts task-level false failures 6.2 % (2/32) → 0 %, and sets "task-level false failure count falls to 0" as a success criterion. Measured: **0/237**. The criterion is **vacuous** — it is already satisfied and would pass for the wrong reason | `evobot_lead_preregistration_test_20261112/` |
+| The pending proposal's safety argument | **FALSE AS WRITTEN.** It says the evaluator grades the world, not the self-report. But `benchmark/evaluators/observe_from_run.py:74,114` reads `place.released`, and that module **builds the observation the evaluator grades**. The changed field is on the grading path | `evobot_lead_fix_prefix_validation_20261112/` |
+| Why the fix is nonetheless safe (part 1) | **INCIDENTALLY.** All 51 rows with `released=false` carry **no** `box_after`; 488 released rows do. `observe_from_run` needs a pose *and* a truthy `released`, so those rows are skipped either way. Safety comes from the failure path not writing `box_after` — not from a guarantee | same |
+| The risky part is the proposal's own follow-on prediction | **Part 2 (`place_box_after_will_be_recorded`) changes the grading input for 51 rows**, shifting provenance from `verify.jsonl` to `place.box_after`. It is **not covered** by the proposal's safety argument and needs its own regression check. Whether it creates false success is **NOT DEMONSTRATED** — `box_after` does not exist on those rows, so its future value cannot be read offline. Unlikely is not a test | same |
+| The pattern behind three separate findings | **A claim that some quantity is not used, made without tracing its use.** Round 2: aperture travel assumed to mean a grasp (0.42 mm from air). Round 3: aperture assumed to mean a release (`carry_release_confirmed` in the same record). Round 4: assumed the evaluator does not read `released` (`observe_from_run.py:74` does). **The cheap check is a grep** | all three |
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
