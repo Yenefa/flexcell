@@ -15,8 +15,8 @@
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 41,
-    "batches_live": 34,
+    "batches_total": 42,
+    "batches_live": 35,
     "batches_superseded": 7,
     "verifier_failures": 0,
     "live_batches": [
@@ -59,6 +59,11 @@
         "batch": "evobot_crosstype_20261111",
         "verified": "PASS",
         "rung": "Generalization Tested across TASK TYPE (T14 order constraint: planning 16/16, wrong-order 0, R 16/16)"
+      },
+      {
+        "batch": "evobot_failure_layer_20261111",
+        "verified": "PASS",
+        "rung": "Attribution (0/64 failures are planner-caused; Level 7 boundary explained)"
       },
       {
         "batch": "evobot_false_failure_20261111",

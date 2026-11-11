@@ -76,6 +76,7 @@ RUNGS = {
     "evobot_release_mechanism_20261111": "Root cause identified (9/9 uniform: carry confirmed, gripper stalled); corrected proposal pre-registered, NOT implemented)",
     "evobot_ladder_generated_20261111": "Documentation now DERIVED (ladder regenerated from the archive; drift tests added; no regression)",
     "evobot_crosstype_20261111": "Generalization Tested across TASK TYPE (T14 order constraint: planning 16/16, wrong-order 0, R 16/16)",
+    "evobot_failure_layer_20261111": "Attribution (0/64 failures are planner-caused; Level 7 boundary explained)",
 }
 
 

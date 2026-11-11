@@ -1,0 +1,32 @@
+batch      run                  task       layer            why
+batch1     HO-47afdffad81a      fail       EXECUTION        grasp
+batch1     HO-5a96f3eb4fae      fail       EXECUTION        grasp
+batch2     HO-a69ec651037a      fail       EXECUTION        task reported failure while the world was correct
+batch2     HO-f9431f8ef925      fail       EXECUTION        task reported failure while the world was correct
+batch3     HO-274c7aaa6485      fail       EXECUTION        grasp
+batch3     HO-285d9e53fbdd      fail       EXECUTION        task reported failure while the world was correct
+batch3     HO-2f52569ef5ca      fail       EXECUTION        grasp
+batch3     HO-50237b4714a9      fail       EXECUTION        task reported failure while the world was correct
+batch3     HO-e2d3ed8c2437      fail       EXECUTION        grasp
+batch3     HO-f9431f8ef925      fail       EXECUTION        task reported failure while the world was correct
+batch4     HO-128c6a231c34      fail       EXECUTION        task reported failure while the world was correct
+batch4     HO-2efba46248da      fail       EXECUTION        grasp
+batch4     HO-51600cf21179      fail       EXECUTION        task reported failure while the world was correct
+batch4     HO-d3ab212142de      fail       EXECUTION        grasp
+batch4     HO-da7c04bdece5      fail       EXECUTION        task reported failure while the world was correct
+
+runs considered          : 64
+passed cleanly           : 49
+PLANNER-attributable     : 0
+EXECUTION-attributable   : 15
+unattributed             : 0
+
+  batch1             ok=14  planner=0  execution=2  unknown=0
+  batch2             ok=14  planner=0  execution=2  unknown=0
+  batch3             ok=10  planner=0  execution=6  unknown=0
+  batch4             ok=11  planner=0  execution=5  unknown=0
+
+CONCLUSION: no failure is attributable to planning. Level 7 Transfer is
+UNOBSERVABLE here because there is nothing for a planning lesson to fix -
+the gap sits below the planner, in execution. That is a different claim from
+"lesson delivery is broken", and it changes what would have to change.

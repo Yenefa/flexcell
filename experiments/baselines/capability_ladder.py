@@ -89,6 +89,32 @@ def batch_stats(base):
     return st
 
 
+def failure_attribution():
+    """Reuse the attribution script so the ladder cannot disagree with it."""
+    import importlib.util
+    p = os.path.join(WT, "experiments", "baselines", "failure_layer.py")
+    spec = importlib.util.spec_from_file_location("fl", p)
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    counts = {"PLANNER": 0, "EXECUTION": 0, "UNKNOWN": 0, "ok": 0, "total": 0}
+    for base in ("/tmp/evobot-batch1", "/tmp/evobot-batch2",
+                 "/tmp/evobot-batch3", "/tmp/evobot-batch4"):
+        if not os.path.isdir(base):
+            continue
+        for d in sorted(glob.glob(os.path.join(base, "HO-*"))):
+            counts["total"] += 1
+            v1 = read(os.path.join(d, "verdict_after1.json")) or {}
+            oc = m.outcome(d)
+            if v1.get("passed") and oc == 0:
+                counts["ok"] += 1
+                continue
+            if v1.get("passed"):
+                counts["EXECUTION"] += 1
+                continue
+            counts[m.attribute(d)[0]] += 1
+    return counts
+
+
 def proposals():
     out = []
     for p in sorted(glob.glob(os.path.join(WT, "evolution", "proposals",
@@ -189,6 +215,20 @@ def main():
             name, st["n"], st["b"], st["r"], st["gained"], st["retried"],
             st["retried_after_pass"], st["task_false_failure"]))
     A("")
+    att = failure_attribution()
+    A("## 失败归因（为什么 Level 7 看不到效果）")
+    A("")
+    A("| 项 | 数量 |")
+    A("| --- | --- |")
+    A("| 参与统计的运行 | %d |" % att["total"])
+    A("| 干净通过 | %d |" % att["ok"])
+    A("| **可归因于规划** | **%d** |" % att["PLANNER"])
+    A("| 可归因于执行 | %d |" % att["EXECUTION"])
+    A("| 无法归因 | %d |" % att["UNKNOWN"])
+    A("")
+    A("规划层零错，意味着**规划级经验没有可修之处**——")
+    A("Level 7 未观察到不是因为投递坏了，而是因为没有东西可送。")
+    A("")
     A("## 阶梯")
     A("")
     A("状态是基于**同行写明的测量**下的判断；阈值写在旁边，可以不同意。")
@@ -202,7 +242,7 @@ def main():
     A("| 4 | Develop | **未达成** | 无 Agent 自建新技能 |")
     A("| 5 | Improve | **待人工批准** | 提案已预注册、依据已更正，**未实施** |")
     A("| 6 | Learn | **骨架** | 经验库+诊断+回归门，Unit Tested |")
-    A("| 7 | Transfer | **未观察到** | 经验不改变计划（16/16 计划字节相同） |")
+    A("| 7 | Transfer | **未观察到（原因已查明）** | 64 例中 **0 例**归因于规划，规划级经验无可修之处 |")
     A("| 8 | Generalize | **已验证（有限）** | 全新种子 8100/8200 与 7500 区间重叠 |")
     A("")
     A("## 提案状态（读自 JSON，不靠记忆）")
