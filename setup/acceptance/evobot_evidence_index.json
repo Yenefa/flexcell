@@ -1,9 +1,9 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 50,
-  "live": 43,
+  "batches": 52,
+  "live": 45,
   "superseded": 7,
-  "verifier_failures": 0,
+  "verifier_failures": 1,
   "rows": [
     {
       "batch": "evobot_abstention_20261111",
@@ -161,7 +161,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 42,
+        "live_batches": 45,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",
@@ -371,7 +371,7 @@
         "public_tasks": 36,
         "public_tasks_with_answers": 0,
         "agent_uid_read_blocked": true,
-        "sealed_answers": 122,
+        "sealed_answers": 123,
         "isolation_kind": "OS permissions; not a kernel namespace"
       }
     },
@@ -398,8 +398,8 @@
       "verdict": {
         "verdict": "EVOBOT_LADDER_DERIVED_AND_CURRENT",
         "regenerated_identically": true,
-        "batches_live": 43,
-        "verifier_failures": 0,
+        "batches_live": 45,
+        "verifier_failures": 1,
         "reports_both_directions": true,
         "zero_is_qualified": true,
         "v01_regression": "6/6 -> 6/6, NONE",
@@ -470,6 +470,20 @@
         "recovery_rate": "3/4",
         "false_success_rate": 0.0,
         "prior_batch_retained": true
+      }
+    },
+    {
+      "batch": "evobot_plan_judge_20261111",
+      "verified": "PASS",
+      "rung": "Negative (judge 100% in-sample, 71.9% held-out; not adopted as the missing gate)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_PLAN_JUDGE_FAILED_HELD_OUT",
+        "in_sample_used_for_debugging": "1.000",
+        "held_out_never_used": "0.750",
+        "lesson": "a perfect score on a set I had already debugged against meant nothing",
+        "decision": "not adopted as the plan-versus-instruction gate; the deterministic claim check stays unusable",
+        "evaluator_touched": false
       }
     },
     {
@@ -606,6 +620,31 @@
       }
     },
     {
+      "batch": "evobot_skill_growth_20261111",
+      "verified": "PASS",
+      "rung": "Level 4 attempt (relational task defeats open loop by 10.35mm vs 6mm; synthesized skill not yet working)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_SKILL_GROWTH_OPEN_LOOP_DEFEATED_SKILL_UNPROVEN",
+        "relational_clause_added": true,
+        "regression": "64/64 archived runs re-graded identically",
+        "open_loop": {
+          "placement": "passed",
+          "relative": "failed",
+          "miss_m": 0.01035,
+          "tolerance_m": 0.006
+        },
+        "closed_loop": {
+          "implemented": true,
+          "second_placemement_moved_object": false
+        },
+        "proven": "one-shot planning cannot solve this task",
+        "NOT_proven": "that the synthesized procedure solves it",
+        "evaluator_change": "generic relative clause, v0.2.0, no clause weakened",
+        "skill_layer_touched": false
+      }
+    },
+    {
       "batch": "evobot_spacing_fix_20261111",
       "verified": "PASS",
       "rung": "Independently Verified (root-cause fix, 8/8)",
@@ -624,29 +663,10 @@
     },
     {
       "batch": "evobot_t01_baseline_a_20261111",
-      "verified": "PASS",
+      "verified": "FAIL",
       "rung": "Simulation Tested (superseded: single arm, n=1)",
       "superseded_by": "evobot_t02_ab_20261111 (paired arms, same instance)",
-      "verdict": {
-        "verdict": "EVOBOT_T01_BASELINE_A_INDEPENDENTLY_VERIFIED",
-        "task_id": "T01-train-seed1000",
-        "template_id": "T01_multi_object_sorting",
-        "instruction": "Put the red block in the right bin and the blue block in the left bin.",
-        "arm": "A_deterministic_composite",
-        "agent_planned": false,
-        "stages_completed": [
-          "target_box_a-0",
-          "target_box_b-1"
-        ],
-        "placement_errors_m": {
-          "placement:target_box_a": 0.00926,
-          "placement:target_box_b": 0.00439
-        },
-        "tolerance_m": 0.06,
-        "false_success": false,
-        "false_failure": true,
-        "capability_level_claimed": "LEVEL_1_EXECUTE (Baseline A only)"
-      }
+      "verdict": null
     },
     {
       "batch": "evobot_t01_baseline_b_20261111",

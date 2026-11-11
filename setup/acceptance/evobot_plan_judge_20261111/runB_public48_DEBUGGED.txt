@@ -1,0 +1,39 @@
+HO-198a4b2688d0        OWN    satisfies=True   matches
+HO-198a4b2688d0        DONOR  satisfies=False  The red block ends in the left bin rather than the right bin, an
+HO-38ce6531a597        OWN    satisfies=True   matches
+HO-38ce6531a597        DONOR  satisfies=False  The blue block has only one stage and ends in the left bin rathe
+HO-3a19766a4104        OWN    satisfies=None   unparseable: 
+HO-3a19766a4104        DONOR  satisfies=False  The plan only moves target_box_a (red) and never moves the blue 
+HO-3bfb9643b7b6        OWN    satisfies=False  The plan unconditionally places both blocks in the right bin, ig
+HO-3bfb9643b7b6        DONOR  satisfies=None   unparseable: 
+HO-4499501c2043        OWN    satisfies=False  The plan never performs the required initial distance comparison
+HO-4499501c2043        DONOR  satisfies=False  The plan simply puts both blocks in the left bin without perform
+HO-47afdffad81a        OWN    satisfies=True   matches
+HO-47afdffad81a        DONOR  satisfies=False  The plan only places blue in the left bin (0.295,0.050) and neve
+HO-4f197a0997af        OWN    satisfies=True   matches
+HO-4f197a0997af        DONOR  satisfies=False  The red block is only placed in the left bin and never visits th
+HO-5a96f3eb4fae        OWN    satisfies=True   matches
+HO-5a96f3eb4fae        DONOR  satisfies=False  The red block ends in the left bin, not the right bin as require
+HO-5d21b382e781        OWN    satisfies=False  The plan unconditionally puts both blocks in the right bin, but 
+HO-5d21b382e781        DONOR  satisfies=False  The red block at (0.205, 0.050) is closer to the left bin, so th
+HO-68f800add5fc        OWN    satisfies=True   matches
+HO-68f800add5fc        DONOR  satisfies=False  The red block is only placed at (0.205,0.050), which is inside t
+HO-72553754ef3a        OWN    satisfies=False  The blue block is placed at (0.295,0.050), which is closer to th
+HO-72553754ef3a        DONOR  satisfies=False  The plan never moves the blue block, so it cannot put BOTH block
+HO-78b746f47443        OWN    satisfies=None   unparseable: {"satisfies": false, "why": "The plan ends with bot
+HO-78b746f47443        DONOR  satisfies=False  The plan only moves the red target_box_a and never moves the blu
+HO-b7bd62621f05        OWN    satisfies=True   matches
+HO-b7bd62621f05        DONOR  satisfies=False  The plan puts the red block only in the left bin and never in th
+HO-de2741728c69        OWN    satisfies=False  The plan unconditionally places both blocks in the right bin wit
+HO-de2741728c69        DONOR  satisfies=False  The red block at (0.205,0.050) is closer to the left bin, so the
+HO-e2580e718ecd        OWN    satisfies=True   matches
+HO-e2580e718ecd        DONOR  satisfies=False  The plan moves blue only once to the left bin, so it never perfo
+HO-fb31a8cd4a66        OWN    satisfies=False  Plan puts both blocks in the right bin, but the red block's plac
+HO-fb31a8cd4a66        DONOR  satisfies=False  The plan unconditionally places both blocks in the left bin and 
+
+OWN   plans judged satisfying : 8/16
+DONOR plans judged NOT satisfying: 15/16
+separation accuracy           : 71.9%
+
+READING: the judge does NOT separate cleanly, so it cannot be used as that gate
+yet, and the deterministic claim check stays unusable.

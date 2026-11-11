@@ -85,6 +85,8 @@ RUNGS = {
     "evobot_claim_accuracy_20261111": "Self-report (LLM 70.3%, 19 false failures; deterministic 100% but rejected - can admit false success)",
     "evobot_wrongplan_probe_20261111": "Decisive (foreign plan executed: evaluator FAILED, claim check said SUCCESS - false success demonstrated)",
     "evobot_claim_hybrid_20261111": "Measured then refused (two-condition claim 40/40; hybrid 64/64 in-sample; not adopted)",
+    "evobot_skill_growth_20261111": "Level 4 attempt (relational task defeats open loop by 10.35mm vs 6mm; synthesized skill not yet working)",
+    "evobot_plan_judge_20261111": "Negative (judge 100% in-sample, 71.9% held-out; not adopted as the missing gate)",
 }
 
 

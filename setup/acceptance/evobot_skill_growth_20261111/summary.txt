@@ -1,0 +1,8 @@
+arm B: passed=False failed=['relative:target_box_b@target_box_a']
+    placement:target_box_a True {}
+    relative:target_box_b@target_box_a False {}
+    world: {'target_box_a': [0.118, -0.154], 'target_box_b': [0.122, -0.085]}
+arm C: passed=False failed=['relative:target_box_b@target_box_a']
+    placement:target_box_a True {}
+    relative:target_box_b@target_box_a False {}
+    world: {'target_box_a': [0.121, -0.15], 'target_box_b': [0.2, -0.18]}

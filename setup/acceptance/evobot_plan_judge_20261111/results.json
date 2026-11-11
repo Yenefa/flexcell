@@ -1,0 +1,26 @@
+{
+  "note": "Two sets were used while fixing the probe's rendering (missing colours, then missing bin radius). Only the third set was never used for that, so only it is an honest test. The judge was NOT adopted.",
+  "runA_public80_used_to_fix_colours": {
+    "own_ok": 16,
+    "own_n": 16,
+    "donor_ok": 16,
+    "donor_n": 16,
+    "separation": 1
+  },
+  "runB_public48_used_to_fix_radius": {
+    "own_ok": 8,
+    "own_n": 16,
+    "donor_ok": 15,
+    "donor_n": 16,
+    "separation": 0.719
+  },
+  "runC_public64_never_used": {
+    "own_ok": 16,
+    "own_n": 32,
+    "donor_ok": 32,
+    "donor_n": 32,
+    "separation": 0.75
+  },
+  "decision": "not adopted as the plan-versus-instruction gate; the deterministic claim check stays unusable",
+  "evaluator_touched": false
+}

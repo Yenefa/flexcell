@@ -19,7 +19,7 @@ import sys
 from pathlib import Path
 
 GENERATOR_VERSION = "0.1.0"
-EVALUATOR_VERSION = "0.1.0"
+EVALUATOR_VERSION = "0.2.0"
 
 # Measured from the worlds the smoke harness actually generates.
 #

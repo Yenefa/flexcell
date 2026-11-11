@@ -14,7 +14,7 @@ number and threshold, so a failure is attributable instead of an opaque FAIL.
 import json
 import math
 
-EVALUATOR_VERSION = "0.1.0"
+EVALUATOR_VERSION = "0.2.0"
 
 # Declared tolerances. Changing one changes what "success" means, so the version
 # string must change with them; the tests assert the pair stays in sync.
@@ -128,6 +128,35 @@ def evaluate(spec, final_state):
         clauses.append(_clause(
             "stacking", tiers >= min_tiers, tiers=tiers, required=min_tiers,
             heights=[round(z, 5) for z in heights]))
+
+    # RELATIONAL clause: "X must end at a fixed offset from wherever Y ACTUALLY ended up".
+    #
+    # Why this is not a convenience: every other clause anchors to something declared in the
+    # spec (a zone, an initial pose, an order). This one anchors to an ACHIEVED pose, which
+    # carries execution error. A planner that never re-observes can only place X relative to
+    # where it INTENDED to put Y, so it is wrong by exactly that error. It is therefore the
+    # first goal shape in this benchmark that a blind one-shot plan cannot satisfy by
+    # construction, and it exists to test whether the agent can acquire a procedure for it.
+    #
+    # It is pure, it reads only the final state, and it can only ADD a clause - no existing
+    # clause is relaxed or removed.
+    for rel in (goal.get("relative") or []):
+        name = rel.get("object")
+        ref = rel.get("reference")
+        off = rel.get("offset") or [0.0, 0.0]
+        tol = float(rel.get("tolerance_m", 0.01))
+        label = "relative:%s@%s" % (name, ref)
+        if name not in pose or ref not in pose:
+            clauses.append(_clause(label, False,
+                                   reason="object missing",
+                                   missing=[n for n in (name, ref) if n not in pose]))
+            continue
+        want = (pose[ref][0] + float(off[0]), pose[ref][1] + float(off[1]))
+        d = _dist2d(pose[name], want)
+        clauses.append(_clause(
+            label, d <= tol, distance_m=round(d, 5), tolerance_m=tol,
+            reference_final=[round(v, 5) for v in pose[ref][:2]],
+            required_delta=[float(off[0]), float(off[1])]))
 
     passed = bool(clauses) and all(c["ok"] for c in clauses)
     claimed = bool(final_state.get("agent_claimed_success"))

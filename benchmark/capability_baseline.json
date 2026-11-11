@@ -3,22 +3,22 @@
   "changes_since_previous": [],
   "why": "Pins the contract that DEFINES correctness, so archived numbers stay comparable. Changing any pinned file requires re-running the experiments, not just editing this file.",
   "pinned_files": {
-    "benchmark/evaluators/evaluate.py": "c75eaf781ca6ea7298c1298a12d86e19026e43708ededf825186a13e94ac8a6d",
+    "benchmark/evaluators/evaluate.py": "ed4a63323d565702d5aa0645ccd44385ad021ad1f050f2744361b32680be9ff5",
     "benchmark/evaluators/sealed_evaluate.py": "fa330e69ac6a35aec4b1313638b458885e93c8877ea5dc53f642859783e3acad",
     "benchmark/evaluators/observe_from_run.py": "c9b910cde2b93da9c5dae1760c1e731d7679eb20b52b3b5fc19b9028973c5250",
     "benchmark/evaluators/capture_ground_truth.py": "faec24ae921acdbef25114fbd20e7c435453fd8d7bdf8190f9cacecbd59cb608",
     "benchmark/schemas/taskspec.schema.json": "29aae267b157efc2f91d48578ed849c4427e79b629cb3fdea7f892dc7a57563e",
-    "benchmark/generators/generate.py": "17e15d4e320b7d3285058bf7eafd389f0ef34eed7345c45a1e536243c6e414ac",
+    "benchmark/generators/generate.py": "5c1324db5d7156c4f94b9e5725be07722931b3ad90106cc055513d9236140cb2",
     "benchmark/generators/seal_held_out.py": "b4c63360db75a603e798e44a614baeedde0e5086b0f4aae2be65355e98d53a8f",
-    "benchmark/generators/unseen_tasks.py": "c29701fb5cb40410e4e775f2a6a27c5dda6fda1d798c18b1efb389728c3720fe",
+    "benchmark/generators/unseen_tasks.py": "db646d1e02fd946a8f28d1e435f12eca012e9a74a5d72ffd324a956883dfb10f",
     "evolution/validation/regress.py": "a3d8bf5246a95695a37ddf0a25f2565b6198f2acc132f84ec1e3dbae7d107d9b"
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 50,
-    "batches_live": 43,
+    "batches_total": 52,
+    "batches_live": 45,
     "batches_superseded": 7,
-    "verifier_failures": 0,
+    "verifier_failures": 1,
     "live_batches": [
       {
         "batch": "evobot_abstention_20261111",
@@ -146,6 +146,11 @@
         "rung": "Independently Verified (paired n=16, recovery 3/4)"
       },
       {
+        "batch": "evobot_plan_judge_20261111",
+        "verified": "PASS",
+        "rung": "Negative (judge 100% in-sample, 71.9% held-out; not adopted as the missing gate)"
+      },
+      {
         "batch": "evobot_pooled_n32_20261111",
         "verified": "PASS",
         "rung": "Independently Verified (pooled n=32, robot runs, intervals)"
@@ -184,6 +189,11 @@
         "batch": "evobot_rule_saturation_20261111",
         "verified": "PASS",
         "rung": "Negative result: a deterministic parser scores 64/64, so the benchmark cannot show the LLM is needed"
+      },
+      {
+        "batch": "evobot_skill_growth_20261111",
+        "verified": "PASS",
+        "rung": "Level 4 attempt (relational task defeats open loop by 10.35mm vs 6mm; synthesized skill not yet working)"
       },
       {
         "batch": "evobot_spacing_fix_20261111",

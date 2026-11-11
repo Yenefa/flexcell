@@ -1,0 +1,51 @@
+{
+  "task_id": "SKG-0001-relative-anchor",
+  "template_id": "T15_relative_anchor",
+  "instruction": "Put the red block in the right bin. Then put the blue block exactly 6 cm to the left of wherever the red block actually ended up. Do not move the red block a second time.",
+  "objects": [
+    {
+      "name": "target_box_a",
+      "color": "red",
+      "initial_pose": [
+        0.22,
+        0,
+        0.018
+      ]
+    },
+    {
+      "name": "target_box_b",
+      "color": "blue",
+      "initial_pose": [
+        0.2,
+        -0.18,
+        0.018
+      ]
+    }
+  ],
+  "zones": [
+    {
+      "name": "zone_1",
+      "pose": [
+        0.12,
+        -0.15,
+        0.0175
+      ],
+      "radius": 0.06
+    },
+    {
+      "name": "zone_2",
+      "pose": [
+        0.25,
+        0.05,
+        0.0175
+      ],
+      "radius": 0.06
+    }
+  ],
+  "skills": [
+    "observe",
+    "pick",
+    "place"
+  ],
+  "random_seed": 170001
+}

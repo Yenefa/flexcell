@@ -28,7 +28,7 @@ BOX_SIZE = [0.035, 0.035, 0.035]
 ZONES = {"zone_1": {"pose": [0.12, -0.15, 0.0175], "radius": 0.06, "label": "right"},
          "zone_2": {"pose": [0.25, 0.05, 0.0175], "radius": 0.06, "label": "left"}}
 SCENE_OBJECTS = ["target_box_a", "target_box_b"]
-EVALUATOR_VERSION = "0.1.0"
+EVALUATOR_VERSION = "0.2.0"
 
 
 def _dist(p, q):

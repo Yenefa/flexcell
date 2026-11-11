@@ -1,0 +1,48 @@
+{
+  "evaluator_version": "0.2.0",
+  "task_id": "SKG-0001-relative-anchor",
+  "template_id": "T15_relative_anchor",
+  "passed": false,
+  "clauses": [
+    {
+      "clause": "placement:target_box_a",
+      "ok": true,
+      "evidence": {
+        "zone": "zone_1",
+        "distance_m": 0.00466,
+        "radius_m": 0.06,
+        "inside_zone": true,
+        "height_error_m": 0.0005,
+        "resting": true,
+        "final_pose": [
+          0.11844,
+          -0.15439,
+          0.0175,
+          0.0
+        ]
+      }
+    },
+    {
+      "clause": "relative:target_box_b@target_box_a",
+      "ok": false,
+      "evidence": {
+        "distance_m": 0.01035,
+        "tolerance_m": 0.006,
+        "reference_final": [
+          0.11844,
+          -0.15439
+        ],
+        "required_delta": [
+          0.0,
+          0.06
+        ]
+      }
+    }
+  ],
+  "failed_clauses": [
+    "relative:target_box_b@target_box_a"
+  ],
+  "agent_claimed_success": false,
+  "false_success": false,
+  "false_failure": false
+}
