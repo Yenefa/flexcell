@@ -1,0 +1,27 @@
+{
+  "task_id": "T04-train-seed1000",
+  "dry": false,
+  "instruction": "The colours are misleading, ignore them. Put the block that is FURTHER from the robot base into the right bin, and the nearer block into the left bin.",
+  "planned": true,
+  "stage": "planned",
+  "moves": [
+    {
+      "object": "target_box_b",
+      "zone": "zone_1",
+      "via": [],
+      "why": "target_box_b is farther from the base and zone_1 is the right bin."
+    },
+    {
+      "object": "target_box_a",
+      "zone": "zone_2",
+      "via": [],
+      "why": "target_box_a is nearer to the base and zone_2 is the left bin."
+    }
+  ],
+  "unmoved": [],
+  "confidence": "high",
+  "stages": 2,
+  "tokens": 919,
+  "model": "deepseek-flash",
+  "key_fingerprint": "2caaf9b9"
+}

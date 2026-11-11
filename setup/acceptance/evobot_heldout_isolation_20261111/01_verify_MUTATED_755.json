@@ -1,0 +1,242 @@
+{
+  "root": "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp",
+  "locked_prefixes": [
+    "benchmark/held_out",
+    "benchmark/evaluators",
+    "benchmark/generators"
+  ],
+  "agent_uid": 1001,
+  "eval_group": "ros",
+  "expected": {
+    "owner": "root:ros",
+    "dir_mode": "0o750",
+    "file_mode": "0o640"
+  },
+  "static": {
+    "ok": false,
+    "violations": [
+      {
+        "path": "benchmark/held_out",
+        "why": "world-accessible",
+        "mode": "0o755"
+      },
+      {
+        "path": "benchmark/held_out/public",
+        "why": "world-accessible",
+        "mode": "0o755"
+      },
+      {
+        "path": "benchmark/held_out/recovery_public",
+        "why": "world-accessible",
+        "mode": "0o755"
+      },
+      {
+        "path": "benchmark/held_out/recovery_public16",
+        "why": "world-accessible",
+        "mode": "0o755"
+      },
+      {
+        "path": "benchmark/held_out/recovery_public32",
+        "why": "world-accessible",
+        "mode": "0o755"
+      },
+      {
+        "path": "benchmark/held_out/recovery_public48",
+        "why": "world-accessible",
+        "mode": "0o755"
+      },
+      {
+        "path": "benchmark/held_out/recovery_public64",
+        "why": "world-accessible",
+        "mode": "0o755"
+      },
+      {
+        "path": "benchmark/held_out/recovery_public80",
+        "why": "world-accessible",
+        "mode": "0o755"
+      },
+      {
+        "path": "benchmark/held_out/skill_growth",
+        "why": "world-accessible",
+        "mode": "0o755"
+      },
+      {
+        "path": "benchmark/held_out/unseen_public",
+        "why": "world-accessible",
+        "mode": "0o755"
+      },
+      {
+        "path": "benchmark/held_out/README.md",
+        "why": "world-accessible",
+        "mode": "0o644"
+      },
+      {
+        "path": "benchmark/held_out/public/HO-008a467cde3f.json",
+        "why": "world-accessible",
+        "mode": "0o644"
+      },
+      {
+        "path": "benchmark/held_out/public/HO-13c5efca228e.json",
+        "why": "world-accessible",
+        "mode": "0o644"
+      },
+      {
+        "path": "benchmark/held_out/public/HO-3654cf0ad144.json",
+        "why": "world-accessible",
+        "mode": "0o644"
+      },
+      {
+        "path": "benchmark/held_out/public/HO-387696edc61f.json",
+        "why": "world-accessible",
+        "mode": "0o644"
+      },
+      {
+        "path": "benchmark/held_out/public/HO-38e7aabc1d67.json",
+        "why": "world-accessible",
+        "mode": "0o644"
+      },
+      {
+        "path": "benchmark/held_out/public/HO-3bd4abddd259.json",
+        "why": "world-accessible",
+        "mode": "0o644"
+      },
+      {
+        "path": "benchmark/held_out/public/HO-407289b23903.json",
+        "why": "world-accessible",
+        "mode": "0o644"
+      },
+      {
+        "path": "benchmark/held_out/public/HO-43fe82146963.json",
+        "why": "world-accessible",
+        "mode": "0o644"
+      },
+      {
+        "path": "benchmark/held_out/public/HO-53db4f2963c7.json",
+        "why": "world-accessible",
+        "mode": "0o644"
+      }
+    ],
+    "violation_count": 167
+  },
+  "agent_blocked": [
+    {
+      "probe": "list:benchmark/held_out",
+      "expected": "denied",
+      "exit": 0,
+      "ok": false,
+      "stderr": [
+        ""
+      ]
+    },
+    {
+      "probe": "read:benchmark/held_out/README.md",
+      "expected": "denied",
+      "exit": 0,
+      "ok": false,
+      "stderr": [
+        ""
+      ]
+    },
+    {
+      "probe": "list:benchmark/evaluators",
+      "expected": "denied",
+      "exit": 0,
+      "ok": false,
+      "stderr": [
+        ""
+      ]
+    },
+    {
+      "probe": "read:benchmark/evaluators/capture_ground_truth.py",
+      "expected": "denied",
+      "exit": 0,
+      "ok": false,
+      "stderr": [
+        ""
+      ]
+    },
+    {
+      "probe": "list:benchmark/generators",
+      "expected": "denied",
+      "exit": 0,
+      "ok": false,
+      "stderr": [
+        ""
+      ]
+    },
+    {
+      "probe": "read:benchmark/generators/build_recovery_set.py",
+      "expected": "denied",
+      "exit": 0,
+      "ok": false,
+      "stderr": [
+        ""
+      ]
+    }
+  ],
+  "agent_control": [
+    {
+      "probe": "control:read:benchmark/tasks/train/T01-train-seed1000.json",
+      "expected": "allowed",
+      "exit": 0,
+      "ok": true,
+      "stderr": [
+        ""
+      ]
+    }
+  ],
+  "reconstruction": [
+    {
+      "probe": "reconstruction:HO-42109d30fa00.json",
+      "expected": "denied at import",
+      "exit": 0,
+      "ok": false,
+      "recovered_answer": true,
+      "stderr": [
+        ""
+      ]
+    }
+  ],
+  "sealed": [
+    {
+      "probe": "sealed:read-all",
+      "expected": "denied",
+      "exit": 1,
+      "ok": true
+    }
+  ],
+  "evaluator_side": [
+    {
+      "probe": "evaluator:pass",
+      "expected_passed": true,
+      "observed_passed": true,
+      "clauses": 4,
+      "ok": true
+    },
+    {
+      "probe": "evaluator:fail",
+      "expected_passed": false,
+      "observed_passed": false,
+      "clauses": 4,
+      "ok": true
+    }
+  ],
+  "residual_risks": [
+    {
+      "risk": "root process",
+      "closed": false,
+      "measured": true,
+      "detail": "any process running as root reads the locked tree; the mechanism assumes the agent is launched as uid 1001 with no sudo"
+    },
+    {
+      "risk": "WSL interop (Windows binary reads the file)",
+      "closed": false,
+      "measured": true,
+      "detail": "uid 1001 can execute cmd.exe and read the same file through the Win32 API; POSIX bits do not apply there. Cannot be closed from inside a running distro without restarting WSL with interop disabled, which would break the rest of the host.",
+      "sample": "benchmark/held_out/README.md"
+    }
+  ],
+  "gate": false,
+  "verdict": "HELDOUT_ISOLATION_NOT_ENFORCED",
+  "claim_level": "Simulation-free OS-level isolation, verified by probe. Not a kernel namespace; not a claim of absolute safety."
+}

@@ -1,0 +1,45 @@
+{
+  "task_id": "T01-train-seed1000",
+  "initial_objects": [
+    {
+      "object_name": "target_box_a",
+      "position": [
+        0.22,
+        0.0,
+        0.0175
+      ]
+    },
+    {
+      "object_name": "target_box_b",
+      "position": [
+        0.2,
+        -0.18,
+        0.0175
+      ]
+    }
+  ],
+  "stages": [
+    {
+      "stage_id": "target_box_a-0",
+      "object_name": "target_box_a",
+      "place_pose": [
+        0.12,
+        -0.15,
+        0.0175
+      ]
+    },
+    {
+      "stage_id": "target_box_b-1",
+      "object_name": "target_box_b",
+      "place_pose": [
+        0.25,
+        0.05,
+        0.0175
+      ]
+    }
+  ],
+  "final_empty_positions": [],
+  "position_tolerance_m": 0.02,
+  "clearance_m": 0.05,
+  "motion_profile_id": "demo_slow"
+}

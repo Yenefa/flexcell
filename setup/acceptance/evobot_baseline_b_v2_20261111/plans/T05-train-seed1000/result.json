@@ -1,0 +1,25 @@
+{
+  "task_id": "T05-train-seed1000",
+  "dry": false,
+  "instruction": "Move the blue block to the left bin, passing through the right bin first.",
+  "planned": true,
+  "stage": "planned",
+  "moves": [
+    {
+      "object": "target_box_b",
+      "zone": "zone_2",
+      "via": [
+        "zone_1"
+      ],
+      "why": "The blue block is target_box_b; zone_1 is the right bin (negative y) and zone_2 is the left bin (positive y), so place it in zone_1 first then zone_2."
+    }
+  ],
+  "unmoved": [
+    "target_box_a"
+  ],
+  "confidence": "high",
+  "stages": 2,
+  "tokens": 900,
+  "model": "deepseek-flash",
+  "key_fingerprint": "2caaf9b9"
+}

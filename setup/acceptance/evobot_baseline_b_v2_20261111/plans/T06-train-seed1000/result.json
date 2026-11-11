@@ -1,0 +1,29 @@
+{
+  "task_id": "T06-train-seed1000",
+  "dry": false,
+  "instruction": "Two-step: put the blue block in the left bin, then move it on to the right bin. Only the final position counts.",
+  "planned": true,
+  "stage": "planned",
+  "moves": [
+    {
+      "object": "target_box_b",
+      "zone": "zone_2",
+      "via": [],
+      "why": "Move blue block to the left bin first"
+    },
+    {
+      "object": "target_box_b",
+      "zone": "zone_1",
+      "via": [],
+      "why": "Then move the same blue block to the right bin for final position"
+    }
+  ],
+  "unmoved": [
+    "target_box_a"
+  ],
+  "confidence": "high",
+  "stages": 2,
+  "tokens": 1090,
+  "model": "deepseek-flash",
+  "key_fingerprint": "2caaf9b9"
+}

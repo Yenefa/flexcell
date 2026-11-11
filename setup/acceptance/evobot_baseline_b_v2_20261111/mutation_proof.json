@@ -1,0 +1,39 @@
+{
+  "control_passes_on_unmutated_code": true,
+  "control_output": "CONTROL OK: unmutated module behaves correctly",
+  "tracked_files_unmodified": true,
+  "legend": "property_broke_under_mutation=true means the check is REAL: the mutation broke the property and the probe detected it",
+  "mutations": [
+    {
+      "mutation": "M1 leak guard disabled -> a task carrying expected_goal is accepted",
+      "detail": "NOT CAUGHT: builder accepted a task carrying expected_goal",
+      "property_broke_under_mutation": true,
+      "probe_exit_code": 1
+    },
+    {
+      "mutation": "M2 bin pose hardcoded -> observation stops being a function of the task",
+      "detail": "NOT CAUGHT: observation ignored the task pose -> {'name': 'z', 'position': [0.12, -0.15, 0.0175], 'radius': 0.06}",
+      "property_broke_under_mutation": true,
+      "probe_exit_code": 1
+    },
+    {
+      "mutation": "M3 gate refusal intercepted by an environment-key fallback -> bypass restored",
+      "detail": "NOT CAUGHT: a refusing gate was bypassed, got a 17-byte key",
+      "property_broke_under_mutation": true,
+      "probe_exit_code": 1
+    },
+    {
+      "mutation": "M4 plan validation downgraded -> a bad plan is returned instead of raised",
+      "detail": "NOT CAUGHT: invalid plan accepted, moves = [{'object': 'a', 'zone': 'z', 'via': [], 'why': ''}]",
+      "property_broke_under_mutation": true,
+      "probe_exit_code": 1
+    },
+    {
+      "mutation": "M5 declared step budget ignored -> an over-budget plan is accepted",
+      "detail": "NOT CAUGHT: 2 distinct valid moves accepted under a budget of 1",
+      "property_broke_under_mutation": true,
+      "probe_exit_code": 1
+    }
+  ],
+  "every_check_is_proven_to_be_able_to_fail": true
+}

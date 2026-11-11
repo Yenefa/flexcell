@@ -1,0 +1,23 @@
+{
+  "task_id": "T02-train-seed1000",
+  "dry": false,
+  "instruction": "Clear the table into the right bin, except the blue block, which must stay put.",
+  "planned": true,
+  "stage": "planned",
+  "moves": [
+    {
+      "object": "target_box_a",
+      "zone": "zone_1",
+      "via": [],
+      "why": "Move the red block into the right-side bin while leaving the blue block untouched."
+    }
+  ],
+  "unmoved": [
+    "target_box_b"
+  ],
+  "confidence": "high",
+  "stages": 1,
+  "tokens": 808,
+  "model": "deepseek-flash",
+  "key_fingerprint": "2caaf9b9"
+}

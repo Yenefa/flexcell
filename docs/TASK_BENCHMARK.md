@@ -39,13 +39,25 @@ Splits use disjoint seed ranges so no instance can appear twice. Instances are
 deterministic from `(template, seed)`, so a third party can regenerate any held-out
 spec to re-check a claim without the agent ever seeing the answer.
 
-## 4. Isolation requirement (design constraint, enforcement pending)
+## 4. Isolation requirement — ENFORCED (2026-11-11)
 
-The evaluator reads the spec; the agent must not. Today both live in the same
-checkout, so isolation is a **documented requirement, not an enforced one**. P1 must
-run the agent in a workspace that cannot read `benchmark/held_out/` or
-`benchmark/evaluators/`. Until that is enforced, held-out results must not be
-presented as evidence of generalisation.
+The evaluator reads the spec; the agent must not. Both still live in the same checkout,
+but the three answer-bearing trees are now `root:ros 0750/0640` and the agent runs as
+uid 1001 with cleared groups, so it is denied by the kernel rather than by convention.
+
+`scripts/heldout_isolation.py apply|verify|restore|stage-public`. Verification is
+bidirectional: the agent must be denied **and** the evaluator must still return both a
+pass and a fail. `restore` (chmod 755) is the mutation path and makes `verify` exit 1.
+
+`benchmark/generators/` is locked too, and that is the substantive correction: sealing
+the answers into `/etc/evobot/sealed` was necessary but insufficient, because a public
+held-out task plus a readable generator reconstructs the sealed `expected_goal`. That
+attack succeeded in under a second before this change.
+
+Not a kernel namespace. A root process, and WSL interop (uid 1001 invoking a Windows
+binary), still read the same bytes; both are measured and reported by the verifier.
+Historical v0.1 held-out specs remain in git history with answers in clear text and stay
+retired as contaminated.
 
 ## 5. TaskSpec v0.1
 

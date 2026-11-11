@@ -1,0 +1,11 @@
+=== 1. test suite ===
+......................................................                   [100%]
+54 passed in 2.47s
+
+=== 2. mutation proof ===
+mutation_verifier_exit=0
+"every_check_is_proven_to_be_able_to_fail": true
+
+=== 3. plan-level check on the 18-instance sweep ===
+instances=18 planned=17 plan_level_correct=17 tokens=14643
+  NOT CORRECT: T06-train-seed1001 ['no JSON object in reply']

@@ -38,8 +38,9 @@ SEALED="$W/benchmark/evaluators/sealed_evaluate.py"
 RECOVERY="$W/runtime/recovery/recovery_driver.py"
 ASSESS="$W/runtime/verifier/self_assess.py"
 VALIDATE="$W/experiments/baselines/validate_batch.py"
+ISOLATE="$W/scripts/heldout_isolation.py"
 
-for f in "$PLAN_B" "$CLIENT" "$CAPTURE" "$OBSERVE" "$SEALED" "$RECOVERY" "$ASSESS" "$VALIDATE"; do
+for f in "$PLAN_B" "$CLIENT" "$CAPTURE" "$OBSERVE" "$SEALED" "$RECOVERY" "$ASSESS" "$VALIDATE" "$ISOLATE"; do
   [ -f "$f" ] || { echo "FATAL: missing helper $f"; exit 3; }
 done
 
@@ -50,8 +51,18 @@ run_one () {
   local DOMAIN=$(( DOMAIN_BASE + IDX ))
   echo "=========== $OID (domain $DOMAIN) ==========="
 
+  # HELD-OUT ISOLATION: benchmark/held_out/ is root:ros 0750, so the agent (uid 1001)
+  # cannot open $PUB where it lives. That is the point - but it also means the agent
+  # would fail on its OWN input file. Stage the public task into the run directory and
+  # hand the agent THAT path. Only public fields are copied; the sealed answer stays in
+  # /etc/evobot/sealed. The privileged side keeps using $PUB for grading.
+  if ! sudo -n python3 "$ISOLATE" stage-public "$PUB" "$D" > "$D/staged_path.txt" 2>&1; then
+    echo "  STAGE_PUBLIC_FAILED"; cat "$D/staged_path.txt"; echo STAGING > "$D/stage.txt"; return 1
+  fi
+  local AGENT_SPEC; AGENT_SPEC=$(cat "$D/staged_path.txt")
+
   sudo -n env FLEXCELL_PILOT_API_KEY="$KEY" setpriv --reuid=1001 --regid=1001 --clear-groups \
-    python3 "$PLAN_B" "$PUB" "$D" > "$D/plan.log" 2>&1
+    python3 "$PLAN_B" "$AGENT_SPEC" "$D" > "$D/plan.log" 2>&1
   if [ ! -f "$D/plan.json" ]; then echo "  PLAN_FAILED"; echo PLANNING > "$D/stage.txt"; return 1; fi
 
   pkill -9 -f "[g]z sim" 2>/dev/null; pkill -9 -f "[r]os2 launch" 2>/dev/null
@@ -114,7 +125,7 @@ PY
   echo "--- self-assessment (claim) ---"
   sudo -n env FLEXCELL_PILOT_API_KEY="$KEY" FLEXCELL_PILOT_MAX_TOKENS=32768 \
     setpriv --reuid=1001 --regid=1001 --clear-groups \
-    python3 "$ASSESS" --run "$D" --spec "$PUB" --out "$D/self_assessment.json" > "$D/self_assess.log" 2>&1
+    python3 "$ASSESS" --run "$D" --spec "$AGENT_SPEC" --out "$D/self_assessment.json" > "$D/self_assess.log" 2>&1
   local CLAIM=""
   if [ -f "$D/self_assessment.json" ]; then
     CLAIM=$(python3 -c 'import json,sys;print("true" if json.load(open(sys.argv[1]))["success"] else "false")' "$D/self_assessment.json")

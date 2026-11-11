@@ -1,0 +1,640 @@
+{
+  "__caveat__": "PLAN-LEVEL ONLY. Not the independent evaluator, which grades the final world state after execution. TRAIN instances, not held-out.",
+  "instances": 18,
+  "planned": 17,
+  "plan_level_correct": 17,
+  "total_tokens": 14643,
+  "rows": [
+    {
+      "task_id": "T01-train-seed1000",
+      "template": "T01_multi_object_sorting",
+      "instruction": "Put the red block in the right bin and the blue block in the left bin.",
+      "planned": true,
+      "agent_placement": {
+        "target_box_a": "zone_1",
+        "target_box_b": "zone_2"
+      },
+      "expected_placement": {
+        "target_box_a": "zone_1",
+        "target_box_b": "zone_2"
+      },
+      "agent_order": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "expected_order": null,
+      "agent_route": {
+        "target_box_a": [
+          "zone_1"
+        ],
+        "target_box_b": [
+          "zone_2"
+        ]
+      },
+      "expected_visit": null,
+      "agent_confidence": "high",
+      "checks": {
+        "placement_matches": true,
+        "protected_objects_left_alone": true,
+        "order_matches": null,
+        "visit_matches": null,
+        "visit_sequence_matches": null
+      },
+      "plan_level_correct": true,
+      "tokens": 895
+    },
+    {
+      "task_id": "T01-train-seed1001",
+      "template": "T01_multi_object_sorting",
+      "instruction": "Put the red block in the right bin and the blue block in the left bin.",
+      "planned": true,
+      "agent_placement": {
+        "target_box_a": "zone_1",
+        "target_box_b": "zone_2"
+      },
+      "expected_placement": {
+        "target_box_a": "zone_1",
+        "target_box_b": "zone_2"
+      },
+      "agent_order": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "expected_order": null,
+      "agent_route": {
+        "target_box_a": [
+          "zone_1"
+        ],
+        "target_box_b": [
+          "zone_2"
+        ]
+      },
+      "expected_visit": null,
+      "agent_confidence": "high",
+      "checks": {
+        "placement_matches": true,
+        "protected_objects_left_alone": true,
+        "order_matches": null,
+        "visit_matches": null,
+        "visit_sequence_matches": null
+      },
+      "plan_level_correct": true,
+      "tokens": 829
+    },
+    {
+      "task_id": "T01-train-seed1002",
+      "template": "T01_multi_object_sorting",
+      "instruction": "Put the red block in the right bin and the blue block in the left bin.",
+      "planned": true,
+      "agent_placement": {
+        "target_box_a": "zone_1",
+        "target_box_b": "zone_2"
+      },
+      "expected_placement": {
+        "target_box_a": "zone_1",
+        "target_box_b": "zone_2"
+      },
+      "agent_order": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "expected_order": null,
+      "agent_route": {
+        "target_box_a": [
+          "zone_1"
+        ],
+        "target_box_b": [
+          "zone_2"
+        ]
+      },
+      "expected_visit": null,
+      "agent_confidence": "high",
+      "checks": {
+        "placement_matches": true,
+        "protected_objects_left_alone": true,
+        "order_matches": null,
+        "visit_matches": null,
+        "visit_sequence_matches": null
+      },
+      "plan_level_correct": true,
+      "tokens": 769
+    },
+    {
+      "task_id": "T02-train-seed1000",
+      "template": "T02_exclusion",
+      "instruction": "Clear the table into the right bin, except the blue block, which must stay put.",
+      "planned": true,
+      "agent_placement": {
+        "target_box_a": "zone_1"
+      },
+      "expected_placement": {
+        "target_box_a": "zone_1"
+      },
+      "agent_order": [
+        "target_box_a"
+      ],
+      "expected_order": null,
+      "agent_route": {
+        "target_box_a": [
+          "zone_1"
+        ]
+      },
+      "expected_visit": null,
+      "agent_confidence": "high",
+      "checks": {
+        "placement_matches": true,
+        "protected_objects_left_alone": true,
+        "order_matches": null,
+        "visit_matches": null,
+        "visit_sequence_matches": null
+      },
+      "plan_level_correct": true,
+      "tokens": 808
+    },
+    {
+      "task_id": "T02-train-seed1001",
+      "template": "T02_exclusion",
+      "instruction": "Clear the table into the right bin, except the red block, which must stay put.",
+      "planned": true,
+      "agent_placement": {
+        "target_box_b": "zone_1"
+      },
+      "expected_placement": {
+        "target_box_b": "zone_1"
+      },
+      "agent_order": [
+        "target_box_b"
+      ],
+      "expected_order": null,
+      "agent_route": {
+        "target_box_b": [
+          "zone_1"
+        ]
+      },
+      "expected_visit": null,
+      "agent_confidence": "high",
+      "checks": {
+        "placement_matches": true,
+        "protected_objects_left_alone": true,
+        "order_matches": null,
+        "visit_matches": null,
+        "visit_sequence_matches": null
+      },
+      "plan_level_correct": true,
+      "tokens": 746
+    },
+    {
+      "task_id": "T02-train-seed1002",
+      "template": "T02_exclusion",
+      "instruction": "Clear the table into the right bin, except the blue block, which must stay put.",
+      "planned": true,
+      "agent_placement": {
+        "target_box_a": "zone_1"
+      },
+      "expected_placement": {
+        "target_box_a": "zone_1"
+      },
+      "agent_order": [
+        "target_box_a"
+      ],
+      "expected_order": null,
+      "agent_route": {
+        "target_box_a": [
+          "zone_1"
+        ]
+      },
+      "expected_visit": null,
+      "agent_confidence": "high",
+      "checks": {
+        "placement_matches": true,
+        "protected_objects_left_alone": true,
+        "order_matches": null,
+        "visit_matches": null,
+        "visit_sequence_matches": null
+      },
+      "plan_level_correct": true,
+      "tokens": 874
+    },
+    {
+      "task_id": "T03-train-seed1000",
+      "template": "T03_ordered",
+      "instruction": "Move blocks into the right bin in this order: the red, then the blue.",
+      "planned": true,
+      "agent_placement": {
+        "target_box_a": "zone_1",
+        "target_box_b": "zone_1"
+      },
+      "expected_placement": {
+        "target_box_a": "zone_1",
+        "target_box_b": "zone_1"
+      },
+      "agent_order": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "expected_order": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "agent_route": {
+        "target_box_a": [
+          "zone_1"
+        ],
+        "target_box_b": [
+          "zone_1"
+        ]
+      },
+      "expected_visit": null,
+      "agent_confidence": "high",
+      "checks": {
+        "placement_matches": true,
+        "protected_objects_left_alone": true,
+        "order_matches": true,
+        "visit_matches": null,
+        "visit_sequence_matches": null
+      },
+      "plan_level_correct": true,
+      "tokens": 759
+    },
+    {
+      "task_id": "T03-train-seed1001",
+      "template": "T03_ordered",
+      "instruction": "Move blocks into the right bin in this order: the blue, then the red.",
+      "planned": true,
+      "agent_placement": {
+        "target_box_b": "zone_1",
+        "target_box_a": "zone_1"
+      },
+      "expected_placement": {
+        "target_box_a": "zone_1",
+        "target_box_b": "zone_1"
+      },
+      "agent_order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "expected_order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "agent_route": {
+        "target_box_b": [
+          "zone_1"
+        ],
+        "target_box_a": [
+          "zone_1"
+        ]
+      },
+      "expected_visit": null,
+      "agent_confidence": "high",
+      "checks": {
+        "placement_matches": true,
+        "protected_objects_left_alone": true,
+        "order_matches": true,
+        "visit_matches": null,
+        "visit_sequence_matches": null
+      },
+      "plan_level_correct": true,
+      "tokens": 837
+    },
+    {
+      "task_id": "T03-train-seed1002",
+      "template": "T03_ordered",
+      "instruction": "Move blocks into the right bin in this order: the blue, then the red.",
+      "planned": true,
+      "agent_placement": {
+        "target_box_b": "zone_1",
+        "target_box_a": "zone_1"
+      },
+      "expected_placement": {
+        "target_box_a": "zone_1",
+        "target_box_b": "zone_1"
+      },
+      "agent_order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "expected_order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "agent_route": {
+        "target_box_b": [
+          "zone_1"
+        ],
+        "target_box_a": [
+          "zone_1"
+        ]
+      },
+      "expected_visit": null,
+      "agent_confidence": "high",
+      "checks": {
+        "placement_matches": true,
+        "protected_objects_left_alone": true,
+        "order_matches": true,
+        "visit_matches": null,
+        "visit_sequence_matches": null
+      },
+      "plan_level_correct": true,
+      "tokens": 799
+    },
+    {
+      "task_id": "T04-train-seed1000",
+      "template": "T04_duplicates",
+      "instruction": "The colours are misleading, ignore them. Put the block that is FURTHER from the robot base into the right bin, and the nearer block into the left bin.",
+      "planned": true,
+      "agent_placement": {
+        "target_box_b": "zone_1",
+        "target_box_a": "zone_2"
+      },
+      "expected_placement": {
+        "target_box_b": "zone_1",
+        "target_box_a": "zone_2"
+      },
+      "agent_order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "expected_order": null,
+      "agent_route": {
+        "target_box_b": [
+          "zone_1"
+        ],
+        "target_box_a": [
+          "zone_2"
+        ]
+      },
+      "expected_visit": null,
+      "agent_confidence": "high",
+      "checks": {
+        "placement_matches": true,
+        "protected_objects_left_alone": true,
+        "order_matches": null,
+        "visit_matches": null,
+        "visit_sequence_matches": null
+      },
+      "plan_level_correct": true,
+      "tokens": 919
+    },
+    {
+      "task_id": "T04-train-seed1001",
+      "template": "T04_duplicates",
+      "instruction": "The colours are misleading, ignore them. Put the block that is FURTHER from the robot base into the right bin, and the nearer block into the left bin.",
+      "planned": true,
+      "agent_placement": {
+        "target_box_b": "zone_1",
+        "target_box_a": "zone_2"
+      },
+      "expected_placement": {
+        "target_box_b": "zone_1",
+        "target_box_a": "zone_2"
+      },
+      "agent_order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "expected_order": null,
+      "agent_route": {
+        "target_box_b": [
+          "zone_1"
+        ],
+        "target_box_a": [
+          "zone_2"
+        ]
+      },
+      "expected_visit": null,
+      "agent_confidence": "high",
+      "checks": {
+        "placement_matches": true,
+        "protected_objects_left_alone": true,
+        "order_matches": null,
+        "visit_matches": null,
+        "visit_sequence_matches": null
+      },
+      "plan_level_correct": true,
+      "tokens": 975
+    },
+    {
+      "task_id": "T04-train-seed1002",
+      "template": "T04_duplicates",
+      "instruction": "The colours are misleading, ignore them. Put the block that is FURTHER from the robot base into the right bin, and the nearer block into the left bin.",
+      "planned": true,
+      "agent_placement": {
+        "target_box_b": "zone_1",
+        "target_box_a": "zone_2"
+      },
+      "expected_placement": {
+        "target_box_b": "zone_1",
+        "target_box_a": "zone_2"
+      },
+      "agent_order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "expected_order": null,
+      "agent_route": {
+        "target_box_b": [
+          "zone_1"
+        ],
+        "target_box_a": [
+          "zone_2"
+        ]
+      },
+      "expected_visit": null,
+      "agent_confidence": "high",
+      "checks": {
+        "placement_matches": true,
+        "protected_objects_left_alone": true,
+        "order_matches": null,
+        "visit_matches": null,
+        "visit_sequence_matches": null
+      },
+      "plan_level_correct": true,
+      "tokens": 976
+    },
+    {
+      "task_id": "T05-train-seed1000",
+      "template": "T05_relay",
+      "instruction": "Move the blue block to the left bin, passing through the right bin first.",
+      "planned": true,
+      "agent_placement": {
+        "target_box_b": "zone_2"
+      },
+      "expected_placement": {
+        "target_box_b": "zone_2"
+      },
+      "agent_order": [
+        "target_box_b"
+      ],
+      "expected_order": null,
+      "agent_route": {
+        "target_box_b": [
+          "zone_1",
+          "zone_2"
+        ]
+      },
+      "expected_visit": {
+        "target_box_b": [
+          "zone_1"
+        ]
+      },
+      "agent_confidence": "high",
+      "checks": {
+        "placement_matches": true,
+        "protected_objects_left_alone": true,
+        "order_matches": null,
+        "visit_matches": true,
+        "visit_sequence_matches": null
+      },
+      "plan_level_correct": true,
+      "tokens": 900
+    },
+    {
+      "task_id": "T05-train-seed1001",
+      "template": "T05_relay",
+      "instruction": "Move the red block to the left bin, passing through the right bin first.",
+      "planned": true,
+      "agent_placement": {
+        "target_box_a": "zone_2"
+      },
+      "expected_placement": {
+        "target_box_a": "zone_2"
+      },
+      "agent_order": [
+        "target_box_a"
+      ],
+      "expected_order": null,
+      "agent_route": {
+        "target_box_a": [
+          "zone_1",
+          "zone_2"
+        ]
+      },
+      "expected_visit": {
+        "target_box_a": [
+          "zone_1"
+        ]
+      },
+      "agent_confidence": "high",
+      "checks": {
+        "placement_matches": true,
+        "protected_objects_left_alone": true,
+        "order_matches": null,
+        "visit_matches": true,
+        "visit_sequence_matches": null
+      },
+      "plan_level_correct": true,
+      "tokens": 799
+    },
+    {
+      "task_id": "T05-train-seed1002",
+      "template": "T05_relay",
+      "instruction": "Move the blue block to the left bin, passing through the right bin first.",
+      "planned": true,
+      "agent_placement": {
+        "target_box_b": "zone_2"
+      },
+      "expected_placement": {
+        "target_box_b": "zone_2"
+      },
+      "agent_order": [
+        "target_box_b"
+      ],
+      "expected_order": null,
+      "agent_route": {
+        "target_box_b": [
+          "zone_1",
+          "zone_2"
+        ]
+      },
+      "expected_visit": {
+        "target_box_b": [
+          "zone_1"
+        ]
+      },
+      "agent_confidence": "high",
+      "checks": {
+        "placement_matches": true,
+        "protected_objects_left_alone": true,
+        "order_matches": null,
+        "visit_matches": true,
+        "visit_sequence_matches": null
+      },
+      "plan_level_correct": true,
+      "tokens": 790
+    },
+    {
+      "task_id": "T06-train-seed1000",
+      "template": "T06_revisit",
+      "instruction": "Two-step: put the blue block in the left bin, then move it on to the right bin. Only the final position counts.",
+      "planned": true,
+      "agent_placement": {
+        "target_box_b": "zone_1"
+      },
+      "expected_placement": {
+        "target_box_b": "zone_1"
+      },
+      "agent_order": [
+        "target_box_b"
+      ],
+      "expected_order": null,
+      "agent_route": {
+        "target_box_b": [
+          "zone_2",
+          "zone_1"
+        ]
+      },
+      "expected_visit": null,
+      "agent_confidence": "high",
+      "checks": {
+        "placement_matches": true,
+        "protected_objects_left_alone": true,
+        "order_matches": null,
+        "visit_matches": null,
+        "visit_sequence_matches": null
+      },
+      "plan_level_correct": true,
+      "tokens": 1090
+    },
+    {
+      "task_id": "T06-train-seed1001",
+      "planned": false,
+      "problems": [
+        "no JSON object in reply"
+      ]
+    },
+    {
+      "task_id": "T06-train-seed1002",
+      "template": "T06_revisit",
+      "instruction": "Two-step: put the blue block in the left bin, then move it on to the right bin. Only the final position counts.",
+      "planned": true,
+      "agent_placement": {
+        "target_box_b": "zone_1"
+      },
+      "expected_placement": {
+        "target_box_b": "zone_1"
+      },
+      "agent_order": [
+        "target_box_b"
+      ],
+      "expected_order": null,
+      "agent_route": {
+        "target_box_b": [
+          "zone_2",
+          "zone_1"
+        ]
+      },
+      "expected_visit": null,
+      "agent_confidence": "high",
+      "checks": {
+        "placement_matches": true,
+        "protected_objects_left_alone": true,
+        "order_matches": null,
+        "visit_matches": null,
+        "visit_sequence_matches": null
+      },
+      "plan_level_correct": true,
+      "tokens": 878
+    }
+  ]
+}

@@ -1,0 +1,115 @@
+{
+  "record_kind": "EVOBOT_HELDOUT_ISOLATION_VERIFICATION",
+  "rung": "Independently Verified (isolation mechanism only)",
+  "checks": [
+    {
+      "check": "verify_in_enforced_state",
+      "exit": 0,
+      "verdict": "HELDOUT_ISOLATION_ENFORCED",
+      "ok": true
+    },
+    {
+      "check": "agent_denied_all_locked_prefixes",
+      "probes": 6,
+      "all_denied": true,
+      "ok": true
+    },
+    {
+      "check": "evaluator_still_grades_both_ways",
+      "observed": true,
+      "detail": [
+        {
+          "probe": "evaluator:pass",
+          "expected_passed": true,
+          "observed_passed": true,
+          "clauses": 4,
+          "ok": true
+        },
+        {
+          "probe": "evaluator:fail",
+          "expected_passed": false,
+          "observed_passed": false,
+          "clauses": 4,
+          "ok": true
+        }
+      ],
+      "ok": true
+    },
+    {
+      "check": "train_split_still_readable_by_agent",
+      "detail": [
+        {
+          "probe": "control:read:benchmark/tasks/train/T01-train-seed1000.json",
+          "expected": "allowed",
+          "exit": 0,
+          "ok": true,
+          "stderr": [
+            ""
+          ]
+        }
+      ],
+      "ok": true
+    },
+    {
+      "check": "answer_reconstruction_blocked",
+      "detail": [
+        {
+          "probe": "reconstruction:HO-42109d30fa00.json",
+          "expected": "denied at import",
+          "exit": 1,
+          "ok": true,
+          "recovered_answer": false,
+          "stderr": [
+            "ModuleNotFoundError: No module named 'unseen_tasks'"
+          ]
+        }
+      ],
+      "ok": true
+    },
+    {
+      "check": "mutation_755_is_detected",
+      "exit": 1,
+      "verdict": "HELDOUT_ISOLATION_NOT_ENFORCED",
+      "ok": true
+    },
+    {
+      "check": "reapply_restores_gate",
+      "exit": 0,
+      "verdict": "HELDOUT_ISOLATION_ENFORCED",
+      "ok": true
+    },
+    {
+      "check": "offline_isolation_tests_pass",
+      "exit": 0,
+      "tail": [
+        "15 passed in 0.18s"
+      ],
+      "ok": true
+    },
+    {
+      "check": "residual_risks_disclosed",
+      "open": [
+        "root process",
+        "WSL interop (Windows binary reads the file)"
+      ],
+      "ok": true
+    }
+  ],
+  "residual_risks": [
+    {
+      "risk": "root process",
+      "closed": false,
+      "measured": true,
+      "detail": "any process running as root reads the locked tree; the mechanism assumes the agent is launched as uid 1001 with no sudo"
+    },
+    {
+      "risk": "WSL interop (Windows binary reads the file)",
+      "closed": false,
+      "measured": true,
+      "detail": "uid 1001 can execute cmd.exe and read the same file through the Win32 API; POSIX bits do not apply there. Cannot be closed from inside a running distro without restarting WSL with interop disabled, which would break the rest of the host.",
+      "sample": "benchmark/held_out/README.md"
+    }
+  ],
+  "verdict": "EVOBOT_HELDOUT_ISOLATION_ENFORCED_AND_MUTATION_DETECTED",
+  "claim_level": "Implemented + Unit Tested + Independently Verified by this script. OS permission isolation, not a kernel namespace. NOT a generalisation result, and NOT a claim of absolute safety: see residual_risks."
+}

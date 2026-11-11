@@ -1,0 +1,25 @@
+{
+  "task_id": "T05-train-seed1001",
+  "dry": false,
+  "instruction": "Move the red block to the left bin, passing through the right bin first.",
+  "planned": true,
+  "stage": "planned",
+  "moves": [
+    {
+      "object": "target_box_a",
+      "zone": "zone_2",
+      "via": [
+        "zone_1"
+      ],
+      "why": "Red block goes to left bin, with right bin as intermediate stop."
+    }
+  ],
+  "unmoved": [
+    "target_box_b"
+  ],
+  "confidence": "high",
+  "stages": 2,
+  "tokens": 799,
+  "model": "deepseek-flash",
+  "key_fingerprint": "2caaf9b9"
+}

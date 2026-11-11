@@ -1,0 +1,27 @@
+{
+  "task_id": "T03-train-seed1000",
+  "dry": false,
+  "instruction": "Move blocks into the right bin in this order: the red, then the blue.",
+  "planned": true,
+  "stage": "planned",
+  "moves": [
+    {
+      "object": "target_box_a",
+      "zone": "zone_1",
+      "via": [],
+      "why": "Red block first, into the right-side bin."
+    },
+    {
+      "object": "target_box_b",
+      "zone": "zone_1",
+      "via": [],
+      "why": "Blue block second, into the right-side bin."
+    }
+  ],
+  "unmoved": [],
+  "confidence": "high",
+  "stages": 2,
+  "tokens": 759,
+  "model": "deepseek-flash",
+  "key_fingerprint": "2caaf9b9"
+}

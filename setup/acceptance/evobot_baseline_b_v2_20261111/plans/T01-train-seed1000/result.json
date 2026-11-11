@@ -1,0 +1,27 @@
+{
+  "task_id": "T01-train-seed1000",
+  "dry": false,
+  "instruction": "Put the red block in the right bin and the blue block in the left bin.",
+  "planned": true,
+  "stage": "planned",
+  "moves": [
+    {
+      "object": "target_box_a",
+      "zone": "zone_1",
+      "via": [],
+      "why": "Red block to the robot-right bin"
+    },
+    {
+      "object": "target_box_b",
+      "zone": "zone_2",
+      "via": [],
+      "why": "Blue block to the robot-left bin"
+    }
+  ],
+  "unmoved": [],
+  "confidence": "high",
+  "stages": 2,
+  "tokens": 895,
+  "model": "deepseek-flash",
+  "key_fingerprint": "2caaf9b9"
+}

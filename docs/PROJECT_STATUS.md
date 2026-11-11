@@ -45,10 +45,26 @@ it measures the stack, so that a later agent advantage can be attributed to the 
 
 ## What was NOT proven
 
-- No agent has planned a task yet. Baselines B and C do not exist as code.
-- 1 of 144 instances. No generalisation, no held-out evaluation.
-- Held-out isolation is **specified but not enforced**: the agent and the evaluator
-  share a checkout. Until that is fixed, held-out numbers must not be reported.
+- ~~No agent has planned a task yet. Baselines B and C do not exist as code.~~
+  **CORRECTED 2026-11-11.** This was wrong when written. Baseline B v1 already existed and had
+  been committed 91 minutes earlier as `9c59d5b2`, with a verified Gazebo run
+  (`evobot_t01_baseline_b_20261111/`: PASS, 10.34 / 5.55 mm). A document edited after a commit
+  must not claim the commit did not happen. Now: **B v1 exists (superseded)**; **B v2 exists and
+  is Unit Tested + plan-level only** (`setup/acceptance/evobot_baseline_b_v2_20261111/`,
+  17/18 planned, 17/17 plan-level correct, all credentials through the gate). No B result has
+  been graded by the independent evaluator on a new task yet, so the *usable* claim about B is
+  still exactly "a plan, not a success". C remains a skeleton.
+- Baseline A v0: 6/6 on T01-T06 seed1000 (Wilson 95% CI 0.61-1.00, false_success 0),
+  frozen in `setup/acceptance/evobot_baseline_a_v0_20261111/`; the 72-instance run
+  (T01-T06 x 12 seeds) is in flight and no number from it is claimed yet.
+- 1 of 144 instances at the time of writing. No generalisation, no held-out evaluation.
+- ~~Held-out isolation is **specified but not enforced**~~ — **CLOSED 2026-11-11**.
+  `scripts/heldout_isolation.py` locks `held_out/`, `evaluators/` **and `generators/`**
+  to `root:ros 0750`; uid 1001 is denied, the evaluator still grades, and the mutation
+  (chmod 755) makes the verifier exit 1. Evidence:
+  `setup/acceptance/evobot_heldout_isolation_20261111/`. Rung: Independently Verified
+  (mechanism only). Residual: a root process and WSL interop still bypass it — measured
+  and disclosed, not hidden.
 - T07-T10 cannot be emitted; the missing physical primitives are listed in
   `docs/TASK_CATALOG.md`.
 

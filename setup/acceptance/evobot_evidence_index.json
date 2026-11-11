@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 64,
-  "live": 57,
+  "batches": 67,
+  "live": 60,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -107,6 +107,45 @@
         "zero_not_bought_by_pessimism": true,
         "v1_defect_evidence_retained": true,
         "evaluator_touched": false
+      }
+    },
+    {
+      "batch": "evobot_baseline_a_v0_20261111",
+      "verified": "PASS",
+      "rung": "unclassified",
+      "superseded_by": null,
+      "verdict": null
+    },
+    {
+      "batch": "evobot_baseline_b_v2_20261111",
+      "verified": "PASS",
+      "rung": "Unit Tested + plan-level (NO robot run; 17/18 planned, 17/17 of planned correct; 4 defects fixed incl. an UNGATED LLM credential path; NOT Simulation Tested)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_BASELINE_B_V2_PLANNING_VERIFIED",
+        "rung": "Unit Tested + plan-level analysis (NO robot run, NOT Simulation Tested)",
+        "instances": 18,
+        "planned": 17,
+        "plan_level_correct": 17,
+        "templates": [
+          "T01_multi_object_sorting",
+          "T02_exclusion",
+          "T03_ordered",
+          "T04_duplicates",
+          "T05_relay",
+          "T06_revisit"
+        ],
+        "not_planned": [
+          "T06-train-seed1001"
+        ],
+        "total_tokens": 17268,
+        "observations_answer_free": true,
+        "all_credentials_from_gate": true,
+        "all_plans_contract_valid": true,
+        "mutation_proof_intact": true,
+        "failed_run_preserved": true,
+        "false_success": null,
+        "false_success_note": "NOT MEASURED. false_success needs a world state and an agent claim; nothing executed, so reporting 0 here would be a vacuous zero - the exact mistake evobot_honesty_retraction_20261111 was written about."
       }
     },
     {
@@ -354,6 +393,127 @@
       }
     },
     {
+      "batch": "evobot_heldout_isolation_20261111",
+      "verified": "PASS",
+      "rung": "Independently Verified (isolation ENFORCED + mutation-detected; mechanism only, NOT a generalisation result)",
+      "superseded_by": null,
+      "verdict": {
+        "record_kind": "EVOBOT_HELDOUT_ISOLATION_VERIFICATION",
+        "rung": "Independently Verified (isolation mechanism only)",
+        "checks": [
+          {
+            "check": "verify_in_enforced_state",
+            "exit": 0,
+            "verdict": "HELDOUT_ISOLATION_ENFORCED",
+            "ok": true
+          },
+          {
+            "check": "agent_denied_all_locked_prefixes",
+            "probes": 6,
+            "all_denied": true,
+            "ok": true
+          },
+          {
+            "check": "evaluator_still_grades_both_ways",
+            "observed": true,
+            "detail": [
+              {
+                "probe": "evaluator:pass",
+                "expected_passed": true,
+                "observed_passed": true,
+                "clauses": 4,
+                "ok": true
+              },
+              {
+                "probe": "evaluator:fail",
+                "expected_passed": false,
+                "observed_passed": false,
+                "clauses": 4,
+                "ok": true
+              }
+            ],
+            "ok": true
+          },
+          {
+            "check": "train_split_still_readable_by_agent",
+            "detail": [
+              {
+                "probe": "control:read:benchmark/tasks/train/T01-train-seed1000.json",
+                "expected": "allowed",
+                "exit": 0,
+                "ok": true,
+                "stderr": [
+                  ""
+                ]
+              }
+            ],
+            "ok": true
+          },
+          {
+            "check": "answer_reconstruction_blocked",
+            "detail": [
+              {
+                "probe": "reconstruction:HO-42109d30fa00.json",
+                "expected": "denied at import",
+                "exit": 1,
+                "ok": true,
+                "recovered_answer": false,
+                "stderr": [
+                  "ModuleNotFoundError: No module named 'unseen_tasks'"
+                ]
+              }
+            ],
+            "ok": true
+          },
+          {
+            "check": "mutation_755_is_detected",
+            "exit": 1,
+            "verdict": "HELDOUT_ISOLATION_NOT_ENFORCED",
+            "ok": true
+          },
+          {
+            "check": "reapply_restores_gate",
+            "exit": 0,
+            "verdict": "HELDOUT_ISOLATION_ENFORCED",
+            "ok": true
+          },
+          {
+            "check": "offline_isolation_tests_pass",
+            "exit": 0,
+            "tail": [
+              "15 passed in 1.28s"
+            ],
+            "ok": true
+          },
+          {
+            "check": "residual_risks_disclosed",
+            "open": [
+              "root process",
+              "WSL interop (Windows binary reads the file)"
+            ],
+            "ok": true
+          }
+        ],
+        "residual_risks": [
+          {
+            "risk": "root process",
+            "closed": false,
+            "measured": true,
+            "detail": "any process running as root reads the locked tree; the mechanism assumes the agent is launched as uid 1001 with no sudo"
+          },
+          {
+            "risk": "WSL interop (Windows binary reads the file)",
+            "closed": false,
+            "measured": true,
+            "detail": "uid 1001 can execute cmd.exe and read the same file through the Win32 API; POSIX bits do not apply there. Cannot be closed from inside a running distro without restarting WSL with interop disabled, which would break the rest of the host.",
+            "sample": "benchmark/held_out/README.md"
+          }
+        ],
+        "verdict": "EVOBOT_HELDOUT_ISOLATION_ENFORCED_AND_MUTATION_DETECTED",
+        "claim_level": "Implemented + Unit Tested + Independently Verified by this script. OS permission isolation, not a kernel namespace. NOT a generalisation result, and NOT a claim of absolute safety: see residual_risks."
+      }
+    },
+    {
       "batch": "evobot_heldout_n6_20261111",
       "verified": "PASS",
       "rung": "Generalization Tested (first held-out, superseded baseline)",
@@ -406,7 +566,7 @@
         "verdict": "EVOBOT_LADDER_DERIVED_AND_CURRENT",
         "regenerated_identically": true,
         "batches_live": 57,
-        "verifier_failures": 1,
+        "verifier_failures": 0,
         "reports_both_directions": true,
         "zero_is_qualified": true,
         "v01_regression": "6/6 -> 6/6, NONE",

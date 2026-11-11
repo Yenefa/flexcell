@@ -1,0 +1,47 @@
+{
+  "instruction": "Move blocks into the right bin in this order: the red, then the blue.",
+  "objects": [
+    {
+      "name": "target_box_a",
+      "color": "red",
+      "position": [
+        0.22,
+        0.0,
+        0.0175
+      ]
+    },
+    {
+      "name": "target_box_b",
+      "color": "blue",
+      "position": [
+        0.2,
+        -0.18,
+        0.0175
+      ]
+    }
+  ],
+  "zones": [
+    {
+      "name": "zone_1",
+      "position": [
+        0.12,
+        -0.15,
+        0.0175
+      ],
+      "radius": 0.06
+    }
+  ],
+  "skills": [
+    "observe",
+    "pick",
+    "place",
+    "verify",
+    "move_to_pose",
+    "run_composite"
+  ],
+  "frame_convention": "+y is the robot LEFT, -y is the robot RIGHT, +x is forward.",
+  "budget": {
+    "max_steps": 60,
+    "max_wall_s": 600.0
+  }
+}

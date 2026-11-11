@@ -1,0 +1,41 @@
+{
+  "agent_plan": {
+    "moves": [
+      {
+        "object": "target_box_a",
+        "zone": "zone_1",
+        "via": [],
+        "why": "Red block first, into the right-side bin."
+      },
+      {
+        "object": "target_box_b",
+        "zone": "zone_1",
+        "via": [],
+        "why": "Blue block second, into the right-side bin."
+      }
+    ],
+    "unmoved": [],
+    "confidence": "high",
+    "uncertainty": ""
+  },
+  "problems": [],
+  "raw_reply": "{\"moves\":[{\"object\":\"target_box_a\",\"zone\":\"zone_1\",\"why\":\"Red block first, into the right-side bin.\"},{\"object\":\"target_box_b\",\"zone\":\"zone_1\",\"why\":\"Blue block second, into the right-side bin.\"}],\"unmoved\":[],\"confidence\":\"high\",\"uncertainty\":\"\"}",
+  "usage": {
+    "tokens": 759,
+    "seconds": 1.611,
+    "model": "deepseek-flash"
+  },
+  "calls": 1,
+  "tokens": 759,
+  "seconds": 1.611,
+  "returned_models": [
+    "deepseek-flash"
+  ],
+  "requested_model": "deepseek-flash",
+  "base_url": "https://api.deepseek.com",
+  "temperature": 0.0,
+  "max_tokens": 2048,
+  "key_fingerprint": "2caaf9b9",
+  "key_source": "evobot_llm_key.sh",
+  "gate": "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/ci-public-window/scripts/evobot_llm_key.sh"
+}
