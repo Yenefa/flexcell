@@ -564,4 +564,21 @@ destination. Recovery did not rescue a task; it undid one.
 
 **Nothing repaired.** No pinned file edited, no re-run performed (a human decision at sanctioned cost), no threshold or spec or verdict changed.
 
+---
+
+## ADDENDUM — goal round 6 (2026-11-12): T08's 0/6 is a REAL capability gap, not a false-rejection artifact
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| Hypothesis: T08's 0/6 is mostly a false-rejection artifact, like the `place` defect | **REFUTED.** Graded all 7 unseen push records against **all four** sub-clauses of `evaluate.py`'s push clause. **1 of 7 satisfies the complete criterion**; 6 fail physically (block did not reach the zone, moved the wrong way, or never made contact) | `evobot_lead_t08_false_rejection_test_20261112/` |
+| My own first pass on this | **WRONG, and I caught it.** Grading 3 of the 4 sub-clauses gave "8 of 23 satisfy, 6 rejected by the skill" — a 75 % false-rejection rate. I had omitted `evaluate.py:199-210`: the block must **end inside `zone_push`** (radius 0.06). With it: 1 of 7 | same |
+| **False Success (T08 unseen)** | **0.** The fail-closed property the mission requires **HOLDS** — the skill never claimed a success it did not achieve. This is the one thing 0/6 was supposed to guarantee, and it is true | same |
+| The one genuine false rejection | **`U/seed3002`**: moved 0.1480 m (task band allows ≤ 0.150), ended 0.0294 m from zone centre (inside 0.06), did not lift → **task satisfied**, but the skill reported `ERR_DISPLACEMENT_OVERSHOOT` because it *requested* 0.0900 m and the error (0.0580) exceeded `displacement_tolerance_m` = 0.005 | same |
+| The defect shape, third instance | **The skill is stricter than the task, on a different quantity.** Task accepts displacement **in a band [0.030, 0.150]**; skill requires **±5 mm of the requested distance**. #1 T08 gate (aperture travel ≠ grasp), #2 `place` release (aperture ≠ release), #3 T08 verdict (request-error ≠ band membership) | — |
+| Magnitude of that third instance | **1 of 7, NOT 6 of 7.** The first two were systematic (37.5 % of runs; 100 % of place failures). Fixing this one moves T08 from 0/7 skill-certified to 1/7, not to 6/7. **Do not cite it as a major false-failure source** | same |
+| T08's real blocker | **REACH, not verification.** The block must travel ~0.09–0.11 m into the zone; observed attempts reach 0.014–0.051 m. Same contact-geometry problem the height calibration exposed. **No verdict change fixes it** | same |
+| T08 four states (unseen) | `planning_correct` **UNKNOWN** (not re-measured); `execution_succeeded` (push clause only) **1/7**; `independent_evaluation_passed` (whole task) **2/6** from the earlier held-out run — **different denominator, not reconciled**; `agent_claimed_success` **0/7** | same |
+
+**T08 skill-level remains 0/6 by the mission's own skill-level definition.** This round establishes that the number is honest, not that it changed.
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
