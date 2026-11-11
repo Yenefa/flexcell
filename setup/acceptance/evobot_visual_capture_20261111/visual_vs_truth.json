@@ -1,0 +1,59 @@
+{
+  "frames_paired": 1,
+  "frames_seen": 1,
+  "frames_unpaired": 0,
+  "max_gap_s": 5.0,
+  "pairs": [
+    {
+      "captured_wall_ns": 1794413156261469656,
+      "frame": "/tmp/vis_sess/frame.png",
+      "height": 480,
+      "label": "resting_pose",
+      "objects": {
+        "target_box_a": [
+          0.22,
+          0.0,
+          0.0175
+        ],
+        "target_box_b": [
+          0.2,
+          -0.18,
+          0.0175
+        ]
+      },
+      "pairing_gap_s": 0.066393,
+      "png_bytes": 22939,
+      "png_sha256": "447ad1dad00a7409b3dc690225a301d88f0ce09c0ee676a9ed52e575456aa3f6",
+      "sim_stamp_ns": 148900000000,
+      "truth_source": "GZ_GROUND_TRUTH",
+      "truth_wall_ns": 1794413156195077109,
+      "width": 640
+    }
+  ],
+  "record_kind": "EVOBOT_VISUAL_TRUTH_PAIRING",
+  "scope": "Each pair means: ground-truth object poses were measured within max_gap_s of the moment this frame was captured. It does NOT mean the frame has been interpreted, that anything in it was recognised, or that the robot can see.",
+  "trajectory": {
+    "target_box_a": {
+      "first_z_m": 0.0175,
+      "last_z_m": 0.0175,
+      "limit": "max_z_m is the maximum over 1 sampled frames; motion that began and ended inside the widest 0.000s gap is not represented",
+      "max_sample_gap_s": null,
+      "max_z_m": 0.0175,
+      "min_z_m": 0.0175,
+      "sample_count": 1,
+      "source": "GZ_GROUND_TRUTH_SAMPLED"
+    },
+    "target_box_b": {
+      "first_z_m": 0.0175,
+      "last_z_m": 0.0175,
+      "limit": "max_z_m is the maximum over 1 sampled frames; motion that began and ended inside the widest 0.000s gap is not represented",
+      "max_sample_gap_s": null,
+      "max_z_m": 0.0175,
+      "min_z_m": 0.0175,
+      "sample_count": 1,
+      "source": "GZ_GROUND_TRUTH_SAMPLED"
+    }
+  },
+  "unpaired": [],
+  "written_wall_ns": 1794413181675592792
+}

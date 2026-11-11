@@ -1,0 +1,44 @@
+{
+  "objects": {
+    "target_box_a": [
+      0.22,
+      0.0,
+      0.0175
+    ],
+    "target_box_b": [
+      0.2,
+      -0.18,
+      0.0175
+    ]
+  },
+  "trajectory": {
+    "target_box_a": {
+      "achieved_hz": 20.002,
+      "first_z_m": 0.0175,
+      "last_z_m": 0.0175,
+      "limit": "max_z_m is the maximum over 191 samples at ~20.0 Hz; a lift that began and ended inside the widest 0.055s gap is not represented. Sparse sampling can only UNDER-report max_z, which biases toward judging a carry as a push.",
+      "max_sample_age_s": 0.0845,
+      "max_sample_gap_s": 0.0546,
+      "max_z_m": 0.0175,
+      "min_z_m": 0.0175,
+      "requested_hz": 20.0,
+      "sample_count": 191,
+      "source": "GZ_GROUND_TRUTH_SAMPLED",
+      "span_s": 9.4988
+    },
+    "target_box_b": {
+      "achieved_hz": 20.003,
+      "first_z_m": 0.0175,
+      "last_z_m": 0.0175,
+      "limit": "max_z_m is the maximum over 191 samples at ~20.0 Hz; a lift that began and ended inside the widest 0.055s gap is not represented. Sparse sampling can only UNDER-report max_z, which biases toward judging a carry as a push.",
+      "max_sample_age_s": 0.0845,
+      "max_sample_gap_s": 0.0546,
+      "max_z_m": 0.0175,
+      "min_z_m": 0.0175,
+      "requested_hz": 20.0,
+      "sample_count": 191,
+      "source": "GZ_GROUND_TRUTH_SAMPLED",
+      "span_s": 9.4988
+    }
+  }
+}
