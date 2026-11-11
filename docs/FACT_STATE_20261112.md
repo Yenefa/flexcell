@@ -743,4 +743,18 @@ destination. Recovery did not rescue a task; it undid one.
 | What would actually work (all need approval) | (1) repeatability well under 2.5 mm; (2) remove the cliff; (3) **close the loop** — measure the achieved pose and act on it, in `contracts/push.py`/`push_server.py`, **both frozen** | — |
 | Thresholds | **none lowered, none proposed.** Sweep, evaluator and criteria unchanged. The claim is narrower than "too hard": the skill must resolve a 2.5 mm feature with a 20 mm actuator distribution | same |
 
+---
+
+## ADDENDUM — goal round 18 (2026-11-12): P1's *recover* measured for the first time — 18/24 = 75%
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| **P1 recover (bounded single retry)** | **18 / 24 = 75%.** Of 24 episodes whose first attempt failed, **18 completed on the one permitted retry**. The 6 that failed got no third attempt (`budget: 1`, by design) | `evobot_lead_recovery_measured_20261112/` — **zero Gazebo runs** |
+| P1 diagnose | **fires correctly**: 26 failure classifications recorded (grasp 18, UNKNOWN 6, planning 2) | same |
+| Runtime recovery decisions | **110 records, all `no_recovery`** — 104 *"first attempt succeeded"*, 6 *"goal already satisfied by measurement"*. Those runs never needed recovery | same |
+| Why 75% is a capability, not success manufacturing | decided from **execution** evidence (`task.out` RESULT), **never** the graded verdict; evaluator consulted only after all attempts; `original_failure_preserved: True` on all 26; a guard refuses to retry a **false** failure (*"worse, made 'arm R' look exercised when it was not"*); retries bounded to 1 | `runtime/recovery/recovery_driver.py:2-7,57-63` |
+| An error I made and caught | I first tested for retries by looking for **sibling directories** (`-a2`), found none, and nearly wrote *"24 retry plans built, 0 executed"*. The retry actually runs **in the same directory**, writing `task_retry.out`, invoked from `evobot_unified_runner_20261111/run_batch.sh:113`. **My heuristic was the bug, not the code** | same |
+| A concern I raised and then resolved | I suspected the baselines might count the original failure and so **understate** the project's capability. **Checked: they do not.** `summarize_recovery.py:63-72` has a first-class **`RECOVERED`** category alongside FIRST_TRY / STILL_FAIL | `experiments/baselines/summarize_recovery.py` |
+| **What this does NOT change** | **It is not T08** (pick/carry/place, not push — T08 stays **0/6**, round 17's ±3.44 mm vs 2.5 mm cliff untouched). **It is not Generalization Tested** — these are held-out instances used while recovery was being developed, so no transfer claim to unseen seeds | — |
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
