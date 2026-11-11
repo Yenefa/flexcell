@@ -207,3 +207,109 @@ see the "motion-not-enclosure" hole in §4.1.
 **One thing this does add to §4:** the passing trial's travel is three orders of magnitude below the
 rejected ones, so the gate *is* measuring something real. It is not noise, and it is not vacuous in the
 way the n=1 sample suggested. It is mis-calibrated, not meaningless.
+
+---
+
+# RESOLUTION (round 3) — the calibration answers §6, and the answer is not a number
+
+This document left two things open: §4.2 marked **R/t1 UNRESOLVED**, and §6 said the correct fix "may
+well not be a number at all". The G1/G2/G3 calibration has now been run
+(`setup/acceptance/evobot_t08_instance_pose_20261112/runs/calib_G1`, `calib_G3`, and the nine dev
+pushes as G2). It answers both, and it resolves R/t1 — but not in the direction this document hoped.
+
+## R1. The numbers
+
+| group | what it is | aperture endpoint travel | object rise |
+| --- | --- | --- | --- |
+| **G1** | genuine grasp **and lift** of the 35 mm block | **11.706 mm** | **97.4 mm** |
+| **G2** | the nine valid dev pushes | 0.013 … **4.824** mm | ≤ 2.37 mm |
+| **G3** | full close with **nothing present** | **12.126 mm** | 0 mm |
+
+Grasp and push are separated by a gap from **4.824 mm to 11.706 mm** — a factor of 2.4, with no
+sample inside it. On *this* measure the 2 mm bound sits **6× below the bottom of the gap**, and a bound
+anywhere inside the gap would keep rejecting real grasps while clearing all four observed false
+rejections.
+
+## R2. But the gap is on the wrong measure
+
+The measure above is the GripperCommand **endpoint**. The gate does not read that. It reads **travel
+across the whole window**, and on that measure:
+
+| group | whole-window joint travel |
+| --- | --- |
+| G1 (grasp) | **31.00 mm** |
+| G3 (empty) | **24.12 mm** |
+
+**22 % apart.** A real grasp and a close on empty air are not separable by this observable.
+
+## R3. The premise, stated in the verifier's own words, is false
+
+`benchmark/evidence/verify.py:302` justifies the gate with:
+
+> "object is in hand, and the fingers stop against the object's width."
+
+Measured, they do not:
+
+| | close position | commanded | `reached_goal` | `stalled` | effort |
+| --- | --- | --- | --- | --- | --- |
+| G1 — on the 35 mm block | **−0.001272** | −0.011 | **True** | **False** | 10.0 |
+| G3 — on nothing | **−0.001692** | −0.011 | **True** | **False** | 10.0 |
+
+Difference **0.42 mm**. The gripper drove nearly the whole commanded stroke in **both** cases, stopped
+**9.7 mm short** of its own target in both, and reported `reached_goal=True` with `stalled=False` in
+both. So the fingers never "stop against the object's width"; they stop because the drive ran out — and
+the drive behaves the same whether there is an object or not.
+
+**Therefore the gate measures drive completion, not contact.** It cannot be repaired by moving the
+number: widening the bound stops the false rejections but leaves the gate unable to see a grasp, and
+narrowing it does not make it able to see one either.
+
+## R4. So R/t1 is resolved
+
+§4.2 could not decide whether R/t1's 3.057 mm was a false rejection, because at the time there was no
+calibration to compare it against. There is now: R/t1's travel sits **inside the push population**
+(0.013–4.824 mm), **1.8 mm below** the smallest genuine grasp on the endpoint measure. It is **not** a
+grasp, and on that basis **R/t1's gripper failure is a FALSE REJECTION.**
+
+That is a change to what this document concluded, and it still does **not** justify editing the limit,
+because the limit lives in a frozen file and because R4's reason for changing it is *not* the reason the
+number should change (§R2–R3). Recording the verdict is not the same as authorising the fix.
+
+## R5. The strong signal is the one the bundle already carries
+
+| | object rise |
+| --- | --- |
+| G1 real grasp | **97.4 mm** |
+| every real push this round | 0.02–2.37 mm |
+| 5 mm bound | — |
+
+**Two orders of magnitude, no overlap.** And the G1 rise happened with no carry/attach path running —
+only `move_to_pose` and `gripper_cmd` — so it is a **physical** grasp, not the magnetic-carry fake that
+T04 exposed. A lift check at 5 mm is decisive where the aperture check is blind.
+
+This matters beyond T08: the Master Goal requires the T08 verification to be **unfakeable by
+pick-carry-place**. The discrimination against a real grasp exists and is wide — but it lives in
+**lift**, and the current gate reads **aperture**.
+
+## R6. Two further corrections that belong to this document
+
+1. **The field is misnamed.** `verify.py:338` emits `aperture_travel_rad`, but `gripper_left_joint` is
+   **prismatic** with `lower="-0.011" upper="0.02"` — **metres**, and 0.02 is exactly
+   `gripper_open_position`. So the bound `0.002` is 2 mm of finger travel, *not* 2 mrad. The **name**
+   is wrong; the **value** is a length and was never 0.002 rad. This is consistent with §2's withdrawal
+   of the "should be 0.040 rad" claim: the number was never in radians. Not renamed — frozen file.
+2. **My round-1 point B stays withdrawn.** §4.1 withdrew the argument that the gate cannot separate
+   grasp from contact. R3 now shows something **stronger** than that argument ever claimed: the gate
+   cannot separate grasp from **no object at all**. The withdrawal was right, and the gate is worse than
+   the claim I withdrew.
+
+## R7. What would fix it — for human approval, not applied
+
+| option | assessment |
+| --- | --- |
+| change `2 mm` → ~6 mm | stops the 4 observed false rejections; **does not** make the gate see a grasp (R2) |
+| add a **lift** check at 5 mm | decisive on measured data (R5); needs the bundle field to exist and be graded |
+| drop the aperture gate | removes a gate that currently rejects real successes and cannot detect what it claims to |
+| rename `aperture_travel_rad` | cosmetic but a real units error in a frozen file |
+
+**Nothing here is applied. No threshold changed. No frozen file touched.**
