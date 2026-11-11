@@ -135,14 +135,22 @@ A′ 在**项目史上第一次被执行**，而且全部 16 个都跑完了：
 | --- | --- | --- |
 | planning_correct | **16/16** | 16/16 |
 | execution_succeeded | **9/16** | 11/16 |
-| independent_evaluation_passed | **9/16** | 11/16 |
+| independent_evaluation_passed | **13/16** | 14/16 |
 | 模型调用 | **0** | 16 |
 
 计划不是「相似」而是**逐字段相同**（stages、position_tolerance_m、clearance_m、motion_profile_id、
 initial_objects，含 spread_destinations 落点）。所以 A′ 不是在解一个更容易的题。
 
-A′ 的 7 次失败**全部**是 error_code=62（composite 不完整、第二阶段未运行），因此 order 子句因
-**序列确实不完整**而失败——不是评分假象。
+A′ 的 7 次执行失败**全部**是 error_code=62，但其中 **4 次在评估层仍然通过**——因为世界状态是对的，
+只是 FSM 报了失败。
+
+**我最初发布的 9/16 是错的，正确是 13/16。** 原因是我的评分器：A′ 的 `move_sequence` 我取自执行器的
+`completed_stage_ids`，而 B 的取自 `observe_from_run` 读 `pick.jsonl`——**同一比较里两条臂用了两个不同的
+记录器**。FSM 报 62 时 stage 列表是短或空的，于是 order 子句在世界状态正确时也失败。改用同一个观测
+构建器后是 13/16。
+
+**规则**：比较两条臂时，每个量必须来自同一条代码路径。若两条臂的测量方式不同，你找到的差异就是你
+的评分器。
 
 **可辩护的断言**：A′ 在这一模板上零模型成本端到端可用，落点与 B 相差两个任务。
 **不可辩护的断言**：A′ 普遍地「几乎和 B 一样好」。16 个任务、9 比 11 在噪声内，单一模板，

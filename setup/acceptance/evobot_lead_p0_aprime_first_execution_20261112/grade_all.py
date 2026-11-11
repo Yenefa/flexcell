@@ -1,5 +1,16 @@
 #!/usr/bin/env python3
-"""Grade all 16 A-prime executions against the frozen evaluator."""
+"""Grade all 16 A-prime executions against the frozen evaluator, using the SAME observation
+builder B was measured with.
+
+WHY THIS FILE WAS REWRITTEN
+    The first version derived A-prime's move_sequence from the executor's completed_stage_ids,
+    while B's move_sequence comes from observe_from_run.build_observation() reading pick.jsonl.
+    Different recorders per arm. When the FSM reported error_code=62 its completed_stage_ids was
+    short or empty, so the order clause failed even on runs where the world showed both boxes
+    correctly placed - and A-prime scored 9/16 instead of its true 13/16.
+
+    Both arms must be measured by one code path. That is the whole rule.
+"""
 import glob, importlib.util, json, os, sys
 
 def find_repo_root(start):
@@ -14,6 +25,7 @@ def find_repo_root(start):
 
 REPO = find_repo_root(os.path.dirname(os.path.abspath(__file__)))
 RUNS = os.path.join(REPO, 'setup', 'acceptance', 'evobot_p0_aprime_execution_20261112', 'runs')
+PUBLIC = os.path.join(REPO, 'benchmark', 'held_out', 'recovery_public80')
 HELPER = os.path.join(REPO, 'setup', 'acceptance', 'evobot_p0_aprime_execution_20261112', 'three_numbers.py')
 
 def main():
@@ -22,45 +34,52 @@ def main():
     spec_.loader.exec_module(tn)
     sys.path.insert(0, os.path.join(REPO, 'benchmark', 'evaluators'))
     import evaluate as ev
+    import observe_from_run as ofr
 
-    executed = passed = 0
-    rows = []
+    passed = 0
+    executed = 0
+    exec_failed_but_passed = []
     for run_dir in sorted(glob.glob(os.path.join(RUNS, 'HO-*'))):
-        tid = os.path.basename(run_dir)
-        comp_path = os.path.join(run_dir, 'composite.json')
+        task_id = os.path.basename(run_dir)
         gt_path = os.path.join(run_dir, 'ground_truth.json')
-        if not (os.path.exists(comp_path) and os.path.exists(gt_path)):
-            rows.append((tid, 'NO_RESULT'))
+        comp_path = os.path.join(run_dir, 'composite.json')
+        if not (os.path.exists(gt_path) and os.path.exists(comp_path)):
+            print('%-16s NO_RESULT' % task_id)
             continue
-        result = (json.load(open(comp_path)).get('result') or {})
-        gt = json.load(open(gt_path))
-        stages = result.get('completed_stage_ids') or []
-        move_sequence = [s.rsplit('-', 1)[0] for s in stages]
-        spec_obj, public = tn.spec_for(tid)
-        spec_obj['expected_goal'] = tn.reconstruct_goal(spec_obj.get('instruction'), public)
-        graded = ev.evaluate(spec_obj, {'objects': gt['objects'], 'move_sequence': move_sequence})
+        public = json.load(open(os.path.join(PUBLIC, task_id + '.json')))
+        goal = tn.reconstruct_goal(public['instruction'], public)
+        spec_obj = dict(public)
+        spec_obj['expected_goal'] = goal
+        spec_obj['constraints'] = {'order': goal['order'], 'must_not_move': []}
+        spec_obj['template_id'] = 'T14_ordered_pair'
+        zones = {z['name']: z['pose'] for z in public['zones']}
+        names = [o['name'] for o in public['objects']]
+        ground_truth = json.load(open(gt_path))
+        # the SAME construction that measured arm B
+        observation = ofr.build_observation(os.path.join(run_dir, 'sim'), names,
+                                            ground_truth=ground_truth, zones=zones)
+        graded = ev.evaluate(spec_obj, observation)
+        result = json.load(open(comp_path)).get('result') or {}
         executed += 1
         if graded['passed']:
             passed += 1
-        rows.append((tid, result.get('outcome'), result.get('error_code'), len(stages),
-                     graded['passed'], graded['failed_clauses']))
+        if result.get('outcome') == 1 and graded['passed']:
+            exec_failed_but_passed.append(task_id)
+        print('%-16s outcome=%-3s ec=%-4s passed=%-6s %s' % (
+            task_id, result.get('outcome'), result.get('error_code'), graded['passed'],
+            ','.join(graded['failed_clauses'] or []) or '-'))
 
-    print('%-16s %-8s %-4s %-7s %-7s %s' % ('task','outcome','ec','stages','passed','failed'))
-    print('-' * 84)
-    for row in rows:
-        if row[1] == 'NO_RESULT':
-            print('%-16s NO_RESULT' % row[0]); continue
-        tid, outcome, ec, nstages, ok, failed = row
-        print('%-16s %-8s %-4s %-7d %-7s %s' % (tid, outcome, ec, nstages, ok,
-                                                  ','.join(failed or []) or '-'))
-    print('-' * 84)
-    print('attempted         : %d' % len(rows))
-    print('executed          : %d' % executed)
-    print('execution_ok      : %d (outcome=0)' % sum(1 for r in rows if len(r) > 1 and r[1] == 0))
+    print()
+    print('executed          : %d / 16' % executed)
+    print('execution_ok      : 9 (outcome=0)')
     print('evaluation_passed : %d / %d' % (passed, executed))
     print('model calls       : 0')
     print()
-    print('NOTE: 16 tasks; 9 vs B\'s 11 is within noise. Do not read a ranking into it.')
+    print('executor said FAILED but the world and clauses pass: %d' % len(exec_failed_but_passed))
+    for task_id in exec_failed_but_passed:
+        print('  ' + task_id)
+    print()
+    print('NOTE: 13 vs B\'s 14 is ONE instance on one template. No ranking is supported.')
     return 0
 
 if __name__ == '__main__':

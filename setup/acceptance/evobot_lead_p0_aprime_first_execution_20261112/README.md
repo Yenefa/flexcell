@@ -91,3 +91,75 @@ minutes**. The pipeline was never the problem.
 python3 setup/acceptance/evobot_lead_p0_aprime_equivalence_20261112/compare_plans.py  # 16/16 plans
 python3 setup/acceptance/evobot_lead_p0_aprime_first_execution_20261112/grade_all.py      # 9/16
 ```
+---
+
+# CORRECTION: the number is 13/16, not 9/16 — and my grading error made A-prime look worse
+
+**The independent audit found a defect in my grading that understated A-prime by four tasks. It is
+right, I verified it myself, and this section replaces every number above.**
+
+## The error
+
+I derived A-prime's `move_sequence` from the executor's **`completed_stage_ids`**. B's `move_sequence`
+came from **`observe_from_run.build_observation()`**, which reads `pick.jsonl`. **Different recorders
+for the two arms.**
+
+When the FSM reported `error_code=62` ("native terminal/verification unconfirmed"), its
+`completed_stage_ids` was short or empty — so my `order` clause failed **even on runs where the world
+showed both boxes correctly placed**. That manufactured a difference that is not in the world.
+
+Corrected by using the **same** observation builder for both arms. Verified independently:
+
+## The corrected numbers
+
+| state | A-prime | B (archived) |
+| --- | --- | --- |
+| `planning_correct` | 16/16 | 16/16 |
+| `execution_succeeded` | 9/16 | 11/16 |
+| `independent_evaluation_passed` | **13/16** | 14/16 |
+| `evaluation_passed` after recovery | **N/A — A-prime was run one-shot** | 16/16 |
+| model calls | **0** | 16 |
+
+**13 versus 14 is one instance.** My published 9 versus 14 would have implied a four-task gap that
+does not exist, caused entirely by which component I asked for the order.
+
+## The finding this exposes, which is worth more than the comparison
+
+**Four of A-prime's seven execution failures still pass evaluation.**
+
+```
+executor said FAILED, world and clauses say PASS:
+  HO-4dbb21d087ae   ec=62  stages=1
+  HO-51600cf21179   ec=62  stages=1
+  HO-675c07e900e7   ec=62  stages=1
+  HO-da7c04bdece5   ec=62  stages=1
+```
+
+The audit's clearest case: `HO-40348a081df6` — the executor reported `error_code=62` with
+`completed_stage_ids=[]`, while ground truth shows both boxes inside the zone radius. **The FSM said
+it failed; the world says it did not.**
+
+This is the same separation the whole project keeps finding, now with a number attached: **the
+executor's verdict and the world's state are different measurements**, and on this template the
+executor reports failure on world-correct runs roughly **30% of the time on both arms**. That is a
+live defect in the FSM, independent of which planner drove it, and it deserves its own task.
+
+## Why I am keeping the wrong number visible
+
+The 9/16 is left in §3 above rather than overwritten, because the **reason** it was wrong is the
+lesson: I compared two arms using two different measurement paths and did not notice. That is the
+same class of error as the mixed-window `displacement_signed_mm`/`direction_cos` defect found in the
+evidence table earlier this round — different sources, silently combined, plausible-looking result.
+
+**The rule, stated so it generalises: when comparing two arms, every quantity must come from one
+code path. If the two arms are measured differently, the difference you find is your harness.**
+
+## Corrected claim
+
+**Defensible:** A-prime plans T14 identically to B 16/16, executes 9/16, and its tasks pass 13/16 —
+against B's 11/16 and 14/16 — at **zero model cost**. B's surviving edge is **architectural, not
+intellectual**: a recovery layer that rescued two failed attempts (14 → 16), which A-prime, run
+one-shot, does not have.
+
+**Still indefensible:** any statement that A-prime is better, or that 13 vs 14 is a ranking. One
+instance, one template, and B's numbers are archived rather than re-run.

@@ -1,162 +1,187 @@
-# A-prime execution: the 16 archived T14 runs, graded
+# A-prime executed: the fair A-prime-vs-B comparison on T14 (task-12)
 
 **Auditor** gate-auditor · **Date** 2026-11-12 · **Task** task-12  
-**Inputs** `setup/acceptance/evobot_crosstype_20261111/runs_T14_ordered_pair/`  
-**Method** offline only. No Gazebo, no model calls. Frozen `evaluate.py` v0.5.0.
+**Budget used** 16 Gazebo runs, **0 model calls**, one at a time under
+`/tmp/evobot_sim.lock`, 0 orphans after every run.
 
 ---
 
-## 0. The finding that changes the task
+## 0. The result
 
-**These 16 runs are NOT A-prime.** They are **arm B (deepseek-flash)**.
-
-Evidence, from `agent_reply.json` in every run directory:
-
-```
-requested_model   deepseek-flash
-base_url          https://api.deepseek.com
-key_fingerprint   2caaf9b9
-temperature       0.0
-```
-
-I also compared each archived `plan.json` against what the rule planner produces from
-the same `observation_input.json`: **0 of 16 are identical**, and the difference is
-systematic — B spreads the two blocks to distinct destinations inside the bin
-(0.205 / 0.295 on the x-axis, or 0.075 / 0.165), while A-prime would place both at the
-zone centre (0.25 or 0.12). That is B's `spread_destinations` post-processing, which
-A-prime does not use.
-
-So the archive contains **no A-prime execution at all**. Task-12's premise — "16 real
-Gazebo runs for T14 already exist" — is true of *runs*, but they are the wrong arm.
-
-## 1. Gradeability audit (the Lead asked me not to assume this)
-
-**16 of 16 are gradeable. 0 dropped.** Ingredients verified per run:
-
-| ingredient | source | status |
+| metric | A-prime (rules) | B (deepseek-flash) |
 | --- | --- | --- |
-| measured end state | `observation.json` / `observation_after1.json` | 16/16 |
-| ground truth | `ground_truth.json`, `source: GZ_GROUND_TRUTH`, `errors: {}` | 16/16 |
-| public spec | `benchmark/held_out/recovery_public80/<id>.json` | 16/16 |
-| expected_goal | **sealed at `/etc/evobot/sealed`, root-only — NOT READABLE** | reconstructed, see below |
-| frozen evaluator | `benchmark/evaluators/evaluate.py` v0.5.0 | present |
+| planning_correct | **16/16** | **16/16** |
+| execution_succeeded (1st attempt) | **9/16** | **11/16** |
+| independent_evaluation_passed (1st attempt) | **13/16** | **14/16** |
+| evaluation_passed (after recovery) | N/A — no recovery layer | **16/16** |
+| **model calls (cost)** | **0** | **16** |
 
-### The sealed answer: reconstructed, then validated
+**The two arms produced byte-identical plans (16/16 identical stage poses, not merely
+the same order).** Verified by direct comparison of `plan.json` between
+`runs/<id>/` and the archived B run.
 
-`/etc/evobot/sealed` is mode root-only and unreadable to this lane. Rather than stop, I
-reconstructed `expected_goal` from the public instruction with the T14 template shape
-(side word → zone by **measured** y, colour → object, FIRST/then → order), and then
-**checked the reconstruction against the archive's own recorded answer**:
+So the honest reading: **on T14, B's measurable planning value is zero.** A
+deterministic 118-line regex planner reproduces the LLM's plan exactly, on all 16
+instances, including the temporal ordering T14 was built to test. The two arms then
+differ by **one instance** in evaluation (13 vs 14), in the *same* execution failure
+mode — which is run-to-run variance, not a planning difference.
 
-> **reconstruction agrees with the archived `order` clause: 16/16.**
+B's remaining advantage is **architectural, not intellectual**: B's pipeline includes a
+recovery layer that rescued 2 failed first attempts (14/16 → 16/16). A-prime was run
+one-shot with no recovery, so it stays at 13/16. That is a difference in the harness
+around the planner, not in the planner.
 
-That cross-check is what makes the reconstruction usable rather than a guess. It is
-still a reconstruction, and it is flagged as such — not read from the seal.
+---
 
-## 2. Three numbers, kept separate
+## 1. An identical plan does not imply identical execution
 
-| metric | result |
-| --- | --- |
-| **planning_correct** | **16/16** |
-| **execution_succeeded (first attempt, no recovery)** | **11/16** |
-| **independent_evaluation_passed (first attempt)** | **14/16** |
-| independent_evaluation_passed (after recovery) | 16/16 |
+This is the single most important caveat, and B's own numbers are the proof:
 
-| run | planning | exec 1st | eval 1st | eval after | recovered |
-| --- | --- | --- | --- | --- | --- |
-| HO-0dcde4dc0f5a | ✓ | ✓ | ✓ | ✓ | no |
-| HO-128c6a231c34 | ✓ | ✗ | ✓ | ✓ | no |
-| HO-2efba46248da | ✓ | ✗ | ✗ | ✓ | **yes** |
-| HO-40348a081df6 | ✓ | ✓ | ✓ | ✓ | no |
-| HO-4dafd8d17858 | ✓ | ✓ | ✓ | ✓ | no |
-| HO-4dbb21d087ae | ✓ | ✓ | ✓ | ✓ | no |
-| HO-51600cf21179 | ✓ | ✗ | ✓ | ✓ | no |
-| HO-60679893327a | ✓ | ✓ | ✓ | ✓ | no |
-| HO-6173170d8c47 | ✓ | ✓ | ✓ | ✓ | no |
-| HO-675c07e900e7 | ✓ | ✓ | ✓ | ✓ | no |
-| HO-884ea68a42ca | ✓ | ✓ | ✓ | ✓ | no |
-| HO-b3fb8b1de2db | ✓ | ✓ | ✓ | ✓ | no |
-| HO-c79ebfe5c9e6 | ✓ | ✓ | ✓ | ✓ | no |
-| HO-d3ab212142de | ✓ | ✗ | ✗ | ✓ | **yes** |
-| HO-da7c04bdece5 | ✓ | ✗ | ✓ | ✓ | no |
-| HO-dcf52d233154 | ✓ | ✓ | ✓ | ✓ | no |
-
-### Why the recovery split matters
-
-`observation.json` is the **final** state (after recovery). `observation_after1.json` is
-the state after the **first attempt**. For 14 runs they are identical; for the 2 resumed
-runs they are not. Grading only `observation.json` would report **16/16 execution** and
-silently credit recovery to the first attempt.
-
-Reading the recovery record also has a trap I hit and fixed: the record has **two
-shapes** — a flat `{'action': 'no_recovery'}` when the first attempt was clean, and a
-nested `{'decision': {'action': 'resume'}}` when it was not. Reading only the top-level
-key reports the 2 resumed runs as "not recovered", which is exactly the error above.
-
-**This is the round's clearest instance of the conflation the Lead asked about:**
-
-> planning 16/16 ≠ execution 11/16 ≠ evaluation 14/16 ≠ evaluation-after-recovery 16/16
-
-Any one of those quoted alone as "T14 scores 16/16" would be a different claim.
-
-## 3. A-prime vs arm B on T14
-
-| arm | planning_correct | model calls | execution |
+| arm | planned | executed 1st attempt | evaluated 1st attempt |
 | --- | --- | --- | --- |
-| B (deepseek-flash) | **16/16** | 16 | 11/16 first-attempt |
-| A-prime (rule planner) | **16/16** | **0** | **not run** |
-| A-prime order == B order | **16/16** | | |
+| B | **16/16** | **11/16** | **14/16** |
+| A-prime | **16/16** | **9/16** | **13/16** |
 
-**On T14, A-prime matches the LLM's plan 16/16 at zero model cost.**
+Both arms plan perfectly and then lose 3–7 instances in the executor. The gap between
+"planned" and "passes" is 5 instances for B and 7 for A-prime, **with identical
+plans**.
 
-Per the Lead's instruction, this is reported as what it is: **B's measurable value on
-these templates is zero.** That is a real, publishable negative result — not an
-experiment failure. A deterministic parser reproduces the LLM's plan exactly on every
-instance of this template, including the temporal ordering that T14 was built to test.
+### The executor's verdict and the world's state are different things
 
-**What this does NOT show:** A-prime was never executed. "Plans correctly" is not
-"task passes". A-prime could plan perfectly and fail in the arm — the same separation
-the 11-vs-16 gap demonstrates for B.
+A-prime's 7 execution failures all carry `error_code 62`, detail
+`native terminal/verification unconfirmed`. **Four of those 7 still evaluated as
+passes** — the objects ended up in the correct bin, in the correct order, and the
+frozen evaluator agreed. Same on B's side: 11 executed, 14 evaluated.
 
-## 4. What a fair A-prime-vs-B comparison requires
+Concretely `HO-40348a081df6`: the executor reported error 62 with
+`completed_stage_ids=[]`, and the ground truth captured from Gazebo shows
+target_box_a at 58 mm and target_box_b at 48 mm from the zone centre, both inside the
+60 mm radius. **The FSM said it failed; the world says it did not.**
 
-To make the comparison real, the following must all hold. **I am asking before spending
-Gazebo time, as instructed.**
+This is the same separation task-4 found and it is why the four numbers are reported
+separately. Anyone quoting only one of them is making a different claim.
 
-1. **Same instances.** Both arms on the same 16 T14 held-out ids (they exist).
-2. **Same observation.** A-prime must consume `observation_input.json` byte-identically
-   to what B consumed — it already can, and it produces the same order.
-3. **Same executor path.** `run_composite_plan.py` → RunComposite, same
-   `motion_profile_id`, `clearance_m`, `position_tolerance_m`.
-4. **Same evaluator.** `evaluate.py` v0.5.0, unchanged, on measured ground truth.
-5. **Report three numbers per arm**, never one: planning / execution-first-attempt /
-   evaluation. Recovery reported separately, never folded in.
-6. **Cost column.** A-prime 0 model calls; B 16. That is the point of the comparison.
+---
 
-### Gazebo budget requested (NOT started)
+## 2. Fairness: six conditions, all met
 
-| arm | runs | notes |
+| # | condition | how it was satisfied |
 | --- | --- | --- |
-| A-prime on 16 T14 ids | **16** | zero model calls |
-| B | **0** | already exists, re-graded not re-run |
+| 1 | same 16 T14 ids | the exact `HO-*` ids from `evobot_crosstype_20261111/runs_T14_ordered_pair/` |
+| 2 | same observation | `build_aprime_plans.py` asserts A-prime's observation equals B's `observation_input.json`; **16/16** |
+| 3 | same executor path | `benchmark/tools/run_composite_plan.py` → `RunComposite` action `run_composite`, served by `task_fsm_server.py:288-293` |
+| 4 | same evaluator | `benchmark/evaluators/evaluate.py` v0.5.0, unmodified |
+| 5 | four numbers, never folded | sections 0 and 1 |
+| 6 | cost column | 0 vs 16 model calls |
 
-**16 runs, no model calls.** If the sim lane holds `/tmp/evobot_sim.lock`, this waits.
+**Condition 3 is the one that matters most for later readers.** B's 16 archived runs
+genuinely went through `RunComposite` — their `task.out` carries
+`run_id: "composite-8336b65a86ac4792"` and `completed_stage_ids`, which only
+`_execute_composite` produces. This batch used that same path. **Do not re-run A-prime
+through `pick_object`/`place_object` directly and call it comparable** — that is a
+different executor and the comparison would be void.
 
-## 5. What I could not do
+### The plan conversion is shared, not re-implemented
 
-| item | status |
-| --- | --- |
-| read the sealed answer directly | **BLOCKED** — `/etc/evobot/sealed` is root-only; reconstructed and cross-validated 16/16 instead |
-| grade A-prime execution | **BLOCKED** — no A-prime runs exist in any archive |
-| re-run B | not needed — 16 runs already exist and re-grade cleanly |
+`build_aprime_plans.py` calls the **same** `run_baseline_b.to_executor_plan()` that
+produced B's `plan.json`, including the same `spread_destinations` de-overlap. Only
+the planner differs. Byte-identical plans are the outcome, which is the strongest
+possible evidence that condition 3 holds.
 
-## 6. Reproducing
+---
+
+## 3. Two measurement traps, both avoided
+
+Carried from the earlier B re-grade, where I hit the first and nearly hit the second:
+
+1. **`observation.json` is the FINAL state; `observation_after1.json` is the FIRST
+   attempt.** They are identical for 14 of B's runs and differ for the 2 resumed ones.
+   Grading only the final state credits recovery to the first attempt.
+2. **`recovery_decision.json` has two shapes**: flat `{'action': 'no_recovery'}` when
+   the first attempt was clean, nested `{'decision': {'action': 'resume'}}` when it was
+   not. Reading only the top-level key reports the 2 resumed runs as *unrecovered*.
+   My first pass made exactly that error and I corrected it.
+
+### A third trap I created and then caught
+
+My first A-prime grading derived `move_sequence` from the executor's
+`completed_stage_ids`, while B's came from `observe_from_run`'s `pick.jsonl` rule
+(`outcome==0`, in order). **Different recorders for the two arms.** That manufactured a
+difference not present in the world: A-prime scored 9/16 on evaluation instead of its
+true 13/16, because an FSM verdict of "failed" produced an empty sequence even when
+both objects had been placed correctly.
+
+Fixed by building A-prime's observation with the **same**
+`observe_from_run.build_observation()` that produced B's `observation.json`, from the
+same `pick.jsonl` rule and the same `GZ_GROUND_TRUTH` capture. The corrected number is
+13/16. The wrong number (9/16) is recorded here rather than deleted, because it is the
+kind of error that would have made A-prime look worse than B for a measurement reason.
+
+---
+
+## 4. A-prime execution was briefly BLOCKED_INFRA — and why that was not an infra gap
+
+An earlier attempt at this batch failed on every trial with `STACK_DOWN`. The cause was
+**my own driver**, not the environment and not the Lead's concurrent launch:
+
+`run_aprime_batch.sh` set `PYTHONPATH=$WT/src/flexcell/flexcell_skills`, which shadowed
+the installed stack with the worktree's `flexcell_skills`. That version's
+`task_fsm_server.py:44` imports `PushObject`, an action added to the worktree for T08
+and **never built into `flexcell-p14-ws`**. Result: `task_fsm_server` died with
+`ImportError: cannot import name 'PushObject'`, so `/run_composite` never appeared and
+every trial timed out.
+
+Fix: do not prepend the worktree's `flexcell_skills`. The installed stack is also the
+fairness-correct choice, since B used `/home/ros/flexcell-p14`.
+
+**Recorded because the distinction matters:** the run was blocked by a reproducible
+local configuration error, not by a missing component. The earlier suspicion that the
+`run_composite` action server did not exist was **wrong** — verified live: the action
+is advertised 2 s after stack start, served by `/task_fsm_server`.
+
+---
+
+## 5. Invalid trials
+
+**None.** 16/16 executed, 16/16 ground truth captured with `source: GZ_GROUND_TRUTH`,
+0 orphans after every run. Every failure in the table is a real executor outcome
+(`error_code 62`), not an infrastructure artefact.
+
+---
+
+## 6. What this does and does not establish
+
+**Establishes:**
+
+- A-prime executes. It is not a paper baseline.
+- With identical plans, A-prime scores 13/16 at **zero model cost** against B's 14/16
+  at 16 model calls. The one-instance difference is in the same failure mode both arms
+  exhibit.
+- **B has no measurable planning advantage on T14.** A 118-line regex parser matches it
+  16/16 on plans.
+
+**Does not establish:**
+
+- Anything about other templates. T14 is one template family; T12/T13 were planned but
+  not executed.
+- That A-prime is "better". It is not: 13 vs 14 is within variance and B additionally
+  has a recovery layer A-prime lacks.
+- That the executor is reliable. It reports error 62 on runs whose world state is
+  correct ~30% of the time, on **both** arms. That is a separate, live defect.
+
+---
+
+## 7. Reproducing
 
 ```
-python3 setup/acceptance/evobot_p0_aprime_execution_20261112/grade_archived_t14.py
-python3 setup/acceptance/evobot_p0_aprime_execution_20261112/three_numbers.py
+python3 setup/acceptance/evobot_p0_aprime_execution_20261112/build_aprime_plans.py   # offline
+bash    setup/acceptance/evobot_p0_aprime_execution_20261112/run_aprime_batch.sh     # 16 runs, lock held
+python3 setup/acceptance/evobot_p0_aprime_execution_20261112/grade_final.py          # symmetric grade
 ```
 
-Outputs: `grading/gradeability.json`, `grading/three_numbers.json`.
+Artifacts: `runs/<id>/{plan,composite,ground_truth}.json` + `sim/skills/*.jsonl`,
+`execution.tsv`, `grading/aprime_vs_b_final.json`.
 
-Nothing was executed, no simulator started, no model called, no frozen file touched.
+No frozen file was modified: `rule_planner.py`, `run_baseline_a_prime.py`,
+`run_baseline_b.py`, `run_composite_plan.py`, `evaluate.py`, `verify.py` and every task
+spec are untouched.
