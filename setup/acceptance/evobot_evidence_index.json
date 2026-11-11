@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 35,
-  "live": 28,
+  "batches": 36,
+  "live": 29,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -122,7 +122,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 27,
+        "live_batches": 28,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",
@@ -132,6 +132,27 @@
           "Level 7 Transfer",
           "hardware (M0, prohibited)"
         ]
+      }
+    },
+    {
+      "batch": "evobot_false_failure_20261111",
+      "verified": "PASS",
+      "rung": "Measurement (NEW metric: task said fail while world was correct, 2/32; prereg basis corrected)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_FALSE_FAILURE_CONFIRMED",
+        "false_failure_rate": "2/32 = 6.2% (1.7-20.1%)",
+        "false_success_rate": "0/32",
+        "case": "HO-a69ec651037a",
+        "fsm_said": "outcome=1 (native terminal/verification unconfirmed for target_box_b-1)",
+        "evaluator_said": "passed=True, no failed clauses",
+        "world": "target_box_b inside zone_1",
+        "skill_layer_said": "released=False err=25",
+        "skill_own_verify": "verified=True",
+        "consequence": "recovery retried an already-completed placement",
+        "preregistration_affected": "actuator_stall basis needs restating (see README)",
+        "evaluator_touched": false,
+        "skill_layer_modified": false
       }
     },
     {

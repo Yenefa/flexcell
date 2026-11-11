@@ -1,0 +1,42 @@
+batch      run                  task_said    evaluator    note
+batch1     HO-198a4b2688d0      ok           passed       
+batch1     HO-38ce6531a597      ok           passed       
+batch1     HO-3a19766a4104      ok           passed       
+batch1     HO-3bfb9643b7b6      ok           passed       
+batch1     HO-4499501c2043      ok           passed       
+batch1     HO-47afdffad81a      FAIL         failed       
+batch1     HO-4f197a0997af      ok           passed       
+batch1     HO-5a96f3eb4fae      FAIL         failed       
+batch1     HO-5d21b382e781      ok           passed       
+batch1     HO-68f800add5fc      ok           passed       
+batch1     HO-72553754ef3a      ok           passed       
+batch1     HO-78b746f47443      ok           passed       
+batch1     HO-b7bd62621f05      ok           passed       
+batch1     HO-de2741728c69      ok           passed       
+batch1     HO-e2580e718ecd      ok           passed       
+batch1     HO-fb31a8cd4a66      ok           passed       
+batch2     HO-036fc9b6e66f      ok           passed       
+batch2     HO-17a85f7d07cc      ok           passed       
+batch2     HO-2536264f2908      ok           passed       
+batch2     HO-274c7aaa6485      ok           passed       
+batch2     HO-285d9e53fbdd      ok           passed       
+batch2     HO-2f52569ef5ca      ok           passed       
+batch2     HO-50237b4714a9      ok           passed       
+batch2     HO-6323db167d30      ok           passed       
+batch2     HO-802d10c045aa      ok           passed       
+batch2     HO-a69ec651037a      FAIL         passed       FALSE_FAILURE (retried=True)
+batch2     HO-d905e198fb9d      ok           passed       
+batch2     HO-e2d3ed8c2437      ok           passed       
+batch2     HO-e736e485c14e      ok           passed       
+batch2     HO-ec89d144824f      ok           passed       
+batch2     HO-f17c4e053953      ok           passed       
+batch2     HO-f9431f8ef925      FAIL         passed       FALSE_FAILURE (retried=True)
+
+runs                                   : 32
+task verdict agrees with evaluator     : 30/32
+FALSE FAILURE (task said fail, world ok)  2/32 =   6.2% (1.7-20.1%)
+FALSE SUCCESS (task said ok, world bad)   0/32 =   0.0% (0.0-10.7%)
+
+The false failures are the ones that trigger pointless recovery. They are
+not evaluator errors: the evaluator is reading the world, the FSM is reading
+its own skill's success flag.

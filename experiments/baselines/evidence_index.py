@@ -70,6 +70,7 @@ RUNGS = {
     "evobot_unified_runner_20261111": "Infrastructure (4 runners merged into 1; absolute paths; smoke-tested end to end)",
     "evobot_valid_batch_20261111": "Simulation Tested (FIRST structurally valid batch: recovery fired 2x, gained 2 lost 0, false success 0/16)",
     "evobot_generalization_20261111": "Generalization Tested (untouched seeds 8100/8200; pooled B 30/32; skill-layer false failure found)",
+    "evobot_false_failure_20261111": "Measurement (NEW metric: task said fail while world was correct, 2/32; prereg basis corrected)",
 }
 
 

@@ -113,6 +113,22 @@ def freeze(force=False):
             "self_assessment_accuracy": "28/32 = 87.5%",
             "mission_requirement": "False Success Rate MUST be 0 -> MET on n=32, but a zero alone is gameable, so accuracy is reported with it",
         },
+        "task_false_failure": {
+            "why_new": ("the mirror of false success: the task reports failure while the "
+                        "independent evaluator says the goal was satisfied. Never measured "
+                        "before this round."),
+            "measured": "2/32 = 6.2% (1.7-20.1%); false success 0/32",
+            "evidence": "setup/acceptance/evobot_false_failure_20261111",
+            "mechanism": ("place reported released=False err=25 and recorded no box_after, "
+                          "yet the box was inside zone_1 (37 mm from centre) and the "
+                          "skill own verify.jsonl said verified=True"),
+            "consequence": ("the recovery driver acts on task.out, so it retried a "
+                            "placement that was already complete - which is why arm R "
+                            "looked exercised in a batch where nothing failed"),
+            "prereg_impact": ("the actuator_stall pre-registration assumed all release "
+                              "stalls were real failures; its basis is now recorded as "
+                              "superseded and it must be re-derived before any change"),
+        },
         "generalization": {
             "batch": "evobot_generalization_20261111 (seeds 8100/8200, zero overlap)",
             "pooled_arm_B": "30/32 = 93.8% (79.9-98.3%)",

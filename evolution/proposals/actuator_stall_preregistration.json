@@ -25,5 +25,14 @@
     "final pass count drops -> regression, MUST be reverted",
     "false success becomes non-zero -> MUST be reverted"
   ],
-  "notes": "Written before any source change. The existing plan-level retry already recovers 6 of 9 stall runs, so the honest increment of a skill-layer retry is latency and risk, not final pass rate."
+  "notes": "Written before any source change. The existing plan-level retry already recovers 6 of 9 stall runs, so the honest increment of a skill-layer retry is latency and risk, not final pass rate. | 2026-11-11: factual basis corrected - a subset of release stalls are FALSE FAILURES (object released, confirmation lost) and the prediction must be re-derived before implementation.",
+  "superseded_basis": {
+    "recorded": "2026-11-11",
+    "why": "This pre-registration assumed every ACTUATOR_STALL_ON_RELEASE was a real release failure. Measurement on 32 validated runs showed at least 2 were the opposite: the object HAD been released and was inside the target zone, but the release confirmation failed, so place reported released=False err=25 while the world satisfied the goal.",
+    "evidence": "setup/acceptance/evobot_false_failure_20261111",
+    "measured": "task-level false failure 2/32 = 6.2% (1.7-20.1%); false success 0/32",
+    "what_changes": "For this sub-class, re-commanding the release cannot help - the gripper already opened. The defect is in the CONFIRMATION, not the actuation. The bounded_release_retry hypothesis therefore does not address the dominant observable failure mode.",
+    "status_of_this_preregistration": "NOT WITHDRAWN and NOT APPROVED. It stays requires_human_approval and must be re-derived from the corrected failure taxonomy before any code change is proposed.",
+    "leakage": "The prediction was fixed before any code change and was never used to manufacture a pass; no skill-layer file was modified."
+  }
 }
