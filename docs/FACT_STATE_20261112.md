@@ -697,4 +697,20 @@ destination. Recovery did not rescue a task; it undid one.
 | **What this does NOT fix** | **The store cannot currently be reseeded from its own seed file**, because the seeds cite evidence the archives do not contain. Three of the review's five ranked fixes remain open: `source_run` pointing at the **run** not the batch, **archiving the failing run** when a defect is fixed, and reviewer-owned verdicts | same |
 | Net effect on P3 | **The channel is HONEST, not FUNCTIONAL.** An empty store that refuses bad records is a better foundation than a populated one that accepts them — but it is not experience reuse | — |
 
+---
+
+## ADDENDUM — goal round 14 (2026-11-12): the fixed seeder ACCEPTS — two provenance-verified records
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| Can the fixed pipeline accept a **genuine** record? | **YES — 2 accepted, 0 rejected.** Without this the channel would be dead rather than strict | `evobot_lead_verified_records_20261112/` |
+| Where genuine machine-readable planner evidence exists | **Exactly two distinct failures** in the whole archive, both under `evobot_recover_n6_20261111/runs/HO-90899d657e68/sim/skills/composites/`: **`ec=61` n=3** `'state drift or occupied destination before target_box_b-1'` and **`ec=60` n=2** `'declared destination occupied at target_box_b-1'` | same |
+| The failure legacy record **R4** claimed | **REAL.** R4 cited the wrong source and the wrong context, but the occupied-destination failure genuinely happened and now has a machine-readable citation. *A wrong record about a real event* | same |
+| Records added | `T05-recover-occupied-stage` and `T05-recover-declared-occupied`, both `provenance_verified: True`, `validated: False`, evidence files present and re-checked after writing | `records.jsonl` now 6 records, chain intact |
+| A filter I broke, and fixed | `audit_actionability.py` filtered on `validated`, which after round 13 means **"the OLD seeder ran"** — so it reported on the 4 **least** trustworthy records and ignored the 2 verified ones. Now partitions by `provenance_verified` and reports **both cohorts** | `evolution/transfer/audit_actionability.py` |
+| **The result that matters for P4** | **verified cohort: 2/2 PLANNER_ACTIONABLE**; unverified cohort: **1/4**; combined **3/6**. **Every verified record is planner-actionable, most unverified ones are not — so the defect was in the SEEDING, not the concept** | same |
+| P4 statement updated | Round 12: "a D arm has nothing to reuse." Now: **two actionable lessons about a failure that genuinely occurs (5 logged instances)**. **P4 is still not complete and not closer to passing** — those lessons may never arise on the frozen unseen set, and D remains undefined behind `BLOCKED_MISSION_TEXT_MISSING` | — |
+| Still wrong, stated plainly | (1) `validated: True` on the four legacy records still does not mean reviewed, so **two conventions coexist under a misleading name**; (2) **no independent reviewer has signed either new record** — `reviewed_by`/`review_verdict`/`review_ref` are `None`, and **provenance verification is not review**; (3) `source_run` still names a run **directory**, not a single artifact | same |
+| Seeder capability added | `--append` mode, justified because append is inherently safe (dedup by `record_sha256`, never rewrites, never deletes) and without it the store could never gain a record after the old seeder's first run | — |
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**

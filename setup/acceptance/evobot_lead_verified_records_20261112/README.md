@@ -102,3 +102,61 @@ never arise on the frozen unseen task set. What changed is that the channel is n
 python3 evolution/experience/seed_from_evidence.py --dry-run --seeds evolution/experience/seed_evidence_verified.json
 python3 evolution/transfer/audit_actionability.py      # verified 2/2, unverified 1/4
 ```
+
+---
+
+## 8. I broke a verifier, and the gate caught me
+
+After appending the two records I ran the differential gate over all 109 verifiers. It **rejected**:
+
+```
+REJECTED: NEW verifier failures not in the baseline (1): evobot_baseline_c_skeleton_20261111
+```
+
+That is the gate doing the job it was built for in round 7 — catching a change I made and could have shipped
+unnoticed.
+
+### 8.1 What failed
+
+`evobot_baseline_c_skeleton_20261111/verify.py` asserted:
+
+```python
+assert len(rows) == 4, len(rows)          # now 6
+assert all(r["validated"] for r in rows)  # the 2 new records carry validated: False, deliberately
+```
+
+**Both assertions encode the defect this whole line of work has been fixing.**
+
+- A **count** forbids an append-only store from ever growing, which is the one thing an append-only store is
+  for.
+- `all(validated)` asserted that **the seeder ran**, because `validated` is set by the seeder. The independent
+  review found 3 of 4 of those records cite evidence their own source cannot contain. So the assertion was
+  certifying exactly the wrong property.
+
+### 8.2 What I changed it to, and why it is not weaker
+
+| before | after |
+| --- | --- |
+| `len(rows) == 4` | `len(rows) >= 4` — the skeleton is populated, without forbidding growth |
+| `all(validated)` | **every** record must carry the **seven** content fields, and its `source_run` must resolve |
+| — | any record claiming `provenance_verified` must **name evidence files that exist**, **and re-verify**: its evidence is re-checked against its cited source at verify time |
+
+**The count is relaxed; everything else is strictly stronger.** The new re-verification means a record cannot
+pass this verifier by asserting provenance it does not have.
+
+Re-run: `EVOBOT_BASELINE_C_SKELETON_VERIFIED`, 6 records, chain intact. Gate re-run: **109 verifiers, 4 known
+failures unchanged, 0 new.**
+
+**I am flagging this plainly rather than burying it**: I edited a verifier that my own change had broken. The
+justification is that its assertions were wrong in substance and the replacement demands more, not less — but
+a reader should see that I judged my own case, and should check me.
+
+## 9. What is still open
+
+- `validated` still means "the old seeder ran" on four records. Two conventions coexist; the field name is
+  still misleading.
+- **No independent reviewer has signed the two new records.** `reviewed_by` / `review_verdict` / `review_ref`
+  are `None`. Provenance verification is not review.
+- `source_run` names a run directory, not a single artifact.
+- **P4 remains incomplete.** D is undefined behind `BLOCKED_MISSION_TEXT_MISSING`, and whether two
+  occupied-destination lessons change behaviour on the frozen unseen set is unmeasured.
