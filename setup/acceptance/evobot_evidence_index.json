@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 52,
-  "live": 45,
+  "batches": 53,
+  "live": 46,
   "superseded": 7,
   "verifier_failures": 1,
   "rows": [
@@ -398,7 +398,7 @@
       "verdict": {
         "verdict": "EVOBOT_LADDER_DERIVED_AND_CURRENT",
         "regenerated_identically": true,
-        "batches_live": 45,
+        "batches_live": 46,
         "verifier_failures": 1,
         "reports_both_directions": true,
         "zero_is_qualified": true,
@@ -421,6 +421,39 @@
         "token_overhead": "+3%",
         "transfer": "NOT OBSERVED",
         "false_success_rate": 0.0
+      }
+    },
+    {
+      "batch": "evobot_libero_official_20261111",
+      "verified": "PASS",
+      "rung": "External benchmark OFFICIAL (LIBERO pinned 8f1084e, MIT; loads+steps+grades in its own env; no agent control yet)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_EXTERNAL_BENCHMARK_OFFICIAL_LOADED_AND_STEPPED",
+        "benchmark": "LIBERO",
+        "classification": {
+          "official": true,
+          "adapted": false,
+          "native": false
+        },
+        "pinned_commit": "8f1084e3132a39270c3a13ebe37270a43ece2a01",
+        "license": "MIT",
+        "suites": {
+          "libero_spatial": 10,
+          "libero_object": 10,
+          "libero_goal": 10,
+          "libero_10": 10,
+          "libero_90": 90
+        },
+        "task_run": {
+          "suite": "libero_object",
+          "index": 0,
+          "name": "pick_up_the_alphabet_soup_and_place_it_in_the_basket"
+        },
+        "action_dim": 7,
+        "success_with_idle_policy": false,
+        "proves": "official task loads in the official environment and grades with the official predicate",
+        "does_not_prove": "that EvoBot controls this environment"
       }
     },
     {

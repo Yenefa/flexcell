@@ -15,8 +15,8 @@
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 52,
-    "batches_live": 45,
+    "batches_total": 53,
+    "batches_live": 46,
     "batches_superseded": 7,
     "verifier_failures": 1,
     "live_batches": [
@@ -129,6 +129,11 @@
         "batch": "evobot_lesson_routing_20261111",
         "verified": "PASS",
         "rung": "Plan-level analysis (mechanism found; NO robot run; transfer NOT observed)"
+      },
+      {
+        "batch": "evobot_libero_official_20261111",
+        "verified": "PASS",
+        "rung": "External benchmark OFFICIAL (LIBERO pinned 8f1084e, MIT; loads+steps+grades in its own env; no agent control yet)"
       },
       {
         "batch": "evobot_native_honesty_20261111",

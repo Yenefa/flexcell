@@ -1,0 +1,33 @@
+{
+  "benchmark": "LIBERO",
+  "official_repo": "https://github.com/Lifelong-Robot-Learning/LIBERO",
+  "pinned_commit": "8f1084e3132a39270c3a13ebe37270a43ece2a01",
+  "commit_date": "2025-03-15",
+  "license": "MIT",
+  "classification": "OFFICIAL - native task, native environment, official success protocol. Not adapted, not native to EvoBot.",
+  "suite_task_counts": {
+    "libero_object": 10,
+    "libero_spatial": 10,
+    "libero_goal": 10,
+    "libero_10": 10,
+    "libero_90": 90
+  },
+  "task": {
+    "suite": "libero_object",
+    "index": 0,
+    "name": "pick_up_the_alphabet_soup_and_place_it_in_the_basket"
+  },
+  "io": {
+    "observation": "dict from the official env (agentview_image, robot0_eef_pos, robot0_eef_quat, robot0_gripper_qpos, robot0_joint_pos, ...)",
+    "action": "7-dim continuous: OSC delta pose (6) + gripper (1)",
+    "success": "LIBERO's own predicate over its BDDL (:goal ...) clause, queried via env.check_success(); no re-scoring"
+  },
+  "environment": {
+    "isolation": "separate venv (/home/ros/ext-bench/venv-libero) with robosuite 1.4.1 + mujoco 3.2.7 + torch CPU",
+    "renderer": "MUJOCO_GL=osmesa (no GPU on this host)",
+    "does_not_touch": "EvoBot's own ROS 2 / Gazebo / MoveIt stack is untouched"
+  },
+  "action": {
+    "dim": 7
+  }
+}
