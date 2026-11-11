@@ -1,0 +1,81 @@
+{
+  "verdict": {
+    "outcome": 1,
+    "achieved_m": 0.14624025293494858,
+    "attempts": 1,
+    "detail": null
+  },
+  "attempts": [
+    {
+      "outcome": 1,
+      "error_code": 36,
+      "status": 2,
+      "measured_before": {
+        "position": [
+          0.21,
+          0.03,
+          0.01749999751174475
+        ],
+        "orientation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "measured_after": {
+        "position": [
+          0.0637597470650514,
+          0.017363813547889847,
+          0.017380719156336672
+        ],
+        "orientation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "displacement_m": 0.1467852138802008,
+      "displacement_along_direction_m": 0.14624025293494858,
+      "direction_cos": 0.9962873580325536,
+      "lateral_m": 0.012636186452110152,
+      "delta_z_m": -0.00011927835540807841,
+      "requested_distance_m": 0.09,
+      "ee_travel_m": 0.16,
+      "reach_error_m": 0.004828768950419149,
+      "contact_made": true,
+      "contact_lost": false,
+      "increments_executed": 5,
+      "contact_lost_at_increment": 0,
+      "carry_engaged_during": false,
+      "evidence_id": "t08loop-target_box_a-0-df1946c4",
+      "detail": "object moved 0.1468m, 0.0568m beyond the 0.0900m requested (tolerance 0.0050m); this is a shove, not a bounded push"
+    }
+  ],
+  "decisions": [
+    {
+      "attempt": 1,
+      "requested_m": 0.09,
+      "achieved_before_m": 0.0,
+      "overshoot_ratio_used": 1.0,
+      "projected_total_m": 0.09,
+      "ceiling_guard_m": 0.14,
+      "guard_bound": false
+    }
+  ],
+  "ceiling_guard_m": 0.14,
+  "guard_bound": false,
+  "target_m": 0.09,
+  "max_displacement_m": 0.15,
+  "achieved_signed_m": 0.14624025293494858,
+  "overshoot_ratio_observed": 1.63094682089112,
+  "last_attempt_unsigned_displacement_m": 0.14678516541711642,
+  "contact_height_m": 0.02,
+  "task_id": "T08-push-seed3000",
+  "target_object": "target_box_a",
+  "direction": [
+    -1.0,
+    0.0
+  ]
+}

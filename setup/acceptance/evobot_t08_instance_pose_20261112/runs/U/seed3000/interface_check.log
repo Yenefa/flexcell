@@ -1,0 +1,14 @@
+=== imports ===
+  ok   imports
+=== declared field names ===
+  RunComposite.Goal   : ['clearance_m', 'final_empty_positions', 'initial_objects', 'motion_profile_id', 'pause_after_stages', 'position_tolerance_m', 'resume_receipt_sha256', 'resume_run_id', 'scenario_id', 'stages']
+  RunComposite.Result : ['completed_stage_ids', 'component_goal_uuids', 'component_run_ids', 'detail', 'error_code', 'evidence_id', 'inherited_stages', 'outcome', 'resumed_from_run_id', 'run_id']
+  CompositeStage      : ['action', 'contact_height_m', 'object_name', 'overdrive_m', 'place_pose', 'push_direction', 'push_distance_m', 'stage_id']
+  ObjectPosition      : ['object_name', 'position']
+=== construct exactly as the drivers do ===
+  ok   CompositeStage + world-framed identity PoseStamped
+  ok   ObjectPosition.object_name
+  ok   RunComposite.Goal full construction
+  ok   PushObject.Result field names
+
+INTERFACE_CHECK_OK -- safe to launch the simulator

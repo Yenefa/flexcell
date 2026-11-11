@@ -14,6 +14,15 @@ WHY IT EDITS THE COPY AND NOT sim_profile.py
     this project (see inject_contact_evidence.py) is to leave it byte-identical and edit a
     COPY of the generated world. This does the same.
 
+IT ALSO MOVES THE ZONE MARKERS
+    The task instruction says "push the red block into the marked zone", but the world's zone
+    markers are as hard-coded as the boxes. Grading does not read them (evaluate.py uses the
+    spec's coordinates, and the push is open-loop), so this cannot change a verdict -- but a
+    mark on the table in the wrong place is a wrong statement about the task, and anything
+    built visually on it later would be built on that. Zones are mapped by index onto the
+    world's zone_1, zone_2, ... markers; a spec zone with no marker is reported, and a marker
+    with no spec zone is parked below the table and named in the output.
+
 WHAT IT REFUSES
     - a spec object that has no matching <model> in the world (silently skipping it would
       reproduce the very defect this fixes)
@@ -25,6 +34,11 @@ import json
 import math
 import re
 import sys
+
+# Zone markers must lie ON the table. The spec's zone z is the block's height (0.0175),
+# because that is what the goal is expressed in; using it for a flat marker would float the
+# mark 17.5 mm above the surface. Keep the spec's x,y; display at table level.
+MARKER_Z = 0.001
 
 
 def _finite_triple(values):
@@ -99,6 +113,36 @@ def main(argv):
                              'the defect this tool exists to fix' % (name, world_path))
         applied.append((name, xyz))
 
+    # --- zone markers, mapped by index -------------------------------------
+    zones = spec.get('zones') or []
+    zone_report = []
+    for index, zone in enumerate(zones, start=1):
+        marker = 'zone_%d' % index
+        pose = zone.get('pose')
+        xyz = _finite_triple(pose) if pose is not None else None
+        if xyz is None:
+            raise SystemExit('REFUSED: zone %r has no usable pose' % zone.get('name'))
+        # The spec's zone z is the block's height (0.0175), because that is what the goal
+        # is expressed in. A table marker must lie ON the table, so keep the spec's x,y and
+        # use a display z. Recorded in the report so nobody reads the marker z as physical.
+        xyz = (xyz[0], xyz[1], MARKER_Z)
+        text, changed = set_model_pose(text, marker, xyz)
+        zone_report.append({'marker': marker, 'zone': zone.get('name'),
+                            'radius_m': zone.get('radius'),
+                            'pose': list(xyz), 'placed': bool(changed)})
+        if not changed:
+            print('  WARNING: spec declares zone %r but the world has no %r marker to move'
+                  % (zone.get('name'), marker))
+    # park any marker the spec does not account for, so the table does not show a
+    # destination the task does not have
+    used = {'zone_%d' % i for i in range(1, len(zones) + 1)}
+    for extra in sorted(set(re.findall(r'<model\s+name="(zone_\d+)"', text)) - used):
+        text, changed = set_model_pose(text, extra, (0.0, 0.0, -1.0))
+        if changed:
+            print('  note: parked %s below the table (no zone in this spec for it)' % extra)
+            zone_report.append({'marker': extra, 'zone': None, 'pose': [0.0, 0.0, -1.0],
+                                'placed': True, 'parked': True})
+
     open(world_path, 'w', encoding='utf-8').write(text)
 
     # RE-READ what is actually on disk. A write that is believed rather than verified is
@@ -111,6 +155,16 @@ def main(argv):
         if any(abs(got[i] - xyz[i]) > 1e-9 for i in range(3)):
             raise SystemExit('FAILED: %s wrote %r but read back %r' % (name, xyz, got))
         print('  %-16s pose = (%.6f, %.6f, %.6f)' % (name, got[0], got[1], got[2]))
+    for entry in zone_report:
+        if not entry.get('placed'):
+            continue
+        got = read_model_pose(verify_text, entry['marker'])
+        if got is None:
+            raise SystemExit('FAILED: zone marker %s unreadable after writing' % entry['marker'])
+        print('  %-16s pose = (%.6f, %.6f, %.6f)%s'
+              % (entry['marker'], got[0], got[1], got[2],
+                 '  [parked]' if entry.get('parked') else
+                 '  -> %s r=%.3f' % (entry.get('zone'), entry.get('radius_m') or 0.0)))
     print('INSTANCE_POSES_SET %d object(s) from %s'
           % (len(applied), task_path.rsplit('/', 1)[-1]))
     return 0

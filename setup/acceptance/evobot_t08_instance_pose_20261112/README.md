@@ -73,6 +73,27 @@ this project keeps finding.** The tool re-reads the file and asserts its own eff
 | integration on seed3001 (worst case, 70.7 mm) | poses land exactly; checkpoint prints `INSTANCE_POSES_OK`; `instance_poses.json` shows `declared == spawned` for both objects |
 | dev spec seed2000 | rewriting is a semantic no-op, as it must be (its poses already match the world) |
 
+## 4b. Zone markers are moved too (found by the sim lane, fixed rather than noted)
+
+The sim lane pointed out, correctly, that the fix above instantiates the **objects** but left the
+world's **zone markers** hard-coded (`zone_1` at (0.12, −0.15), `zone_2` at (0.25, 0.05)) while a
+T08 spec declares `zone_push` at (0.11, 0.03). Grading was never affected — `evaluate.py` uses the
+spec's coordinates and the push is open-loop — but the instruction literally says *"push the red
+block into the marked zone"*, and the mark on the table was in the wrong place.
+
+Fixed in the same tool rather than filed as a note:
+
+| Behaviour | Detail |
+| --- | --- |
+| spec zones map by index | spec zone *i* → world marker `zone_<i>` |
+| marker z is a **display** height | the spec's zone z is the *block's* height (0.0175); a flat marker using it would float 17.5 mm above the table, so x,y come from the spec and z is `MARKER_Z = 0.001` |
+| a marker the spec does not account for is **parked** below the table | `z = −1.0`, no collision, and named in the output — better than leaving a destination the task does not have |
+| a spec zone with **no** marker | warning printed, placement reported as `placed: false` rather than silently skipped |
+
+**This cannot change a verdict** and it is recorded as a display fix, not a measurement fix. Its
+value is that anything built on the marker later — vision, a demo, a human watching — is not built
+on a false statement about the task.
+
 ## 5. Driver integration
 
 `run_batch_v2.sh` = the round-1 driver with **step 2b** inserted after the ContactTrace injection:

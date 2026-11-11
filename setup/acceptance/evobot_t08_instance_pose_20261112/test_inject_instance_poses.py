@@ -59,13 +59,22 @@ def test_moves_both_objects():
     assert '<pose>0.200000 -0.190000 0.017500 0 0 0</pose>' in after
 
 
-def test_never_touches_a_model_that_is_not_in_the_spec():
+def test_a_model_outside_the_spec_is_left_where_it_was():
+    """Objects not named in the spec must not move.
+
+    NOTE on scope: this used to assert the same about zone_1, and it was right at the time.
+    Zone markers are now moved ON PURPOSE (see the zone tests below) because a marker that
+    says 'push it into the marked zone' while sitting somewhere else is a wrong statement
+    about the task. So this test is narrowed to OBJECT models, which is the property it was
+    really about -- an unrelated object drifting would be worse than not rewriting at all.
+    The zone behaviour is covered by its own three tests rather than dropped.
+    """
     spec = {'task_id': 'X', 'objects': [
         {'name': 'target_box_a', 'initial_pose': [0.19, 0.02, 0.0175, 0.0]}]}
     proc, after = run(WORLD, spec)
-    assert proc.returncode == 0
-    # zone_1 must be byte-identical; a pose rewrite that drifts is worse than none
-    assert '<pose>0.120000 -0.150000 0.001 0 0 0</pose>' in after
+    assert proc.returncode == 0, proc.stderr
+    # target_box_b is not in the spec, so it must keep the pose the world gave it
+    assert '<pose>0.200000 -0.180000 0.0175 0 0 0</pose>' in after
 
 
 def test_refuses_when_a_spec_object_has_no_model():
@@ -105,6 +114,70 @@ def test_dev_spec_is_a_semantic_no_op():
     assert proc.returncode == 0
     assert '0.220000 0.000000 0.017500' in after
     assert '0.200000 -0.180000 0.017500' in after
+
+
+ZONE_WORLD = '''<?xml version="1.0"?>
+<sdf version="1.10">
+  <world name="empty">
+    <model name="target_box_a">
+      <pose>0.220000 0.000000 0.0175 0 0 0</pose>
+      <link name="link"/>
+    </model>
+    <model name="target_box_b">
+      <pose>0.200000 -0.180000 0.0175 0 0 0</pose>
+      <link name="link"/>
+    </model>
+    <model name="zone_1">
+      <pose>0.120000 -0.150000 0.001 0 0 0</pose>
+    </model>
+    <model name="zone_2">
+      <pose>0.250000 0.050000 0.001 0 0 0</pose>
+    </model>
+  </world>
+</sdf>
+'''
+
+
+def test_zone_marker_moves_to_the_spec_zone_at_table_height():
+    spec = {'task_id': 'X',
+            'objects': [{'name': 'target_box_a', 'initial_pose': [0.22, 0.0, 0.0175, 0.0]}],
+            'zones': [{'name': 'zone_push', 'pose': [0.11, 0.03, 0.0175], 'radius': 0.06}]}
+    proc, after = run(ZONE_WORLD, spec)
+    assert proc.returncode == 0, proc.stderr
+    # x,y from the spec, z at table level not at the block's height
+    assert '<pose>0.110000 0.030000 0.001000 0 0 0</pose>' in after
+
+
+def test_unused_zone_marker_is_parked_not_left_on_the_table():
+    spec = {'task_id': 'X',
+            'objects': [{'name': 'target_box_a', 'initial_pose': [0.22, 0.0, 0.0175, 0.0]}],
+            'zones': [{'name': 'zone_push', 'pose': [0.11, 0.03, 0.0175], 'radius': 0.06}]}
+    proc, after = run(ZONE_WORLD, spec)
+    assert proc.returncode == 0
+    # zone_2 has no counterpart in the spec, so it must not stay where it was
+    assert '<pose>0.250000 0.050000 0.001 0 0 0</pose>' not in after
+    assert '<pose>0.000000 0.000000 -1.000000 0 0 0</pose>' in after
+
+
+def test_two_spec_zones_map_onto_both_markers():
+    spec = {'task_id': 'X',
+            'objects': [{'name': 'target_box_a', 'initial_pose': [0.22, 0.0, 0.0175, 0.0]}],
+            'zones': [{'name': 'zone_1', 'pose': [0.12, -0.15, 0.0175], 'radius': 0.06},
+                      {'name': 'zone_2', 'pose': [0.25, 0.05, 0.0175], 'radius': 0.06}]}
+    proc, after = run(ZONE_WORLD, spec)
+    assert proc.returncode == 0, proc.stderr
+    assert '<pose>0.120000 -0.150000 0.001000 0 0 0</pose>' in after
+    assert '<pose>0.250000 0.050000 0.001000 0 0 0</pose>' in after
+    # nothing parked when the spec accounts for every marker
+    assert '-1.000000' not in after
+
+
+def test_a_spec_without_zones_leaves_markers_parked_but_does_not_fail():
+    spec = {'task_id': 'X',
+            'objects': [{'name': 'target_box_a', 'initial_pose': [0.22, 0.0, 0.0175, 0.0]}]}
+    proc, after = run(ZONE_WORLD, spec)
+    assert proc.returncode == 0, proc.stderr
+    assert '-1.000000' in after
 
 
 if __name__ == '__main__':

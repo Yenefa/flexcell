@@ -1,0 +1,89 @@
+{
+  "verdict": {
+    "outcome": 1,
+    "achieved_m": 0.14859604949210234,
+    "attempts": 1,
+    "detail": null
+  },
+  "attempts": [
+    {
+      "outcome": 1,
+      "error_code": 29,
+      "status": 2,
+      "measured_before": {
+        "position": [
+          0.23,
+          -0.07,
+          0.01749999751174475
+        ],
+        "orientation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "measured_after": {
+        "position": [
+          0.08140395050789767,
+          -0.04811575125480356,
+          0.017440318316121514
+        ],
+        "orientation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "displacement_m": 0.1501989008928073,
+      "displacement_along_direction_m": 0.14859604949210234,
+      "direction_cos": 0.9893284745016285,
+      "lateral_m": 0.021884248745196448,
+      "delta_z_m": -5.967919562323634e-05,
+      "requested_distance_m": 0.09,
+      "ee_travel_m": 0.16000000000000003,
+      "reach_error_m": 0.0037083600197119044,
+      "contact_made": true,
+      "contact_lost": false,
+      "increments_executed": 5,
+      "contact_lost_at_increment": 0,
+      "carry_engaged_during": false,
+      "evidence_id": "t08loop-target_box_a-0-81f03c22",
+      "detail": "lateral displacement 0.0219m exceeds 0.0200m"
+    }
+  ],
+  "decisions": [
+    {
+      "attempt": 1,
+      "requested_m": 0.09,
+      "achieved_before_m": 0.0,
+      "overshoot_ratio_used": 1.0,
+      "projected_total_m": 0.09,
+      "ceiling_guard_m": 0.14,
+      "guard_bound": false
+    },
+    {
+      "attempt": 2,
+      "action": "reached",
+      "payload": {
+        "achieved_m": 0.14859604949210234,
+        "target_m": 0.09
+      }
+    }
+  ],
+  "ceiling_guard_m": 0.14,
+  "guard_bound": false,
+  "target_m": 0.09,
+  "max_displacement_m": 0.15,
+  "achieved_signed_m": 0.14859604949210234,
+  "overshoot_ratio_observed": 1.6688766765867478,
+  "last_attempt_unsigned_displacement_m": 0.15019888903650705,
+  "contact_height_m": 0.02,
+  "task_id": "T08-push-seed3001",
+  "target_object": "target_box_a",
+  "direction": [
+    -1.0,
+    0.0
+  ]
+}

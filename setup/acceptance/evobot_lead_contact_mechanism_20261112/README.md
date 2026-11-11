@@ -110,3 +110,51 @@ python3 setup/acceptance/evobot_lead_contact_mechanism_20261112/contact_first_to
 ```
 
 Reads the committed `contact_steps.jsonl.gz` logs. No simulator, no model calls.
+
+---
+
+## 8. Where the +15 mm comes from — a code trace, not a guess
+
+The measured contact height (0.0349–0.0350) is 15 mm above the commanded `contact_height_m` (0.0200).
+Reading the frozen contract (`contracts/push.py`, unmodified) explains it without any new run:
+
+```
+push.py:215-219  contact_pose(center, half, direction, height)
+                     -> [center - direction*half, ... , float(height)]
+                 the z of the target pose IS contact_height_m, verbatim.
+
+push.py:408-412  face     = contact_pose(before, half_extent_m, direction, contact_height)
+                 approach = face - direction*approach_clearance_m,  z = face[2]
+
+push.py:222-233  push_targets(...) -> every increment target keeps z = face[2]
+```
+
+So the end-effector is commanded to travel **at constant z = contact_height_m** through the block
+region. For `contact_height_m = 0.0200` that is 2.5 mm above the block's centre (0.0175) — which,
+if the commanded frame were the physical contact surface, would be a **face push**.
+
+It is not. The confirmed round-1 tooling finding is that the control target
+`end_effector_link` **has no collision geometry**; the bodies that actually collide are the gripper
+finger links, and their collision meshes do not sit at the `end_effector_link` origin. The observed
+offset is ≈ **+15 mm in z**, which is exactly the gap between the commanded `0.0200` and the measured
+contact `0.0349–0.0350`.
+
+**This is why the parameter does not do what its name says.** `contact_height_m` positions a virtual
+frame, not the contact surface, so setting it to "block mid-height" produces a contact at the block's
+**top edge**. Round 1's own sweep is consistent: commanding **0.0300** gave first contact z **0.0350**
+and commanding **0.0200** gave **0.0349** — a 10 mm change in the command moved the contact by
+**0.1 mm**. The contact height is essentially **insensitive** to the parameter over the range that was
+tested, because the finger rides on the block top either way.
+
+### The experiment this implies (not yet run)
+
+Not a sweep to "tune the displacement", and not "lower it a little" — an **inverse calibration**:
+
+> For a range of commanded `contact_height_m`, record the **first-contact z** from the contact log.
+> Find the command whose first-contact z is ≈ **0.0175** (block centre) rather than 0.035 (block top).
+> Then verify the contact **x-offset** moves from the top edge toward the `+x` face.
+
+That is ~6 short runs with existing tooling, and it is the difference between an edge drag and a
+face push. **Until that calibration exists, no amount of retry budgeting, threshold discussion or
+extra trials will change the outcome**, which is consistent with everything this round measured:
+5/5 forwards, 5/5 backwards, same geometry, same command.
