@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 60,
-  "live": 53,
+  "batches": 61,
+  "live": 54,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -161,7 +161,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 52,
+        "live_batches": 53,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",
@@ -398,7 +398,7 @@
       "verdict": {
         "verdict": "EVOBOT_LADDER_DERIVED_AND_CURRENT",
         "regenerated_identically": true,
-        "batches_live": 52,
+        "batches_live": 53,
         "verifier_failures": 0,
         "reports_both_directions": true,
         "zero_is_qualified": true,
@@ -473,6 +473,23 @@
         "llm_involvement": "none - this is a deterministic geometry rule, i.e. the strong baseline",
         "perception": "ORACLE",
         "evaluator_touched": false
+      }
+    },
+    {
+      "batch": "evobot_libero_closed_loop_retry_20261111",
+      "verified": "PASS",
+      "rung": "Closed-loop retry from measured lift (3/5 in-sample with NO fitted constant; held-out still 0/10 but diagnosis: neither approach grips)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_LIBERO_CLOSED_LOOP_RETRY",
+        "in_sample_libero_object": "3/5, no fitted constant",
+        "retry_actually_fired": "task 3: top failed to grip, side_x succeeded",
+        "held_out_libero_spatial": "0/10",
+        "diagnosis_change": "not 'the wrong approach was chosen' but 'neither approach grips a bowl' - every attempt reports carried=False",
+        "why_retry_cannot_help_there": "the failure is upstream of approach selection",
+        "perception": "ORACLE",
+        "evaluator_touched": false,
+        "llm_involved": false
       }
     },
     {

@@ -15,8 +15,8 @@
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 60,
-    "batches_live": 53,
+    "batches_total": 61,
+    "batches_live": 54,
     "batches_superseded": 7,
     "verifier_failures": 0,
     "live_batches": [
@@ -139,6 +139,11 @@
         "batch": "evobot_libero_auto_approach_20261111",
         "verified": "PASS",
         "rung": "Auto approach from geometry: single system 3/5 (each fixed policy was 2/5); two alternatives refuted"
+      },
+      {
+        "batch": "evobot_libero_closed_loop_retry_20261111",
+        "verified": "PASS",
+        "rung": "Closed-loop retry from measured lift (3/5 in-sample with NO fitted constant; held-out still 0/10 but diagnosis: neither approach grips)"
       },
       {
         "batch": "evobot_libero_geometry_grasp_20261111",

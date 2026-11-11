@@ -1,0 +1,35 @@
+{
+  "task": "pick_up_the_bbq_sauce_and_place_it_in_the_basket",
+  "suite": "libero_object",
+  "index": 3,
+  "official_success": true,
+  "attempts": [
+    {
+      "mode": "top",
+      "grasp_z": 0.0265,
+      "extent": [
+        -0.0456,
+        0.0987
+      ],
+      "lift_m": 0.0,
+      "carried": false
+    },
+    {
+      "mode": "side_x",
+      "grasp_z": 0.0265,
+      "extent": [
+        -0.0456,
+        0.0987
+      ],
+      "lift_m": 0.1308,
+      "carried": true,
+      "release_err_m": 0.00357,
+      "success": true
+    }
+  ],
+  "log": [
+    "top: lift 0.000 m - grasp did not take",
+    "side_x: carried, released at 3.6 mm, success=True"
+  ],
+  "perception": "ORACLE"
+}
