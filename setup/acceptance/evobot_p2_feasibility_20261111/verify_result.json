@@ -1,0 +1,162 @@
+{
+  "git_head_expected": "4a97c250",
+  "claims": [
+    {
+      "id": "A1",
+      "ok": true,
+      "claim": "generate.py still refuses T07/T08/T09/T10 (the precondition of this capsule)",
+      "detail": "T07=refused; T08=refused; T09=refused; T10=refused"
+    },
+    {
+      "id": "B1",
+      "ok": true,
+      "claim": "the evaluator consumes exactly this goal vocabulary (verified by source scan) and none of it is a push clause",
+      "detail": "goal keys=min_tiers,order,placement,relative,unmoved,visit,visit_sequence"
+    },
+    {
+      "id": "B2",
+      "ok": true,
+      "claim": "no displacement/push clause: 'push' appears nowhere in the evaluator's goal handling",
+      "detail": "grep goal.get(...push/displace/move) = 0"
+    },
+    {
+      "id": "B3",
+      "ok": true,
+      "claim": "a 60 mm displacement toward the commanded direction is graded FAIL by the closest existing clause (placement is 'end inside a declared zone')",
+      "detail": "failed=['placement:target_box_a'] distance_to_zone=[0.15524]"
+    },
+    {
+      "id": "B3b",
+      "ok": true,
+      "claim": "the only motion-observing threshold (unmoved, 15 mm) exists to reject motion, not to require it",
+      "detail": "moved 60 mm -> unmoved clause ['unmoved:target_box_a']"
+    },
+    {
+      "id": "B4",
+      "ok": true,
+      "claim": "the only 'did the object move' threshold in the evaluator is UNMOVED_TOLERANCE_M=0.015 and it guards NON-motion",
+      "detail": "UNMOVED_TOLERANCE_M=0.015 STACK_TIER_HEIGHT_M=0.03 REST_HEIGHT_TOLERANCE_M=0.02"
+    },
+    {
+      "id": "B5",
+      "ok": true,
+      "claim": "a stacking clause (min_tiers) ALREADY exists in the evaluator",
+      "detail": "STACK_TIER_HEIGHT_M=0.03"
+    },
+    {
+      "id": "B6",
+      "ok": true,
+      "claim": "no generator template ever sets min_tiers -> the stacking clause is implemented but unused",
+      "detail": "min_tiers appears only in _spec's signature/defaults"
+    },
+    {
+      "id": "C1",
+      "ok": true,
+      "claim": "control: an ordinary same-height composite plan is ACCEPTED (so C2/C3 are about stacking, not a broken fixture)",
+      "detail": "control plan accepted"
+    },
+    {
+      "id": "C2",
+      "ok": true,
+      "claim": "a stack destination (z=0.0525) is REJECTED: the box below is 0.035 m away, clearance floor is 0.05 m",
+      "detail": "err=(60, 'declared destination occupied at s1')  dist=0.0350 < clearance_min=0.05"
+    },
+    {
+      "id": "C3",
+      "ok": true,
+      "claim": "lowering clearance_m to the stack pitch is itself REJECTED (contract floor 0.05 > 0.035)",
+      "detail": "err=(60, 'invalid clearance_m')"
+    },
+    {
+      "id": "D1",
+      "ok": true,
+      "claim": "place_server takes an arbitrary z from the goal (place_pos = [pp.x, pp.y, pp.z])",
+      "detail": "place_server.py has place_pos = [pp.x, pp.y, pp.z]"
+    },
+    {
+      "id": "D2",
+      "ok": true,
+      "claim": "release height is derived from that z (box_target_z = place_pos[2] + clearance), not from table height",
+      "detail": "clearance default 0.012"
+    },
+    {
+      "id": "D3",
+      "ok": true,
+      "claim": "the drop is graded against the REQUESTED z (drop_err = dist3(box_after, place_pos))",
+      "detail": "3-D distance, tol 0.06"
+    },
+    {
+      "id": "E1",
+      "ok": true,
+      "claim": "over 3133 archived goals the LOWEST end-effector z actually reached is below the push contact height (0.1775 m)",
+      "detail": "min_reached_z=0.1717 (move_to_pose.jsonl:target_box_a-grasp)"
+    },
+    {
+      "id": "E2",
+      "ok": true,
+      "claim": "the lowest z ever COMMANDED was below 0.16 and it FAILED (no verified pose exists down there)",
+      "detail": "min_target_z=0.1000 (move_to_pose.jsonl:case7_ik_unreachable)"
+    },
+    {
+      "id": "F1",
+      "ok": true,
+      "claim": "the push contact pose for target_box_a is INSIDE the declared arm envelope",
+      "detail": "contact(0.26,0,0.1775)=0.3040 <= 0.35"
+    },
+    {
+      "id": "F2",
+      "ok": true,
+      "claim": "pushing target_box_b 60 mm ALONG ITS OWN outward radial direction leaves the envelope (push direction is a real constraint)",
+      "detail": "box_b r=0.2691; +60 mm outward -> (0.2446,-0.2201) env=0.3648 > 0.35"
+    },
+    {
+      "id": "F3",
+      "ok": true,
+      "claim": "stacking is inside the envelope too, so T07's blocker is the CONTRACT, not reach",
+      "detail": "place stack EE(0.22,0,0.2245)=0.3004 <= 0.35"
+    },
+    {
+      "id": "G1",
+      "ok": true,
+      "claim": "a composite stage is only {stage_id, object_name, place_pose}: no push/offset field",
+      "detail": "fields=['string stage_id', 'string object_name', 'geometry_msgs/PoseStamped place_pose']"
+    },
+    {
+      "id": "G2",
+      "ok": true,
+      "claim": "the executor-owned action menu contains no PUSH",
+      "detail": "menu=ACTION_OBSERVE, ACTION_PICK, ACTION_PLACE, ACTION_VERIFY, 'WAIT', ACTION_ABORT"
+    },
+    {
+      "id": "H1",
+      "ok": true,
+      "claim": "pick_server documents MEASURED contact-induced displacement by the arm ('a blind approach swept the box aside')",
+      "detail": "pick_server.py comment, measured 2026-09-26"
+    },
+    {
+      "id": "H2",
+      "ok": true,
+      "claim": "the current mitigation is to make MoveIt AVOID the box, i.e. the opposite of a push",
+      "detail": "add_box before approach; remove() fallback accepts knock risk"
+    },
+    {
+      "id": "H4",
+      "ok": true,
+      "claim": "a MEASURED 0.18 m contact-induced displacement by the arm is on record (a carry knocked the third box away)",
+      "detail": "pick_server.py docstring, measured 2026-11-04"
+    },
+    {
+      "id": "H5",
+      "ok": true,
+      "claim": "the planning scene is populated only by skills, so a fresh stack's scene holds no box (Step 0 needs no scene surgery)",
+      "detail": "sync at :438, per-target add_box at :471; bookkeeping lives in common.py:544-604"
+    },
+    {
+      "id": "H3",
+      "ok": true,
+      "claim": "carry is a pose servo, not a grasp: it only acts while 'engaged', otherwise physics owns the box",
+      "detail": "CarryDynamics.cc:1"
+    }
+  ],
+  "all_ok": true
+}

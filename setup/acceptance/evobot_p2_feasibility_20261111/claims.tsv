@@ -1,0 +1,44 @@
+id	verdict	claim	evidence	checked_by
+T08-1	FEASIBLE_WITH_PRIMITIVE_WORK	T08 的运动通路已存在: move_to_pose 的 goal 不含夹爪字段, 校验不看夹爪/搬运状态	src/flexcell/flexcell_interfaces/action/MoveToPose.action:12-31; src/flexcell/flexcell_skills/flexcell_skills/move_to_pose_server.py:1034-1091	verify B1(源扫描) + 人工读码
+T08-2	FEASIBLE_WITH_PRIMITIVE_WORK	夹爪与运动是两个独立出口; 不调用 GripperClient 夹爪就不动	src/flexcell/flexcell_skills/flexcell_skills/common.py:436-518; src/flexcell/flexcell_skills/config/week1.yaml:30	人工读码
+T08-3	FEASIBLE_WITH_PRIMITIVE_WORK	成功判据是实测末端位姿入 0.02 m, 不是 MoveIt 自称成功 -> 堵住/滑过可被区分	src/flexcell/flexcell_skills/flexcell_skills/move_to_pose_server.py:109,785-796	人工读码
+T08-4	(阻塞)	agent 唯一动作出口 RunComposite 的 stage 只有 stage_id/object_name/place_pose, 无推动字段	src/flexcell/flexcell_interfaces/msg/CompositeStage.msg:1-4; src/flexcell/flexcell_skills/flexcell_skills/contracts/composite.py:58-64	verify G1
+T08-5	(阻塞)	决策层动作菜单无 PUSH	src/flexcell/flexcell_skills/flexcell_skills/task_fsm_server.py:893-895	verify G2
+T08-6	(阻塞)	验收器 goal 词表无位移/推动子句; 60 mm 位移今天无法评分	benchmark/evaluators/evaluate.py (全文 goal.get 词表)	verify B1,B2,B3,B3b
+T08-7	(事实)	唯一看物体动没动的阈值 UNMOVED_TOLERANCE_M=0.015 是判不该动的	benchmark/evaluators/evaluate.py:23,71-85	verify B4
+T08-8	(事实)	盒子是真物理刚体 0.05 kg / 35 mm / mu=1.0, 不在 planning scene 时由物理拥有	worlds/flexcell_world.sdf:97-113	人工读码
+T08-9	(事实)	carry 是位姿伺服不是接触抓取; 仅 engaged 时钉住物体	src/flexcell/flexcell_gazebo/src/CarryDynamics.cc:1,162-166	verify H3
+T08-10	(事实)	批次实际使用 velocity_servo + legacy	setup/acceptance/evobot_unified_runner_20261111/run_batch.sh:83; scripts/sim_profile.py:154	人工读码
+T08-11	(事实)	静置盒子接触力已实测签名: 501 样本 2 ms, 合力 0.49 N = m*g, 余弦 1.0	docs/SIGNED_CONTACT_FORCE_20261031.md:41-49	人工读文档
+T08-12	(边界)	该接触力证据明确排除机械臂: no arm, no attachment, no grasp -> 臂-盒接触力从未测过	docs/SIGNED_CONTACT_FORCE_20261031.md:58	人工读文档
+T08-13	(事实)	臂已实测扫飞方块: 盲接近把方块扫到一边且落点差 4.7 cm	src/flexcell/flexcell_skills/flexcell_skills/pick_server.py:468-472	verify H1
+T08-14	(事实)	更大量级: 一次 carry 把第三个盒子撞飞 0.18 m (2026-11-04 实测)	src/flexcell/flexcell_skills/flexcell_skills/pick_server.py:180-186	verify H4
+T08-15	(事实)	低位失控朝向时长夹爪扫进方块/地面, 实测差 4-7 cm; EE 安全区 z>=0.16	docs/HANDOFF.md:345	人工读文档
+T08-16	(事实)	本栈把夹爪扫飞方块归类为已拦截的假成功	docs/HANDOFF.md:342	人工读文档
+T08-17	(边界)	臂展包络 sqrt(x^2+y^2+(z-0.02)^2) <= 0.35	docs/HANDOFF.md:345	verify F1,F2,F3
+T08-18	FEASIBLE_WITH_PRIMITIVE_WORK	推 box_a 的接触位姿 (0.26,0,0.1775) 在包络内: 0.3040	docs/HANDOFF.md:345 (公式) + 实算	verify F1
+T08-19	(约束)	把 box_b 沿自身外径向推 60 mm 会出包络(0.3648) -> 推的方向是真约束	docs/HANDOFF.md:345 + worlds/flexcell_world.sdf:116	verify F2
+T08-20	(事实)	EE 安全接触高度的依据: 夹爪实体在 EE 下方 160 mm (grasp_dz=0.16)	src/flexcell/flexcell_skills/config/week1.yaml:34,58	人工读码
+T08-21	(事实)	实测 grasp 目标 z=0.1775 且 SUCCEEDED 误差 0.0040 m	setup/acceptance/evobot_t05_n6_20261111/runs/s1000-a1/sim/skills/move_to_pose.jsonl (target_box_b-grasp)	扫描脚本 + verify E1
+T08-22	(事实)	归档 3133 条 goal 中 EE 实际到达最低 z=0.1717 -> 推的接触高度已在实测到达范围内	同上, 全 setup/acceptance/**/move_to_pose.jsonl	verify E1
+T08-23	(事实)	归档中 EE 被命令过的最低 z=0.1000 且 FAILED(NO_IK_SOLUTION)	setup/acceptance/day2/move_to_pose.jsonl (case7_ik_unreachable)	verify E2
+T08-24	(事实)	fresh stack 的 planning scene 无盒子; PICK 会同步全部盒子	src/flexcell/flexcell_skills/flexcell_skills/pick_server.py:180-199,438,471	verify H5
+T08-25	(判据)	位移下限 30 mm 的锚点: box_follow_min_m=0.03	src/flexcell/flexcell_skills/config/week1.yaml:40	人工读码
+T08-26	(判据)	新增子句只能只增不减, 有先例; 改固定文件须登记	benchmark/evaluators/evaluate.py:111-119,132-142; docs/FREEZE_CHANGELOG.md:1-42; docs/AGENT_HANDOFF.md:295,367	人工读文档
+T08-27	(假成功)	stage 报执行但物体不动的先例 -> 位移必须由真值测	setup/acceptance/evobot_skill_growth_20261111/README.md:50-58	人工读文档
+T08-28	(假成功)	没被搬走可判定: composite 已强制 carry.engaged==False 且 object_id==''	src/flexcell/flexcell_skills/flexcell_skills/contracts/composite.py:96	人工读码
+T08-29	(假成功)	终态静置高度阈值先例 REST_HEIGHT_TOLERANCE_M=0.02 -> 可判推飞/翻倒	benchmark/evaluators/evaluate.py:22	人工读码
+T08-30	(假成功)	真值采样入口存在: capture_ground_truth 走 gz Pose_V	benchmark/evaluators/capture_ground_truth.py:26-37; benchmark/evaluators/observe_from_run.py:85-94	人工读码
+T07-1	FEASIBLE_WITH_PRIMITIVE_WORK	place 原语接受任意 z; 释放高度由请求 z 推导; 落点用三维距离判	src/flexcell/flexcell_skills/flexcell_skills/place_server.py:278,286,449,473	verify D1,D2,D3
+T07-2	(更正)	文档称无堆叠高度原语与 release clearance 设成桌面高度 -> 与代码不符	docs/TASK_CATALOG.md:39; benchmark/generators/generate.py:54 vs place_server.py:278,286	verify D1,D2
+T07-3	(阻塞)	真正的算术阻塞: clearance_m 下限 0.05 > 堆叠节距 0.035	src/flexcell/flexcell_skills/flexcell_skills/contracts/composite.py:45,81-82,116-117	verify C1,C2,C3
+T07-4	(机会)	评分侧已有 min_tiers 堆叠子句, 但无模板使用	benchmark/evaluators/evaluate.py:24,121-130; benchmark/generators/generate.py:87,92-93	verify B5,B6
+T07-5	FEASIBLE_WITH_PRIMITIVE_WORK	堆叠的 EE 位姿在包络内: 0.3004 <= 0.35 -> 臂展不是阻塞	docs/HANDOFF.md:345 + 实算	verify F3
+T09-1	NOT_FEASIBLE	场景是 3 选 1 白名单, 物体位姿硬编码, 无避碰摆放代码	scripts/sim_profile.py:25,157-167; benchmark/generators/generate.py:39-51	人工读码
+T09-2	NOT_FEASIBLE	观测是 oracle 真值 -> 识别干扰物这一步不会被考	src/flexcell/flexcell_skills/flexcell_skills/contracts/composite.py:93; src/flexcell/flexcell_skills/config/week1.yaml:22	人工读码
+T09-3	NOT_FEASIBLE	只改物体数量属 mission 明令禁止的凑数包装	docs/EVOBOT_NORTH_STAR_MISSION.md:134	人工读文档
+T09-4	(替代)	可用既有 AprilTag 感知路径重铸为感知任务; 当前批次 camera=False	scripts/sim_profile.py:242-246,219-241; setup/acceptance/evobot_unified_runner_20261111/run_batch.sh:83	人工读码
+T10-1	(已通)	受约束场景与执行已实测: legacy 顶板 PASS 6/6 29.6 s	scripts/sim_profile.py:168-187; setup/acceptance/c13_constrained_20261110/README.md:14	人工读文档
+T10-2	NOT_FEASIBLE	任务级约束无声明位	src/flexcell/flexcell_interfaces/msg/TaskConstraints.msg:1-8	人工读码
+T10-3	NOT_FEASIBLE	验收器是终态纯函数, 看不见路径 -> 受约束与自由放置的成功终态不可区分	benchmark/evaluators/evaluate.py:5-8,42	人工读码
+T10-4	(替代)	建议降级为 T01-T06 的难度轴(scene 参数), 不新增模板	scripts/sim_profile.py:70-71,168-187	人工读码
