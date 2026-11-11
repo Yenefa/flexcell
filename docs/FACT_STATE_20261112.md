@@ -151,9 +151,21 @@ can be trusted.
 | 6 | `max_gap_ns` is a tautology | `recorder.py:172` writes `max(gap,1)` = the observed gap; `schema.py:164` compares the gap to itself | 40 of 80 physics steps lost (a 200 ms hole) → `dropped=0`, no schema problem |
 
 **Correct framing:** the verifier **is** fail-closed against an *honest but broken* recorder, and it
-**is not** fail-closed against a *fabricating producer*. Every gate that rests on a self-declared
-reference value (`rest_height_m`, `pusher_links`, `max_z_m`, `bundle_sha256`, `max_gap_ns`,
-`dropped_samples`) is currently vacuous.
+**is not** fail-closed against a *fabricating producer*.
+
+**Scope of that claim, corrected after independent review.** The Lead's first draft named six
+self-declared values. The Curator re-derived it from `verify.py` and the Lead re-verified:
+**only 3 of the 9 gates rest on a producer-declared comparand** —
+`table_support` and `no_lift` on `rest_height_m`, and `pusher_contact` on `pusher_links`
+(each appears twice in `verify.py`; that is the whole footprint). `max_z_m`, `bundle_sha256`,
+`max_gap_ns` and `dropped_samples` are read by **no gate at all** (0 occurrences in `verify.py`).
+Two consequences follow, and they point in opposite directions:
+
+| Correction | Effect |
+| --- | --- |
+| Only 3 gates are vulnerable, not 6 | The bypass surface is **narrower** than first reported |
+| The redundancy **holds**: `table_support` is two-sided, so re-declaring `rest_height_m` to hide a lift trips it | The F1 carry-bypass needs the *specific* constant-height construction, not any carry — the finding is **narrower and sharper** |
+| **But a hole not on the first list:** `manifest.bundle_sha256` is checked only as `isinstance(str)` (`schema.py`) and **no gate verifies the seal** | Zeroing it changes nothing. This is a **separate, real** defect: the manifest claims an integrity guarantee nothing enforces |
 
 **Consequence for this round's numbers:** no T08 `passed=true` may be reported until the bundle's
 `rest_height_m` is independently bound to the spec. The existing T08 results are unaffected in the
