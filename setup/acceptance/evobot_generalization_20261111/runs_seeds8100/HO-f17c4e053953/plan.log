@@ -1,0 +1,21 @@
+{
+  "moves": [
+    {
+      "object": "target_box_b",
+      "zone": "zone_1",
+      "why": "blue block first goes to the right bin"
+    },
+    {
+      "object": "target_box_b",
+      "zone": "zone_2",
+      "why": "blue block must visit the left bin"
+    },
+    {
+      "object": "target_box_b",
+      "zone": "zone_1",
+      "why": "blue block returns to the right bin"
+    }
+  ],
+  "confidence": "high",
+  "uncertainty": "Assuming right bin is zone_1 (negative y) and left bin is zone_2 (positive y)."
+}

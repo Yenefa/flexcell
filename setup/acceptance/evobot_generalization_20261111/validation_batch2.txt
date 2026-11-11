@@ -1,0 +1,17 @@
+{
+  "runs": 16,
+  "b_failed": 0,
+  "recovery_ran": 16,
+  "claims": 16,
+  "retried": 2,
+  "retried_after_pass": 2
+}
+
+ANOMALIES (data sound, but a reader must see these):
+  - HO-a69ec651037a: SKILL_LAYER_DISAGREEMENT - first attempt PASSED but a retry was issued (action=resume, class=grasp, reason="native place stage failed: ['PICK_A(attempt=1):OK', 'PLACE_A:FAIL']")
+  - HO-f9431f8ef925: SKILL_LAYER_DISAGREEMENT - first attempt PASSED but a retry was issued (action=resume, class=grasp, reason="native place stage failed: ['PICK_A(attempt=1):OK', 'PLACE_A:FAIL']")
+  - no first attempt failed: recovery was never needed, so this batch supports no claim about recovery EFFICACY
+
+Batch structure OK: every failed first attempt has a recorded recovery decision,
+every run carries a measured claim, and the retry mechanism demonstrably fired.
+rc=0

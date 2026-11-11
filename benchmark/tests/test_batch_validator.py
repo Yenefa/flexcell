@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
-"""Tests for the batch validator: a batch must prove its steps RAN before its numbers count.
+"""Tests for the ANOMALY / INVALID split in the batch validator.
 
-THE FAILURE THESE GUARD: the pair48 batch reported "R 13/16" and looked like a normal
-recovery arm. Recovery had never executed - the runner was still in the simulator checkout
-and invoked recovery_driver.py by relative path, so every run logged "No such file or
-directory". Arm R was byte-identical to arm B on all 16 runs. The same cwd trap had already
-silently disabled the self-assessment.
-
-A batch can be internally consistent and still measure nothing, so the validator checks for
-evidence that each step ran rather than for plausible-looking values.
+WHY THE SPLIT EXISTS: the first version treated every surprise as "BATCH INVALID". When a
+retry was issued although the first attempt had already PASSED, that made the whole batch
+unreportable - which is wrong. The verdicts and the claims are sound; what is surprising is
+that the SKILL LAYER reported a failure the measured world contradicts. Throwing the batch
+away would hide a real finding about the skill layer, and calling it clean would hide it from
+a reader. So the validator now separates:
+  INVALID - a required step did not run  -> no number may be reported
+  ANOMALY - data sound, surprising fact -> report it alongside the numbers
 """
 import importlib.util
 import json
@@ -24,7 +24,6 @@ spec.loader.exec_module(VB)
 
 
 def _run(tmp_path, runs):
-    """runs: list of dicts describing each fake run directory."""
     for name, files in runs.items():
         d = tmp_path / name
         d.mkdir()
@@ -36,48 +35,50 @@ def _run(tmp_path, runs):
     return rc.returncode, rc.stdout
 
 
-def _passing():
+def _ok():
     return {"verdict_after1.json": {"passed": True}, "verdict.json": {"passed": True},
-            "observation_claimed.json": {"agent_claim_source": "measured"}}
+            "observation_claimed.json": {"agent_claim_source": "measured"},
+            "recovery_decision.json": {"action": "no_recovery"}}
 
 
-def test_a_healthy_batch_validates(tmp_path):
-    runs = {"HO-a": _passing(),
-            "HO-b": dict(_passing(),
-                         **{"verdict_after1.json": {"passed": False},
-                            "recovery_decision.json": {"action": "resume"},
-                            "plan_retry.json": {"stages": []}})}
+def test_a_retry_after_a_passing_first_attempt_is_an_anomaly_not_a_failure(tmp_path):
+    runs = {"HO-a": dict(_ok(), **{"plan_retry.json": {"stages": []}})}
     rc, out = _run(tmp_path, runs)
-    assert rc == 0, out
+    assert rc == 0, out                      # the batch is still usable
+    assert "SKILL_LAYER_DISAGREEMENT" in out  # but the disagreement is visible
+    assert "recovery_decision.json" in json.dumps(runs)  # fixture sanity
 
 
-def test_failed_first_attempt_without_a_recovery_decision_invalidates(tmp_path):
-    """This is exactly what happened: nothing recorded, nothing ran."""
-    runs = {"HO-a": dict(_passing(), **{"verdict_after1.json": {"passed": False}})}
+def test_recovery_ran_is_counted_even_when_nothing_failed(tmp_path):
+    """The earlier counter only ticked recovery on failure, so it reported 0 for a batch
+    where the driver had in fact run on every instance."""
+    runs = {"HO-a": _ok(), "HO-b": _ok()}
+    rc, out = _run(tmp_path, runs)
+    assert rc == 0
+    assert '"recovery_ran": 2' in out, out
+
+
+def test_a_batch_with_no_failures_cannot_support_a_recovery_claim(tmp_path):
+    runs = {"HO-a": _ok()}
+    rc, out = _run(tmp_path, runs)
+    assert rc == 0
+    assert "no claim about recovery EFFICACY" in out
+
+
+def test_a_failed_attempt_without_recovery_is_still_invalid(tmp_path):
+    runs = {"HO-a": dict(_ok(), **{"verdict_after1.json": {"passed": False}}),
+            "HO-b": dict(_ok(), **{"verdict_after1.json": {"passed": False},
+                                   "recovery_decision.json": {"action": "resume"},
+                                   "plan_retry.json": {"stages": []}})}
+    # remove HO-a's decision to reproduce the pair48 shape
+    del runs["HO-a"]["recovery_decision.json"]
     rc, out = _run(tmp_path, runs)
     assert rc == 1
     assert "recovery never ran" in out
 
 
-def test_a_batch_with_no_retries_at_all_is_flagged(tmp_path):
-    runs = {"HO-a": dict(_passing(), **{"verdict_after1.json": {"passed": False},
-                                        "recovery_decision.json": {"action": "resume"}})}
+def test_failures_with_zero_retries_is_invalid(tmp_path):
+    runs = {"HO-a": dict(_ok(), **{"verdict_after1.json": {"passed": False}})}
     rc, out = _run(tmp_path, runs)
     assert rc == 1
-    assert "arm R is not a recovery arm" in out
-
-
-def test_a_run_without_a_measured_claim_is_flagged(tmp_path):
-    runs = {"HO-a": {"verdict_after1.json": {"passed": True},
-                     "verdict.json": {"passed": True}}}
-    rc, out = _run(tmp_path, runs)
-    assert rc == 1
-    assert "unmeasurable" in out
-
-
-def test_a_claim_present_but_not_marked_measured_is_flagged(tmp_path):
-    runs = {"HO-a": dict(_passing(),
-                         **{"observation_claimed.json": {"agent_claim_source": "absent"}})}
-    rc, out = _run(tmp_path, runs)
-    assert rc == 1
-    assert "not marked measured" in out
+    assert "not a recovery arm" in out

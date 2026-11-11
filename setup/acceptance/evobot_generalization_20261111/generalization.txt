@@ -1,0 +1,23 @@
+batch1_seeds7500 validation rc=0
+batch2_seeds8100 validation rc=0
+
+batch              n        B        R        retried  false_success
+batch1_seeds7500   16       14/16    16/16    2        0
+batch2_seeds8100   16       16/16    16/16    2        0
+
+arm B (first try)
+  seeds 7500: 14/16 = 87.5% (64.0-96.5%)
+  seeds 8100: 16/16 = 100.0% (80.6-100.0%)
+  pooled    : 30/32 = 93.8% (79.9-98.3%)
+  intervals overlap: YES
+
+arm R (final)
+  seeds 7500: 16/16 = 100.0% (80.6-100.0%)
+  seeds 8100: 16/16 = 100.0% (80.6-100.0%)
+  pooled    : 32/32 = 100.0% (89.3-100.0%)
+  intervals overlap: YES
+
+VERDICT INPUTS, not a verdict:
+  A generalization claim needs the new set to be consistent with the old one.
+  Consistency is necessary, not sufficient: two sets agreeing on 16 instances
+  each still bounds the true rate only to the pooled interval above.

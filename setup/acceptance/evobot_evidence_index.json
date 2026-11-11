@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 34,
-  "live": 27,
+  "batches": 35,
+  "live": 28,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -149,6 +149,25 @@
       }
     },
     {
+      "batch": "evobot_generalization_20261111",
+      "verified": "PASS",
+      "rung": "Generalization Tested (untouched seeds 8100/8200; pooled B 30/32; skill-layer false failure found)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_GENERALIZATION_TESTED_ON_UNTOUCHED_SEEDS",
+        "new_seeds": "8100/8200, zero overlap with public16/32/48",
+        "batch2_arm_B": "16/16 = 100% (80.6-100%)",
+        "pooled_arm_B": "30/32 = 93.8% (79.9-98.3%)",
+        "pooled_arm_R": "32/32 = 100% (89.3-100%)",
+        "intervals_overlap": true,
+        "false_success": "0 on both batches",
+        "anomaly_surfaced": "2/16 retried after a PASSING first attempt",
+        "meaning": "the skill layer reported failure while the measured world satisfied the goal - the opposite of false success",
+        "recovery_efficacy_measured": false,
+        "evaluator_touched": false
+      }
+    },
+    {
       "batch": "evobot_heldout_n6_20261111",
       "verified": "PASS",
       "rung": "Generalization Tested (first held-out, superseded baseline)",
@@ -173,7 +192,7 @@
         "public_tasks": 36,
         "public_tasks_with_answers": 0,
         "agent_uid_read_blocked": true,
-        "sealed_answers": 90,
+        "sealed_answers": 106,
         "isolation_kind": "OS permissions; not a kernel namespace"
       }
     },

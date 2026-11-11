@@ -113,6 +113,18 @@ def freeze(force=False):
             "self_assessment_accuracy": "28/32 = 87.5%",
             "mission_requirement": "False Success Rate MUST be 0 -> MET on n=32, but a zero alone is gameable, so accuracy is reported with it",
         },
+        "generalization": {
+            "batch": "evobot_generalization_20261111 (seeds 8100/8200, zero overlap)",
+            "pooled_arm_B": "30/32 = 93.8% (79.9-98.3%)",
+            "pooled_arm_R": "32/32 = 100% (89.3-100%)",
+            "intervals_overlap": True,
+            "false_success": "0 on both batches",
+            "new_finding": ("skill layer reported PLACE_A:FAIL while the measured world "
+                            "satisfied the goal, on 2/16 instances - a false FAILURE that "
+                            "triggered a retry which was not needed"),
+            "do_not_overclaim": ("same generator with only the seeds changed, so this is "
+                                 "not cross-distribution; recovery efficacy unmeasured"),
+        },
         "first_valid_batch": {
             "batch": "evobot_valid_batch_20261111 (16 instances, seeds 7500/7600)",
             "why_valid": ("validate_batch.py rc=0: 2 failed first attempts, 2 recovery "
