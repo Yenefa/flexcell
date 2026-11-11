@@ -1,0 +1,25 @@
+{
+  "task": "pick_up_the_alphabet_soup_and_place_it_in_the_basket",
+  "suite": "libero_object",
+  "index": 0,
+  "phase_success": true,
+  "official_success": false,
+  "log": [
+    "approach reached",
+    "descend stopped at eef z=0.08 (fingers on the can lid)",
+    "close gripper 12 steps",
+    "lift reached",
+    "transport reached (39 steps)",
+    "lower reached",
+    "open gripper",
+    "settle 30 steps",
+    "retreat reached",
+    "object final [-0.119,-0.24,0.038] - never left its start pose; distance to basket 0.510 m"
+  ],
+  "perception": "ORACLE (simulator state), not camera",
+  "policy": "scripted phase controller over a pose->OSC-delta adapter",
+  "reach_probe": {
+    "lowest_eef_z_in_free_space": 0.02,
+    "reading": "reach is fine - the can blocked it"
+  }
+}

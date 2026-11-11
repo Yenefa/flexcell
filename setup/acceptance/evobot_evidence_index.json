@@ -1,9 +1,9 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 53,
-  "live": 46,
+  "batches": 54,
+  "live": 47,
   "superseded": 7,
-  "verifier_failures": 1,
+  "verifier_failures": 2,
   "rows": [
     {
       "batch": "evobot_abstention_20261111",
@@ -161,7 +161,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 45,
+        "live_batches": 46,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",
@@ -392,20 +392,10 @@
     },
     {
       "batch": "evobot_ladder_generated_20261111",
-      "verified": "PASS",
+      "verified": "FAIL",
       "rung": "Documentation now DERIVED (ladder regenerated from the archive; drift tests added; no regression)",
       "superseded_by": null,
-      "verdict": {
-        "verdict": "EVOBOT_LADDER_DERIVED_AND_CURRENT",
-        "regenerated_identically": true,
-        "batches_live": 46,
-        "verifier_failures": 1,
-        "reports_both_directions": true,
-        "zero_is_qualified": true,
-        "v01_regression": "6/6 -> 6/6, NONE",
-        "evaluator_touched": false,
-        "skill_layer_touched": false
-      }
+      "verdict": null
     },
     {
       "batch": "evobot_lesson_routing_20261111",
@@ -421,6 +411,27 @@
         "token_overhead": "+3%",
         "transfer": "NOT OBSERVED",
         "false_success_rate": 0.0
+      }
+    },
+    {
+      "batch": "evobot_libero_adapter_20261111",
+      "verified": "PASS",
+      "rung": "LIBERO adapter (pose->delta; all phases run; grasp fails - object never moves; reach probe rules out reach limit)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_LIBERO_ADAPTER_RUNS_GRASP_FAILS",
+        "official_task": "pick_up_the_alphabet_soup_and_place_it_in_the_basket",
+        "phases_completed": true,
+        "object_moved": false,
+        "official_success": false,
+        "root_cause": "fingers stop on the can lid; reach in free space is 0.02 m, so the arm is capable",
+        "perception": "ORACLE - execution result, not a perception result",
+        "classification": {
+          "official": true,
+          "adapted": false,
+          "native": false
+        },
+        "evobot_gazebo_stack_touched": false
       }
     },
     {
