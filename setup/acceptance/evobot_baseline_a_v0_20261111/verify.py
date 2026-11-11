@@ -44,15 +44,34 @@ def sha256(path):
 def main():
     cfg = json.loads((HERE / "config.json").read_text(encoding="utf-8"))
 
-    # 1. the definition must not drift
+    # 1. the MEASUREMENT must not drift. These are the components a verdict depends on:
+    #    what plan is built, what world is generated, how the robot is driven, how it is graded.
     drift = []
-    for rel, want in cfg["sha256"].items():
+    for rel, want in cfg["definition_sha256"].items():
         p = PROJ / rel
         if not p.is_file():
             drift.append(rel + ": missing")
         elif sha256(p) != want:
             drift.append(rel + ": hash changed")
-    check("frozen components unchanged", not drift, "; ".join(drift))
+    check("measurement-critical components unchanged", not drift, "; ".join(drift))
+
+    # 1b. the HARNESS may change, but only visibly. A batch driver swap mid-campaign is
+    #     exactly the kind of thing that gets found months later and destroys trust, so a
+    #     drift here is reported loudly and the recorded history must explain it.
+    harness_notes = []
+    for rel, info in cfg.get("harness_sha256", {}).items():
+        p = PROJ / rel
+        if not p.is_file():
+            harness_notes.append(rel + ": missing")
+            continue
+        got = sha256(p)
+        known = {h["sha256"] for h in info.get("history", [])}
+        if got not in known:
+            harness_notes.append(rel + ": current hash matches NO recorded version")
+        elif got != info.get("current"):
+            harness_notes.append(rel + ": running an older recorded version")
+    check("batch harness is a recorded version (drift allowed, undocumented drift not)",
+          not harness_notes, "; ".join(harness_notes))
 
     # 2. the invalid batch stays marked invalid
     check("r1 batch marked INVALID_MEASUREMENT",

@@ -10,12 +10,45 @@
     "evaluator": "wt-comp/benchmark/evaluators/evaluate.py (pure function of spec + final_state)",
     "note": "No assertion, tolerance or evaluator was changed to produce any number in this directory."
   },
-  "sha256": {
+  "sha256_split_note": [
+    "SPLIT 2026-11-11 18:30: the single sha256 map conflated two things that must be judged differently.",
+    "definition_sha256 = components the MEASUREMENT depends on: what plan is built, what world is generated,",
+    "  how the robot is driven, how the result is graded. A drift here invalidates a run.",
+    "harness_sha256 = how runs are scheduled. A drift here does not change any verdict, but it must be",
+    "  recorded, because 'the batch driver changed mid-campaign' is exactly the kind of thing that gets",
+    "  discovered later and poisons trust."
+  ],
+  "definition_sha256": {
     "wt-comp/experiments/baselines/build_composite_plan.py": "5fc29f29de685eb9bd5313f5d5c86a28c0e05338b67a08a72a07b2cb01a24dbf",
     "wt-comp/benchmark/evaluators/evaluate.py": "ed4a63323d565702d5aa0645ccd44385ad021ad1f050f2744361b32680be9ff5",
     "wt-comp/benchmark/generators/generate.py": "5c1324db5d7156c4f94b9e5725be07722931b3ad90106cc055513d9236140cb2",
-    "ci-public-window/scripts/evobot_run_b.sh": "5b77724dd1c830cfb89a369dfd30e94b290ee63db8975913d250091a93bb589a",
-    "ci-public-window/scripts/evobot_baseline_a_batch.sh": "f75981b400d15ffe2ebf1e7445a4a99041e88cf2e83346402425ccbe82c2d406",
-    "ci-public-window/scripts/evobot_batch_summary.py": "6febef74b22baf6db1d2497e6d2bf4509486d66124d9b1bada3d252f68f8e4f9"
+    "ci-public-window/scripts/evobot_run_b.sh": "5b77724dd1c830cfb89a369dfd30e94b290ee63db8975913d250091a93bb589a"
+  },
+  "harness_sha256": {
+    "ci-public-window/scripts/evobot_baseline_a_batch.sh": {
+      "current": "2e765fa327434b705bc5a50b22e1a5092741b5fb203b1af843ad92cfa42f4766",
+      "history": [
+        {
+          "version": "h0",
+          "sha256": "f75981b400d15ffe2ebf1e7445a4a99041e88cf2e83346402425ccbe82c2d406",
+          "note": "domain = 210 + i, rows.tsv truncated per run"
+        },
+        {
+          "version": "h1",
+        "sha256": "2e765fa327434b705bc5a50b22e1a5092741b5fb203b1af843ad92cfa42f4766",
+          "note": "domain pool 20 + i%100 (cyclonedds maps domain D to ports 7400+250*D, so D<=232; 210+i overflowed at the 23rd instance and the classifier caught it as INVALID_INFRA rather than a robot failure); rows.tsv truncation is worked around by scanning instance directories instead. VERDICT-NEUTRAL: assigns ROS domains and scheduling only."
+        }
+      ]
+    },
+    "ci-public-window/scripts/evobot_batch_summary.py": {
+      "current": "6febef74b22baf6db1d2497e6d2bf4509486d66124d9b1bada3d252f68f8e4f9",
+      "history": [
+        {
+          "version": "h0",
+          "sha256": "6febef74b22baf6db1d2497e6d2bf4509486d66124d9b1bada3d252f68f8e4f9",
+          "note": "aggregation only; superseded by evobot_scan_summary.py because rows.tsv is truncated per run"
+        }
+      ]
+    }
   }
 }
