@@ -17,7 +17,7 @@ import math
 # 0.3.0 adds the "push" goal clause (T08). It is a pure addition: a spec that does not
 # declare "push" produces exactly the clause list it produced under 0.2.0, which is
 # asserted by re-grading a frozen instance and comparing the verdict.
-EVALUATOR_VERSION = "0.3.0"
+EVALUATOR_VERSION = "0.4.0"
 
 # Declared tolerances. Changing one changes what "success" means, so the version
 # string must change with them; the tests assert the pair stays in sync.
@@ -208,7 +208,37 @@ def evaluate(spec, final_state):
                 zone_ok = d <= zones[zn]["radius"]
                 zone_ev = {"zone": zn, "distance_m": round(d, 5),
                            "radius_m": zones[zn]["radius"], "inside_zone": zone_ok}
-        ok = (min_m <= moved <= max_m) and dz <= max_dz and zone_ok
+        # GRASP EVIDENCE (v0.4.0). End-state geometry CANNOT distinguish a push from a
+        # grasp-carry-place: pick the object up, carry it the required distance, put it
+        # down at the same height, and every end-state check above passes while the task
+        # ("without picking it up") was violated. That is not an edge case, it is a
+        # guaranteed mis-grade, and it was found by audit rather than by this test suite.
+        #
+        # The fix is not a tighter threshold, it is a different evidence source: the
+        # object's maximum height over the whole motion. A carry must lift the object to
+        # clear the table, so a genuine push has max_z barely above its start.
+        #
+        # It FAILS CLOSED. If no trajectory is supplied the clause is False, never True:
+        # absence of evidence that the object stayed down is not evidence that it did.
+        max_lift = float(want.get("max_lift_during_m", 0.005))
+        lift_ok = True
+        lift_ev = {}
+        if want.get("require_no_grasp", True):
+            traj = (final_state.get("trajectory") or {}).get(name)
+            zmax = traj.get("max_z_m") if isinstance(traj, dict) else None
+            if zmax is None:
+                lift_ok = False
+                lift_ev = {
+                    "reason": "no trajectory for this object: end state alone cannot "
+                              "prove it was pushed rather than carried",
+                    "trajectory_required": True,
+                }
+            else:
+                lift = float(zmax) - start[2]
+                lift_ok = lift <= max_lift
+                lift_ev = {"max_lift_m": round(lift, 5),
+                           "max_lift_allowed_m": max_lift}
+        ok = (min_m <= moved <= max_m) and dz <= max_dz and zone_ok and lift_ok
         if cos is not None:
             ok = ok and cos >= min_cos
         clauses.append(_clause(
@@ -218,7 +248,7 @@ def evaluate(spec, final_state):
             max_vertical_m=max_dz,
             direction_cosine=None if cos is None else round(cos, 5),
             min_direction_cosine=min_cos,
-            **zone_ev))
+            **zone_ev, **lift_ev))
 
     passed = bool(clauses) and all(c["ok"] for c in clauses)
     claimed = bool(final_state.get("agent_claimed_success"))
