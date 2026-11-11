@@ -1,0 +1,17 @@
+{
+  "task": "pick_up_the_alphabet_soup_and_place_it_in_the_basket",
+  "suite": "libero_object",
+  "index": 0,
+  "parsed_object": "alphabet_soup_1",
+  "parsed_region": "basket_1_contain_region",
+  "official_success": true,
+  "log": [
+    "parsed goal: alphabet_soup_1 -> basket_1_contain_region",
+    "object body alphabet_soup_1_main at [-0.12, -0.24, 0.015] ; goal region at [0.015, 0.252, 0.107]",
+    "object while carried at [0.018, 0.257, 0.12]",
+    "success trace during settle: [True, True, True, True]",
+    "object final at [0.022, 0.261, 0.055]"
+  ],
+  "perception": "ORACLE (simulator state), not camera",
+  "policy": "same phase controller, targets parsed from the official goal"
+}
