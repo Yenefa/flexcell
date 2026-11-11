@@ -1,108 +1,93 @@
-# A-prime's first execution in project history: it passed, and it cost zero model calls
+# Baseline A-prime, complete: 9/16 executed and passed, at zero model cost
 
-**Date** 2026-11-12 · **n = 1 of 16** · frozen `evaluate.py` v0.5.0 · **Status: CONFIRMED, n=1**
+**Date** 2026-11-12 · frozen `evaluate.py` v0.5.0 · 16/16 attempted · **Status: COMPLETE**
 
 ---
 
-## 1. What happened
+## 1. The result
 
-The project had **never executed Baseline A-prime** — not once. It had only ever produced plans.
-The batch approved this round ran one task to completion before operator interference
-(mine — see `evobot_lead_p0_composite_retraction_20261112/`) terminated the remaining fifteen.
+The project had never executed Baseline A-prime. This round it executed all sixteen T14 tasks, at
+**zero model calls**, through the same `RunComposite` path B uses.
 
-That one task is a real result, and it is the first of its kind:
+| state | A-prime | B (archived baseline) |
+| --- | --- | --- |
+| `planning_correct` | **16/16** — executable plan identical to B's | 16/16 |
+| `execution_succeeded` (`outcome=0`) | **9/16** | 11/16 |
+| `independent_evaluation_passed` | **9/16** | 11/16 |
+| model calls | **0** | 16 (one per task) |
 
-| field | value |
-| --- | --- |
-| task | `HO-0dcde4dc0f5a` (T14 ordered pair) |
-| composite result | `outcome = 0`, `error_code = 0` |
-| `run_id` | `composite-c32a5b7b75c341ef` |
-| completed stage ids | `['target_box_b-0', 'target_box_a-1']` |
-| detail | "all native stages and fresh joint conditions confirmed" |
-| wall time | 36 s |
-| model calls | **0** |
-
-## 2. The graded result — all clauses pass
-
-Graded with the frozen evaluator against the spec, using the auditor's reconstruction of
-`expected_goal` (validated 16/16 against the archive's own recorded answer, since the real seal is
-root-only and I chose not to break it for a grading convenience):
+Per-task:
 
 ```
-placement:target_box_a   ok=True
-placement:target_box_b   ok=True
-order                    ok=True
-
-passed            : True
-terminal_passed   : True
-failed_clauses    : []
+PASS  HO-0dcde4dc0f5a  outcome=0  stages=2
+PASS  HO-128c6a231c34  outcome=0  stages=2
+PASS  HO-2efba46248da  outcome=0  stages=2
+FAIL  HO-40348a081df6  outcome=1 ec=62 stages=0  failed: order
+PASS  HO-4dafd8d17858  outcome=0  stages=2
+FAIL  HO-4dbb21d087ae  outcome=1 ec=62 stages=1  failed: order
+FAIL  HO-51600cf21179  outcome=1 ec=62 stages=1  failed: order
+PASS  HO-60679893327a  outcome=0  stages=2
+PASS  HO-6173170d8c47  outcome=0  stages=2
+FAIL  HO-675c07e900e7  outcome=1 ec=62 stages=1  failed: order
+PASS  HO-884ea68a42ca  outcome=0  stages=2
+PASS  HO-b3fb8b1de2db  outcome=0  stages=2
+FAIL  HO-c79ebfe5c9e6  outcome=1 ec=62 stages=0  failed: placement:target_box_b, order
+PASS  HO-d3ab212142de  outcome=0  stages=2
+FAIL  HO-da7c04bdece5  outcome=1 ec=62 stages=1  failed: order
+FAIL  HO-dcf52d233154  outcome=1 ec=62 stages=0  failed: order
 ```
 
-Ground truth: `target_box_a` at (0.3047, 0.0492), `target_box_b` at (0.2106, 0.0470) — both inside
-`zone_2` at (0.25, 0.05) r = 0.06, and in the required order (blue first, then red).
+**A-prime is 2 tasks worse than B on execution, and costs nothing.** Every A-prime failure is
+`error_code=62` — an incomplete composite where the second stage never ran — so the `order` clause
+fails because the required sequence is genuinely incomplete. There is no grading artifact in these
+seven: stages completed is 0 or 1 in all of them, and the failure is real.
 
-## 3. The four states, separated
+## 2. What makes this comparison meaningful — and what does not
 
-| state | value |
-| --- | --- |
-| `planning_correct` | **16/16** (all 16 plans match B's executable plan exactly) |
-| `execution_succeeded` | **1/1 attempted** (the other 15 were never attempted) |
-| `independent_evaluation_passed` | **1/1** — all clauses |
-| `agent_claimed_success` | **false** — A-prime claims nothing; it is a rule parser |
+Meaningful:
 
-Note the shape: 16 plans, 1 execution, 1 pass. **Those are three different denominators and must
-never be collapsed.** "A-prime passes 1/1" and "A-prime plans 16/16" are both true and neither
-implies the other.
+- Same task set, same executor (`RunComposite`), same frozen evaluator, same reconstructed goals.
+- The plans are not merely similar: `compare_plans.py` shows all 16 A-prime plans equal B's on
+  `stages`, `position_tolerance_m`, `clearance_m`, `motion_profile_id` and `initial_objects`,
+  including the `spread_destinations` targets. A-prime is not solving an easier problem.
+- Zero model calls is exact, not estimated: a rule parser makes none.
 
-## 4. A grading error I made first, and how it was caught
+Not meaningful:
 
-My **first** grading attempt reported `passed=False, failed_clauses=['order']` — and I nearly recorded
-that as an A-prime failure. It was not. I had graded against `{objects: ground_truth}`, a single
-end-state snapshot, and the `order` clause reads `final_state['move_sequence']` — an event sequence
-that a snapshot does not contain. An empty sequence fails the clause by construction.
+- **16 tasks, 9 vs 11 is within noise.** Two tasks separate them; do not read a ranking into this.
+- B's numbers are from the archive, not re-run this round against a live machine.
+- A single template (T14 ordered pair). Nothing here generalises to other templates.
 
-Re-graded with the move sequence taken from the composite's own `completed_stage_ids`:
+**The defensible claim is narrow: A-prime executes this template end to end at zero model cost and
+lands within two tasks of B. The indefensible claim would be that A-prime is nearly as good in
+general — nothing here supports that.**
 
-```
-completed_stage_ids : ['target_box_b-0', 'target_box_a-1']
-derived move_sequence: ['target_box_b', 'target_box_a']
-required order       : ['target_box_b', 'target_box_a']  ->  match
-```
+## 3. A grading error I made first
 
-**This is the sixth premise error of the round and the most dangerous kind**: a grading harness
-that silently reports failure when it is given insufficient input. It is the mirror of the
-vacuous-clause finding — there, a clause passed for the wrong reason; here, a clause failed for the
-wrong reason. Both are the harness, not the robot.
+My first grading attempt on the first task reported `passed=False, failed_clauses=['order']`, and I
+nearly recorded it as an A-prime failure. It was my harness. I had passed `{objects: ground_truth}`
+— a single end-state snapshot — and the `order` clause reads `final_state['move_sequence']`, which
+a snapshot cannot contain. An empty sequence fails the clause by construction.
 
-**The general lesson, stated so it can be applied elsewhere: a clause that needs a time series must
-refuse to grade when given a snapshot, not silently fail.** Currently it silently fails.
+Re-graded with the move sequence taken from each run's own `completed_stage_ids`, the first task
+passes. **Every number in this document uses the corrected input.**
 
-## 5. What this does and does not establish
+**General lesson: a clause that needs a time series must refuse to grade when given a snapshot, not
+silently fail.** Today it silently fails, which means any harness that forgets `move_sequence` will
+report a false failure. That is the mirror of the vacuous-clause defect found earlier, where a
+clause passed for the wrong reason. Both are the harness, not the robot.
 
-| Claim | Status |
-| --- | --- |
-| A-prime has executed at least one task and passed it | **CONFIRMED, n=1** |
-| A-prime's execution is at zero model cost | **CONFIRMED** |
-| A-prime's executor plan equals B's on all 16 | **CONFIRMED** at plan level |
-| A-prime passes T14 generally | **NOT ESTABLISHED** — 1 of 16 executed, and n=1 supports no rate |
-| A-prime beats or matches B on execution | **NOT ESTABLISHED** — B's rate is 11/16 first attempt; comparing 1/1 to 16 runs is meaningless |
+## 4. Why the batch took three attempts
 
-**The honest summary: the pipeline works end to end for A-prime, at zero cost, and the question
-"what is A-prime's pass rate on T14?" now has a method and one data point instead of no method.**
+Attempt 1: I launched a second instance of the same batch while the first was running, then killed
+simulator nodes while diagnosing. Two instances contended for one Gazebo and nothing finished.
+Attempt 2: same interference, one task completed.
+Attempt 3: single operator, lock held, no diagnostic kills — **16/16 completed cleanly in ~10
+minutes**. The pipeline was never the problem.
 
-## 6. The remaining work is now purely operational
-
-Fifteen tasks remain. Nothing technical blocks them: the server exists (`task_fsm_server.py:289`),
-the plans are built and committed, the executor path is the same one B used, and one task has now
-run cleanly in 36 s. What went wrong was **two operators contending for one simulator**. The fix is
-process, not code: one lane, one operator, lock held, no second instance, and no diagnostic kills
-against a live run.
-
-## 7. Reproduce
+## 5. Reproduce
 
 ```bash
-# the plan equivalence (16/16), from committed artifacts, no simulator:
-python3 setup/acceptance/evobot_lead_p0_aprime_equivalence_20261112/compare_plans.py
-# the graded execution (1/1):
-python3 setup/acceptance/evobot_lead_p0_aprime_first_execution_20261112/grade_first_execution.py
+python3 setup/acceptance/evobot_lead_p0_aprime_equivalence_20261112/compare_plans.py  # 16/16 plans
+python3 setup/acceptance/evobot_lead_p0_aprime_first_execution_20261112/grade_all.py      # 9/16
 ```

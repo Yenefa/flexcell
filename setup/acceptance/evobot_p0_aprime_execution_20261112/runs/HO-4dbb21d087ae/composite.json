@@ -1,0 +1,34 @@
+{
+  "goal": {
+    "scenario_id": "HO-4dbb21d087ae",
+    "motion_profile_id": "demo_slow",
+    "stages": [
+      "target_box_b-0",
+      "target_box_a-1"
+    ],
+    "initial_objects": [
+      "target_box_a",
+      "target_box_b"
+    ]
+  },
+  "result": {
+    "outcome": 1,
+    "error_code": 62,
+    "run_id": "composite-d1d12bb42d1e410e",
+    "completed_stage_ids": [
+      "target_box_b-0"
+    ],
+    "component_run_ids": [
+      "pick_place_v1-92bfd2b7",
+      "pick_place_v1-cdc3cf57"
+    ],
+    "component_goal_uuids": [
+      "33e0ff1beee64159b7f7b70bc623519a",
+      "bec827cac2364db89a63b97d052eccb1"
+    ],
+    "evidence_id": "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp/setup/acceptance/evobot_p0_aprime_execution_20261112/runs/HO-4dbb21d087ae/sim/skills/composites/composite-d1d12bb42d1e410e.jsonl",
+    "detail": "native terminal/verification unconfirmed for target_box_a-1",
+    "resumed_from_run_id": "",
+    "inherited_stages": 0
+  }
+}
