@@ -581,4 +581,20 @@ destination. Recovery did not rescue a task; it undid one.
 
 **T08 skill-level remains 0/6 by the mission's own skill-level definition.** This round establishes that the number is honest, not that it changed.
 
+---
+
+## ADDENDUM — goal round 7 (2026-11-12): P3's gate is now ON
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| P3's regression gate | **RESTORED.** `evolution/validation/gate_differential.py` requires **no NEW** verifier failures versus `known_failures.json` instead of no failures at all. `run_loop.py` now calls it | `evobot_lead_p3_gate_restored_20261112/` |
+| End-to-end proof | **109 verifiers run per proposal; 4 known failures unchanged; 0 new**; before the change the loop printed *"structure accepted (regressions skipped by caller)"* | same |
+| The gate's own side effect | **SOLVED and verified.** 108 of 109 `verify.py` rewrite their `verify_result.json`; the gate now byte-snapshots the files beside each `verify.py` and restores what its run changed. Restoration proven byte-identical, and **zero `verify_result.json` dirty** after a full loop run | same |
+| **My second defect this round** | **I first fixed the side effect with git — and git does not work in this worktree under WSL.** Its `.git` holds a Windows path, so both helpers raised, `_dirty_paths()` returned empty, and **the restore silently did nothing while the gate reported success.** Caught only because a file stayed dirty after a full run. Same failure mode as everything in this file: a component reporting a result it did not achieve | same |
+| **My first defect this round** | **My first TEST was wrong, not the gate.** I baselined a verifier, ran a *different* one, and expected a "cleared" note. A baselined failure can only be reported cleared if it was actually run | same |
+| Gate evidence level | **Designed → Implemented → Unit Tested (7/7).** **NOT** Simulation Tested, **NOT** Independently Verified. It is test tooling, not robot capability | same |
+| Two baselined failures remain `UNKNOWN` | `evobot_baseline_a_v0_20261111` and `evobot_t08_push_criterion_20261111` are recorded in `known_failures.json` so the gate can run, **not** because they are benign. Cause **UNKNOWN** | same |
+| **T08's blocker is kinematic, not a verdict problem** | The `move_to_pose` action **does** accept a full `PoseStamped` with orientation, so the wrist attitude is commandable in principle — but the URDF analysis (round 2) puts the palm bodies ~82 mm along link5 x with the arm's reachable floor at the block's top edge (0.035). Reaching the side face at mid-height (0.0175) needs either a different tool or a robot change. **Needs approval; not attempted** | `evobot_lead_contact_mechanism_20261112/` |
+| P3 event chain | **STILL INCOMPLETE.** The guard is restored. No change has been applied and re-measured, and the **seven-field experience records with independent review are not delivered.** No round so far has achieved Baseline C end-to-end | — |
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
