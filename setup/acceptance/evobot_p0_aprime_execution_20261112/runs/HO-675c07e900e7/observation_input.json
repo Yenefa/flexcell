@@ -1,0 +1,56 @@
+{
+  "instruction": "Put both blocks in the right bin. The blue block must be put there FIRST, then the red block. Doing it in the other order is not acceptable even if both end up in the right bin. Do not move anything else.",
+  "objects": [
+    {
+      "name": "target_box_a",
+      "color": "red",
+      "position": [
+        0.22,
+        0.0,
+        0.0175
+      ]
+    },
+    {
+      "name": "target_box_b",
+      "color": "blue",
+      "position": [
+        0.2,
+        -0.18,
+        0.0175
+      ]
+    }
+  ],
+  "zones": [
+    {
+      "name": "zone_1",
+      "position": [
+        0.12,
+        -0.15,
+        0.0175
+      ],
+      "radius": 0.06
+    },
+    {
+      "name": "zone_2",
+      "position": [
+        0.25,
+        0.05,
+        0.0175
+      ],
+      "radius": 0.06
+    }
+  ],
+  "skills": [
+    "observe",
+    "pick",
+    "place",
+    "verify",
+    "move_to_pose",
+    "run_composite"
+  ],
+  "frame_convention": "+y is the robot LEFT, -y is the robot RIGHT, +x is forward.",
+  "budget": {
+    "max_steps": 80,
+    "max_wall_s": 900.0
+  }
+}
