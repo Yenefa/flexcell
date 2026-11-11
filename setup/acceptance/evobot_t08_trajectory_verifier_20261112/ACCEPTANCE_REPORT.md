@@ -6,14 +6,51 @@
 | 执行者 | skill-gap（teammate） |
 | 验证器版本 | **1.0.0** |
 | 证据 schema 版本 | **t08-evidence/1.0** |
-| 终态评测器 | **v0.4.0 未改**（与 HEAD 逐字节相同） |
+| 终态评测器 | **v0.4.0 → v0.5.0**（本轮集成，见下） |
+| v0.4.0 行为 | **未放宽任何阈值**；v0.5.0 只做合取，只能把 pass 变 fail |
 | v0.3.0 | **未改**（与 HEAD 逐字节相同） |
 | 30 mm 阈值 | **未改** |
 | TaskSpec | **未改** |
 | PushObject 技能实现 | **未改**（与 HEAD 逐字节相同） |
 | `sim_profile.py` | **未改**（与 HEAD 逐字节相同） |
-| git commit | 无 |
+| git commit | 验证器 `2f90a58a`；v0.5.0 集成 `879d8d82`；集成流程 `d1720049` |
 | LLM 调用 | 0 |
+
+---
+
+## 0.1 v0.5.0 集成（本报告初稿之后补做，必须单列）
+
+本报告初稿写于验证器单独成立时，当时**终态评测器仍是 v0.4.0 且从不调用验证器**。
+一个没人调用的验证器等于一份文档，所以补了集成。
+
+| 项 | 集成前 | 集成后 |
+| --- | --- | --- |
+| 评测器版本 | v0.4.0 | **v0.5.0** |
+| 是否调用 `verify()` | ❌ 从不 | ✅ push 任务必调 |
+| 无证据包时 | 只看终态 | **fail closed** |
+| T01–T06 | 不受影响 | **不受影响**（有测试断言） |
+
+### 决定性用例（v0.4.0 表达不出来）
+
+```
+terminal_passed = True      终态几何完全合格
+failed_clauses  = []        没有子句失败
+passed          = False     仍然判失败
+evidence_status = INCOMPLETE_OR_INVALID_EVIDENCE
+```
+
+### 三个变异证明集成会咬
+
+| 变异 | 被捕获于 |
+| --- | --- |
+| 忽略 `verify()` 返回值 | `test_a_malformed_bundle_fails_closed` |
+| 缺失证据当成通过 | `test_the_terminal_state_alone_is_no_longer_enough` |
+| 证据要求泄漏到 T01–T06 | `test_t01_has_no_evidence_requirement_and_keeps_its_old_shape` |
+
+### 30 mm 阈值被测试钉死
+
+`test_the_30mm_threshold_is_untouched` 断言 `min_displacement_m == 0.030`。
+连续三次失败（23.02 / 28.55 / 23.26 mm）正是最想改它的压力点。
 
 ---
 
@@ -117,9 +154,14 @@ bash ci-public-window/scripts/evobot_t08_evidence_run.sh <out> <task> 0.030 47
 实测产出：
 
 ```
-contact_steps.jsonl    3213 行   （每物理步）
-physics_steps.jsonl    3210 行   （每物理步）
-joint_states.jsonl      937 行
+evidence_bundle.json   内嵌 3210×2 完整样本（1.47 MB，可复核）
+contact_steps_sample.jsonl   200 行（预览切片；全量在 bundle 内）
+physics_steps_sample.jsonl   200 行（预览切片；全量在 bundle 内）
+joint_states_sample.jsonl    100 行（预览切片；全量 937 在 bundle 内）
+
+**归档说明**：`_sample.jsonl` 是为便于人眼查看而截取的预览，**不是全量证据**。
+全量样本内嵌在 `evidence_bundle.json` 的 `objects.*.samples` 里，验证器读的是后者。
+引用行数时必须以 bundle 为准，否则会误以为证据被截断。
 ```
 
 recorder 读出的 bundle：
