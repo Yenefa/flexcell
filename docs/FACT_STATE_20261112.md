@@ -73,6 +73,68 @@ acceptance dir).
 | T08 unseen instances 3000–3002 | **NOT_RUN** — zero runs | `benchmark/tasks/t08_unseen/` |
 | T08 as a usable robot capability | **NOT ACQUIRED** | `passed` false everywhere; unseen unrun; mechanism of the variance UNKNOWN |
 
+### 4.0a The first T08 runs with a complete evidence bundle (sim lane, this round)
+
+These are the first T08 trials where `passed` is a **decidable** question rather than permanently false
+for lack of a bundle. All four re-graded independently by the validation lane: **0 disagreements**.
+
+| Trial | terminal | passed | failed gates | reading |
+| --- | --- | --- | --- | --- |
+| R/t1 | **true** | false | `gripper` | 149.07 mm, cos 0.99999, in zone at 49.07/60 mm, lift 1.82 mm — **every terminal clause passed** |
+| R/t2 | false | false | `terminal` | cos **−0.99269** — pushed the wrong way 65 mm |
+| R/t3 | false | false | `terminal` | 141 mm, cos 0.9998, in zone — failed **only** on max_lift 7.2 mm vs 5 mm |
+| R/t4 | false | false | all 9 | incomplete artifact set — **INVALID_INFRA**, not a robot failure |
+
+**Producer integrity: CONFIRMED.** The sim lane bound `rest_height` to the spec
+(`rest_height_from_spec = rest_height_declared_to_recorder = 0.0175`) and recomputed `max_z` from the
+raw physics log (3580 samples). So the verifier bypass described in §4.0 is **not** exercised by this
+batch.
+
+### 4.0b Adjudication: R/t1's single failing gate is not what the auditor thought
+
+The validation lane reported R/t1 as a probable **false failure** caused by a **units error**
+(`0.002 rad` should be `0.040 rad`). The Lead re-derived it from the robot model:
+
+```
+open_manipulator_x.urdf: <joint name="gripper_left_joint" type="prismatic">
+                         <limit lower="-0.011" upper="0.02"/>
+```
+
+The joints are **prismatic** → position is **metres**, so `0.002` already means 2 mm and the units
+claim is **REFUTED**. Two real defects do sit underneath, and they are recorded instead:
+
+| # | Defect | Severity |
+| --- | --- | --- |
+| A | Field `max_aperture_change_rad` carries **metres**; `verify.py:339` reports it back as `limit_rad` | low — a label asserting a unit it does not have |
+| B | The gate bounds **travel only** and never tests whether the aperture could **enclose** the object — the property that defines a grasp | **real, false-rejection path** |
+
+Measured from R/t1's own bundle (1666 samples): aperture `[-0.002960, +0.000096]`, i.e. the fingers sat
+within ~3 mm of the **closed** stop, max finger gap **0.2 mm**. A 35 mm block cannot be between them at
+any sample. Meanwhile the project's own archived `pick.jsonl` records `GRASPED_AT_GOAL` at
+`position = −0.00107` — the **same aperture region**. So a 2 mm bound is narrower than the variation
+this project's own nominal grasps exhibit, and the bound is **untraceable to any measurement**
+(`evaluate.py:328` calls it "calibrated" with no citation).
+
+**Disposition — decided, and it is a decision not to act:** R/t1 keeps `passed=false`. The limit is
+**not** raised, the field is **not** renamed, and R/t1 is **not** re-graded as a pass this round.
+Converting the round's only `terminal_passed=true` into its headline success, on the strength of a
+threshold change made *after* seeing it fail, is precisely the "adjust the acceptance rule to
+manufacture success" failure the mission forbids. Correct order is **calibrate, then re-grade**.
+
+**The experiment that settles it (2 Gazebo runs, no model calls):** G1 = a genuine grasp of the 35 mm
+block; G2 = the T08 push (have it); G3 = closed-finger sweep with no object. If G1 separates from G2, a
+data-justified threshold exists. **If they overlap, aperture travel cannot distinguish grasp from
+contact on this robot and the gate needs a different observable — not a different number.**
+
+### 4.0c Limits divergence is now a live false-rejection path
+
+R/t3 failed its terminal clause on `max_lift 0.0072 m vs allowed 0.005` while its displacement,
+direction and zone all passed. But the spec's own `max_vertical_m` is **0.020**, and
+`evaluate.py:327` passes **0.020** to the evidence layer. So the same run is judged against **0.005** in
+the terminal layer and **0.020** in the evidence layer — the terminal layer is **stricter than the spec
+it is grading**. Three different lift limits are in play across three layers
+(`fixtures.py` 0.005, `evaluate.py` 0.020, terminal default 0.005). **CONFIRMED defect.**
+
 ### 4.0 The verifier itself is not fail-closed against a fabricating producer
 
 Found by the independent validation lane and **re-verified by the Lead against the source** this round.
@@ -137,12 +199,46 @@ approval before merge because it changes the acceptance protocol.
 | **C** (self-evolving) | **NOT_RUN as a closed loop** — experience store + diagnosis + retrieval exist with offline tests, never executed in Gazebo as a full event chain | `PROJECT_STATUS.md`, capability report §5 |
 | **D** | **UNKNOWN — undefined**; the goal §7.5 gives a *proposed* definition only, explicitly not frozen | goal §7.5, capability report §5 |
 
-### 5.1 The one integrity question left open in P0
+### 5.1 The P0 integrity question — **RESOLVED this round** (H1 confirmed, H2 killed)
 
 `T04-train-seed1000`: executor `outcome=1 (FAILED)`, independent verifier `passed=True`.
-Skill reported `ERR_PLACE_FAILED(25)` with `gripper did not open, position=-0.011 requested=0.02`,
-executor reported 62. **This is a False Failure at minimum; the cause is UNKNOWN.** Assigned to a
-diagnosis lane this round. Until resolved, B's 9/9 may not be quoted without this caveat.
+Skill reported `ERR_PLACE_FAILED(25)`, executor reported 62.
+
+**Discriminating measurement (bit-exact, no sampling):** the object's XY at release and in the final
+ground truth are *the same floating-point values* —
+`place.jsonl object_before_release = [0.12515345487641943, -0.14727041380856554]` and
+`gt_after.json target_box_b = [0.12515345487641943, -0.14727041380856554]`.
+**Lateral displacement release→final = 0.000e+0 m (exact zero)**; only Z changed (−7.572 mm, gravity
+settle). The goal was already satisfied **1.10 s before** the failure was written.
+
+| Hypothesis | Verdict |
+| --- | --- |
+| **H1** the object was already placed; the failure is a false negative | **CONFIRMED** |
+| **H2** the object arrived incidentally after a genuine mid-episode failure | **KILLED** — H2 requires lateral motion; it is exactly zero |
+
+**Attribution:** State Management (primary) — the skill's success predicate tests **jaw aperture** while
+the actual release is performed by the **carry pin**; and it early-returns before recording any physical
+outcome, so `box_after`/`place_error_m` are absent. Tooling/Environment (secondary) — benchmark vacuity.
+**Explicitly not** Kinematics, Control, Grasp, Planning, Perception, Runtime or Model Reasoning.
+
+**Scope correction to the known P1 defect:** this is **not** the approved P1 signature. `pick.attach_gap_m
+= 0.1646 m`, so the box hangs 0.1646 m **below** the end effector and the jaws never held it. The precise
+claim is: *the success predicate tests a mechanism that is not the one performing the release* — a
+**scope error in one predicate**, not a second bug. **Fix location = `place_server.py`, NOT the
+contract** (the contract already exposes `released` and the skill discards it; `native_success()`
+re-derives success and must not be weakened; `recovery.py` correctly forbids PLACE retry). **Gated on
+human approval — location conclusion only, no edit proposed or made.**
+
+**Rate is UNKNOWN** (n=1). Missing artifact: `pick.jsonl` (`attach_gap_m`/`carry_offset`) for the 9
+`HO-*` runs — one re-execution of any `HO-*` instance settles whether the 0.1646 m pin geometry is
+universal or whether both mechanisms coexist.
+
+**Metric rule derived (now project-wide):** `false_failure` is **only defined when an agent made a
+claim**. It is computed as `passed and not agent_claimed_success` (`evaluate.py:254/344`), so with no
+claim it degenerates to `== passed` and reports `true` on **every passing run** regardless of any defect.
+It measures claim calibration, not executor correctness, and is meaningful only paired with
+`false_success`. Quoting it from a claim-less run is a category error — all 9 B runs report `true`,
+including the 8 clean ones.
 
 ---
 
