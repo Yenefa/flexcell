@@ -30,6 +30,30 @@ import agent_planner as ap
 DEFAULT_STORE = WT / "evolution" / "experience" / "records.jsonl"
 
 
+LEDGER = "review_ledger.jsonl"
+
+
+def _rejected_shas(store_path):
+    """record_sha256 values an independent reviewer rejected. Absent ledger = nothing rejected."""
+    import json as _json
+    import os as _os
+    path = _os.path.join(_os.path.dirname(str(store_path)), LEDGER)
+    if not _os.path.exists(path):
+        return set()
+    out = set()
+    try:
+        for line in open(path, encoding="utf-8"):
+            line = line.strip()
+            if not line:
+                continue
+            entry = _json.loads(line)
+            if entry.get("verdict") == "REJECT":
+                out.add(entry.get("record_sha256"))
+    except (OSError, ValueError):
+        return set()
+    return out
+
+
 def retrieve(observation, store_path=DEFAULT_STORE, limit=3):
     """Return validated lessons that can actually change a PLAN.
 
@@ -59,8 +83,19 @@ def retrieve(observation, store_path=DEFAULT_STORE, limit=3):
     # stores with no provenance field fall back to the old field so their behaviour is
     # unchanged - a fallback, not a preference.
     all_rows = store.read(store_path)
-    verified = [r for r in all_rows if r.get("provenance_verified") is True]
-    if verified:
+    # AN INDEPENDENT REJECT MUST STOP A LESSON REACHING A PLAN.
+    # A provenance check only proves the evidence is findable. It does not prove the lesson follows
+    # from it. Two records passed provenance and an independent review then found their lessons
+    # false - the plan was correct in both and a 9.65 mm placement error inside the accepted 20 mm
+    # tolerance broke the next stage. A wrong lesson that passes provenance is WORSE than a record
+    # that fails provenance, because this path would act on it.
+    rejected = _rejected_shas(store_path)
+    verified = [r for r in all_rows
+                if r.get("provenance_verified") is True
+                and r.get("record_sha256") not in rejected]
+    if any(r.get("provenance_verified") is True for r in all_rows):
+        # This store uses provenance. Do NOT fall back to unverified records just because every
+        # verified one was rejected - an empty retrieval is the honest answer.
         rows = verified
     else:
         rows = [r for r in all_rows if r.get("validated")]
