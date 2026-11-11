@@ -544,4 +544,24 @@ destination. Recovery did not rescue a task; it undid one.
 | The risky part is the proposal's own follow-on prediction | **Part 2 (`place_box_after_will_be_recorded`) changes the grading input for 51 rows**, shifting provenance from `verify.jsonl` to `place.box_after`. It is **not covered** by the proposal's safety argument and needs its own regression check. Whether it creates false success is **NOT DEMONSTRATED** — `box_after` does not exist on those rows, so its future value cannot be read offline. Unlikely is not a test | same |
 | The pattern behind three separate findings | **A claim that some quantity is not used, made without tracing its use.** Round 2: aperture travel assumed to mean a grasp (0.42 mm from air). Round 3: aperture assumed to mean a release (`carry_release_confirmed` in the same record). Round 4: assumed the evaluator does not read `released` (`observe_from_run.py:74` does). **The cheap check is a grep** | all three |
 
+---
+
+## ADDENDUM — goal round 5 (2026-11-12): P3's improvement chain is not gated
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| P3's regression gate | **DISABLED.** `evolution/proposals/run_loop.py:68` calls `regress.gate(proposal, run_regressions=False)` while the gate defaults to `True`. The gate's own docstring calls itself "the guard that makes Baseline C different from let the agent edit code". **A proposal that breaks every verifier is accepted and written** | `evobot_lead_p3_gate_integrity_20261112/` |
+| Why it was disabled | **A real reason.** Enabling it: **105 of 109 verifiers pass, 4 fail for pre-existing reasons.** An all-green gate would reject every proposal forever. It was turned off rather than made differential — **so it has never gated anything** | same |
+| The capability freeze | **THREE generations, formally re-pinned** (`evobot_capability_freeze_20261111` → `evobot_freeze_change_20261111` → `benchmark/capability_baseline.json`). My first draft claimed a violated freeze; **that was too strong and I withdrew it before publishing**. Drift against a superseded baseline is expected | same |
+| The **LIVE** baseline | **exactly ONE drift: `benchmark/evaluators/evaluate.py`** (pinned `c75eaf78…`, actual `441903f1…`). Changed at `4fd36cd6` on 2026-11-12 after the live baseline was recorded, and never updated | same |
+| `evobot_capability_freeze_20261111/verify.py` | **validates the OLDEST baseline, superseded twice, never retired** — so it fails permanently on files that are *supposed* to have changed. It is one of the four reasons the gate stays off | same |
+| `freeze_check.txt` and `evidence_summary.txt` | **BOTH STALE.** They record `{"baseline": "INTACT", "pinned": 9}` and `verifier failures: 0` while the verifier currently fails. Same pathology as round 3's `released: false` beside `carry_release_confirmed: true` | same |
+| **The gate is not read-only** | **108 of 109 `verify.py` write their own `verify_result.json`.** Running the gate rewrites evidence across the acceptance archive. A gate that mutates the evidence it reads cannot certify it unchanged | same |
+| A verifier can fail because the world got **better** | **`evobot_p2_feasibility_20261111` is red because commit `0dc1245b` ADDED the push clause** — fixing exactly the deficiency its pre-registration documented ("no displacement/push clause"). Not a regression: a **stale premise** | same |
+| The general form of that | **A verifier of the shape "X is currently missing" becomes permanently false the moment X is added, and then blocks every gate that includes it. Premise verifiers need a retirement date, not just a creation date** | — |
+| Corrected count of the 4 failures | **2 of 4 are stale records, not live defects** (`capability_freeze`, `p2_feasibility`); the other two (`baseline_a_v0`, `t08_push_criterion`) were not investigated this round → **UNKNOWN** | same |
+| `run_loop.py` writes proposals in place | **it overwrote `evolution/proposals/actuator_stall.json`**, a proposal awaiting review. Reverted with `git checkout`. A proposal awaiting human approval can be silently replaced by a regeneration | same |
+
+**Nothing repaired.** No pinned file edited, no re-run performed (a human decision at sanctioned cost), no threshold or spec or verdict changed.
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
