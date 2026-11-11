@@ -480,3 +480,21 @@ LIBERO (Panda) never folded into OpenMANIPULATOR-X capability.
 | `order` clause graded from a snapshot | **SILENTLY FAILS — harness defect.** It reads `final_state['move_sequence']`; given `{objects}` alone the sequence is empty and the clause fails by construction. I hit this and nearly recorded it as an A-prime failure | `evaluate.py` order clause |
 
 **The general lesson, worth carrying beyond P0:** *a clause that needs a time series must refuse to grade when given a snapshot, not silently fail.* This is the mirror of the vacuous-clause finding — there a clause passed for the wrong reason, here one failed for the wrong reason. Both are the harness, not the robot.
+---
+
+## ADDENDUM — goal round 3 (2026-11-12): the False Failure mechanism
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| The ~30–37 % false-failure rate on both P0 arms | **ONE DEFECT, root-caused.** `place_server.py:424-432` uses **gripper aperture** as the release predicate: fails when `aperture_error > 0.005` **and** `not reached_goal`, with `gripper_open_position = 0.02` | `evobot_lead_place_release_predicate_20261112/` |
+| Why that predicate is wrong on this robot | **CONFIRMED.** The transport is a `velocity_servo` **pin** with offset z = **−163.8 mm** (`carry.jsonl`), so the fingers never touch the object. Aperture is not evidence about an object the gripper is not holding. Same quantity as T04's `attach_gap_m = 0.1646 m`, found independently | same |
+| The aperture band is narrower than the actuator's own shortfall | **CONFIRMED.** G1 measured free-space open at **0.0104** against a 0.02 target → `aperture_error = 0.0096 m`, nearly **2× the 0.005 m tolerance**. The check passes only because `reached_goal` rescues it; it is one flag from rejecting every placement | G1 calibration + `place_server.py:68-69` |
+| The object is released anyway | **CONFIRMED.** `place` returns `released: false`, while `carry.jsonl` records `{'event':'stop','cause':'release','engaged':true}`. The pin releases on abort and drops the box at the destination — which is why 4 of A-prime's 7 "failures" still pass evaluation | same |
+| Frequency | **12 of 63 place attempts (19 %); 12 of 32 runs (37.5 %)** — A-prime 7/16, B 5/16 | `analyse_place_failures.py` |
+| Historical reach | **51 of 539 place attempts (9.5 %) across 21 acceptance archives, back to 20261010.** Worst: P0 A-prime 24.1 %, goal-check A/B 16.7 %, pooled n=32 16.7 %, crosstype 14.7 %, unseen n6 14.3 % | sweep of every `place.jsonl` |
+| B's "architectural recovery edge" (14/16 → 16/16) | **REFUTED.** Both recovered runs failed their first attempt with **exactly this defect**: `PICK_A(attempt=1):OK, PLACE_A:FAIL, ERR_PLACE_FAILED, legacy_error_code=25`. B's edge is a retry loop around its own place bug, not a capability | `failure_evidence.json` of both runs |
+| Who is the better arm | **NOT ESTABLISHED.** Every run separating A-prime (13/16 one-shot) from B (14/16 first, 16/16 with retries) fails for this defect. The comparison cannot distinguish them | same |
+| Every execution-based success rate in project history | **AN UNDERESTIMATE**, by 5–24 % of place attempts depending on the batch. Task-level evaluation figures are **unaffected** — they read the world, not the verdict | same |
+| The general lesson | **On this robot, gripper telemetry is not evidence about objects.** The same mistake appears twice: T08's push gate uses aperture travel to detect *a grasp* (refuted round 2), `place` uses aperture position to detect *a release* (refuted now). Both use a gripper-state proxy for an object-level event | both refutations |
+
+**The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
