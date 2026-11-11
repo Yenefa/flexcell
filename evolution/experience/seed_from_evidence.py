@@ -58,11 +58,19 @@ def review_seed(s, store_path):
 def main(argv=None):
     argv = argv or sys.argv[1:]
     dry = '--dry-run' in argv
+    append_mode = '--append' in argv
+    seeds_path = SEEDS
+    for i, a in enumerate(argv):
+        if a == '--seeds' and i + 1 < len(argv):
+            seeds_path = Path(argv[i + 1])
     store_path = Path(STORE)
-    if store_path.exists() and not dry:
-        print('store already exists; append-only, refusing to reseed')
+    # Refuse a full reseed, but ALLOW appending: append is inherently safe (dedup by
+    # record_sha256, never rewrites, never deletes). Without this the store could never
+    # gain a record after the first run of the old seeder.
+    if store_path.exists() and not (dry or append_mode):
+        print('store already exists; append-only, refusing to reseed (use --append)')
         return 1
-    seeds = json.loads(SEEDS.read_text(encoding='utf-8'))
+    seeds = json.loads(seeds_path.read_text(encoding='utf-8'))
     accepted = rejected = 0
     for s in seeds:
         ok, why, rec = review_seed(s, store_path)

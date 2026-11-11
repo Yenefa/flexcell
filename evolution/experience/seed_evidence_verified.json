@@ -1,0 +1,24 @@
+[
+  {
+    "task_id": "T05-recover-occupied-stage",
+    "failure_class": "planning",
+    "evidence": {
+      "detail": "state drift or occupied destination before target_box_b-1",
+      "error_code": 61
+    },
+    "lesson": "Before sending a second object into an area, check that area is still free; order the moves so a later stage is not blocked by an earlier one.",
+    "source_run": "setup/acceptance/evobot_recover_n6_20261111/runs/HO-90899d657e68",
+    "outcome": "failed"
+  },
+  {
+    "task_id": "T05-recover-declared-occupied",
+    "failure_class": "planning",
+    "evidence": {
+      "detail": "declared destination occupied at target_box_b-1",
+      "error_code": 60
+    },
+    "lesson": "A plan whose second move names an already taken destination is rejected before it runs, so the planner must choose a free one for each object.",
+    "source_run": "setup/acceptance/evobot_recover_n6_20261111/runs/HO-90899d657e68",
+    "outcome": "failed"
+  }
+]
