@@ -149,3 +149,65 @@ python3 setup/acceptance/evobot_lead_p0_aprime_vacuity_20261112/check_aprime_bli
 Both offline, no simulator, no model calls. The coverage scanner refuses on zero specs; the
 blindness checker refuses if the sample spec lacks `expected_goal`, since the test would otherwise
 be vacuous itself.
+---
+
+# CORRECTION (2026-11-12): the number stands, my characterisation was WRONG
+
+**The independent audit (task-11, gate-auditor) confirmed the count and refuted the framing. It is right and I was wrong.** This section replaces section 2's characterisation; section 1's numbers stand.
+
+## What I got right
+
+- **A-prime plans 0 of the specs in benchmark/tasks/.** The auditor's from-scratch census agrees, and improves the denominator: **114 specs, not 72** - the corpus also contains T08 x6.
+- Every downstream consequence: P0's A-prime-vs-B comparison is **NOT_RUN, not failed**; every 'A-prime vs B' statement compares B against an arm that produced no plan on those tasks.
+- The answer-blindness check (section 7) and the conditional-reducer hole both stand.
+
+## What I got WRONG
+
+**I wrote: 'the rules were written for templates that do not exist.'** That is false, and it is false because my census only enumerated benchmark/tasks/.
+
+T12, T13 and T14 **are first-class templates** in benchmark/generators/unseen_tasks.py:67-153 (the TEMPLATES dict), referenced by build scripts, test modules, the held-out sealer, and a purpose-built runtime/planner/rule_planner_pre_t14.py lineage. They are absent only from the **task split**.
+
+I verified the auditor's decisive test myself rather than accepting it - generating 12 instances of each template and running the real planner:
+
+| template | planned | refused | moves per plan |
+| --- | --- | --- | --- |
+| T12_triple_revisit | **12** | 0 | 3 |
+| T13_geometric_conditional | **12** | 0 | 2 |
+| T14_ordered_pair | **12** | 0 | 2 |
+| **total** | **36** | **0** | |
+
+A sample T14 plan, from the real instruction '...The blue block must be put there FIRST, then the red block...':
+
+```json
+[{"object": "target_box_b", "zone": "zone_2", "why": "required first by the instruction"},
+ {"object": "target_box_a", "zone": "zone_2", "why": "required second by the instruction"}]
+note: T14 order parsed
+```
+
+**A-prime is 36/36 correct on the templates it was built for.** An arm that does that is not vacuous.
+
+## The correct statement
+
+> **A-prime is correct for T12/T13/T14, and the benchmark's task split contains none of them. P0's A-prime-vs-B comparison is NOT_RUN - not because the baseline is vacuous, but because the two arms were pointed at different template families: B at T01-T06, A-prime at T12-T14. The baseline is real; the pairing is the defect.**
+
+## Why the difference is material, not cosmetic
+
+| | my framing ('vacuous') | the correct framing ('split mismatch') |
+| --- | --- | --- |
+| implies | rewrite the planner | the planner already works; it needs a matching corpus |
+| remedy | write new rules | run A-prime on T12/T13/T14, or add those templates to the split |
+| what it says about A-prime | cannot act | acts correctly, and declines honestly where it cannot parse |
+| cost | weeks of unnecessary rule work | one experiment |
+
+**My framing would have caused exactly the wrong work.** The auditor also established that the decline is *honest* rather than silent: the planner refuses with a reason rather than guessing, which is the behaviour this project has been demanding everywhere else.
+
+## What I am keeping from my own analysis
+
+The finding that P0 has **no usable baseline comparison** stands, and is the reason this matters. But the honest reason is a **mismatch between two template families**, not a broken planner. Sections 1-7 above are left unedited so the error and its correction are both visible rather than silently rewritten.
+
+## The remaining real work, restated
+
+Not 'write six rules for T01-T06' (task-10 as I originally scoped it). Instead:
+
+1. **Establish whether A-prime's T12/T13/T14 plans actually execute and pass** - 16 real Gazebo runs for T14 already exist under evobot_crosstype_20261111/; grade them with the frozen evaluator.
+2. **Decide the P0 pairing**: run both arms on the same family. Either extend the split with T12/T13/T14, or give A-prime rules for T01-T06 as a *second* arm. The first is cheaper and tests the existing planner; the second tests whether the rule approach generalises at all.
