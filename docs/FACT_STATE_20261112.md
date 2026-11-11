@@ -121,6 +121,8 @@ approval before merge because it changes the acceptance protocol.
 | --- | --- | --- |
 | **A** (deterministic executor) | **CONFIRMED** A-v2 = 71/72 = 98.6 %, False Success 0 | `evobot_a_v2_final_20261111/` |
 | A-v0's 44/72 | **INVALID as a capability measure** — process leak (136 orphans, `load_after` 2.48→19.89) | `PROJECT_STATUS.md`, retraction recorded |
+| A-v2's 72 verdicts under **one** evaluator | **INVALID** — the archive mixes `evaluator_version` **0.2.0 (27)**, **0.3.0 (40)**, **0.4.0 (5)** | `evobot_lead_regression_v050_20261112/README.md` §3 |
+| A-v2 **version-robustness** | **CONFIRMED** — re-grading all 72 archived observations with `evaluate.py` v0.5.0 reproduces **72/72 verdicts, 0 disagreements**, including the single T05 failure | same doc §2, `run_regression.sh` (exit 0) |
 | **A′** (rule planner, no LLM) | **CONFIRMED** 72/72 at plan level on T01–T06 | `evobot_rule_saturation_t01_t06_20261111/` |
 | A′ 72/72 meaning | **Known negative result**: rules were written *after* seeing the templates; this proves a 6-rule regex matches the LLM on these templates, **not** generalisation | same doc |
 | **B** v1 | CONFIRMED, n=1, real Gazebo, PASS — **SUPERSEDED** | `evobot_t01_baseline_b_20261111/` |
@@ -129,6 +131,9 @@ approval before merge because it changes the acceptance protocol.
 | **A′ vs B** paired comparison | **MISLABELLED — the "A′" column is the ORACLE.** `evobot_batch_v2_gated.sh` → `evobot_run_b.sh:31` → `build_composite_plan.py:44` → `baseline_a_composite.plan_from_spec`, which reads `expected_goal`. Regenerating with that builder reproduces the archived plan **byte-identically**; the real rule planner produces a *different* plan on T06 (2 hops vs 1). So the 12-identical/5-different table is **oracle-A vs B**, and the goal §6.4 A′/B gate is **NOT closed**. | `setup/acceptance/evobot_p0_aprime_mislabel_20261112/README.md` (three reproductions) |
 | What the paired table still validly shows | Oracle-A and B agree on all 9 executed outcomes; B is not worse than open-book execution on these instances — **CONFIRMED**, but near-tautological since the oracle reads the answer | same |
 | Genuine A′/B paired **execution** | **NOT_RUN** — task-6 assigned; requires running A′ plans through RunComposite | `team_task_list` task-6 |
+| **"A′" is ambiguous in this repo** | **CONFIRMED — three distinct implementations** carry the name: `rule_planner_t01_t06.py` (source of the 72/72), generic `rule_planner.py` (**declines 100 % of T01–T06**), and `baseline_a_prime_rules.py` (a third rule set). Different hashes, different behaviour. | `evobot_t08_gate_audit_20261112/PROVENANCE_APRIME_VERIFICATION.md` §4, verified by the Lead |
+| `evobot_p0_paired.sh` (the script that claims to produce the paired execution) | **BROKEN — has never run.** Python heredoc block 1 fails to compile (`unexpected indent`, lines 90-91); `bash -n` passes because bash cannot see inside a heredoc; **no `paired.tsv` exists anywhere** | Lead reproduction + auditor §5 |
+| A′ 72/72 scope | **PLAN LAYER ONLY, never executed in Gazebo** — must not be quoted as an execution result | `rule_saturation_t01_t06` banner; auditor §4 |
 | **C** (self-evolving) | **NOT_RUN as a closed loop** — experience store + diagnosis + retrieval exist with offline tests, never executed in Gazebo as a full event chain | `PROJECT_STATUS.md`, capability report §5 |
 | **D** | **UNKNOWN — undefined**; the goal §7.5 gives a *proposed* definition only, explicitly not frozen | goal §7.5, capability report §5 |
 

@@ -73,7 +73,7 @@ evidence about planning intelligence; it is evidence that B reproduced the answe
 | --- | --- |
 | B executed 9 instances in real Gazebo, 9/9 independently passed, False Success 0 | **UNAFFECTED** — B's execution and its independent grading are untouched |
 | A-v2 executed 72 instances, 71/72 | **UNAFFECTED** — but this is Baseline **A (oracle)**, exactly as previously labelled |
-| "A′ scores 72/72 at plan level on T01–T06" | **UNAFFECTED** — that number comes from `benchmark/rule_saturation_t01_t06.py` → `rule_planner_t01_t06.py`, a different and correctly-labelled path |
+| "A′ scores 72/72 at plan level on T01–T06" | **PATH CONFIRMED, SCOPE CORRECTED — see §9.** The 72/72 is real and reproducible from `benchmark/rule_saturation_t01_t06.py` → `rule_planner_t01_t06.py`, but it is **plan-layer only and A′ has never been executed in Gazebo**, and there are **three different artifacts called "A′"** in this repo |
 | "A′ and B produced 12 identical / 5 different plans" | **INVALID AS LABELLED** — it is *oracle-A* vs B |
 | "The 5 plan differences do not change any verdict" | **WEAKER THAN STATED** — it shows the oracle and B agree on outcomes, which is close to tautological |
 | "This is the P0 A′/B paired comparison required by the goal §6.4" | **NOT MET** — goal §6.4 requires *same public observation* for both arms; the oracle reads `expected_goal`, A′ does not |
@@ -132,3 +132,54 @@ evidence of a real planning advantage, and it would need its own verification.
 Every claim above was produced by re-running a command in this repository this round; no simulator
 was started and no model was called. The two byte-identical `diff` results and the true-A′ plan
 contents are the evidence. Reproduce with the commands in §3.
+
+---
+
+## 9. Correction, after independent review (added 2026-11-12)
+
+The independent validation lane (`setup/acceptance/evobot_t08_gate_audit_20261112/PROVENANCE_APRIME_VERIFICATION.md`)
+re-derived this document's claims and **confirmed them, while correcting §4**. The Lead verified the
+correction directly and accepts it. Recording it here rather than quietly editing §4, because a
+finding about provenance errors must not itself hide a revision.
+
+### 9.1 What was wrong in §4
+
+§4 said the 72/72 A′ result was "unaffected". The *path* attribution was right; the **scope** was not.
+There are **three distinct artifacts in this repository all called "A′"**, with different behaviour:
+
+| Artifact | Planner module | Behaviour on T01–T06 |
+| --- | --- | --- |
+| `benchmark/rule_saturation_t01_t06.py:23` | `runtime/planner/rule_planner_t01_t06.py` | parses all six templates; this is the source of **72/72** |
+| `runtime/planner/run_baseline_a_prime.py:29` | `runtime/planner/rule_planner.py` (generic) | **declines every T01–T06 instruction** ("no rule matched") |
+| `ci-public-window/scripts/evobot_p0_paired.sh:67` | `rule_planner_t01_t06` | parses correctly, but the script cannot run — see §9.2 |
+| (plus `experiments/baselines/baseline_a_prime_rules.py`) | third rule set, `BIN_WORD` mapping | cited by `BASELINE_CORRECTION.md:36` |
+
+Verified by hashing the three modules — they are three different files. A reader cannot tell from any
+document which "A′" a given number refers to. **That is the real defect, and it is broader than the one
+mislabelled column this document originally reported.**
+
+### 9.2 A second, independent defect: the paired-execution script has never run
+
+`ci-public-window/scripts/evobot_p0_paired.sh` — the script whose name claims to produce the genuine
+A′/B paired execution — contains a Python heredoc that **does not compile**:
+
+```
+lines 90-91 (inside the for-loop body at 4-space indent):
+        s.place_pose = ps; stages.append(s)     <- 8 spaces, unexpected indent
+python3 compile of heredoc block 1 -> SyntaxError: unexpected indent, line 30
+bash -n passes (bash cannot see inside a heredoc); 3 heredoc blocks found, block 1 fails
+```
+
+No `paired.tsv` exists anywhere in the repository. So **the "P0 paired execution" has no artifact at
+all** — the archived table is plan-comparison only. This independently supports §4's conclusion that
+the P0 gate is open, and it means the gate cannot be closed by re-running that script as committed.
+
+### 9.3 Net effect on this document's conclusion
+
+**Strengthened, not weakened.** The original conclusion was "the A′/B gate is not closed". The
+correction makes the reason worse: it is not merely that the A-side was the oracle, but that (a) the
+A′ label is ambiguous across three implementations, and (b) the script that would have closed the gate
+has a syntax error and has never produced an artifact.
+
+**What still stands unchanged:** B's 9/9 real Gazebo execution with False Success 0; the oracle-A vs B
+12/5 plan table (correctly relabelled); the need for a genuine A′/B paired execution (task-6).
