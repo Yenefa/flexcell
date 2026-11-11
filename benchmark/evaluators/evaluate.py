@@ -17,7 +17,7 @@ import math
 # 0.3.0 adds the "push" goal clause (T08). It is a pure addition: a spec that does not
 # declare "push" produces exactly the clause list it produced under 0.2.0, which is
 # asserted by re-grading a frozen instance and comparing the verdict.
-EVALUATOR_VERSION = "0.4.0"
+EVALUATOR_VERSION = "0.5.0"
 
 # Declared tolerances. Changing one changes what "success" means, so the version
 # string must change with them; the tests assert the pair stays in sync.
@@ -250,19 +250,77 @@ def evaluate(spec, final_state):
             min_direction_cosine=min_cos,
             **zone_ev, **lift_ev))
 
-    passed = bool(clauses) and all(c["ok"] for c in clauses)
+    terminal_passed = bool(clauses) and all(c["ok"] for c in clauses)
     claimed = bool(final_state.get("agent_claimed_success"))
-    return {
+
+    # ---------------------------------------------------------------------
+    # v0.5.0: the terminal verdict is no longer the whole verdict.
+    #
+    # Terminal geometry cannot tell a push from a pick-carry-place; v0.4.0
+    # patched that with a single number (max_z). A task that forbids grasping
+    # deserves the full physical evidence set: trajectory continuity, table
+    # support, no lift, pusher contact, gripper aperture, attachment events and
+    # teleport detection.
+    #
+    # THE TERMINAL CLAUSES ARE NOT RELAXED. This can only turn a pass into a
+    # fail, never a fail into a pass: passed is the conjunction.
+    #
+    # Missing evidence is a failure, not a skip. Every gate that cannot be
+    # evaluated counts as failed, because skipping on missing data is how a
+    # verifier quietly becomes a rubber stamp.
+    #
+    # Backwards compatibility: a spec with no push clause -- every T01-T06
+    # task -- gets no evidence requirement, so all frozen results are
+    # unchanged.
+    evidence = None
+    passed = terminal_passed
+    wants_push = bool(goal.get("push") or {})
+    if wants_push:
+        bundle = final_state.get("evidence")
+        if bundle is None:
+            evidence = {
+                "passed": False,
+                "physical_outcome": "UNKNOWN",
+                "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+                "failure_reason": ("no evidence bundle was supplied; a push cannot "
+                                   "be confirmed from terminal geometry alone"),
+                "gates": [],
+            }
+            passed = False
+        else:
+            # The evidence package imports its sibling `schema` module both
+            # relatively and flatly, so the package root AND the evidence
+            # directory itself must both be importable. Getting this wrong is
+            # silent: the import failure would otherwise surface as a missing
+            # bundle rather than a wiring bug.
+            import os as _os
+            import sys as _sys
+            _here = _os.path.dirname(_os.path.abspath(__file__))
+            _bench = _os.path.dirname(_here)
+            _evdir = _os.path.join(_bench, "evidence")
+            _root = _os.path.dirname(_bench)
+            for _p in (_evdir, _root):
+                if _p not in _sys.path:
+                    _sys.path.insert(0, _p)
+            from benchmark.evidence.verify import verify as _verify_evidence
+            evidence = _verify_evidence(bundle, {"passed": terminal_passed})
+            passed = bool(terminal_passed and evidence.get("passed"))
+
+    result = {
         "evaluator_version": EVALUATOR_VERSION,
         "task_id": spec["task_id"],
         "template_id": spec["template_id"],
         "passed": passed,
+        "terminal_passed": terminal_passed,
         "clauses": clauses,
         "failed_clauses": [c["clause"] for c in clauses if not c["ok"]],
         "agent_claimed_success": claimed,
         "false_success": bool(claimed and not passed),
         "false_failure": bool(passed and not claimed),
     }
+    if evidence is not None:
+        result["evidence"] = evidence
+    return result
 
 
 def evaluate_file(spec_path, state_path):
