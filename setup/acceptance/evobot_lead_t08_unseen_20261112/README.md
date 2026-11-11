@@ -1,117 +1,123 @@
-# T08 on unseen instances: **0 of 6** — the first generalisation measurement, and it is negative
+# RETRACTED: the unseen arm did not run the unseen instances
 
-**Date** 2026-11-12 · **Produced by** the simulation lane · **Verified by** the Lead
-**Status: CONFIRMED. This is the decisive result about scope.**
+**Date** 2026-11-12 · **Status: RETRACTED IN FULL by the Lead, on the simulation lane's evidence.**
+**This file replaces an earlier version that claimed "0/6 unseen". That claim was WRONG.**
 
 ---
 
-## 1. The headline
+## 1. What was claimed, and why it was wrong
 
-Six trials on the three frozen unseen instances (`t08_unseen` seeds 3000/3001/3002), two arms:
+The earlier version of this document reported that T08 failed on all six unseen trials and called
+that "the first generalisation measurement, and it is negative". **That is retracted.**
+
+The six trials **never instantiated the unseen task geometry.** `sim_profile.py` hard-codes the spawn
+poses for the benchmark blocks and takes no per-instance pose argument:
 
 ```
-arm      seed      terminal  passed  displacement  failure class
-U        seed3000  false     false   147.45 mm     FAIL_OVERSHOOT
-U        seed3001  false     false   166.21 mm     FAIL_DIRECTION
-U        seed3002  false     false   118.05 mm     EVIDENCE_INCOMPLETE
-U_shot   seed3000  false     false    45.79 mm     FAIL_DIRECTION
-U_shot   seed3001  false     false    76.41 mm     FAIL_DIRECTION
-U_shot   seed3002  false     false    54.82 mm     FAIL_DIRECTION
-
-unseen trials: 6   terminal_passed: 0   passed: 0
+target_box_a  ->  <pose>0.220000  0.000000 0.0175</pose>     (seed-2000 dev geometry)
+target_box_b  ->  <pose>0.200000 -0.180000 0.0175</pose>     (seed-2000 dev geometry)
 ```
 
-**0/6.** The one dev-instance pass (S/t3) **does not transfer**.
+Verified in every one of the six `sim/world.sdf` files, for both arms and all three seeds: the spawn
+poses are **identical** across all six, and they match the **dev** spec, not any unseen spec.
+`sim_profile.profile()` accepts `zone_2_pose` but **no box-pose argument**, so no supported path in this
+pipeline can place a task's objects where its spec says they are.
 
-## 2. Why this is the round's most important number
+**So what ran was the dev world six more times, graded against unseen geometry.**
 
-The dev instance (seed 2000) produced **1 pass in 9 valid trials**. The three unseen instances produced
-**0 in 6**. Whatever produced that single pass on seed 2000 is **not** a capability that survives a change
-of initial pose.
+## 2. The measured consequence
 
-This is exactly why the mission separates `Simulation Tested` from `Generalization Tested`, and it is the
-measurement that prevents the round from over-claiming. Without these six runs, "T08 produced a
-`passed=true`" would be the whole story, and it would be misleading.
+Spec-declared start vs actual world spawn:
 
-## 3. The failures are genuine, not artifacts — checked deliberately
+| Seed | Object | Spec XY | World XY | Offset |
+| --- | --- | --- | --- | --- |
+| 3000 | `target_box_a` | (0.21, 0.03) | (0.22, 0.00) | **31.6 mm** |
+| 3000 | `target_box_b` | (0.20, −0.21) | (0.20, −0.18) | **30.0 mm** |
+| 3001 | `target_box_a` | (0.23, −0.07) | (0.22, 0.00) | **70.7 mm** |
+| 3001 | `target_box_b` | (0.20, −0.19) | (0.20, −0.18) | 10.0 mm |
+| 3002 | `target_box_a` | (0.19, 0.02) | (0.22, 0.00) | **36.1 mm** |
+| 3002 | `target_box_b` | (0.20, −0.23) | (0.20, −0.18) | **50.0 mm** |
 
-The round had just found a recorder defect that invalidates a whole bundle when any contact lasts exactly
-one physics step, so the first thing I checked was whether U's failures were that defect rather than robot
-failures:
+## 3. A second error of mine, in the same document
 
-| Seed | Zero-span contact intervals | Schema problems | Verdict |
+The retracted version said the `unmoved` clause failures were **real robot failures** because
+"the blue block moved 0.030 / 0.010 / 0.050 m". **That is wrong too.** Re-derived from ground truth:
+
+```
+U       seed3000..3002   target_box_b world motion = 0.000000 m   (all three)
+U_shot  seed3000..3002   target_box_b world motion = 0.000000 m   (all three)
+```
+
+**The blue block never moved in any unseen trial.** The clause's `distance_m` of 0.030 / 0.010 / 0.050 m
+is exactly the **spec-vs-world spawn offset**, not motion. I read the clause's distance field as if it
+were a displacement between two world states, when it is a distance between the spec's declared start
+and the world's actual end — and the world started somewhere else.
+
+This is the same class of error I spent the round finding in others' work: **reading a number without
+checking what it is a number *of*.**
+
+## 4. The push displacements were also distorted, in both directions
+
+Recomputed on the world basis (ground truth before → after):
+
+| Trial | Evaluator read | Actual world motion | Consequence |
 | --- | --- | --- | --- |
-| seed3000 | **3** | 3 | bundle invalid **and** terminal genuinely failed (`unmoved` clause: blue block moved 0.030 m vs 0.015 tol) |
-| seed3001 | **1** | 1 | bundle invalid **and** terminal genuinely failed (166.21 mm, cos −0.89) |
-| seed3002 | 0 | 0 | bundle **valid**; terminal failed on `unmoved` (blue block moved 0.050 m vs 0.015 tol) |
+| U/seed3000 | 147.45 mm (under the 150 ceiling) | **155.32 mm** | would be **OVER** the ceiling |
+| U/seed3001 | 166.21 mm | 158.63 mm | over either way |
+| U/seed3002 | 118.05 mm | **145.19 mm** | different margin entirely |
+| U_shot/seed3000 | 45.79 mm | **29.50 mm** | would be **UNDER** the 30 mm floor |
+| U_shot/seed3001 | 76.41 mm | **33.14 mm** | near the floor |
+| U_shot/seed3002 | 54.82 mm | **19.85 mm** | would be **UNDER** the floor |
 
-**The defect recurred on unseen data (2 of 3 recovery trials) — the exact failure I predicted when I wrote
-it up — but it destroyed no pass.** In both affected runs the terminal clause was already failing on an
-independent ground: the protected blue block had been moved. So the correct labels are:
+**So the six trials cannot even be scored against the unseen clauses**, because the grader's frame and
+the world's frame differ by up to 71 mm on a task whose whole tolerance band is 30–150 mm.
 
-- seed3000 / seed3001: **terminal failure + invalid evidence** (both true; the physical failure is proven
-  by the `unmoved` clause, which does not depend on the bundle)
-- seed3002: **terminal failure + valid evidence** — a clean, fully-evidenced negative
+## 5. Verdict
 
-**This is the difference between "we could not measure" and "we measured and it failed."** Two of the six
-are the former only for the evidence gates, never for the terminal clause.
-
-## 4. What the failures say about the physics
-
-**4 of 6 unseen trials ended with negative direction cosine** — the block driven backwards. Across the
-whole round (dev + unseen, 15 valid trials) `FAIL_DIRECTION` is the dominant class:
-
-| Class | Count (all arms, valid trials) |
+| Item | State |
 | --- | --- |
-| `FAIL_DIRECTION` (cos < 0, pushed backwards) | **8** |
-| `FAIL_LIFT` | 1 |
-| `FAIL_ZONE` / `FAIL_OVERSHOOT` | 3 |
-| `GATE_GRIPPER` | 1 |
-| **PASSED** | **1** |
+| The six unseen trials | **INVALID_INFRA (Environment)** — not measurements of the unseen tasks |
+| "0/6 on unseen" | **RETRACTED — never measured** |
+| "T08 fails to generalise" | **WITHDRAWN** — no generalisation measurement exists |
+| T08 unseen 3000–3002 | **NOT_RUN**, and the harness cannot currently run them |
+| Arms R and S (dev) | **UNAFFECTED** — seed-2000 spec matches the world exactly (delta 0.000 m), verified on R/t1 and S/t3 |
+| S/t3 `passed=true` | **UNAFFECTED and still valid** |
+| 9-valid-dev-trial failure-class counts | **UNAFFECTED** |
 
-The unseen instances make it worse, not better: **the strategy is not merely unreliable on one pose, it is
-unreliable in the same specific way everywhere** — the end effector does not maintain a stable contact face,
-and whether the block goes forward or is flicked backwards depends on the contact instant.
+## 6. What this means for the round
 
-## 5. Consequences for every claim in the round
+**The round has NO generalisation result.** That is different from, and less bad than, "generalisation
+failed" — but it is also less than was claimed an hour ago.
 
-| Claim | Effect |
-| --- | --- |
-| "T08 produced its first `passed=true`" | **STILL TRUE** — S/t3 is real and verified |
-| "T08 is a usable capability" | **REFUTED MORE STRONGLY** — 0/6 unseen |
-| "T08 is Generalization Tested" | **NO — and now we know it fails generalisation** |
-| "The single pass shows the approach works" | **NO — it shows one pose out of four tried admits a pass** |
-| "The recovery strategy generalises" | **NO** — 0/3 unseen; and it was 0/5 on dev |
-| "T08 deserves more tuning on dev" | **NO** — dev tuning already produced 1/9; more dev tuning would fit the one instance |
+The honest statement is: **T08 produced one verified pass on one dev instance (1/9 valid dev trials),
+and generalisation is UNMEASURED because the harness cannot instantiate a task's declared initial poses.**
 
-**The correct level remains `Simulation Tested` on a single dev instance.** The mission's ladder says
-`Generalization Tested` requires success on **frozen unseen tasks**; six unseen trials produced zero. The
-project now has a **measured negative generalisation result**, which is worth more than an unmeasured claim.
+## 7. The blocker this exposes is bigger than the arm
 
-## 6. What this means for the next round
+**No task in this benchmark has ever been instantiated at its declared initial pose**, except where the
+spec happens to coincide with the hard-coded world (the dev spec does). That means:
 
-The next experiment is **not** more T08 trials. It is the same one this round's audit pointed at:
-**fix the contact geometry, then re-measure.** Specifically:
+- every "unseen" or "held-out" measurement attempted through this pipeline would be void;
+- `benchmark/tasks/val/` and any regenerated specs with different poses are equally uninstantiable;
+- the held-out generalisation result reported in earlier rounds (`evobot_heldout_n6_20261111/`) needs
+  its initial poses re-checked against this defect before it is quoted again. **That check has NOT been
+  done** and is the highest-priority verification for the next round.
 
-1. **The G1/G2/G3 gripper calibration** (`evobot_lead_gripper_gate_adjudication_20261112/` §6) — 2 runs,
-   no model calls, and it decides whether the round's best trial was wrongly rejected.
-2. **Then a contact-geometry change** — the backwards flick is a physical mechanism, and no retry policy
-   addresses it. Candidates: derive the contact height from object geometry rather than a constant;
-   command a link that has collision geometry; a single-finger push.
-3. **Then re-measure on unseen with a larger n.** n≈9.5 per arm is the threshold for ordering two arms at
-   80 % vs 20 %; the round has 1 pass in 15 valid trials overall, so the honest expectation after a geometry
-   fix is a different number, not a better one.
+**Fix required (outside the sim lane's scope, needs a decision):** either a per-instance world generator
+that reads `spec.objects[].initial_pose`, or a supported `set_pose` path after spawn for the T08 push
+task. `PushObject` has no initial-pose field, so this is a harness change, not a driver flag.
 
-**Do not run more dev-instance trials first.** That is how the single pass happened, and repeating it would
-fit the instance rather than the task.
+## 8. Credit
 
-## 7. Provenance
+The simulation lane found this, verified it three ways (world.sdf poses, spec-vs-world offsets, ground
+truth motion), reported it **before** publishing a result it could have kept, and refused to rerun or
+tune. It also corrected two claims of mine in the process. This document exists because they did not
+let a wrong headline stand.
 
-Produced by the simulation lane on the frozen unseen specs
-(`benchmark/tasks/t08_unseen/T08-push-seed{3000,3001,3002}.json`, split `t08_unseen`, never used for
-development). Policy frozen before the run; `git HEAD` and script hashes recorded in the batch manifest.
-No parameter was changed after U began. Verdicts from `evaluate.py` v0.5.0 and `verify.py` v1.0.0.
+## 9. Reproduce
 
-**Independent re-grade of arm U is tracked as task-7 and is NOT yet done.** Until it is, the producer's
-verdicts for U are the only source, though the two arm-level counts above were re-derived by the Lead from
-the raw `trial_record.json` and `verdict.json` files, not quoted from a summary.
+```bash
+python3 setup/acceptance/evobot_lead_t08_unseen_20261112/check_world_poses.py
+```
+
+Reads the six `world.sdf` files, the unseen specs, and `gt_before`/`gt_after`. No simulator, no model calls.

@@ -70,9 +70,12 @@ acceptance dir).
 | `passed` (full 9-gate) for any T08 run | **NOT_RUN / always false** — driver supplies trajectory only, no contact/joint/telemetry bundle | `verdict_t*.json`: `"failure_reason": "no evidence bundle was supplied…"` |
 | Statistical significance of 2/5 → 4/5 | **NOT SIGNIFICANT** — Fisher exact two-sided **p = 0.5238**; Wilson95 [0.376,0.964] vs [0.118,0.769]; n≈22/arm needed | `setup/acceptance/evobot_lead_statistical_audit_20261112/` |
 | Ceiling risk in the recovery arm | **CONFIRMED RISK** — max 145.58 mm against the frozen 150 mm ceiling = 4.4 mm margin; a fixed-step control already produced 156.77 mm | audit doc §3 + `FIXEDSTEP_CONTROL_RESULT.md` |
-| T08 unseen instances 3000–3002 | **RUN — 0/6.** The first generalisation measurement, and it is negative | `evobot_lead_t08_unseen_20261112/` |
-| dev pass transfers to unseen | **REFUTED** — 1 pass in 9 valid dev trials, **0 in 6 unseen** | same |
-| Are U's failures measurement artifacts? | **NO.** seed3000/seed3001 = terminal failure **+** invalid bundle (2 of 3 hit the recorder defect — predicted then confirmed); seed3002 = terminal failure with a **valid** bundle. In all three the `unmoved` clause failed independently of the bundle (blue block moved 0.030/0.010/0.050 m vs 0.015 tol). **4 of 6 are fully measured negatives** | same §3 |
+| T08 unseen instances 3000–3002 | **NOT_RUN — the harness cannot instantiate them.** The six U trials ran the **dev** world and were graded against unseen geometry. **RETRACTED as a measurement; INVALID_INFRA (Environment).** | `evobot_lead_t08_unseen_20261112/` (retraction + `check_world_poses.py`) |
+| Why: spec-vs-world spawn offset | **CONFIRMED** — `sim_profile.py` hard-codes `target_box_a (0.22,0.00)`, `target_box_b (0.20,−0.18)` and takes **no box-pose argument**. Verified in all six `sim/world.sdf`. Offsets: seed3000 31.6 mm, seed3001 **70.7 mm**, seed3002 36.1 mm on a task whose whole band is 30–150 mm | same §1–§2 |
+| "blue block moved 0.030/0.010/0.050 m" (earlier claim) | **INVALID — the Lead's own error.** Ground truth shows `target_box_b` world motion = **0.000000 m** in all six. The clause distance **is** the spec-vs-world spawn offset, not motion | `check_world_poses.py` output |
+| "0/6 unseen" / "T08 fails to generalise" | **RETRACTED / WITHDRAWN — never measured** | same |
+| Dev arms R and S | **UNAFFECTED** — seed-2000 spec matches the world exactly (delta 0.000 m), verified on R/t1 and S/t3. S/t3 `passed=true` stands | same §5 |
+| Held-out result from earlier rounds (`evobot_heldout_n6_20261111/`) | **UNKNOWN — needs re-check.** If that pipeline instantiates objects the same way, its initial poses may also differ from its specs. **NOT yet checked; must be verified before being quoted again** | flagged, not resolved |
 | T08 as a usable robot capability | **NOT ACQUIRED** | `passed` false everywhere; unseen unrun; mechanism of the variance UNKNOWN |
 
 ### 4.0d **FIRST T08 `passed=true` IN PROJECT HISTORY** — and it is the single-shot arm
@@ -97,10 +100,9 @@ Fisher exact on passed, valid trials only: **p = 1.0000**. On terminal: **p = 1.
 **both arms are dominated by run-to-run variance** and last round's 4/5 was itself inside that variance
 (the Lead's audit already put 4/5 vs 2/5 at p=0.5238). n≈9.5 per arm would be needed to detect 80 % vs 20 %.
 
-**Dominant failure mode, all arms, 15 valid trials (dev + unseen):** `FAIL_DIRECTION` **8** (cos < 0, block
-driven *backwards*), `FAIL_ZONE`/`FAIL_OVERSHOOT` 3, `FAIL_LIFT` 1, `GATE_GRIPPER` 1, **PASSED 1**.
-It got **worse** on unseen, not better — the strategy is unreliable in the *same specific way* everywhere,
-not merely unreliable on one pose.
+**Dominant failure mode, 9 valid DEV trials:** `FAIL_DIRECTION` **4** (cos < 0, block driven *backwards*),
+`FAIL_ZONE`/`FAIL_OVERSHOOT` 2, `FAIL_LIFT` 1, `GATE_GRIPPER` 1, **PASSED 1**.
+(The earlier "8 of 15" figure counted the six invalid unseen trials; it is **withdrawn**.)
 Mechanism **UNKNOWN**; shape established (contact face not maintained; a retry cannot fix contact geometry,
 consistent with R scoring 0/5).
 
