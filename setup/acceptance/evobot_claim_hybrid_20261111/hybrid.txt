@@ -1,0 +1,11 @@
+runs: 64
+
+two-condition check    coverage 40/64  correct 40  wrong  0 (false_success 0, false_failure 0)
+LLM self-assessment    coverage 64/64  correct 45  wrong 19 (false_success 0, false_failure 19)
+hybrid (det where possible) coverage 64/64  correct 64  wrong  0 (false_success 0, false_failure 0)
+
+two-condition check refused on 24 runs; reasons:
+   an object appears in more than one stage, so the goal includes an orde 24
+
+IN-SAMPLE ONLY. The hybrid rule was chosen after seeing where each component
+fails, so its figure here is an upper bound. Adoption needs a new batch.

@@ -1,0 +1,7 @@
+  plan targets  : [('target_box_a', [0.075, -0.15, 0.018]), ('target_box_b', [0.165, -0.15, 0.018])]
+  measured world: {'target_box_a': [0.075, -0.163], 'target_box_b': [0.17, -0.149]}
+  EVALUATOR     : passed=False failed=['placement:target_box_a', 'placement:target_box_b', 'order']
+  CLAIM CHECK   : True
+     target_box_a zone_1 ok= True
+     target_box_b zone_1 ok= True
+     why: both conditions met for every stage

@@ -83,6 +83,8 @@ RUNGS = {
     "evobot_replication_20261111": "Method (0/32 instances fail reproducibly; 25% flip; failure counts describe runs)",
     "evobot_abstention_repeats_20261111": "Replicated (64 impossible trials, 0 confident answers; flips stay inside honest verdicts)",
     "evobot_claim_accuracy_20261111": "Self-report (LLM 70.3%, 19 false failures; deterministic 100% but rejected - can admit false success)",
+    "evobot_wrongplan_probe_20261111": "Decisive (foreign plan executed: evaluator FAILED, claim check said SUCCESS - false success demonstrated)",
+    "evobot_claim_hybrid_20261111": "Measured then refused (two-condition claim 40/40; hybrid 64/64 in-sample; not adopted)",
 }
 
 

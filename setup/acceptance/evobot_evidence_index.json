@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 48,
-  "live": 41,
+  "batches": 50,
+  "live": 43,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -161,7 +161,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 40,
+        "live_batches": 42,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",
@@ -185,6 +185,23 @@
         "deterministic_claim": "40/64 coverage, 40 correct, 100%",
         "why_not_adopted": "plan tolerance 20 mm exceeds the 15 mm slack between plan targets and the zone edge, so it can call an out-of-zone placement satisfied; it is also blind to a wrong plan",
         "decision": "keep the current claim; a safe version needs both criteria plus an independent plan check",
+        "evaluator_touched": false,
+        "skill_layer_touched": false,
+        "claim_mechanism_changed": false
+      }
+    },
+    {
+      "batch": "evobot_claim_hybrid_20261111",
+      "verified": "PASS",
+      "rung": "Measured then refused (two-condition claim 40/40; hybrid 64/64 in-sample; not adopted)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_TWO_CONDITION_CLAIM_MEASURED_NOT_ADOPTED",
+        "two_condition": "40/64 coverage, 40 correct, 0 false success, 0 false failure",
+        "llm": "64/64, 45 correct, 19 false failures",
+        "hybrid_in_sample": "64/64",
+        "adopted": false,
+        "reason": "verifies execution against the plan, not the plan against the instruction - demonstrated by evobot_wrongplan_probe_20261111",
         "evaluator_touched": false,
         "skill_layer_touched": false,
         "claim_mechanism_changed": false
@@ -381,8 +398,8 @@
       "verdict": {
         "verdict": "EVOBOT_LADDER_DERIVED_AND_CURRENT",
         "regenerated_identically": true,
-        "batches_live": 41,
-        "verifier_failures": 1,
+        "batches_live": 43,
+        "verifier_failures": 0,
         "reports_both_directions": true,
         "zero_is_qualified": true,
         "v01_regression": "6/6 -> 6/6, NONE",
@@ -881,6 +898,24 @@
         "false_failure": "1/16",
         "caveat": "only 2 instances exercised recovery; R=16/16 is not a 100% claim",
         "evaluator_touched": false
+      }
+    },
+    {
+      "batch": "evobot_wrongplan_probe_20261111",
+      "verified": "PASS",
+      "rung": "Decisive (foreign plan executed: evaluator FAILED, claim check said SUCCESS - false success demonstrated)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_FALSE_SUCCESS_DEMONSTRATED_BY_WRONG_PLAN",
+        "setup": "donor plan for a zone_1 task executed on a zone_2 task",
+        "world_followed_the_wrong_plan": true,
+        "evaluator": "passed=False (placement + order)",
+        "claim_check": "True - both conditions met",
+        "meaning": "the two-condition check verifies execution against the plan and cannot see that the plan is wrong for the instruction",
+        "decision": "do not adopt it as the agent claim",
+        "earlier_attempts_that_proved_nothing": 3,
+        "evaluator_touched": false,
+        "skill_layer_touched": false
       }
     }
   ]

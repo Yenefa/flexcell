@@ -1,0 +1,4 @@
+=== the three failed attempts, for the record ===
+v1: swap silently not applied (heredoc error, no set -e) -> correct plan ran -> looked like a pass
+v2: both stages mapped to one pose -> executor refused for clearance, nothing moved
+v3: hand-edited plan -> "declared destination occupied" at plan preparation, never started

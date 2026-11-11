@@ -15,8 +15,8 @@
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 48,
-    "batches_live": 41,
+    "batches_total": 50,
+    "batches_live": 43,
     "batches_superseded": 7,
     "verifier_failures": 0,
     "live_batches": [
@@ -69,6 +69,11 @@
         "batch": "evobot_claim_accuracy_20261111",
         "verified": "PASS",
         "rung": "Self-report (LLM 70.3%, 19 false failures; deterministic 100% but rejected - can admit false success)"
+      },
+      {
+        "batch": "evobot_claim_hybrid_20261111",
+        "verified": "PASS",
+        "rung": "Measured then refused (two-condition claim 40/40; hybrid 64/64 in-sample; not adopted)"
       },
       {
         "batch": "evobot_crosstype_20261111",
@@ -224,6 +229,11 @@
         "batch": "evobot_valid_batch_20261111",
         "verified": "PASS",
         "rung": "Simulation Tested (FIRST structurally valid batch: recovery fired 2x, gained 2 lost 0, false success 0/16)"
+      },
+      {
+        "batch": "evobot_wrongplan_probe_20261111",
+        "verified": "PASS",
+        "rung": "Decisive (foreign plan executed: evaluator FAILED, claim check said SUCCESS - false success demonstrated)"
       }
     ]
   },
