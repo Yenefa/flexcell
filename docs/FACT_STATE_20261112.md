@@ -757,4 +757,19 @@ destination. Recovery did not rescue a task; it undid one.
 | A concern I raised and then resolved | I suspected the baselines might count the original failure and so **understate** the project's capability. **Checked: they do not.** `summarize_recovery.py:63-72` has a first-class **`RECOVERED`** category alongside FIRST_TRY / STILL_FAIL | `experiments/baselines/summarize_recovery.py` |
 | **What this does NOT change** | **It is not T08** (pick/carry/place, not push — T08 stays **0/6**, round 17's ±3.44 mm vs 2.5 mm cliff untouched). **It is not Generalization Tested** — these are held-out instances used while recovery was being developed, so no transfer claim to unseen seeds | — |
 
+---
+
+## ADDENDUM — goal round 19 (2026-11-12): the planned n=22 test is under-powered; the real requirement is n=53/arm
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| The prior audit's `n ≈ 22 per arm` | **CIRCULAR.** It was sized to detect **80% vs 40%**, and those numbers come from the **same n=5 sample** (4/5 vs 2/5) the study exists to replace. The effect size used to size the experiment was estimated from the experiment being sized | `evobot_lead_power_analysis_20261112/` |
+| Independent per-draw estimate | Round 17's 197 contact-height samples: only the **69.92 mm** band passes the frozen [30, 150] mm clause → **14.7% per draw**. With `push_recover`'s 3 attempts: **38.0%** | same |
+| Real effect size and requirement | **23 points, not 40** → **n = 53 per arm = 106 Gazebo runs** (not 44) | same |
+| Power of the planned test | **0.44** at n=22. It would most likely return a null that is **indistinguishable between "no effect" and "not enough data"** — uninterpretable, for ~44 runs | same |
+| **Decision handed back** | **Do not run the 22-per-arm test.** Either fund **106 runs** (~5+ h of continuous Gazebo against a one-instance-at-a-time lock) or accept the recovery effect stays unestablished. **A resource decision, not one to absorb into a round** | same |
+| What this does NOT say | **Not** that recovery fails — the distributional finding stands independently of power: the recovery floor moved **2.6 mm → 74.0 mm**. **Not** that 14.7% is exact (pooled across batches, not the single instance used) | same |
+| Synthesis | single draw lands across 20.4 mm with ~15% passing (r17) **+** recovery retries a short push and lifts the floor (prior audit) **→ a real but modest ~23-point effect**. That is why 4/5 vs 2/5 looked dramatic and is not | same |
+| Environment pre-flight | all 5 setup files present, no stray sim process, task spec present, lock free — **the run was feasible and I chose not to spend it** | `_r19_pre.sh` output |
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
