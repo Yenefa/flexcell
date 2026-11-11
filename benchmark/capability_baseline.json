@@ -15,8 +15,8 @@
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 47,
-    "batches_live": 40,
+    "batches_total": 48,
+    "batches_live": 41,
     "batches_superseded": 7,
     "verifier_failures": 0,
     "live_batches": [
@@ -64,6 +64,11 @@
         "batch": "evobot_capability_freeze_20261111",
         "verified": "PASS",
         "rung": "P0 capability freeze (hash-pinned ruler; drift tested)"
+      },
+      {
+        "batch": "evobot_claim_accuracy_20261111",
+        "verified": "PASS",
+        "rung": "Self-report (LLM 70.3%, 19 false failures; deterministic 100% but rejected - can admit false success)"
       },
       {
         "batch": "evobot_crosstype_20261111",

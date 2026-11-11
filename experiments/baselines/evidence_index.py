@@ -82,6 +82,7 @@ RUNGS = {
     "evobot_rule_crosstype_20261111": "Correction: rules written before T14 understand it 0/16; LLM 16/16 (cross-type gap is real)",
     "evobot_replication_20261111": "Method (0/32 instances fail reproducibly; 25% flip; failure counts describe runs)",
     "evobot_abstention_repeats_20261111": "Replicated (64 impossible trials, 0 confident answers; flips stay inside honest verdicts)",
+    "evobot_claim_accuracy_20261111": "Self-report (LLM 70.3%, 19 false failures; deterministic 100% but rejected - can admit false success)",
 }
 
 

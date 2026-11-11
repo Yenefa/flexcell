@@ -1,0 +1,20 @@
+plan targets, distance from NEAREST zone centre vs that zone's radius:
+run                  distance_m   radius_m slack_m
+HO-198a4b2688d0      0.0450       0.060    0.0150
+HO-4f197a0997af      0.0450       0.060    0.0150
+HO-5a96f3eb4fae      0.0450       0.060    0.0150
+HO-68f800add5fc      0.0450       0.060    0.0150
+HO-b7bd62621f05      0.0450       0.060    0.0150
+HO-274c7aaa6485      0.0450       0.060    0.0150
+HO-6323db167d30      0.0450       0.060    0.0150
+HO-802d10c045aa      0.0450       0.060    0.0150
+
+stage targets examined        : 152
+inside their zone             : 152
+outside (would be a bad plan) : 0
+tightest slack                : 15.0 mm
+
+WHAT THIS MEANS FOR A DETERMINISTIC CLAIM: it verifies EXECUTION against the plan,
+not the plan against the instruction. With every plan correct that is invisible;
+one wrong plan and it would report success while the evaluator fails. Nothing in
+this archive can rule that out, so the check is NOT adopted as the agent claim.

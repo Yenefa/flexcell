@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 47,
-  "live": 40,
+  "batches": 48,
+  "live": 41,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -161,7 +161,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 39,
+        "live_batches": 40,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",
@@ -171,6 +171,23 @@
           "Level 7 Transfer",
           "hardware (M0, prohibited)"
         ]
+      }
+    },
+    {
+      "batch": "evobot_claim_accuracy_20261111",
+      "verified": "PASS",
+      "rung": "Self-report (LLM 70.3%, 19 false failures; deterministic 100% but rejected - can admit false success)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_CLAIM_ACCURACY_COMPARED_AND_REPLACEMENT_REFUSED",
+        "llm_claim": "64/64 coverage, 45 correct, 70.3%",
+        "llm_errors_all_false_failures": true,
+        "deterministic_claim": "40/64 coverage, 40 correct, 100%",
+        "why_not_adopted": "plan tolerance 20 mm exceeds the 15 mm slack between plan targets and the zone edge, so it can call an out-of-zone placement satisfied; it is also blind to a wrong plan",
+        "decision": "keep the current claim; a safe version needs both criteria plus an independent plan check",
+        "evaluator_touched": false,
+        "skill_layer_touched": false,
+        "claim_mechanism_changed": false
       }
     },
     {
@@ -364,7 +381,7 @@
       "verdict": {
         "verdict": "EVOBOT_LADDER_DERIVED_AND_CURRENT",
         "regenerated_identically": true,
-        "batches_live": 40,
+        "batches_live": 41,
         "verifier_failures": 1,
         "reports_both_directions": true,
         "zero_is_qualified": true,

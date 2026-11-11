@@ -1,0 +1,48 @@
+runs: 64
+
+LLM self-assessment              coverage 64/64  correct 45  WRONG 19  accuracy 70.3%
+     wrong: HO-3bfb9643b7b6 passed=True claim=False
+     wrong: HO-036fc9b6e66f passed=True claim=False
+     wrong: HO-285d9e53fbdd passed=True claim=False
+     wrong: HO-50237b4714a9 passed=True claim=False
+     wrong: HO-a69ec651037a passed=True claim=False
+     wrong: HO-036fc9b6e66f passed=True claim=False
+     wrong: HO-50237b4714a9 passed=True claim=False
+     wrong: HO-f9431f8ef925 passed=True claim=False
+     wrong: HO-0dcde4dc0f5a passed=True claim=False
+     wrong: HO-128c6a231c34 passed=True claim=False
+     wrong: HO-40348a081df6 passed=True claim=False
+     wrong: HO-4dbb21d087ae passed=True claim=False
+     wrong: HO-51600cf21179 passed=True claim=False
+     wrong: HO-6173170d8c47 passed=True claim=False
+     wrong: HO-675c07e900e7 passed=True claim=False
+     wrong: HO-884ea68a42ca passed=True claim=False
+     wrong: HO-b3fb8b1de2db passed=True claim=False
+     wrong: HO-da7c04bdece5 passed=True claim=False
+     wrong: HO-dcf52d233154 passed=True claim=False
+deterministic measurement check  coverage 40/64  correct 40  WRONG  0  accuracy 100.0%
+
+on the 40 runs both can answer: agree 21, disagree 19
+     disagree: HO-3bfb9643b7b6 passed=True llm=False det=True
+     disagree: HO-036fc9b6e66f passed=True llm=False det=True
+     disagree: HO-285d9e53fbdd passed=True llm=False det=True
+     disagree: HO-50237b4714a9 passed=True llm=False det=True
+     disagree: HO-a69ec651037a passed=True llm=False det=True
+     disagree: HO-036fc9b6e66f passed=True llm=False det=True
+     disagree: HO-50237b4714a9 passed=True llm=False det=True
+     disagree: HO-f9431f8ef925 passed=True llm=False det=True
+     disagree: HO-0dcde4dc0f5a passed=True llm=False det=True
+     disagree: HO-128c6a231c34 passed=True llm=False det=True
+     disagree: HO-40348a081df6 passed=True llm=False det=True
+     disagree: HO-4dbb21d087ae passed=True llm=False det=True
+     disagree: HO-51600cf21179 passed=True llm=False det=True
+     disagree: HO-6173170d8c47 passed=True llm=False det=True
+     disagree: HO-675c07e900e7 passed=True llm=False det=True
+     disagree: HO-884ea68a42ca passed=True llm=False det=True
+     disagree: HO-b3fb8b1de2db passed=True llm=False det=True
+     disagree: HO-da7c04bdece5 passed=True llm=False det=True
+     disagree: HO-dcf52d233154 passed=True llm=False det=True
+
+READING: whichever is more accurate is the one the agent should use for its claim.
+The deterministic check has lower coverage by construction - it declines where a
+sequence matters - so a high accuracy on a small subset is not automatically better.
