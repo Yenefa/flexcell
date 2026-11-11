@@ -78,5 +78,33 @@
   "open_questions": [
     "All four skills are PROPOSED. None has revisit data, so none may be marked VERIFIED.",
     "Team slot for a dedicated Skill Curator could not be created: member limit 8 reached and there is no delete-member tool available to the Lead."
+  ],
+  "revisit": {
+    "round": 1,
+    "date": "2026-11-12",
+    "verdict": "NO VALID EFFECT EVIDENCE FOR ANY SKILL; all four stay PROPOSED",
+    "measured": {
+      "preflight invoked by batch driver": "yes",
+      "interface-class errors, 9 most recent runs": 0,
+      "interface-class errors before the skill existed": 6,
+      "orphan processes while idle": 0,
+      "evidence verifier has a real caller": "yes, from the v0.5.0 integration, not from the skill"
+    },
+    "why_not_evidence": [
+      "the 9 clean runs used the already-fixed driver, so absence of the error is confounded",
+      "no with-skill versus without-skill comparison was run, so no effect is attributable",
+      "zero orphans while idle says nothing; the metric must be measured after a batch",
+      "the verifier caller came from the v0.5.0 integration, which predates the skill"
+    ],
+    "required_experiment": "a NEW task where the agent could plausibly repeat the failure; group A without the skill, group B with it; compare first-run success, interface-error count, time-to-first-success",
+    "report": "REVISIT_20261112.md"
+  },
+  "blocked": [
+    {
+      "item": "dedicated Skill Curator teammate",
+      "status": "BLOCKED",
+      "reason": "team limit 8 reached; the Lead has no remove-member tool",
+      "unblock": "delete 7 finished members in the UI; keep geom-wire, which has task-9 in progress"
+    }
   ]
 }
