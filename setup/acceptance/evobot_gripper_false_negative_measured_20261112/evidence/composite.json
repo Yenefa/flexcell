@@ -1,0 +1,30 @@
+{
+  "goal": {
+    "scenario_id": "T04-train-seed1000",
+    "motion_profile_id": "demo_slow",
+    "stages": [
+      "target_box_b-0",
+      "target_box_a-1"
+    ],
+    "initial_objects": [
+      "target_box_a",
+      "target_box_b"
+    ]
+  },
+  "result": {
+    "outcome": 1,
+    "error_code": 62,
+    "run_id": "composite-9a4946e2f13e4f2b",
+    "completed_stage_ids": [],
+    "component_run_ids": [
+      "pick_place_v1-3a5018f5"
+    ],
+    "component_goal_uuids": [
+      "29fb42a4939c4e1c8e0be13b0d421724"
+    ],
+    "evidence_id": "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/ci-public-window/evidence/b_realexec_diff5_20261112/T04-train-seed1000/sim/skills/composites/composite-9a4946e2f13e4f2b.jsonl",
+    "detail": "native terminal/verification unconfirmed for target_box_b-0",
+    "resumed_from_run_id": "",
+    "inherited_stages": 0
+  }
+}

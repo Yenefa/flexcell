@@ -1,0 +1,49 @@
+{
+  "evaluator_version": "0.5.0",
+  "task_id": "T04-train-seed1000",
+  "template_id": "T04_duplicates",
+  "passed": true,
+  "terminal_passed": true,
+  "clauses": [
+    {
+      "clause": "placement:target_box_a",
+      "ok": true,
+      "evidence": {
+        "zone": "zone_2",
+        "distance_m": 0.05831,
+        "radius_m": 0.06,
+        "inside_zone": true,
+        "height_error_m": 0.0,
+        "resting": true,
+        "final_pose": [
+          0.22,
+          0.0,
+          0.0175,
+          0.0
+        ]
+      }
+    },
+    {
+      "clause": "placement:target_box_b",
+      "ok": true,
+      "evidence": {
+        "zone": "zone_1",
+        "distance_m": 0.00583,
+        "radius_m": 0.06,
+        "inside_zone": true,
+        "height_error_m": 1e-05,
+        "resting": true,
+        "final_pose": [
+          0.12515,
+          -0.14727,
+          0.01749,
+          0.0
+        ]
+      }
+    }
+  ],
+  "failed_clauses": [],
+  "agent_claimed_success": false,
+  "false_success": false,
+  "false_failure": true
+}
