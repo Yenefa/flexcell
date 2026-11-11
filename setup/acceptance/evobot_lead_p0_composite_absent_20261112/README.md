@@ -82,3 +82,24 @@ it advertised. The absence of `/run_composite` in that list is the whole finding
 
 **A stalled batch that leaves an orphan is a signal, not a nuisance.** Had I only killed the orphan
 and retried, this would have looped indefinitely.
+---
+
+## 7. A fifth error, in how I diagnosed this: I nearly killed a healthy run
+
+While investigating, I concluded the batch had **died** and began killing processes. It had not.
+`smoke_one.sh` was alive, holding `/tmp/evobot_sim.lock`, with a `sleep` child — legitimately inside
+its own 90-second wait loop for the `run_composite` action. I killed the simulator nodes it had
+spawned, breaking that run.
+
+**"No new output for eight minutes" looks identical for a dead process and a process blocked in a
+wait loop.** I checked `pgrep -af run_aprime_batch` — which correctly found nothing, because the
+running script was named `smoke_one.sh` — and treated that as proof of death. It was proof only that
+I had guessed the wrong process name.
+
+The corrective, alongside the one in §3: **before concluding a process is dead, check whether it is
+alive and waiting** — `fuser` on the lock, or `ps` on the holder, not just a name match. The lock was
+the evidence all along: it was held, which is only possible if something was still running.
+
+This does not change the finding. The server is genuinely absent, the wait loop genuinely cannot
+succeed, and the smoke test would have timed out regardless. But the diagnosis cost a healthy run,
+and that is worth recording next to the error it was supposed to explain.
