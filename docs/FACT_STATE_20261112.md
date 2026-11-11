@@ -631,4 +631,21 @@ destination. Recovery did not rescue a task; it undid one.
 | **Generalisation** | **NOT CLAIMED.** The instances are spent; re-tuning on them and re-running would be the manufactured-success pattern the freeze manifest exists to prevent | — |
 | A first instance set (seeds 4000–4005) | **GENERATED AND DISCARDED UNRUN.** `/home/ros/flexcell-p14/scripts/sim_profile.py` always spawns `target_box_a` at **(0.22, 0.0)** — it cannot place an arbitrary box pose — so those instances would have graded against a zone while the simulator put the block elsewhere. Replaced by a set that varies the **zone** only, which narrows the claim to **generalisation over zone placement** | same |
 
+---
+
+## ADDENDUM — goal round 10 (2026-11-12): the variance mechanism is in the logs, and overdrive helps but not enough
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| **Why T08's push is not repeatable** | **FOUND IN THE LOGS, not inferred.** `move_to_pose.jsonl` for the round-9 runs: commanded `z = 0.0175` but **reached z 0.021–0.022** (a consistent **+0.004 m**), **`orientation_enforced: False`**, **orientation error 0.44–1.02 rad (25–58°)**. The tool attitude is whatever IK returns and varies run to run; the achieved contact height lands on the committed sweep's **cliff** (0.0200 → 70 mm, 0.0225 → 6 mm) | `evobot_lead_t08_overdrive_20261112/` |
+| **Reconciliation of round 8 vs round 9** | **Arm travel = `requested + overdrive`.** The sweep's 151 mm came from **overdrive 0.05** (travel 0.14 m); my six runs used **0.005** (travel 0.095 m). **They were never the same experiment** — the 151 mm was not evidence that 0.0175 works better | same |
+| Pre-registered overdrive test | **PREDICTION FALSIFIED.** Predicted **≥5 of 6** at `overdrive_m = 0.030`; measured **3 of 6** (round 9 baseline 2 of 6). Reported as a miss; instances not re-tuned | same |
+| **`agent_claimed_success` for T08** | **1 — the first of this session.** `seed5001`: displacement 0.0934 m against a 0.090 request (3.4 mm error, inside the skill's 5 mm tolerance), **`outcome = 0`, `error_code = 0`** | same |
+| **False Success** | **0.** The single success was independently confirmed inside **both** the displacement band and the zone | same |
+| **New failure mode** | **`seed5000` was pushed BACKWARDS**: displacement 0.0056 m with **cosine −0.765**. Overdrive made the arm ride over the block and flick it the wrong way. Neither the skill's taxonomy nor mine had this in view | same |
+| `seed5002` | **failed identically twice** (`ec=30`, zero displacement) at both overdrive settings — raised above coincidence from `UNKNOWN`-on-one-sample to **reproducible**, but the **cause remains UNKNOWN** (control vs harness vs world generation not distinguished; not investigated) | same |
+| The pattern across rounds 9–10 | **Every request-field lever moves the pass count by about one run in six** (2/6 → 3/6). That is the signature of a **marginal contact** whose outcome is set by an uncontrolled variable (tool attitude), not of a parameter that needs tuning | — |
+| T08 skill-level on the **unseen** set | **0/6, UNCHANGED.** The 5000–5005 set was **spent in round 9**, so round 10 is a **configuration result on spent data**, not generalisation | — |
+| `unmoved: target_box_b` | **still UNMEASURED** — the push action measures only the pushed object | — |
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
