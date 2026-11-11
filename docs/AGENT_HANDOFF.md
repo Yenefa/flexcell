@@ -59,10 +59,13 @@ git log --oneline -1              # 应显示 724350ef 之后的提交
 | 项 | 值 |
 | --- | --- |
 | 分支 | `autonomous/flexcell-remediation` |
-| HEAD | `8e1ba83b1f9671a4431796c3df52dc8048345c1e` |
-| 远端 | 已同步（无未推送 commit） |
-| 未提交 | **有**，约 100+ 文件，见下 |
-| 工作树 | 除下述未提交内容外干净 |
+| HEAD | `7be814e1`（2026-11-11 第二轮；交接时是 `2a488211`） |
+| 远端 | 已同步 |
+| 未提交 | **无** |
+| 工作树 | 干净 |
+
+> 下面「未提交内容」小节是更早一轮的历史记录。交接时工作树就已经是干净的（`2a488211`），
+> 那 100+ 文件当时已提交。
 | main | **从未合并，也未开 PR。需人工批准** |
 
 ### 未提交内容（三类）
@@ -466,5 +469,61 @@ ci-public-window/scripts/evobot_close_key_bypass.py    # 加 --apply 才写盘�
 1. 5 个 GitHub 仓库是否删除（`desktop-tutorial` / `test-demo` / `Web` / `IQ-test` / `stock`）——**用户未下达明确指令，不得动手**；
 2. key 是否已改名/更换；
 3. `familyhealth/.env` 明文副本如何处理。
+
+---
+## 11. 2026-11-11 第二轮会话：预算门闭环
+
+### 11.1 判据换了 —— 门禁不再是装饰品
+
+`ci-public-window/scripts/evobot_llm_key.sh` 现在有**两道门，都 fail-closed**：
+
+1. **真实余额**：`GET https://api.deepseek.com/user/balance`（不消耗 token、不计费）。
+   低于 `FLEXCELL_BALANCE_FLOOR_CNY`（默认 `1.00`）直接 `exit 3`。
+2. **账本上限**：保留原来的 `committed_upper_bound_microyuan >= limit_microyuan` 判断。
+
+为什么加第 1 道：账本 `calls` 有 173 条、settled 合计 **¥0.5984**、最后一条 `2026-11-03T06:52Z`；
+而 `committed_upper_bound_microyuan` 自那以后**没有任何活代码回写**——`InferenceBudget` 的实现只出现在
+`experiments/pilot-001/runs/**` 的历史快照里（归档，不是运行时）。所以只读账本的那道门**永远放行**。
+
+记账方式：每次放行向 `/home/ros/.config/flexcell/evobot_key_usage.log` 追加一行，带**当次余额**；
+相邻两行之差就是期间真实花费。不写共享账本、不加锁。**写不进审计行就不放行。**
+
+契约：**stdout 只有 key**，诊断全走 stderr，拒绝时 `exit 3`。
+
+### 11.2 已接线范围
+
+| 范围 | 数量 | 状态 |
+| --- | --- | --- |
+| `ci-public-window/` 未跟踪实验脚本 | 50 | 已接线 |
+| 受 git 跟踪的 `.py`/`.sh` 调用点 | 13 | 已接线，commit `7be814e1` |
+| `setup/110_configure_gateway.py` | 1 | **故意不改**：它是写 key 的配置工具，不是消费者 |
+| 其它 worktree 里的旧副本 | 未清点 | **未改**，见 11.4 |
+
+### 11.3 两个陷阱（本会话各踩了一次，都会产生假结论）
+
+1. **改写器会吞掉赋值前缀**：第一版把 `KEYFILE=${FLEXCELL_KEY_FILE:-...}` 整行替换成
+   `"$FLEXCELL_LLM_KEY_FILE"`，变成一行裸字符串——`bash -n` 通过，运行时会把 key 当命令执行。
+   已修：只匹配**值**（lookbehind 保留前缀）+ 后置断言（出现裸行即判 unrecognised 并拒绝），
+   并用「回滚后 50/50 字节一致」验证过回滚。
+2. **WSL 里对 `wt-comp` 跑 git 一律失败**，`git grep` / `git diff --name-only` 也一样。失败时
+   `wc -l` 返回 0，脚本会打印「NONE / 全部通过」这种**假阴性**。本会话因此产出过一句假结论，已作废。
+   **规则：所有 git 结论只能来自 Windows 侧 git；给 WSL 侧脚本的文件清单必须显式传入。**
+
+### 11.4 仍未做（按优先级）
+
+1. 其它 worktree（`wt-123`/`wt-88`/…/`code-clone/wt-*`）里的旧 `mainline_model.sh` 副本仍是裸读。
+   它们是别的分支的 checkout，要先判定「活 / 陈旧」再决定改不改，不要批量改。
+2. **两个项目共用同一把 key**：`project-035-familyhealth/.env` 里那把与机器人 `deepseek_api_key`
+   的 sha256 指纹完全相同。要真正分账，需要用户在平台**新建一把机器人专用 key**，再把
+   `deepseek_api_key` 指向它。在此之前，余额门是「共用钱包」的门。
+3. 门禁自测：`ci-public-window/scripts/evobot_llm_key_selftest.sh`（16 项 + 2 个变异证明它会失败）。
+
+### 11.5 用户可以自己核验
+
+```bash
+bash ci-public-window/scripts/evobot_llm_key_selftest.sh          # 16 passed, 0 failed
+bash ci-public-window/scripts/evobot_llm_key.sh > /tmp/k; echo rc=$? # rc=0，/tmp/k 就是 35 字节 key
+FLEXCELL_BALANCE_FLOOR_CNY=9999 bash ci-public-window/scripts/evobot_llm_key.sh; echo rc=$?  # rc=3
+```
 
 ---
