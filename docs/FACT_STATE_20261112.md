@@ -648,4 +648,21 @@ destination. Recovery did not rescue a task; it undid one.
 | T08 skill-level on the **unseen** set | **0/6, UNCHANGED.** The 5000–5005 set was **spent in round 9**, so round 10 is a **configuration result on spent data**, not generalisation | — |
 | `unmoved: target_box_b` | **still UNMEASURED** — the push action measures only the pushed object | — |
 
+---
+
+## ADDENDUM — goal round 11 (2026-11-12): round 10's explanation is withdrawn; the real cause is operation at the reach limit
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| Round 10's "uncontrolled variable is the tool attitude" | **REFUTED — WITHDRAWN.** Comparing reached orientations across separate runs at byte-identical commanded poses: max difference **1.4–4.5°** (one 22° outlier at the pre-push standoff). The 0.44–1.02 rad `orientation_error_rad` is a **systematic offset against the requested identity**, not run-to-run scatter | `evobot_lead_t08_height_offset_20261112/` |
+| What actually varies | **ACHIEVED end-effector height: 0.0198 – 0.0249** (~5 mm scatter) around a commanded 0.0175. The block starts at exactly `[0.22, 0.0, 0.0175]` in every usable run — **zero variance** — and attitude is repeatable, so height is the only remaining variable | same |
+| Why that matters | The committed sweep is extremely sensitive there: **0.0215 → 151 mm, 0.0240 → 70 mm, 0.0265 → 6 mm**. The ~5 mm achieved-height scatter **straddles the cliff**. Quantitative mechanism, no free parameter | same |
+| Pre-registered height-offset test | **FALSIFIED.** Predicted `contact_height_m = 0.010` would achieve 0.012–0.018 and ≥0.060 m displacement; measured **0 of 3, all `ec=30`, zero motion** | same |
+| Why it failed — not a harness fault | `move_to_pose.jsonl`: **`outcome=POSE_NOT_REACHED`**, `ec=30`, **`ik_precheck.ok=True`, `'IK solution found'`**. IK finds a solution; the arm cannot execute it. **The reachable floor sits above the commanded height, so the cliff cannot be escaped with a request field** | same |
+| `seed5002` re-attributed | **UNKNOWN → Control / kinematics.** Its `move_to_pose` log in **both** earlier batches shows the **ordinary approach pose `[0.2575, 0, 0.0175]`** failing with `ec=20`, IK ok, `reached_pose=None` — reproducibly twice, in a world that is byte-identical every run. Named by its own log, not by preference | same |
+| **Three request fields, three falsifications** | contact height 0.0200→0.0175 (**1/1 dev, then 2/6 fresh**); overdrive 0.005→0.030 (**3/6** vs predicted ≥5/6); contact height 0.0175→0.0100 (**0/3**, unreachable). **The request-field avenue is closed by measurement, not assumption** | — |
+| What remains, and it needs approval | (1) **Control layer** — command an explicit tool orientation and a pose inside the reachable envelope, instead of `orientation_enforced: False` with a pose on the boundary (`contracts/push.py` / `push_server.py`, **both frozen**). (2) **Tool geometry** — a side-mounted probe, a robot-description change | — |
+| False Success across **every** T08 run this session | **0** | all runs |
+| T08 skill-level on unseen | **0/6, unchanged.** `agent_claimed_success` = 1 (round 10 `seed5001`) | — |
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
