@@ -1,0 +1,136 @@
+{
+  "verdict": {
+    "outcome": 2,
+    "achieved_m": 0.005583810474623835,
+    "attempts": 2,
+    "detail": "short by 0.0844 m after 2 attempts"
+  },
+  "attempts": [
+    {
+      "outcome": 1,
+      "error_code": 28,
+      "status": 2,
+      "measured_before": {
+        "position": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ],
+        "orientation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "measured_after": {
+        "position": [
+          0.21441618952537617,
+          -0.005561960706151799,
+          0.017457141768722022
+        ],
+        "orientation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "displacement_m": 0.007881382044286745,
+      "displacement_along_direction_m": 0.005583810474623835,
+      "direction_cos": 0.7084811322744553,
+      "lateral_m": 0.005561960706151799,
+      "delta_z_m": -4.285574302272804e-05,
+      "requested_distance_m": 0.09,
+      "ee_travel_m": 0.07600000000000001,
+      "reach_error_m": 0.009401292864585018,
+      "contact_made": true,
+      "contact_lost": true,
+      "increments_executed": 2,
+      "contact_lost_at_increment": 2,
+      "carry_engaged_during": false,
+      "evidence_id": "t08loop-target_box_a-0-309b1a4a",
+      "detail": "contact lost at increment 2: object moved 0.0079m of 0.0900m requested while the arm kept advancing"
+    },
+    {
+      "outcome": 1,
+      "error_code": 28,
+      "status": 2,
+      "measured_before": {
+        "position": [
+          0.24959651759148074,
+          -0.001027477303206849,
+          0.017340567794636916
+        ],
+        "orientation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "measured_after": {
+        "position": [
+          0.27081509852628893,
+          -0.0009772402307251446,
+          0.017497585087244645
+        ],
+        "orientation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "displacement_m": 0.021219221358962138,
+      "displacement_along_direction_m": -0.02121858093480819,
+      "direction_cos": -0.9999698186779282,
+      "lateral_m": 5.02370724817043e-05,
+      "delta_z_m": 0.0001570172926077286,
+      "requested_distance_m": 0.08441618952537616,
+      "ee_travel_m": 0.07376647581015047,
+      "reach_error_m": 0.008606543161239795,
+      "contact_made": true,
+      "contact_lost": true,
+      "increments_executed": 2,
+      "contact_lost_at_increment": 2,
+      "carry_engaged_during": false,
+      "evidence_id": "t08loop-target_box_a-1-c7012b21",
+      "detail": "contact lost at increment 2: object moved 0.0212m of 0.0844m requested while the arm kept advancing"
+    }
+  ],
+  "decisions": [
+    {
+      "attempt": 1,
+      "requested_m": 0.09,
+      "achieved_before_m": 0.0,
+      "overshoot_ratio_used": 1.0,
+      "projected_total_m": 0.09,
+      "ceiling_guard_m": 0.14,
+      "guard_bound": false
+    },
+    {
+      "attempt": 2,
+      "requested_m": 0.08441618952537616,
+      "achieved_before_m": 0.005583810474623835,
+      "overshoot_ratio_used": 1.0,
+      "projected_total_m": 0.09,
+      "ceiling_guard_m": 0.14,
+      "guard_bound": false
+    }
+  ],
+  "ceiling_guard_m": 0.14,
+  "guard_bound": false,
+  "target_m": 0.09,
+  "max_displacement_m": 0.15,
+  "achieved_signed_m": 0.005583810474623835,
+  "overshoot_ratio_observed": 1.0,
+  "last_attempt_unsigned_displacement_m": 0.02121864040532421,
+  "contact_height_m": 0.02,
+  "task_id": "T08-push-seed2000",
+  "target_object": "target_box_a",
+  "direction": [
+    -1.0,
+    0.0
+  ]
+}

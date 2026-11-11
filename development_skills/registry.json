@@ -2,60 +2,206 @@
   "schema": "evobot-development-skills/1.0",
   "role": "Skill Curator (permanent, event-driven)",
   "updated": "2026-11-12",
-  "promotion_rule": "A skill is VERIFIED only with revisit data showing it reduced the targeted failure. Tests passing is necessary, not sufficient.",
+  "promotion_rule": "A skill is VERIFIED only with revisit data showing it reduced the targeted failure. Tests passing is necessary, not sufficient. Adoption is not effect.",
+  "state_legend": {
+    "VERIFIED": "a with/without comparison on a NEW task showed a measured reduction in the targeted failure",
+    "PROPOSED": "written, unit-tested, mutation-tested; effect NOT_MEASURED",
+    "REJECTED": "a with/without comparison showed no effect, or showed harm",
+    "NOT_MEASURED": "the metric has no data this round; this is an acceptable and honest outcome"
+  },
   "skills": [
     {
       "name": "ros2-interface-preflight",
       "status": "PROPOSED",
+      "status_reason": "adoption 0/6 round-2 drivers; 0 interface-class errors observed but confounded by a pre-existing gate; covers only 2/6 of its own cited cases",
       "incidents": 6,
       "trigger": "writing any script that builds a ROS 2 action goal or reads a message field",
-      "evidence": ["references/failure-cases.md"],
-      "entrypoints": ["scripts/preflight.py"],
-      "tests": "tests/test_preflight.py :: 11 passed, 3 mutants caught",
-      "revisit_metrics": [
-        "interface failures still occurring: NOT MEASURED",
-        "agents actually running preflight: NOT MEASURED"
+      "evidence": [
+        "references/failure-cases.md"
       ],
-      "related": ["benchmark/tools/check_ros_interfaces.py"]
+      "entrypoints": [
+        "scripts/preflight.py"
+      ],
+      "tests": "tests/test_preflight.py :: 11 passed (re-measured 2026-11-12)",
+      "mutation": "4/4 mutants killed (registry previously claimed 3; re-measured 4)",
+      "revisit_metrics": {
+        "adoption_round2": {
+          "value": 0,
+          "provenance": "revisit_r2/adoption_census.sh"
+        },
+        "interface_class_errors_round2": {
+          "value": "0 of 24 authored scripts",
+          "provenance": "revisit_r2/interface_error_scan.sh",
+          "confounded": true,
+          "why": "2 of 6 drivers gated by check_ros_interfaces.py, authored 81e530a9 (01:46), before the skills at 5866de4b (02:10); and that gate's output was never archived (0 interface_check.log in repo)"
+        },
+        "coverage_of_own_cited_cases": {
+          "value": "2 of 6",
+          "provenance": "revisit_r2/coverage_of_own_cases.sh",
+          "detail": "cases 1,2,3 MISSED (never inspects PushObject.Result or sample_gz_pose); case 5 CRASHES; cases 4,6 CAUGHT"
+        },
+        "effect": "NOT_MEASURED"
+      },
+      "related": [
+        "benchmark/tools/check_ros_interfaces.py"
+      ],
+      "merge_candidate": {
+        "with": "benchmark/tools/check_ros_interfaces.py",
+        "rationale": "assert the same class of interface facts; that tool covers 5/6 of the cited cases and has 2 real round-2 callers, while preflight.py has 0 callers and covers 2/6",
+        "unique_to_preflight": [
+          "clearance_m range",
+          "position_tolerance_m range",
+          "header.frame_id rule",
+          "pure duck-typed unit-testability without ROS"
+        ],
+        "action": "recorded, NOT applied: porting the three numeric-range rules into benchmark/tools/ needs Lead approval (that path is outside development_skills/)"
+      }
     },
     {
       "name": "simulation-process-lifecycle",
       "status": "PROPOSED",
+      "status_reason": "adoption 0; guidance demonstrably not propagated (6/6 round-2 drivers still use bare pkill -f); post-batch orphan count never archived, so the target metric has no data",
       "incidents": 2,
       "trigger": "writing or changing any process cleanup for a simulator run",
-      "evidence": ["references/failure-cases.md"],
-      "entrypoints": ["scripts/safe_pattern.py"],
-      "tests": "tests/test_safe_pattern.py :: 8 passed, 2 mutants caught",
-      "revisit_metrics": [
-        "cleanup misfires recurring: NOT MEASURED",
-        "load_after stability between batches: NOT MEASURED"
-      ]
+      "evidence": [
+        "references/failure-cases.md"
+      ],
+      "entrypoints": [
+        "scripts/safe_pattern.py"
+      ],
+      "tests": "tests/test_safe_pattern.py :: 8 passed (re-measured 2026-11-12)",
+      "mutation": "3/3 mutants killed (registry previously claimed 2; re-measured 3)",
+      "revisit_metrics": {
+        "adoption_round2": {
+          "value": 0,
+          "provenance": "revisit_r2/adoption_census.sh"
+        },
+        "drivers_using_bare_pkill": {
+          "value": "6 of 6 round-2 drivers",
+          "provenance": "grep over setup/acceptance/*20261112*/*.sh"
+        },
+        "drivers_using_the_bracket_trick": {
+          "value": "1 of 6",
+          "provenance": "evobot_t08_evidence_run.sh uses [g]z sim"
+        },
+        "post_batch_orphan_count": {
+          "value": "NOT_MEASURED",
+          "provenance": "no round-2 artifact records pgrep after a batch; 0 files contain such a count"
+        },
+        "effect": "NOT_MEASURED"
+      }
     },
     {
       "name": "evidence-level-audit",
       "status": "PROPOSED",
+      "status_reason": "detects its own cited case A (2/2) but MISSES round 2's real recurrence (0/1); its declared scope ('is this symbol referenced') sits exactly outside what actually recurred this round",
       "incidents": 2,
       "trigger": "about to claim a verifier works, or a batch passed",
-      "evidence": ["references/failure-cases.md"],
-      "entrypoints": ["scripts/call_path_check.py"],
-      "tests": "tests/test_call_path_check.py :: 6 passed",
-      "revisit_metrics": [
-        "test-green-with-no-caller recurring: NOT MEASURED",
-        "report numbers matching reality: NOT MEASURED"
-      ]
+      "evidence": [
+        "references/failure-cases.md"
+      ],
+      "entrypoints": [
+        "scripts/call_path_check.py"
+      ],
+      "tests": "tests/test_call_path_check.py :: 6 passed (re-measured 2026-11-12)",
+      "mutation": "1/1 mutant killed (registry previously claimed none; now measured)",
+      "revisit_metrics": {
+        "adoption_round2": {
+          "value": 0,
+          "provenance": "revisit_r2/adoption_census.sh"
+        },
+        "detects_its_own_cited_case_A": {
+          "value": "2 of 2 (ABSENT on v0.4.0 tree, OK on post-fix tree)",
+          "provenance": "revisit_r2/case_a_check.sh",
+          "note": "this is a CAPABILITY result, not an effect result"
+        },
+        "detects_round2_real_recurrence": {
+          "value": "0 of 1",
+          "provenance": "revisit_r2/case_a_check.sh",
+          "detail": "round 2's bug was evaluate.py CALLING verify with a missing argument; the file contains the string 'verify', so a presence check reports OK"
+        },
+        "target_failure_inside_declared_scope_round2": {
+          "value": 0
+        },
+        "target_failure_outside_declared_scope_round2": {
+          "value": 5,
+          "detail": "five cases of a reported number that does not recompute from committed artifacts: R2-a..R2-e in REVISIT_R2_20261112.md section M9"
+        },
+        "effect": "NOT_MEASURED"
+      },
+      "candidate_review_questions": [
+        {
+          "id": "P1",
+          "question": "Does a label assert a producer that nothing verifies?",
+          "round2_instances": 3,
+          "instances": [
+            "baseline_a_v2_gated_20261111/ labelled A-prime is the oracle builder's output (72/72 byte-identical, reproduced independently by the Curator)",
+            "three different modules are all called A-prime (only baseline_a_composite.py actually reads expected_goal)",
+            "evobot_p0_paired.sh has never compiled (IndentationError); no paired.tsv exists anywhere"
+          ],
+          "cheapest_detector": "revisit_r2/provenance_label_check.sh -- rebuild from the declared producer, compare sha256, plus an AST check that an 'oracle' module really reads expected_goal",
+          "detector_cost": "0 Gazebo, 0 model calls, ~40 lines, <30s for the whole repo",
+          "detector_status": "RUNS and reproduces 72/72; NOT adopted by any workflow, therefore NOT_MEASURED"
+        },
+        {
+          "id": "P2",
+          "question": "For each gate: is the value it compares AGAINST supplied by the same untrusted producer as the evidence it judges? If yes the gate is not a check on its own.",
+          "measured": "3 of 9 T08 gates rest on a producer-declared reference: table_support and no_lift on task.rest_height_m, pusher_contact on contacts.pusher_links",
+          "correction_to_lead_brief": "not six. max_z_m / bundle_sha256 / max_gap_ns / dropped_samples are read by NO gate in verify.py; the latter three are only shape-checked in schema.py",
+          "mitigation_measured": "redundancy holds for the carry case: re-declaring rest_height_m to hide a carry is caught by the two-sided table_support gate (revisit_r2/forge_test.sh F2)",
+          "separate_hole_found": "zeroing manifest.bundle_sha256 changes nothing -- no gate verifies the seal (forge_test.sh F7). This is independent of P2 and not in the Lead's list of six.",
+          "cheapest_detector": "revisit_r2/self_declared_reference_check.sh -- AST + line attribution of which bundle fields each gate reads",
+          "detector_cost": "0 Gazebo, 0 model calls, ~30 lines, seconds",
+          "detector_status": "RUNS; NOT adopted, therefore NOT_MEASURED"
+        },
+        {
+          "id": "P3",
+          "question": "Is a reported metric degenerate on the subpopulation where it is being quoted? For M defined over (A, B), check whether M collapses to A (or B) on that subpopulation. If it does, quoting M there is quoting A under a second name.",
+          "round2_instance": "verdict.false_failure",
+          "measured": "evaluate.py:344 defines false_failure = bool(passed and not claimed). Exhaustive truth table: on both claimed=False rows, false_failure == passed exactly. The 9/9 B runs that were quoted all had no agent claim, so the value carried zero information there.",
+          "provenance": "revisit_r2/degenerate_metric_check.sh",
+          "corroborating_lane": "setup/acceptance/evobot_t04_executor_mismatch_20261112/README.md section 6 (exec-mystery lane measured the 9/9; this Curator verified the rule that makes it inevitable)",
+          "cheapest_detector": "revisit_r2/degenerate_metric_check.sh -- enumerate the (A,B) truth table and test whether M is a projection of A on the reported subpopulation",
+          "detector_cost": "0 Gazebo, 0 model calls, pure arithmetic, milliseconds",
+          "detector_status": "RUNS; NOT adopted, therefore NOT_MEASURED"
+        }
+      ],
+      "new_skill_decision": "NOT created as separate skill directories. Both P1 and P2 share evidence-level-audit's root failure ('a trusted thing with no verification step'). Adding two more PROPOSED directories to a library with 0/4 adoption would be manufacturing output, not capability.",
+      "candidate_review_questions_summary": "P1 (label claims a producer nothing verifies), P2 (gate compares against a value from the same untrusted producer), P3 (metric is degenerate on the subpopulation it is quoted for). All three share one shape: a trust relationship exists and the corresponding verification relationship does not. That is the same shape as this skill's cited case A (tests green, no caller). Hence all three are recorded HERE rather than as new skill directories."
     },
     {
       "name": "effect-verification",
       "status": "PROPOSED",
+      "status_reason": "code is correct and mutation-proven, but it caught 0 of round 2's 2 real errors and was adopted 0 times",
       "incidents": 3,
       "trigger": "after editing a file with a script, or after running a check whose output you will trust",
-      "evidence": ["references/failure-cases.md"],
-      "entrypoints": ["scripts/effect_check.py"],
-      "tests": "tests/test_effect_check.py :: 17 passed, 3 mutants caught",
-      "revisit_metrics": [
-        "empty output read as success: NOT MEASURED",
-        "mutations verified by hash: NOT MEASURED"
-      ]
+      "evidence": [
+        "references/failure-cases.md"
+      ],
+      "entrypoints": [
+        "scripts/effect_check.py"
+      ],
+      "tests": "tests/test_effect_check.py :: 17 passed (re-measured 2026-11-12)",
+      "mutation": "3/3 mutants killed (matches registry)",
+      "revisit_metrics": {
+        "adoption_round2": {
+          "value": 0,
+          "provenance": "revisit_r2/adoption_census.sh"
+        },
+        "catches_its_three_cited_shapes": {
+          "value": "4 of 4 (empty output, failed edit, 'no tests ran', 'collected 0 items')",
+          "provenance": "revisit_r2/coverage_of_own_cases.sh"
+        },
+        "catches_round2_real_errors": {
+          "value": "0 of 2",
+          "detail": "R2-err-1 unsigned displacement_m (0.0735 is non-empty, passes); R2-err-2 passed vs terminal_passed (False is non-empty, passes)"
+        },
+        "mutation_cycles_with_silent_no_op": {
+          "value": "0 of 12",
+          "note": "SELF-OBSERVATION ONLY: the Curator added a cmp guard before trusting results. Round 1 had 1 such no-op. This must NOT be counted as an effect of this skill."
+        },
+        "effect": "NOT_MEASURED"
+      }
     }
   ],
   "rejected_as_skills": [
@@ -73,38 +219,237 @@
       "incident": "commanded contact height is not the physical contact point",
       "decision": "case retained, no skill",
       "reason": "single instance; mechanism still UNKNOWN"
+    },
+    {
+      "incident": "push_recover v1 read unsigned displacement_m as progress",
+      "decision": "bug fix only",
+      "reason": "one-time defect, now locked by 3 named tests (reverting it turns them red, measured)",
+      "note": "this is a ROBOT capability, not a Development Skill"
+    },
+    {
+      "incident": "acceptance report cited files that were never archived",
+      "decision": "case retained, no skill",
+      "reason": "single instance, self-corrected in commit 00f5d4ba"
+    },
+    {
+      "incident": "number reported does not recompute from committed artifacts (5 instances this round)",
+      "decision": "candidate, deferred",
+      "reason": "recurrence is high enough, but the right fix is a recompute mechanism, not prose. Requires a 5/5 replay on the 5 archived cases first (see REVISIT_R2 section 3)."
     }
   ],
   "open_questions": [
-    "All four skills are PROPOSED. None has revisit data, so none may be marked VERIFIED.",
-    "Team slot for a dedicated Skill Curator could not be created: member limit 8 reached and there is no delete-member tool available to the Lead."
+    "All four skills remain PROPOSED. Round 2 measured adoption = 0/4 and effect = NOT_MEASURED for every one. No skill may be promoted on 'the error did not recur'.",
+    "Two new review questions (P1 provenance-label, P2 self-declared reference) are recorded inside evidence-level-audit rather than as new skills. Both detectors run; neither is adopted.",
+    "Round 2 found that the round-1 registry over-claimed nothing but under-reported mutation coverage (3->4 and 2->3), and omitted it entirely for evidence-level-audit (0->1)."
   ],
   "revisit": {
-    "round": 1,
+    "round": 2,
     "date": "2026-11-12",
-    "verdict": "NO VALID EFFECT EVIDENCE FOR ANY SKILL; all four stay PROPOSED",
+    "head_at_measurement": "6dab7aea",
+    "verdict": "NO VALID EFFECT EVIDENCE FOR ANY SKILL; all four stay PROPOSED. Round 2 additionally measured adoption = 0/4 and found two of the four miss the round's real recurrences.",
     "measured": {
-      "preflight invoked by batch driver": "yes",
-      "interface-class errors, 9 most recent runs": 0,
-      "interface-class errors before the skill existed": 6,
-      "orphan processes while idle": 0,
-      "evidence verifier has a real caller": "yes, from the v0.5.0 integration, not from the skill"
+      "skill_tests_total": {
+        "value": 42,
+        "provenance": "revisit_r2/run_tests.sh"
+      },
+      "mutation_mutants_killed": {
+        "value": "11 of 11",
+        "provenance": "revisit_r2/mutation_test.sh"
+      },
+      "adoption_across_round2_drivers": {
+        "value": "0 of 4 skills",
+        "provenance": "revisit_r2/adoption_census.sh",
+        "detail": "check_ros_interfaces.py (not a skill) has 2 callers"
+      },
+      "interface_class_errors_round2": {
+        "value": "0 of 24 authored scripts",
+        "provenance": "revisit_r2/interface_error_scan.sh",
+        "confounded": true
+      },
+      "interface_check_log_archived": {
+        "value": 0,
+        "provenance": "revisit_r2/adoption_census.sh"
+      },
+      "preflight_coverage_of_own_cases": {
+        "value": "2 of 6",
+        "provenance": "revisit_r2/coverage_of_own_cases.sh"
+      },
+      "call_path_check_on_own_case_A": {
+        "value": "2 of 2",
+        "provenance": "revisit_r2/case_a_check.sh"
+      },
+      "call_path_check_on_round2_real_bug": {
+        "value": "0 of 1",
+        "provenance": "revisit_r2/case_a_check.sh"
+      },
+      "effect_check_on_round2_real_errors": {
+        "value": "0 of 2",
+        "provenance": "revisit_r2/coverage_of_own_cases.sh"
+      },
+      "round2_numbers_recomputing_from_artifacts": {
+        "value": "4/5 recovery and 2/5 baseline both recompute",
+        "provenance": "revisit_r2/recompute_round2_numbers.sh",
+        "caveat": "the 2/5 needs the zone distances, which are NOT in the committed tsv -- finding R2-e"
+      },
+      "number_vs_artifact_mismatches_round2": {
+        "value": 5,
+        "detail": "R2-a..R2-e"
+      },
+      "provenance_label_instances": {
+        "value": 3,
+        "provenance": "revisit_r2/provenance_label_check.sh",
+        "detail": "72/72 byte-identical to the oracle builder, reproduced independently"
+      },
+      "gates_resting_on_producer_declared_reference": {
+        "value": "3 of 9",
+        "provenance": "revisit_r2/self_declared_reference_check.sh"
+      },
+      "bundle_seal_verified_by_any_gate": {
+        "value": "no",
+        "provenance": "revisit_r2/forge_test.sh F7"
+      },
+      "post_batch_orphan_count": {
+        "value": "NOT_MEASURED",
+        "why": "never archived this round"
+      },
+      "degenerate_metric_false_failure": {
+        "value": "false_failure == passed exactly on all claimed=False runs",
+        "provenance": "revisit_r2/degenerate_metric_check.sh"
+      },
+      "reproducer_count": 11
     },
     "why_not_evidence": [
-      "the 9 clean runs used the already-fixed driver, so absence of the error is confounded",
-      "no with-skill versus without-skill comparison was run, so no effect is attributable",
-      "zero orphans while idle says nothing; the metric must be measured after a batch",
-      "the verifier caller came from the v0.5.0 integration, which predates the skill"
+      "adoption 0/4: a skill that is never invoked cannot have caused anything",
+      "the 0 interface-class errors used an already-fixed driver AND a gate that predates the skills, and that gate's output was never archived",
+      "no with/without comparison exists for any skill",
+      "the verifier caller came from the v0.5.0 integration, which predates evidence-level-audit",
+      "the Curator's own 0-silent-no-op mutation record is self-observation, not a controlled comparison"
     ],
-    "required_experiment": "a NEW task where the agent could plausibly repeat the failure; group A without the skill, group B with it; compare first-run success, interface-error count, time-to-first-success",
-    "report": "REVISIT_20261112.md"
-  },
-  "blocked": [
-    {
-      "item": "dedicated Skill Curator teammate",
-      "status": "BLOCKED",
-      "reason": "team limit 8 reached; the Lead has no remove-member tool",
-      "unblock": "delete 7 finished members in the UI; keep geom-wire, which has task-9 in progress"
+    "required_experiment": {
+      "primary": {
+        "skill": "ros2-interface-preflight",
+        "why": "its target failure is purely static, so the comparison needs NO simulator at all -- the only one of the four that can be A/B tested without Gazebo",
+        "task": "an agent writes a new T08 driver that builds a PushObject.Goal from benchmark/tasks/t08_unseen/T08-push-seed3000.json and prints the PushObject.Result field names (this is real pending work: unseen 3000-3002 have never been run)",
+        "group_A": "task description + repo path only; development_skills/ not mentioned",
+        "group_B": "same description plus 'read development_skills/ros2-interface-preflight/SKILL.md and run scripts/preflight.py --describe first'",
+        "metric_1": "interface-class errors before first successful Goal construction (AttributeError|has no attribute|TypeError), counted by revisit_r2/interface_error_scan.sh",
+        "metric_2": "number of edit-run cycles to first success",
+        "falsifiable_threshold": "A>=1 AND B=0 => effective; A=0 => the task did not elicit the error, the experiment is uninformative and MUST NOT be recorded as a skill success",
+        "cost": "2 agent runs x ~10 min; 0 Gazebo; 0 paid model calls; ROS sourced but nothing launched (--describe only imports message definitions)"
+      },
+      "secondary": {
+        "skill": "evidence-level-audit (via candidate P1)",
+        "method": "replay the 5 archived number-vs-artifact mismatches (R2-a..R2-e) against a recompute check",
+        "current_detector_score": "0 of 5 (it only checks symbol presence)",
+        "target": "5 of 5",
+        "warning": "a 5/5 retrospective replay REPLACES the entrypoint; it does not promote the skill. Adoption on a NEW task is still required before VERIFIED.",
+        "cost": "~30 min offline, 0 Gazebo"
+      },
+      "explicitly_not_doing": [
+        "no Gazebo-based skill comparison: the sim lane owns the lock and none of the interface-class failures need physics",
+        "no promotion on 'the error did not recur while the skill existed'"
+      ]
+    },
+    "report": "REVISIT_R2_20261112.md",
+    "reproducers": "revisit_r2/ (11 scripts; every number above is printed by one of them; all 11 verified to run clean)",
+    "headline_answer_q5": {
+      "question": "Did any Development Skill measurably reduce error rate or development cost this round?",
+      "answer": "No. Adoption was 0/4, and on the two bugs that actually recurred this round the entrypoint coverage was 0/1 and 0/2. The four skills are documentation of lessons learned after the fact, not instruments that changed behaviour.",
+      "supporting_evidence": {
+        "adoption_across_round2_drivers": "0 of 4",
+        "evidence_level_audit_on_the_recurring_bug": "0 of 1",
+        "effect_verification_on_the_two_real_errors": "0 of 2",
+        "preflight_coverage_of_its_own_cited_cases": "2 of 6",
+        "skills_with_a_with_without_comparison": 0
+      },
+      "decisive_test": "A tool changed behaviour only if it was invoked AND the invocation did not fail. The first condition alone fails (0/4)."
+    },
+    "self_correction": {
+      "id": "R2-e",
+      "what": "The Curator's own first recompute of the 2/5 baseline gave 3/5 because the committed repeats.tsv has no zone-distance column, so one of the three frozen gates was silently dropped.",
+      "how_resolved": "Re-derived with all three gates -> 2/5, matching the report. The error was the recompute, not the report; the defect is that a claimed-recomputable number's criteria are not all in the committed artifacts.",
+      "why_it_matters": "The only one of the five number-vs-artifact instances this round that was created by a reviewer and caught by that same reviewer in the act. Demonstrates the correct chain: conflicting number -> do not pick a side -> find why -> record the defect rather than erase the trace.",
+      "lead_note": "Lead flagged this as the most valuable item in the round."
+    },
+    "lead_accepted_corrections": [
+      {
+        "id": "P2",
+        "curator_correction": "3 of 9 gates rest on a producer-declared comparand, not six; four of the six named values are read by no gate in verify.py",
+        "lead_response": "ACCEPTED. Lead fact state corrected. Lead added the two-sided table_support point (the F1 carry bypass needs the specific constant-height construction, not any carry) and recorded the F7 seal hole as a separate defect credited to the Curator."
+      },
+      {
+        "id": "P1",
+        "curator_correction": "Only one module reads expected_goal; the other A-prime modules are genuine planners, so the defect is the label and the ambiguity",
+        "lead_response": "ACCEPTED. Lead had overstated it as three fake planners; corrected in the fact state."
+      },
+      {
+        "id": "P3",
+        "curator_correction": "false_failure == passed exactly on all claimed=False runs (truth-table identity), so the 9/9 is arithmetic inevitability, not empirical",
+        "lead_response": "ACCEPTED and folded into the round summary."
+      }
+    ],
+    "follow_up_approved": {
+      "experiment": "ros2-interface-preflight offline A/B",
+      "status": "APPROVED IN PRINCIPLE by the Lead, NOT RUN this round",
+      "why_not_run": "the sim lane owns the Gazebo lock and arms S/U are still pending; a 2-run agent A/B would need model budget, which this round deliberately kept at zero",
+      "falsifiability_clause_is_now_project_standard": "A=0 means the task did not elicit the error, and MUST NOT be recorded as success"
+    },
+    "decision_on_new_skill_directories": "DO NOT create. Lead confirmed: adding PROPOSED directories to a library with 0/4 adoption manufactures output, not capability. P1/P2/P3 stay as review questions inside evidence-level-audit.",
+    "staleness_verification": {
+      "question": "The measurements were taken at 6dab7aea; HEAD advanced to a6fe30af before publication. Are the evidence-layer findings still current?",
+      "answer": "YES. The evidence layer is byte-identical between the two hashes. P2 (3-of-9 gates) and F7 (unsealed manifest) are CURRENT at a6fe30af, not merely true at 6dab7aea.",
+      "raised_by": "Curator, as an open question rather than letting the numbers travel unqualified",
+      "resolved_by": "Lead confirmed; Curator independently re-ran all three proofs before recording them",
+      "proofs": [
+        {
+          "command": "git -C <wt-comp> diff --name-only 6dab7aea..HEAD -- benchmark/evidence benchmark/evaluators src/",
+          "result": "EMPTY",
+          "ran_by": "both Lead and Curator (independently)"
+        },
+        {
+          "command": "git -C <wt-comp> show --stat a6fe30af",
+          "result": "touches only docs/FACT_STATE_20261112.md and the two new files under setup/acceptance/evobot_lead_recorder_zero_interval_20261112/",
+          "ran_by": "both"
+        },
+        {
+          "command": "git rev-parse <hash>:<path> for the five evidence-layer files, at 6dab7aea and at a6fe30af",
+          "result": "all five IDENTICAL: verify.py d2c1912f4a23, schema.py 7c43ce6fde09, recorder.py be1d41322ef8, fixtures.py e5a75221648c, evaluate.py c01024491544",
+          "ran_by": "Curator"
+        },
+        {
+          "command": "re-run revisit_r2/forge_test.sh, self_declared_reference_check.sh, case_a_check.sh at a6fe30af",
+          "result": "byte-for-byte identical output to the 6dab7aea run: F2 rejected by table_support, F7 passes with the seal zeroed, 3 of 9 gates, case A caught 2/2, round-2 bug missed 0/1",
+          "ran_by": "Curator"
+        }
+      ],
+      "recorded_state": "measured at 6dab7aea; evidence layer confirmed byte-identical at a6fe30af",
+      "lesson": "A measurement hash that goes stale between measurement and publication is itself a provenance fact and must be stated, not omitted. This is the same defect class as P1: a label (the recorded hash) asserting a state that nothing re-verified."
+    },
+    "project_rules_credited_to_curator": [
+      {
+        "rule": "Falsifiability clause for Development Skill experiments",
+        "statement": "An A/B test where arm A shows ZERO errors is UNINFORMATIVE, not a success. A=0 means the task did not elicit the error and MUST NOT be recorded as a skill success.",
+        "origin": "Curator's proposed preflight experiment, round 2",
+        "status": "ADOPTED by the Lead as the standard for every Development Skill experiment"
+      },
+      {
+        "rule": "R2-e as the canonical example of the recomputability defect class",
+        "statement": "A number claimed to be recomputable whose criteria are not all in the committed artifacts. The committed repeats.tsv has no zone-distance column, so a reviewer recomputing with the two visible gates gets 3/5 against a reported 2/5.",
+        "origin": "Curator self-caught this while recomputing the round's headline baseline",
+        "status": "ADOPTED by the Lead as the canonical example; outranks the four skills because the skills never once demonstrated the detect-record-don't-erase chain"
+      },
+      {
+        "rule": "'Documentation after the fact, not instruments that changed behaviour'",
+        "statement": "The four skills are documentation of lessons learned after the fact. Falsifiable basis: their commit is 5866de4b (02:10) and every case in their references/failure-cases.md predates it, so there is no instance of a skill existing first and intercepting an error.",
+        "origin": "Curator, round 2 Q5 answer",
+        "status": "ADOPTED by the Lead as usable precisely because it is falsifiable"
+      }
+    ],
+    "round_closed": {
+      "status": "ACCEPTED by the Lead",
+      "disposition": "Files remain uncommitted; the Lead commits development_skills/ in the round's final commit, attributed as the Curator lane's work.",
+      "further_work_requested": "none"
     }
-  ]
+  },
+  "boundary_note": "Development Skills make the AGENT better at developing. They are NOT robot capabilities. push_recover and the T08 evidence verifier are ROBOT/runtime work and are never counted as Development Skill capability. This separation is the precondition for this directory existing."
 }

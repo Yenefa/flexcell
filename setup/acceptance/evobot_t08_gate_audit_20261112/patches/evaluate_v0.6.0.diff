@@ -1,0 +1,47 @@
+--- a/benchmark/evaluators/evaluate.py
++++ b/benchmark/evaluators/evaluate.py
+@@ -16,9 +16,9 @@
+ 
+ # 0.3.0 adds the "push" goal clause (T08). It is a pure addition: a spec that does not
+ # declare "push" produces exactly the clause list it produced under 0.2.0, which is
+ # asserted by re-grading a frozen instance and comparing the verdict.
+-EVALUATOR_VERSION = "0.5.0"
++EVALUATOR_VERSION = "0.6.0"
+ 
+ # Declared tolerances. Changing one changes what "success" means, so the version
+ # string must change with them; the tests assert the pair stays in sync.
+ HORIZONTAL_TOLERANCE_M = 0.02
+@@ -237,8 +237,23 @@
+                 lift = float(zmax) - start[2]
+                 lift_ok = lift <= max_lift
+                 lift_ev = {"max_lift_m": round(lift, 5),
+                            "max_lift_allowed_m": max_lift}
++        # v0.6.0 (F14): an overshoot and an undershoot need OPPOSITE fixes --
++        # back off vs push harder -- but v0.5.0 collapsed both into one boolean,
++        # so failed_clauses could not tell them apart. Record which bound failed.
++        #
++        # DELIBERATELY NOT CHANGED HERE: max_lift. See MIGRATION.md 4b --
++        # max_vertical_m bounds the END-STATE height difference (dz), while
++        # max_lift_during_m bounds the PEAK height over the whole trace. They are
++        # different quantities, so substituting one for the other would silently
++        # relax the no-lift rule and flip R/t3 to a pass. That is a task-design
++        # decision, not a version bump.
++        displacement_reason = None
++        if moved < min_m:
++            displacement_reason = "undershoot"
++        elif moved > max_m:
++            displacement_reason = "overshoot"
+         ok = (min_m <= moved <= max_m) and dz <= max_dz and zone_ok and lift_ok
+         if cos is not None:
+             ok = ok and cos >= min_cos
+         clauses.append(_clause(
+@@ -247,8 +262,9 @@
+             max_displacement_m=max_m, vertical_m=round(dz, 5),
+             max_vertical_m=max_dz,
+             direction_cosine=None if cos is None else round(cos, 5),
+             min_direction_cosine=min_cos,
++            displacement_failure=displacement_reason,
+             **zone_ev, **lift_ev))
+ 
+     terminal_passed = bool(clauses) and all(c["ok"] for c in clauses)
+     claimed = bool(final_state.get("agent_claimed_success"))

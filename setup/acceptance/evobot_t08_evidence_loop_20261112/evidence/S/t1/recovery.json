@@ -1,0 +1,81 @@
+{
+  "verdict": {
+    "outcome": 2,
+    "achieved_m": 0.08624320644363243,
+    "attempts": 1,
+    "detail": "short by 0.0038 m after 1 attempts"
+  },
+  "attempts": [
+    {
+      "outcome": 0,
+      "error_code": 0,
+      "status": 1,
+      "measured_before": {
+        "position": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ],
+        "orientation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "measured_after": {
+        "position": [
+          0.13375679355636758,
+          0.0019696686029586482,
+          0.01749066372697885
+        ],
+        "orientation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "displacement_m": 0.08626569619033989,
+      "displacement_along_direction_m": 0.08624320644363243,
+      "direction_cos": 0.9997392967575682,
+      "lateral_m": 0.0019696686029586482,
+      "delta_z_m": -9.333784765901826e-06,
+      "requested_distance_m": 0.09,
+      "ee_travel_m": 0.16000000000000003,
+      "reach_error_m": 0.0025305290332172242,
+      "contact_made": true,
+      "contact_lost": false,
+      "increments_executed": 5,
+      "contact_lost_at_increment": 0,
+      "carry_engaged_during": false,
+      "evidence_id": "t08loop-target_box_a-0-182ea0f4",
+      "detail": "pushed 0.0863m along the requested direction (cos 0.9997, lateral 0.0020m, dz -0.0000m) in 5 increments"
+    }
+  ],
+  "decisions": [
+    {
+      "attempt": 1,
+      "requested_m": 0.09,
+      "achieved_before_m": 0.0,
+      "overshoot_ratio_used": 1.0,
+      "projected_total_m": 0.09,
+      "ceiling_guard_m": 0.14,
+      "guard_bound": false
+    }
+  ],
+  "ceiling_guard_m": 0.14,
+  "guard_bound": false,
+  "target_m": 0.09,
+  "max_displacement_m": 0.15,
+  "achieved_signed_m": 0.08624320644363243,
+  "overshoot_ratio_observed": 1.0,
+  "last_attempt_unsigned_displacement_m": 0.08626569568539097,
+  "contact_height_m": 0.02,
+  "task_id": "T08-push-seed2000",
+  "target_object": "target_box_a",
+  "direction": [
+    -1.0,
+    0.0
+  ]
+}

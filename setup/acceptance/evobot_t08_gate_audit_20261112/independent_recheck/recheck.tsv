@@ -1,0 +1,17 @@
+arm	trial	my_passed	producer_passed	agree	my_failed_gates	producer_failed_gates	rest_bound_to_spec	task_sha256_matches	digest_matches	max_z_honest	my_evidence_status	producer_evidence_status
+R	t1	False	False	True	['gripper']	['gripper']	True	True	True	True	COMPLETE_EVIDENCE_CONTRADICTS_PUSH	COMPLETE_EVIDENCE_CONTRADICTS_PUSH
+R	t2	False	False	True	['terminal']	['terminal']	True	True	True	True	INCOMPLETE_OR_INVALID_EVIDENCE	INCOMPLETE_OR_INVALID_EVIDENCE
+R	t3	False	False	True	['terminal']	['terminal']	True	True	True	True	INCOMPLETE_OR_INVALID_EVIDENCE	INCOMPLETE_OR_INVALID_EVIDENCE
+R	t4	False	False	True	['terminal', 'trajectory', 'table_support', 'protected_unmoved', 'no_lift', 'pusher_contact', 'gripper', 'no_attachment', 'no_teleport']	['terminal', 'trajectory', 'table_support', 'protected_unmoved', 'no_lift', 'pusher_contact', 'gripper', 'no_attachment', 'no_teleport']	True	True	True	True	INCOMPLETE_OR_INVALID_EVIDENCE	INCOMPLETE_OR_INVALID_EVIDENCE
+R	t5	False	False	True	['terminal']	['terminal']	True	True	True	True	INCOMPLETE_OR_INVALID_EVIDENCE	INCOMPLETE_OR_INVALID_EVIDENCE
+S	t1	False	False	True	['terminal']	['terminal']	True	True	True	True	INCOMPLETE_OR_INVALID_EVIDENCE	INCOMPLETE_OR_INVALID_EVIDENCE
+S	t2	False	False	True	['terminal']	['terminal']	True	True	True	True	INCOMPLETE_OR_INVALID_EVIDENCE	INCOMPLETE_OR_INVALID_EVIDENCE
+S	t3	True	True	True	[]	[]	True	True	True	True	COMPLETE	COMPLETE
+S	t4	False	False	True	['gripper']	['gripper']	True	True	True	True	COMPLETE_EVIDENCE_CONTRADICTS_PUSH	COMPLETE_EVIDENCE_CONTRADICTS_PUSH
+S	t5	False	False	True	['terminal']	['terminal']	True	True	True	True	INCOMPLETE_OR_INVALID_EVIDENCE	INCOMPLETE_OR_INVALID_EVIDENCE
+U	seed3000	None	None	None	None	None	None	None	None	None	None	None
+U	seed3001	None	None	None	None	None	None	None	None	None	None	None
+U	seed3002	None	None	None	None	None	None	None	None	None	None	None
+U_shot	seed3000	None	None	None	None	None	None	None	None	None	None	None
+U_shot	seed3001	None	None	None	None	None	None	None	None	None	None	None
+U_shot	seed3002	None	None	None	None	None	None	None	None	None	None	None

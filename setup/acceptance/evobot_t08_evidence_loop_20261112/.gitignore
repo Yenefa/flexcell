@@ -1,0 +1,9 @@
+# evaluator_input.json is a DERIVED artifact: it is exactly {objects: gt_after,
+# evidence: evidence_bundle.json}, and both of those are committed alongside it.
+# It is 28 MB across the 16 trials and has never been tracked in this repo.
+# Everything needed to reconstruct it is present, so it is regenerable, not lost.
+evaluator_input.json
+
+# uncompressed per-step logs are kept ONLY as .jsonl.gz (repo convention: 11 such
+# files are already tracked elsewhere). The plain form would duplicate ~90 MB.
+logs/*.jsonl

@@ -1,0 +1,121 @@
+{
+  "evaluator_version": "0.5.0",
+  "task_id": "T08-push-seed3001",
+  "template_id": "T08_push_manipulation",
+  "passed": false,
+  "terminal_passed": false,
+  "clauses": [
+    {
+      "clause": "unmoved:target_box_b",
+      "ok": true,
+      "evidence": {
+        "distance_m": 0.01,
+        "tolerance_m": 0.015
+      }
+    },
+    {
+      "clause": "push:target_box_a",
+      "ok": false,
+      "evidence": {
+        "displacement_m": 0.16621,
+        "min_displacement_m": 0.03,
+        "max_displacement_m": 0.15,
+        "vertical_m": 0.00029,
+        "max_vertical_m": 0.02,
+        "direction_cosine": -0.89385,
+        "min_direction_cosine": 0.9,
+        "zone": "zone_push",
+        "distance_m": 0.2595,
+        "radius_m": 0.06,
+        "inside_zone": false,
+        "max_lift_m": 0.0072,
+        "max_lift_allowed_m": 0.005
+      }
+    }
+  ],
+  "failed_clauses": [
+    "push:target_box_a"
+  ],
+  "agent_claimed_success": false,
+  "false_success": false,
+  "false_failure": false,
+  "evidence": {
+    "verifier_version": "1.0.0",
+    "physical_outcome": "UNKNOWN",
+    "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+    "failure_reason": "terminal: terminal evaluator did not pass (failed: None)",
+    "passed": false,
+    "gates": [
+      {
+        "gate": "terminal",
+        "ok": false,
+        "reason": "terminal evaluator did not pass (failed: None)",
+        "evidence": {
+          "evaluator_version": null,
+          "passed": false
+        }
+      },
+      {
+        "gate": "trajectory",
+        "ok": false,
+        "reason": "evidence bundle is not valid: contacts.intervals[5]: empty or inverted interval",
+        "evidence": {
+          "problem_count": 1
+        }
+      },
+      {
+        "gate": "table_support",
+        "ok": false,
+        "reason": "not evaluable: the evidence bundle did not validate",
+        "evidence": {}
+      },
+      {
+        "gate": "protected_unmoved",
+        "ok": false,
+        "reason": "not evaluable: the evidence bundle did not validate",
+        "evidence": {}
+      },
+      {
+        "gate": "no_lift",
+        "ok": false,
+        "reason": "not evaluable: the evidence bundle did not validate",
+        "evidence": {}
+      },
+      {
+        "gate": "pusher_contact",
+        "ok": false,
+        "reason": "not evaluable: the evidence bundle did not validate",
+        "evidence": {}
+      },
+      {
+        "gate": "gripper",
+        "ok": false,
+        "reason": "not evaluable: the evidence bundle did not validate",
+        "evidence": {}
+      },
+      {
+        "gate": "no_attachment",
+        "ok": false,
+        "reason": "not evaluable: the evidence bundle did not validate",
+        "evidence": {}
+      },
+      {
+        "gate": "no_teleport",
+        "ok": false,
+        "reason": "not evaluable: the evidence bundle did not validate",
+        "evidence": {}
+      }
+    ],
+    "failed_gates": [
+      "terminal",
+      "trajectory",
+      "table_support",
+      "protected_unmoved",
+      "no_lift",
+      "pusher_contact",
+      "gripper",
+      "no_attachment",
+      "no_teleport"
+    ]
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "verdict": {
+    "outcome": 3,
+    "achieved_m": 0.0,
+    "attempts": 1,
+    "detail": "no attempt established contact"
+  },
+  "attempts": [
+    {
+      "outcome": 1,
+      "error_code": 27,
+      "status": 2,
+      "measured_before": {
+        "position": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ],
+        "orientation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "measured_after": {
+        "position": [
+          0.22009925721822515,
+          -0.0037021863977582023,
+          0.017499709848155322
+        ],
+        "orientation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "displacement_m": 0.0037035167343844946,
+      "displacement_along_direction_m": -9.925721822515166e-05,
+      "direction_cos": -0.02680080187126458,
+      "lateral_m": 0.0037021863977582023,
+      "delta_z_m": -2.876635894280555e-07,
+      "requested_distance_m": 0.09,
+      "ee_travel_m": 0.16000000000000003,
+      "reach_error_m": 0.006679702879705794,
+      "contact_made": false,
+      "contact_lost": false,
+      "increments_executed": 5,
+      "contact_lost_at_increment": 0,
+      "carry_engaged_during": false,
+      "evidence_id": "t08loop-target_box_a-0-66973c48",
+      "detail": "object moved 0.0037m (< contact floor 0.0050); no contact was made at height 0.0200"
+    }
+  ],
+  "decisions": [
+    {
+      "attempt": 1,
+      "requested_m": 0.09,
+      "achieved_before_m": 0.0,
+      "overshoot_ratio_used": 1.0,
+      "projected_total_m": 0.09,
+      "ceiling_guard_m": 0.14,
+      "guard_bound": false
+    }
+  ],
+  "ceiling_guard_m": 0.14,
+  "guard_bound": false,
+  "target_m": 0.09,
+  "max_displacement_m": 0.15,
+  "achieved_signed_m": 0.0,
+  "overshoot_ratio_observed": 1.0,
+  "last_attempt_unsigned_displacement_m": 0.0037035167232126343,
+  "contact_height_m": 0.02,
+  "task_id": "T08-push-seed3002",
+  "target_object": "target_box_a",
+  "direction": [
+    -1.0,
+    0.0
+  ]
+}

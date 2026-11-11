@@ -47,28 +47,47 @@ auditor to conclude there was a 20× units error, and it would cause the next re
 `verify.py:339` even reports the number back as `limit_rad`. **A field whose name asserts a unit it
 does not have is the same class of defect as the mislabelled A′ column** — a label nothing verifies.
 
-## 4. Defect B (real, and it is the one that matters): the gate cannot distinguish contact from grasp
+## 4. Defect B — **WITHDRAWN.** My argument was wrong; the independent lane refuted it
 
-The gate bounds **total aperture travel** and calls any excursion beyond the bound "fingers closing on
-an object". It never checks whether the aperture could **physically enclose the object**, which is the
-only thing that makes a grasp a grasp.
+I claimed the gate cannot distinguish a grasp from contact, on the grounds that R/t1's aperture
+(`[-0.002960, +0.000096]`) sits in the same *absolute* region as this project's archived
+`GRASPED_AT_GOAL` records (`position ≈ −0.00107`).
 
-Measured, from `R/t1/evidence_bundle.json`, 1666 samples of `gripper_left_joint`:
+**That compares the wrong quantity.** The gate bounds **travel**, `max(span) − min(span)`
+(`verify.py:329`), not absolute position. Recomputing with travel, from the actual artifacts:
 
-```
-min = -0.002960 m   max = +0.000096 m   travel = 0.003057 m
-```
+| Case | Travel | vs 2 mm limit | Gate outcome |
+| --- | --- | --- | --- |
+| Nominal grasp (open `+0.020` → closed ≈ `−0.0013`, n=15 archived picks) | **21.05 mm** | **10.5×** | rejects — **correct** |
+| **R/t1 push** (n=1666) | **3.06 mm** | **1.5×** | rejects |
+| Known non-grasp push (937-sample calibration run) | **0.00099 mm** | **0.0005×** | passes — correct |
 
-The commanded open position for this stack is `gripper_open_position: 0.02` (`params.yaml:40`) and the
-closed stop is `-0.011` (`:41`). The fingers sat within **3.1 mm of the closed end** for the entire
-window, i.e. essentially shut, and the 3.06 mm excursion is that closed-finger pose flexing under
-contact.
+A real grasp is **10.5×** the limit; a known push is **0.0005×**. **The 2 mm bound does separate the
+two measured classes.** My "same region" observation was about absolute positions, which the gate
+never looks at. The lane also correctly refused to quote an absolute finger gap, because the finger
+links are collision **meshes** with no `<box size>` in the URDF — so the inner-face offset is not a
+measured quantity. I had reasoned from a number the robot model does not contain.
 
-For comparison, the project's own archived pick sequences record
-`gripper_close.position ≈ -0.00107` at `classification: GRASPED_AT_GOAL` — **the same region of
-travel** as this "grasp". So the gate's 2 mm bound is narrower than the aperture variation this
-project's own nominal grasps exhibit. A gate that would flag the nominal behaviour is not measuring
-what it claims.
+### 4.1 What survives, and it is a different hole
+
+The gate measures **motion**, never **enclosure**. Fingers already closed *around* an object and then
+dragged would show travel ≈ 0 and **pass**. That is a real hole, it is not R/t1's case, and **no change
+of the number can fix it** — it needs a different observable (e.g. object velocity correlated with
+finger motion, or the carry layer's own attach state). Recorded as the standing defect.
+
+### 4.2 R/t1 is therefore **UNRESOLVED**, not a false rejection
+
+The only non-grasp push ever measured has travel `0.00099 mm`; a nominal grasp is `21.05 mm`.
+**R/t1's 3.06 mm lies inside an interval containing no non-grasp measurement.** A threshold set inside
+an unmeasured interval cannot be judged right or wrong from existing data:
+
+- calling R/t1 a **false** rejection asserts a calibration nobody performed;
+- calling it a **true** rejection asserts 2 mm is justified when it was a round number ~2000× above a
+  single observation.
+
+**So I withdraw "probable false failure" — my own earlier framing — and the lane withdraws it too.**
+The honest state is UNRESOLVED, and it is the *same* conclusion my §5 already forced: the limit needs
+calibration before it can be used to decide anything.
 
 ## 5. What I will NOT do
 
@@ -110,8 +129,9 @@ calibration the gate has always lacked.
 | --- | --- |
 | R/t1 terminal clause passed | **CONFIRMED** — displacement, direction, zone, lift all inside the frozen bounds |
 | R/t1 `passed` | **false**, and it stays false this round |
-| R/t1 is a false failure | **PROBABLE BUT NOT ESTABLISHED** — the units argument is refuted; the "gate cannot distinguish contact from grasp" argument is strong but needs G1/G2 |
-| The gripper gate's 2 mm bound is calibrated | **NO — untraceable to any measurement.** `evaluate.py:328` calls it "calibrated" with no citation |
+| R/t1 is a false failure | **WITHDRAWN — UNRESOLVED.** The units argument is refuted (§2) and my own "same aperture region" argument is refuted (§4). 3.06 mm lies in an unmeasured interval between a known push (0.001 mm) and a nominal grasp (21.05 mm) |
+| The gripper gate's 2 mm bound is calibrated | **NO — untraceable to any measurement.** `evaluate.py:328` calls it "calibrated" with no citation. It does, however, separate the two *measured* classes (10.5× vs 0.0005×), so it is not obviously wrong — it is unvalidated |
+| The gate can distinguish grasp from contact | **PARTLY** — it separates the measured classes by travel, but it measures **motion, never enclosure**, so a pre-closed drag passes (§4.1) |
 | T08 acquired | **NO** — unchanged |
 
 ## 8. Reproduce
@@ -121,3 +141,69 @@ python3 setup/acceptance/evobot_lead_gripper_gate_adjudication_20261112/aperture
 ```
 
 Reads the URDF from the installed workspace and `R/t1/evidence_bundle.json`. No simulator, no model calls.
+
+---
+
+## 9. Revision log (kept because this document is itself a judgement, and judgements get reviewed)
+
+| Revision | What changed | Why |
+| --- | --- | --- |
+| v1 | Reported R/t1 as a probable **false failure** caused by a **units error** (0.002 rad → 0.040 rad) | the independent lane's initial reading |
+| v2 | **Units claim REFUTED** (§2) — the joints are prismatic, so 0.002 already means 2 mm. Two real defects substituted: the field-name/unit mismatch, and a claimed discrimination failure | Lead re-derivation from the URDF |
+| **v3 (this)** | **My own discrimination argument (§4) WITHDRAWN.** It compared absolute aperture positions; the gate bounds travel. Recomputed: nominal grasp 21.05 mm (10.5×), known push 0.00099 mm (0.0005×), R/t1 3.06 mm (1.5×). The bound **does** separate the measured classes. R/t1 is **UNRESOLVED**, not a false rejection | the independent lane refuted it; the Lead reproduced the refutation |
+
+**What survived all three revisions:** the units *naming* defect, the fact that the 2 mm bound is
+**untraceable to any measurement**, the "motion-not-enclosure" hole, and the **decision not to touch
+the threshold this round**. The direction of the round's conclusion never depended on the part that
+was wrong — which is the only reason it is safe to keep the conclusion.
+
+---
+
+## 10. Second correction (after the full 10-trial batch): the distribution now exists, and it shows false rejections
+
+The §4.2 "UNRESOLVED" verdict rested on the fact that only **one** non-grasp push had ever been
+measured. That is no longer true. Ten trials now exist, and nine have gripper telemetry:
+
+| Trial | Aperture travel | Gate | terminal_passed | passed |
+| --- | --- | --- | --- | --- |
+| **S/t3** | **0.0130 mm** | ✅ | true | **true** |
+| S/t5 | 0.0270 mm | ✅ | false | false |
+| R/t2 | 0.1320 mm | ✅ | false | false |
+| S/t2 | 0.2340 mm | ✅ | false | false |
+| S/t1 | 0.9700 mm | ✅ | false | false |
+| R/t5 | 1.0370 mm | ✅ | false | false |
+| R/t3 | 1.2870 mm | ✅ | false | false |
+| **R/t1** | **3.0570 mm** | ❌ | **true** | false |
+| **S/t4** | **4.8240 mm** | ❌ | **true** | false |
+
+*(R/t4's bundle is invalid for the recorder defect, so it has no gripper evidence and is excluded.)*
+
+### What this establishes
+
+**The 2 mm bound rejects 2 of 9 ordinary non-grasp pushes (22 %), and both rejections are trials whose
+terminal clause PASSED.** R/t1 and S/t4 are the only two trials this round that satisfied the frozen
+terminal geometry and were then stopped by the gripper gate alone.
+
+So the earlier "unresolved" framing was too kind to the gate. With n=9 the gate has a measurable
+**false-rejection rate of 22 %** among pushes, and it is the sole blocker on two otherwise-passing runs.
+Meanwhile the one clean pass sits **154× below the limit** (2.0 mm / 0.013 mm) and **235× below the
+smallest trial that exceeded it** (3.057 mm).
+
+### What this still does NOT establish
+
+- It does **not** show the limit should be raised to a specific number. The distribution is **bimodal with
+  a gap**: 7 trials at 0.013–1.29 mm, then 3.06 and 4.82 mm. **No trial falls between 1.29 mm and 3.06 mm.**
+  A threshold anywhere in that gap would separate these nine samples — but with no measurements inside it,
+  any cut point is a post-hoc choice, which is exactly what §5 forbids.
+- It does **not** re-grade R/t1 or S/t4. They stay `passed=false`.
+
+### The honest statement
+
+**The 2 mm bound is demonstrably too tight in practice (22 % false rejection), and the data does not
+contain the information needed to pick a correct value.** That is an argument for the G1/G2/G3
+calibration experiment in §6, not for a new number. The correct fix may well not be a number at all —
+see the "motion-not-enclosure" hole in §4.1.
+
+**One thing this does add to §4:** the passing trial's travel is three orders of magnitude below the
+rejected ones, so the gate *is* measuring something real. It is not noise, and it is not vacuous in the
+way the n=1 sample suggested. It is mis-calibrated, not meaningless.

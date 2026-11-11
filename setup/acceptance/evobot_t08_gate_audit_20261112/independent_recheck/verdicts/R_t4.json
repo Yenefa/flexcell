@@ -1,0 +1,57 @@
+{
+  "agree": true,
+  "arm": "R",
+  "bundle_file_sha256": "91699c2475c36e85dc803b4a7a2d69016230c96ccaf07b62885366fe65690d6a",
+  "bundle_self_digest_ok": true,
+  "declared_sha256": "91699c2475c36e85dc803b4a7a2d69016230c96ccaf07b62885366fe65690d6a",
+  "digest_matches": true,
+  "max_z_from_raw_log": 0.020144884,
+  "max_z_honest": true,
+  "max_z_passed_to_evaluator": 0.0201448837265564,
+  "my_evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+  "my_failed_clauses": [
+    "push:target_box_a"
+  ],
+  "my_failed_gates": [
+    "terminal",
+    "trajectory",
+    "table_support",
+    "protected_unmoved",
+    "no_lift",
+    "pusher_contact",
+    "gripper",
+    "no_attachment",
+    "no_teleport"
+  ],
+  "my_passed": false,
+  "my_physical_outcome": "UNKNOWN",
+  "my_terminal_passed": false,
+  "producer_evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+  "producer_failed_gates": [
+    "terminal",
+    "trajectory",
+    "table_support",
+    "protected_unmoved",
+    "no_lift",
+    "pusher_contact",
+    "gripper",
+    "no_attachment",
+    "no_teleport"
+  ],
+  "producer_passed": false,
+  "producer_terminal_passed": false,
+  "raw_log_missing": 0,
+  "raw_log_samples": 5430,
+  "rest_bound_to_spec": true,
+  "rest_declared": 0.0175,
+  "rest_from_spec": 0.0175,
+  "schema_problems": [
+    "contacts.intervals[6]: empty or inverted interval"
+  ],
+  "spec_path": "benchmark/tasks/t08_dev/T08-push-seed2000.json",
+  "task_id": "T08-push-seed2000",
+  "task_sha256_matches": true,
+  "task_spec_found": true,
+  "timestamp_problems": [],
+  "trial": "t4"
+}

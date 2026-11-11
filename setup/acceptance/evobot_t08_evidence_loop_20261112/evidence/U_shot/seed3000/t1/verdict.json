@@ -1,0 +1,149 @@
+{
+  "evaluator_version": "0.5.0",
+  "task_id": "T08-push-seed3000",
+  "template_id": "T08_push_manipulation",
+  "passed": false,
+  "terminal_passed": false,
+  "clauses": [
+    {
+      "clause": "unmoved:target_box_b",
+      "ok": false,
+      "evidence": {
+        "distance_m": 0.03,
+        "tolerance_m": 0.015
+      }
+    },
+    {
+      "clause": "push:target_box_a",
+      "ok": false,
+      "evidence": {
+        "displacement_m": 0.04579,
+        "min_displacement_m": 0.03,
+        "max_displacement_m": 0.15,
+        "vertical_m": 7e-05,
+        "max_vertical_m": 0.02,
+        "direction_cosine": -0.84982,
+        "min_direction_cosine": 0.9,
+        "zone": "zone_push",
+        "distance_m": 0.141,
+        "radius_m": 0.06,
+        "inside_zone": false,
+        "max_lift_m": 0.00219,
+        "max_lift_allowed_m": 0.005
+      }
+    }
+  ],
+  "failed_clauses": [
+    "unmoved:target_box_b",
+    "push:target_box_a"
+  ],
+  "agent_claimed_success": false,
+  "false_success": false,
+  "false_failure": false,
+  "evidence": {
+    "verifier_version": "1.0.0",
+    "physical_outcome": "UNKNOWN",
+    "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+    "failure_reason": "terminal: terminal evaluator did not pass (failed: None)",
+    "passed": false,
+    "gates": [
+      {
+        "gate": "terminal",
+        "ok": false,
+        "reason": "terminal evaluator did not pass (failed: None)",
+        "evidence": {
+          "evaluator_version": null,
+          "passed": false
+        }
+      },
+      {
+        "gate": "trajectory",
+        "ok": true,
+        "reason": null,
+        "evidence": {
+          "objects": [
+            "target_box_a",
+            "target_box_b"
+          ],
+          "total_samples": 5200
+        }
+      },
+      {
+        "gate": "table_support",
+        "ok": true,
+        "reason": null,
+        "evidence": {
+          "off_table_samples": 0,
+          "tolerance_m": 0.01
+        }
+      },
+      {
+        "gate": "protected_unmoved",
+        "ok": true,
+        "reason": null,
+        "evidence": {
+          "max_excursion_m": 0.0,
+          "tolerance_m": 0.005
+        }
+      },
+      {
+        "gate": "no_lift",
+        "ok": true,
+        "reason": null,
+        "evidence": {
+          "max_lift_m": 0.00219,
+          "allowed_m": 0.02
+        }
+      },
+      {
+        "gate": "pusher_contact",
+        "ok": true,
+        "reason": null,
+        "evidence": {
+          "motion_windows": 686,
+          "overlapping_windows": 683,
+          "contact_intervals": 4,
+          "pusher_links": [
+            "open_manipulator_x::gripper_left_link::gripper_left_link_collision",
+            "open_manipulator_x::gripper_right_link::gripper_right_link_collision"
+          ]
+        }
+      },
+      {
+        "gate": "gripper",
+        "ok": true,
+        "reason": null,
+        "evidence": {
+          "joint": "gripper_left_joint",
+          "samples": 1185,
+          "aperture_travel_rad": 0.001464,
+          "limit_rad": 0.002,
+          "min_aperture_rad": -0.001197,
+          "max_aperture_rad": 0.000267
+        }
+      },
+      {
+        "gate": "no_attachment",
+        "ok": true,
+        "reason": null,
+        "evidence": {
+          "events": 0
+        }
+      },
+      {
+        "gate": "no_teleport",
+        "ok": true,
+        "reason": null,
+        "evidence": {
+          "max_jump_m": 0.000709,
+          "threshold_m": 0.03,
+          "declared_jump_m": 0.000709,
+          "measured_jump_m": 0.000709
+        }
+      }
+    ],
+    "failed_gates": [
+      "terminal"
+    ]
+  }
+}

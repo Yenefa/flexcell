@@ -1,0 +1,81 @@
+{
+  "verdict": {
+    "outcome": 2,
+    "achieved_m": 0.018891609648241298,
+    "attempts": 1,
+    "detail": "short by 0.0711 m after 1 attempts"
+  },
+  "attempts": [
+    {
+      "outcome": 1,
+      "error_code": 28,
+      "status": 2,
+      "measured_before": {
+        "position": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ],
+        "orientation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "measured_after": {
+        "position": [
+          0.2011083903517587,
+          0.0027500206906887485,
+          0.01738916271454437
+        ],
+        "orientation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ]
+      },
+      "displacement_m": 0.01909104013020271,
+      "displacement_along_direction_m": 0.018891609648241298,
+      "direction_cos": 0.9895537131239954,
+      "lateral_m": 0.0027500206906887485,
+      "delta_z_m": -0.00011083479720037925,
+      "requested_distance_m": 0.09,
+      "ee_travel_m": 0.10400000000000004,
+      "reach_error_m": 0.0033681244449061485,
+      "contact_made": true,
+      "contact_lost": true,
+      "increments_executed": 3,
+      "contact_lost_at_increment": 3,
+      "carry_engaged_during": false,
+      "evidence_id": "t08loop-target_box_a-0-c00c87ac",
+      "detail": "contact lost at increment 3: object moved 0.0191m of 0.0900m requested while the arm kept advancing"
+    }
+  ],
+  "decisions": [
+    {
+      "attempt": 1,
+      "requested_m": 0.09,
+      "achieved_before_m": 0.0,
+      "overshoot_ratio_used": 1.0,
+      "projected_total_m": 0.09,
+      "ceiling_guard_m": 0.14,
+      "guard_bound": false
+    }
+  ],
+  "ceiling_guard_m": 0.14,
+  "guard_bound": false,
+  "target_m": 0.09,
+  "max_displacement_m": 0.15,
+  "achieved_signed_m": 0.018891609648241298,
+  "overshoot_ratio_observed": 1.0,
+  "last_attempt_unsigned_displacement_m": 0.01909071839666438,
+  "contact_height_m": 0.02,
+  "task_id": "T08-push-seed2000",
+  "target_object": "target_box_a",
+  "direction": [
+    -1.0,
+    0.0
+  ]
+}
