@@ -18,9 +18,19 @@ mkdir -p "$OUT"
 
 set +u
 source /opt/ros/jazzy/setup.bash
+# agentic_workcell_ws supplies open_manipulator_description. Without it the launch
+# dies with 'package not found' and the action server never appears -- which the
+# driver would report as a null result rather than as a launch failure, so this
+# line is the difference between a measurement and a silent non-measurement.
+source /home/ros/agentic_workcell_ws/install/setup.bash
 source /home/ros/flexcell-p14-ws/install/setup.bash
 source /tmp/t08_push_ws/install/setup.bash
 set -u
+# Same isolation the working T08 driver uses: a separate Gazebo partition and DDS
+# domain so this script cannot collide with any other run and cannot be reached by
+# a stale participant from an earlier one.
+export GZ_PARTITION=evobot-t08 RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+export ROS_DOMAIN_ID=${EVOBOT_ROS_DOMAIN:-180} LIBGL_ALWAYS_SOFTWARE=1
 
 OBJ=$(python3 -c "import json;print(json.load(open('$TASK'))['objects'][0]['name'])")
 echo "object=$OBJ  task=$TASK"
@@ -47,7 +57,21 @@ PY
   PARAMS=$HOUT/sim/params.yaml; WORLD=$HOUT/sim/world.sdf
   setsid ros2 launch flexcell_skills trusted_sim.launch.py world:=$WORLD params_file:=$PARAMS camera:=false > "$HOUT/stack.log" 2>&1 &
   STACK=$!
-  for i in $(seq 1 90); do ros2 action list 2>/dev/null | grep -q push_object && break; sleep 1; done
+  SERVER_UP=0
+  for i in $(seq 1 90); do
+    if ros2 action list 2>/dev/null | grep -q push_object; then SERVER_UP=1; break; fi
+    sleep 1
+  done
+  # A missing action server is a HARNESS failure, not a robot result. Recording it
+  # as a zero-displacement push would be exactly the infrastructure-failure-as-
+  # task-failure confusion the mission forbids.
+  if [ "$SERVER_UP" -ne 1 ]; then
+    echo "  HARNESS_ERROR: push_object action server never appeared; not a measurement"
+    printf '%s\tHARNESS_ERROR\tno_server\t-\t-\n' "$H" >> "$OUT/sweep.tsv"
+    kill -9 -$STACK 2>/dev/null || true; kill -9 $STACK 2>/dev/null || true
+    sleep 2
+    continue
+  fi
   python3 - "$OBJ" "$H" "$HOUT" <<'PY'
 import sys, json
 import rclpy
