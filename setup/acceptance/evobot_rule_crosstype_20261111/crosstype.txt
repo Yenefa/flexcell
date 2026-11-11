@@ -1,0 +1,32 @@
+T14 instance         pre-T14  all-rules LLM      pre-T14 note
+HO-0dcde4dc0f5a      False    True     True     generic both-blocks rule
+HO-128c6a231c34      True     True     True     generic both-blocks rule
+HO-2efba46248da      True     True     True     generic both-blocks rule
+HO-40348a081df6      False    True     True     generic both-blocks rule
+HO-4dafd8d17858      True     True     True     generic both-blocks rule
+HO-4dbb21d087ae      False    True     True     generic both-blocks rule
+HO-51600cf21179      False    True     True     generic both-blocks rule
+HO-60679893327a      True     True     True     generic both-blocks rule
+HO-6173170d8c47      False    True     True     generic both-blocks rule
+HO-675c07e900e7      False    True     True     generic both-blocks rule
+HO-884ea68a42ca      False    True     True     generic both-blocks rule
+HO-b3fb8b1de2db      False    True     True     generic both-blocks rule
+HO-c79ebfe5c9e6      True     True     True     generic both-blocks rule
+HO-d3ab212142de      False    True     True     generic both-blocks rule
+HO-da7c04bdece5      False    True     True     generic both-blocks rule
+HO-dcf52d233154      False    True     True     generic both-blocks rule
+
+rule set WITHOUT a T14 branch     5/16
+rule set WITH a T14 branch       16/16
+LLM planner                      16/16
+
+of the 5 that scored, 5 only because the required order coincided with the
+natural object order - the rule set never parsed the constraint at all.
+
+READING: the pre-T14 rule set scored 5/16, and 5 of those are luck - the
+required order happened to equal the object enumeration order. On the 11
+instances where it did not, the rule set IGNORED the constraint and produced a
+confidently wrong plan instead of declining. So its understanding of the new
+task type is 0/16, the LLM is 16/16, and last round's blanket claim that
+'the benchmark cannot show the LLM is needed' was too strong: it holds WITHIN a
+known template family, not ACROSS families.

@@ -15,8 +15,8 @@
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 44,
-    "batches_live": 37,
+    "batches_total": 45,
+    "batches_live": 38,
     "batches_superseded": 7,
     "verifier_failures": 0,
     "live_batches": [
@@ -154,6 +154,11 @@
         "batch": "evobot_release_mechanism_20261111",
         "verified": "PASS",
         "rung": "Root cause identified (9/9 uniform: carry confirmed, gripper stalled); corrected proposal pre-registered, NOT implemented)"
+      },
+      {
+        "batch": "evobot_rule_crosstype_20261111",
+        "verified": "PASS",
+        "rung": "Correction: rules written before T14 understand it 0/16; LLM 16/16 (cross-type gap is real)"
       },
       {
         "batch": "evobot_rule_saturation_20261111",

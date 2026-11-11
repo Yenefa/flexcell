@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 44,
-  "live": 37,
+  "batches": 45,
+  "live": 38,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -141,7 +141,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 36,
+        "live_batches": 37,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",
@@ -344,8 +344,8 @@
       "verdict": {
         "verdict": "EVOBOT_LADDER_DERIVED_AND_CURRENT",
         "regenerated_identically": true,
-        "batches_live": 37,
-        "verifier_failures": 0,
+        "batches_live": 38,
+        "verifier_failures": 1,
         "reports_both_directions": true,
         "zero_is_qualified": true,
         "v01_regression": "6/6 -> 6/6, NONE",
@@ -494,6 +494,22 @@
         "new_proposal": "release_confirmation_over_gripper_aperture",
         "status": "PROPOSED, awaiting human approval, NOT implemented",
         "mitigation_already_live": "goal_check",
+        "evaluator_touched": false,
+        "skill_layer_touched": false
+      }
+    },
+    {
+      "batch": "evobot_rule_crosstype_20261111",
+      "verified": "PASS",
+      "rung": "Correction: rules written before T14 understand it 0/16; LLM 16/16 (cross-type gap is real)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_CROSSTYPE_RULE_GAP_MEASURED",
+        "rule_set_written_before_T14": "5/16 scored, 5 of them luck, understanding 0/16",
+        "rule_set_updated_for_T14": "16/16",
+        "llm_planner": "16/16",
+        "conclusion": "last round over-claimed. Within a template family a regex matches the LLM; across an unseen type it does not.",
+        "calibration_note": "the rule set silently ignored the order constraint instead of declining, which is the failure mode the LLM avoided",
         "evaluator_touched": false,
         "skill_layer_touched": false
       }
