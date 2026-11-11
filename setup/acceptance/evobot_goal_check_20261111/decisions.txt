@@ -1,0 +1,11 @@
+run                batch      satisfied expectation
+HO-a69ec651037a    evobot-batch2 True      FALSE_FAILURE (recovery was pointless)
+     {'stage': 'target_box_a-0', 'object': 'target_box_a', 'measured': [0.07289, -0.14556], 'target': [0.075, -0.15], 'distance_m': 0.00492, 'tolerance_m': 0.02, 'status': 'AT_TARGET'}
+     {'stage': 'target_box_b-1', 'object': 'target_box_b', 'measured': [0.15734, -0.14798], 'target': [0.165, -0.15], 'distance_m': 0.00792, 'tolerance_m': 0.02, 'status': 'AT_TARGET'}
+HO-f9431f8ef925    evobot-batch2 True      FALSE_FAILURE (recovery was pointless)
+     {'stage': 'target_box_a-0', 'object': 'target_box_a', 'measured': [0.07605, -0.15092], 'target': [0.075, -0.15], 'distance_m': 0.00139, 'tolerance_m': 0.02, 'status': 'AT_TARGET'}
+     {'stage': 'target_box_b-1', 'object': 'target_box_b', 'measured': [0.15599, -0.14867], 'target': [0.165, -0.15], 'distance_m': 0.00911, 'tolerance_m': 0.02, 'status': 'AT_TARGET'}
+HO-5a96f3eb4fae    evobot-batch1 False     REAL failure, recovery PRODUCED A GAIN
+     why: object(s) appear in more than one stage, so the goal includes an ordering this check cannot verify from final positions
+HO-47afdffad81a    evobot-batch1 False     REAL failure, recovery PRODUCED A GAIN
+     why: object(s) appear in more than one stage, so the goal includes an ordering this check cannot verify from final positions

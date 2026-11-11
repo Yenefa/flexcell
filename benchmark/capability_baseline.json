@@ -15,8 +15,8 @@
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 36,
-    "batches_live": 29,
+    "batches_total": 37,
+    "batches_live": 30,
     "batches_superseded": 7,
     "verifier_failures": 0,
     "live_batches": [
@@ -69,6 +69,11 @@
         "batch": "evobot_generalization_20261111",
         "verified": "PASS",
         "rung": "Generalization Tested (untouched seeds 8100/8200; pooled B 30/32; skill-layer false failure found)"
+      },
+      {
+        "batch": "evobot_goal_check_20261111",
+        "verified": "PASS",
+        "rung": "Implementation + Unit Tested (recovery now verifies the world before retrying; two self-caught bugs)"
       },
       {
         "batch": "evobot_heldout_seal_20261111",

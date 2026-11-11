@@ -20,6 +20,7 @@ WT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(WT / "runtime" / "recovery"))
 import recover
 import diagnostics
+import goal_check
 
 
 def execution_evidence(task_out):
@@ -52,6 +53,34 @@ def main(argv=None):
             + "\n", encoding="utf-8")
         print("no recovery needed")
         return 0
+
+    # ---- is the goal ALREADY met, whatever task.out says? ----------------------
+    # The FSM conclusion can be a false negative: measured over 32 validated runs, 2 had
+    # the task report failure while the box was already released and inside the target
+    # zone, with the skill own verifier agreeing. Blindly retrying wasted a full
+    # pick-and-place cycle and, worse, made "arm R" look exercised when it was not.
+    # This uses ONLY the plan own declared tolerance and the measured positions, never the
+    # held-out answer or the evaluator tolerance, so it cannot manufacture a pass.
+    if args.ground_truth:
+        try:
+            gt_now = json.loads(Path(args.ground_truth).read_text(encoding="utf-8"))
+            plan_now = json.loads((run / "plan.json").read_text(encoding="utf-8"))
+            satisfied, goal_detail = goal_check.check(plan_now,
+                                                      gt_now.get("objects") or {})
+            (run / "goal_check.json").write_text(
+                json.dumps(goal_detail, indent=2) + "\n", encoding="utf-8")
+            if satisfied:
+                (run / "recovery_decision.json").write_text(json.dumps({
+                    "action": "no_recovery",
+                    "reason": "goal already satisfied by measurement",
+                    "task_out_said": {"outcome": ev.get("outcome"),
+                                      "detail": ev.get("detail")},
+                    "goal_check": goal_detail,
+                }, indent=2) + "\n", encoding="utf-8")
+                print("no recovery: goal already satisfied by measurement")
+                return 0
+        except (ValueError, OSError, KeyError) as exc:
+            (run / "goal_check_error.txt").write_text(str(exc), encoding="utf-8")
 
     decision = recover.decide(ev, attempt=args.attempt)
     action = decision["action"]
