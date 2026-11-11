@@ -1,39 +1,56 @@
-# Harness diagnosis: rclpy node creation fails — three fixes tried, none worked
+# CORRECTION: the harness was never broken. I chose invalid ROS domain IDs.
 
-**Date** 2026-11-12 (round 24) · **Status: UNRESOLVED. Gazebo work remains blocked.**
+**Date** 2026-11-12 (round 25) · **Status: RESOLVED. Root cause was my own wrapper.**
 
-## The fault
+---
+
+## The answer, in one table
 
 ```
-rclpy._rclpy_pybind11.RCLError: error creating node: error not set, at ./src/rcl/node.c:252
+domain 183 : NODE OK
+domain 200 : NODE OK
+domain 232 : NODE OK
+domain 233 : RCLError: error creating node: error not set, at ./src/rcl/node.c:252
+domain 241 : RCLError: error creating node: error not set, at ./src/rcl/node.c:252
 ```
 
-Deterministic, single trial, clean environment, fresh domain, 8 occurrences per stack start (round 23).
+**ROS 2 domain IDs are valid only in 0..232.** Above that the DDS port calculation overflows: FastRTPS says it
+outright — *"Calculated port number is too high. Probably the domainId is over 232"* — and CycloneDDS fails
+less helpfully with `error not set` at `rcl/node.c:252`.
 
-## Tests run (each isolated, fresh ROS_DOMAIN_ID)
+## What I did, and what it cost
 
-| test | result |
-| --- | --- |
-| A. `rclpy.create_node()` as-is, domain 260 | **FAIL** |
-| B. `ROS_LOCALHOST_ONLY=1`, domain 261 | **FAIL** |
-| C. after `hostnamectl set-hostname rosbox` + `/etc/hosts` fix, domain 262 | **FAIL** |
+| round | action | domain used | outcome |
+| --- | --- | --- | --- |
+| 21 | built `run_paired.sh`, rotating domains **to avoid participant exhaustion** | **241–246** | invalid |
+| 22 | launched 66 trials | 241 | 2/2 `HARNESS_ERROR`, run killed as void |
+| 23 | "isolation" test, clean environment | 251 | same failure — **concluded the stack was dead** |
+| 24 | three fixes: localhost-only, hostname, hosts | 260/261/262 | same failure — **concluded UNRESOLVED** |
+| 24 | RMW binding, alternate middleware | 270 | FastRTPS finally said *domainId is over 232* |
 
-So it is **not** hostname resolution, **not** localhost-only discovery, and **not** the abnormal
-`hostname == localhost` (which resolved to `::1` via getent while Python resolved `127.0.0.1` — a real
-inconsistency, but not the cause).
+**Every diagnostic in rounds 23–24 used an invalid domain.** I was testing a configuration that could not work
+and reading its failure as evidence about the simulator.
 
-**The hostname change was reverted** because it fixed nothing; leaving the environment as found is safer than
-leaving it altered for no gain.
+## The error I made, precisely
 
-## What is still untested
+I introduced domain rotation in round 21 because round 18 found that **domain reuse** exhausts CycloneDDS
+participants — the T05 n6 batch failed with *"resulting port numbers (65660, 65661) are out of range"* at
+**domain 233**. **That message was already telling me 233 was the problem** — I read it as "participants
+exhausted" and not as "domain out of range", then chose 241–246, which repeats the same mistake harder.
 
-- whether the `rcl`/`rmw` install itself is intact (e.g. a broken `rmw_cyclonedds_cpp` build or a missing
-  `librmw` symbol) — removing the middleware entirely is the next step
-- whether the RMW falls back to a working implementation at all
-- whether the fault is in CycloneDDS config (`CYCLONEDDS_URI`) rather than in rcl
+The original script's `ROS_DOMAIN_ID=183` was **valid all along**. The rotation was unnecessary for the reason I
+gave it and fatal for the reason I missed.
 
-## Consequence
+## Fixed
 
-**Every remaining robotics phase is blocked** until this is repaired: the pre-registered paired experiment
-cannot run, no T08 measurement can be taken, no fresh unseen batch can be generated. The registered design is
-unchanged and still binding.
+`run_paired.sh` now uses **200 + chunk** (200–205), inside the legal range. The evidence script remains
+unmodified.
+
+## What this costs the record
+
+- **Rounds 23 and 24 reached a wrong conclusion** ("the harness is deterministically broken"), and both are now
+  superseded by this file. They are left in place rather than deleted: a diagnosis that was wrong for a
+  mundane reason is worth keeping.
+- **Nothing about T08 was learned or lost.** The registered experiment is still unrun and still binding.
+- **The lesson is the same one this project keeps teaching**: the instrument was fine, and the thing that
+  needed validating was my own change to it.

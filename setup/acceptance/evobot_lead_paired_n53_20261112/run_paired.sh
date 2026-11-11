@@ -18,7 +18,11 @@ SCRIPT=/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp/setup/a
 mkdir -p "$OUT"
 echo "wrapper start $(date -Is) chunks=$CHUNKS per=$PER" | tee -a "$OUT/wrapper.log"
 for C in $(seq 1 "$CHUNKS"); do
-  DOMAIN=$((240 + C))
+  # ROS 2 domain IDs are 0..232. Above that the DDS port calculation overflows and NODE CREATION
+  # FAILS with 'error creating node: error not set'. Round 22 used 241-246 and round 23-24 tested
+  # 251/260/261/262/270/271 - every one of them invalid - and concluded the harness was broken. It
+  # was not: see HARNESS_DIAGNOSIS.md, corrected below.
+  DOMAIN=$((200 + C))
   echo "=== chunk $C  ROS_DOMAIN_ID=$DOMAIN ===" | tee -a "$OUT/wrapper.log"
   EVOBOT_ROS_DOMAIN=$DOMAIN timeout 3600 bash "$SCRIPT" "$OUT/c$C" "$PER" 0.0200 3 >> "$OUT/wrapper.log" 2>&1
   RC=$?
