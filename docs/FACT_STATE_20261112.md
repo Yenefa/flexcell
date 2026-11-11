@@ -446,3 +446,22 @@ LIBERO (Panda) never folded into OpenMANIPULATOR-X capability.
 3. **"H0150 = deepest face engagement" withdrawn** — it is tumbling contact; the trial cannot support the claim.
 4. **"A-prime is vacuous" withdrawn** — refuted by the independent auditor and confirmed by my own reproduction. The narrower true statement is a template-family mismatch, and the difference changes the remedy from "rewrite the planner" to "run it on its own templates".
 5. **Evidence gap in my own analysis, fixed** — the sweep's full per-step contact logs were initially left uncommitted while my corrections were derived from them; now committed as 18 `.jsonl.gz` files so every claim above re-derives from disk.
+### Goal round 2, further corrections (append-only; earlier rows stand unless listed here)
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| `run_composite` action server missing | **FALSE — RETRACTED.** The server is `task_fsm_server`, which registers `RunComposite` at `task_fsm_server.py:288-293`. I grepped for a *binary named* `composite_server` and concluded the capability was missing. The archive corroborates it: `HO-0dcde4dc0f5a/task.out` carries `run_id: composite-…` and `completed_stage_ids`, produced only by `_execute_composite` | `task_fsm_server.py`, archived `task.out` |
+| A-prime execution | **NOT RUN — blocked only by operator kills, not by infrastructure.** Re-authorised | this round |
+| Fairness condition 3 (same executor path) | **HOLDS** — B used `RunComposite`, and A-prime's batch targets the same action | archived `task.out` |
+
+**The five premise errors of goal round 2**, all recorded in their artifacts rather than deleted:
+
+| # | Error | Shape | Caught by |
+| --- | --- | --- | --- |
+| 1 | "four heights stall" | read a value without reading the field that contradicted it | sim lane |
+| 2 | "H0150 is face engagement" | read a z-coordinate without reading the block pose | sim lane |
+| 3 | "A-prime is vacuous" | enumerated `benchmark/tasks/` and concluded about the repo | independent audit |
+| 4 | "the batch died" | matched a process name and concluded about liveness | self, after killing a live run |
+| 5 | "the server is missing" | matched a file name and concluded about capability | independent audit |
+
+**#4 and #5 are the same error twice: resolving labels and inferring capabilities.** The corrective now adopted: **resolve the capability, not the label** — ask *who implements `RunComposite`*, not *is there a file named `composite_server`*; ask *what holds the lock* via `fuser`, not *is there a process matching this name*. It would have caught #3 as well.
