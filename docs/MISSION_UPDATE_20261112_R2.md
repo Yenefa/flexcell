@@ -68,7 +68,7 @@ joint 1580–2642 行、ContactTrace 插件实测注入）。
 
 | 臂 | 实例集 | terminal | **passed** |
 | --- | --- | --- | --- |
-| R | dev | 1/5 | **0/5** |
+| R | dev | 1/5（有效 1/4，R/t4 记录器缺陷作废） | **0/5** |
 | S | dev | 2/5 | **1/5** |
 | U | unseen | — | **INVALID_INFRA** |
 | U_shot | unseen | — | **INVALID_INFRA** |
@@ -86,12 +86,11 @@ Lead 独立复核六项：证据包绑定该 run、轨迹末样本与 `gt_after`
 绑定 spec（10/10）、max_z 从原始物理日志重算一致（10/10）、bundle digest 与文件字节一致（10/10）。
 **仿真车道的判定是诚实的。**
 
-### 5.4 未见的独立重评
+### 5.4 未见的独立重评：**不需要**
 
-**未做**（task-7 已登记）。U 的判定目前只有产出方来源；但臂级计数由 Lead 从原始 `trial_record.json` /
-`verdict.json` 重新汇总，不是引用摘要。
-
----
+U 臂已判定 **INVALID_INFRA**（从未实例化未见任务），因此没有需要独立重评的判定。
+原 task-7（U 的独立重评）已改为更高价值的任务：**复核 held-out 与 val 的初始位姿**是否也受同一缺陷影响。
+该复核**未做**——held-out spec 是 root:ros 0750 封存，需要特权路径。状态 **UNKNOWN**，复核前不得引用早前 held-out 结果。
 
 ## 6. 能力变化
 
