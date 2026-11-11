@@ -45,6 +45,7 @@ RUNGS = {
     "evobot_t04_b_20261111": "Independently Verified (geometric discrimination)",
     "evobot_t05_n6_clean_20261111": "Independently Verified (n=6 relay)",
     "evobot_heldout_seal_20261111": "Implemented + Unit Tested (isolation enforced)",
+    "evobot_heldout_isolation_20261111": "Independently Verified (isolation ENFORCED + mutation-detected; mechanism only, NOT a generalisation result)",
     "evobot_heldout_n6_20261111": "Generalization Tested (first held-out, superseded baseline)",
     "evobot_unseen_n6_20261111": "Generalization Tested (unseen task types)",
     "evobot_unseen_bc_20261111": "Generalization Tested (B/C pair, negative result)",
@@ -57,6 +58,13 @@ RUNGS = {
     "evobot_proposal_loop_20261111": "Implemented + Unit Tested (loop wired; Level 5 NOT achieved)",
     "evobot_lesson_routing_20261111": "Plan-level analysis (mechanism found; NO robot run; transfer NOT observed)",
     "evobot_three_arm_20261111": "Plan-level three-arm comparison (NO robot run)",
+    "evobot_baseline_a_v0_20261111": ("FROZEN baseline definition + mutation-detected verifier; "
+                                      "the 6-instance r2 batch is Simulation Tested. The earlier "
+                                      "r1 batch is an INVALID measurement (DDS exhaustion) and is "
+                                      "marked as such, not counted)"),
+    "evobot_baseline_b_v2_20261111": ("Unit Tested + plan-level (NO robot run; 17/18 planned, "
+                                     "17/17 of planned correct; 4 defects fixed incl. an "
+                                     "UNGATED LLM credential path; NOT Simulation Tested)"),
     "evobot_actuator_rootcause_20261111": "Root-cause analysis of archived runs (NO new robot run)",
     "evobot_pooled_n32_20261111": "Independently Verified (pooled n=32, robot runs, intervals)",
     "evobot_capability_freeze_20261111": "P0 capability freeze (hash-pinned ruler; drift tested)",

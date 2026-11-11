@@ -45,7 +45,44 @@ def _from_env_file():
     return out
 
 
+GATE = ("/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/"
+        "ci-public-window/scripts/evobot_llm_key.sh")
+
+
+def _looks_like_a_credential(name):
+    return "API_KEY" in name.upper() or "TOKEN" in name.upper()
+
+
+def _from_gate():
+    """The ONE sanctioned source for the credential.
+
+    WHY THE FALLBACKS HAD TO GO (measured, not suspected): setting() used to resolve
+    env -> Windows registry -> ~/.config/flexcell/pilot.env. The budget gate only ever
+    closed the FIRST of those. With the environment variable removed, the registry still
+    returned a 35-byte key, so a caller that never touched the gate could still spend
+    money the ledger never saw -- the exact incident this project was held accountable
+    for. A credential that can arrive by three roads is not gated by closing one of them.
+
+    The gate checks the real account balance, refuses when the spend cannot be accounted
+    for, and appends an audit line. If it cannot run, we fail closed rather than fall back
+    to a copy of the key lying somewhere else on the machine.
+    """
+    import subprocess
+    try:
+        done = subprocess.run(["bash", GATE], capture_output=True, text=True, timeout=60)
+    except Exception as exc:
+        raise RuntimeError("budget gate could not run (%s); refusing to use a key from "
+                           "any other source" % exc)
+    if done.returncode != 0:
+        raise RuntimeError("budget gate refused (exit %d): %s"
+                           % (done.returncode, (done.stderr or "").strip()[:300]))
+    return done.stdout.strip()
+
+
 def setting(name, default=None):
+    if _looks_like_a_credential(name):
+        # No registry, no env file, no inherited copy: only the gate, or nothing.
+        return _from_gate()
     if os.environ.get(name):
         return os.environ[name]
     value = _from_windows_registry(name)
