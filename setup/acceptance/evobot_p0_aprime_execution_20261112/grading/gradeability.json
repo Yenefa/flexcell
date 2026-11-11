@@ -1,0 +1,1298 @@
+[
+  {
+    "task_id": "HO-0dcde4dc0f5a",
+    "gradeable": true,
+    "reasons": [],
+    "gt_source": "GZ_GROUND_TRUTH",
+    "reconstructed_goal": {
+      "placement": {
+        "target_box_b": "zone_2",
+        "target_box_a": "zone_2"
+      },
+      "order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "unmoved": []
+    },
+    "passed": true,
+    "failed_clauses": [],
+    "evaluator_version": "0.5.0",
+    "clauses": [
+      {
+        "clause": "placement:target_box_a",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_2",
+          "distance_m": 0.04784,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.29764,
+            0.04557,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "placement:target_box_b",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_2",
+          "distance_m": 0.0438,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.20709,
+            0.05882,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "order",
+        "ok": true,
+        "evidence": {
+          "required": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "observed": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "matched": 2,
+          "out_of_order": []
+        }
+      }
+    ],
+    "archived_required_order": [
+      "target_box_b",
+      "target_box_a"
+    ],
+    "reconstruction_matches_archive": true,
+    "archived_passed": true,
+    "archived_evaluator_version": "0.1.0"
+  },
+  {
+    "task_id": "HO-128c6a231c34",
+    "gradeable": true,
+    "reasons": [],
+    "gt_source": "GZ_GROUND_TRUTH",
+    "reconstructed_goal": {
+      "placement": {
+        "target_box_a": "zone_1",
+        "target_box_b": "zone_1"
+      },
+      "order": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "unmoved": []
+    },
+    "passed": true,
+    "failed_clauses": [],
+    "evaluator_version": "0.5.0",
+    "clauses": [
+      {
+        "clause": "placement:target_box_a",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_1",
+          "distance_m": 0.03885,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.08115,
+            -0.15021,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "placement:target_box_b",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_1",
+          "distance_m": 0.04887,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.16881,
+            -0.14761,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "order",
+        "ok": true,
+        "evidence": {
+          "required": [
+            "target_box_a",
+            "target_box_b"
+          ],
+          "observed": [
+            "target_box_a",
+            "target_box_b"
+          ],
+          "matched": 2,
+          "out_of_order": []
+        }
+      }
+    ],
+    "archived_required_order": [
+      "target_box_a",
+      "target_box_b"
+    ],
+    "reconstruction_matches_archive": true,
+    "archived_passed": true,
+    "archived_evaluator_version": "0.1.0"
+  },
+  {
+    "task_id": "HO-2efba46248da",
+    "gradeable": true,
+    "reasons": [],
+    "gt_source": "GZ_GROUND_TRUTH",
+    "reconstructed_goal": {
+      "placement": {
+        "target_box_a": "zone_2",
+        "target_box_b": "zone_2"
+      },
+      "order": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "unmoved": []
+    },
+    "passed": true,
+    "failed_clauses": [],
+    "evaluator_version": "0.5.0",
+    "clauses": [
+      {
+        "clause": "placement:target_box_a",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_2",
+          "distance_m": 0.04944,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.20082,
+            0.05509,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "placement:target_box_b",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_2",
+          "distance_m": 0.0373,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.28684,
+            0.04417,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "order",
+        "ok": true,
+        "evidence": {
+          "required": [
+            "target_box_a",
+            "target_box_b"
+          ],
+          "observed": [
+            "target_box_a",
+            "target_box_b"
+          ],
+          "matched": 2,
+          "out_of_order": []
+        }
+      }
+    ],
+    "archived_required_order": [
+      "target_box_a",
+      "target_box_b"
+    ],
+    "reconstruction_matches_archive": true,
+    "archived_passed": true,
+    "archived_evaluator_version": "0.1.0"
+  },
+  {
+    "task_id": "HO-40348a081df6",
+    "gradeable": true,
+    "reasons": [],
+    "gt_source": "GZ_GROUND_TRUTH",
+    "reconstructed_goal": {
+      "placement": {
+        "target_box_b": "zone_2",
+        "target_box_a": "zone_2"
+      },
+      "order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "unmoved": []
+    },
+    "passed": true,
+    "failed_clauses": [],
+    "evaluator_version": "0.5.0",
+    "clauses": [
+      {
+        "clause": "placement:target_box_a",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_2",
+          "distance_m": 0.04231,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.29195,
+            0.05556,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "placement:target_box_b",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_2",
+          "distance_m": 0.04379,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.20733,
+            0.05987,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "order",
+        "ok": true,
+        "evidence": {
+          "required": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "observed": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "matched": 2,
+          "out_of_order": []
+        }
+      }
+    ],
+    "archived_required_order": [
+      "target_box_b",
+      "target_box_a"
+    ],
+    "reconstruction_matches_archive": true,
+    "archived_passed": true,
+    "archived_evaluator_version": "0.1.0"
+  },
+  {
+    "task_id": "HO-4dafd8d17858",
+    "gradeable": true,
+    "reasons": [],
+    "gt_source": "GZ_GROUND_TRUTH",
+    "reconstructed_goal": {
+      "placement": {
+        "target_box_a": "zone_1",
+        "target_box_b": "zone_1"
+      },
+      "order": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "unmoved": []
+    },
+    "passed": true,
+    "failed_clauses": [],
+    "evaluator_version": "0.5.0",
+    "clauses": [
+      {
+        "clause": "placement:target_box_a",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_1",
+          "distance_m": 0.04257,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.07786,
+            -0.14393,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "placement:target_box_b",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_1",
+          "distance_m": 0.04427,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.16427,
+            -0.15074,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "order",
+        "ok": true,
+        "evidence": {
+          "required": [
+            "target_box_a",
+            "target_box_b"
+          ],
+          "observed": [
+            "target_box_a",
+            "target_box_b"
+          ],
+          "matched": 2,
+          "out_of_order": []
+        }
+      }
+    ],
+    "archived_required_order": [
+      "target_box_a",
+      "target_box_b"
+    ],
+    "reconstruction_matches_archive": true,
+    "archived_passed": true,
+    "archived_evaluator_version": "0.1.0"
+  },
+  {
+    "task_id": "HO-4dbb21d087ae",
+    "gradeable": true,
+    "reasons": [],
+    "gt_source": "GZ_GROUND_TRUTH",
+    "reconstructed_goal": {
+      "placement": {
+        "target_box_b": "zone_1",
+        "target_box_a": "zone_1"
+      },
+      "order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "unmoved": []
+    },
+    "passed": true,
+    "failed_clauses": [],
+    "evaluator_version": "0.5.0",
+    "clauses": [
+      {
+        "clause": "placement:target_box_a",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_1",
+          "distance_m": 0.05299,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.17241,
+            -0.1422,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "placement:target_box_b",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_1",
+          "distance_m": 0.03918,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.08132,
+            -0.15623,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "order",
+        "ok": true,
+        "evidence": {
+          "required": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "observed": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "matched": 2,
+          "out_of_order": []
+        }
+      }
+    ],
+    "archived_required_order": [
+      "target_box_b",
+      "target_box_a"
+    ],
+    "reconstruction_matches_archive": true,
+    "archived_passed": true,
+    "archived_evaluator_version": "0.1.0"
+  },
+  {
+    "task_id": "HO-51600cf21179",
+    "gradeable": true,
+    "reasons": [],
+    "gt_source": "GZ_GROUND_TRUTH",
+    "reconstructed_goal": {
+      "placement": {
+        "target_box_b": "zone_1",
+        "target_box_a": "zone_1"
+      },
+      "order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "unmoved": []
+    },
+    "passed": true,
+    "failed_clauses": [],
+    "evaluator_version": "0.5.0",
+    "clauses": [
+      {
+        "clause": "placement:target_box_a",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_1",
+          "distance_m": 0.03652,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.15602,
+            -0.14395,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "placement:target_box_b",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_1",
+          "distance_m": 0.04943,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.07116,
+            -0.15762,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "order",
+        "ok": true,
+        "evidence": {
+          "required": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "observed": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "matched": 2,
+          "out_of_order": []
+        }
+      }
+    ],
+    "archived_required_order": [
+      "target_box_b",
+      "target_box_a"
+    ],
+    "reconstruction_matches_archive": true,
+    "archived_passed": true,
+    "archived_evaluator_version": "0.1.0"
+  },
+  {
+    "task_id": "HO-60679893327a",
+    "gradeable": true,
+    "reasons": [],
+    "gt_source": "GZ_GROUND_TRUTH",
+    "reconstructed_goal": {
+      "placement": {
+        "target_box_a": "zone_2",
+        "target_box_b": "zone_2"
+      },
+      "order": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "unmoved": []
+    },
+    "passed": true,
+    "failed_clauses": [],
+    "evaluator_version": "0.5.0",
+    "clauses": [
+      {
+        "clause": "placement:target_box_a",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_2",
+          "distance_m": 0.05081,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.19948,
+            0.05533,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "placement:target_box_b",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_2",
+          "distance_m": 0.05062,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.30016,
+            0.0568,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "order",
+        "ok": true,
+        "evidence": {
+          "required": [
+            "target_box_a",
+            "target_box_b"
+          ],
+          "observed": [
+            "target_box_a",
+            "target_box_b"
+          ],
+          "matched": 2,
+          "out_of_order": []
+        }
+      }
+    ],
+    "archived_required_order": [
+      "target_box_a",
+      "target_box_b"
+    ],
+    "reconstruction_matches_archive": true,
+    "archived_passed": true,
+    "archived_evaluator_version": "0.1.0"
+  },
+  {
+    "task_id": "HO-6173170d8c47",
+    "gradeable": true,
+    "reasons": [],
+    "gt_source": "GZ_GROUND_TRUTH",
+    "reconstructed_goal": {
+      "placement": {
+        "target_box_b": "zone_2",
+        "target_box_a": "zone_2"
+      },
+      "order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "unmoved": []
+    },
+    "passed": true,
+    "failed_clauses": [],
+    "evaluator_version": "0.5.0",
+    "clauses": [
+      {
+        "clause": "placement:target_box_a",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_2",
+          "distance_m": 0.04275,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.29274,
+            0.04981,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "placement:target_box_b",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_2",
+          "distance_m": 0.04156,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.20846,
+            0.05135,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "order",
+        "ok": true,
+        "evidence": {
+          "required": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "observed": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "matched": 2,
+          "out_of_order": []
+        }
+      }
+    ],
+    "archived_required_order": [
+      "target_box_b",
+      "target_box_a"
+    ],
+    "reconstruction_matches_archive": true,
+    "archived_passed": true,
+    "archived_evaluator_version": "0.1.0"
+  },
+  {
+    "task_id": "HO-675c07e900e7",
+    "gradeable": true,
+    "reasons": [],
+    "gt_source": "GZ_GROUND_TRUTH",
+    "reconstructed_goal": {
+      "placement": {
+        "target_box_b": "zone_1",
+        "target_box_a": "zone_1"
+      },
+      "order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "unmoved": []
+    },
+    "passed": true,
+    "failed_clauses": [],
+    "evaluator_version": "0.5.0",
+    "clauses": [
+      {
+        "clause": "placement:target_box_a",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_1",
+          "distance_m": 0.05278,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.17277,
+            -0.14902,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "placement:target_box_b",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_1",
+          "distance_m": 0.04371,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.07687,
+            -0.14289,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "order",
+        "ok": true,
+        "evidence": {
+          "required": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "observed": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "matched": 2,
+          "out_of_order": []
+        }
+      }
+    ],
+    "archived_required_order": [
+      "target_box_b",
+      "target_box_a"
+    ],
+    "reconstruction_matches_archive": true,
+    "archived_passed": true,
+    "archived_evaluator_version": "0.1.0"
+  },
+  {
+    "task_id": "HO-884ea68a42ca",
+    "gradeable": true,
+    "reasons": [],
+    "gt_source": "GZ_GROUND_TRUTH",
+    "reconstructed_goal": {
+      "placement": {
+        "target_box_b": "zone_1",
+        "target_box_a": "zone_1"
+      },
+      "order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "unmoved": []
+    },
+    "passed": true,
+    "failed_clauses": [],
+    "evaluator_version": "0.5.0",
+    "clauses": [
+      {
+        "clause": "placement:target_box_a",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_1",
+          "distance_m": 0.03715,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.1567,
+            -0.15579,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "placement:target_box_b",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_1",
+          "distance_m": 0.05165,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.06865,
+            -0.15565,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "order",
+        "ok": true,
+        "evidence": {
+          "required": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "observed": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "matched": 2,
+          "out_of_order": []
+        }
+      }
+    ],
+    "archived_required_order": [
+      "target_box_b",
+      "target_box_a"
+    ],
+    "reconstruction_matches_archive": true,
+    "archived_passed": true,
+    "archived_evaluator_version": "0.1.0"
+  },
+  {
+    "task_id": "HO-b3fb8b1de2db",
+    "gradeable": true,
+    "reasons": [],
+    "gt_source": "GZ_GROUND_TRUTH",
+    "reconstructed_goal": {
+      "placement": {
+        "target_box_b": "zone_2",
+        "target_box_a": "zone_2"
+      },
+      "order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "unmoved": []
+    },
+    "passed": true,
+    "failed_clauses": [],
+    "evaluator_version": "0.5.0",
+    "clauses": [
+      {
+        "clause": "placement:target_box_a",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_2",
+          "distance_m": 0.05205,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.30199,
+            0.05253,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "placement:target_box_b",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_2",
+          "distance_m": 0.04468,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.20656,
+            0.06046,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "order",
+        "ok": true,
+        "evidence": {
+          "required": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "observed": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "matched": 2,
+          "out_of_order": []
+        }
+      }
+    ],
+    "archived_required_order": [
+      "target_box_b",
+      "target_box_a"
+    ],
+    "reconstruction_matches_archive": true,
+    "archived_passed": true,
+    "archived_evaluator_version": "0.1.0"
+  },
+  {
+    "task_id": "HO-c79ebfe5c9e6",
+    "gradeable": true,
+    "reasons": [],
+    "gt_source": "GZ_GROUND_TRUTH",
+    "reconstructed_goal": {
+      "placement": {
+        "target_box_a": "zone_2",
+        "target_box_b": "zone_2"
+      },
+      "order": [
+        "target_box_a",
+        "target_box_b"
+      ],
+      "unmoved": []
+    },
+    "passed": true,
+    "failed_clauses": [],
+    "evaluator_version": "0.5.0",
+    "clauses": [
+      {
+        "clause": "placement:target_box_a",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_2",
+          "distance_m": 0.0491,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.2014,
+            0.05702,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "placement:target_box_b",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_2",
+          "distance_m": 0.05687,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.30664,
+            0.05515,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "order",
+        "ok": true,
+        "evidence": {
+          "required": [
+            "target_box_a",
+            "target_box_b"
+          ],
+          "observed": [
+            "target_box_a",
+            "target_box_b"
+          ],
+          "matched": 2,
+          "out_of_order": []
+        }
+      }
+    ],
+    "archived_required_order": [
+      "target_box_a",
+      "target_box_b"
+    ],
+    "reconstruction_matches_archive": true,
+    "archived_passed": true,
+    "archived_evaluator_version": "0.1.0"
+  },
+  {
+    "task_id": "HO-d3ab212142de",
+    "gradeable": true,
+    "reasons": [],
+    "gt_source": "GZ_GROUND_TRUTH",
+    "reconstructed_goal": {
+      "placement": {
+        "target_box_b": "zone_2",
+        "target_box_a": "zone_2"
+      },
+      "order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "unmoved": []
+    },
+    "passed": true,
+    "failed_clauses": [],
+    "evaluator_version": "0.5.0",
+    "clauses": [
+      {
+        "clause": "placement:target_box_a",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_2",
+          "distance_m": 0.054,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.304,
+            0.04967,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "placement:target_box_b",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_2",
+          "distance_m": 0.04619,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.20564,
+            0.06285,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "order",
+        "ok": true,
+        "evidence": {
+          "required": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "observed": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "matched": 2,
+          "out_of_order": []
+        }
+      }
+    ],
+    "archived_required_order": [
+      "target_box_b",
+      "target_box_a"
+    ],
+    "reconstruction_matches_archive": true,
+    "archived_passed": true,
+    "archived_evaluator_version": "0.1.0"
+  },
+  {
+    "task_id": "HO-da7c04bdece5",
+    "gradeable": true,
+    "reasons": [],
+    "gt_source": "GZ_GROUND_TRUTH",
+    "reconstructed_goal": {
+      "placement": {
+        "target_box_b": "zone_1",
+        "target_box_a": "zone_1"
+      },
+      "order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "unmoved": []
+    },
+    "passed": true,
+    "failed_clauses": [],
+    "evaluator_version": "0.5.0",
+    "clauses": [
+      {
+        "clause": "placement:target_box_a",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_1",
+          "distance_m": 0.04427,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.16404,
+            -0.14546,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "placement:target_box_b",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_1",
+          "distance_m": 0.03999,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.08039,
+            -0.14449,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "order",
+        "ok": true,
+        "evidence": {
+          "required": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "observed": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "matched": 2,
+          "out_of_order": []
+        }
+      }
+    ],
+    "archived_required_order": [
+      "target_box_b",
+      "target_box_a"
+    ],
+    "reconstruction_matches_archive": true,
+    "archived_passed": true,
+    "archived_evaluator_version": "0.1.0"
+  },
+  {
+    "task_id": "HO-dcf52d233154",
+    "gradeable": true,
+    "reasons": [],
+    "gt_source": "GZ_GROUND_TRUTH",
+    "reconstructed_goal": {
+      "placement": {
+        "target_box_b": "zone_2",
+        "target_box_a": "zone_2"
+      },
+      "order": [
+        "target_box_b",
+        "target_box_a"
+      ],
+      "unmoved": []
+    },
+    "passed": true,
+    "failed_clauses": [],
+    "evaluator_version": "0.5.0",
+    "clauses": [
+      {
+        "clause": "placement:target_box_a",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_2",
+          "distance_m": 0.04833,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.29833,
+            0.0508,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "placement:target_box_b",
+        "ok": true,
+        "evidence": {
+          "zone": "zone_2",
+          "distance_m": 0.05191,
+          "radius_m": 0.06,
+          "inside_zone": true,
+          "height_error_m": 0.0,
+          "resting": true,
+          "final_pose": [
+            0.1982,
+            0.0534,
+            0.0175,
+            0.0
+          ]
+        }
+      },
+      {
+        "clause": "order",
+        "ok": true,
+        "evidence": {
+          "required": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "observed": [
+            "target_box_b",
+            "target_box_a"
+          ],
+          "matched": 2,
+          "out_of_order": []
+        }
+      }
+    ],
+    "archived_required_order": [
+      "target_box_b",
+      "target_box_a"
+    ],
+    "reconstruction_matches_archive": true,
+    "archived_passed": true,
+    "archived_evaluator_version": "0.1.0"
+  }
+]

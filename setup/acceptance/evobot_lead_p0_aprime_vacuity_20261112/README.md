@@ -211,3 +211,47 @@ Not 'write six rules for T01-T06' (task-10 as I originally scoped it). Instead:
 
 1. **Establish whether A-prime's T12/T13/T14 plans actually execute and pass** - 16 real Gazebo runs for T14 already exist under evobot_crosstype_20261111/; grade them with the frozen evaluator.
 2. **Decide the P0 pairing**: run both arms on the same family. Either extend the split with T12/T13/T14, or give A-prime rules for T01-T06 as a *second* arm. The first is cheaper and tests the existing planner; the second tests whether the rule approach generalises at all.
+---
+
+# THIRD CORRECTION: the 16 T14 runs are arm B, and I told the auditor they were A-prime
+
+**I gave the audit a false premise.** When I dispatched the follow-up work I wrote that "16 real
+Gazebo runs for T14 already exist" under `evobot_crosstype_20261111/runs_T14_ordered_pair/`,
+implying they were A-prime executions. They are not.
+
+I verified this myself rather than taking the auditor's word:
+
+| Check | Result |
+| --- | --- |
+| `agent_reply.json` in each of the 16 run directories | `requested_model = deepseek-flash`, `base_url = https://api.deepseek.com`, `temperature = 0` |
+| `*a_prime*` artifacts anywhere in that directory | **0** |
+| `plan.json` present | 16 — these are **arm B** plans |
+| Auditor's structural check: re-run the rule planner on each run's own observation, compare to the archived plan | **0 / 16 identical** |
+
+The structural difference is systematic and diagnostic: B applies `spread_destinations`, placing the
+two blocks at distinct points inside the bin (x = 0.205/0.295 or 0.075/0.165), while A-prime places
+both at the zone centre. That is a post-processing step A-prime does not perform, so identical
+plans were never possible.
+
+## Consequence
+
+**The project has no A-prime execution at all.** A-prime has only ever produced plans. So:
+
+| Claim | Status |
+| --- | --- |
+| A-prime plans T14 correctly, 16/16, at zero model cost | **CONFIRMED** (my reproduction and the auditor's, independently) |
+| A-prime's plan matches B's plan 16/16 | **CONFIRMED at the order level** — the auditor's comparison |
+| A-prime executes and passes | **NOT RUN — no evidence exists** |
+| "T14 scores 16/16" | **FALSE as a single number.** B alone gives four different numbers: planning 16/16, execution first attempt 11/16, evaluation first attempt 14/16, after recovery 16/16 |
+
+The auditor's table is therefore a **B** measurement, and I am keeping it as B's reference numbers.
+The P0 comparison the mission needs is the one that still does not exist: **A-prime executed**.
+
+## What this says about my own process
+
+I built a task on a premise I had not checked — that a directory of runs belonged to the arm I was
+interested in — and the auditor caught it by testing the premise rather than the conclusion. That is
+the third premise-level error I have made this round, and the pattern is consistent: I have been
+reading artifact *names* and inferring contents. The corrective is cheap and I am adopting it:
+**before building work on an archive, read one record from it and confirm it is what the directory
+name claims.**
