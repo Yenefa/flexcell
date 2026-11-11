@@ -91,3 +91,13 @@ def test_pending_proposals_are_reported_as_unapproved():
     if (ROOT / "evolution" / "proposals" / "release_confirmation_preregistration.json").exists():
         assert "False" in text or "false" in text
         assert "待人工批准" in text
+
+
+def test_the_document_states_that_failures_do_not_reproduce():
+    """A pass rate without this caveat invites the reader to treat it as a rate over tasks."""
+    _regenerate()
+    text = _doc()
+    assert "失败不可复现" in text
+    assert "两次都失败" in text
+    assert "25%" in text
+    assert "机制证据" in text

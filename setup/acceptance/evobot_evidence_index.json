@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 45,
-  "live": 38,
+  "batches": 46,
+  "live": 39,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -141,7 +141,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 37,
+        "live_batches": 39,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",
@@ -344,8 +344,8 @@
       "verdict": {
         "verdict": "EVOBOT_LADDER_DERIVED_AND_CURRENT",
         "regenerated_identically": true,
-        "batches_live": 38,
-        "verifier_failures": 1,
+        "batches_live": 39,
+        "verifier_failures": 0,
         "reports_both_directions": true,
         "zero_is_qualified": true,
         "v01_regression": "6/6 -> 6/6, NONE",
@@ -494,6 +494,25 @@
         "new_proposal": "release_confirmation_over_gripper_aperture",
         "status": "PROPOSED, awaiting human approval, NOT implemented",
         "mitigation_already_live": "goal_check",
+        "evaluator_touched": false,
+        "skill_layer_touched": false
+      }
+    },
+    {
+      "batch": "evobot_replication_20261111",
+      "verified": "PASS",
+      "rung": "Method (0/32 instances fail reproducibly; 25% flip; failure counts describe runs)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_FAILURES_NOT_REPRODUCIBLE",
+        "instances_with_two_replicates": 32,
+        "stable_pass": 24,
+        "stable_fail": 0,
+        "flipped": 8,
+        "flip_rate": "25.0%",
+        "what_changes": "failure counts describe RUNS, not instances; single-batch A/B cannot separate an effect from this noise",
+        "what_survives": "mechanism evidence - whether a step ran, whether a decision was recorded - and goal_check 2->0, which rests on the mechanism",
+        "what_does_not_survive": "the goal_check claim of gains 0->2",
         "evaluator_touched": false,
         "skill_layer_touched": false
       }

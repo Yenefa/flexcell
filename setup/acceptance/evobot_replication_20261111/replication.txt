@@ -1,0 +1,48 @@
+set          instance             replicate outcomes   class
+seeds7500    HO-198a4b2688d0      pass pass            STABLE PASS
+seeds7500    HO-38ce6531a597      FAIL pass            MIXED (run-dependent)
+seeds7500    HO-3a19766a4104      pass pass            STABLE PASS
+seeds7500    HO-3bfb9643b7b6      pass pass            STABLE PASS
+seeds7500    HO-4499501c2043      pass pass            STABLE PASS
+seeds7500    HO-47afdffad81a      pass FAIL            MIXED (run-dependent)
+seeds7500    HO-4f197a0997af      FAIL pass            MIXED (run-dependent)
+seeds7500    HO-5a96f3eb4fae      pass FAIL            MIXED (run-dependent)
+seeds7500    HO-5d21b382e781      pass pass            STABLE PASS
+seeds7500    HO-68f800add5fc      pass pass            STABLE PASS
+seeds7500    HO-72553754ef3a      FAIL pass            MIXED (run-dependent)
+seeds7500    HO-78b746f47443      pass pass            STABLE PASS
+seeds7500    HO-b7bd62621f05      pass pass            STABLE PASS
+seeds7500    HO-de2741728c69      pass pass            STABLE PASS
+seeds7500    HO-e2580e718ecd      pass pass            STABLE PASS
+seeds7500    HO-fb31a8cd4a66      pass pass            STABLE PASS
+seeds8100    HO-036fc9b6e66f      pass pass            STABLE PASS
+seeds8100    HO-17a85f7d07cc      pass pass            STABLE PASS
+seeds8100    HO-2536264f2908      pass pass            STABLE PASS
+seeds8100    HO-274c7aaa6485      pass FAIL            MIXED (run-dependent)
+seeds8100    HO-285d9e53fbdd      pass pass            STABLE PASS
+seeds8100    HO-2f52569ef5ca      pass FAIL            MIXED (run-dependent)
+seeds8100    HO-50237b4714a9      pass pass            STABLE PASS
+seeds8100    HO-6323db167d30      pass pass            STABLE PASS
+seeds8100    HO-802d10c045aa      pass pass            STABLE PASS
+seeds8100    HO-a69ec651037a      pass pass            STABLE PASS
+seeds8100    HO-d905e198fb9d      pass pass            STABLE PASS
+seeds8100    HO-e2d3ed8c2437      pass FAIL            MIXED (run-dependent)
+seeds8100    HO-e736e485c14e      pass pass            STABLE PASS
+seeds8100    HO-ec89d144824f      pass pass            STABLE PASS
+seeds8100    HO-f17c4e053953      pass pass            STABLE PASS
+seeds8100    HO-f9431f8ef925      pass pass            STABLE PASS
+
+instances with 2+ replicates : 32
+  STABLE PASS                : 24
+  STABLE FAIL                : 0
+  MIXED (outcome flipped)    : 8
+
+flip rate over instances     : 25.0%
+
+AND THE UNCOMFORTABLE CASE: if 8 of 32 instances flip, then a single-batch
+failure count is mostly a statement about RUNS. A fix aimed at 'the failing
+instances' would be aimed at coin flips, and a batch that happens to draw fewer
+failures would look like progress.
+
+WHAT SURVIVES: stable failures are the ones worth attributing. Those are the
+instances where a fix could be shown to work.

@@ -15,8 +15,8 @@
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 45,
-    "batches_live": 38,
+    "batches_total": 46,
+    "batches_live": 39,
     "batches_superseded": 7,
     "verifier_failures": 0,
     "live_batches": [
@@ -154,6 +154,11 @@
         "batch": "evobot_release_mechanism_20261111",
         "verified": "PASS",
         "rung": "Root cause identified (9/9 uniform: carry confirmed, gripper stalled); corrected proposal pre-registered, NOT implemented)"
+      },
+      {
+        "batch": "evobot_replication_20261111",
+        "verified": "PASS",
+        "rung": "Method (0/32 instances fail reproducibly; 25% flip; failure counts describe runs)"
       },
       {
         "batch": "evobot_rule_crosstype_20261111",

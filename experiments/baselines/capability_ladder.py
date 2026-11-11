@@ -89,6 +89,36 @@ def batch_stats(base):
     return st
 
 
+def failure_reproduction():
+    """Reuse the replication analysis so the ladder cannot soften its own caveat."""
+    import glob as _g
+    sets = {"s7500": ["/tmp/evobot-pair48", "/tmp/evobot-batch1"],
+            "s8100": ["/tmp/evobot-batch2", "/tmp/evobot-batch3"]}
+    sp = sf = mx = 0
+    for _name, bases in sets.items():
+        ids = set()
+        for b in bases:
+            for p in _g.glob(os.path.join(b, "HO-*")):
+                ids.add(os.path.basename(p))
+        for oid in ids:
+            seq = []
+            for b in bases:
+                v = read(os.path.join(b, oid, "verdict_after1.json"))
+                if v is not None:
+                    seq.append(bool(v.get("passed")))
+            if len(seq) < 2:
+                continue
+            if all(seq):
+                sp += 1
+            elif not any(seq):
+                sf += 1
+            else:
+                mx += 1
+    n = sp + sf + mx
+    return {"n": n, "stable_pass": sp, "stable_fail": sf, "mixed": mx,
+            "flip_rate": (100.0 * mx / n) if n else 0.0}
+
+
 def failure_attribution():
     """Reuse the attribution script so the ladder cannot disagree with it."""
     import importlib.util
@@ -215,7 +245,20 @@ def main():
             name, st["n"], st["b"], st["r"], st["gained"], st["retried"],
             st["retried_after_pass"], st["task_false_failure"]))
     A("")
+    rep = failure_reproduction()
     att = failure_attribution()
+    A("## 失败不可复现（读通过率前必须知道）")
+    A("")
+    A("| 类别 | 实例数 |")
+    A("| --- | --- |")
+    A("| 有 2 次重复的实例 | %d |" % rep["n"])
+    A("| 两次都通过 | %d |" % rep["stable_pass"])
+    A("| **两次都失败** | **%d** |" % rep["stable_fail"])
+    A("| **翻转（run-dependent）** | **%d（%.0f%%）** |" % (rep["mixed"], rep["flip_rate"]))
+    A("")
+    A("**没有实例在两次运行中都失败。** 所以失败数是**运行**的属性，不是实例的；")
+    A("任何只跑一次的 A/B 都无法把效应与这一噪声分开。能可靠报告的只有**机制证据**。")
+    A("")
     A("## 失败归因（为什么 Level 7 看不到效果）")
     A("")
     A("| 项 | 数量 |")

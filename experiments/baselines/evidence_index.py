@@ -80,6 +80,7 @@ RUNGS = {
     "evobot_abstention_20261111": "Calibration (impossible tasks: 0/8 confidently answered; controls correct)",
     "evobot_rule_saturation_20261111": "Negative result: a deterministic parser scores 64/64, so the benchmark cannot show the LLM is needed",
     "evobot_rule_crosstype_20261111": "Correction: rules written before T14 understand it 0/16; LLM 16/16 (cross-type gap is real)",
+    "evobot_replication_20261111": "Method (0/32 instances fail reproducibly; 25% flip; failure counts describe runs)",
 }
 
 
