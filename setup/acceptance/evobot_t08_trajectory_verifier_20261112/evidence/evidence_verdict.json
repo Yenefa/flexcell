@@ -1,0 +1,106 @@
+{
+  "verifier_version": "1.0.0",
+  "physical_outcome": "UNKNOWN",
+  "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+  "failure_reason": "terminal: terminal evaluator did not pass (failed: ['push:target_box_a'])",
+  "passed": false,
+  "gates": [
+    {
+      "gate": "terminal",
+      "ok": false,
+      "reason": "terminal evaluator did not pass (failed: ['push:target_box_a'])",
+      "evidence": {
+        "evaluator_version": "0.4.0",
+        "passed": false
+      }
+    },
+    {
+      "gate": "trajectory",
+      "ok": true,
+      "reason": null,
+      "evidence": {
+        "objects": [
+          "target_box_a",
+          "target_box_b"
+        ],
+        "total_samples": 6420
+      }
+    },
+    {
+      "gate": "table_support",
+      "ok": true,
+      "reason": null,
+      "evidence": {
+        "off_table_samples": 0,
+        "tolerance_m": 0.01
+      }
+    },
+    {
+      "gate": "protected_unmoved",
+      "ok": true,
+      "reason": null,
+      "evidence": {
+        "max_excursion_m": 0.0,
+        "tolerance_m": 0.005
+      }
+    },
+    {
+      "gate": "no_lift",
+      "ok": true,
+      "reason": null,
+      "evidence": {
+        "max_lift_m": -0.0,
+        "allowed_m": 0.005
+      }
+    },
+    {
+      "gate": "pusher_contact",
+      "ok": true,
+      "reason": null,
+      "evidence": {
+        "motion_windows": 216,
+        "overlapping_windows": 216,
+        "contact_intervals": 4,
+        "pusher_links": [
+          "open_manipulator_x::gripper_left_link::gripper_left_link_collision",
+          "open_manipulator_x::gripper_right_link::gripper_right_link_collision"
+        ]
+      }
+    },
+    {
+      "gate": "gripper",
+      "ok": true,
+      "reason": null,
+      "evidence": {
+        "joint": "gripper_left_joint",
+        "samples": 937,
+        "aperture_travel_rad": 1e-06,
+        "limit_rad": 0.002,
+        "min_aperture_rad": -1e-06,
+        "max_aperture_rad": 0.0
+      }
+    },
+    {
+      "gate": "no_attachment",
+      "ok": true,
+      "reason": null,
+      "evidence": {
+        "events": 0
+      }
+    },
+    {
+      "gate": "no_teleport",
+      "ok": true,
+      "reason": null,
+      "evidence": {
+        "max_jump_m": 0.000555,
+        "threshold_m": 0.03,
+        "declared_jump_m": 0.000555,
+        "measured_jump_m": 0.000555
+      }
+    }
+  ],
+  "failed_gates": [
+    "terminal"
+  ]
+}

@@ -44,6 +44,16 @@ def instance(seed, box_a_xy, box_b_xy, zone_xy, direction, split):
             {'name': 'target_box_b', 'size': BOX, 'color': 'blue',
              'initial_pose': [box_b_xy[0], box_b_xy[1], REST_Z, 0.0]},
         ],
+        # THE ZONE MUST NOT CONTAIN THE STARTING POSE.
+        #
+        # In the first generated set every instance placed the block exactly on the zone
+        # boundary: block x=0.22, zone centre x=0.16, radius 0.06, so the distance from
+        # block to centre was exactly the radius. inside_zone was therefore already true
+        # at zero displacement, which made the zone clause vacuous and left the 30 mm
+        # displacement gate carrying the whole task.
+        #
+        # The radius and every threshold stay exactly as they were. Only the geometry
+        # moves, so that reaching the zone requires pushing through real distance.
         'zones': [{'name': 'zone_push', 'pose': [zone_xy[0], zone_xy[1], REST_Z],
                    'radius': 0.06}],
         'constraints': {'order': [], 'must_not_move': ['target_box_b']},
@@ -70,16 +80,16 @@ def instance(seed, box_a_xy, box_b_xy, zone_xy, direction, split):
 
 
 DEV = [
-    (2000, (0.22, 0.0), (0.20, -0.18), (0.16, 0.0), [-1.0, 0.0]),
-    (2001, (0.20, 0.06), (0.20, -0.22), (0.14, 0.06), [-1.0, 0.0]),
-    (2002, (0.24, -0.05), (0.20, -0.20), (0.18, -0.05), [-1.0, 0.0]),
+    (2000, (0.22, 0.0), (0.20, -0.18), (0.12, 0.0), [-1.0, 0.0]),
+    (2001, (0.20, 0.06), (0.20, -0.22), (0.10, 0.06), [-1.0, 0.0]),
+    (2002, (0.24, -0.05), (0.20, -0.20), (0.14, -0.05), [-1.0, 0.0]),
 ]
 
 # UNSEEN. Generated now so the protocol is fixed, not run until the skill is frozen.
 HELD = [
-    (3000, (0.21, 0.03), (0.20, -0.21), (0.15, 0.03), [-1.0, 0.0]),
-    (3001, (0.23, -0.07), (0.20, -0.19), (0.17, -0.07), [-1.0, 0.0]),
-    (3002, (0.19, 0.02), (0.20, -0.23), (0.13, 0.02), [-1.0, 0.0]),
+    (3000, (0.21, 0.03), (0.20, -0.21), (0.11, 0.03), [-1.0, 0.0]),
+    (3001, (0.23, -0.07), (0.20, -0.19), (0.13, -0.07), [-1.0, 0.0]),
+    (3002, (0.19, 0.02), (0.20, -0.23), (0.09, 0.02), [-1.0, 0.0]),
 ]
 
 
