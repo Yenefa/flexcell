@@ -47,6 +47,38 @@ evidence_status = INCOMPLETE_OR_INVALID_EVIDENCE
 | 缺失证据当成通过 | `test_the_terminal_state_alone_is_no_longer_enough` |
 | 证据要求泄漏到 T01–T06 | `test_t01_has_no_evidence_requirement_and_keeps_its_old_shape` |
 
+### 集成后抓到并修复的一个接线缺陷（本报告必须记录）
+
+集成完成后，把**有效证据包**穿过真实调用路径，与直接 `verify()` 对比，得到两个不同答案：
+
+```
+verify(bundle, terminal, fixtures.limits())  ->  PUSHED,  COMPLETE,  passed=True
+verify(bundle, terminal)   <- evaluate.py    ->  NOT_PUSHED, passed=False
+```
+
+**根因**：三个门是限值依赖的，拿到 `None` 时各自 `return False, "no lift limit supplied"`。
+这对门是对的，对调用方是灾难——`evaluate.py` 一个 limits 都没传。
+**每一次真实推都会被判成 NOT_PUSHED。**
+
+**为什么测试看不见**：单元测试用 `judge()` 传了 `fixtures.limits()`，集成测试也是，
+而唯一的真实调用路径没传。**65 个验证器测试全绿 + 8 个集成测试全绿，与「生产路径每次都失败」并存。**
+
+**修复**：`evaluate.py` 从同一个 spec 推导限值，证据层与终态层不可能对任务产生分歧。
+
+**修复前后的真实证据包对比**：
+
+| 门 | 修复前 | 修复后 |
+| --- | --- | --- |
+| no_lift | FAIL（无上限） | **OK** |
+| gripper | FAIL（无上限） | **OK** |
+| terminal | FAIL（23.26 mm） | FAIL（23.26 mm） |
+| 其余 6 门 | OK | OK |
+
+**所以本报告此前写的「8/9 门通过」在修复前是错的**（实际是 6/9），
+现在才真正成立。这不是证据变了，是判据的接线修好了。
+
+---
+
 ### 30 mm 阈值被测试钉死
 
 `test_the_30mm_threshold_is_untouched` 断言 `min_displacement_m == 0.030`。
