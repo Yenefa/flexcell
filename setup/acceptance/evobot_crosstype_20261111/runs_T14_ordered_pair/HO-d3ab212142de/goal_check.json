@@ -1,0 +1,38 @@
+{
+  "tolerance_m": 0.02,
+  "tolerance_source": "plan.position_tolerance_m - the robot's own declared standard, not the evaluator's acceptance radius",
+  "stages": [
+    {
+      "stage": "target_box_b-0",
+      "object": "target_box_b",
+      "measured": [
+        0.21265,
+        0.04869
+      ],
+      "target": [
+        0.205,
+        0.05
+      ],
+      "distance_m": 0.00776,
+      "tolerance_m": 0.02,
+      "status": "AT_TARGET"
+    },
+    {
+      "stage": "target_box_a-1",
+      "object": "target_box_a",
+      "measured": [
+        0.22,
+        0.0
+      ],
+      "target": [
+        0.295,
+        0.05
+      ],
+      "distance_m": 0.09014,
+      "tolerance_m": 0.02,
+      "status": "OUTSIDE_TOLERANCE"
+    }
+  ],
+  "not_measured": 0,
+  "outside_tolerance": 1
+}

@@ -1,0 +1,15 @@
+{
+  "outcome": 1,
+  "error_code": 62,
+  "detail": "native terminal/verification unconfirmed for target_box_a-1",
+  "completed_stage_ids": [
+    "target_box_b-0"
+  ],
+  "native_detail": "policy abort (NON_RECOVERABLE): place failed (ERR_PLACE_FAILED, carried box is not retried) (trace=PICK_A(attempt=1):OK,PLACE_A:FAIL); previous_skill=PLACE cause=ERR_PLACE_FAILED legacy_error_code=25",
+  "native_fsm_trace": [
+    "PICK_A(attempt=1):OK",
+    "PLACE_A:FAIL"
+  ],
+  "native_error_code": 50,
+  "failed_stage": "target_box_a-1"
+}

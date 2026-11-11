@@ -119,9 +119,37 @@ def t13_geometric_conditional(seed, split):
     return spec
 
 
+def t14_ordered_pair(seed, split):
+    """Two placements under a TEMPORAL constraint: one block must be put away first.
+
+    WHY THIS TEMPLATE EXISTS: T12 asks for a repeated route and T13 asks for a measured
+    choice, so every held-out instance so far varied only the WORLD, never the STRUCTURE of
+    the requirement. A planner can satisfy both without ever reasoning about when things
+    must happen. This one makes order part of the goal: the same final placement is correct
+    only if the blocks were moved in the required sequence.
+
+    The evaluator already grades this from move_sequence (clause "order"), so no evaluator
+    change is needed and the ruler is untouched.
+    """
+    rng = random.Random(seed)
+    names = list(SCENE_OBJECTS)
+    first = rng.choice(names)
+    second = [n for n in names if n != first][0]
+    zone = rng.choice(["zone_1", "zone_2"])
+    placement = {first: zone, second: zone}
+    instruction = (
+        "Put both blocks in the %s bin. The %s block must be put there FIRST, then the %s "
+        "block. Doing it in the other order is not acceptable even if both end up in the "
+        "right bin. Do not move anything else." % (
+            ZONES[zone]["label"], OBJECTS[first]["color"], OBJECTS[second]["color"]))
+    return _spec("T14_ordered_pair", seed, split, instruction, placement,
+                 order=[first, second], max_steps=80)
+
+
 TEMPLATES = {
     "T12_triple_revisit": t12_triple_revisit,
     "T13_geometric_conditional": t13_geometric_conditional,
+    "T14_ordered_pair": t14_ordered_pair,
 }
 
 

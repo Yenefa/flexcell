@@ -1,7 +1,7 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 40,
-  "live": 33,
+  "batches": 41,
+  "live": 34,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
@@ -122,7 +122,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 32,
+        "live_batches": 34,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",
@@ -132,6 +132,27 @@
           "Level 7 Transfer",
           "hardware (M0, prohibited)"
         ]
+      }
+    },
+    {
+      "batch": "evobot_crosstype_20261111",
+      "verified": "PASS",
+      "rung": "Generalization Tested across TASK TYPE (T14 order constraint: planning 16/16, wrong-order 0, R 16/16)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_CROSSTYPE_ORDER_CONSTRAINT",
+        "new_template": "T14_ordered_pair (constrains WHEN, not just WHERE)",
+        "seeds": "9300/9400, zero overlap with earlier sets",
+        "planning_in_order": "16/16 = 100% (80.6-100%)",
+        "execution_in_order": "14/16 = 87.5%",
+        "wrong_order": 0,
+        "incomplete": 2,
+        "arm_B": "14/16",
+        "arm_R": "16/16",
+        "required_order_source": "the verdict own order clause (no privileged read)",
+        "incomplete_cause": "the run stopped before the later move; both recovered",
+        "evaluator_touched": false,
+        "skill_layer_touched": false
       }
     },
     {
@@ -256,7 +277,7 @@
         "public_tasks": 36,
         "public_tasks_with_answers": 0,
         "agent_uid_read_blocked": true,
-        "sealed_answers": 106,
+        "sealed_answers": 122,
         "isolation_kind": "OS permissions; not a kernel namespace"
       }
     },
@@ -283,8 +304,8 @@
       "verdict": {
         "verdict": "EVOBOT_LADDER_DERIVED_AND_CURRENT",
         "regenerated_identically": true,
-        "batches_live": 32,
-        "verifier_failures": 0,
+        "batches_live": 34,
+        "verifier_failures": 2,
         "reports_both_directions": true,
         "zero_is_qualified": true,
         "v01_regression": "6/6 -> 6/6, NONE",

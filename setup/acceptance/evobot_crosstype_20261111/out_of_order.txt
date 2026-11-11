@@ -1,0 +1,12 @@
+--- HO-2efba46248da
+  planned order : ['target_box_a', 'target_box_b']
+  observed order: ['target_box_a']
+  order clause  : {"clause": "order", "ok": false, "evidence": {"required": ["target_box_a", "target_box_b"], "observed": ["target_box_a"], "matched": 1, "out_of_order": []}}
+  final passed  : True
+  retried       : True
+--- HO-d3ab212142de
+  planned order : ['target_box_b', 'target_box_a']
+  observed order: ['target_box_b']
+  order clause  : {"clause": "order", "ok": false, "evidence": {"required": ["target_box_b", "target_box_a"], "observed": ["target_box_b"], "matched": 1, "out_of_order": []}}
+  final passed  : True
+  retried       : True

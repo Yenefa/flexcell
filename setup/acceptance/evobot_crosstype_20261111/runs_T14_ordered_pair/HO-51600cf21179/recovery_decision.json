@@ -1,0 +1,46 @@
+{
+  "action": "no_recovery",
+  "reason": "goal already satisfied by measurement",
+  "task_out_said": {
+    "outcome": 1,
+    "detail": "native terminal/verification unconfirmed for target_box_a-1"
+  },
+  "goal_check": {
+    "tolerance_m": 0.02,
+    "tolerance_source": "plan.position_tolerance_m - the robot's own declared standard, not the evaluator's acceptance radius",
+    "stages": [
+      {
+        "stage": "target_box_b-0",
+        "object": "target_box_b",
+        "measured": [
+          0.07116,
+          -0.15762
+        ],
+        "target": [
+          0.075,
+          -0.15
+        ],
+        "distance_m": 0.00853,
+        "tolerance_m": 0.02,
+        "status": "AT_TARGET"
+      },
+      {
+        "stage": "target_box_a-1",
+        "object": "target_box_a",
+        "measured": [
+          0.15602,
+          -0.14395
+        ],
+        "target": [
+          0.165,
+          -0.15
+        ],
+        "distance_m": 0.01083,
+        "tolerance_m": 0.02,
+        "status": "AT_TARGET"
+      }
+    ],
+    "not_measured": 0,
+    "outside_tolerance": 0
+  }
+}

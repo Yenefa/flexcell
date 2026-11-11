@@ -1,0 +1,64 @@
+{
+  "evaluator_version": "0.1.0",
+  "task_id": "HO-51600cf21179",
+  "template_id": "T14_ordered_pair",
+  "passed": true,
+  "clauses": [
+    {
+      "clause": "placement:target_box_a",
+      "ok": true,
+      "evidence": {
+        "zone": "zone_1",
+        "distance_m": 0.03652,
+        "radius_m": 0.06,
+        "inside_zone": true,
+        "height_error_m": 1e-05,
+        "resting": true,
+        "final_pose": [
+          0.15602,
+          -0.14395,
+          0.01749,
+          0.0
+        ]
+      }
+    },
+    {
+      "clause": "placement:target_box_b",
+      "ok": true,
+      "evidence": {
+        "zone": "zone_1",
+        "distance_m": 0.04943,
+        "radius_m": 0.06,
+        "inside_zone": true,
+        "height_error_m": 0.0,
+        "resting": true,
+        "final_pose": [
+          0.07116,
+          -0.15762,
+          0.0175,
+          0.0
+        ]
+      }
+    },
+    {
+      "clause": "order",
+      "ok": true,
+      "evidence": {
+        "required": [
+          "target_box_b",
+          "target_box_a"
+        ],
+        "observed": [
+          "target_box_b",
+          "target_box_a"
+        ],
+        "matched": 2,
+        "out_of_order": []
+      }
+    }
+  ],
+  "failed_clauses": [],
+  "agent_claimed_success": false,
+  "false_success": false,
+  "false_failure": true
+}

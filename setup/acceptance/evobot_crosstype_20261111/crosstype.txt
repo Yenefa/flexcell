@@ -1,0 +1,41 @@
+{
+  "runs": 16,
+  "b_failed": 2,
+  "recovery_ran": 16,
+  "claims": 16,
+  "retried": 2,
+  "retried_after_pass": 0
+}
+
+Batch structure OK: every failed first attempt has a recorded recovery decision,
+every run carries a measured claim, and the retry mechanism demonstrably fired.
+
+run                  required plan           exec           ordercl B      R
+HO-0dcde4dc0f5a      b,a      in-order       in-order       True    True   True
+HO-128c6a231c34      a,b      in-order       in-order       True    True   True
+HO-2efba46248da      a,b      in-order       INCOMPLETE     False   False  True
+HO-40348a081df6      b,a      in-order       in-order       True    True   True
+HO-4dafd8d17858      a,b      in-order       in-order       True    True   True
+HO-4dbb21d087ae      b,a      in-order       in-order       True    True   True
+HO-51600cf21179      b,a      in-order       in-order       True    True   True
+HO-60679893327a      a,b      in-order       in-order       True    True   True
+HO-6173170d8c47      b,a      in-order       in-order       True    True   True
+HO-675c07e900e7      b,a      in-order       in-order       True    True   True
+HO-884ea68a42ca      b,a      in-order       in-order       True    True   True
+HO-b3fb8b1de2db      b,a      in-order       in-order       True    True   True
+HO-c79ebfe5c9e6      a,b      in-order       in-order       True    True   True
+HO-d3ab212142de      b,a      in-order       INCOMPLETE     False   False  True
+HO-da7c04bdece5      b,a      in-order       in-order       True    True   True
+HO-dcf52d233154      b,a      in-order       in-order       True    True   True
+
+planning in-order      16/16 = 100.0% (80.6-100.0%)
+execution in-order     14/16 =  87.5% (64.0-96.5%)
+arm B pass             14/16 =  87.5% (64.0-96.5%)
+arm R pass             16/16 = 100.0% (80.6-100.0%)
+
+execution INCOMPLETE (a move was never recorded): 2 ['HO-2efba46248da', 'HO-d3ab212142de']
+execution WRONG-ORDER (moves happened out of sequence): 0 -
+  -> these did not reorder the work; the run stopped before the later move
+
+READING: T14 constrains WHEN, not just where. Every earlier held-out set varied
+only the world, so a planner could pass them without reasoning about sequence.

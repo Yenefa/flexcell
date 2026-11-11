@@ -10,13 +10,13 @@
     "benchmark/schemas/taskspec.schema.json": "29aae267b157efc2f91d48578ed849c4427e79b629cb3fdea7f892dc7a57563e",
     "benchmark/generators/generate.py": "17e15d4e320b7d3285058bf7eafd389f0ef34eed7345c45a1e536243c6e414ac",
     "benchmark/generators/seal_held_out.py": "b4c63360db75a603e798e44a614baeedde0e5086b0f4aae2be65355e98d53a8f",
-    "benchmark/generators/unseen_tasks.py": "4d9248eed866cb43b859db13f655fa4a8dae49f354b68733c1990ceff4299144",
+    "benchmark/generators/unseen_tasks.py": "c29701fb5cb40410e4e775f2a6a27c5dda6fda1d798c18b1efb389728c3720fe",
     "evolution/validation/regress.py": "a3d8bf5246a95695a37ddf0a25f2565b6198f2acc132f84ec1e3dbae7d107d9b"
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 40,
-    "batches_live": 33,
+    "batches_total": 41,
+    "batches_live": 34,
     "batches_superseded": 7,
     "verifier_failures": 0,
     "live_batches": [
@@ -54,6 +54,11 @@
         "batch": "evobot_capability_freeze_20261111",
         "verified": "PASS",
         "rung": "P0 capability freeze (hash-pinned ruler; drift tested)"
+      },
+      {
+        "batch": "evobot_crosstype_20261111",
+        "verified": "PASS",
+        "rung": "Generalization Tested across TASK TYPE (T14 order constraint: planning 16/16, wrong-order 0, R 16/16)"
       },
       {
         "batch": "evobot_false_failure_20261111",
