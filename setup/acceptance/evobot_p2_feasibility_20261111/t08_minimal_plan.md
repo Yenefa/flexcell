@@ -153,7 +153,7 @@ string evidence_id
 | --- | --- | --- | --- |
 | S1 | 位移由 **gz Pose_V 真值**测，前后各一次，`max_age_s=0.5` | 「夹着走」与「推着走」在真值里都是位移，所以 S1 只负责**证明动过**，不负责分类 | `capture_ground_truth.py:26-37`；`place_server.py:361,442` 的采样用法 |
 | S2 | `carry.engaged == False 且 object_id == ''`（推前、推后各一次） | 本栈**没有接触抓取**：承载是位姿伺服（`CarryDynamics.cc:1`），一旦 engaged 物体就是被钉在 EE 上。这条把「夹着走」变成类型化失败 | `contracts/composite.py:96` 已把这条当硬前提 |
-| S3 | 动作期间**从未调用** `/gripper_controller/gripper_cmd`（技能自证 + 日志可查） | 夹爪闭合本身不会带动盒子（最大开口 0.031 m < 盒 0.035 m，`week1.yaml:31-32`），但它会让「夹」这个解释复活；不调就没有争议 | `common.py:436-518` |
+| S3 | 动作期间**从未调用** `/gripper_controller/gripper_cmd`（技能自证 + 日志可查） | 夹爪行程只有 0.031 m（`0.02 → −0.011`，`config/week1.yaml:31-32`），放不进 0.035 m 的盒子；真正有多少指间净空属 U1/UNKNOWN。不调用夹爪就没有「夹」这个解释 | `common.py:436-518` |
 | S4 | EE **确实到达**了 overdrive 目标（`position_error_m ≤ 0.02`） | 挡「机器人没走到、物体自己滑了」以及「机器人卡死但报成功」 | `move_to_pose_server.py:786-796` |
 | S5 | 位移方向余弦 ≥ 0.9，侧向 ≤ 0.02 m | 挡「推歪/甩出去」 | Step 2 新子句 |
 | S6 | 终态静置高度 `abs(z − 0.0175) ≤ 0.02` | 挡「推飞/翻倒」；阈值直接沿用验收器已有的 REST_HEIGHT_TOLERANCE_M | `evaluate.py:22` |

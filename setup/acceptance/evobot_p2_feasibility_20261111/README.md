@@ -7,7 +7,7 @@
 | --- | --- |
 | 日期 | 2026-11-11 |
 | 执行者 | skill-gap（teammate，task-7） |
-| 仓库 | `project-033-flexcell/wt-comp` @ `4a97c250`（工作树干净） |
+| 仓库 | `project-033-flexcell/wt-comp` @ 起点 `4a97c250`、写作期间被并发会话推进到 `b396e340`（见 §6 说明） |
 | 范围 | mission §3 Phase 2（T07 堆叠 / T08 推动 / T09 杂乱 / T10 受约束放置）的可实现性 |
 | 跑过仿真 | **否**（Gazebo 被 Baseline A 批次占用） |
 | 新增原语 | **否**（只给方案，见 `t08_minimal_plan.md`） |
@@ -41,7 +41,7 @@
 
 ```
 python3 setup/acceptance/evobot_p2_feasibility_20261111/verify.py
-# === 24/24 claims hold ===   (exit 0)
+# === 26/26 claims hold ===   (exit 0)
 ```
 
 `verify.py` 是**只读论证检查器**：不跑仿真、不连 ROS、不联网、不写仓库里的任何源文件。
@@ -277,7 +277,7 @@ clearance 下限」还是「让堆叠走另一条动作通路」；这是**契�
 | --- | --- |
 | `README.md` | 本报告 |
 | `claims.tsv` | 每条结论 → 证据 file:line → 由哪个检查项复核 |
-| `verify.py` | 只读论证检查器（24 条断言，不跑仿真） |
+| `verify.py` | 只读论证检查器（26 条断言，不跑仿真） |
 | `verify_result.json` | 上述检查的机器可读结果（由 verify.py 写出） |
 | `t08_minimal_plan.md` | T08 的最小可验证实现方案（Step 0/1/2 + 判据 + 防假成功） |
 
@@ -289,5 +289,11 @@ python3 setup/acceptance/evobot_p2_feasibility_20261111/verify.py
 没有做 Step 0 探测，没有测 IK 可达性（U1/U2/U3 全部依赖实机/仿真）。
 
 Repo: `/mnt/c/dev/flexcell`（= `C:/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp`）。
-HEAD `4a97c250`。本卡**未 commit / 未 push**；新增文件只在
-`setup/acceptance/evobot_p2_feasibility_20261111/` 之下。
+
+**git 归属说明（必须写清楚）**：本卡**没有执行任何 commit 或 push**。开工时 HEAD = `4a97c250`。
+写作期间并发会话提交了 `b396e340`（`2026-11-11 18:38:51 +0800`，
+"experiment(baseline-a): A-v1 tolerance contrast, designed but not yet run"），
+该提交用 `git add -A` **把本目录当时的 5 个文件一并带进了版本库**——不是本卡做的。
+本卡其后对 `t08_minimal_plan.md` 的那次修改因此显示为 `M`。
+也就是说：本目录的**内容**是本卡的，**提交动作**是别人的；如需把这批文件从那条
+Baseline-A 提交里拆出来，那是 lead/该提交所有者的决定，本卡不擅自 revert。
