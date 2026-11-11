@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.join(WT, "evolution", "proposals"))
 sys.path.insert(0, os.path.join(WT, "evolution", "validation"))
 import generate
 import regress
+import gate_differential
 
 # The actuator stall is ONLY visible in the episode records: task*.out carries the
 # policy wrapper ("native terminal/verification unconfirmed"), never "gripper did not
@@ -65,7 +66,10 @@ def main():
         if proposal is None:
             print("  SKIP  %-22s n=%-3d %s" % (sig, len(fs), why))
             continue
-        ok, reason = regress.gate(proposal, run_regressions=False)
+        # WAS: regress.gate(proposal, run_regressions=False) - an all-green gate rejects every
+        # proposal forever while 4 verifiers fail for pre-existing reasons, so it was switched
+        # off and gated nothing. This gate requires NO NEW failures instead of no failures.
+        ok, reason = gate_differential.gate(proposal)
         print("  GATE  %-22s n=%-3d %s" % (sig, len(fs), "ACCEPTED" if ok else "REJECTED"))
         print("        ", reason)
         if ok:

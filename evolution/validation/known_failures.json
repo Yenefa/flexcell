@@ -1,0 +1,36 @@
+{
+  "record_kind": "EVOBOT_KNOWN_VERIFIER_FAILURES",
+  "why": "A regression gate that requires all verifiers green is impossible while these fail, and a gate that is impossible gets disabled - which is what happened (run_loop.py passed run_regressions=False). This file records the failures that exist INDEPENDENTLY of any proposal, so the gate can require NO NEW failures instead of no failures at all.",
+  "recorded_at": "2026-11-12",
+  "how_to_change": "Removing an entry requires evidence the failure was FIXED, not that it became inconvenient. Adding an entry requires the same, in reverse: a recorded reason why the failure cannot be attributed to any proposal. Editing this file to make a proposal pass is the exact abuse it exists to prevent.",
+  "failures": [
+    {
+      "verifier": "evobot_capability_freeze_20261111",
+      "reported": "AssertionError: ['pinned file CHANGED: benchmark/evaluators/evaluate.py']",
+      "classification": "STALE_RECORD",
+      "why_not_a_live_defect": "This verifier validates the OLDEST of three baseline generations (evobot_capability_freeze_20261111 -> evobot_freeze_change_20261111 -> benchmark/capability_baseline.json). It was legitimately superseded twice and never retired or redirected, so it fails permanently on files that are supposed to have changed.",
+      "what_would_fix_it": "Retire it or point it at benchmark/capability_baseline.json. Requires human approval: it is committed evidence."
+    },
+    {
+      "verifier": "evobot_p2_feasibility_20261111",
+      "reported": "23/26 claims hold",
+      "classification": "STALE_PREMISE",
+      "why_not_a_live_defect": "It pre-registered 'no displacement/push clause: push appears nowhere in the evaluator goal handling'. Commit 0dc1245b ADDED the push clause, fixing exactly the deficiency this record documented. It fails because the world got BETTER.",
+      "what_would_fix_it": "Retire it, or re-express it as a dated premise. Requires human approval."
+    },
+    {
+      "verifier": "evobot_baseline_a_v0_20261111",
+      "reported": "1 failed",
+      "classification": "UNKNOWN",
+      "why_not_a_live_defect": "NOT INVESTIGATED. Recorded here as a known failure so the gate can function, NOT because it has been shown harmless. Its cause is UNKNOWN and it must not be treated as benign.",
+      "what_would_fix_it": "Investigate. Until then it cannot be attributed to any proposal, which is the only claim this entry makes."
+    },
+    {
+      "verifier": "evobot_t08_push_criterion_20261111",
+      "reported": "7 passed, 2 failed",
+      "classification": "UNKNOWN",
+      "why_not_a_live_defect": "NOT INVESTIGATED. Same caveat as above: recorded so the gate can function, with cause UNKNOWN.",
+      "what_would_fix_it": "Investigate."
+    }
+  ]
+}
