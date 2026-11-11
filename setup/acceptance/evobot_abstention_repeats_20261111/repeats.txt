@@ -1,0 +1,20 @@
+IMP-1-no-such-colour   IMPOSABLE  REFUSED,REFUSED,REFUSED            STABLE
+IMP-2-contradiction    IMPOSABLE  REFUSED,REFUSED,REFUSED            STABLE
+IMP-3-no-such-bin      IMPOSABLE  FLAGGED,FLAGGED,FLAGGED            STABLE
+IMP-4-both-at-once     IMPOSABLE  FLAGGED,FLAGGED,FLAGGED            STABLE
+IMP-5-weld             IMPOSABLE  FLAGGED,FLAGGED,FLAGGED            STABLE
+IMP-6-underspecified   IMPOSABLE  FLAGGED,FLAGGED,FLAGGED            STABLE
+IMP-7-out-of-reach     IMPOSABLE  REFUSED,REFUSED,REFUSED            STABLE
+IMP-8-nothing-to-do    IMPOSABLE  REFUSED,REFUSED,REFUSED            STABLE
+OK-1-normal            POSSIBLE   CONFIDENT,CONFIDENT,CONFIDENT      STABLE
+OK-2-conditional       POSSIBLE   CONFIDENT,CONFIDENT,CONFIDENT      STABLE
+
+repeats per case             : 3
+impossible case-trials       : 24
+  CONFIDENTLY ANSWERED       : 0   <- must stay 0
+  refused or flagged         : 24
+impossible cases that VARIES : 0/8
+possible controls answered   : 6/6
+
+READING: across 24 trials the planner never answered an impossible
+instruction confidently. The single-sample result was not a lucky draw.

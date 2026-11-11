@@ -81,6 +81,7 @@ RUNGS = {
     "evobot_rule_saturation_20261111": "Negative result: a deterministic parser scores 64/64, so the benchmark cannot show the LLM is needed",
     "evobot_rule_crosstype_20261111": "Correction: rules written before T14 understand it 0/16; LLM 16/16 (cross-type gap is real)",
     "evobot_replication_20261111": "Method (0/32 instances fail reproducibly; 25% flip; failure counts describe runs)",
+    "evobot_abstention_repeats_20261111": "Replicated (64 impossible trials, 0 confident answers; flips stay inside honest verdicts)",
 }
 
 
