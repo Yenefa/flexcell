@@ -54,9 +54,18 @@ it measures the stack, so that a later agent advantage can be attributed to the 
   17/18 planned, 17/17 plan-level correct, all credentials through the gate). No B result has
   been graded by the independent evaluator on a new task yet, so the *usable* claim about B is
   still exactly "a plan, not a success". C remains a skeleton.
-- Baseline A v0: 6/6 on T01-T06 seed1000 (Wilson 95% CI 0.61-1.00, false_success 0),
-  frozen in `setup/acceptance/evobot_baseline_a_v0_20261111/`; the 72-instance run
-  (T01-T06 x 12 seeds) is in flight and no number from it is claimed yet.
+- Baseline A v0: the seed1000 batch (6/6) is a small sample and was superseded. The full
+  72-instance run (T01-T06 x 12 seeds) is in flight; **no number from it is claimed yet**, but
+  the partial picture is already informative and is recorded here rather than saved for later:
+  **T05_relay and T06_revisit fail 0/19 while T01-T04 pass 44/48.** So the benchmark does not
+  have six usable templates today, it has four. Diagnosis in flight
+  (`setup/acceptance/evobot_t05_t06_diagnosis_20261111/`).
+  The mechanism is NOT a tolerance problem: 17 of the 19 failures are the native component
+  reporting FAILED with `final_position_error_m=None`, i.e. the robot never placed the object.
+  Exactly one instance (T05-seed1000, error 0.0497 m) was a native SUCCESS rejected by the
+  composite's 0.02 m tolerance. Raising that tolerance could therefore recover at most 1 of 19,
+  which is why it is being run as a SAFETY check (does 0.06 admit false successes?) and not as a
+  fix.
 - 1 of 144 instances at the time of writing. No generalisation, no held-out evaluation.
 - ~~Held-out isolation is **specified but not enforced**~~ — **CLOSED 2026-11-11**.
   `scripts/heldout_isolation.py` locks `held_out/`, `evaluators/` **and `generators/`**
