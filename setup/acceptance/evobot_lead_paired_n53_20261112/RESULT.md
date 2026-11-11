@@ -63,6 +63,25 @@ failure than the one that actually occurred.**
 
 **No threshold, evaluator, task or contract was touched. No result was inferred from a void run.**
 
+## 5b. Isolation test (round 23) — the fault is DETERMINISTIC, not contention
+
+Ran **one** trial with the environment cleaned first:
+
+```
+gz sim procs left: 0        shm entries: 2 -> 2 (cyclonedds/fastrtps segments removed)
+single trial, fresh domain 251
+  interface check: OK
+  HARNESS_ERROR: push_object server never appeared
+  'error creating node' occurrences in stack.log: 8
+```
+
+**It fails identically with nothing else running, a fresh domain, and cleared shared memory.** So the fault is
+not residual contention from earlier rounds — **the simulation stack can no longer create ROS nodes in this
+environment at all**, and it did so successfully in rounds 8–11.
+
+**This is a hard blocker on any further Gazebo work, including the registered experiment, until the environment
+is repaired.** No amount of re-running the batch will produce data.
+
 ## 6. What must happen before re-running
 
 1. **Isolate the node-creation failure on a single trial**, with nothing else running, and confirm the stack
