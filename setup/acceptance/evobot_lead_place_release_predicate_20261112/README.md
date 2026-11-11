@@ -171,3 +171,51 @@ python3 setup/acceptance/evobot_lead_place_release_predicate_20261112/analyse_pl
 ```
 
 Reads the committed `place.jsonl`, `carry.jsonl` and episodes from both arms. Offline, no simulator.
+---
+
+## 9. This is not a new defect — it is in the whole project history
+
+Sweeping every `place.jsonl` under `setup/acceptance/` (234 files, 21 experiment archives,
+back to 20261110):
+
+```
+total place rows across ALL archives : 539
+with 'gripper did not open'          :  51  (9.5%)
+```
+
+Per archive, the ones that matter:
+
+| archive | place attempts | closed-gripper failures | rate |
+| --- | --- | --- | --- |
+| `evobot_p0_aprime_execution_20261112` | 29 | 7 | **24.1 %** |
+| `evobot_goal_check_ab_20261111` | 42 | 7 | **16.7 %** |
+| `evobot_pooled_n32_20261111` | 42 | 7 | **16.7 %** |
+| `evobot_crosstype_20261111` | 34 | 5 | 14.7 % |
+| `evobot_unseen_n6_20261111` | 14 | 2 | 14.3 % |
+| `evobot_pair16_drift_20261111` | 42 | 5 | 11.9 % |
+| `evobot_pair16_20261111` | 39 | 4 | 10.3 % |
+| `evobot_heldout_n6_20261111` | 11 | 1 | 9.1 % |
+| `evobot_native_honesty_20261111` | 37 | 3 | 8.1 % |
+| `evobot_unseen_bc_20261111` | 29 | 2 | 6.9 % |
+| `evobot_recover_n6_20261111` | 15 | 1 | 6.7 % |
+| `evobot_generalization_20261111` | 42 | 2 | 4.8 % |
+| `evobot_valid_batch_20261111` | 42 | 2 | 4.8 % |
+
+**Every baseline comparison this project has made is contaminated, at 5–24 % of place attempts
+depending on the batch.** The worst affected are exactly the ones the project has been quoting:
+the P0 A-prime batch, the goal-check A/B comparison, the pooled n=32, and the crosstype run.
+
+## 10. What must be restated
+
+| claim | status after this |
+| --- | --- |
+| "A-prime executes 9/16, B 11/16" | **lower bounds.** Both arms lose runs to this defect at similar rates (7/16 and 5/16), so the *comparison* survives; the absolute rates do not |
+| "B planned 16/16 and executed 11/16" | the 5-run gap is **not all B's fault** — 5 of B's 16 runs have a false release denial |
+| any "execution succeeded" rate in any archive | **an underestimate**, by 5–24 % of place attempts depending on the batch |
+| task-level evaluation numbers | **unaffected** — they read the world, not the verdict |
+| "the recovery layer rescued two B runs (14 → 16)" | **needs re-checking.** If the first-attempt failures include false release denials, recovery partly consists of retrying a step that had already physically succeeded |
+
+The last row is the one I would most want checked next, and I am flagging it rather than asserting
+it: B's recovery advantage may be an artifact of this defect rather than a genuine capability, which
+would change the P0 conclusion from "B's edge is architectural" to "B's edge is recovery from a
+bug in its own place step".
