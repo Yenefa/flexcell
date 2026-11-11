@@ -54,18 +54,33 @@ it measures the stack, so that a later agent advantage can be attributed to the 
   17/18 planned, 17/17 plan-level correct, all credentials through the gate). No B result has
   been graded by the independent evaluator on a new task yet, so the *usable* claim about B is
   still exactly "a plan, not a success". C remains a skeleton.
-- Baseline A v0: the seed1000 batch (6/6) is a small sample and was superseded. The full
-  72-instance run (T01-T06 x 12 seeds) is in flight; **no number from it is claimed yet**, but
-  the partial picture is already informative and is recorded here rather than saved for later:
-  **T05_relay and T06_revisit fail 0/19 while T01-T04 pass 44/48.** So the benchmark does not
-  have six usable templates today, it has four. Diagnosis in flight
-  (`setup/acceptance/evobot_t05_t06_diagnosis_20261111/`).
-  The mechanism is NOT a tolerance problem: 17 of the 19 failures are the native component
-  reporting FAILED with `final_position_error_m=None`, i.e. the robot never placed the object.
-  Exactly one instance (T05-seed1000, error 0.0497 m) was a native SUCCESS rejected by the
-  composite's 0.02 m tolerance. Raising that tolerance could therefore recover at most 1 of 19,
-  which is why it is being run as a SAFETY check (does 0.06 admit false successes?) and not as a
-  fix.
+- Baseline A v0: 72/72 graded, 44 passed, 61.1%, Wilson [0.4956, 0.7153], false_success 0.
+  **Those numbers are valid arithmetic and invalid as a capability measure.** The batch ran
+  T01 x12, T02 x12, ... T06 x12 in order, so template identity and execution position are
+  perfectly confounded; pass rate by execution quartile was 100% / 94% / 50% / 0%. Two
+  independent lines say the driver is machine load, not template difficulty: `set_pose
+  rejected` counts in stack.log match the verdict exactly (every instance with rejected > 0
+  failed; all 24 T01/T02 instances have rejected = 0 and passed), and T06 passes 3/3 when run
+  first on a cold machine against 0/12 at the end of the batch. The mechanism is the
+  velocity-servo carry pin timing out under load, where carry_server.py:571-578 aborts after
+  three consecutive set_pose failures and the PICK stage never completes.
+  A v2 measurement is running (`setup/acceptance/evobot_baseline_v2_measurement_20261111/`):
+  randomised order with a recorded seed, a per-instance load gate, loadavg recorded before and
+  after every instance, and a classifier that treats a broken observation as INVALID_INFRA.
+  **No v2 number is claimed yet.**
+- The T05/T06 attribution in an earlier revision of this document ("structurally broken, so the
+  benchmark has four usable templates") was WRONG and is retracted in
+  `setup/acceptance/evobot_baseline_a_v0_20261111/RETRACTION_T05_T06.md`. Grouping results by
+  template in a batch that executes templates in order manufactures a causal story out of an
+  ordering effect.
+- The tolerance hypothesis is also dead: T05-seed1000 and T05-seed1001 both PASS at
+  `position_tolerance_m = 0.02` on an idle machine, and 0.06 gives identical results. Raising
+  the tolerance rescued nothing and admitted no false success, so A-v1 is NOT adopted -- it is
+  inert, not unsafe, and shipping an inert "fix" invites readers to believe something changed.
+- Baseline B has still never been executed and graded. `evobot_run_b_with_plan.sh` now exists
+  and differs from `evobot_run_b.sh` only in where plan.json comes from, so a B result can
+  finally be attributed to the planner rather than to a different execution path. Until that
+  runs, the usable claim about B remains "a plan, not a success".
 - 1 of 144 instances at the time of writing. No generalisation, no held-out evaluation.
 - ~~Held-out isolation is **specified but not enforced**~~ — **CLOSED 2026-11-11**.
   `scripts/heldout_isolation.py` locks `held_out/`, `evaluators/` **and `generators/`**
