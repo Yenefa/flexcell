@@ -383,3 +383,33 @@ no PR · no real hardware · no unsanctioned spend · no bypassing the LLM budge
 no quoting a plan-level result as an execution result · no quoting a sim result as a
 real-robot result · no single-arm result presented as dual-arm or cross-embodiment ·
 LIBERO (Panda) never folded into OpenMANIPULATOR-X capability.
+
+---
+
+## ADDENDUM — round 3 (2026-11-12), supersedes any conflicting row above
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| Round 1's "no task ever instantiated at its declared pose" | **SUPERSEDED / WITHDRAWN as too broad.** Measured: train 0/72, val 0/36, held_out/public 0/36 affected; only `t08_dev` 2/3 and `t08_unseen` 3/3 | `evobot_t08_instance_pose_20261112/scan_pose_scope.py` |
+| Held-out n6 result contaminated by the pose defect | **INVALID (the worry, not the result)** — all 36 held_out/public specs spawn correctly, so the earlier result is **NOT** contaminated | same |
+| Instance-pose fix | **CONFIRMED implemented + unit tested**, 11 tests, 7 refusal paths, `sim_profile.py` byte-identical; proven live by `gt_before == spec` in all 6 unseen trials | `inject_instance_poses.py`, `runs/*/*/t1/instance_poses.json` |
+| Zone marker placement | **CONFIRMED implemented** (round-2 lane finding) — spec zones mapped by index, unused markers parked, table-level display z | same tool, 3 dedicated tests |
+| "Backwards flick = end effector cannot hold a contact face" | **INVALID** — both candidate mechanisms refuted. Contact height does not separate forward from backward (2.3 mm across the run, 0.1 mm at first touch) | `evobot_lead_contact_mechanism_20261112/` |
+| Where the effector actually contacts | **CONFIRMED: the block's TOP EDGE, every trial** — first-contact z 0.0349–0.0350 m = block top; commanded `contact_height_m` 0.0200; offset **+15 mm**; changing command 0.0300→0.0200 moved the contact **0.1 mm** | same + `push.py:215-219,408-414` |
+| Why `contact_height_m` does not control contact height | **CONFIRMED by code trace** — it positions the `end_effector_link` frame, which has **no collision geometry**; the finger links sit ~15 mm above it | same |
+| First genuine unseen generalisation measurement | **CONFIRMED, n=6: terminal 5/6, task passed 2/6 (Wilson95 [0.097,0.700]), skill-level 0/6** | `evobot_lead_unseen_result_20261112/`, `runs/U*` |
+| The two unseen task passes | **CONFIRMED but NOT controlled pushes** — both came from arm motion the skill itself rejected: `ec=36` 63% shove (2.86 mm margin) and `ec=28` contact lost at 30.6 mm followed by a 117 mm overdrive sweep at t=13.5 s (9.01 mm margin) | same, plus block trajectory in `evidence_bundle.json` |
+| Backwards flicks on unseen | **0 of 6** (cos 0.989–0.998), versus 4 of 9 on dev — the flick is **pose-dependent contact geometry**, not an arm property | `evobot_lead_unseen_result_20261112/` §4 |
+| Gripper gate false-rejection | **CONFIRMED and now joint-largest failure cause** — 4 of 10 terminal-passing T08 trials across both batches stopped by the aperture bound alone | both batches' trial records |
+| G1 genuine grasp aperture travel | **CONFIRMED = 11.71 mm** (open 0.010434 → close −0.001272), i.e. **5.9× the 2 mm bound**; max observed push travel 4.824 mm → a bound in (4.83, 11.70) mm would preserve grasp rejection and clear all 4 observed false rejections. **NOT APPLIED — needs human approval** | `runs/calib_G1/gripper_calibration.json` |
+| G1 grasp actually captured the block | **INVALID — it lifted 0.000000 m.** Even a purpose-built grasp fails to hold the 35 mm block, consistent with the T04 finding that "carry" is a velocity_servo pin and not a grasp | same |
+| T08 skill-level capability | **NOT ACHIEVED** — 0/6 on unseen, 0/5 dev closed-loop; the primitive has never satisfied its own contract on any batch | both batches |
+| Contact-height calibration (task-9) | **NOT_RUN** | task-9 |
+| L4 Develop | **NOT CROSSED** | — |
+
+### Round 3 corrections to the Lead's own record
+
+1. **Withdrawn:** "no task in this benchmark has ever been instantiated at its declared pose" — true of 5 T08 specs, not of the benchmark.
+2. **Withdrawn:** "the backwards flick is the end effector failing to hold a contact face" — contact geometry does not predict the flick.
+3. **Disclosed:** one commit (`59a9d7f5`) accidentally included 145 MB of derived evidence; the next commit compressed and excluded it (`86f78f2d`), and the oversized blobs remain in history because force-pushing a shared branch is worse than the storage cost.
+4. **Disclosed:** a test (`never touches a model that is not in the spec`) required narrowing because the zone-marker behaviour changed **on purpose**; the narrowing is documented in the test and the zone behaviour gained 3 tests of its own rather than losing coverage.
