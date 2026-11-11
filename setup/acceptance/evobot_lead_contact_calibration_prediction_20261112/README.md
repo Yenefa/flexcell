@@ -185,3 +185,74 @@ engaged the face most deeply flicked it backwards.
 **Still n = 1 per height.** The stall-vs-push split at 0.0200 could be luck; the first-contact result
 cannot be. I am recording the pattern because it is the third independent line of evidence that
 **face engagement is not the fix**, not because it is established.
+---
+
+# SECOND CORRECTION: two of my readings were wrong, and the real mechanism is better
+
+**The simulation lane checked my analysis against its own runs and found two errors. Both are real and both are corrected here.** I verified each independently from the artifacts before accepting it.
+
+## Correction 1 — four of six heights never pushed at all
+
+I wrote that four low heights "stall", implying they were push attempts that failed to move the block. **They were not push attempts.** The skill's own result fields:
+
+| point | cmd | `increments_executed` | `contact_made` | error |
+| --- | --- | --- | --- | --- |
+| H0000 | 0.0000 | **0** | false | 30 |
+| H0050 | 0.0050 | **0** | false | 30 |
+| H0100 | 0.0100 | **0** | false | 30 |
+| HM0050 | −0.0050 | **0** | false | 30 |
+| H0150 | 0.0150 | 2 | true | 28 |
+| H0200 | 0.0200 | 5 | true | 36 |
+
+Their 4.4–5.9 mm "displacements" are **the block being nudged by the arm descending onto it**, measured bundle-start to bundle-end. I had flagged exactly this for H0000 and failed to notice it applied to three more. So the spread I described as "four heights of varying push quality" is **two pushes and four descents**. My §"What IS sensitive to the command" table and its reading are withdrawn.
+
+## Correction 2 — the mechanism is collision-limited, not merely ineffective
+
+The approach errors carry the explanation. `cmd_h + pos_error`:
+
+| point | cmd | approach error | cmd + error | block top |
+| --- | --- | --- | --- | --- |
+| H0000 | 0.0000 | 0.0346 | **0.0346** | 0.0350 |
+| H0050 | 0.0050 | 0.0289 | **0.0339** | 0.0350 |
+| H0100 | 0.0100 | 0.0235 | **0.0335** | 0.0350 |
+| HM0050 | −0.0050 | 0.0399 | **0.0349** | 0.0350 |
+
+**Four independent runs converge on 0.0335–0.0349 — a 1.4 mm span, all within 1.5 mm of the block top.** The finger descends, lands on the block's top face, and the arm **stops there**. The target is below the block, so the measured pose falls short by exactly the amount the command went below the top, and the approach gate rejects it at its 0.020 m tolerance.
+
+**This is a collision-limited failure, not a reach failure.** The arm is physically stopped by the block it is trying to get under. That is why lowering the command cannot lower the contact: **the contact is what prevents the descent.** My conclusion (geometry fix, not a number) survives, but for a sharper reason than I gave — below the block top the command is not merely ineffective, it is **unreachable**.
+
+## Correction 3 — H0150 is not face engagement
+
+I read H0150's deep contact as "the most face engagement gave the worst outcome" and used it as evidence that face engagement is not the fix. The lane measured contact against **the block's own pose in the same record**:
+
+| point | contact z | relative to block top | reading |
+| --- | --- | --- | --- |
+| H0200 | 0.0324–0.0356 | **−1.5 mm to +0.6 mm** | pinned to the top face — a pure edge drag |
+| H0150 | 0.0097–0.0784 | **−24.3 mm to +43.4 mm** | spans 68 mm, reaching 43 mm **above** the block top, where there is only air |
+
+A contact reaching 43 mm above a 35 mm block is not on the block's face. **H0150 is tumbling/rotating contact, not a palm-on-face push**, and it must not be recorded as evidence that face engagement backfires. My broader claim that "face engagement is not automatically better" may still be true, but **this trial does not demonstrate it and I withdraw it as support**.
+
+## What survives, and it is now firmer
+
+| Claim | Status |
+| --- | --- |
+| First-contact z = 0.0350 at all six commanded heights, −0.0050 to +0.0200 | **FIRM** — 6/6, 0.1 mm spread; fitted slope 0.0001 against a predicted 1.0 |
+| My pre-registered prediction is falsified | **FIRM** — missed by 20.1 mm, 4× its own tolerance |
+| The command is **unreachable** below the block top | **FIRM** — four independent runs converge on the block top within 1.5 mm |
+| The contact frame is the **world** frame | **FIRM** — contact reads 0.0350 (block top) not +0.0175 (local half-height). I had listed this as an unproven assumption; the lane proved it |
+| "four heights stall" | **WITHDRAWN** — they never pushed |
+| "H0150 = deepest face engagement, worst outcome" | **WITHDRAWN** — it is tumbling contact |
+| Any displacement ordering across heights | **NOT INTERPRETABLE** — n=1, and four of six are descents |
+
+## The fix this implies, stated more sharply than before
+
+Not "calibrate the height" and not even "the parameter is ineffective". The push skill cannot get its finger **under** the block's top face at all, because the block is in the way. A face push requires either:
+
+- a **different contact body** — something that can reach the face without descending through the top, e.g. a side-mounted pusher or a single finger entering from the side; or
+- an **approach from the side** rather than from above, so the finger never has to pass through the block's footprint.
+
+Both are geometry changes to the robot or the motion, not parameter changes. **This is now a well-supported negative result about the skill's design, which is worth more than the calibration number I set out to find.**
+
+## Note on the discipline that caught this
+
+Three of my claims were corrected this round by measurement — the pre-registered prediction, the stall reading, and the H0150 reading — and two of the three were caught by a lane checking my analysis against the same artifacts. Recording them in order, with the original text left in place, is the only way the correction is worth anything.
