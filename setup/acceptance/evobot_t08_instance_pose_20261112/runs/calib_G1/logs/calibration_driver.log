@@ -1,0 +1,93 @@
+{
+  "mode": "G1",
+  "gripper_joint": "gripper_left_joint",
+  "limits": {
+    "open_position": 0.02,
+    "close_position": -0.011,
+    "max_effort": 10.0
+  },
+  "task_spec": "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp/benchmark/tasks/t08_dev/T08-push-seed2000.json",
+  "target_object": "target_box_a",
+  "box_initial_pose": [
+    0.22,
+    0.0,
+    0.0175,
+    0.0
+  ],
+  "phases": {
+    "open": {
+      "ok": true,
+      "reached_goal": true,
+      "stalled": false,
+      "position": 0.010434041468073986,
+      "effort": 10.0,
+      "requested": 0.02
+    },
+    "hover": {
+      "ok": true,
+      "outcome": 0,
+      "error_code": 0,
+      "detail": "planning + execution + measured pose within tolerance"
+    },
+    "descend": {
+      "ok": true,
+      "outcome": 0,
+      "error_code": 0,
+      "detail": "planning + execution + measured pose within tolerance"
+    },
+    "close": {
+      "ok": true,
+      "reached_goal": true,
+      "stalled": false,
+      "position": -0.0012718869253359683,
+      "effort": 10.0,
+      "requested": -0.011
+    },
+    "lift": {
+      "ok": true,
+      "outcome": 0,
+      "error_code": 0,
+      "detail": "planning + execution + measured pose within tolerance"
+    },
+    "release": {
+      "ok": true,
+      "reached_goal": true,
+      "stalled": false,
+      "position": 0.010271958310544836,
+      "effort": 10.0,
+      "requested": 0.02
+    }
+  },
+  "errors": [],
+  "box_before": [
+    0.22,
+    0.0,
+    0.0175
+  ],
+  "grasp_evidence": {
+    "close_result": {
+      "ok": true,
+      "reached_goal": true,
+      "stalled": false,
+      "position": -0.0012718869253359683,
+      "effort": 10.0,
+      "requested": -0.011
+    },
+    "requested_close": -0.011,
+    "full_stroke": 0.031,
+    "box_rose_m": 0.097449
+  },
+  "box_after_lift": [
+    0.21526,
+    0.000357,
+    0.114949
+  ],
+  "phase_marks_monotonic_ns": {
+    "t_start": 135577293653027,
+    "t_close_start": 135581077007014,
+    "t_close_end": 135581228694275,
+    "t_hold_end": 135584233031837,
+    "t_end": 135586672980315
+  }
+}
+SAMPLES 1257

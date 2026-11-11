@@ -62,6 +62,17 @@ def main(argv):
     marks = {}
     samples = []
 
+    def box_pose():
+        """Ground-truth pose of the target, so a 'grasp' is proven, not assumed."""
+        try:
+            from flexcell_skills.common import sample_gz_pose
+            pose, err = sample_gz_pose(target, timeout_s=8.0)
+            if pose is None:
+                return {"error": str(err)}
+            return [round(float(v), 6) for v in pose[0]]
+        except Exception as exc:                                # noqa: BLE001
+            return {"error": str(exc)}
+
     def on_joint(msg):
         names = list(msg.name)
         if gripper_joint not in names:
@@ -146,23 +157,41 @@ def main(argv):
 
     if mode == "G1":
         # ---- G1: genuine grasp of the 35 mm block -------------------------
-        # The pick_server's own geometry: hover then descend to the grasp
-        # target, then close. Using the project's own grasp pose keeps this a
-        # measurement of THIS robot rather than of a pose invented here.
+        # MEASURED CORRECTION TO THE OBVIOUS CHOICE.
+        # The first G1 attempt reused pick_server's own declared grasp target
+        # (box_z + grasp_dz_m = box_z + 0.16). That is NOT where the fingers
+        # reach the block: run 1 recorded zero gripper contact with the target,
+        # the aperture closed fully to -0.011 without stalling, and the box
+        # never rose. The reason is in the archived picks: attach_gap_m is
+        # ~0.166 m, i.e. that stack "grasps" by MAGNETIC CARRY from 166 mm away,
+        # not by fingers. So the grasp target here is derived from the block's
+        # own geometry instead: fingers level with the block centre, close on
+        # the 35 mm faces. Hover stays high for a clean approach.
         hover = [box[0], box[1], box[2] + 0.22]
-        grasp = [box[0], box[1], box[2] + 0.16]
+        grasp = [box[0], box[1], box[2] + 0.000]
         marks["t_start"] = time.monotonic_ns()
+        report["box_before"] = box_pose()
         report["phases"]["open"] = gripper_command(open_position, "open")
         report["phases"]["hover"] = move_to(hover, "hover")
         report["phases"]["descend"] = move_to(grasp, "grasp")
         marks["t_close_start"] = time.monotonic_ns()
         report["phases"]["close"] = gripper_command(close_position, "close")
         marks["t_close_end"] = time.monotonic_ns()
+        report["grasp_evidence"] = {
+            "close_result": report["phases"]["close"],
+            "requested_close": close_position,
+            "full_stroke": abs(open_position - close_position),
+        }
         spin_for(3.0)                 # hold while "holding" the block
         marks["t_hold_end"] = time.monotonic_ns()
         # lift slightly to prove the grasp holds; aperture should not change
         report["phases"]["lift"] = move_to([grasp[0], grasp[1], grasp[2] + 0.10], "lift")
         spin_for(1.0)
+        report["box_after_lift"] = box_pose()
+        report["grasp_evidence"]["box_rose_m"] = (
+            None if not isinstance(report.get("box_before"), list)
+            or not isinstance(report.get("box_after_lift"), list)
+            else round(report["box_after_lift"][2] - report["box_before"][2], 6))
         marks["t_end"] = time.monotonic_ns()
         report["phases"]["release"] = gripper_command(open_position, "release")
 
@@ -173,13 +202,15 @@ def main(argv):
         # The contact log is checked afterwards to confirm nothing was touched.
         sweep_y = 0.16
         sweep_z = 0.0200
+        report["sweep_geometry"] = {"y": sweep_y, "z": sweep_z,
+                                    "from_x": 0.24, "to_x": 0.12}
         marks["t_start"] = time.monotonic_ns()
         report["phases"]["open"] = gripper_command(open_position, "open")
         report["phases"]["close"] = gripper_command(close_position, "close")
         marks["t_close_end"] = time.monotonic_ns()
-        report["phases"]["sweep_start"] = move_to([0.26, sweep_y, sweep_z], "sweep_start")
+        report["phases"]["sweep_start"] = move_to([0.24, sweep_y, sweep_z], "sweep_start")
         marks["t_sweep_start"] = time.monotonic_ns()
-        report["phases"]["sweep_end"] = move_to([0.10, sweep_y, sweep_z], "sweep_end")
+        report["phases"]["sweep_end"] = move_to([0.12, sweep_y, sweep_z], "sweep_end")
         marks["t_sweep_end"] = time.monotonic_ns()
         spin_for(1.0)
         marks["t_end"] = time.monotonic_ns()

@@ -1,0 +1,62 @@
+{
+  "mode": "G3",
+  "gripper_joint": "gripper_left_joint",
+  "limits": {
+    "open_position": 0.02,
+    "close_position": -0.011,
+    "max_effort": 10.0
+  },
+  "task_spec": "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp/benchmark/tasks/t08_dev/T08-push-seed2000.json",
+  "target_object": "target_box_a",
+  "box_initial_pose": [
+    0.22,
+    0.0,
+    0.0175,
+    0.0
+  ],
+  "phases": {
+    "open": {
+      "ok": true,
+      "reached_goal": true,
+      "stalled": false,
+      "position": 0.010434041468075058,
+      "effort": 10.0,
+      "requested": 0.02
+    },
+    "close": {
+      "ok": true,
+      "reached_goal": true,
+      "stalled": false,
+      "position": -0.0016916740721545157,
+      "effort": 10.0,
+      "requested": -0.011
+    },
+    "sweep_start": {
+      "ok": true,
+      "outcome": 0,
+      "error_code": 0,
+      "detail": "planning + execution + measured pose within tolerance"
+    },
+    "sweep_end": {
+      "ok": true,
+      "outcome": 0,
+      "error_code": 0,
+      "detail": "planning + execution + measured pose within tolerance"
+    }
+  },
+  "errors": [],
+  "sweep_geometry": {
+    "y": 0.16,
+    "z": 0.02,
+    "from_x": 0.24,
+    "to_x": 0.12
+  },
+  "phase_marks_monotonic_ns": {
+    "t_start": 135618281828778,
+    "t_close_end": 135618485285682,
+    "t_sweep_start": 135620145828761,
+    "t_sweep_end": 135621666628017,
+    "t_end": 135622667552490
+  }
+}
+SAMPLES 747
