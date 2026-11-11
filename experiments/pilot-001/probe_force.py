@@ -1,7 +1,8 @@
 import os, sys, json, urllib.error
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-with open(os.path.expanduser("~/.config/flexcell/deepseek_api_key")) as fh:
-    os.environ["FLEXCELL_PILOT_API_KEY"] = fh.read().strip()
+import subprocess as _sp
+_GATE = "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/ci-public-window/scripts/evobot_llm_key.sh"
+os.environ["FLEXCELL_PILOT_API_KEY"] = _sp.run(["bash", _GATE], check=True, capture_output=True, text=True).stdout.strip()
 from pilot.llm import Chat
 c = Chat()
 tools = [{"type": "function", "function": {"name": "run_execution",

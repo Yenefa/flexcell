@@ -22,8 +22,12 @@ ZONES = ('{"zone_1":[0.12,-0.15,0.0175],"zone_2":[0.25,0.05,0.0175]}')
 
 def main():
     # sudo resets HOME to /root, so "~" is the wrong place to look under privilege.
-    key_path = os.environ.get("FLEXCELL_KEY_FILE", "/home/ros/.config/flexcell/deepseek_api_key")
-    key = open(key_path).read().strip()
+    gate = "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/ci-public-window/scripts/evobot_llm_key.sh"
+    if os.environ.get("FLEXCELL_KEY_FILE"):
+        key = Path(os.environ["FLEXCELL_KEY_FILE"]).read_text().strip()
+    else:
+        key = subprocess.run(["bash", gate], check=True,
+                             capture_output=True, text=True).stdout.strip()
     fixed = failed = 0
     for d in sorted(BASE.glob("HO-*")):
         pub = WT / "benchmark" / "held_out" / PUBNAME / (d.name + ".json")

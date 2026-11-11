@@ -10,16 +10,9 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 if not os.environ.get("FLEXCELL_PILOT_API_KEY"):
-    key_path = os.path.expanduser("~/.config/flexcell/deepseek_api_key")
-    if os.path.exists(key_path):
-        with open(key_path) as fh:
-            os.environ["FLEXCELL_PILOT_API_KEY"] = fh.read().strip()
-    else:
-        import subprocess as _sp
-        out = _sp.run(["wsl", "-d", "Ubuntu-24.04", "--", "bash", "-lc",
-                       "cat ~/.config/flexcell/deepseek_api_key"],
-                      capture_output=True, text=True)
-        os.environ["FLEXCELL_PILOT_API_KEY"] = (out.stdout or "").strip()
+    import subprocess as _sp
+    os.environ["FLEXCELL_PILOT_API_KEY"] = _sp.run(
+        ["bash", "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/ci-public-window/scripts/evobot_llm_key.sh"], check=True, capture_output=True, text=True).stdout.strip()
 from pilot.agent_fc import FCAgent
 from pilot.llm import Chat
 from pilot import runner, w5s, w5sc

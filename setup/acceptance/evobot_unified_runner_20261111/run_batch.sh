@@ -20,8 +20,11 @@ SIM=/home/ros/flexcell-p14
 PUBDIR=${1:?public dir name, e.g. recovery_public48}
 OUT=${2:?output dir}
 DOMAIN_BASE=${3:-60}
-KEYFILE=${FLEXCELL_KEY_FILE:-/home/ros/.config/flexcell/deepseek_api_key}
-KEY=$(cat "$KEYFILE")
+# The key comes from the budget gate, never from the private file: the gate checks the real
+# account balance, refuses when the spend cannot be accounted for, and appends one audit line.
+GATE=/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/ci-public-window/scripts/evobot_llm_key.sh
+[ -f "$GATE" ] || { echo "FATAL: missing budget gate $GATE"; exit 3; }
+KEY=$(bash "$GATE") || exit 3
 ZONES='{"zone_1":[0.12,-0.15,0.0175],"zone_2":[0.25,0.05,0.0175]}'
 
 mkdir -p "$OUT"; chmod 777 "$OUT"

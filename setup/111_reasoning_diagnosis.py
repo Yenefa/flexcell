@@ -33,7 +33,9 @@ def main():
     private = Path.home() / '.config/flexcell'
     budget = InferenceBudget(private / 'deepseek_budget_20261001.json')
     call_id = budget.reserve(endpoint, payload)
-    key = (private / 'deepseek_api_key').read_text().strip()
+    import subprocess as _sp
+    key = _sp.run(["bash", "/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/ci-public-window/scripts/evobot_llm_key.sh"],
+                  check=True, capture_output=True, text=True).stdout.strip()
     req = Request(endpoint, data=json.dumps(payload).encode(), method='POST',
                   headers={'Authorization': 'Bearer ' + key, 'Content-Type': 'application/json',
                            'User-Agent': 'flexcell-diagnosis/1.0'})
