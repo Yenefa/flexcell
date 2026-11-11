@@ -472,7 +472,8 @@ LIBERO (Panda) never folded into OpenMANIPULATOR-X capability.
 | A-prime has ever executed a task | **YES — first time in project history, this round.** `HO-0dcde4dc0f5a`: composite `outcome=0`, `error_code=0`, both stages completed, 36 s, **0 model calls** | `evobot_lead_p0_aprime_first_execution_20261112/` |
 | A-prime's first execution passed | **CONFIRMED, n=1** — frozen `evaluate.py` v0.5.0, all clauses: `placement:target_box_a`, `placement:target_box_b`, `order` → `passed=True`, `failed_clauses=[]` | same, `grade_first_execution.py` |
 | A-prime's executor plan vs B's | **CONFIRMED identical 16/16** on `stages`, `position_tolerance_m`, `clearance_m`, `motion_profile_id`, `initial_objects` — including `spread_destinations` destinations | `evobot_lead_p0_aprime_equivalence_20261112/` |
-| A-prime's pass RATE on T14 | **NOT ESTABLISHED** — 1 of 16 executed; n=1 supports no rate, and comparing 1/1 to B's 16 runs is meaningless | — |
+| A-prime's pass RATE on T14 | **MEASURED: 9/16 executed and passed, all 16 attempted.** B is 11/16. Every A-prime failure is `error_code=62` (incomplete composite, second stage never ran), so the `order` clause fails on a genuinely incomplete sequence — no grading artifact | `evobot_lead_p0_aprime_first_execution_20261112/grade_all.py` |
+| A-prime vs B on T14 | **Within noise — do not rank.** 9 vs 11 on 16 tasks, one template, B from archive not re-run. Defensible: A-prime reaches within two tasks of B at **zero model cost**. Indefensible: any statement about general quality | same |
 | B's measurable planning value on T14 | **ZERO** — a zero-cost rule parser reproduces its executable plan 16/16 | same |
 | `order` clause graded from a snapshot | **SILENTLY FAILS — harness defect.** It reads `final_state['move_sequence']`; given `{objects}` alone the sequence is empty and the clause fails by construction. I hit this and nearly recorded it as an A-prime failure | `evaluate.py` order clause |
 
