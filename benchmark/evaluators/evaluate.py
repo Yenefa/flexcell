@@ -14,7 +14,10 @@ number and threshold, so a failure is attributable instead of an opaque FAIL.
 import json
 import math
 
-EVALUATOR_VERSION = "0.2.0"
+# 0.3.0 adds the "push" goal clause (T08). It is a pure addition: a spec that does not
+# declare "push" produces exactly the clause list it produced under 0.2.0, which is
+# asserted by re-grading a frozen instance and comparing the verdict.
+EVALUATOR_VERSION = "0.3.0"
 
 # Declared tolerances. Changing one changes what "success" means, so the version
 # string must change with them; the tests assert the pair stays in sync.
@@ -157,6 +160,65 @@ def evaluate(spec, final_state):
             label, d <= tol, distance_m=round(d, 5), tolerance_m=tol,
             reference_final=[round(v, 5) for v in pose[ref][:2]],
             required_delta=[float(off[0]), float(off[1])]))
+
+    # PUSH clause (T08). A push task is distinguished from a pick-and-place task by
+    # REQUIRING displacement and REQUIRING that the object not be lifted. Both halves are
+    # needed: a displacement test alone is satisfied by carrying the object, and an
+    # "unlifted" test alone is satisfied by doing nothing.
+    #
+    # This is a pure addition. No existing clause is relaxed, and a spec that does not
+    # declare "push" evaluates exactly as before, so every frozen T01-T06 result stands.
+    for name, want in sorted((goal.get("push") or {}).items()):
+        label = "push:" + name
+        if name not in pose:
+            clauses.append(_clause(label, False, reason="object missing"))
+            continue
+        if name not in initial:
+            clauses.append(_clause(label, False, reason="object not declared in spec"))
+            continue
+        start = initial[name]
+        end = pose[name]
+        dx, dy = end[0] - start[0], end[1] - start[1]
+        moved = math.hypot(dx, dy)
+        min_m = float(want.get("min_displacement_m", 0.030))
+        max_m = float(want.get("max_displacement_m", 0.150))
+        # Vertical displacement is checked separately: pushing must not become lifting.
+        dz = abs(end[2] - start[2])
+        max_dz = float(want.get("max_vertical_m", 0.020))
+        # Direction: cosine against the required unit vector. Reported even when the
+        # object barely moved, where the cosine is numerically meaningless -- the
+        # displacement bound is what rejects that case, not the cosine.
+        want_dir = want.get("direction")
+        cos = None
+        if want_dir and moved > 1e-9:
+            n = math.hypot(float(want_dir[0]), float(want_dir[1]))
+            cos = (dx * float(want_dir[0]) + dy * float(want_dir[1])) / (moved * n)
+        min_cos = float(want.get("min_direction_cosine", 0.9))
+        # A target zone, if given, is where the object must END UP; the displacement
+        # bounds above are what distinguish a push from a carry.
+        zone_ok = True
+        zone_ev = {}
+        if want.get("zone"):
+            zn = want["zone"]
+            if zn not in zones:
+                zone_ok = False
+                zone_ev = {"reason": "unknown zone", "zone": zn}
+            else:
+                d = _dist2d(end, zones[zn]["pose"])
+                zone_ok = d <= zones[zn]["radius"]
+                zone_ev = {"zone": zn, "distance_m": round(d, 5),
+                           "radius_m": zones[zn]["radius"], "inside_zone": zone_ok}
+        ok = (min_m <= moved <= max_m) and dz <= max_dz and zone_ok
+        if cos is not None:
+            ok = ok and cos >= min_cos
+        clauses.append(_clause(
+            label, ok,
+            displacement_m=round(moved, 5), min_displacement_m=min_m,
+            max_displacement_m=max_m, vertical_m=round(dz, 5),
+            max_vertical_m=max_dz,
+            direction_cosine=None if cos is None else round(cos, 5),
+            min_direction_cosine=min_cos,
+            **zone_ev))
 
     passed = bool(clauses) and all(c["ok"] for c in clauses)
     claimed = bool(final_state.get("agent_claimed_success"))
