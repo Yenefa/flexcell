@@ -1,0 +1,23 @@
+{
+  "task": "pick_up_the_alphabet_soup_and_place_it_in_the_basket",
+  "index": 0,
+  "mode": "side_x",
+  "official_success": false,
+  "release_xy_error_m": 0.57535,
+  "log": [
+    "mode side_x, grasp frac 0.50, extent z -0.051..0.081, grasp z 0.015",
+    "goal alphabet_soup_1 -> basket_1_contain_region",
+    "lateral standoff reached at eef [-0.015, -0.238, 0.022]",
+    "grasp pose reached at eef [-0.108, -0.242, 0.024] (target z 0.015)",
+    "object after lift: [-0.192, -0.285, 0.033]",
+    "release attempt 0: object xy error 0.5753 m",
+    "release attempt 1: object xy error 0.5753 m",
+    "release attempt 2: object xy error 0.5753 m",
+    "release attempt 3: object xy error 0.5753 m",
+    "releasing at object xy error 0.5753 m",
+    "episode terminated during run: True",
+    "success trace: [False, False, False, False]",
+    "object final [-0.192, -0.285, 0.033]"
+  ],
+  "perception": "ORACLE"
+}

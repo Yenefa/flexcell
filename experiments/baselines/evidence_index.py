@@ -92,6 +92,7 @@ RUNGS = {
     "evobot_libero_solved_20261111": "OFFICIAL EXTERNAL TASK COMPLETED (LIBERO check_success=True; scripted controller; oracle perception)",
     "evobot_libero_transfer_20261111": "Transfer NEGATIVE (goal parsing 3/3, grasp parameter 1/3; two grasp failures on unseen objects)",
     "evobot_libero_geometry_grasp_20261111": "Geometry-derived grasp (transfer 2/5 up from 1/3; height not the lever; two distinct failure mechanisms)",
+    "evobot_libero_side_grasp_20261111": "Side grasp + verified release (top solves {0,1}, side solves {1,3}; disjoint - missing approach selection)",
 }
 
 

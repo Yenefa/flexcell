@@ -15,8 +15,8 @@
   },
   "missing_pinned_files": [],
   "evidence": {
-    "batches_total": 57,
-    "batches_live": 50,
+    "batches_total": 58,
+    "batches_live": 51,
     "batches_superseded": 7,
     "verifier_failures": 0,
     "live_batches": [
@@ -144,6 +144,11 @@
         "batch": "evobot_libero_official_20261111",
         "verified": "PASS",
         "rung": "External benchmark OFFICIAL (LIBERO pinned 8f1084e, MIT; loads+steps+grades in its own env; no agent control yet)"
+      },
+      {
+        "batch": "evobot_libero_side_grasp_20261111",
+        "verified": "PASS",
+        "rung": "Side grasp + verified release (top solves {0,1}, side solves {1,3}; disjoint - missing approach selection)"
       },
       {
         "batch": "evobot_libero_solved_20261111",

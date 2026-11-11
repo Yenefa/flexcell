@@ -1,0 +1,21 @@
+{
+  "task": "pick_up_the_cream_cheese_and_place_it_in_the_basket",
+  "index": 1,
+  "mode": "side_x",
+  "official_success": true,
+  "release_xy_error_m": 0.00407,
+  "log": [
+    "mode side_x, grasp frac 0.50, extent z -0.048..0.048, grasp z -0.000",
+    "goal cream_cheese_1 -> basket_1_contain_region",
+    "lateral standoff reached at eef [0.16, -0.103, 0.009]",
+    "grasp pose reached at eef [0.06, -0.092, 0.016] (target z -0.000)",
+    "object after lift: [0.044, -0.09, 0.141]",
+    "release attempt 0: object xy error 0.0175 m",
+    "release attempt 1: object xy error 0.0041 m",
+    "releasing at object xy error 0.0041 m",
+    "episode terminated during run: True",
+    "success trace: [True, True, True, True]",
+    "object final [-0.005, 0.271, 0.136]"
+  ],
+  "perception": "ORACLE"
+}

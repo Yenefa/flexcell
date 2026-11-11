@@ -1,0 +1,21 @@
+{
+  "task": "pick_up_the_bbq_sauce_and_place_it_in_the_basket",
+  "index": 3,
+  "mode": "side_x",
+  "official_success": true,
+  "release_xy_error_m": 0.00367,
+  "log": [
+    "mode side_x, grasp frac 0.50, extent z -0.046..0.099, grasp z 0.027",
+    "goal bbq_sauce_1 -> basket_1_contain_region",
+    "lateral standoff reached at eef [0.162, -0.094, 0.042]",
+    "grasp pose reached at eef [0.046, -0.093, 0.031] (target z 0.027)",
+    "object after lift: [-0.033, -0.092, 0.15]",
+    "release attempt 0: object xy error 0.0532 m",
+    "release attempt 1: object xy error 0.0037 m",
+    "releasing at object xy error 0.0037 m",
+    "episode terminated during run: True",
+    "success trace: [True, True, True, True]",
+    "object final [0.004, 0.26, 0.126]"
+  ],
+  "perception": "ORACLE"
+}
