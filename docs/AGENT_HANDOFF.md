@@ -1,11 +1,47 @@
 # EvoBot Agent 交接文档
 
 > 生成时间：2026-11-11（会话结束时）。**本文件只记录状态，不改动任何核心代码。**
-> 上一任 Agent 的工作分支：`autonomous/flexcell-remediation`，HEAD `8e1ba83b`。
+> 最后更新：2026-11-11 16:2x（补入仓库布局陷阱、预算/key 未完成项、更新启动提示词）。
+> 上一任 Agent 的工作分支：`autonomous/flexcell-remediation`，HEAD `724350ef`。
 
 ---
 
-## 0. 三十秒摘要
+## 0. 先读这一节：仓库布局陷阱（上一任在这里翻过车）
+
+同一个目录下**有两个 git 仓库**，分不清就会找错文件、看错历史：
+
+| | 仓库 A（外层） | 仓库 B（`code-clone`） |
+| --- | --- | --- |
+| 路径 | `project-033-flexcell/` | `project-033-flexcell/code-clone/` |
+| remote | **无 origin（空壳）** | `https://github.com/Yenefa/flexcell.git` |
+| 分支 | `main`，HEAD `343cafb`（11-01 停更） | `autonomous/flexcell-remediation` = `724350ef` |
+| 跟踪文件 | **只有 13 个** | 完整仓库 |
+| 里面有什么 | **460 个 `evobot_*.sh` 脚本（全部未跟踪）** | benchmark / setup/acceptance / docs |
+
+`wt-comp/` 是仓库 B 的 **worktree**。它的 `.git` 是一个**指针文件**，内容是
+`gitdir: C:/Users/.../code-clone/.git/worktrees/wt-comp` ——
+**这是一个 Windows 绝对路径，在 WSL 下 `git` 无法解析，会报 `fatal: not a git repository`。**
+
+### 因此：
+
+- **在 WSL 里操作 `wt-comp` 的 git，一律失败。** 要用 **Windows 侧** `git`（PowerShell / pwsh，`workdir` 指向 `wt-comp`）。
+- 在**外层目录** `project-033-flexcell/` 跑 `git log`，看到的是仓库 A 的无关历史（`main` / `343cafb`），
+  **不要据此判断「仓库被替换」** —— 上一任就是这样误判的，并差点得出「工作全丢」的错误结论。
+- 我写的 460 个实验脚本（`ci-public-window/scripts/evobot_*.sh`）**从未被任何仓库跟踪**，
+  只存在于仓库 A 的磁盘上。要改它们，路径是 `project-033-flexcell/ci-public-window/scripts/`，
+  **不是** `wt-comp/ci-public-window/`（后者不存在）。
+
+### 验证命令（Windows 侧）
+
+```powershell
+cd C:\Users\fuker\Desktop\workspace\project-033-flexcell\wt-comp
+git rev-parse --abbrev-ref HEAD   # 应显示 autonomous/flexcell-remediation
+git log --oneline -1              # 应显示 724350ef 之后的提交
+```
+
+---
+
+## 摘要（三十秒读完）
 
 **已经真实做到的**：把 LIBERO（官方外部 Benchmark，MIT，commit `8f1084e3`）接进了 EvoBot，
 用隔离 venv + 官方环境 + 官方判据，**完成过 1 个官方任务**（`libero_object[0]`，`check_success=True`）。
@@ -299,32 +335,136 @@ python3 experiments/baselines/capability_ladder.py
 ## 8. 新会话启动提示词
 
 ```text
-你是 EvoBot 的新任 Agent。先读 docs/AGENT_HANDOFF.md，它是上一任的完整交接。
+你是 EvoBot 的新任 Agent。先完整读 docs/AGENT_HANDOFF.md，尤其第 0 节和第 10 节。
 
-硬约束（不可协商）：
-- 工作分支 autonomous/flexcell-remediation，不要合并 main、不要开 PR；
-- 不得修改 benchmark/evaluators/* 来制造成功，改固定文件必须登记 docs/FREEZE_CHANGELOG.md；
-- 不得删除任何失败证据；
-- 不得上真机、不得采购；
-- 任何 verifier 必须能失败——写完自己变异一次证明。
+【第一件事：搞清路径，别像我前任一样找错地方】
+真正的仓库是 project-033-flexcell/code-clone（remote = Yenefa/flexcell.git）。
+wt-comp 是它的 worktree，且 wt-comp/.git 是指向 Windows 绝对路径的指针文件，
+所以【在 WSL 里对 wt-comp 跑 git 一定失败】，必须用 Windows 侧 git。
+在外层目录 project-033-flexcell/ 跑 git 看到的是另一个空壳仓库（main / 343cafb），不要据此判断仓库异常。
+实验脚本在 project-033-flexcell/ci-public-window/scripts/（未跟踪，只在磁盘上），不在 wt-comp 下。
 
-当前最高优先级：修 B2（geom_rbound 不是半高，用 evobot_geom_true.py 的真实网格顶点替换四个
-runner 里的公式），然后修 B7（单 episode → 多 episode + 置信区间），再重跑 libero_object 5 个任务。
-在 B2 修好之前，不要报任何 LIBERO 成功率，也不要引用任何历史成功率。
+【第二件事：省钱，这是用户明确追责过的事故】
+74 个脚本曾裸读 ~/.config/flexcell/deepseek_api_key，绕过预算账本，用另一个项目（familyhealth）的 key
+给机器人实验付费且不记账。现在已有唯一入口 ci-public-window/scripts/evobot_llm_key.sh（会查账本、超限拒绝、写审计），
+但【还有 41 个脚本没接上】。在接上之前，不要运行任何调用 LLM 的脚本。
+key 可能已被用户改名或更换，动任何东西之前先问。
+能纯仿真的就不要调 LLM。
 
-工作方式：
-1. 先 git status -uall 看清未提交内容（约 100 文件，含队友半成品与 red-team 审计）；
-2. 独立审查用 spawn_teammate(context:'fresh')，只给自包含任务书、只读权限，让它能失败；
-3. 每轮结束前跑 pytest + freeze --verify + evidence_index，把新批次登记进 RUNGS；
-4. 汇报时区分：Designed / Implemented / Unit Tested / Simulation Tested /
-   Independently Verified / Generalization Tested，不得越级。
+【第三件事：科研上别重复我前任的错】
+1. 先修「沉降后再测量」（set_init_state 后空走直到连续 10 步位移 < 0.5mm），再修「测什么」
+   （geom_rbound 是包围球半径，不是半高，要用真实网格顶点）。两件事分开验证，不要一起改。
+2. 在 B2 修好前，不要引用任何历史成功率，也不要报新成功率。
+3. 判抓取成功用「闭合时接触数」，不要用「抬升」——陈旧世界轴会产生 0 接触的假成功。
+4. 每个 verifier 必须能失败：写完自己变异一次证明它 exit≠0。
+5. 独立审查用 spawn_teammate(context:'fresh')，只给自包含任务书 + 只读权限。
+
+【硬约束】
+分支 autonomous/flexcell-remediation；不合并 main、不开 PR；
+不得为制造成功而改 benchmark/evaluators/*（改固定文件必须登记 docs/FREEZE_CHANGELOG.md）；
+不得删除失败证据；不得上真机、不得采购；不得删除用户的任何 GitHub 仓库。
+
+【汇报】
+区分 Designed / Implemented / Unit Tested / Simulation Tested / Independently Verified /
+Generalization Tested，不得越级。做不到就说 BLOCKED 并给实际阻碍。
 ```
 
 ---
 
-## 9. 交接时的即时状态（可能已过期）
+## 9. 未完成且必须优先处理：LLM 预算与 key（上一任留下的真实事故）
 
-- 两个 teammate（`bowl-grasp`、`tall-bottles`）在交接时**仍在运行**，已被要求收尾。
-- `red-team` 已 inactive，产物已落盘。
-- 测试：**280 通过 / 3 失败**。3 个失败均为新目录未登记（`evobot_redteam` 与 `evobot_bowl_grasp` 缺 verify.py；`evobot_tall_bottles` 的 verify.py 路径错误）。
-- 冻结：**INTACT**。
+### 10.1 发生了什么
+
+上一任写的 **74 个 `evobot_*.sh` 全部直接读 `~/.config/flexcell/deepseek_api_key`**，
+**完全绕过**预算账本 `/home/ros/.config/flexcell/deepseek_budget_20261001.json`。
+后果：
+
+- 账本上限 **¥5.00**，已记录 **¥0.598**，但**最后一次记账停在 11-03**；
+- 11-11 当天有 240 个 `plan.json`、217 个 `self_assessment.json`、228 个 `agent_reply.json` 生成，
+  **全部没有进账本**；
+- 这把 key 属于**另一个项目**（`project-035-familyhealth`，标签显示为 `health`），
+  **用家庭健康项目的 key 给机器人实验付费且不记账**，这是事故的实质。
+
+用户已发现并追责。**不要重犯。**
+
+### 10.2 已完成的部分
+
+预算门已建好并通过测试：
+
+```
+C:\Users\fuker\Desktop\workspace\project-033-flexcell\ci-public-window\scripts\evobot_llm_key.sh
+```
+
+行为（已实测）：
+
+| 场景 | 结果 |
+| --- | --- |
+| 正常、未超限 | 输出 key，并向 `/home/ros/.config/flexcell/evobot_key_usage.log` 追加一行审计 |
+| 账本已达上限 | **exit 3**，拒绝出 key |
+| 账本文件缺失 | **exit 3**，拒绝出 key |
+
+设计要点：它**不调用 API、自己不能花钱**，只是唯一允许吐 key 的choke point。
+
+配套还有一个改写脚本（**试运行通过，未正式应用**）：
+
+```
+ci-public-window/scripts/evobot_close_key_bypass.py    # 加 --apply 才写盘，默认 DRY
+```
+
+试运行结果：**71 个文件可改写、0 个不认识的形态**。
+**注意**：DRY 模式报告的 `remaining_direct_reads` 读的是未改动的磁盘文件，所以它总等于原值，
+这是预期行为，不是 bug —— 真正的信号是 `rewritten: 71`。
+
+### 10.3 未完成的部分（交给新会话）
+
+| # | 事项 | 现状 |
+| --- | --- | --- |
+| 1 | 把 41 个仍裸读 key 的脚本接到预算门 | **未做**。改写脚本已就绪，未执行 `--apply` |
+| 2 | key 归属 | **等用户**。用户可能已在 DeepSeek 平台把该 key 改名；**API key 本身是否更换未知** |
+| 3 | `project-035-familyhealth/.env` 里的明文副本 | **未动**，属其他项目，需用户决定 |
+
+### 10.4 新会话的行动顺序建议
+
+1. **先确认 key 现状**：用户可能已改名/换 key，**先问清楚再动手**，不要假设旧路径仍有效。
+2. 确认后，跑 `evobot_close_key_bypass.py`（先 DRY 看 `rewritten`，再 `--apply`），
+   然后逐个 `bash -n` 语法检查被改的脚本。
+3. **在此之前不要运行任何会调用 LLM 的脚本。**
+4. 每次调用 LLM 前想清楚：这次运行值不值这些钱，能不能用纯仿真替代。
+
+### 10.5 硬规则（用户明确要求，不可协商）
+
+- 任何调用 LLM 的脚本**必须**通过 `evobot_llm_key.sh` 取 key，**不得再出现 `cat ... deepseek_api_key`**；
+- 不得再出现「账本存在但没人记账」的状态；
+- 花钱前先估价，能不用 LLM 就不用。
+
+---
+
+## 10. 交接时的即时状态（2026-11-11 16:2x 复核）
+
+| 项 | 值 |
+| --- | --- |
+| 分支 | `autonomous/flexcell-remediation` |
+| HEAD | `724350ef` + 本次交接文档更新提交 |
+| 远端 | 已同步（`origin/autonomous/flexcell-remediation` 存在） |
+| 工作树 | 干净 |
+| main | **从未合并，未开 PR** |
+| 测试 | **283 通过 / 0 失败**（上一轮已全部修好） |
+| 证据索引 | 0 verifier failures |
+| 冻结 | **INTACT**（9 个 pinned 文件） |
+| 封存 | **BLOCKED_GOOD** |
+| teammates | `bowl-grasp`、`tall-bottles`、`red-team` **全部已收尾**，产物已落盘 |
+
+### 已知仍未做
+
+- **41 个脚本未接预算门**（见第 10 节）——最高优先级；
+- key 归属待用户确认；
+- B2 几何修正未做（`evobot_geom_true.py` 已写好，未接线）；
+- 单 episode → 多 episode（B7）未做。
+
+### 用户未决事项（不要自行决定）
+
+1. 5 个 GitHub 仓库是否删除（`desktop-tutorial` / `test-demo` / `Web` / `IQ-test` / `stock`）——**用户未下达明确指令，不得动手**；
+2. key 是否已改名/更换；
+3. `familyhealth/.env` 明文副本如何处理。
+
+---
