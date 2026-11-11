@@ -1,10 +1,29 @@
 {
   "record_kind": "EVOBOT_EVIDENCE_INDEX",
-  "batches": 42,
-  "live": 35,
+  "batches": 43,
+  "live": 36,
   "superseded": 7,
   "verifier_failures": 0,
   "rows": [
+    {
+      "batch": "evobot_abstention_20261111",
+      "verified": "PASS",
+      "rung": "Calibration (impossible tasks: 0/8 confidently answered; controls correct)",
+      "superseded_by": null,
+      "verdict": {
+        "verdict": "EVOBOT_ABSTENTION_MEASURED",
+        "impossible_instructions": 8,
+        "refused": 4,
+        "flagged_with_a_specific_reason": 4,
+        "confidently_answered": 0,
+        "possible_controls_answered": "2/2",
+        "what_this_bounds": "last round claimed 0/64 planner failures; this probes the boundary with tasks that have no correct plan",
+        "caveats": "n=10, one model, temperature 0, self-authored probes",
+        "robot_runs": 0,
+        "evaluator_touched": false,
+        "skill_layer_touched": false
+      }
+    },
     {
       "batch": "evobot_actuator_prereg_20261111",
       "verified": "PASS",
@@ -122,7 +141,7 @@
       "verdict": {
         "verdict": "EVOBOT_CAPABILITY_BASELINE_FROZEN",
         "pinned_files": 9,
-        "live_batches": 35,
+        "live_batches": 36,
         "verifier_failures": 0,
         "drift_detection": "tested by mutation and deletion",
         "false_success_rate": "0/32",
@@ -325,7 +344,7 @@
       "verdict": {
         "verdict": "EVOBOT_LADDER_DERIVED_AND_CURRENT",
         "regenerated_identically": true,
-        "batches_live": 35,
+        "batches_live": 36,
         "verifier_failures": 0,
         "reports_both_directions": true,
         "zero_is_qualified": true,

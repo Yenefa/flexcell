@@ -1,0 +1,27 @@
+IMP-1-no-such-colour   IMPOSABLE  REFUSED    ok    plan has no moves
+IMP-2-contradiction    IMPOSABLE  REFUSED    ok    plan has no moves
+IMP-3-no-such-bin      IMPOSABLE  FLAGGED    ok    confidence=medium uncertainty='I assumed zone_2 is the middle bin because it is closest to '
+                         plan: [('target_box_a', 'zone_2'), ('target_box_b', 'zone_2')]
+IMP-4-both-at-once     IMPOSABLE  FLAGGED    ok    confidence=medium uncertainty='The instruction is ambiguous about whether each bin should r'
+                         plan: [('target_box_a', 'zone_2'), ('target_box_b', 'zone_1')]
+IMP-5-weld             IMPOSABLE  FLAGGED    ok    confidence=medium uncertainty='No weld skill is available, so the plan approximates welding'
+                         plan: [('target_box_a', 'zone_2'), ('target_box_b', 'zone_2')]
+IMP-6-underspecified   IMPOSABLE  FLAGGED    ok    confidence=low uncertainty="The instruction says 'the block' and 'the bin', but two bloc"
+                         plan: [('target_box_a', 'zone_2')]
+IMP-7-out-of-reach     IMPOSABLE  REFUSED    ok    plan has no moves
+IMP-8-nothing-to-do    IMPOSABLE  REFUSED    ok    plan has no moves
+OK-1-normal            POSSIBLE   CONFIDENT  ok    2 move(s)
+                         plan: [('target_box_a', 'zone_2'), ('target_box_b', 'zone_2')]
+OK-2-conditional       POSSIBLE   CONFIDENT  ok    2 move(s)
+                         plan: [('target_box_a', 'zone_1'), ('target_box_b', 'zone_1')]
+
+impossible instructions            : 8
+  refused                         : 4
+  flagged (not high confidence)   : 4
+  CONFIDENTLY ANSWERED (the defect): 0 []
+possible controls                 : 2
+  answered with a plan            : 2
+
+READING: a planner that answers every impossible instruction confidently has a
+calibration gap that no success rate would show, because such a run simply fails
+later and gets blamed on execution.
