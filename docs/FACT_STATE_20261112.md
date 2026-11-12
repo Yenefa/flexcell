@@ -863,4 +863,53 @@ claim. Counting it because a separate flag said `passed: true` is the error this
 **Sequence of my own widths for this claim: 9 → 5 → 3 → 2.** Each reduction came from reading one more
 qualifying artifact. The honest number is **two**, and two is not a generalization study.
 
+---
+
+## ADDENDUM — goal round 51–52 (2026-11-12): T08 is **Simulation Tested**, NOT Generalization Tested
+
+> **Independent review by `gate-auditor` overturns the label in the two addenda above.** The count n=2 survives;
+> **the word "Generalization Tested" does not.** `evobot_lead_t08_verify_20261112/REVIEW.md`.
+
+### The wording that is now correct
+
+> **"Simulation Tested — T08 push, 2 clean held-out instances (n=2), zero false success."**
+
+### Why the label fails (three reasons, all independent)
+
+| reason | detail |
+| --- | --- |
+| **The denominator was chosen after the results** | six runs over three instances on two arms. **Both arms ran all three seeds.** The claim kept the arm that passed and dropped the arm that failed — **arm selection, unless `U_shot` was declared primary before the batch. No such pre-registration exists**: `run_batch_v2.sh` takes arm as a parameter and defines no primary. Honest denominator: **6 runs on 3 instances, 2 passed** |
+| **The capability is stochastic on the SAME instance** | `U/seed3000` and `U_shot/seed3000` are the **same task** (`task_sha256` identical `ede25524…`), same `contact_height 0.02`, same `attempts=1`, **run 2 minutes apart: 121.7 mm vs 147.1 mm with opposite verdicts.** At that variance **2/2 is not separable from a coin landing heads twice** |
+| **Two instances from one family** | both passes are geometries ~30 mm apart inside a 30–150 mm band. That is not a generalization measurement |
+
+### What was CONFIRMED, by re-execution rather than by reading a flag
+
+| item | status |
+| --- | --- |
+| `U` genuinely means **unseen** | **CONFIRMED from the definition**, not the directory name: `generate_t08.py` lines 11–16, 89, 107 — `HELD = 3000-3002`, written to `t08_unseen/`, commented *"must NOT be run until the skill implementation is frozen"* |
+| the nine gates | **CONFIRMED.** `evidence_status` is computed by `verify.py:474-477` from the gate list, not self-reported. Reviewer re-ran `verify.py` v1.0.0 on the archived bundles: **6 of 6 verdicts reproduce EXACTLY**, both COMPLETE at 9/9. Trajectories **6680** and **6500** samples; `no_lift` 0.788 mm and 0.02 mm; protected excursion **0.0**; `no_attachment` **0 events** |
+| my exclusion of the two `COMPLETE_EVIDENCE_CONTRADICTS_PUSH` runs | **CORRECT as a pass criterion** — `verify.py:478-483` makes it a *positive claim of failure*, not absence of evidence |
+| first valid instantiation of the unseen poses | **this batch is the first**; round-1 runs never instantiated the declared poses, so they measured nothing about those instances. **Do not write "never run"** |
+| gripper bound was not tuned on unseen | `calib_G1/G3` both run `t08_dev/seed2000` — **point in the claim's favour** |
+
+### A finding that is bigger than my claim: the gripper bound cannot tell push from grasp
+
+**Both excluded runs pushed the box correctly.** `U_shot/seed3001`: push clause **ok=TRUE**, disp **144.0 mm**, cos 0.9906, vertical **0.00000**, in zone. `U/seed3000`: push clause **ok=TRUE**, disp **121.7 mm**, cos 0.9976, vertical **0.00000**, in zone. Both were rejected **on the `gripper` gate alone** — 0.0035 and 0.0030 against a 0.0020 bound.
+
+The run's own record says why: *"on this arm the fingers are deflected by contact, so the bound is being crossed by a push."* Physics: vertical 0.00000, `max_lift` 0.39 mm against a 20 mm limit, `no_attachment` 0 events, 144 mm travelled **along the table**. **A box never lifted and never attached is not being carried — this is finger deflection during contact**, the F8 failure mode already recorded (bound sits **154× below** the pass value, bimodal, no samples between 1.287 and 3.057).
+
+| consequence | |
+| --- | --- |
+| as a **pass criterion** | the exclusion **must stay** — I may not re-label runs to reach n=4 |
+| as a **statement about the robot** | **the label is false; n=2 undercounts physical capability by at least 2** |
+| scope | this affects **every T08 number this project has published, in both directions** — the gate that decides push-vs-grasp cannot tell them apart on this robot |
+
+### seed3001 is burned — carry this caveat
+
+The pose fix's own integration test targeted **seed3001** explicitly (*"integration on seed3001, worst case 70.7 mm"*). **It is the one that failed.** My n=2 excludes it because it failed, **not because it was excluded a priori** — the difference matters for how the denominator is read.
+
+### My own four numbers, adjudicated
+
+**9 → 5 → 3 → 2.** The review's verdict: *"2 is the FIRST of those that is defensible as a count — because I re-ran the verifier and it reproduces — and it is STILL not 'Generalization Tested'. **The narrowing was not the error. The label on top of the number was.**"*
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
