@@ -1096,3 +1096,51 @@ direction-correct runs, compared. That has not been done.
 ones that survived were the ones that were **looked at** rather than **reasoned about**. The camera settled in one
 round what twenty-two rounds of inference did not.
 
+
+---
+
+## ADDENDUM — 2026-11-12, round 27: the defect is QUANTIFIED — the fingers sit 21.7 mm above the box top
+
+Rounds 24 and 25 of this record described the mechanism qualitatively and, in round 25, **wrongly** (it called the
+primitive a carried drag with a grip that holds or slips). Round 26 corrected the wording. This addendum replaces
+both with a number derived from the URDF and an archived pose record.
+
+| Fact | Value | Source |
+| --- | --- | --- |
+| `end_effector_link` offset from `link5` | **0.1260 m** | `open_manipulator_x.urdf`, `end_effector_joint` |
+| finger joints offset from `link5` | **0.0817 m**, y = +/-0.0210 | same file, `gripper_left/right_joint` |
+| **fingers behind the ee frame** | **0.0443 m** | difference of the two |
+| ee height at a real push approach | 0.0301 m | archived `move_to_pose` record |
+| link5 x-axis in world at that pose | (0.7985, -0.0199, **-0.6016**) | from the recorded quaternion |
+| **resulting finger height** | **0.0567 m** | 0.0301 - 0.0443 x (-0.6016) |
+| box top (35 mm cube, pose z 0.0175) | 0.0350 m | T08 TaskSpec |
+| **finger clearance above box top** | **21.7 mm** | difference |
+
+**So `contact_height_m` names a contact that does not happen.** It is commanded against `end_effector_link`, which
+is 44.3 mm ahead of the fingers; at the orientations used, the fingers end up 21.7 mm above the top face. The
+gripper is never commanded to close (`push_server.py` lines 20-26, deliberately, so that a push cannot be mistaken
+for a carry), so nothing closes the remaining gap. The executed motion is a friction drag across the top face, which
+has no fixed direction — and that is the 44% reversal rate.
+
+**This also explains the negative result that no other hypothesis could.** Scanning `contact_height_m` over
+0.0150/0.0175/0.0200/0.0225/0.0250 produced **both outcomes at every height**: a 10 mm scan cannot close a 21.7 mm
+stand-off, so every setting in that range put the fingers above the top face and every setting was friction-driven.
+
+### Superseded entries in this file
+
+| Earlier entry | Status |
+| --- | --- |
+| Round 24: "fingers come down on top of the box, dragged by friction, direction is a coin flip" | **directionally right, superseded** — the stand-off is now measured, not inferred |
+| Round 25: "grip holds / grip slips", "carried drag" | **WITHDRAWN** — the gripper is never commanded, so no grip exists and "carried" is what the contract forbids |
+| Round 22: `approach_clearance 0.02 < finger offset 0.021` explains reversal | **WITHDRAWN** — a 20 mm horizontal stand-off is not the problem; a 44.3 mm axial offset is |
+
+### What is still owed to a human
+
+A technical note with both candidate fixes is committed at
+`setup/acceptance/evobot_lead_t08_calib_20261112/T08_PUSH_DEFECT_NOTE_FOR_PUSH_PY_OWNER.md`. **Neither was
+implemented.** Both change `contracts/push.py`, which is outside this session's granted scope, and both alter a
+threshold-shaped quantity that this session is forbidden from tuning to make a test pass.
+
+**Not established: that compensating the offset fixes the task.** That needs the edit and a re-run. The orientation
+used above is one archived record, not a distribution.
+
