@@ -1376,3 +1376,85 @@ Round 54 claimed the aperture change was a boundary artefact from a single final
 
 **No capability level was raised.** The run was rejected by the verifier, so it is not Independently Verified. One false failure is not a reproducible rate: n=1. The T08 baseline remains `CALIBRATION_UNSUPPORTED`. No frozen file, threshold, TaskSpec or acceptance evidence was modified - `evaluate.py` and `verify.py` were read and executed, never edited.
 
+
+---
+
+## ADDENDUM — 2026-11-12, rounds 59-74: the failure structure, measured with repeats
+
+### The headline
+
+**T08 push fails in THREE distinct ways, and one of them is not a failure to push - it is not
+trying.** Twelve runs with repeats, plus a guard that separates them.
+
+| mode | signature | gripper contact | box outcome |
+| --- | --- | --- | --- |
+| **A drag-back** | heavy contact, box ends BEHIND its start | 1500-1900 contacts | reversed |
+| **B no-push** | arm descends, contact, box barely moves | ~950 contacts | +2 mm |
+| **C no-op** | arm never descends; ee z frozen at 0.1872 | **0 contacts** | 0 mm |
+
+### The rate, stated with its limits
+
+12 runs on seeds 2000 and 3001, two configurations, three repeats each:
+
+```
+lift 0.0   n=6  4 OK  2 mode A  0 mode B  0 mode C
+lift 0.08  n=6  4 OK  0 mode A  1 mode B  1 mode C
+```
+
+**Both 4/6.** The lift is not a rate improvement.
+
+### A retracted claim from round 68
+
+Round 68 reported the retreat lift as a fix: one paired run showed drag +0.0596 -> 0.0000 and the
+box landing in the zone. **The repeats show that was sampling luck.**
+
+What is true: **the lift eliminates mode A entirely.** Baseline failures carry drag +0.0596 and
++0.0782; lift failures carry +0.0070 and +0.0000. The mechanic works. The rate does not move,
+because removing one failure mode lets two others through.
+
+### The retreat mechanism, located at the line
+
+`contracts/push.py:512-513` carries `face[2]` through unchanged - the retreat is horizontal. The
+fingers sit 44.3 mm behind the ee frame, so a horizontal withdrawal sweeps them back through the
+box. Implemented in an **isolated overlay only** (`/tmp/t08_push_ws`): a `retreat_lift_m` default
+of 0.0 and `face[2] + p['retreat_lift_m']`. **The repository copy of `contracts/push.py` is
+untouched**; the 0.0 default means the build behaves identically unless the parameter is set.
+
+### Levers tested and found ineffective
+
+| lever | result |
+| --- | --- |
+| staging y (lateral offset) | fixed seed 2000 once, did not replicate; no effect on 3002 |
+| `distance_m` 0.040 / 0.090 / 0.130 | drag scales with it; at 0.130 the return EXCEEDED the advance |
+| staging x 0.35 / 0.30 / 0.27 | drag stayed ~0.06 while push varied |
+| `contact_height_m` | excluded arithmetically in an earlier round |
+| **`retreat_lift_m` (overlay)** | **removes mode A; rate unchanged** |
+
+### The guard that makes a rate interpretable
+
+`t08_timeline.py` now records `ee_descent_m` and `push_executed` per run: a push counts as
+executed if the end effector descended more than 10 mm. Validated at **1600x separation**
+(0.0001 m for the no-op, 0.166 m for real pushes).
+
+**Without it, a no-op is scored as a capability failure**, conflating 'the robot could not push
+it' with 'the robot did not try'.
+
+### Carried forward as UNKNOWN
+
+- **Whether modes B and C are caused by the lift or merely unmasked by it.** 12 runs cannot say.
+- **Mode C's cause.** Descent, action dispatch, or controller - not investigated.
+- **Base rates per mode.** 2/1/1 is a shape, not a distribution.
+- **Anything on unseen instances.** All twelve runs are on seeds 2000 and 3001.
+
+### A hypothesis explicitly NOT established
+
+The objective records `0.0-73.1 mm` achieved displacement across nine runs. It is tempting to
+read the 0.0 mm end as mode C. **That is a hypothesis and is not tested** - those nine runs were
+not sampled with a pose series and cannot be classified retroactively.
+
+### Status unchanged
+
+**T08 remains `CALIBRATION_UNSUPPORTED`.** No capability level was raised by any of this. The
+evaluator work from rounds 49-58 (8/10 gates, terminal passing on a satisfying run, the confirmed
+false failure on a 1.2 mrad gripper overage) stands, and the false failure is still n=1.
+
