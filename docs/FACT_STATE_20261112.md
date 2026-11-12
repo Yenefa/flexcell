@@ -810,4 +810,25 @@ number produced by a harness that withheld the required evidence. The `reason` s
 missing was printed in **every** verdict: *no trajectory for this object, end state alone cannot prove it was
 pushed rather than carried*. **I read that as a verdict instead of as an instruction about my harness.**
 
+---
+
+## ADDENDUM — goal rounds 44–47 (2026-11-12): T08 reaches **Generalization Tested** (n=3, single-shot confirmed)
+
+> **This supersedes the "Generalization Tested: NOT ESTABLISHED" line in the rounds 34–38 addendum above.**
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| **T08 full pass on an UNSEEN instance, in ONE push** | **CONFIRMED.** `TRIAL_RECORD` for `U_shot/seed3000/t1` records `attempts: 1`, `clause_ok: true`, `evidence_status: COMPLETE`, `failed_clauses: []`, `failed_gates: []`, displacement **147.14 mm** (inside [30,150]), `direction_cos` **0.9963**, `dist_to_zone` **48.28 mm** (≤60) | `evobot_t08_instance_pose_20261112/runs/U_shot/seed3000/t1/logs/evidence.log` |
+| **All nine anti-fake gates satisfied** | `trajectory` **6680 samples**; `no_lift` max **0.000788 m** vs 0.02; `no_attachment` **0 events**; `pusher_contact` **1176/1182** motion windows with gripper collision links named; gripper aperture travel **0.000391 rad** vs 0.002; `table_support` **0** off-table; `protected_unmoved` **0.0 m**; `no_teleport` **0.000561 m** vs 0.03 | `.../t1/verdict.json` |
+| Why that matters | **These are precisely the gates that make T08 unfakeable by pick-carry-place**, which the Master Goal demanded. `no_lift` + `no_attachment` + aperture stability prove the box was **not grasped**; `pusher_contact` proves the gripper links **did** contact it | same |
+| **False Success** | **0.** `false_success: false`, `agent_claimed_success: false`. The skill even flagged its **own** push with `ERR_DISPLACEMENT_OVERSHOOT` (ec 36) while the graded outcome was inside the bound — **conservative about itself** | `TRIAL_RECORD` |
+| Further instances | `U_shot/seed3001`, `U_shot/seed3002`, and closed-loop `U/seed3000`, `U/seed3002` all carry `passed: true` by the same gate pattern | verdict scan |
+| **Evidence level** | **Generalization Tested for T08** — with the immediate caveat that **n = 3 distinct unseen instances is thin**; the evidence **quality** is high, the **breadth** is not a generalization study | — |
+| What this supersedes | Round 17's *"this configuration cannot do this task"* — **FALSE**, and it stood for twenty rounds. Round 33–40's 0/26 — **VOID** (no `trajectory` key, clause failed closed) | — |
+| Still not claimed | P3 unchanged (**0/6** records review-grade); P4 **`EVOLUTION_ADVANTAGE_NOT_DEMONSTRATED`**; **L4 Develop not crossed** | — |
+
+**How the error was made, for the record:** for twenty rounds a graded number said *cannot* while the artifacts
+said *done*. I believed the number. The verdict printed the reason on every single failure — *no trajectory for
+this object* — and I read it as a verdict instead of as a diagnosis of my own harness.
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
