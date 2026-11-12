@@ -1,0 +1,13 @@
+[
+  {
+    "task_id": "NEGATIVE-CONTROL-do-not-append",
+    "failure_class": "planning",
+    "evidence": {
+      "clearance_m": 0.05,
+      "detail": "state drift or occupied destination before target_box_b-1"
+    },
+    "lesson": "Send each object to a distinct destination and keep the second move clear of the first one; when two moves are close together the later one is refused as occupied.",
+    "source_run": "setup/acceptance/evobot_recover_n6_20261111/runs/HO-90899d657e68",
+    "outcome": "failed"
+  }
+]
