@@ -25,7 +25,12 @@ from pathlib import Path
 
 WT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(WT / "evolution" / "validation"))
+sys.path.insert(0, str(WT / "evolution" / "proposals"))
 import regress
+# Issue #236: a proposal whose basis was already measured and refuted must not be emitted
+# again. status.py reads the superseded_basis / supersedes records that already exist next
+# to the proposals and that this generator previously ignored.
+import status as pstatus
 
 MIN_OCCURRENCES = 2
 
@@ -150,14 +155,28 @@ def main(argv=None):
     failures = load_evidence(runs)
     print("measured failures:", len(failures))
     buckets = cluster(failures)
+    # Read the repository's own negative records ONCE, before generating anything, so a
+    # signature already documented as unsound or replaced never reaches build_proposal.
+    status_index = pstatus.load_status_index(str(WT / "evolution" / "proposals"))
     for sig, fs in sorted(buckets.items(), key=lambda kv: -len(kv[1])):
+        allowed, pstatus_state, pstatus_reason = pstatus.check(sig, status_index)
+        if not allowed:
+            # Traceable skip: the status, the reason and its source file are all printed, so
+            # the decision can be audited without re-deriving it.
+            print("  SKIP %-22s %s: %s" % (sig, pstatus_state, pstatus_reason))
+            continue
         proposal, why = build_proposal(sig, fs)
         if proposal is None:
             print("  SKIP %-22s %s" % (sig, why))
             continue
+        # Carry the status into the emitted artifact. UNKNOWN means nobody reviewed this
+        # signature; it is deliberately not written as approved or verified, because a
+        # missing record must never become a positive one by default (issue #236).
+        proposal["proposal_status"] = pstatus_state
+        proposal["status_note"] = pstatus_reason
         ok, reason = regress.gate(proposal, run_regressions=False)
-        print("  PROPOSAL %-20s occurrences=%d gate=%s" % (
-            sig, len(fs), "ACCEPTED" if ok else "REJECTED"))
+        print("  PROPOSAL %-20s occurrences=%d status=%s gate=%s" % (
+            sig, len(fs), pstatus_state, "ACCEPTED" if ok else "REJECTED"))
         print("    reason:", reason)
         if ok:
             out = WT / "evolution" / "proposals" / ("%s.json" % sig)
