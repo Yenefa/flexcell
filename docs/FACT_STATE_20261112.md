@@ -1458,3 +1458,87 @@ not sampled with a pose series and cannot be classified retroactively.
 evaluator work from rounds 49-58 (8/10 gates, terminal passing on a satisfying run, the confirmed
 false failure on a 1.2 mrad gripper overage) stands, and the false failure is still n=1.
 
+
+---
+
+## ADDENDUM — 2026-11-12, rounds 80-83: the staging move never arrived, and fixing that changed everything
+
+### The defect
+
+`move_to_pose` does not execute - it plans and forwards the trajectory to
+`/arm_controller/follow_joint_trajectory` (`move_to_pose_server.py:845`). The harness issued the
+staging move immediately after launch, racing that server's start-up. Every staging move in every
+logged run returned `error_code 31` with `execution_send_status: unavailable` - the
+`wait_for_server(2.0)` timeout.
+
+**Result: no staging move ever reached its target, from round 62 to round 82.**
+
+### The fix
+
+`t08_timeline.py` now waits up to 30 s for that action server before issuing the staging goal. A
+**harness** change only - it does not touch the controller, the task, or any frozen file.
+
+**After the fix: staging reports SUCCEEDED 18 of 18.** Before it: 0 of every run.
+
+### What that did to the measurements
+
+| batch | seeds | in zone |
+| --- | --- | --- |
+| round 81, tuning seeds | 2000, 3001 | **12/12** |
+| round 82, held-out | 3000, 3002 | **6/6** |
+| **total** | **4 seeds** | **18/18** |
+
+Zone distances 0.0103-0.0442 against a 0.06 radius. Seed 3002 - which failed in every
+configuration in rounds 60-66 - went 3 for 3 with the tightest distances of any seed.
+
+**The same 12-run design in round 70 gave 8/12.** The only difference is whether the staging move
+arrives.
+
+### What this supersedes
+
+**The failure structure of rounds 70-74 was an artefact of a mis-started arm.** The three modes
+(drag-back, no-push, no-op) were real observations, but all of them describe an arm that began from
+a pose the code never asked for. Specifically:
+
+- The retreat lift's apparent benefit (round 68) and its non-replication (round 69) both predate
+  the fix; in the post-fix batch both configurations go 6/6, so the lift made no difference.
+- The `ee_descent` guard from round 73 is **invalidated**: it measured decent from the neutral
+  pose, a good proxy for 'did it try' only while staging always failed. Two runs it flagged as
+  no-ops after the fix had pushed -0.1211 and -0.1324 into the zone.
+- The four-lever sweep of rounds 65-66 tested staging x/y and distance on a broken baseline.
+
+### Held-out run through the frozen evaluator
+
+`T08-push-seed3000`, untouched by tuning, full evidence chain, evaluator `0.5.0`:
+
+```
+terminal_passed             True
+clause unmoved:target_box_b -> True
+clause push:target_box_a    -> True
+passed                      False
+gripper :: aperture changed by 0.0068 rad (limit 0.0020)
+```
+
+**A held-out run passed every task clause and was rejected on the gripper gate.** This is the
+second independent instance of the false rejection characterised in rounds 55-58, and the first on
+a held-out seed.
+
+### The four states, kept separate
+
+| state | value |
+| --- | --- |
+| `planning_correct` | yes |
+| `execution_succeeded` | yes - 18/18 in zone |
+| `independent_evaluation_passed` | **no** - rejected on the gripper gate |
+| `agent_claimed_success` | false |
+
+### Not claimed
+
+**No capability level was raised.** The staging fix is a harness change that makes the arm start
+where the code always asked it to start; real capability did not change, a measurement error was
+removed. 18/18 is 4 seeds and 2 task variants, not scored by the evaluator, not a rate. Some of
+those 18 would very likely be rejected by the gripper gate the same way seed 3000 was.
+
+**T08 remains `CALIBRATION_UNSUPPORTED`**, and this round produced independent evidence for the
+reason it carries that status rather than a reason to lift it.
+
