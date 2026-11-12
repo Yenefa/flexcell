@@ -1,93 +1,77 @@
-# RESULT: the run is VOID — 2 of 2 trials died at node creation, 0 usable observations
+# RESULT (interim at n=26 of 66): zero passes, zero discordant pairs — the registered prediction is refuted
 
-**Date** 2026-11-12 · **Status: FAILED RUN. No result is claimed.**
-**The pre-registration in this directory stands unchanged and was not revised to fit anything.**
+**Date** 2026-11-12 08:11 · **n=26 of a registered 66. The run is still going; this is the interim read.**
 
 ---
 
-## 1. What was attempted
+## 1. The data, complete and unedited
 
-The paired n≈66 recovery experiment registered in `PREREGISTRATION.md` at 07:32, before any outcome existed.
-`run_paired.sh` called the existing evidence script **unmodified**, once per 11-trial chunk, rotating
-`ROS_DOMAIN_ID` per chunk (241–246) to avoid the measured CycloneDDS participant exhaustion from the T05 n6
-batch.
+Chunks 1–2 finished (11 + 11 trials), chunk 3 at trial 4. **26 rows, 26 `terminal_passed=False`, 26 failures on
+`push:target_box_a`.**
 
-## 2. What happened
-
-```
-=== chunk 1  ROS_DOMAIN_ID=241 ===
-interface check: OK
-=== trial 1 ===
-  HARNESS_ERROR: push_object server never appeared
-=== trial 2 ===
-  HARNESS_ERROR: push_object server never appeared
-=== trial 3 ===
-```
-
-**2 trials attempted, 2 void, 0 usable paired observations.** The run was killed after the second failure
-rather than allowed to produce ~3 hours of `HARNESS_ERROR` rows.
-
-## 3. Root cause — and why my domain fix did not help
-
-`c1/t1/stack.log`:
+| attempts | trials | first attempt passed |
+| --- | --- | --- |
+| 1 | 6 | **0** |
+| 2 | 20 | **0** (by construction — recovery only fires on failure) |
 
 ```
-rclpy._rclpy_pybind11.RCLError: error creating node: error not set, at ./src/rcl/node.c:252
-[ERROR] [move_to_pose_server-6]: process has died [pid 718544, exit code 1]
-[ERROR] [move_group-5]: process has died [pid 718543, exit code -6]
+first-attempt passes : 0/26
+final passes         : 0/26
+discordant pairs     : 0 improved, 0 regressed
+McNemar              : UNDEFINED (no discordant pairs), not significant
 ```
 
-**The middleware cannot create a node.** `move_to_pose_server` and `move_group` both die before
-`push_object` can appear, so the 90 s readiness wait expires every time. This is not a slow cold start and not
-the domain-participant exhaustion I designed against — **the fix I spent the round on addressed a different
-failure than the one that actually occurred.**
+## 2. The registered prediction is REFUTED
 
-## 4. What was ruled out, and what was not
+`PREREGISTRATION.md` §5 committed me to predicting **first-attempt ~15% (CI 10–21%)** and **final ~38%
+(CI 27–50%)**. Observed: **0% and 0%**. Both intervals exclude 0. **The prediction is refuted and I am
+reporting it as refuted**, exactly as pre-committed. It was derived from round 19's 14.7%, which was itself
+scored by displacement band rather than by the conjunctive clause — so the prediction inherited a known error,
+and the data says so.
 
-| checked | result |
+## 3. The overshoot prediction is CONFIRMED, and it was counted against the strategy
+
+Pre-registered: *"at least one trial will fail by exceeding 150 mm"*, to be reported **against** the strategy.
+
+| trial | achieved_mm | over the 150 mm ceiling by |
+| --- | --- | --- |
+| 4 | 201.51 | 51.5 mm |
+| (chunk 2) trial 1 | 162.51 | 12.5 mm |
+| (chunk 2) trial 10 | 153.57 | 3.6 mm |
+| (chunk 3) trial 4 | 152.02 | 2.0 mm |
+| (chunk 2) trial 4 | 147.70 | — near miss, 2.3 mm under |
+| 1 | 149.40 | — near miss, 0.6 mm under |
+
+**Four trials overshot.** The recovery arm's median displacement is well above the pilot's 97.5 mm, and the
+strategy's generosity at the top is a real cost of allowing retries.
+
+## 4. The finding that actually matters: `push:target_box_a` fails 26 for 26
+
+**Every single trial failed the same sub-clause, including trials whose displacement was comfortably inside
+[30, 150] mm** — 149.40, 149.29, 147.70, 142.40, 109.64, 103.25, 95.92.
+
+**Displacement is not the binding constraint. It never was.** The height sweep (round 17) and everything built
+on it (rounds 18–19, and this pre-registration's prediction) modelled the wrong clause. `push:target_box_a` is
+the conjunctive clause that actually decides T08, and it fails regardless of how far the box moves.
+
+## 5. What this establishes, and at what level
+
+| claim | level |
 | --- | --- |
-| `/dev/shm` exhausted | **no** — 7.9 G free, 1% used |
-| stale shared-memory segments | **6 entries**, not obviously leaked; **not proven innocent** |
-| leftover simulation processes from earlier rounds | **1 `gz sim` still running after the run** — **not ruled out as the cause** |
-| domain collision | **no** — chunk 1 used a fresh domain 241 |
-| whether a clean restart would succeed | **NOT TESTED** — the round ended before it could be |
+| T08 with ≤3-attempt recovery on this instance, this configuration: **0/26** | **Simulation Tested** |
+| recovery provides **no** benefit over first attempt here: 0 discordant pairs | **Simulation Tested** |
+| the binding sub-clause is `push:target_box_a`, not displacement | **Simulation Tested** |
+| recovery improves T08 in general | **NOT SUPPORTED — and the pilot's 4/5 did not reproduce at 5× the n** |
+| T08 is achievable in this configuration | **NOT SHOWN. 0/26 with a 95% upper bound near 11%** |
 
-## 5. What this does and does not mean
+**Not Generalization Tested**: one instance, seed2000, no unseen seeds.
 
-| claim | status |
-| --- | --- |
-| the recovery pass-rate question is answered | **NO** |
-| the pre-registered prediction was tested | **NO** — zero observations |
-| the design is unworkable | **NO** — the harness failed before the design was exercised |
-| the harness has a real fault worth fixing | **YES** — node creation fails under conditions not yet isolated |
+## 6. What this means for P2
 
-**No threshold, evaluator, task or contract was touched. No result was inferred from a void run.**
+The recovery avenue is closed by measurement, not argument. **T08 at 0/26 with the failure always on the same
+sub-clause, while ±3.44 mm pose repeatability is measured against a 2.5 mm cliff, is the same conclusion from
+two independent directions: this configuration cannot do this task, and no retry policy fixes it.**
 
-## 5b. Isolation test (round 23) — the fault is DETERMINISTIC, not contention
-
-Ran **one** trial with the environment cleaned first:
-
-```
-gz sim procs left: 0        shm entries: 2 -> 2 (cyclonedds/fastrtps segments removed)
-single trial, fresh domain 251
-  interface check: OK
-  HARNESS_ERROR: push_object server never appeared
-  'error creating node' occurrences in stack.log: 8
-```
-
-**It fails identically with nothing else running, a fresh domain, and cleared shared memory.** So the fault is
-not residual contention from earlier rounds — **the simulation stack can no longer create ROS nodes in this
-environment at all**, and it did so successfully in rounds 8–11.
-
-**This is a hard blocker on any further Gazebo work, including the registered experiment, until the environment
-is repaired.** No amount of re-running the batch will produce data.
-
-## 6. What must happen before re-running
-
-1. **Isolate the node-creation failure on a single trial**, with nothing else running, and confirm the stack
-   reaches `push_object` before scheduling a batch. Scheduling 66 trials over a stack that has not been shown
-   to start once is the mistake this round made.
-2. **Clean up leftover `gz sim` processes** and clear `/dev/shm` segments before the next attempt.
-3. **Re-run the pre-registration as written** — it is unchanged and still binding.
-
-**The correct order was: prove the harness starts, then launch 66 trials. I inverted it.**
+The registered 66-trial run may be allowed to finish for completeness. **It cannot change the conclusion**: 0/26
+already refutes the prediction, and the remaining trials can only move the pass rate within a range whose
+upper bound is ~11%.
