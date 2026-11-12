@@ -1144,3 +1144,53 @@ threshold-shaped quantity that this session is forbidden from tuning to make a t
 **Not established: that compensating the offset fixes the task.** That needs the edit and a re-run. The orientation
 used above is one archived record, not a distribution.
 
+
+---
+
+## ADDENDUM — 2026-11-12, round 30: an entire class of fix is EXCLUDED, and an honest inventory of 29 rounds
+
+### The exclusion
+
+**Tuning `contact_height_m` cannot fix T08.** This is arithmetic, not opinion.
+
+At the approach the arm holds `link5` x-axis pitched about -0.60 in world z, so the fingers sit
+`0.0443 x 0.60 = 0.0267 m` **above** the ee frame. Therefore:
+
+| To bring the fingers to | The ee frame must be commanded to | Feasible? |
+| --- | --- | --- |
+| box top 0.0350 | 0.0083 | below the arm's reachable floor (~0.030 measured) |
+| box centre 0.0175 | **-0.0092** | **9 mm below the floor** |
+| box centre via requested 0.0200 | fingers land at 0.0467 | **11.7 mm above the box top** |
+
+Measured on 26 of this session's own runs that have both an approach log and a push result: **every one had
+the fingers above the box top, clearance 16.9-25.2 mm, and none below.** Within that range height did not predict
+direction - 11 of 26 correct, mean cosine -0.098, with runs at the same 21.7 mm clearance splitting both ways.
+
+**This retroactively explains the contact-height sweep** (0.0150/0.0175/0.0200/0.0225/0.0250 all producing both
+outcomes): that scan moves the fingers 10 mm against a required -26.7 mm compensation. **No setting in the tested
+range could have worked, and no setting in any feasible range can work while the pitch is unchanged.**
+
+### What this session actually produced, stated without inflation
+
+| Item | Honest status |
+| --- | --- |
+| **New robot task capability** | **NONE.** T08 single-shot pass rate was 0/10 at request 0.10 and is still not demonstrated at any request value. |
+| **T08 root cause** | **FOUND, with three independent kinds of evidence** - geometric (URDF offsets), statistical (204 approaches, 90% fingers above the top face), and visual (camera frames of the gripper above the box in both a correct and a reversed push). |
+| **A class of fix excluded** | **YES**, the `contact_height_m` sweep, by arithmetic plus 26 runs. |
+| **Recovery-layer fix** | re-observe after each push is **implemented and its mechanism verified** (it caught a -0.078 m sign error the skill did not see) but its **effect on task success is NOT measured** - the paired comparison was void because both arms failed. |
+| **Target value** | round 10's change 0.09 -> 0.10 was **wrong** (delivers 0.152 against a 0.150 ceiling); 0.09 was already marginal; 0.040 is best measured (3/4) but n=4. |
+| **Retractions issued** | **11**, tabulated in the round-24 addendum plus rounds 25-29. |
+| **Frozen files touched** | **ZERO.** No evaluator, threshold, TaskSpec or acceptance evidence modified. |
+| **Paid calls** | **ZERO.** |
+
+### Where the fix has to happen, and what I cannot do
+
+Both viable repairs - redefining the push TCP as the finger midpoint, or compensating the 44.3 mm offset per
+attempt by the orientation-dependent term - live in **`contracts/push.py`, outside this session's granted scope**, and
+both change a threshold-shaped quantity that this session is forbidden from tuning to make a test pass. The note at
+`T08_PUSH_DEFECT_NOTE_FOR_PUSH_PY_OWNER.md` contains both, with the arithmetic.
+
+**So the honest statement of the project state is: T08 is not a calibration problem and not a recovery problem. It
+is a primitive-definition defect in a file this session may not edit. Every further round spent searching for an
+in-scope fix for the reversal is a round spent against an impossibility.**
+
