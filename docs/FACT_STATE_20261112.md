@@ -1542,3 +1542,74 @@ those 18 would very likely be rejected by the gripper gate the same way seed 300
 **T08 remains `CALIBRATION_UNSUPPORTED`**, and this round produced independent evidence for the
 reason it carries that status rather than a reason to lift it.
 
+
+---
+
+## ADDENDUM — 2026-11-12, rounds 84-87: the 18/18 WITHDRAWN, and both blockers identified exactly
+
+### Retraction
+
+**Rounds 81-82 reported 18/18 in-zone. That figure is WITHDRAWN.**
+
+It was my own criterion (box final position within the zone radius), not the evaluator's. Run
+through `evaluate.py` 0.5.0 with the full evidence chain the same eighteen runs give:
+
+```
+evaluator terminal_passed   7 / 18
+evaluator passed            0 / 18
+```
+
+### Both blockers, measured
+
+**Blocker 1 - `max_lift_during_m` (5 mm).** `evaluate.py:223-241` carries a term the clause's
+evidence summary does not make obvious. Predicted against all 18 runs:
+
+| `max_lift_m` | count | `terminal_passed` |
+| --- | --- | --- |
+| 0.00074 - 0.00361 | 7 | **True** |
+| 0.00530 - 0.00730 | 11 | **False** |
+
+**18 of 18. No exceptions, no overlap.** The lift is 5.3-7.3 mm against a 118 mm horizontal push -
+a ratio of 17:1, not a carry.
+
+**Blocker 2 - `gripper` aperture (0.0020 rad).** Independent of the above: the seven runs that
+pass every clause carry grip deltas of 0.0040-0.0136, all above the limit. **It rejects all 18.**
+
+```
+max_lift > 0.005     ->  11 runs fail the push clause
+gripper  > 0.0020    ->  all 18 fail the gate
+both under limits    ->   0 runs pass
+```
+
+### Why both are the same class of defect
+
+Rounds 55-58 established `gripper_position` is measured `/joint_states` and the gripper is never
+commanded during a push. The aperture moves because the box presses on passive fingers.
+
+`max_lift_during_m` guards against a grasp-carry-place. **5-7 mm of rise on a box being pushed by
+fingers that ride above its top face is not a carry.**
+
+**Both thresholds are sized for deliberate manipulation and both are tripped by passively-induced
+motion.** That is the structural reason T08 cannot be certified, and it is now measurable rather
+than asserted.
+
+### What actually works
+
+The staging race fix from round 80 stands: `t08_timeline.py` waits for
+`/arm_controller/follow_joint_trajectory` before the staging move. **Staging reports SUCCEEDED
+18/18 where it was 0 of every run before.** With it in place the push clauses on 7 of 18 runs
+satisfy displacement, direction, zone and vertical simultaneously on four seeds.
+
+### What must not be cited
+
+- **18/18.** Withdrawn.
+- **Any success rate from rounds 81-82.** Those counted a criterion the evaluator does not use.
+- The three failure modes of rounds 70-74 as properties of the push mechanism - they were
+  observations of an arm that started from a pose the code never asked for.
+
+### Status
+
+**0 of 18 Independently Verified. T08 remains `CALIBRATION_UNSUPPORTED`.** No capability level was
+raised. No threshold, TaskSpec, frozen evaluator file or acceptance evidence was modified - both
+blocking thresholds are inside the frozen evaluator and changing either requires human approval.
+
