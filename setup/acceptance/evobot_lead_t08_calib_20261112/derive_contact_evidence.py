@@ -113,7 +113,11 @@ def main(argv):
     def max_jump_from(rows):
         mx = 0.0
         for a, b in zip(rows, rows[1:]):
-            d = sum((float(a[i]) - float(b[i])) ** 2 for i in (3, 4, 5)) ** 0.5
+            # XY ONLY. benchmark/evidence/verify.py:_observed_max_jump measures the largest
+            # single-step xy displacement, because a teleport is horizontal state mutation.
+            # Including z gave 0.007682 against a measured 0.007675 - a 7e-6 gap that fails the
+            # gate's 1e-6 'record contradicts its own samples' tolerance.
+            d = ((float(a[3]) - float(b[3])) ** 2 + (float(a[4]) - float(b[4])) ** 2) ** 0.5
             mx = max(mx, d)
         return mx
     per_obj = {}
