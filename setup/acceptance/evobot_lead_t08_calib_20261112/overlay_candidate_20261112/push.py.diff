@@ -1,0 +1,36 @@
+--- src/flexcell/flexcell_skills/flexcell_skills/contracts/push.py	2026-11-11 21:54:56.306275700 +0800
++++ /mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-comp/setup/acceptance/evobot_lead_t08_calib_20261112/overlay_candidate_20261112/push.py.patched	2026-11-12 17:02:15.944335600 +0800
+@@ -212,11 +212,31 @@
+                 delta_z_m=delta[2], direction_cos=cosine), None
+ 
+ 
++# OVERLAY PATCH for T08 verification. The repository copy of this file is NOT modified.
++#
++# The frame that WorldState.robot.ee_pose and every move_to_pose target refer to is
++# end_effector_link, which open_manipulator_x.urdf places at link5 + (0.1260, 0, 0). The finger
++# joints sit at link5 + (0.0817, +/-0.0210, 0) - that is 0.0443 m BEHIND the ee frame along
++# link5 -x. At the pitch these approaches actually hold, the link5 x-axis world z component is
++# about -0.60 (median -0.7327 over 204 archived approaches; -0.6016 measured at the T08
++# approach), so the fingers ride 0.0443 * 0.60 = 0.0266 m ABOVE whatever height is commanded.
++# With the box top at 0.0350 and contact_height_m 0.0200, the fingers land at ~0.0467 - 21.7 mm
++# clear of the box - so no jaw face ever contacts a side face and the motion is a friction drag
++# across the top face, which is why 44% of pushes reverse.
++#
++# This patch compensates the offset so the FINGERS, not the ee frame, reach the requested height.
++FINGER_OFFSET_COMPENSATION_M = 0.0443 * 0.60
++
++
+ def contact_pose(center, half_along_direction, direction, height):
+-    """End-effector pose at the object's near face, at the contact height."""
++    """End-effector pose at the object's near face, at the contact height.
++
++    OVERLAY: the returned z is raised by FINGER_OFFSET_COMPENSATION_M so the fingers land at
++    the requested height rather than the ee frame.
++    """
+     return [center[0] - direction[0] * half_along_direction,
+             center[1] - direction[1] * half_along_direction,
+-            float(height)]
++            float(height) + FINGER_OFFSET_COMPENSATION_M]
+ 
+ 
+ def push_targets(face, direction, distance, overdrive, increments):
