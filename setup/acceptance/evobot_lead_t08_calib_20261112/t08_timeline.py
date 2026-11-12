@@ -13,6 +13,10 @@ from rclpy.action import ActionClient
 from rclpy.executors import MultiThreadedExecutor
 from flexcell_interfaces.action import Observe, PushObject, MoveToPose
 from geometry_msgs.msg import PoseStamped
+try:
+    from control_msgs.action import FollowJointTrajectory
+except ImportError:
+    FollowJointTrajectory = None
 
 OUT = sys.argv[1]
 CONTACT_Z = float(sys.argv[2]) if len(sys.argv) > 2 else 0.0200
@@ -72,6 +76,21 @@ def observe(max_wait=8.0):
                 pass
     return {'ee': (round(e.x,5), round(e.y,5), round(e.z,5)), 'boxes': boxes,
             'grip': round(float(getattr(ws.robot,'gripper_position',0.0)),5)}
+
+# WAIT FOR THE CONTROLLER ACTION BEFORE STAGING.
+# move_to_pose does not execute directly - it plans and then forwards the trajectory to
+# /arm_controller/follow_joint_trajectory (move_to_pose_server.py:845). Issuing the staging move
+# immediately after launch raced that server's start-up: every logged staging move came back
+# 'unavailable' with 2 s on the wait_for_server timeout, i.e. the server was not there yet. The
+# arm moved partway, which is why the pitch changed, but the goal was never accepted.
+# Waiting here converts that constant silent failure into a real move - which CHANGES the starting
+# pose the push gets, so this must be measured, not assumed to help.
+if STAGE is not None and FollowJointTrajectory is not None:
+    _fjt = ActionClient(node, FollowJointTrajectory, '/arm_controller/follow_joint_trajectory')
+    if _fjt.wait_for_server(timeout_sec=30.0):
+        sys.stderr.write('controller action available before staging\n')
+    else:
+        sys.stderr.write('WARNING: controller action NOT available after 30 s; staging will likely fail\n')
 
 if STAGE is not None:
     g = MoveToPose.Goal(); g.request_id = 'stage'
