@@ -21,6 +21,47 @@ sys.path.insert(0, os.path.join(WT, "src/flexcell/flexcell_skills/flexcell_skill
 import push_recover as R  # noqa: E402
 
 
+def observe_box(node_and_client, object_name):
+    """Ground-truth object position via the /observe action, or None.
+
+    WHY THIS EXISTS. The push skill's displacement_m is measured BEFORE its retreat, and
+    on 28 archived T08 runs the decision it implies disagrees with ground truth 4 times
+    (14%). All four flips go the same way: reported short, actually reached - 0.0324 vs
+    0.1410, 0.0863 vs 0.1762, 0.0917 vs 0.1248, 0.0306 vs 0.1403. There is no flip in the
+    other direction. So the skill systematically UNDER-reports, and a recovery loop reading
+    it retries pushes the task has already satisfied.
+
+    Re-observing after each push removes that class of error without changing any
+    threshold: 9 of 28 runs would be judged reached on the skill's number, 13 of 28 on
+    ground truth.
+    """
+    import rclpy
+    from flexcell_interfaces.action import Observe
+    node, client = node_and_client
+    goal = Observe.Goal()
+    goal.refresh = True
+    goal.max_age_s = 0.0
+    future = client.send_goal_async(goal)
+    rclpy.spin_until_future_complete(node, future, timeout_sec=30.0)
+    handle = future.result()
+    if handle is None or not handle.accepted:
+        return None
+    result_future = handle.get_result_async()
+    rclpy.spin_until_future_complete(node, result_future, timeout_sec=30.0)
+    wrapped = result_future.result()
+    if wrapped is None:
+        return None
+    ws = wrapped.result.world_state
+    for attr in ("objects", "tracked_objects", "items"):
+        for obj in (getattr(ws, attr, None) or []):
+            try:
+                if obj.name == object_name:
+                    return [float(v) for v in obj.pose.position]
+            except AttributeError:
+                continue
+    return None
+
+
 def send_push(node_and_client, object_name, distance_m, contact_z):
     import rclpy
     from flexcell_interfaces.action import PushObject
@@ -118,9 +159,22 @@ def main(argv):
     from rclpy.node import Node
     from flexcell_interfaces.action import PushObject
 
+    # Ground-truth bookkeeping for the re-observe path. box_initial comes from the task
+    # spec (public geometry, also used by _target_from_spec); direction is the commanded
+    # push axis, -x for every T08 instance.
+    box_initial = [float(v) for v in spec["objects"][0]["initial_pose"]]
+    direction_x = -1.0
+
+    import rclpy
+    from rclpy.action import ActionClient
+    from rclpy.node import Node
+    from flexcell_interfaces.action import Observe, PushObject
+
     rclpy.init()
     node = Node("push_recovery")
     client = ActionClient(node, PushObject, "push_object")
+    observe_client = ActionClient(node, Observe, "observe")
+    observe_client.wait_for_server(timeout_sec=30.0)
     attempts = []
     if client.wait_for_server(timeout_sec=30.0):
         achieved = 0.0
@@ -132,6 +186,14 @@ def main(argv):
                 break
             print("  attempt %d: asking for %.4f m" % (attempt + 1, payload["distance_m"]))
             result = send_push((node, client), target_object, payload["distance_m"], contact_z)
+            # Measure the object directly instead of trusting the skill's pre-retreat
+            # displacement. Signed along the commanded direction (-x), same convention as
+            # displacement_along_direction_m, so push_recover can consume either.
+            box_now = observe_box((node, observe_client), target_object)
+            if box_now is not None and isinstance(result, dict):
+                result["ground_truth_position"] = box_now
+                result["ground_truth_along_direction_m"] = round(
+                    (box_initial[0] - box_now[0]) * -direction_x, 6)
             json.dump(result, open(os.path.join(outdir, "push_%02d.json" % attempt), "w"),
                       indent=2, default=str)
             attempts.append(result)

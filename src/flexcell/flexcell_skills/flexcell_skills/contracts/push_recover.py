@@ -82,7 +82,18 @@ def classify_attempt(result):
     # ending at x=0.29, 0.36 and 0.41 against a start of 0.22 and a target of roughly 0.13.
     # displacement_along_direction_m is the projection onto the commanded direction and
     # carries its sign, which is the only field that can answer "did it move toward the goal".
-    moved = result.get("displacement_along_direction_m")
+    #
+    # GROUND TRUTH WINS WHEN PRESENT. The skill measures displacement before its retreat,
+    # and on 28 archived T08 runs the resulting decision disagreed with ground truth 4
+    # times - always the same direction, reported short while actually reached (0.0324 vs
+    # 0.1410, 0.0863 vs 0.1762, 0.0917 vs 0.1248, 0.0306 vs 0.1403). A driver that
+    # re-observes the object after each push fills ground_truth_along_direction_m, which is
+    # signed the same way and measured after the retreat. It is preferred when available;
+    # when absent the previous behaviour is unchanged, so this cannot regress callers that
+    # do not supply it.
+    moved = result.get("ground_truth_along_direction_m")
+    if moved is None:
+        moved = result.get("displacement_along_direction_m")
     if moved is None:
         moved = result.get("displacement_m")
     if not isinstance(moved, (int, float)) or isinstance(moved, bool):
