@@ -128,8 +128,19 @@ def push_once(i):
 
 s0 = observe()
 if s0: s0['t']=round(time.time()-T0,3); s0['phase']='initial'; timeline.append(s0)
+# REPEAT COUNT DEFAULTS TO 1. Running two pushes was a diagnostic choice and it invalidated a
+# graded run: measured on T08-push-seed3001, push_1 left the box 0.0372 m from the zone centre
+# (inside the 0.06 radius, 0.1371 m travelled, cosine 0.9999 - a pass), and push_2 then moved it
+# a further 0.0746 m to 0.10981 m out, with total travel 0.20865 m against a 0.15 ceiling. The
+# task failed because the second push undid the first. argv[6] overrides for diagnostics.
+REPEATS = 1
+if len(sys.argv) > 6:
+    try:
+        REPEATS = max(1, int(sys.argv[6]))
+    except ValueError:
+        REPEATS = 1
 results = []
-for i in (1, 2):
+for i in range(1, REPEATS + 1):
     results.append(push_once(i))
 json.dump({'timeline': timeline, 'results': results}, open(OUT,'w'), indent=1)
 print('SAMPLES', len(timeline))
