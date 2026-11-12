@@ -43,7 +43,7 @@ Per acceptance criterion 1. A row may appear in several buckets; buckets are nev
 
 | Fact | Value | Source | Scope |
 | --- | --- | --- | --- |
-| Fingers above the box top | **21.7 mm** measured; **median 21.3 mm across 204 archived approaches, 90 % above at all** | FACT_STATE rounds 24/27/30 | archived approach orientations |
+| Fingers above the box top | **21.7 mm** measured; **204 archived approaches, 90 % above the top face** (median 21.3 mm — commit `c868068f`) | FACT_STATE rounds 24/27/30; median from that commit | archived approach orientations |
 | Cause | `end_effector_link` **44.3 mm ahead** of the finger joints; `contact_height_m` targets the ee frame | `open_manipulator_x.urdf` + one archived `move_to_pose` record | **one record, not a distribution** |
 | Reversal rate | **7 of 16 = 44 %**, cosine ≈ −1.000, `contact_made` true | 16 single-shot runs | single-shot arm only |
 | `contact_height` sweep | 0.0150–0.0250 all produce **both** outcomes | height-sweep batch | **excluded as a fix class** (−26.7 mm needed vs a 10 mm scan) |
