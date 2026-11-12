@@ -280,6 +280,7 @@ def test_consumed_handoff_cannot_be_replayed():
     # Registration shares the legacy motion admission lock, not a second controller owner.
     server._admission = threading.Lock()
     server._admission.acquire()
+    server._admission_wait_s = 0.  # __new__ fixture bypasses the node's declared bounded wait.
     response = server._register_mtc(request, RegisterMtcTrajectory.Response())
     server._admission.release()
     assert not response.success and 'busy' in response.detail
@@ -291,6 +292,7 @@ def test_executor_exception_before_motion_returns_declared_failure_code():
     server = MoveToPoseServer.__new__(MoveToPoseServer)
     server._new_evidence = lambda _: ('fixture', 'fixture-evidence')
     server._admission = threading.Lock()
+    server._admission_wait_s = 0.
     server._enforce_ori = False
     server._feedback = Mock(side_effect=ValueError('broken before execution'))
     server._log = Mock()
@@ -328,6 +330,7 @@ def test_point_handoff_is_single_use_and_shares_motion_admission():
     import threading
     server = MoveToPoseServer.__new__(MoveToPoseServer)
     server._admission = threading.Lock()
+    server._admission_wait_s = 0.
     server._motion_blocked = server._terminal_uncertain = False
     server._base = 'world'
     server._validate = lambda _: (None, '', None)

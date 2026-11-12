@@ -1148,3 +1148,31 @@ are still pending. No new reliable bounded-stroke capability claimed this turn.
 Prioritize actual contact modeling, constrained motion and explicit post-return
 state, then Runtime integration and frozen regression/unseen tests. T08 remains
 CALIBRATION_UNSUPPORTED; formal baseline NOT_PROMOTED; L4 NOT_ACQUIRED. Goal active.
+
+
+---
+
+## ADDENDUM — finger TCP, constrained strokes and returned receipts (2026-11-12)
+
+Source: `setup/acceptance/evobot_contact_motion_20261112/README.md`, statistics,
+all 15 executed sessions, preregistrations/source snapshots and hash-verified raw
+archives. Base6186271b. Isolated engineering; no autonomous Runtime development
+experiment or baseline promotion.
+
+| Fact | State / scope |
+| --- | --- |
+| Real finger TCP | **IMPLEMENTED / PHYSICALLY CHECKED** — actual pinned collision triangles and native world link5+126mm EE transform; selected left-finger patch, lateral offset and fixed85° pitch. Ground-truth contact-to-patch error max0.050mm across final six strokes |
+| Bounded new adapter | **CONFIRMED ON EXPOSED INSTANCE/TASK-SCOPED GRAPH** — K1 development validation plus fixed K2/K3 confirmations: six30mm requests pass unchanged push.judge; returned signed distances30.480–30.494mm; final nets **60.974 / 60.972 / 60.975mm**, each full9/9 PASS. Existing PushObject action/server remains unchanged; these are new adapter receipts |
+| Actual tracking | **NATIVE5ms CHECKED** — no simulation-step gaps; worst TCP lateral/vertical9.2µm, pitch0.0041°, tool floor clearance about2.000mm. Knot/midpoint screening is not a continuous arbitrary-spline collision proof |
+| Returned interface | **EXECUTED / LIVE-CONSUMED** — six completed stable returns with arm_ready and returned-request geometry true; all six accepted on timely ROS reception and refused300ms later. Stroke outcome, return completion and unknown terminal remain separate. Revision equality is not a pose-invariance guarantee |
+| Same-graph control K0 | **FULL PASS / PRIMITIVE FAILED** — old30mm request moved47.948mm in frozen primitive log and failed overshoot. Final physical net46.097mm; earlier online snapshot46.257mm is not final. Do not claim final-task superiority or pool old/default-graph D1 |
+| Development failures | **RETAINED** — pilot1 unknown terminal; pilot2 two bounded strokes/full task PASS but second return unusable; B1/C1/E1/F1/G1/H1 state/telemetry refusals; I1 bounded stroke with return-preparation failure; J1 strict-stop cancellation; D1 full default-graph control FAIL. Unearned confirmation slots NOT_RUN. No replacements |
+| Resource/scheduling | **PARTIALLY ADDRESSED IN ISOLATION** — CPU quota2; pure planning moved to worker, source/frame joins corrected, fresh actuator admission retained. Final harness removes four unused services only. Full default Runtime source pauses remain unresolved; no blanket real-time reliability claim |
+| Cost | **NOT IMPROVED** — final candidates24 actuator goals/2 requests, event spans370/460/427s; same-graph K0 six goals/1 request/~35s. Precision and safe returned state are the gain, not throughput |
+| Verification/integrity | **HELD** —162 relevant unit checks,7 explicitly synthetic real-ROS protocol checks, isolated package build/imports, all executed source hashes match preregistrations. Final geometry comment alone corrected; five runtime ASTs match execution. Nine frozen files, push core and10 existing modules unchanged; no TaskSpec/threshold/default-launch change |
+| Ordinary tasks/unseen/Runtime | **NOT_RUN / NOT_INTEGRATED** this round. Prior mixed release outcomes retained. Adapter supports pinned upright35mm boxes/world−x only and engineering expected_goal input |
+| Agent claims | **NOT_MEASURED** — no Agent claim; default false flags are not claim-accuracy evidence |
+
+This is a scoped new bounded-push/returned-state development capability. Do not
+promote it into a reliable general robot skill or L4 claim. Formal T08 remains
+CALIBRATION_UNSUPPORTED; baseline NOT_PROMOTED. Goal active.

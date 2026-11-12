@@ -1,0 +1,55 @@
+{
+  "recorded_utc": "2026-11-12T15:26:05.721500+00:00",
+  "base": "6186271b7bc444741f9d06d138cfbc2525423945",
+  "nine_frozen_bytes_match": {
+    "benchmark/evaluators/evaluate.py": true,
+    "benchmark/evaluators/sealed_evaluate.py": true,
+    "benchmark/evaluators/observe_from_run.py": true,
+    "benchmark/evaluators/capture_ground_truth.py": true,
+    "benchmark/schemas/taskspec.schema.json": true,
+    "benchmark/generators/generate.py": true,
+    "benchmark/generators/seal_held_out.py": true,
+    "benchmark/generators/unseen_tasks.py": true,
+    "evolution/validation/regress.py": true
+  },
+  "existing_modules_unchanged": {
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/push.py": true,
+    "src/flexcell/flexcell_skills/flexcell_skills/push_server.py": true,
+    "src/flexcell/flexcell_skills/flexcell_skills/move_to_pose_server.py": true,
+    "src/flexcell/flexcell_skills/flexcell_skills/common.py": true,
+    "src/flexcell/flexcell_skills/flexcell_skills/observe_server.py": true,
+    "src/flexcell/flexcell_skills/flexcell_skills/pick_server.py": true,
+    "src/flexcell/flexcell_skills/flexcell_skills/place_server.py": true,
+    "src/flexcell/flexcell_skills/flexcell_skills/carry_server.py": true,
+    "src/flexcell/flexcell_skills/flexcell_skills/verify_server.py": true,
+    "src/flexcell/flexcell_skills/flexcell_skills/reposition.py": true
+  },
+  "runtime_ast_matches_executed": {
+    "src/flexcell/flexcell_skills/flexcell_skills/contact_geometry.py": true,
+    "src/flexcell/flexcell_skills/flexcell_skills/contact_motion.py": true,
+    "src/flexcell/flexcell_skills/flexcell_skills/contact_receipt.py": true,
+    "src/flexcell/flexcell_skills/flexcell_skills/contact_trace.py": true,
+    "src/flexcell/flexcell_skills/run_contact_push.py": true
+  },
+  "runtime_bytes_match_executed": {
+    "src/flexcell/flexcell_skills/flexcell_skills/contact_geometry.py": false,
+    "src/flexcell/flexcell_skills/flexcell_skills/contact_motion.py": true,
+    "src/flexcell/flexcell_skills/flexcell_skills/contact_receipt.py": true,
+    "src/flexcell/flexcell_skills/flexcell_skills/contact_trace.py": true,
+    "src/flexcell/flexcell_skills/run_contact_push.py": true
+  },
+  "current_runtime_sha256": {
+    "src/flexcell/flexcell_skills/flexcell_skills/contact_geometry.py": "eb530a449cea3953069d223ce028e38c2b540e646e2624a32815b263547df19f",
+    "src/flexcell/flexcell_skills/flexcell_skills/contact_motion.py": "6a807f97bec1b9168480c039eef2d8d4c549b2c07bbd7281766b4e539f89714a",
+    "src/flexcell/flexcell_skills/flexcell_skills/contact_receipt.py": "2f84cfd3e19a79274d9e9182cea70e939f65be76abfca8db6b242f34b96a840b",
+    "src/flexcell/flexcell_skills/flexcell_skills/contact_trace.py": "526a928cc12ecd451f19a7fa24aa6eab513ad71b0d43f404212ee3fe0c4e06ab",
+    "src/flexcell/flexcell_skills/run_contact_push.py": "2462432932046583bb858192c39c859cc783192cfa0f7841de19c33f23a24373"
+  },
+  "nonfunctional_change_after_confirmations": "contact_geometry.py comment: midpoint proxy is not a proof of the controller spline; AST unchanged",
+  "model_hashes_match": true,
+  "task_specs_modified": false,
+  "thresholds_modified": false,
+  "ordinary_launches_modified": false,
+  "shared_install_modified": false,
+  "formal_baseline_promoted": false
+}

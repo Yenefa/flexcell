@@ -1,0 +1,3448 @@
+{
+  "scope": "isolated exposed seed2000; no baseline promotion",
+  "runs": [
+    {
+      "run": "pilot1",
+      "version": "v2",
+      "role": "development_validation",
+      "execution": {
+        "arm": "contact",
+        "status": "EXECUTED",
+        "physical_capability_claim": false,
+        "driver_exit": 2
+      },
+      "net_signed_m": 0.02641528563713455,
+      "net_vector_m": [
+        -0.02641528563713455,
+        1.626057098830327e-05,
+        2.8308888095594786e-06
+      ],
+      "protected_net_m": 0.0,
+      "full_task_passed": false,
+      "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+      "gates": [
+        {
+          "gate": "terminal",
+          "ok": false,
+          "evidence": {
+            "evaluator_version": null,
+            "passed": false
+          }
+        },
+        {
+          "gate": "trajectory",
+          "ok": true,
+          "evidence": {
+            "objects": [
+              "target_box_a",
+              "target_box_b"
+            ],
+            "total_samples": 24826
+          }
+        },
+        {
+          "gate": "table_support",
+          "ok": true,
+          "evidence": {
+            "off_table_samples": 0,
+            "tolerance_m": 0.01
+          }
+        },
+        {
+          "gate": "protected_unmoved",
+          "ok": true,
+          "evidence": {
+            "max_excursion_m": 0.0,
+            "tolerance_m": 0.005
+          }
+        },
+        {
+          "gate": "no_lift",
+          "ok": true,
+          "evidence": {
+            "max_lift_m": 1.5e-05,
+            "allowed_m": 0.02
+          }
+        },
+        {
+          "gate": "pusher_contact",
+          "ok": true,
+          "evidence": {
+            "motion_windows": 2044,
+            "overlapping_windows": 2044,
+            "contact_intervals": 1,
+            "pusher_links": [
+              "open_manipulator_x::gripper_left_link::gripper_left_link_collision",
+              "open_manipulator_x::gripper_right_link::gripper_right_link_collision",
+              "open_manipulator_x::link5::link5_collision"
+            ]
+          }
+        },
+        {
+          "gate": "gripper",
+          "ok": true,
+          "evidence": {
+            "joint": "gripper_left_joint",
+            "samples": 6022,
+            "aperture_travel_rad": 0.0,
+            "limit_rad": 0.002,
+            "min_aperture_rad": -0.0,
+            "max_aperture_rad": -0.0
+          }
+        },
+        {
+          "gate": "no_attachment",
+          "ok": true,
+          "evidence": {
+            "events": 0
+          }
+        },
+        {
+          "gate": "no_teleport",
+          "ok": true,
+          "evidence": {
+            "max_jump_m": 2.7e-05,
+            "threshold_m": 0.03,
+            "declared_jump_m": 2.7e-05,
+            "measured_jump_m": 2.7e-05
+          }
+        }
+      ],
+      "failed_gates": [
+        "terminal"
+      ],
+      "summary": {
+        "kind": "CONSTRAINED_FINGER_PUSH",
+        "status": "STATE_UNKNOWN",
+        "detail": "canceled motion has no strict stop confirmation",
+        "attempts": 1,
+        "goal_geometry_reached": false,
+        "actuator_goals": 9,
+        "independent_acceptance_claim": false,
+        "motion_terminal_known": false
+      },
+      "receipts": [
+        {
+          "request_id": "contact-00",
+          "primitive_outcome": "STATE_UNKNOWN",
+          "primitive_error_code": 33,
+          "stroke_signed_m": 0.02246819595033353,
+          "requested_m": 0.03,
+          "physical_contact_observed": true,
+          "motion_terminal_known": false,
+          "return_completed": false,
+          "canceled": false,
+          "post_return": null,
+          "attempt_start": [
+            0.22,
+            2.5230356855132592e-20,
+            0.01749999751174475
+          ],
+          "schema_version": "contact-push-receipt/1",
+          "arm_ready": false,
+          "clock_domain": "ROS_SIM_TIME",
+          "monotonic_clock_scope": "same_host",
+          "direction": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "returned_signed_m": null,
+          "return_loss_m": null,
+          "progress_preserved": null,
+          "returned_request_geometry_satisfied": null,
+          "independent_acceptance_claim": false,
+          "native_contact": {
+            "physical_contact_observed": true,
+            "contact_steps": 2800,
+            "rear_fraction": 1.0,
+            "horizontal_normal_fraction": 1.0,
+            "maximum_patch_distance_m": 3.427152304112479e-05,
+            "unexpected_robot_colliders": [],
+            "source_problem": null,
+            "protected_peak_m": 2.4882552511484857e-09
+          },
+          "detail": "canceled motion has no strict stop confirmation"
+        }
+      ],
+      "consumer_checks": [],
+      "dispatch_joint_source_age_max_s": null,
+      "dispatch_joint_receive_age_max_s": null,
+      "recorded_source_hash_checks": {
+        "flexcell_skills.contracts.push": true,
+        "flexcell_skills.contact_geometry": true,
+        "flexcell_skills.contact_motion": true,
+        "flexcell_skills.contact_receipt": true,
+        "flexcell_skills.contact_trace": true,
+        "run_contact_push.py": true,
+        "run_case.py": true
+      },
+      "recorded_sources_match_preregistration": true,
+      "claim_accuracy": "NOT_MEASURED_NO_AGENT_CLAIM"
+    },
+    {
+      "run": "pilot2",
+      "version": "v3",
+      "role": "development_validation",
+      "execution": {
+        "arm": "contact",
+        "status": "EXECUTED",
+        "physical_capability_claim": false,
+        "driver_exit": 2
+      },
+      "net_signed_m": 0.06098054170726103,
+      "net_vector_m": [
+        -0.06098054170726103,
+        3.501012582060397e-05,
+        -2.567954417997953e-07
+      ],
+      "protected_net_m": 0.0,
+      "full_task_passed": true,
+      "evidence_status": "COMPLETE",
+      "gates": [
+        {
+          "gate": "terminal",
+          "ok": true,
+          "evidence": {
+            "evaluator_version": null,
+            "passed": true
+          }
+        },
+        {
+          "gate": "trajectory",
+          "ok": true,
+          "evidence": {
+            "objects": [
+              "target_box_a",
+              "target_box_b"
+            ],
+            "total_samples": 58946
+          }
+        },
+        {
+          "gate": "table_support",
+          "ok": true,
+          "evidence": {
+            "off_table_samples": 0,
+            "tolerance_m": 0.01
+          }
+        },
+        {
+          "gate": "protected_unmoved",
+          "ok": true,
+          "evidence": {
+            "max_excursion_m": 0.0,
+            "tolerance_m": 0.005
+          }
+        },
+        {
+          "gate": "no_lift",
+          "ok": true,
+          "evidence": {
+            "max_lift_m": 1.7e-05,
+            "allowed_m": 0.02
+          }
+        },
+        {
+          "gate": "pusher_contact",
+          "ok": true,
+          "evidence": {
+            "motion_windows": 4330,
+            "overlapping_windows": 4330,
+            "contact_intervals": 3,
+            "pusher_links": [
+              "open_manipulator_x::gripper_left_link::gripper_left_link_collision",
+              "open_manipulator_x::gripper_right_link::gripper_right_link_collision",
+              "open_manipulator_x::link5::link5_collision"
+            ]
+          }
+        },
+        {
+          "gate": "gripper",
+          "ok": true,
+          "evidence": {
+            "joint": "gripper_left_joint",
+            "samples": 14251,
+            "aperture_travel_rad": 0.0,
+            "limit_rad": 0.002,
+            "min_aperture_rad": -0.0,
+            "max_aperture_rad": -0.0
+          }
+        },
+        {
+          "gate": "no_attachment",
+          "ok": true,
+          "evidence": {
+            "events": 0
+          }
+        },
+        {
+          "gate": "no_teleport",
+          "ok": true,
+          "evidence": {
+            "max_jump_m": 3.2e-05,
+            "threshold_m": 0.03,
+            "declared_jump_m": 3.2e-05,
+            "measured_jump_m": 3.2e-05
+          }
+        }
+      ],
+      "failed_gates": [],
+      "summary": {
+        "kind": "CONSTRAINED_FINGER_PUSH",
+        "status": "RETURN_FAILED",
+        "detail": "MotionFailed: motion guard stopped path: native source unavailable",
+        "attempts": 2,
+        "goal_geometry_reached": false,
+        "actuator_goals": 24,
+        "independent_acceptance_claim": false,
+        "motion_terminal_known": true
+      },
+      "receipts": [
+        {
+          "request_id": "contact-00",
+          "primitive_outcome": "SUCCEEDED",
+          "primitive_error_code": 0,
+          "stroke_signed_m": 0.0304776007794339,
+          "requested_m": 0.03,
+          "physical_contact_observed": true,
+          "motion_terminal_known": true,
+          "return_completed": true,
+          "canceled": false,
+          "post_return": {
+            "source": "SIMULATION_GROUND_TRUTH",
+            "frame": "world",
+            "source_age_s": 0.03658137999809696,
+            "arm_quiet": true,
+            "object_stable": true,
+            "carry_disengaged": true,
+            "gripper_state_known": true,
+            "tool_clearance_m": 0.1033729793939508,
+            "protected_excursion_m": 2.4882552511484857e-09,
+            "position": [
+              0.18950983041657044,
+              1.9507791594251396e-05,
+              0.017499730750828554
+            ],
+            "revision": 2,
+            "source_stamp_ns": 86215000000,
+            "observed_monotonic_ns": 24941421076969
+          },
+          "attempt_start": [
+            0.22,
+            2.5230356855132592e-20,
+            0.01749999751174475
+          ],
+          "schema_version": "contact-push-receipt/1",
+          "arm_ready": true,
+          "clock_domain": "ROS_SIM_TIME",
+          "monotonic_clock_scope": "same_host",
+          "direction": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "returned_signed_m": 0.030490169583429566,
+          "return_loss_m": -1.2568803995666178e-05,
+          "progress_preserved": true,
+          "returned_request_geometry_satisfied": true,
+          "independent_acceptance_claim": false,
+          "native_contact": {
+            "physical_contact_observed": true,
+            "contact_steps": 3191,
+            "rear_fraction": 1.0,
+            "horizontal_normal_fraction": 1.0,
+            "maximum_patch_distance_m": 3.881705871394395e-05,
+            "unexpected_robot_colliders": [],
+            "source_problem": null,
+            "protected_peak_m": 2.4882552511484857e-09
+          },
+          "detail": null
+        },
+        {
+          "request_id": "contact-01",
+          "primitive_outcome": "SUCCEEDED",
+          "primitive_error_code": 0,
+          "stroke_signed_m": 0.030470024042218852,
+          "requested_m": 0.03,
+          "physical_contact_observed": true,
+          "motion_terminal_known": true,
+          "return_completed": false,
+          "canceled": false,
+          "post_return": null,
+          "attempt_start": [
+            0.18950983041657044,
+            1.9507791594251396e-05,
+            0.017499730750828554
+          ],
+          "schema_version": "contact-push-receipt/1",
+          "arm_ready": false,
+          "clock_domain": "ROS_SIM_TIME",
+          "monotonic_clock_scope": "same_host",
+          "direction": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "returned_signed_m": null,
+          "return_loss_m": null,
+          "progress_preserved": null,
+          "returned_request_geometry_satisfied": null,
+          "independent_acceptance_claim": false,
+          "native_contact": {
+            "physical_contact_observed": true,
+            "contact_steps": 2836,
+            "rear_fraction": 1.0,
+            "horizontal_normal_fraction": 1.0,
+            "maximum_patch_distance_m": 3.773524072654045e-05,
+            "unexpected_robot_colliders": [],
+            "source_problem": null,
+            "protected_peak_m": 2.4882552511484857e-09
+          },
+          "detail": "MotionFailed: motion guard stopped path: native source unavailable"
+        }
+      ],
+      "consumer_checks": [
+        {
+          "kind": "RECEIPT_RECEIVED",
+          "monotonic_ns": 24941442374772,
+          "sim_ns": 86250000000,
+          "observed_world_revision": 2,
+          "ready_checked": true
+        },
+        {
+          "kind": "RECEIPT_RECHECK_AFTER_300MS",
+          "monotonic_ns": 24941745487263,
+          "sim_ns": 86410000000,
+          "request_id": "contact-00",
+          "ready_checked": false
+        },
+        {
+          "kind": "RECEIPT_RECEIVED",
+          "monotonic_ns": 25091948999466,
+          "sim_ns": 145750000000,
+          "observed_world_revision": 2,
+          "ready_checked": false
+        },
+        {
+          "kind": "RECEIPT_RECHECK_AFTER_300MS",
+          "monotonic_ns": 25092282217468,
+          "sim_ns": 145885000000,
+          "request_id": "contact-01",
+          "ready_checked": false
+        },
+        {
+          "kind": "CONSUMER_FINISHED",
+          "monotonic_ns": 25095462068800,
+          "sim_ns": 147070000000,
+          "received": 2,
+          "actuator_goals": 0
+        }
+      ],
+      "dispatch_joint_source_age_max_s": null,
+      "dispatch_joint_receive_age_max_s": null,
+      "recorded_source_hash_checks": {
+        "flexcell_skills.contracts.push": true,
+        "flexcell_skills.contact_geometry": true,
+        "flexcell_skills.contact_motion": true,
+        "flexcell_skills.contact_receipt": true,
+        "flexcell_skills.contact_trace": true,
+        "run_contact_push.py": true,
+        "run_case.py": true
+      },
+      "recorded_sources_match_preregistration": true,
+      "claim_accuracy": "NOT_MEASURED_NO_AGENT_CLAIM"
+    },
+    {
+      "run": "B1",
+      "version": "v4_fixed_batch",
+      "role": "development_validation",
+      "execution": {
+        "arm": "contact",
+        "status": "EXECUTED",
+        "physical_capability_claim": false,
+        "driver_exit": 2
+      },
+      "net_signed_m": 0.0,
+      "net_vector_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "protected_net_m": 0.0,
+      "full_task_passed": false,
+      "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+      "gates": [
+        {
+          "gate": "terminal",
+          "ok": false,
+          "evidence": {
+            "evaluator_version": null,
+            "passed": false
+          }
+        },
+        {
+          "gate": "trajectory",
+          "ok": true,
+          "evidence": {
+            "objects": [
+              "target_box_a",
+              "target_box_b"
+            ],
+            "total_samples": 13094
+          }
+        },
+        {
+          "gate": "table_support",
+          "ok": true,
+          "evidence": {
+            "off_table_samples": 0,
+            "tolerance_m": 0.01
+          }
+        },
+        {
+          "gate": "protected_unmoved",
+          "ok": true,
+          "evidence": {
+            "max_excursion_m": 0.0,
+            "tolerance_m": 0.005
+          }
+        },
+        {
+          "gate": "no_lift",
+          "ok": true,
+          "evidence": {
+            "max_lift_m": -0.0,
+            "allowed_m": 0.02
+          }
+        },
+        {
+          "gate": "pusher_contact",
+          "ok": false,
+          "evidence": {}
+        },
+        {
+          "gate": "gripper",
+          "ok": true,
+          "evidence": {
+            "joint": "gripper_left_joint",
+            "samples": 3080,
+            "aperture_travel_rad": 0.0,
+            "limit_rad": 0.002,
+            "min_aperture_rad": -0.0,
+            "max_aperture_rad": -0.0
+          }
+        },
+        {
+          "gate": "no_attachment",
+          "ok": true,
+          "evidence": {
+            "events": 0
+          }
+        },
+        {
+          "gate": "no_teleport",
+          "ok": true,
+          "evidence": {
+            "max_jump_m": 0.0,
+            "threshold_m": 0.03,
+            "declared_jump_m": 0.0,
+            "measured_jump_m": 0.0
+          }
+        }
+      ],
+      "failed_gates": [
+        "terminal",
+        "pusher_contact"
+      ],
+      "summary": {
+        "kind": "CONSTRAINED_FINGER_PUSH",
+        "status": "FAILED",
+        "detail": "MotionFailed: fresh complete measured joints unavailable",
+        "attempts": 1,
+        "goal_geometry_reached": false,
+        "actuator_goals": 1,
+        "independent_acceptance_claim": false,
+        "motion_terminal_known": true
+      },
+      "receipts": [
+        {
+          "request_id": "contact-00",
+          "primitive_outcome": "FAILED",
+          "primitive_error_code": 30,
+          "stroke_signed_m": null,
+          "requested_m": 0.03,
+          "physical_contact_observed": null,
+          "motion_terminal_known": true,
+          "return_completed": false,
+          "canceled": false,
+          "post_return": null,
+          "attempt_start": [
+            0.22,
+            2.5230356855132592e-20,
+            0.01749999751174475
+          ],
+          "schema_version": "contact-push-receipt/1",
+          "arm_ready": false,
+          "clock_domain": "ROS_SIM_TIME",
+          "monotonic_clock_scope": "same_host",
+          "direction": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "returned_signed_m": null,
+          "return_loss_m": null,
+          "progress_preserved": null,
+          "returned_request_geometry_satisfied": null,
+          "independent_acceptance_claim": false,
+          "native_contact": {
+            "physical_contact_observed": null,
+            "contact_steps": 0,
+            "rear_fraction": null,
+            "horizontal_normal_fraction": null,
+            "maximum_patch_distance_m": 0.0,
+            "unexpected_robot_colliders": [],
+            "source_problem": null,
+            "protected_peak_m": 2.4882552511484857e-09,
+            "freshness": {
+              "physics": {
+                "wall_age_s": 3.143908562,
+                "source_sim_ns": 29470000000,
+                "clock_minus_source_ns": -15160000000
+              },
+              "contacts": {
+                "wall_age_s": 2.397807955,
+                "source_sim_ns": 29830000000,
+                "clock_minus_source_ns": -15520000000
+              }
+            }
+          },
+          "detail": "MotionFailed: fresh complete measured joints unavailable"
+        }
+      ],
+      "consumer_checks": [
+        {
+          "kind": "RECEIPT_RECEIVED",
+          "monotonic_ns": 25317235945842,
+          "sim_ns": 30890000000,
+          "observed_world_revision": 2,
+          "ready_checked": false
+        },
+        {
+          "kind": "RECEIPT_RECHECK_AFTER_300MS",
+          "monotonic_ns": 25317541819069,
+          "sim_ns": 30975000000,
+          "request_id": "contact-00",
+          "ready_checked": false
+        },
+        {
+          "kind": "CONSUMER_FINISHED",
+          "monotonic_ns": 25320079934533,
+          "sim_ns": 32330000000,
+          "received": 1,
+          "actuator_goals": 0
+        }
+      ],
+      "dispatch_joint_source_age_max_s": null,
+      "dispatch_joint_receive_age_max_s": null,
+      "recorded_source_hash_checks": {
+        "flexcell_skills.contracts.push": true,
+        "flexcell_skills.contact_geometry": true,
+        "flexcell_skills.contact_motion": true,
+        "flexcell_skills.contact_receipt": true,
+        "flexcell_skills.contact_trace": true,
+        "run_contact_push.py": true,
+        "record_receipts.py": true,
+        "run_case.py": true
+      },
+      "recorded_sources_match_preregistration": true,
+      "claim_accuracy": "NOT_MEASURED_NO_AGENT_CLAIM"
+    },
+    {
+      "run": "C1",
+      "version": "v5_fixed_batch",
+      "role": "development_validation",
+      "execution": {
+        "arm": "contact",
+        "status": "EXECUTED",
+        "physical_capability_claim": false,
+        "driver_exit": 2
+      },
+      "net_signed_m": 0.0,
+      "net_vector_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "protected_net_m": 0.0,
+      "full_task_passed": false,
+      "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+      "gates": [
+        {
+          "gate": "terminal",
+          "ok": false,
+          "evidence": {
+            "evaluator_version": null,
+            "passed": false
+          }
+        },
+        {
+          "gate": "trajectory",
+          "ok": true,
+          "evidence": {
+            "objects": [
+              "target_box_a",
+              "target_box_b"
+            ],
+            "total_samples": 10122
+          }
+        },
+        {
+          "gate": "table_support",
+          "ok": true,
+          "evidence": {
+            "off_table_samples": 0,
+            "tolerance_m": 0.01
+          }
+        },
+        {
+          "gate": "protected_unmoved",
+          "ok": true,
+          "evidence": {
+            "max_excursion_m": 0.0,
+            "tolerance_m": 0.005
+          }
+        },
+        {
+          "gate": "no_lift",
+          "ok": true,
+          "evidence": {
+            "max_lift_m": -0.0,
+            "allowed_m": 0.02
+          }
+        },
+        {
+          "gate": "pusher_contact",
+          "ok": false,
+          "evidence": {}
+        },
+        {
+          "gate": "gripper",
+          "ok": true,
+          "evidence": {
+            "joint": "gripper_left_joint",
+            "samples": 2355,
+            "aperture_travel_rad": 0.0,
+            "limit_rad": 0.002,
+            "min_aperture_rad": -0.0,
+            "max_aperture_rad": -0.0
+          }
+        },
+        {
+          "gate": "no_attachment",
+          "ok": true,
+          "evidence": {
+            "events": 0
+          }
+        },
+        {
+          "gate": "no_teleport",
+          "ok": true,
+          "evidence": {
+            "max_jump_m": 0.0,
+            "threshold_m": 0.03,
+            "declared_jump_m": 0.0,
+            "measured_jump_m": 0.0
+          }
+        }
+      ],
+      "failed_gates": [
+        "terminal",
+        "pusher_contact"
+      ],
+      "summary": {
+        "kind": "CONSTRAINED_FINGER_PUSH",
+        "status": "FAILED",
+        "detail": "MotionFailed: observation guard during planning: native source unavailable: {\"physics\": {\"wall_age_s\": 0.379249985, \"source_sim_ns\": 22855000000, \"clock_minus_source_ns\": 5000000}, \"contacts\": {\"wall_age_s\": 0.358852584, \"source_sim_ns\": 22865000000, \"clock_minus_source_ns\": -5000000}}",
+        "attempts": 1,
+        "goal_geometry_reached": false,
+        "actuator_goals": 1,
+        "independent_acceptance_claim": false,
+        "motion_terminal_known": true
+      },
+      "receipts": [
+        {
+          "request_id": "contact-00",
+          "primitive_outcome": "FAILED",
+          "primitive_error_code": 30,
+          "stroke_signed_m": null,
+          "requested_m": 0.03,
+          "physical_contact_observed": null,
+          "motion_terminal_known": true,
+          "return_completed": false,
+          "canceled": false,
+          "post_return": null,
+          "attempt_start": [
+            0.22,
+            2.5230356855132592e-20,
+            0.01749999751174475
+          ],
+          "schema_version": "contact-push-receipt/1",
+          "arm_ready": false,
+          "clock_domain": "ROS_SIM_TIME",
+          "monotonic_clock_scope": "same_host",
+          "direction": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "returned_signed_m": null,
+          "return_loss_m": null,
+          "progress_preserved": null,
+          "returned_request_geometry_satisfied": null,
+          "independent_acceptance_claim": false,
+          "native_contact": {
+            "physical_contact_observed": null,
+            "contact_steps": 0,
+            "rear_fraction": null,
+            "horizontal_normal_fraction": null,
+            "maximum_patch_distance_m": 0.0,
+            "unexpected_robot_colliders": [],
+            "source_problem": null,
+            "protected_peak_m": 2.4882552511484857e-09,
+            "freshness": {
+              "physics": {
+                "wall_age_s": 3.492543962,
+                "source_sim_ns": 22855000000,
+                "clock_minus_source_ns": 5000000
+              },
+              "contacts": {
+                "wall_age_s": 3.472146561,
+                "source_sim_ns": 22865000000,
+                "clock_minus_source_ns": -5000000
+              }
+            }
+          },
+          "detail": "MotionFailed: observation guard during planning: native source unavailable: {\"physics\": {\"wall_age_s\": 0.379249985, \"source_sim_ns\": 22855000000, \"clock_minus_source_ns\": 5000000}, \"contacts\": {\"wall_age_s\": 0.358852584, \"source_sim_ns\": 22865000000, \"clock_minus_source_ns\": -5000000}}"
+        }
+      ],
+      "consumer_checks": [
+        {
+          "kind": "RECEIPT_RECEIVED",
+          "monotonic_ns": 25583325211475,
+          "sim_ns": 23995000000,
+          "observed_world_revision": 2,
+          "ready_checked": false
+        },
+        {
+          "kind": "RECEIPT_RECHECK_AFTER_300MS",
+          "monotonic_ns": 25583630419543,
+          "sim_ns": 24065000000,
+          "request_id": "contact-00",
+          "ready_checked": false
+        },
+        {
+          "kind": "CONSUMER_FINISHED",
+          "monotonic_ns": 25586445456458,
+          "sim_ns": 25140000000,
+          "received": 1,
+          "actuator_goals": 0
+        }
+      ],
+      "dispatch_joint_source_age_max_s": null,
+      "dispatch_joint_receive_age_max_s": null,
+      "recorded_source_hash_checks": {
+        "flexcell_skills.contracts.push": true,
+        "flexcell_skills.contact_geometry": true,
+        "flexcell_skills.contact_motion": true,
+        "flexcell_skills.contact_receipt": true,
+        "flexcell_skills.contact_trace": true,
+        "run_contact_push.py": true,
+        "record_receipts.py": true,
+        "run_case.py": true
+      },
+      "recorded_sources_match_preregistration": true,
+      "claim_accuracy": "NOT_MEASURED_NO_AGENT_CLAIM"
+    },
+    {
+      "run": "D1",
+      "version": "v5_fixed_batch",
+      "role": "control",
+      "execution": {
+        "arm": "control",
+        "status": "EXECUTED",
+        "physical_capability_claim": false,
+        "driver_exit": 0
+      },
+      "net_signed_m": 0.017744351481363885,
+      "net_vector_m": [
+        -0.017744351481363885,
+        -0.012946581148445569,
+        -2.988916630100591e-07
+      ],
+      "protected_net_m": 0.0,
+      "full_task_passed": false,
+      "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+      "gates": [
+        {
+          "gate": "terminal",
+          "ok": false,
+          "evidence": {
+            "evaluator_version": null,
+            "passed": false
+          }
+        },
+        {
+          "gate": "trajectory",
+          "ok": true,
+          "evidence": {
+            "objects": [
+              "target_box_a",
+              "target_box_b"
+            ],
+            "total_samples": 13528
+          }
+        },
+        {
+          "gate": "table_support",
+          "ok": false,
+          "evidence": {
+            "off_table_samples": 151,
+            "tolerance_m": 0.01
+          }
+        },
+        {
+          "gate": "protected_unmoved",
+          "ok": true,
+          "evidence": {
+            "max_excursion_m": 0.0,
+            "tolerance_m": 0.005
+          }
+        },
+        {
+          "gate": "no_lift",
+          "ok": false,
+          "evidence": {
+            "max_lift_m": 0.057788,
+            "allowed_m": 0.02
+          }
+        },
+        {
+          "gate": "pusher_contact",
+          "ok": true,
+          "evidence": {
+            "motion_windows": 1712,
+            "overlapping_windows": 1443,
+            "contact_intervals": 2,
+            "pusher_links": [
+              "open_manipulator_x::gripper_left_link::gripper_left_link_collision",
+              "open_manipulator_x::gripper_right_link::gripper_right_link_collision",
+              "open_manipulator_x::link5::link5_collision"
+            ]
+          }
+        },
+        {
+          "gate": "gripper",
+          "ok": true,
+          "evidence": {
+            "joint": "gripper_left_joint",
+            "samples": 3147,
+            "aperture_travel_rad": 0.000909,
+            "limit_rad": 0.002,
+            "min_aperture_rad": -0.0,
+            "max_aperture_rad": 0.000909
+          }
+        },
+        {
+          "gate": "no_attachment",
+          "ok": true,
+          "evidence": {
+            "events": 0
+          }
+        },
+        {
+          "gate": "no_teleport",
+          "ok": true,
+          "evidence": {
+            "max_jump_m": 0.001258,
+            "threshold_m": 0.03,
+            "declared_jump_m": 0.001258,
+            "measured_jump_m": 0.001258
+          }
+        }
+      ],
+      "failed_gates": [
+        "terminal",
+        "table_support",
+        "no_lift"
+      ],
+      "primitive_results": [
+        {
+          "outcome": 1,
+          "error_code": 28,
+          "displacement_m": 0.005627890245323113
+        },
+        {
+          "outcome": 1,
+          "error_code": 36,
+          "displacement_m": 0.059116153632215084
+        }
+      ],
+      "returned_arm_readiness": "NOT_EXPOSED_BY_LEGACY_ACTION",
+      "recorded_source_hash_checks": {
+        "flexcell_skills.contracts.push": true,
+        "flexcell_skills.contact_geometry": true,
+        "flexcell_skills.contact_motion": true,
+        "flexcell_skills.contact_receipt": true,
+        "flexcell_skills.contact_trace": true,
+        "run_contact_push.py": true,
+        "record_receipts.py": true,
+        "run_case.py": true
+      },
+      "recorded_sources_match_preregistration": true,
+      "claim_accuracy": "NOT_MEASURED_NO_AGENT_CLAIM"
+    },
+    {
+      "run": "E1",
+      "version": "v6_fixed_batch",
+      "role": "development_validation",
+      "execution": {
+        "arm": "contact",
+        "status": "EXECUTED",
+        "physical_capability_claim": false,
+        "driver_exit": 2
+      },
+      "net_signed_m": 0.0,
+      "net_vector_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "protected_net_m": 0.0,
+      "full_task_passed": false,
+      "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+      "gates": [
+        {
+          "gate": "terminal",
+          "ok": false,
+          "evidence": {
+            "evaluator_version": null,
+            "passed": false
+          }
+        },
+        {
+          "gate": "trajectory",
+          "ok": true,
+          "evidence": {
+            "objects": [
+              "target_box_a",
+              "target_box_b"
+            ],
+            "total_samples": 4988
+          }
+        },
+        {
+          "gate": "table_support",
+          "ok": true,
+          "evidence": {
+            "off_table_samples": 0,
+            "tolerance_m": 0.01
+          }
+        },
+        {
+          "gate": "protected_unmoved",
+          "ok": true,
+          "evidence": {
+            "max_excursion_m": 0.0,
+            "tolerance_m": 0.005
+          }
+        },
+        {
+          "gate": "no_lift",
+          "ok": true,
+          "evidence": {
+            "max_lift_m": -0.0,
+            "allowed_m": 0.02
+          }
+        },
+        {
+          "gate": "pusher_contact",
+          "ok": false,
+          "evidence": {}
+        },
+        {
+          "gate": "gripper",
+          "ok": true,
+          "evidence": {
+            "joint": "gripper_left_joint",
+            "samples": 952,
+            "aperture_travel_rad": 0.0,
+            "limit_rad": 0.002,
+            "min_aperture_rad": -0.0,
+            "max_aperture_rad": -0.0
+          }
+        },
+        {
+          "gate": "no_attachment",
+          "ok": true,
+          "evidence": {
+            "events": 0
+          }
+        },
+        {
+          "gate": "no_teleport",
+          "ok": true,
+          "evidence": {
+            "max_jump_m": 0.0,
+            "threshold_m": 0.03,
+            "declared_jump_m": 0.0,
+            "measured_jump_m": 0.0
+          }
+        }
+      ],
+      "failed_gates": [
+        "terminal",
+        "pusher_contact"
+      ],
+      "summary": {
+        "kind": "CONSTRAINED_FINGER_PUSH",
+        "status": "FAILED",
+        "detail": "MotionFailed: observation guard during planning: native contact step expired without a physics match",
+        "attempts": 1,
+        "goal_geometry_reached": false,
+        "actuator_goals": 0,
+        "independent_acceptance_claim": false,
+        "motion_terminal_known": true
+      },
+      "receipts": [
+        {
+          "request_id": "contact-00",
+          "primitive_outcome": "FAILED",
+          "primitive_error_code": 30,
+          "stroke_signed_m": null,
+          "requested_m": 0.03,
+          "physical_contact_observed": null,
+          "motion_terminal_known": true,
+          "return_completed": false,
+          "canceled": false,
+          "post_return": null,
+          "attempt_start": [
+            0.22,
+            2.5230356855132592e-20,
+            0.01749999751174475
+          ],
+          "schema_version": "contact-push-receipt/1",
+          "arm_ready": false,
+          "clock_domain": "ROS_SIM_TIME",
+          "monotonic_clock_scope": "same_host",
+          "direction": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "returned_signed_m": null,
+          "return_loss_m": null,
+          "progress_preserved": null,
+          "returned_request_geometry_satisfied": null,
+          "independent_acceptance_claim": false,
+          "native_contact": {
+            "physical_contact_observed": null,
+            "contact_steps": 0,
+            "rear_fraction": null,
+            "horizontal_normal_fraction": null,
+            "maximum_patch_distance_m": 0.0,
+            "unexpected_robot_colliders": [],
+            "source_problem": "native contact step expired without a physics match",
+            "protected_peak_m": 2.4882552511484857e-09,
+            "freshness": {
+              "physics": {
+                "wall_age_s": 16.496939585,
+                "source_sim_ns": 5630000000,
+                "clock_minus_source_ns": 0
+              },
+              "contacts": {
+                "wall_age_s": 16.499185067,
+                "source_sim_ns": 5630000000,
+                "clock_minus_source_ns": 0
+              },
+              "raw_physics": {
+                "wall_age_s": 16.496939585,
+                "source_sim_ns": 5630000000,
+                "clock_minus_source_ns": 0
+              }
+            }
+          },
+          "detail": "MotionFailed: observation guard during planning: native contact step expired without a physics match"
+        }
+      ],
+      "consumer_checks": [
+        {
+          "kind": "RECEIPT_RECEIVED",
+          "monotonic_ns": 33112113937705,
+          "sim_ns": 10925000000,
+          "observed_world_revision": 2,
+          "ready_checked": false
+        },
+        {
+          "kind": "RECEIPT_RECHECK_AFTER_300MS",
+          "monotonic_ns": 33112417040225,
+          "sim_ns": 11060000000,
+          "request_id": "contact-00",
+          "ready_checked": false
+        },
+        {
+          "kind": "CONSUMER_FINISHED",
+          "monotonic_ns": 33114886878435,
+          "sim_ns": 12280000000,
+          "received": 1,
+          "actuator_goals": 0
+        }
+      ],
+      "dispatch_joint_source_age_max_s": null,
+      "dispatch_joint_receive_age_max_s": null,
+      "recorded_source_hash_checks": {
+        "flexcell_skills.contracts.push": true,
+        "flexcell_skills.contact_geometry": true,
+        "flexcell_skills.contact_motion": true,
+        "flexcell_skills.contact_receipt": true,
+        "flexcell_skills.contact_trace": true,
+        "run_contact_push.py": true,
+        "record_receipts.py": true,
+        "run_case.py": true
+      },
+      "recorded_sources_match_preregistration": true,
+      "claim_accuracy": "NOT_MEASURED_NO_AGENT_CLAIM"
+    },
+    {
+      "run": "F1",
+      "version": "v7_validation",
+      "role": "development_validation",
+      "execution": {
+        "arm": "contact",
+        "status": "EXECUTED",
+        "physical_capability_claim": false,
+        "driver_exit": 2
+      },
+      "net_signed_m": 0.0,
+      "net_vector_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "protected_net_m": 0.0,
+      "full_task_passed": false,
+      "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+      "gates": [
+        {
+          "gate": "terminal",
+          "ok": false,
+          "evidence": {
+            "evaluator_version": null,
+            "passed": false
+          }
+        },
+        {
+          "gate": "trajectory",
+          "ok": true,
+          "evidence": {
+            "objects": [
+              "target_box_a",
+              "target_box_b"
+            ],
+            "total_samples": 12994
+          }
+        },
+        {
+          "gate": "table_support",
+          "ok": true,
+          "evidence": {
+            "off_table_samples": 0,
+            "tolerance_m": 0.01
+          }
+        },
+        {
+          "gate": "protected_unmoved",
+          "ok": true,
+          "evidence": {
+            "max_excursion_m": 0.0,
+            "tolerance_m": 0.005
+          }
+        },
+        {
+          "gate": "no_lift",
+          "ok": true,
+          "evidence": {
+            "max_lift_m": -0.0,
+            "allowed_m": 0.02
+          }
+        },
+        {
+          "gate": "pusher_contact",
+          "ok": false,
+          "evidence": {}
+        },
+        {
+          "gate": "gripper",
+          "ok": true,
+          "evidence": {
+            "joint": "gripper_left_joint",
+            "samples": 3060,
+            "aperture_travel_rad": 0.0,
+            "limit_rad": 0.002,
+            "min_aperture_rad": -0.0,
+            "max_aperture_rad": -0.0
+          }
+        },
+        {
+          "gate": "no_attachment",
+          "ok": true,
+          "evidence": {
+            "events": 0
+          }
+        },
+        {
+          "gate": "no_teleport",
+          "ok": true,
+          "evidence": {
+            "max_jump_m": 0.0,
+            "threshold_m": 0.03,
+            "declared_jump_m": 0.0,
+            "measured_jump_m": 0.0
+          }
+        }
+      ],
+      "failed_gates": [
+        "terminal",
+        "pusher_contact"
+      ],
+      "summary": {
+        "kind": "CONSTRAINED_FINGER_PUSH",
+        "status": "FAILED",
+        "detail": "MotionFailed: observation guard during planning: native source unavailable: {\"physics\": {\"wall_age_s\": 0.544853179, \"source_sim_ns\": 19030000000, \"clock_minus_source_ns\": -45000000}, \"contacts\": {\"wall_age_s\": 0.54014129, \"source_sim_ns\": 19030000000, \"clock_minus_source_ns\": -45000000}, \"raw_physics\": {\"wall_age_s\": 0.544853179, \"source_sim_ns\": 19030000000, \"clock_minus_source_ns\": -45000000}}",
+        "attempts": 1,
+        "goal_geometry_reached": false,
+        "actuator_goals": 1,
+        "independent_acceptance_claim": false,
+        "motion_terminal_known": true
+      },
+      "receipts": [
+        {
+          "request_id": "contact-00",
+          "primitive_outcome": "FAILED",
+          "primitive_error_code": 30,
+          "stroke_signed_m": null,
+          "requested_m": 0.03,
+          "physical_contact_observed": null,
+          "motion_terminal_known": true,
+          "return_completed": false,
+          "canceled": false,
+          "post_return": null,
+          "attempt_start": [
+            0.22,
+            2.5230356855132592e-20,
+            0.01749999751174475
+          ],
+          "schema_version": "contact-push-receipt/1",
+          "arm_ready": false,
+          "clock_domain": "ROS_SIM_TIME",
+          "monotonic_clock_scope": "same_host",
+          "direction": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "returned_signed_m": null,
+          "return_loss_m": null,
+          "progress_preserved": null,
+          "returned_request_geometry_satisfied": null,
+          "independent_acceptance_claim": false,
+          "native_contact": {
+            "physical_contact_observed": null,
+            "contact_steps": 0,
+            "rear_fraction": null,
+            "horizontal_normal_fraction": null,
+            "maximum_patch_distance_m": 0.0,
+            "unexpected_robot_colliders": [],
+            "source_problem": null,
+            "protected_peak_m": 2.4882552511484857e-09,
+            "freshness": {
+              "physics": {
+                "wall_age_s": 36.62830814,
+                "source_sim_ns": 19030000000,
+                "clock_minus_source_ns": -45000000
+              },
+              "contacts": {
+                "wall_age_s": 36.623596251,
+                "source_sim_ns": 19030000000,
+                "clock_minus_source_ns": -45000000
+              },
+              "raw_physics": {
+                "wall_age_s": 36.62830814,
+                "source_sim_ns": 19030000000,
+                "clock_minus_source_ns": -45000000
+              }
+            },
+            "pre_robot_contact_prefix_records": 1
+          },
+          "detail": "MotionFailed: observation guard during planning: native source unavailable: {\"physics\": {\"wall_age_s\": 0.544853179, \"source_sim_ns\": 19030000000, \"clock_minus_source_ns\": -45000000}, \"contacts\": {\"wall_age_s\": 0.54014129, \"source_sim_ns\": 19030000000, \"clock_minus_source_ns\": -45000000}, \"raw_physics\": {\"wall_age_s\": 0.544853179, \"source_sim_ns\": 19030000000, \"clock_minus_source_ns\": -45000000}}"
+        }
+      ],
+      "consumer_checks": [
+        {
+          "kind": "RECEIPT_RECEIVED",
+          "monotonic_ns": 33482822453100,
+          "sim_ns": 30500000000,
+          "observed_world_revision": 2,
+          "ready_checked": false
+        },
+        {
+          "kind": "RECEIPT_RECHECK_AFTER_300MS",
+          "monotonic_ns": 33483134201469,
+          "sim_ns": 30625000000,
+          "request_id": "contact-00",
+          "ready_checked": false
+        },
+        {
+          "kind": "CONSUMER_FINISHED",
+          "monotonic_ns": 33485906107215,
+          "sim_ns": 31965000000,
+          "received": 1,
+          "actuator_goals": 0
+        }
+      ],
+      "dispatch_joint_source_age_max_s": null,
+      "dispatch_joint_receive_age_max_s": null,
+      "recorded_source_hash_checks": {
+        "flexcell_skills.contracts.push": true,
+        "flexcell_skills.contact_geometry": true,
+        "flexcell_skills.contact_motion": true,
+        "flexcell_skills.contact_receipt": true,
+        "flexcell_skills.contact_trace": true,
+        "run_contact_push.py": true,
+        "record_receipts.py": true,
+        "run_case.py": true
+      },
+      "recorded_sources_match_preregistration": true,
+      "claim_accuracy": "NOT_MEASURED_NO_AGENT_CLAIM"
+    },
+    {
+      "run": "G1",
+      "version": "v8_validation",
+      "role": "development_validation",
+      "execution": {
+        "arm": "contact",
+        "status": "EXECUTED",
+        "physical_capability_claim": false,
+        "driver_exit": 2
+      },
+      "net_signed_m": 0.0,
+      "net_vector_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "protected_net_m": 0.0,
+      "full_task_passed": false,
+      "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+      "gates": [
+        {
+          "gate": "terminal",
+          "ok": false,
+          "evidence": {
+            "evaluator_version": null,
+            "passed": false
+          }
+        },
+        {
+          "gate": "trajectory",
+          "ok": true,
+          "evidence": {
+            "objects": [
+              "target_box_a",
+              "target_box_b"
+            ],
+            "total_samples": 14506
+          }
+        },
+        {
+          "gate": "table_support",
+          "ok": true,
+          "evidence": {
+            "off_table_samples": 0,
+            "tolerance_m": 0.01
+          }
+        },
+        {
+          "gate": "protected_unmoved",
+          "ok": true,
+          "evidence": {
+            "max_excursion_m": 0.0,
+            "tolerance_m": 0.005
+          }
+        },
+        {
+          "gate": "no_lift",
+          "ok": true,
+          "evidence": {
+            "max_lift_m": -0.0,
+            "allowed_m": 0.02
+          }
+        },
+        {
+          "gate": "pusher_contact",
+          "ok": false,
+          "evidence": {}
+        },
+        {
+          "gate": "gripper",
+          "ok": true,
+          "evidence": {
+            "joint": "gripper_left_joint",
+            "samples": 3387,
+            "aperture_travel_rad": 0.0,
+            "limit_rad": 0.002,
+            "min_aperture_rad": -0.0,
+            "max_aperture_rad": -0.0
+          }
+        },
+        {
+          "gate": "no_attachment",
+          "ok": true,
+          "evidence": {
+            "events": 0
+          }
+        },
+        {
+          "gate": "no_teleport",
+          "ok": true,
+          "evidence": {
+            "max_jump_m": 0.0,
+            "threshold_m": 0.03,
+            "declared_jump_m": 0.0,
+            "measured_jump_m": 0.0
+          }
+        }
+      ],
+      "failed_gates": [
+        "terminal",
+        "pusher_contact"
+      ],
+      "summary": {
+        "kind": "CONSTRAINED_FINGER_PUSH",
+        "status": "FAILED",
+        "detail": "MotionFailed: fresh complete measured joints unavailable",
+        "attempts": 1,
+        "goal_geometry_reached": false,
+        "actuator_goals": 1,
+        "independent_acceptance_claim": false,
+        "motion_terminal_known": true
+      },
+      "receipts": [
+        {
+          "request_id": "contact-00",
+          "primitive_outcome": "FAILED",
+          "primitive_error_code": 30,
+          "stroke_signed_m": null,
+          "requested_m": 0.03,
+          "physical_contact_observed": null,
+          "motion_terminal_known": true,
+          "return_completed": false,
+          "canceled": false,
+          "post_return": null,
+          "attempt_start": [
+            0.22,
+            2.5230356855132592e-20,
+            0.01749999751174475
+          ],
+          "schema_version": "contact-push-receipt/1",
+          "arm_ready": false,
+          "clock_domain": "ROS_SIM_TIME",
+          "monotonic_clock_scope": "same_host",
+          "direction": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "returned_signed_m": null,
+          "return_loss_m": null,
+          "progress_preserved": null,
+          "returned_request_geometry_satisfied": null,
+          "independent_acceptance_claim": false,
+          "native_contact": {
+            "physical_contact_observed": null,
+            "contact_steps": 0,
+            "rear_fraction": null,
+            "horizontal_normal_fraction": null,
+            "maximum_patch_distance_m": 0.0,
+            "unexpected_robot_colliders": [],
+            "source_problem": null,
+            "protected_peak_m": 2.4882552511484857e-09,
+            "freshness": {
+              "physics": {
+                "wall_age_s": 62.943098675,
+                "source_sim_ns": 23670000000,
+                "clock_minus_source_ns": -20000000
+              },
+              "contacts": {
+                "wall_age_s": 62.943001026,
+                "source_sim_ns": 23670000000,
+                "clock_minus_source_ns": -20000000
+              },
+              "raw_physics": {
+                "wall_age_s": 62.943098675,
+                "source_sim_ns": 23670000000,
+                "clock_minus_source_ns": -20000000
+              }
+            },
+            "pre_robot_contact_prefix_records": 1
+          },
+          "detail": "MotionFailed: fresh complete measured joints unavailable"
+        }
+      ],
+      "consumer_checks": [
+        {
+          "kind": "RECEIPT_RECEIVED",
+          "monotonic_ns": 33800415613624,
+          "sim_ns": 34625000000,
+          "observed_world_revision": 2,
+          "ready_checked": false
+        },
+        {
+          "kind": "RECEIPT_RECHECK_AFTER_300MS",
+          "monotonic_ns": 33800718560789,
+          "sim_ns": 34710000000,
+          "request_id": "contact-00",
+          "ready_checked": false
+        },
+        {
+          "kind": "CONSUMER_FINISHED",
+          "monotonic_ns": 33803800706732,
+          "sim_ns": 35795000000,
+          "received": 1,
+          "actuator_goals": 0
+        }
+      ],
+      "dispatch_joint_source_age_max_s": null,
+      "dispatch_joint_receive_age_max_s": null,
+      "recorded_source_hash_checks": {
+        "flexcell_skills.contracts.push": true,
+        "flexcell_skills.contact_geometry": true,
+        "flexcell_skills.contact_motion": true,
+        "flexcell_skills.contact_receipt": true,
+        "flexcell_skills.contact_trace": true,
+        "run_contact_push.py": true,
+        "record_receipts.py": true,
+        "run_case.py": true
+      },
+      "recorded_sources_match_preregistration": true,
+      "claim_accuracy": "NOT_MEASURED_NO_AGENT_CLAIM"
+    },
+    {
+      "run": "H1",
+      "version": "v9_validation",
+      "role": "development_validation",
+      "execution": {
+        "arm": "contact",
+        "status": "EXECUTED",
+        "physical_capability_claim": false,
+        "driver_exit": 2
+      },
+      "net_signed_m": 0.0,
+      "net_vector_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "protected_net_m": 0.0,
+      "full_task_passed": false,
+      "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+      "gates": [
+        {
+          "gate": "terminal",
+          "ok": false,
+          "evidence": {
+            "evaluator_version": null,
+            "passed": false
+          }
+        },
+        {
+          "gate": "trajectory",
+          "ok": true,
+          "evidence": {
+            "objects": [
+              "target_box_a",
+              "target_box_b"
+            ],
+            "total_samples": 16744
+          }
+        },
+        {
+          "gate": "table_support",
+          "ok": true,
+          "evidence": {
+            "off_table_samples": 0,
+            "tolerance_m": 0.01
+          }
+        },
+        {
+          "gate": "protected_unmoved",
+          "ok": true,
+          "evidence": {
+            "max_excursion_m": 0.0,
+            "tolerance_m": 0.005
+          }
+        },
+        {
+          "gate": "no_lift",
+          "ok": true,
+          "evidence": {
+            "max_lift_m": -0.0,
+            "allowed_m": 0.02
+          }
+        },
+        {
+          "gate": "pusher_contact",
+          "ok": false,
+          "evidence": {}
+        },
+        {
+          "gate": "gripper",
+          "ok": true,
+          "evidence": {
+            "joint": "gripper_left_joint",
+            "samples": 3902,
+            "aperture_travel_rad": 0.0,
+            "limit_rad": 0.002,
+            "min_aperture_rad": -0.0,
+            "max_aperture_rad": -0.0
+          }
+        },
+        {
+          "gate": "no_attachment",
+          "ok": true,
+          "evidence": {
+            "events": 0
+          }
+        },
+        {
+          "gate": "no_teleport",
+          "ok": true,
+          "evidence": {
+            "max_jump_m": 0.0,
+            "threshold_m": 0.03,
+            "declared_jump_m": 0.0,
+            "measured_jump_m": 0.0
+          }
+        }
+      ],
+      "failed_gates": [
+        "terminal",
+        "pusher_contact"
+      ],
+      "summary": {
+        "kind": "CONSTRAINED_FINGER_PUSH",
+        "status": "FAILED",
+        "detail": "MotionFailed: fresh complete measured joints unavailable",
+        "attempts": 1,
+        "goal_geometry_reached": false,
+        "actuator_goals": 1,
+        "independent_acceptance_claim": false,
+        "motion_terminal_known": true
+      },
+      "receipts": [
+        {
+          "request_id": "contact-00",
+          "primitive_outcome": "FAILED",
+          "primitive_error_code": 30,
+          "stroke_signed_m": null,
+          "requested_m": 0.03,
+          "physical_contact_observed": null,
+          "motion_terminal_known": true,
+          "return_completed": false,
+          "canceled": false,
+          "post_return": null,
+          "attempt_start": [
+            0.22,
+            2.5230356855132592e-20,
+            0.01749999751174475
+          ],
+          "schema_version": "contact-push-receipt/1",
+          "arm_ready": false,
+          "clock_domain": "ROS_SIM_TIME",
+          "monotonic_clock_scope": "same_host",
+          "direction": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "returned_signed_m": null,
+          "return_loss_m": null,
+          "progress_preserved": null,
+          "returned_request_geometry_satisfied": null,
+          "independent_acceptance_claim": false,
+          "native_contact": {
+            "physical_contact_observed": null,
+            "contact_steps": 0,
+            "rear_fraction": null,
+            "horizontal_normal_fraction": null,
+            "maximum_patch_distance_m": 0.0,
+            "unexpected_robot_colliders": [],
+            "source_problem": null,
+            "protected_peak_m": 2.4882552511484857e-09,
+            "freshness": {
+              "physics": {
+                "wall_age_s": 60.203241631,
+                "source_sim_ns": 21000000000,
+                "clock_minus_source_ns": -45000000
+              },
+              "contacts": {
+                "wall_age_s": 60.203636001,
+                "source_sim_ns": 21000000000,
+                "clock_minus_source_ns": -45000000
+              },
+              "raw_physics": {
+                "wall_age_s": 60.203241631,
+                "source_sim_ns": 21000000000,
+                "clock_minus_source_ns": -45000000
+              }
+            },
+            "pre_robot_contact_prefix_records": 1
+          },
+          "detail": "MotionFailed: fresh complete measured joints unavailable"
+        }
+      ],
+      "consumer_checks": [
+        {
+          "kind": "RECEIPT_RECEIVED",
+          "monotonic_ns": 34191448857867,
+          "sim_ns": 40030000000,
+          "observed_world_revision": 2,
+          "ready_checked": false
+        },
+        {
+          "kind": "RECEIPT_RECHECK_AFTER_300MS",
+          "monotonic_ns": 34191780372821,
+          "sim_ns": 40130000000,
+          "request_id": "contact-00",
+          "ready_checked": false
+        },
+        {
+          "kind": "CONSUMER_FINISHED",
+          "monotonic_ns": 34194511546844,
+          "sim_ns": 41460000000,
+          "received": 1,
+          "actuator_goals": 0
+        }
+      ],
+      "dispatch_joint_source_age_max_s": 0.0,
+      "dispatch_joint_receive_age_max_s": 0.04702699000335997,
+      "recorded_source_hash_checks": {
+        "flexcell_skills.contracts.push": true,
+        "flexcell_skills.contact_geometry": true,
+        "flexcell_skills.contact_motion": true,
+        "flexcell_skills.contact_receipt": true,
+        "flexcell_skills.contact_trace": true,
+        "run_contact_push.py": true,
+        "record_receipts.py": true,
+        "run_case.py": true
+      },
+      "recorded_sources_match_preregistration": true,
+      "claim_accuracy": "NOT_MEASURED_NO_AGENT_CLAIM"
+    },
+    {
+      "run": "I1",
+      "version": "v10_validation",
+      "role": "development_validation",
+      "execution": {
+        "arm": "contact",
+        "status": "EXECUTED",
+        "physical_capability_claim": false,
+        "driver_exit": 2
+      },
+      "net_signed_m": 0.030486771603405155,
+      "net_vector_m": [
+        -0.030486771603405155,
+        3.006482684161764e-05,
+        -2.581707169956038e-07
+      ],
+      "protected_net_m": 0.0,
+      "full_task_passed": false,
+      "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+      "gates": [
+        {
+          "gate": "terminal",
+          "ok": false,
+          "evidence": {
+            "evaluator_version": null,
+            "passed": false
+          }
+        },
+        {
+          "gate": "trajectory",
+          "ok": true,
+          "evidence": {
+            "objects": [
+              "target_box_a",
+              "target_box_b"
+            ],
+            "total_samples": 33442
+          }
+        },
+        {
+          "gate": "table_support",
+          "ok": true,
+          "evidence": {
+            "off_table_samples": 0,
+            "tolerance_m": 0.01
+          }
+        },
+        {
+          "gate": "protected_unmoved",
+          "ok": true,
+          "evidence": {
+            "max_excursion_m": 0.0,
+            "tolerance_m": 0.005
+          }
+        },
+        {
+          "gate": "no_lift",
+          "ok": true,
+          "evidence": {
+            "max_lift_m": 1.4e-05,
+            "allowed_m": 0.02
+          }
+        },
+        {
+          "gate": "pusher_contact",
+          "ok": true,
+          "evidence": {
+            "motion_windows": 2354,
+            "overlapping_windows": 2354,
+            "contact_intervals": 1,
+            "pusher_links": [
+              "open_manipulator_x::gripper_left_link::gripper_left_link_collision",
+              "open_manipulator_x::gripper_right_link::gripper_right_link_collision",
+              "open_manipulator_x::link5::link5_collision"
+            ]
+          }
+        },
+        {
+          "gate": "gripper",
+          "ok": true,
+          "evidence": {
+            "joint": "gripper_left_joint",
+            "samples": 8156,
+            "aperture_travel_rad": 0.0,
+            "limit_rad": 0.002,
+            "min_aperture_rad": -0.0,
+            "max_aperture_rad": -0.0
+          }
+        },
+        {
+          "gate": "no_attachment",
+          "ok": true,
+          "evidence": {
+            "events": 0
+          }
+        },
+        {
+          "gate": "no_teleport",
+          "ok": true,
+          "evidence": {
+            "max_jump_m": 2.7e-05,
+            "threshold_m": 0.03,
+            "declared_jump_m": 2.7e-05,
+            "measured_jump_m": 2.7e-05
+          }
+        }
+      ],
+      "failed_gates": [
+        "terminal"
+      ],
+      "summary": {
+        "kind": "CONSTRAINED_FINGER_PUSH",
+        "status": "RETURN_FAILED",
+        "detail": "MotionFailed: observation guard during planning: native source unavailable: {\"physics\": {\"wall_age_s\": 2.020100726, \"source_sim_ns\": 70295000000, \"clock_minus_source_ns\": -5000000}, \"contacts\": {\"wall_age_s\": 2.020394529, \"source_sim_ns\": 70295000000, \"clock_minus_source_ns\": -5000000}, \"raw_physics\": {\"wall_age_s\": 2.020100726, \"source_sim_ns\": 70295000000, \"clock_minus_source_ns\": -5000000}}",
+        "attempts": 1,
+        "goal_geometry_reached": false,
+        "actuator_goals": 11,
+        "independent_acceptance_claim": false,
+        "motion_terminal_known": true
+      },
+      "receipts": [
+        {
+          "request_id": "contact-00",
+          "primitive_outcome": "SUCCEEDED",
+          "primitive_error_code": 0,
+          "stroke_signed_m": 0.030493667185220202,
+          "requested_m": 0.03,
+          "physical_contact_observed": true,
+          "motion_terminal_known": true,
+          "return_completed": false,
+          "canceled": false,
+          "post_return": null,
+          "attempt_start": [
+            0.22,
+            2.5230356855132592e-20,
+            0.01749999751174475
+          ],
+          "schema_version": "contact-push-receipt/1",
+          "arm_ready": false,
+          "clock_domain": "ROS_SIM_TIME",
+          "monotonic_clock_scope": "same_host",
+          "direction": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "returned_signed_m": null,
+          "return_loss_m": null,
+          "progress_preserved": null,
+          "returned_request_geometry_satisfied": null,
+          "independent_acceptance_claim": false,
+          "native_contact": {
+            "physical_contact_observed": true,
+            "contact_steps": 3934,
+            "rear_fraction": 1.0,
+            "horizontal_normal_fraction": 1.0,
+            "maximum_patch_distance_m": 4.510780178882506e-05,
+            "unexpected_robot_colliders": [],
+            "source_problem": null,
+            "protected_peak_m": 2.4882552511484857e-09,
+            "freshness": {
+              "physics": {
+                "wall_age_s": 0.109304101,
+                "source_sim_ns": 64610000000,
+                "clock_minus_source_ns": -45000000
+              },
+              "contacts": {
+                "wall_age_s": 0.109108431,
+                "source_sim_ns": 64610000000,
+                "clock_minus_source_ns": -45000000
+              },
+              "raw_physics": {
+                "wall_age_s": 0.109304101,
+                "source_sim_ns": 64610000000,
+                "clock_minus_source_ns": -45000000
+              }
+            },
+            "pre_robot_contact_prefix_records": 1
+          },
+          "detail": "MotionFailed: observation guard during planning: native source unavailable: {\"physics\": {\"wall_age_s\": 2.020100726, \"source_sim_ns\": 70295000000, \"clock_minus_source_ns\": -5000000}, \"contacts\": {\"wall_age_s\": 2.020394529, \"source_sim_ns\": 70295000000, \"clock_minus_source_ns\": -5000000}, \"raw_physics\": {\"wall_age_s\": 2.020100726, \"source_sim_ns\": 70295000000, \"clock_minus_source_ns\": -5000000}}"
+        }
+      ],
+      "consumer_checks": [
+        {
+          "kind": "RECEIPT_RECEIVED",
+          "monotonic_ns": 34737022524872,
+          "sim_ns": 81625000000,
+          "observed_world_revision": 2,
+          "ready_checked": false
+        },
+        {
+          "kind": "RECEIPT_RECHECK_AFTER_300MS",
+          "monotonic_ns": 34737329396490,
+          "sim_ns": 81735000000,
+          "request_id": "contact-00",
+          "ready_checked": false
+        },
+        {
+          "kind": "CONSUMER_FINISHED",
+          "monotonic_ns": 34740146342804,
+          "sim_ns": 83245000000,
+          "received": 1,
+          "actuator_goals": 0
+        }
+      ],
+      "dispatch_joint_source_age_max_s": 0.05,
+      "dispatch_joint_receive_age_max_s": 0.02406026799872052,
+      "recorded_source_hash_checks": {
+        "flexcell_skills.contracts.push": true,
+        "flexcell_skills.contact_geometry": true,
+        "flexcell_skills.contact_motion": true,
+        "flexcell_skills.contact_receipt": true,
+        "flexcell_skills.contact_trace": true,
+        "run_contact_push.py": true,
+        "record_receipts.py": true,
+        "run_case.py": true
+      },
+      "recorded_sources_match_preregistration": true,
+      "claim_accuracy": "NOT_MEASURED_NO_AGENT_CLAIM"
+    },
+    {
+      "run": "J1",
+      "version": "v11_validation",
+      "role": "development_validation",
+      "execution": {
+        "arm": "contact",
+        "status": "EXECUTED",
+        "physical_capability_claim": false,
+        "driver_exit": 2
+      },
+      "net_signed_m": 0.0,
+      "net_vector_m": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "protected_net_m": 0.0,
+      "full_task_passed": false,
+      "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+      "gates": [
+        {
+          "gate": "terminal",
+          "ok": false,
+          "evidence": {
+            "evaluator_version": null,
+            "passed": false
+          }
+        },
+        {
+          "gate": "trajectory",
+          "ok": true,
+          "evidence": {
+            "objects": [
+              "target_box_a",
+              "target_box_b"
+            ],
+            "total_samples": 16952
+          }
+        },
+        {
+          "gate": "table_support",
+          "ok": true,
+          "evidence": {
+            "off_table_samples": 0,
+            "tolerance_m": 0.01
+          }
+        },
+        {
+          "gate": "protected_unmoved",
+          "ok": true,
+          "evidence": {
+            "max_excursion_m": 0.0,
+            "tolerance_m": 0.005
+          }
+        },
+        {
+          "gate": "no_lift",
+          "ok": true,
+          "evidence": {
+            "max_lift_m": -0.0,
+            "allowed_m": 0.02
+          }
+        },
+        {
+          "gate": "pusher_contact",
+          "ok": false,
+          "evidence": {}
+        },
+        {
+          "gate": "gripper",
+          "ok": true,
+          "evidence": {
+            "joint": "gripper_left_joint",
+            "samples": 3970,
+            "aperture_travel_rad": 0.0,
+            "limit_rad": 0.002,
+            "min_aperture_rad": -0.0,
+            "max_aperture_rad": -0.0
+          }
+        },
+        {
+          "gate": "no_attachment",
+          "ok": true,
+          "evidence": {
+            "events": 0
+          }
+        },
+        {
+          "gate": "no_teleport",
+          "ok": true,
+          "evidence": {
+            "max_jump_m": 0.0,
+            "threshold_m": 0.03,
+            "declared_jump_m": 0.0,
+            "measured_jump_m": 0.0
+          }
+        }
+      ],
+      "failed_gates": [
+        "terminal",
+        "pusher_contact"
+      ],
+      "summary": {
+        "kind": "CONSTRAINED_FINGER_PUSH",
+        "status": "FAILED",
+        "detail": "MotionFailed: motion guard stopped path: native source unavailable: {\"physics\": {\"wall_age_s\": 2.266715115, \"source_sim_ns\": 40485000000, \"clock_minus_source_ns\": -150000000}, \"contacts\": {\"wall_age_s\": 2.266597281, \"source_sim_ns\": 40485000000, \"clock_minus_source_ns\": -150000000}, \"raw_physics\": {\"wall_age_s\": 2.266715115, \"source_sim_ns\": 40485000000, \"clock_minus_source_ns\": -150000000}}",
+        "attempts": 1,
+        "goal_geometry_reached": false,
+        "actuator_goals": 2,
+        "independent_acceptance_claim": false,
+        "motion_terminal_known": true
+      },
+      "receipts": [
+        {
+          "request_id": "contact-00",
+          "primitive_outcome": "FAILED",
+          "primitive_error_code": 30,
+          "stroke_signed_m": null,
+          "requested_m": 0.03,
+          "physical_contact_observed": false,
+          "motion_terminal_known": true,
+          "return_completed": false,
+          "canceled": false,
+          "post_return": null,
+          "attempt_start": [
+            0.22,
+            2.5230356855132592e-20,
+            0.01749999751174475
+          ],
+          "schema_version": "contact-push-receipt/1",
+          "arm_ready": false,
+          "clock_domain": "ROS_SIM_TIME",
+          "monotonic_clock_scope": "same_host",
+          "direction": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "returned_signed_m": null,
+          "return_loss_m": null,
+          "progress_preserved": null,
+          "returned_request_geometry_satisfied": null,
+          "independent_acceptance_claim": false,
+          "native_contact": {
+            "physical_contact_observed": false,
+            "contact_steps": 0,
+            "rear_fraction": null,
+            "horizontal_normal_fraction": null,
+            "maximum_patch_distance_m": 0.0,
+            "unexpected_robot_colliders": [],
+            "source_problem": null,
+            "protected_peak_m": 2.4882552511484857e-09,
+            "freshness": {
+              "physics": {
+                "wall_age_s": 0.119079778,
+                "source_sim_ns": 40825000000,
+                "clock_minus_source_ns": 5000000
+              },
+              "contacts": {
+                "wall_age_s": 0.122026276,
+                "source_sim_ns": 40825000000,
+                "clock_minus_source_ns": 5000000
+              },
+              "raw_physics": {
+                "wall_age_s": 0.029349127,
+                "source_sim_ns": 40830000000,
+                "clock_minus_source_ns": 0
+              }
+            },
+            "pre_robot_contact_prefix_records": 1
+          },
+          "detail": "MotionFailed: motion guard stopped path: native source unavailable: {\"physics\": {\"wall_age_s\": 2.266715115, \"source_sim_ns\": 40485000000, \"clock_minus_source_ns\": -150000000}, \"contacts\": {\"wall_age_s\": 2.266597281, \"source_sim_ns\": 40485000000, \"clock_minus_source_ns\": -150000000}, \"raw_physics\": {\"wall_age_s\": 2.266715115, \"source_sim_ns\": 40485000000, \"clock_minus_source_ns\": -150000000}}"
+        }
+      ],
+      "consumer_checks": [
+        {
+          "kind": "RECEIPT_RECEIVED",
+          "monotonic_ns": 35081436353639,
+          "sim_ns": 40840000000,
+          "observed_world_revision": 2,
+          "ready_checked": false
+        },
+        {
+          "kind": "RECEIPT_RECHECK_AFTER_300MS",
+          "monotonic_ns": 35081789631540,
+          "sim_ns": 40855000000,
+          "request_id": "contact-00",
+          "ready_checked": false
+        },
+        {
+          "kind": "CONSUMER_FINISHED",
+          "monotonic_ns": 35088147232345,
+          "sim_ns": 41860000000,
+          "received": 1,
+          "actuator_goals": 0
+        }
+      ],
+      "dispatch_joint_source_age_max_s": 0.005,
+      "dispatch_joint_receive_age_max_s": 0.03355979900516104,
+      "recorded_source_hash_checks": {
+        "flexcell_skills.contracts.push": true,
+        "flexcell_skills.contact_geometry": true,
+        "flexcell_skills.contact_motion": true,
+        "flexcell_skills.contact_receipt": true,
+        "flexcell_skills.contact_trace": true,
+        "run_contact_push.py": true,
+        "record_receipts.py": true,
+        "run_case.py": true
+      },
+      "recorded_sources_match_preregistration": true,
+      "claim_accuracy": "NOT_MEASURED_NO_AGENT_CLAIM"
+    },
+    {
+      "run": "K0",
+      "version": "v12_harness",
+      "role": "control",
+      "execution": {
+        "arm": "control",
+        "status": "EXECUTED",
+        "physical_capability_claim": false,
+        "driver_exit": 0
+      },
+      "net_signed_m": 0.04609680636494298,
+      "net_vector_m": [
+        -0.04609680636494298,
+        -0.002849258013390488,
+        -5.247904808075576e-07
+      ],
+      "protected_net_m": 0.0,
+      "full_task_passed": true,
+      "evidence_status": "COMPLETE",
+      "gates": [
+        {
+          "gate": "terminal",
+          "ok": true,
+          "evidence": {
+            "evaluator_version": null,
+            "passed": true
+          }
+        },
+        {
+          "gate": "trajectory",
+          "ok": true,
+          "evidence": {
+            "objects": [
+              "target_box_a",
+              "target_box_b"
+            ],
+            "total_samples": 8462
+          }
+        },
+        {
+          "gate": "table_support",
+          "ok": true,
+          "evidence": {
+            "off_table_samples": 0,
+            "tolerance_m": 0.01
+          }
+        },
+        {
+          "gate": "protected_unmoved",
+          "ok": true,
+          "evidence": {
+            "max_excursion_m": 0.0,
+            "tolerance_m": 0.005
+          }
+        },
+        {
+          "gate": "no_lift",
+          "ok": true,
+          "evidence": {
+            "max_lift_m": 4e-06,
+            "allowed_m": 0.02
+          }
+        },
+        {
+          "gate": "pusher_contact",
+          "ok": true,
+          "evidence": {
+            "motion_windows": 1338,
+            "overlapping_windows": 549,
+            "contact_intervals": 2,
+            "pusher_links": [
+              "open_manipulator_x::gripper_left_link::gripper_left_link_collision",
+              "open_manipulator_x::gripper_right_link::gripper_right_link_collision",
+              "open_manipulator_x::link5::link5_collision"
+            ]
+          }
+        },
+        {
+          "gate": "gripper",
+          "ok": true,
+          "evidence": {
+            "joint": "gripper_left_joint",
+            "samples": 1918,
+            "aperture_travel_rad": 3.5e-05,
+            "limit_rad": 0.002,
+            "min_aperture_rad": -3.3e-05,
+            "max_aperture_rad": 2e-06
+          }
+        },
+        {
+          "gate": "no_attachment",
+          "ok": true,
+          "evidence": {
+            "events": 0
+          }
+        },
+        {
+          "gate": "no_teleport",
+          "ok": true,
+          "evidence": {
+            "max_jump_m": 0.000461,
+            "threshold_m": 0.03,
+            "declared_jump_m": 0.000461,
+            "measured_jump_m": 0.000461
+          }
+        }
+      ],
+      "failed_gates": [],
+      "primitive_results": [
+        {
+          "outcome": 1,
+          "error_code": 36,
+          "displacement_m": 0.047947939153097974
+        }
+      ],
+      "returned_arm_readiness": "NOT_EXPOSED_BY_LEGACY_ACTION",
+      "recorded_source_hash_checks": {
+        "flexcell_skills.contracts.push": true,
+        "flexcell_skills.contact_geometry": true,
+        "flexcell_skills.contact_motion": true,
+        "flexcell_skills.contact_receipt": true,
+        "flexcell_skills.contact_trace": true,
+        "run_contact_push.py": true,
+        "record_receipts.py": true,
+        "task_launch.py": true,
+        "run_case.py": true
+      },
+      "recorded_sources_match_preregistration": true,
+      "claim_accuracy": "NOT_MEASURED_NO_AGENT_CLAIM"
+    },
+    {
+      "run": "K1",
+      "version": "v12_harness",
+      "role": "development_validation",
+      "execution": {
+        "arm": "contact",
+        "status": "EXECUTED",
+        "physical_capability_claim": false,
+        "driver_exit": 0
+      },
+      "net_signed_m": 0.060974108879101124,
+      "net_vector_m": [
+        -0.060974108879101124,
+        5.688848693765085e-05,
+        -2.5509356993067e-07
+      ],
+      "protected_net_m": 0.0,
+      "full_task_passed": true,
+      "evidence_status": "COMPLETE",
+      "gates": [
+        {
+          "gate": "terminal",
+          "ok": true,
+          "evidence": {
+            "evaluator_version": null,
+            "passed": true
+          }
+        },
+        {
+          "gate": "trajectory",
+          "ok": true,
+          "evidence": {
+            "objects": [
+              "target_box_a",
+              "target_box_b"
+            ],
+            "total_samples": 77760
+          }
+        },
+        {
+          "gate": "table_support",
+          "ok": true,
+          "evidence": {
+            "off_table_samples": 0,
+            "tolerance_m": 0.01
+          }
+        },
+        {
+          "gate": "protected_unmoved",
+          "ok": true,
+          "evidence": {
+            "max_excursion_m": 0.0,
+            "tolerance_m": 0.005
+          }
+        },
+        {
+          "gate": "no_lift",
+          "ok": true,
+          "evidence": {
+            "max_lift_m": 1.8e-05,
+            "allowed_m": 0.02
+          }
+        },
+        {
+          "gate": "pusher_contact",
+          "ok": true,
+          "evidence": {
+            "motion_windows": 4320,
+            "overlapping_windows": 4320,
+            "contact_intervals": 2,
+            "pusher_links": [
+              "open_manipulator_x::gripper_left_link::gripper_left_link_collision",
+              "open_manipulator_x::gripper_right_link::gripper_right_link_collision",
+              "open_manipulator_x::link5::link5_collision"
+            ]
+          }
+        },
+        {
+          "gate": "gripper",
+          "ok": true,
+          "evidence": {
+            "joint": "gripper_left_joint",
+            "samples": 18022,
+            "aperture_travel_rad": 0.0,
+            "limit_rad": 0.002,
+            "min_aperture_rad": -0.0,
+            "max_aperture_rad": -0.0
+          }
+        },
+        {
+          "gate": "no_attachment",
+          "ok": true,
+          "evidence": {
+            "events": 0
+          }
+        },
+        {
+          "gate": "no_teleport",
+          "ok": true,
+          "evidence": {
+            "max_jump_m": 3.1e-05,
+            "threshold_m": 0.03,
+            "declared_jump_m": 3.1e-05,
+            "measured_jump_m": 3.1e-05
+          }
+        }
+      ],
+      "failed_gates": [],
+      "summary": {
+        "kind": "CONSTRAINED_FINGER_PUSH",
+        "status": "GOAL_GEOMETRY_REACHED",
+        "detail": null,
+        "attempts": 2,
+        "goal_geometry_reached": true,
+        "actuator_goals": 24,
+        "independent_acceptance_claim": false,
+        "motion_terminal_known": true
+      },
+      "receipts": [
+        {
+          "request_id": "contact-00",
+          "primitive_outcome": "SUCCEEDED",
+          "primitive_error_code": 0,
+          "stroke_signed_m": 0.030477118552113103,
+          "requested_m": 0.03,
+          "physical_contact_observed": true,
+          "motion_terminal_known": true,
+          "return_completed": true,
+          "canceled": false,
+          "post_return": {
+            "source": "SIMULATION_GROUND_TRUTH",
+            "frame": "world",
+            "source_age_s": 0.023222449999593664,
+            "arm_quiet": true,
+            "object_stable": true,
+            "carry_disengaged": true,
+            "gripper_state_known": true,
+            "tool_clearance_m": 0.10337316663428607,
+            "protected_excursion_m": 2.4882552511484857e-09,
+            "position": [
+              0.18951969860182696,
+              3.217785006620075e-05,
+              0.017499706488234144
+            ],
+            "revision": 2,
+            "source_stamp_ns": 108130000000,
+            "observed_monotonic_ns": 35698791220216
+          },
+          "attempt_start": [
+            0.22,
+            2.5230356855132592e-20,
+            0.01749999751174475
+          ],
+          "schema_version": "contact-push-receipt/1",
+          "arm_ready": true,
+          "clock_domain": "ROS_SIM_TIME",
+          "monotonic_clock_scope": "same_host",
+          "direction": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "returned_signed_m": 0.030480301398173038,
+          "return_loss_m": -3.1828460599347963e-06,
+          "progress_preserved": true,
+          "returned_request_geometry_satisfied": true,
+          "independent_acceptance_claim": false,
+          "native_contact": {
+            "physical_contact_observed": true,
+            "contact_steps": 4368,
+            "rear_fraction": 1.0,
+            "horizontal_normal_fraction": 1.0,
+            "maximum_patch_distance_m": 3.6018517043137213e-05,
+            "unexpected_robot_colliders": [],
+            "source_problem": null,
+            "protected_peak_m": 2.4882552511484857e-09,
+            "freshness": {
+              "physics": {
+                "wall_age_s": 0.010892278,
+                "source_sim_ns": 71195000000,
+                "clock_minus_source_ns": 0
+              },
+              "contacts": {
+                "wall_age_s": 0.010820476,
+                "source_sim_ns": 71195000000,
+                "clock_minus_source_ns": 0
+              },
+              "raw_physics": {
+                "wall_age_s": 0.010892278,
+                "source_sim_ns": 71195000000,
+                "clock_minus_source_ns": 0
+              }
+            },
+            "pre_robot_contact_prefix_records": 0
+          },
+          "detail": null
+        },
+        {
+          "request_id": "contact-01",
+          "primitive_outcome": "SUCCEEDED",
+          "primitive_error_code": 0,
+          "stroke_signed_m": 0.030484407337049463,
+          "requested_m": 0.03,
+          "physical_contact_observed": true,
+          "motion_terminal_known": true,
+          "return_completed": true,
+          "canceled": false,
+          "post_return": {
+            "source": "SIMULATION_GROUND_TRUTH",
+            "frame": "world",
+            "source_age_s": 0.07573748000140768,
+            "arm_quiet": true,
+            "object_stable": true,
+            "carry_disengaged": true,
+            "gripper_state_known": true,
+            "tool_clearance_m": 0.1033733038547272,
+            "protected_excursion_m": 2.4882552511484857e-09,
+            "position": [
+              0.15902589112089888,
+              5.6888486937650874e-05,
+              0.01749974241817482
+            ],
+            "revision": 4,
+            "source_stamp_ns": 191735000000,
+            "observed_monotonic_ns": 35862007514511
+          },
+          "attempt_start": [
+            0.18951969860182696,
+            3.217785006620075e-05,
+            0.017499706488234144
+          ],
+          "schema_version": "contact-push-receipt/1",
+          "arm_ready": true,
+          "clock_domain": "ROS_SIM_TIME",
+          "monotonic_clock_scope": "same_host",
+          "direction": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "returned_signed_m": 0.030493807480928087,
+          "return_loss_m": -9.400143878623979e-06,
+          "progress_preserved": true,
+          "returned_request_geometry_satisfied": true,
+          "independent_acceptance_claim": false,
+          "native_contact": {
+            "physical_contact_observed": true,
+            "contact_steps": 4636,
+            "rear_fraction": 1.0,
+            "horizontal_normal_fraction": 1.0,
+            "maximum_patch_distance_m": 4.428073261153182e-05,
+            "unexpected_robot_colliders": [],
+            "source_problem": null,
+            "protected_peak_m": 2.4882552511484857e-09,
+            "freshness": {
+              "physics": {
+                "wall_age_s": 0.028123211,
+                "source_sim_ns": 159655000000,
+                "clock_minus_source_ns": -40000000
+              },
+              "contacts": {
+                "wall_age_s": 0.031242225,
+                "source_sim_ns": 159655000000,
+                "clock_minus_source_ns": -40000000
+              },
+              "raw_physics": {
+                "wall_age_s": 0.028123211,
+                "source_sim_ns": 159655000000,
+                "clock_minus_source_ns": -40000000
+              }
+            },
+            "pre_robot_contact_prefix_records": 0
+          },
+          "detail": null
+        }
+      ],
+      "consumer_checks": [
+        {
+          "kind": "RECEIPT_RECEIVED",
+          "monotonic_ns": 35698821535787,
+          "sim_ns": 108170000000,
+          "observed_world_revision": 2,
+          "ready_checked": true
+        },
+        {
+          "kind": "RECEIPT_RECHECK_AFTER_300MS",
+          "monotonic_ns": 35699121508741,
+          "sim_ns": 108340000000,
+          "request_id": "contact-00",
+          "ready_checked": false
+        },
+        {
+          "kind": "RECEIPT_RECEIVED",
+          "monotonic_ns": 35862045502941,
+          "sim_ns": 191825000000,
+          "observed_world_revision": 4,
+          "ready_checked": true
+        },
+        {
+          "kind": "RECEIPT_RECHECK_AFTER_300MS",
+          "monotonic_ns": 35862346006909,
+          "sim_ns": 192000000000,
+          "request_id": "contact-01",
+          "ready_checked": false
+        },
+        {
+          "kind": "CONSUMER_FINISHED",
+          "monotonic_ns": 35864999318882,
+          "sim_ns": 194000000000,
+          "received": 2,
+          "actuator_goals": 0
+        }
+      ],
+      "dispatch_joint_source_age_max_s": 0.025,
+      "dispatch_joint_receive_age_max_s": 0.18517880699801026,
+      "recorded_source_hash_checks": {
+        "flexcell_skills.contracts.push": true,
+        "flexcell_skills.contact_geometry": true,
+        "flexcell_skills.contact_motion": true,
+        "flexcell_skills.contact_receipt": true,
+        "flexcell_skills.contact_trace": true,
+        "run_contact_push.py": true,
+        "record_receipts.py": true,
+        "task_launch.py": true,
+        "run_case.py": true
+      },
+      "recorded_sources_match_preregistration": true,
+      "claim_accuracy": "NOT_MEASURED_NO_AGENT_CLAIM"
+    },
+    {
+      "run": "K2",
+      "version": "v12_harness",
+      "role": "confirmation",
+      "execution": {
+        "arm": "contact",
+        "status": "EXECUTED",
+        "physical_capability_claim": false,
+        "driver_exit": 0
+      },
+      "net_signed_m": 0.06097241759458494,
+      "net_vector_m": [
+        -0.06097241759458494,
+        3.893212252966459e-05,
+        -2.718446871809166e-07
+      ],
+      "protected_net_m": 0.0,
+      "full_task_passed": true,
+      "evidence_status": "COMPLETE",
+      "gates": [
+        {
+          "gate": "terminal",
+          "ok": true,
+          "evidence": {
+            "evaluator_version": null,
+            "passed": true
+          }
+        },
+        {
+          "gate": "trajectory",
+          "ok": true,
+          "evidence": {
+            "objects": [
+              "target_box_a",
+              "target_box_b"
+            ],
+            "total_samples": 88584
+          }
+        },
+        {
+          "gate": "table_support",
+          "ok": true,
+          "evidence": {
+            "off_table_samples": 0,
+            "tolerance_m": 0.01
+          }
+        },
+        {
+          "gate": "protected_unmoved",
+          "ok": true,
+          "evidence": {
+            "max_excursion_m": 0.0,
+            "tolerance_m": 0.005
+          }
+        },
+        {
+          "gate": "no_lift",
+          "ok": true,
+          "evidence": {
+            "max_lift_m": 1.6e-05,
+            "allowed_m": 0.02
+          }
+        },
+        {
+          "gate": "pusher_contact",
+          "ok": true,
+          "evidence": {
+            "motion_windows": 4324,
+            "overlapping_windows": 4324,
+            "contact_intervals": 3,
+            "pusher_links": [
+              "open_manipulator_x::gripper_left_link::gripper_left_link_collision",
+              "open_manipulator_x::gripper_right_link::gripper_right_link_collision",
+              "open_manipulator_x::link5::link5_collision"
+            ]
+          }
+        },
+        {
+          "gate": "gripper",
+          "ok": true,
+          "evidence": {
+            "joint": "gripper_left_joint",
+            "samples": 16867,
+            "aperture_travel_rad": 0.0,
+            "limit_rad": 0.002,
+            "min_aperture_rad": -0.0,
+            "max_aperture_rad": -0.0
+          }
+        },
+        {
+          "gate": "no_attachment",
+          "ok": true,
+          "evidence": {
+            "events": 0
+          }
+        },
+        {
+          "gate": "no_teleport",
+          "ok": true,
+          "evidence": {
+            "max_jump_m": 3.2e-05,
+            "threshold_m": 0.03,
+            "declared_jump_m": 3.2e-05,
+            "measured_jump_m": 3.2e-05
+          }
+        }
+      ],
+      "failed_gates": [],
+      "summary": {
+        "kind": "CONSTRAINED_FINGER_PUSH",
+        "status": "GOAL_GEOMETRY_REACHED",
+        "detail": null,
+        "attempts": 2,
+        "goal_geometry_reached": true,
+        "actuator_goals": 24,
+        "independent_acceptance_claim": false,
+        "motion_terminal_known": true
+      },
+      "receipts": [
+        {
+          "request_id": "contact-00",
+          "primitive_outcome": "SUCCEEDED",
+          "primitive_error_code": 0,
+          "stroke_signed_m": 0.030475948093368177,
+          "requested_m": 0.03,
+          "physical_contact_observed": true,
+          "motion_terminal_known": true,
+          "return_completed": true,
+          "canceled": false,
+          "post_return": {
+            "source": "SIMULATION_GROUND_TRUTH",
+            "frame": "world",
+            "source_age_s": 0.05280554199998733,
+            "arm_quiet": true,
+            "object_stable": true,
+            "carry_disengaged": true,
+            "gripper_state_known": true,
+            "tool_clearance_m": 0.10337303902721884,
+            "protected_excursion_m": 2.4882552511484857e-09,
+            "position": [
+              0.18951625580621667,
+              1.989352448847554e-05,
+              0.017499694848609477
+            ],
+            "revision": 2,
+            "source_stamp_ns": 117005000000,
+            "observed_monotonic_ns": 36221283021392
+          },
+          "attempt_start": [
+            0.22,
+            2.5230356855132592e-20,
+            0.01749999751174475
+          ],
+          "schema_version": "contact-push-receipt/1",
+          "arm_ready": true,
+          "clock_domain": "ROS_SIM_TIME",
+          "monotonic_clock_scope": "same_host",
+          "direction": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "returned_signed_m": 0.03048374419378333,
+          "return_loss_m": -7.796100415152774e-06,
+          "progress_preserved": true,
+          "returned_request_geometry_satisfied": true,
+          "independent_acceptance_claim": false,
+          "native_contact": {
+            "physical_contact_observed": true,
+            "contact_steps": 4615,
+            "rear_fraction": 1.0,
+            "horizontal_normal_fraction": 1.0,
+            "maximum_patch_distance_m": 3.291936288431884e-05,
+            "unexpected_robot_colliders": [],
+            "source_problem": null,
+            "protected_peak_m": 2.4882552511484857e-09,
+            "freshness": {
+              "physics": {
+                "wall_age_s": 0.010462736,
+                "source_sim_ns": 77245000000,
+                "clock_minus_source_ns": -15000000
+              },
+              "contacts": {
+                "wall_age_s": 0.010382826,
+                "source_sim_ns": 77245000000,
+                "clock_minus_source_ns": -15000000
+              },
+              "raw_physics": {
+                "wall_age_s": 0.010462736,
+                "source_sim_ns": 77245000000,
+                "clock_minus_source_ns": -15000000
+              }
+            },
+            "pre_robot_contact_prefix_records": 0
+          },
+          "detail": null
+        },
+        {
+          "request_id": "contact-01",
+          "primitive_outcome": "SUCCEEDED",
+          "primitive_error_code": 0,
+          "stroke_signed_m": 0.030445374220557597,
+          "requested_m": 0.03,
+          "physical_contact_observed": true,
+          "motion_terminal_known": true,
+          "return_completed": true,
+          "canceled": false,
+          "post_return": {
+            "source": "SIMULATION_GROUND_TRUTH",
+            "frame": "world",
+            "source_age_s": 0.04733381400001235,
+            "arm_quiet": true,
+            "object_stable": true,
+            "carry_disengaged": true,
+            "gripper_state_known": true,
+            "tool_clearance_m": 0.10337330893360105,
+            "protected_excursion_m": 2.4882552511484857e-09,
+            "position": [
+              0.15902758240541506,
+              3.8932122529664616e-05,
+              0.01749972566705757
+            ],
+            "revision": 5,
+            "source_stamp_ns": 219000000000,
+            "observed_monotonic_ns": 36433510725666
+          },
+          "attempt_start": [
+            0.18951625580621667,
+            1.989352448847554e-05,
+            0.017499694848609477
+          ],
+          "schema_version": "contact-push-receipt/1",
+          "arm_ready": true,
+          "clock_domain": "ROS_SIM_TIME",
+          "monotonic_clock_scope": "same_host",
+          "direction": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "returned_signed_m": 0.030488673400801608,
+          "return_loss_m": -4.3299180244010804e-05,
+          "progress_preserved": true,
+          "returned_request_geometry_satisfied": true,
+          "independent_acceptance_claim": false,
+          "native_contact": {
+            "physical_contact_observed": true,
+            "contact_steps": 4423,
+            "rear_fraction": 1.0,
+            "horizontal_normal_fraction": 1.0,
+            "maximum_patch_distance_m": 4.997085250643695e-05,
+            "unexpected_robot_colliders": [],
+            "source_problem": null,
+            "protected_peak_m": 2.4882552511484857e-09,
+            "freshness": {
+              "physics": {
+                "wall_age_s": 0.040577237,
+                "source_sim_ns": 179495000000,
+                "clock_minus_source_ns": -20000000
+              },
+              "contacts": {
+                "wall_age_s": 0.042468041,
+                "source_sim_ns": 179495000000,
+                "clock_minus_source_ns": -20000000
+              },
+              "raw_physics": {
+                "wall_age_s": 0.023570326,
+                "source_sim_ns": 179500000000,
+                "clock_minus_source_ns": -25000000
+              }
+            },
+            "pre_robot_contact_prefix_records": 0
+          },
+          "detail": null
+        }
+      ],
+      "consumer_checks": [
+        {
+          "kind": "RECEIPT_RECEIVED",
+          "monotonic_ns": 36221305919134,
+          "sim_ns": 117040000000,
+          "observed_world_revision": 2,
+          "ready_checked": true
+        },
+        {
+          "kind": "RECEIPT_RECHECK_AFTER_300MS",
+          "monotonic_ns": 36221606415323,
+          "sim_ns": 117215000000,
+          "request_id": "contact-00",
+          "ready_checked": false
+        },
+        {
+          "kind": "RECEIPT_RECEIVED",
+          "monotonic_ns": 36433529245096,
+          "sim_ns": 219055000000,
+          "observed_world_revision": 5,
+          "ready_checked": true
+        },
+        {
+          "kind": "RECEIPT_RECHECK_AFTER_300MS",
+          "monotonic_ns": 36433829743384,
+          "sim_ns": 219225000000,
+          "request_id": "contact-01",
+          "ready_checked": false
+        },
+        {
+          "kind": "CONSUMER_FINISHED",
+          "monotonic_ns": 36436198484424,
+          "sim_ns": 221035000000,
+          "received": 2,
+          "actuator_goals": 0
+        }
+      ],
+      "dispatch_joint_source_age_max_s": 0.015,
+      "dispatch_joint_receive_age_max_s": 0.07930428300460335,
+      "recorded_source_hash_checks": {
+        "flexcell_skills.contracts.push": true,
+        "flexcell_skills.contact_geometry": true,
+        "flexcell_skills.contact_motion": true,
+        "flexcell_skills.contact_receipt": true,
+        "flexcell_skills.contact_trace": true,
+        "run_contact_push.py": true,
+        "record_receipts.py": true,
+        "task_launch.py": true,
+        "run_case.py": true
+      },
+      "recorded_sources_match_preregistration": true,
+      "claim_accuracy": "NOT_MEASURED_NO_AGENT_CLAIM"
+    },
+    {
+      "run": "K3",
+      "version": "v12_harness",
+      "role": "confirmation",
+      "execution": {
+        "arm": "contact",
+        "status": "EXECUTED",
+        "physical_capability_claim": false,
+        "driver_exit": 0
+      },
+      "net_signed_m": 0.060974990859453765,
+      "net_vector_m": [
+        -0.060974990859453765,
+        4.6776145879285926e-05,
+        -5.18472996528796e-07
+      ],
+      "protected_net_m": 0.0,
+      "full_task_passed": true,
+      "evidence_status": "COMPLETE",
+      "gates": [
+        {
+          "gate": "terminal",
+          "ok": true,
+          "evidence": {
+            "evaluator_version": null,
+            "passed": true
+          }
+        },
+        {
+          "gate": "trajectory",
+          "ok": true,
+          "evidence": {
+            "objects": [
+              "target_box_a",
+              "target_box_b"
+            ],
+            "total_samples": 79700
+          }
+        },
+        {
+          "gate": "table_support",
+          "ok": true,
+          "evidence": {
+            "off_table_samples": 0,
+            "tolerance_m": 0.01
+          }
+        },
+        {
+          "gate": "protected_unmoved",
+          "ok": true,
+          "evidence": {
+            "max_excursion_m": 0.0,
+            "tolerance_m": 0.005
+          }
+        },
+        {
+          "gate": "no_lift",
+          "ok": true,
+          "evidence": {
+            "max_lift_m": 1.7e-05,
+            "allowed_m": 0.02
+          }
+        },
+        {
+          "gate": "pusher_contact",
+          "ok": true,
+          "evidence": {
+            "motion_windows": 4312,
+            "overlapping_windows": 4312,
+            "contact_intervals": 2,
+            "pusher_links": [
+              "open_manipulator_x::gripper_left_link::gripper_left_link_collision",
+              "open_manipulator_x::gripper_right_link::gripper_right_link_collision",
+              "open_manipulator_x::link5::link5_collision"
+            ]
+          }
+        },
+        {
+          "gate": "gripper",
+          "ok": true,
+          "evidence": {
+            "joint": "gripper_left_joint",
+            "samples": 15881,
+            "aperture_travel_rad": 0.0,
+            "limit_rad": 0.002,
+            "min_aperture_rad": -0.0,
+            "max_aperture_rad": -0.0
+          }
+        },
+        {
+          "gate": "no_attachment",
+          "ok": true,
+          "evidence": {
+            "events": 0
+          }
+        },
+        {
+          "gate": "no_teleport",
+          "ok": true,
+          "evidence": {
+            "max_jump_m": 3.1e-05,
+            "threshold_m": 0.03,
+            "declared_jump_m": 3.1e-05,
+            "measured_jump_m": 3.1e-05
+          }
+        }
+      ],
+      "failed_gates": [],
+      "summary": {
+        "kind": "CONSTRAINED_FINGER_PUSH",
+        "status": "GOAL_GEOMETRY_REACHED",
+        "detail": null,
+        "attempts": 2,
+        "goal_geometry_reached": true,
+        "actuator_goals": 24,
+        "independent_acceptance_claim": false,
+        "motion_terminal_known": true
+      },
+      "receipts": [
+        {
+          "request_id": "contact-00",
+          "primitive_outcome": "SUCCEEDED",
+          "primitive_error_code": 0,
+          "stroke_signed_m": 0.03046689351941001,
+          "requested_m": 0.03,
+          "physical_contact_observed": true,
+          "motion_terminal_known": true,
+          "return_completed": true,
+          "canceled": false,
+          "post_return": {
+            "source": "SIMULATION_GROUND_TRUTH",
+            "frame": "world",
+            "source_age_s": 0.04422325800260296,
+            "arm_quiet": true,
+            "object_stable": true,
+            "carry_disengaged": true,
+            "gripper_state_known": true,
+            "tool_clearance_m": 0.10337313341502474,
+            "protected_excursion_m": 2.4882552511484857e-09,
+            "position": [
+              0.18951409210565726,
+              1.8195697324947976e-05,
+              0.017499617047089997
+            ],
+            "revision": 2,
+            "source_stamp_ns": 95260000000,
+            "observed_monotonic_ns": 36713895404558
+          },
+          "attempt_start": [
+            0.22,
+            2.5230356855132592e-20,
+            0.01749999751174475
+          ],
+          "schema_version": "contact-push-receipt/1",
+          "arm_ready": true,
+          "clock_domain": "ROS_SIM_TIME",
+          "monotonic_clock_scope": "same_host",
+          "direction": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "returned_signed_m": 0.030485907894342745,
+          "return_loss_m": -1.901437493273539e-05,
+          "progress_preserved": true,
+          "returned_request_geometry_satisfied": true,
+          "independent_acceptance_claim": false,
+          "native_contact": {
+            "physical_contact_observed": true,
+            "contact_steps": 4294,
+            "rear_fraction": 1.0,
+            "horizontal_normal_fraction": 1.0,
+            "maximum_patch_distance_m": 3.636723861020687e-05,
+            "unexpected_robot_colliders": [],
+            "source_problem": null,
+            "protected_peak_m": 2.4882552511484857e-09,
+            "freshness": {
+              "physics": {
+                "wall_age_s": 0.022596212,
+                "source_sim_ns": 66225000000,
+                "clock_minus_source_ns": -15000000
+              },
+              "contacts": {
+                "wall_age_s": 0.023614758,
+                "source_sim_ns": 66225000000,
+                "clock_minus_source_ns": -15000000
+              },
+              "raw_physics": {
+                "wall_age_s": 0.022596212,
+                "source_sim_ns": 66225000000,
+                "clock_minus_source_ns": -15000000
+              }
+            },
+            "pre_robot_contact_prefix_records": 0
+          },
+          "detail": null
+        },
+        {
+          "request_id": "contact-01",
+          "primitive_outcome": "SUCCEEDED",
+          "primitive_error_code": 0,
+          "stroke_signed_m": 0.03045989452711559,
+          "requested_m": 0.03,
+          "physical_contact_observed": true,
+          "motion_terminal_known": true,
+          "return_completed": true,
+          "canceled": false,
+          "post_return": {
+            "source": "SIMULATION_GROUND_TRUTH",
+            "frame": "world",
+            "source_age_s": 0.060000000000002274,
+            "arm_quiet": true,
+            "object_stable": true,
+            "carry_disengaged": true,
+            "gripper_state_known": true,
+            "tool_clearance_m": 0.103373360389528,
+            "protected_excursion_m": 2.4882552511484857e-09,
+            "position": [
+              0.15902500914054624,
+              4.6776145879285953e-05,
+              0.01749947903874822
+            ],
+            "revision": 5,
+            "source_stamp_ns": 196425000000,
+            "observed_monotonic_ns": 36933347591026
+          },
+          "attempt_start": [
+            0.18951409210565726,
+            1.8195697324947976e-05,
+            0.017499617047089997
+          ],
+          "schema_version": "contact-push-receipt/1",
+          "arm_ready": true,
+          "clock_domain": "ROS_SIM_TIME",
+          "monotonic_clock_scope": "same_host",
+          "direction": [
+            -1.0,
+            0.0,
+            0.0
+          ],
+          "returned_signed_m": 0.03048908296511102,
+          "return_loss_m": -2.9188437995431027e-05,
+          "progress_preserved": true,
+          "returned_request_geometry_satisfied": true,
+          "independent_acceptance_claim": false,
+          "native_contact": {
+            "physical_contact_observed": true,
+            "contact_steps": 4003,
+            "rear_fraction": 1.0,
+            "horizontal_normal_fraction": 1.0,
+            "maximum_patch_distance_m": 4.028206100157709e-05,
+            "unexpected_robot_colliders": [],
+            "source_problem": null,
+            "protected_peak_m": 2.4882552511484857e-09,
+            "freshness": {
+              "physics": {
+                "wall_age_s": 0.020248126,
+                "source_sim_ns": 156440000000,
+                "clock_minus_source_ns": -20000000
+              },
+              "contacts": {
+                "wall_age_s": 0.020586157,
+                "source_sim_ns": 156440000000,
+                "clock_minus_source_ns": -20000000
+              },
+              "raw_physics": {
+                "wall_age_s": 0.020248126,
+                "source_sim_ns": 156440000000,
+                "clock_minus_source_ns": -20000000
+              }
+            },
+            "pre_robot_contact_prefix_records": 0
+          },
+          "detail": null
+        }
+      ],
+      "consumer_checks": [
+        {
+          "kind": "RECEIPT_RECEIVED",
+          "monotonic_ns": 36713987881454,
+          "sim_ns": 95375000000,
+          "observed_world_revision": 2,
+          "ready_checked": true
+        },
+        {
+          "kind": "RECEIPT_RECHECK_AFTER_300MS",
+          "monotonic_ns": 36714286846963,
+          "sim_ns": 95570000000,
+          "request_id": "contact-00",
+          "ready_checked": false
+        },
+        {
+          "kind": "RECEIPT_RECEIVED",
+          "monotonic_ns": 36933444895889,
+          "sim_ns": 196530000000,
+          "observed_world_revision": 5,
+          "ready_checked": true
+        },
+        {
+          "kind": "RECEIPT_RECHECK_AFTER_300MS",
+          "monotonic_ns": 36933739818077,
+          "sim_ns": 196685000000,
+          "request_id": "contact-01",
+          "ready_checked": false
+        },
+        {
+          "kind": "CONSUMER_FINISHED",
+          "monotonic_ns": 36936534802340,
+          "sim_ns": 198515000000,
+          "received": 2,
+          "actuator_goals": 0
+        }
+      ],
+      "dispatch_joint_source_age_max_s": 0.07,
+      "dispatch_joint_receive_age_max_s": 0.04196327899990138,
+      "recorded_source_hash_checks": {
+        "flexcell_skills.contracts.push": true,
+        "flexcell_skills.contact_geometry": true,
+        "flexcell_skills.contact_motion": true,
+        "flexcell_skills.contact_receipt": true,
+        "flexcell_skills.contact_trace": true,
+        "run_contact_push.py": true,
+        "record_receipts.py": true,
+        "task_launch.py": true,
+        "run_case.py": true
+      },
+      "recorded_sources_match_preregistration": true,
+      "claim_accuracy": "NOT_MEASURED_NO_AGENT_CLAIM"
+    }
+  ],
+  "aborted_or_unearned_slots": {
+    "v3_fixed_batch": [
+      "A1",
+      "B1",
+      "B2",
+      "B3"
+    ],
+    "v4_fixed_batch": [
+      "A1",
+      "B2",
+      "B3"
+    ],
+    "v5_fixed_batch": [
+      "C2",
+      "C3"
+    ],
+    "v6_fixed_batch": [
+      "E2",
+      "E3"
+    ],
+    "v7_validation": [
+      "F2",
+      "F3"
+    ],
+    "v8_validation": [
+      "G2",
+      "G3"
+    ],
+    "v9_validation": [
+      "H2",
+      "H3"
+    ],
+    "v10_validation": [
+      "I2",
+      "I3"
+    ],
+    "v11_validation": [
+      "J2",
+      "J3"
+    ]
+  },
+  "ordinary_pick_place_this_round": "NOT_RUN; prior mixed release outcomes retained",
+  "runtime_integration": "NOT_DONE",
+  "formal_baseline": "NOT_PROMOTED",
+  "L4": "NOT_ACQUIRED"
+}

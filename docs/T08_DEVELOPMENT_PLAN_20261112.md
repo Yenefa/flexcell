@@ -157,3 +157,29 @@ unseen experiments. Runtime already dispatches native PUSH in composites, but
 the feedback CLI is not a registered Runtime skill, and its engineering TaskSpec
 input is not the Agent's public-input boundary. Do not relabel primitive failure
 to make the composition pass. Formal baseline and L4 remain unchanged.
+
+
+## Checkpoint — finger TCP and returned-state adapter
+
+The isolated contact adapter now has native physical evidence for bounded30mm
+strokes and usable returned-state receipts on exposed seed2000. K1 development
+validation and fixed K2/K3 confirmations each passed9/9; all six narrow strokes
+and all six returned-request geometries passed. Final nets60.974/60.972/60.975mm.
+See `setup/acceptance/evobot_contact_motion_20261112/README.md` and
+`docs/CONTACT_CONTROL_INTERFACE_20261112.md` for code/evidence and limitations.
+
+This is additional precision/interface evidence, not final-task superiority:
+same task-scoped graph control K0 also passes the full task while its single
+30mm primitive overshoots to47.948mm. Final net46.097mm. Candidates require24
+actuator goals and370–460s; control needs6 goals/~35s. All earlier failures and
+unearned confirmation slots remain visible. The full default graph still has
+resource/scheduling failures; the isolated harness removes four unused services
+without changing physics, robot, controllers or ordinary launches.
+
+Next main-line work: integrate the adapter/returned-state contract into Runtime
+with fresh observation and executor admission, measure resource/latency behavior
+under the intended service graph, then frozen ordinary regression and unseen
+instances before experience-transfer claims. The CLI reads engineering
+expected_goal and is not the autonomous Agent boundary. Historical release
+failures are still open. Formal T08 CALIBRATION_UNSUPPORTED, baseline
+NOT_PROMOTED, L4 NOT_ACQUIRED; goal active.
