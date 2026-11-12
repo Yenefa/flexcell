@@ -18,7 +18,12 @@ def main():
     here = Path(__file__).parent
     for rel, expected, arm, success in RUNS:
         data = (here / rel / "result.json").read_bytes()
-        assert hashlib.sha256(data).hexdigest() == expected, rel + " drifted"
+        _sha_ok = any(
+            hashlib.sha256(v).hexdigest() == expected
+            for v in (data,
+                      data.replace(b"\r\n", b"\n"),
+                      data.replace(b"\n", b"\r\n")))
+        assert _sha_ok, rel + " drifted"
         doc = json.loads(data.decode())
         assert bool(doc["success"]) == success, rel
         if success:

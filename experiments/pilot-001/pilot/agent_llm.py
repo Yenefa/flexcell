@@ -12,7 +12,8 @@ Rules:
 - If the task is not yet passing you MUST include at least one write_file action.
 - write_file requires "path" and "content" (the FULL new file content).
 - run_checks / run_execution take no arguments.
-- read_telemetry / read_verification take no arguments.
+- read_telemetry / read_verification / read_diagnosis take no arguments.
+- read_diagnosis returns the recorded failure classification of the last execution.
 - claim_success=true only when you believe the acceptance check passes.
 - done=true when you have finished (successfully or not).
 """
@@ -83,6 +84,11 @@ class LLMAgent:
                     observations.append(name + ": " + str(toolbox.read_telemetry()))
                 elif name == "read_verification":
                     observations.append(name + ": " + str(toolbox.read_verification()))
+                elif name == "read_diagnosis":
+                    # AUDIT FIX #3: TOOL_SPEC and the prompt both advertised this tool,
+                    # but no dispatch branch existed, so every call fell through to
+                    # "unknown tool" and the B2 ablation never exercised it.
+                    observations.append(name + ": " + str(toolbox.read_diagnosis()))
                 else:
                     observations.append("unknown tool: %s" % name)
             except Exception as exc:  # tool refusal/limits must reach the agent

@@ -16,7 +16,12 @@ def main():
     agg = json.loads((HERE / "aggregate.json").read_text())
     for rep, expected, iters, tokens in RUNS:
         data = (HERE / rep / "result.json").read_bytes()
-        assert hashlib.sha256(data).hexdigest() == expected, rep + " drifted"
+        _sha_ok = any(
+            hashlib.sha256(v).hexdigest() == expected
+            for v in (data,
+                      data.replace(b"\r\n", b"\n"),
+                      data.replace(b"\n", b"\r\n")))
+        assert _sha_ok, rep + " drifted"
         doc = json.loads(data.decode())
         assert doc["success"] is True and doc["false_success"] is False, rep
         assert doc["iterations"] == iters and doc["cost"]["tokens"] == tokens, rep

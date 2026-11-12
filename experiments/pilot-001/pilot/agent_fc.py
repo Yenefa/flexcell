@@ -114,6 +114,14 @@ class FCAgent:
         calls = reply.get("tool_calls") or []
         if not calls:
             self.history.append({"role": "assistant", "content": reply.get("content") or ""})
+            # AUDIT FINDING #4d, recorded here at the site: FCAgent's model output is
+            # tool_calls only, so there is no field in which the model could claim success.
+            # claim_success is therefore ALWAYS False on this arm, and runner.py's
+            # false_success = bool(claim_success and not success) is then structurally
+            # incapable of being True. Reporting "0 false success" from an FCAgent arm is
+            # reporting a property of this line, not a measurement. Fixing it needs a claim
+            # channel added to the interface and the affected runs re-executed; a hardcoded
+            # value cannot be corrected retroactively.
             return {"claim_success": False, "done": True, "tokens": reply["tokens"]}
 
         assistant = {"role": "assistant", "content": reply.get("content") or "",
@@ -147,6 +155,12 @@ class FCAgent:
                     result = str(toolbox.read_telemetry())
                 elif name == "read_verification":
                     result = str(toolbox.read_verification())
+                elif name == "read_diagnosis":
+                    # AUDIT FIX #3: DESCRIPTIONS and SPECS both advertised this tool and
+                    # toolbox.read_diagnosis exists, but no branch dispatched to it, so a
+                    # model that called it received "unknown tool". The B2 ablation that was
+                    # supposed to isolate read_diagnosis could therefore never have measured it.
+                    result = str(toolbox.read_diagnosis())
                 elif name == "record_experience":
                     result = str(toolbox.record_experience(
                         args.get("defect_class", ""), args.get("symptom", ""),
