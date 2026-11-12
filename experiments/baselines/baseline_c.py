@@ -109,7 +109,24 @@ def retrieve(observation, store_path=DEFAULT_STORE, limit=3):
         rows = [r for r in all_rows if r.get("validated")]
     text = observation["instruction"].lower()
     scored = []
+    # A CONTROL FACT IS NOT A PLANNER LESSON (round 55, measured cost reported by an
+    # independent reviewer). The first ACCEPTed record, T13-recover-clearance-margin, has
+    # failure_class=control: its lesson is that a 9.65 mm actuator placement error consumed a
+    # 6 mm geometric margin. It is TRUE and it was independently accepted, and the planner
+    # still cannot act on it - the planner emits {object, zone, why}; it cannot widen a 56 mm
+    # spread, reduce a 9.65 mm actuator error, or change a 50 mm clearance.
+    #
+    # Without this filter it scored >=1 for EVERY instruction via _REQUIRED_FIELDS (its text
+    # contains 'object'), so it took one of limit=3 slots on every plan and DISPLACED a lesson
+    # the planner could act on. The reviewer verified it was retrieved for a bin task, a
+    # conditional task and a push task.
+    #
+    # So class is a gate, not a label: only planner-relevant classes may influence a plan.
+    # Control/tooling facts stay in the store and stay reviewable; they just do not steer a plan.
+    PLANNER_RELEVANT_CLASSES = frozenset(("planning", "state"))
     for r in rows:
+        if r.get("failure_class") not in PLANNER_RELEVANT_CLASSES:
+            continue
         if not _is_planner_actionable(r.get("lesson", "")):
             continue
         score = 0
