@@ -38,9 +38,10 @@ objname='target_box_a'
 x0=spec['objects'][0]['initial_pose'][0]
 
 pre=obs()
+REQ=float(sys.argv[4]) if len(sys.argv)>4 else 0.10
 g=PushObject.Goal(); g.object_name=objname
 g.direction.x=-1.0; g.direction.y=0.0; g.direction.z=0.0
-g.distance_m=0.10; g.contact_height_m=Z; g.overdrive_m=float('nan')
+g.distance_m=REQ; g.contact_height_m=Z; g.overdrive_m=float('nan')
 f=pu.send_goal_async(g); rclpy.spin_until_future_complete(node,f,timeout_sec=60.0)
 h=f.result(); res=None
 if h is not None and h.accepted:
@@ -65,10 +66,16 @@ if post and objname in post and objname in pre:
     c4=zdist<=zone['radius']
     verdict['clauses']={'displacement':c1,'vertical':c2,'cosine':c3,'zone':c4}
     verdict['passed']=bool(c1 and c2 and c3 and c4)
+    # Direction and distance are reported separately because they fail for different
+    # reasons: a reversed push makes the requested distance irrelevant, so pooling them
+    # hides whichever effect is being looked for.
+    verdict['direction_ok']=bool(cos>=want['min_direction_cosine'])
+    verdict['requested_m']=REQ
+    verdict['delivery_ratio']=round(disp/REQ,3) if REQ>0 else None
 json.dump({'verdict':verdict,'push':res,'pre':pre,'post':post}, open(OUT,'w'), indent=1)
 v=verdict.get('passed')
-print('%-10s ec=%-3s disp=%.4f cos=%+.3f zone=%.4f -> %s' % (spec['task_id'][-8:],
-      str(res['ec']) if res else '?', verdict.get('displacement_m',0),
-      verdict.get('direction_cosine',0), verdict.get('zone_distance_m',0),
-      'PASS' if v else 'FAIL'))
+print('%-10s req=%.3f ec=%-3s disp=%.4f cos=%+.3f dir=%s zone=%.4f -> %s' % (spec['task_id'][-8:],
+      REQ, str(res['ec']) if res else '?', verdict.get('displacement_m',0),
+      verdict.get('direction_cosine',0), 'OK' if verdict.get('direction_ok') else 'REV',
+      verdict.get('zone_distance_m',0), 'PASS' if v else 'FAIL'))
 node.destroy_node(); rclpy.shutdown()
