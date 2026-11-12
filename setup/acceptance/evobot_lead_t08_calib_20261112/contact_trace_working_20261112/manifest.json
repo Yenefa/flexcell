@@ -2,27 +2,34 @@
  "env_var": "FLEXCELL_CONTACT_STEP_LOG",
  "required_sdf": [
   "<contacts_entity_names>true</contacts_entity_names>",
-  "<sensor name=contact_probe type=contact> per watched link",
+  "<sensor type=contact name=contact_probe> per watched link",
   "flexcell::ContactTrace plugin with <watch> per model"
  ],
  "records": 2440,
- "component_present_true": 4880,
- "component_present_false": 2440,
- "contact_entries": 4879,
- "distinct_partner_strings": 1,
- "examples": [
+ "distinct_collision_pairs": 3,
+ "pairs": [
   {
-   "target": "target_box_a",
-   "contact": "contact"
+   "a": "ground_plane::link::collision",
+   "b": "target_box_b::link::col",
+   "count": 2440
   },
   {
-   "target": "target_box_b",
-   "contact": "contact"
+   "a": "ground_plane::link::collision",
+   "b": "target_box_a::link::col",
+   "count": 2439
   },
   {
-   "target": "target_box_a",
-   "contact": "contact"
+   "a": "open_manipulator_x::gripper_right_link::gripper_right_link_collision",
+   "b": "target_box_a::link::col",
+   "count": 765
   }
  ],
- "sha256_head": "b53ff6f550ccf4f3f6553e88b1f1acb516f8482ffcde4924575dc7ffb2013d5c"
+ "gripper_contact_pairs": [
+  {
+   "a": "open_manipulator_x::gripper_right_link::gripper_right_link_collision",
+   "b": "target_box_a::link::col",
+   "count": 765
+  }
+ ],
+ "note": "only gripper_right_link appears; no gripper_left_link contact in this run - consistent with the round-23 camera observation that the gripper approaches from one side/top rather than straddling symmetrically"
 }
