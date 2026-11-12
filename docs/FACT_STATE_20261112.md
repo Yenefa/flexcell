@@ -912,4 +912,19 @@ The pose fix's own integration test targeted **seed3001** explicitly (*"integrat
 
 **9 → 5 → 3 → 2.** The review's verdict: *"2 is the FIRST of those that is defensible as a count — because I re-ran the verifier and it reproduces — and it is STILL not 'Generalization Tested'. **The narrowing was not the error. The label on top of the number was.**"*
 
+---
+
+## ADDENDUM — goal round 60 (2026-11-12): P4's root cause, and why the archive cannot supply the missing evidence
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| **Why C has never shown an advantage** | **C's retrievable set is empty because the planner is never wrong in the archived record.** This replaces the earlier *symptom* explanation ("the channel contains no actionable lesson") with the root cause | `evobot_lead_p3_record2_20261112/README.md` |
+| The audit | **four independent checks, all zero**: `failure_layer` — 0 of 64 runs planning-attributable; 41 plans vs 120 task specs — 0 wrong zone / missing leg / protected move / omitted object; **211 runs** vs requirements rebuilt from each run's **own** `verdict.json` — **0 genuine plan defects**; zone-identity sweep — **0 misrouted** | same |
+| The record that would have been plausible and false | `plans/T05-train-seed1000` emits one move `b→zone_2`, which reads as a skipped relay. **It carries `"via":["zone_1"], "stages":2`.** Reading `via` correctly removes the only apparent planning error in the set | same |
+| The only genuine planner-side failure | **one event, archived twice**: `T06-train-seed1001`, `agent_plan: null`, `raw_reply: ""` — **zero characters while 2625 tokens were billed**, 1 in 18 attempts. Correctly refused: the planner chose nothing, there is no plan to learn from, n=1 on an empty artifact | same |
+| **The negative control, kept** | a **manufactured** planning lesson asserting the round-14 false finding printed `ACCEPT`. Retrieval gates on `failure_class ∈ {planning, state}` **plus** review ACCEPT, so it would have become **the first retrievable lesson in the store, and it would be false** — a false lesson entering plans | `NEGATIVE_CONTROL_false_planning_lesson.json` (do-not-append) |
+| **The prerequisite, precisely** | **score plan correctness BEFORE execution**, so an actuator error cannot masquerade as a planning error. Until that measurement exists, **any planning-class record in this store is either mislabeled or invented** | same |
+| **Why the archive cannot close it** | the archive holds **316 `plan.json` files but 0 `spec.json` for T13 and T06** — the hard families where the planner's choice can actually be wrong are barely represented, and every archived plan that was audited proved correct. **Producing a genuine planning error needs either new instances of T13/T05/T06 or paid model calls on the B planner** — a resource decision, not an analysis | this round |
+| P4's statement, final for this session | **`EVOLUTION_ADVANTAGE_NOT_DEMONSTRATED`** — with the cause at the root: *the planner is never wrong in the archived record, so there is nothing for C to learn, and the checker would admit a false planning lesson if one were manufactured to fill the gap* | — |
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
