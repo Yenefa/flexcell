@@ -1,17 +1,22 @@
 #!/usr/bin/env bash
 # Instrument a generated world for contact evidence.
 #
-# TWO things are required, and the first was invisible until the contact trace ran:
-#   1. the Physics system must publish contact entity names -
-#        <contacts_entity_names>true</contacts_entity_names>
-#      Without it the ContactTrace plugin loads, finds collision_entity, and still reports
-#      component_present:false / contacts:null on every step. sim_profile emits a SELF-CLOSING
-#      Physics plugin, so this has to be rewritten, not appended.
-#   2. the trace plugins themselves, whose class/output is configured by the environment
-#      variable FLEXCELL_CONTACT_STEP_LOG (found in strings on the .so; it is not an SDF child).
+# THREE things are required. The third was the one that mattered, and each was found by a
+# different route - recorded here so the next person does not repeat the search:
 #
-# Declarations copied from an archived world that DID record contacts:
-#   evobot_t08_contact_calibration_20261112/runs/H0000/t1/sim/world.sdf
+#   1. FLEXCELL_CONTACT_STEP_LOG must be set in the environment. The trace plugin reads its
+#      output path from that variable, not from an SDF child - found in strings on the .so.
+#      Without it gz dies with 'new contact step log path required'.
+#   2. the Physics system must publish contact entity names:
+#        <contacts_entity_names>true</contacts_entity_names>
+#      sim_profile emits a SELF-CLOSING Physics plugin, so this has to be rewritten.
+#      This alone did NOT enable contact data (tested), but it is present in the archived world.
+#   3. each watched link needs a contact SENSOR. The plugin probes the gz ContactSensorData
+#      component; with no sensor that component never exists and every record reports
+#      component_present:false / contacts:null. The archived world carries:
+#        <sensor name='contact_probe' type='contact'><always_on>true</always_on>
+#          <update_rate>500</update_rate><contact><collision>col</collision></contact></sensor>
+#      inside the target model's link. THIS is the gate.
 set -u
 W=$1
 [ -f "$W" ] || { echo "no world at $W"; exit 2; }
@@ -21,17 +26,31 @@ w = sys.argv[1]
 src = open(w).read()
 changed = []
 
-# 1. physics must publish contact entity names
-self_closing = '<plugin name="gz::sim::systems::Physics" filename="gz-sim-physics-system" />'
-if self_closing in src:
-    src = src.replace(self_closing,
+sc = '<plugin name="gz::sim::systems::Physics" filename="gz-sim-physics-system" />'
+if sc in src:
+    src = src.replace(sc,
         '<plugin name="gz::sim::systems::Physics" filename="gz-sim-physics-system">'
         '<contacts_entity_names>true</contacts_entity_names></plugin>', 1)
-    changed.append('physics: contacts_entity_names=true')
-elif '<contacts_entity_names>' not in src:
-    print('WARNING: physics plugin neither self-closing nor carrying contacts_entity_names')
+    changed.append('physics contacts_entity_names')
 
-# 2. trace plugins, appended once
+# contact sensor on every watched box model's link
+SENSOR = ('<sensor name="contact_probe" type="contact"><always_on>true</always_on>',
+          '<update_rate>500</update_rate><contact><collision>{col}</collision></contact></sensor>')
+for model in ('target_box_a', 'target_box_b'):
+    m = re.search(r'(<model name="%s">)(.*?)(</model>)' % re.escape(model), src, re.S)
+    if not m:
+        print('WARNING: model %s not found' % model); continue
+    block = m.group(0)
+    if 'type="contact"' in block:
+        continue
+    col = re.search(r'<collision name="([^"]+)"', block)
+    colname = col.group(1) if col else 'collision'
+    if '</link>' not in block:
+        print('WARNING: no </link> in %s' % model); continue
+    newblock = block.replace('</link>', SENSOR[0] + SENSOR[1].format(col=colname) + '</link>', 1)
+    src = src.replace(block, newblock, 1)
+    changed.append('contact sensor on %s (collision=%s)' % (model, colname))
+
 if 'flexcell::ContactTrace' not in src:
     plugins = ('<plugin name="flexcell::PhysicsTrace" filename="libflexcell_physics_trace.so" />'
                '<plugin name="flexcell::ContactTrace" filename="libflexcell_contact_trace.so">'
@@ -39,10 +58,8 @@ if 'flexcell::ContactTrace' not in src:
                '<watch><model>target_box_b</model><link>link</link><collision>col</collision></watch>'
                '<watch><model>ground_plane</model><link>link</link><collision>collision</collision></watch>'
                '<flush_each_step>true</flush_each_step></plugin>')
-    if '</world>' not in src:
-        print('no </world> tag'); sys.exit(2)
     src = src.replace('</world>', plugins + '</world>', 1)
-    changed.append('trace plugins appended')
+    changed.append('trace plugins')
 
 open(w, 'w').write(src)
 print('instrumented: ' + (', '.join(changed) if changed else 'already complete'))
