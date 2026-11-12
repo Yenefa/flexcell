@@ -61,10 +61,15 @@ def analyse(trace_path, dt_ns=5_000_000):
     for pair, (s, e) in open_pair.items():
         if s is None or e is None or e < s:
             continue
+        # 'other' is the PUSHER, not the object being pushed. Read off the archived accepted
+        # bundle: every interval there names open_manipulator_x::gripper_*_link as 'other'.
+        # I had this inverted, naming the box, which is why pusher_contact reported
+        # 'the object moved without being touched' while a real 765-contact interval existed.
         gripper = [x for x in pair if 'gripper' in x]
-        other = [x for x in pair if 'gripper' not in x]
+        if not gripper:
+            continue
         intervals.append({'start_sim_ns': int(s), 'end_sim_ns': int(e),
-                          'other': (other[0] if other else pair[1])})
+                          'other': gripper[0]})
     return {'component_present_true': present_true, 'component_present_false': present_false,
             'all_partners_seen': sorted(partners), 'pusher_links': sorted(pusher_links),
             'intervals': intervals, 'max_jump_m': max_jump, 'per_object_jump_m': per_object_jump}
@@ -121,6 +126,11 @@ def main(argv):
                       'per_object_m': per_obj,
                       'note': ('computed from objects[*].samples in this same bundle, which is '
                                'what the validator cross-checks')}
+    # The validator still measured 0.007675 against my 0.007682. Both are computed from the same
+    # series by the same formula, so the remaining difference must come from WHICH samples each
+    # side walks. Recorded here rather than papered over by rounding to the validator's value -
+    # writing its number back would make the gate pass on a figure I did not measure.
+    print('teleport declared %.9f  (validator previously measured 0.007675; unresolved)' % (max(per_obj.values()) if per_obj else 0.0))
     body = json.dumps({k: v for k, v in ev.items() if k != 'manifest'}, sort_keys=True).encode()
     ev['manifest']['bundle_sha256'] = hashlib.sha256(body).hexdigest()
     json.dump(state, open(a.out, 'w'), indent=1)
