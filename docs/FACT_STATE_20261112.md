@@ -983,4 +983,30 @@ fixed the very evidence-passing bug this session rediscovered from the other end
 **What remains genuinely worth flagging**: a capability baseline that lists hashes it no longer describes will keep
 producing this alarm for every future reader, and the next person may act on it less carefully than this one just did.
 
+---
+
+## ADDENDUM — goal round 63 (2026-11-12): the Skill Curator's only measurement — adoption is ZERO, and why
+
+The Master Goal names the Skill Curator a **permanent role measuring Development Skill effect with controlled
+comparisons, never file counts**. Across 60+ rounds it had produced **nothing**. It was activated and measured.
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| **Is there a controlled comparison?** | **NO — and none can be constructed offline.** Not for lack of data: **the treatment was never administered** | `evobot_lead_curator_measure_20261112/` |
+| Adoption | **0.** 295 branches scanned, full history: **0** contain any file invoking a skill entrypoint. **819 commits**, 2104 distinct `.py`, 206 distinct `.sh` — **0 invocations**. 100 files authored after the skills existed → **81 external** → **0 invoke a skill** | same |
+| **The cause — there is no load path** | No `CLAUDE.md` / `AGENTS.md` / `.cursorrules` / `GEMINI.md` / `.claude/` anywhere. **Nothing in the codebase reads `development_skills/`.** The repo README mentions it **0** times. The only two docs naming it carry status reports and one explicit warning *not* to count the 42 tests as an achievement — **none tells an agent to load or run a skill.** No agent had a reason to open the directory, and none did | same |
+| Shape B is also absent | all **12** A/B experiments in `setup/acceptance` compare **robot** configurations; **0** compare development practices. There is no pair of comparable episodes differing only in skill availability | same |
+| What the Curator refused to do | **did not manufacture a proxy.** Two offline measurements were reported **explicitly labelled as ceilings, not effects**: detector coverage (preflight 2/6 of its own cited cases; evidence-level-audit 0/1 on the bug that actually recurred) and practice drift on the `pkill` bracket trick (5/20 → 3/12, **not an effect** — the trick predates the skill) | same |
+| The one real improvement, still not an effect | archived `interface_check.log` went **0 → 20**, all `INTERFACE_CHECK_OK` — but that gate is `benchmark/tools/check_ros_interfaces.py`, authored **01:46**, *before* the skills at **02:10**. **Pre-existing tool, not the skill** | same |
+| What is missing, in dependency order | (1) **a load path** — one line in an agent-read instruction file pointing at `registry.json`, ~5 minutes; (2) a recurring task class (9 instances ever, 4 post-skill); (3) a per-episode outcome variable; (4) two-arm assignment | same |
+| Power | detecting 50%→10% needs **n=14/arm**; 40%→10% needs **n=22**. Against **9 total episodes**, the smallest credible experiment is **~28 episodes — about 3× the entire history** of that task class. **It cannot be run by waiting for natural work** | same |
+| The Curator's own discipline | it got two of its own numbers wrong in draft (3809→819 commits, 2118→2104 `.py`), **corrected them in a recorded section rather than editing quietly**, and re-ran the headline afterwards | same |
+
+**The honest conclusion about the Curator role**: it is not that Development Skills do not work — **they have never been
+tried.** A permanent measurement role with no load path can only ever report zero, and zero adoption is not
+evidence of ineffectiveness.
+
+**Prerequisite before the role can measure anything: add the load path.** Until then this role's correct output is
+the one it produced — *"adoption is 0, here is what is missing"* — and not a plausible substitute.
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
