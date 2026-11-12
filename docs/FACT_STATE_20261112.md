@@ -1038,3 +1038,25 @@ author, with a commit message describing the reason.
 find**, and the baseline was never re-pinned afterwards. That remains one of the three decisions owed to a human.
 
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
+
+---
+
+## ADDENDUM — WorldState acquisition follow-up (2026-11-12, isolated cloud environment)
+
+Source: `setup/acceptance/evobot_worldstate_probe_20261112/README.md`, its retained
+raw captures, `analysis.json`, and `analyze_probe.py`. Base source `30fa2066`;
+new environment, **not pooled with the preceding nine same-condition runs**.
+
+| Fact | State and evidence |
+| --- | --- |
+| WorldState stream acquired | **CONFIRMED** — one Gazebo instance, 34 usable topic snapshots with 34 distinct source stamps over 19.785 s, and 34 identical action-result copies. Median gap 0.590 s, max 0.781 s, maximum reported object age 0.137 s |
+| Earlier durability-mismatch hypothesis | **CONTRADICTED for this source/runtime** — actual publisher RELIABLE/VOLATILE; publishes only when `/observe` executes. Passive window: 0; active Observe: 34. TRANSIENT_LOCAL nearby in source belongs to CarryState subscription. Historical installed-source identity was not retained, so do not overstate retrospective certainty |
+| `/tf` interpretation | **CORRECTED** — constant parent-relative link translations do not imply no world-frame motion. tf2 composition in WorldState shows EE x 0.19068–0.29134 m and z 0.01971–0.18750 m |
+| Failed retreat is necessary for reverse motion | **REFUTED in this run** — first retreat's MoveToPose returned SUCCEEDED, reach error 6.296 mm, while bracketing red x moved 0.214850→0.247365 m. Second approach moved it further backwards; second retreat also reversed it. Exact finger/contact identity and reach-error contribution remain UNKNOWN |
+| Actual end state | **FAILED** — red x 0.220000→0.279444 m, signed displacement along requested −x = **−59.444 mm**. Blue movement 0.0 m. Driver `achieved=+5.141 mm` is a positive per-attempt accumulation, not final net displacement; PushObject's displacement sample precedes its own retreat |
+| Missing evidence | **CONFIRMED omission by this follow-up** — Push node `push.jsonl` was not retained: legacy profile has no push_server log_dir entry and the container fallback directory was not mounted. MoveToPose endpoint records, phase feedback, raw WorldState and both push results WERE retained. Future reproduction command now mounts the fallback directory |
+| Full independent task acceptance | **FALSE** — unchanged evaluator reports terminal failure plus missing complete physics/contact evidence bundle; no new success or physical capability claimed |
+| Frozen files / source changes | **UNCHANGED** — nine session-start frozen-file hashes preserved, inherited stale evaluator pin not refreshed. Added diagnostic tool, ROS verification and this new evidence archive; recovery policy and push contract unchanged |
+
+Acquisition is **CAPTURED**; new robot capability **NONE**. T08 remains
+`CALIBRATION_UNSUPPORTED`; L4 has not been acquired. Goal remains active.
