@@ -81,13 +81,37 @@ def _target_from_spec(spec):
     return _m.hypot(box[0] - centre[0], box[1] - centre[1]), radius, centre
 
 
+RECOVERY_MODES = ("centre", "enter")
+
+
+def _target_for_mode(spec, mode):
+    """Two defensible objectives, exposed so the difference can be measured.
+
+    centre - push until the box centre reaches the zone centre. Maximum margin
+             inside the disc, at the cost of re-pushing runs that an evaluator
+             reading only "is the box inside the zone" would already accept.
+    enter  - push only until the box centre is within the zone radius. Matches the
+             evaluator's intent and stops earlier, but parks the box near the
+             acceptance boundary where measurement noise can put it back outside.
+
+    Neither is chosen here. The mode must be named explicitly.
+    """
+    if mode not in RECOVERY_MODES:
+        raise ValueError("recovery mode must be one of %r, got %r" % (RECOVERY_MODES, mode))
+    to_centre, radius, centre = _target_from_spec(spec)
+    if mode == "centre":
+        return to_centre, radius, centre
+    return max(0.0, to_centre - radius), radius, centre
+
+
 def main(argv):
     task_path, outdir, contact_z, max_attempts = argv[1], argv[2], float(argv[3]), int(argv[4])
+    mode = argv[5] if len(argv) > 5 else "centre"
     spec = json.load(open(task_path, encoding="utf-8"))
     target_object = spec["objects"][0]["name"]
-    target_m, zone_radius, zone_centre = _target_from_spec(spec)
-    print("  target from task geometry: %.4f m to zone centre %s (radius %.3f)"
-          % (target_m, zone_centre[:2], zone_radius))
+    target_m, zone_radius, zone_centre = _target_for_mode(spec, mode)
+    print("  mode=%s target from task geometry: %.4f m (zone centre %s, radius %.3f)"
+          % (mode, target_m, zone_centre[:2], zone_radius))
 
     import rclpy
     from rclpy.action import ActionClient
