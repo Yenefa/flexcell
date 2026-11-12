@@ -1009,4 +1009,32 @@ evidence of ineffectiveness.
 **Prerequisite before the role can measure anything: add the load path.** Until then this role's correct output is
 the one it produced — *"adoption is 0, here is what is missing"* — and not a plausible substitute.
 
+---
+
+## ADDENDUM — goal round 65 (2026-11-12): pinned-file invariant VERIFIED, and the drift predates this session
+
+An integrity check flagged that `benchmark/evaluators/evaluate.py` was touched within 12 hours. Identified:
+
+```
+4fd36cd6  2026-11-12 01:04:34 +0800  sca331613-commits
+  fix(t08): the evidence verifier rejected every valid push because evaluate.py never passed limits
+  benchmark/evaluators/evaluate.py                 | 27 ++++++++++++-
+  benchmark/evidence/test_evaluator_integration.py | 48 ++++++++++++++++++++++++
+```
+
+| Fact | State |
+| --- | --- |
+| **Who modified the pinned evaluator** | commit **`4fd36cd6` at 01:04:34**, author `sca331613-commits` — **the previous session, not this one** |
+| When this session began | **~06:33** (simulator lock timestamp); first commit of this session is later still |
+| **Pinned-file edits by THIS session** | **ZERO.** Verified across all 9 pinned files: none modified by any commit under this session |
+| Live hash vs pinned hash | live `441903f1…`, pinned `ed4a6332…` — **still mismatched**, as recorded in the round-62 correction |
+| So the drift is | **inherited, not created here.** It is the stale pin identified in round 62, and the evaluator it fails to describe was legitimately extended by the prior session at 01:04 |
+
+**What this confirms**: the mission's prohibition on frozen-file edits without human approval was **held by this
+session**. The one drifted pinned file was modified seven hours before this session's first action, by an earlier
+author, with a commit message describing the reason.
+
+**What it does not resolve**: whether that 01:04 modification had human approval is **not recorded anywhere I can
+find**, and the baseline was never re-pinned afterwards. That remains one of the three decisions owed to a human.
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
