@@ -927,4 +927,28 @@ The pose fix's own integration test targeted **seed3001** explicitly (*"integrat
 | **Why the archive cannot close it** | the archive holds **316 `plan.json` files but 0 `spec.json` for T13 and T06** — the hard families where the planner's choice can actually be wrong are barely represented, and every archived plan that was audited proved correct. **Producing a genuine planning error needs either new instances of T13/T05/T06 or paid model calls on the B planner** — a resource decision, not an analysis | this round |
 | P4's statement, final for this session | **`EVOLUTION_ADVANTAGE_NOT_DEMONSTRATED`** — with the cause at the root: *the planner is never wrong in the archived record, so there is nothing for C to learn, and the checker would admit a false planning lesson if one were manufactured to fill the gap* | — |
 
+---
+
+## ADDENDUM — goal round 61 (2026-11-12): the EVALUATOR is drifted from its pinned hash, and every T08 number depends on it
+
+Integrity check at HEAD `b1457e8a`:
+
+```
+experience store : 7 records, chain intact
+review ledger    : 3 entries -> REJECT, REJECT, ACCEPT
+pinned baseline  : 9 files, DRIFT -> benchmark/evaluators/evaluate.py
+```
+
+| Fact | State |
+| --- | --- |
+| `benchmark/evaluators/evaluate.py` hash | **does not match `benchmark/capability_baseline.json`** |
+| Was this known? | **YES, flagged in round 1 and never resolved** — it is not a new regression from this session's work |
+| Why it was not resolved | **re-pinning a baseline is a human approval**, and reverting would discard whatever change produced v0.5.0 |
+| Why it matters more now than in round 1 | **every T08 figure in this session — the 4/5, the 2 clean unseen instances, the `gripper` bound finding — was graded by this file.** The evaluator is the ruler, and the ruler is not the one that was pinned |
+| What it does NOT mean | not that any number is wrong. The drift may be a legitimate update (v0.5.0 with the trajectory gates) whose pin was never refreshed. **Unverified either way** |
+| The decision | **re-pin** (accept the current evaluator and update the baseline, which invalidates comparability with older results), or **revert** (restore the pinned evaluator, which discards v0.5.0), or **document the drift as accepted** and stop describing the baseline as intact |
+
+**This is the single highest-leverage open item.** Every capability claim in this project is downstream of a file that
+does not match its own stated pin, and the project has described that baseline as authoritative throughout.
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
