@@ -56,7 +56,10 @@ def observe_box(node_and_client, object_name):
         for obj in (getattr(ws, attr, None) or []):
             try:
                 if obj.name == object_name:
-                    return [float(v) for v in obj.pose.position]
+                    # geometry_msgs/Point is a message object, not a sequence: indexing it
+                    # raises TypeError. Read the fields explicitly.
+                    point = obj.pose.position
+                    return [float(point.x), float(point.y), float(point.z)]
             except AttributeError:
                 continue
     return None
