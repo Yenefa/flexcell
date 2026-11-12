@@ -64,3 +64,33 @@ grading invocation.** The clause name `push:target_box_a` appeared in every verd
 > *"no trajectory for this object: end state alone cannot prove it was pushed rather than carried"*
 
 **I read that string as an explanation of a geometric failure instead of as an instruction about my harness.**
+
+---
+
+## 6. Final tally, and the run was stopped (round 40)
+
+```
+trials recorded        : 47
+terminal_passed == True: 0
+sim procs after stop   : 0
+```
+
+**47 of 47 failed closed**, exactly as the mechanism in §1 predicts: the state file carried no `trajectory` key,
+so `evaluate.py:227` found `None`, the clause took the fail-closed branch, and `terminal_passed` was false
+**regardless of what the robot did**.
+
+The run was **killed rather than left to complete**. It could not produce a valid T08 observation, and letting
+it consume the single-instance simulator for another two hours would have been waste. Killing it is also a
+confirmation: 47/47 is the same result the mechanism predicts, at n large enough that it is no longer luck.
+
+**The 47 trials are retained on disk as evidence of the failure mode, not deleted** — they are the record of a
+harness that withheld required evidence across 47 attempts.
+
+## 7. What a correct re-run needs, exactly
+
+1. Write the state file as `{"objects": {...}, "trajectory": {name: {...}}}` — the shape the pilot's
+   `traj_t*.json` already has.
+2. Grading, not simulation, is where the current failure lives; the robot behaviour was already correct.
+3. Re-run the pre-registered paired design against that state file. **The pre-registration still stands**, but it
+   was written against a harness that turned out to be starved of evidence, so its numeric prediction is not
+   binding on the corrected harness — and that deviation must be stated, not silently adopted.
