@@ -1,0 +1,1164 @@
+{
+  "G0": {
+    "run": "G0",
+    "provenance": {
+      "arm": "feedback",
+      "run_label": "G0",
+      "image_base_revision": "30fa2066e787a7b06d4037261bbd9a6d90ce9078",
+      "runtime_overlay": true,
+      "ee_height_m": 0.02,
+      "motion_profile": "demo_slow",
+      "sources": {
+        "sim_profile": {
+          "path": "/opt/flexcell/repo/scripts/sim_profile.py",
+          "sha256": "6ae431fc036c9b626c681fbde9991e6c5da472cd9499c67da0c5db981a91c80c"
+        },
+        "flexcell_skills.common": {
+          "path": "/candidate/src/flexcell/flexcell_skills/flexcell_skills/common.py",
+          "sha256": "e27563b369d3bdcea372da57ff4358b0668220a1bdfcebdb853c081fad89361b"
+        },
+        "flexcell_skills.push_server": {
+          "path": "/candidate/src/flexcell/flexcell_skills/flexcell_skills/push_server.py",
+          "sha256": "c571b28d9e0e4f86752d2d6c7f4faf75219644f3587dcfba59dbb27818e392e0"
+        },
+        "flexcell_skills.contracts.push": {
+          "path": "/candidate/src/flexcell/flexcell_skills/flexcell_skills/contracts/push.py",
+          "sha256": "e8a44c7d1b5889c786e8653759861f2ebefcccc1bec435bf2e439592d4945b53"
+        },
+        "flexcell_skills.contracts.push_recover": {
+          "path": "/candidate/src/flexcell/flexcell_skills/flexcell_skills/contracts/push_recover.py",
+          "sha256": "e17f34de418c807672bee2c26db66b3ca57c92ee7865b36f0254f01983c5c54d"
+        },
+        "record_world_state.py": {
+          "path": "/candidate/scripts/diagnostics/record_world_state.py",
+          "sha256": "02f2cd5c7db9f693aa7c911865fbfbeb6a5f6eb65229ba308c9b5e3486b5a883"
+        },
+        "run_case.py": {
+          "path": "/candidate/setup/acceptance/evobot_contact_arch_audit_20261112/run_case.py",
+          "sha256": "cd4c3462c46aa02e2112c10994cbbd6779785c75ff463758dd45a4b38caaaff8"
+        }
+      },
+      "world_sha256": "41aaada28216c028e8552fffc1971cf8b37d84594a16fbccc6de2fead0bc92f9",
+      "params_sha256": "a9eedbefb347a435d6dcd4b8cc456a59eaf73c982980852fa08fa8d71aba968b"
+    },
+    "final_signed_forward_m": 0.10666424872721533,
+    "final_target": [
+      0.11333575127278467,
+      -0.0016992556554870865,
+      0.01749743970975012,
+      -0.0033241307224220985
+    ],
+    "controller": {
+      "kind": "POST_RETURN_FEEDBACK",
+      "status": "GOAL_GEOMETRY_REACHED",
+      "detail": {
+        "net_along_m": 0.1066168174718617,
+        "net_planar_m": 0.10663052046088795,
+        "delta_z_m": -4.056976307805632e-05,
+        "direction_cos": 0.9998714909299231,
+        "zone_distance_m": 0.006834061704982043,
+        "protected_motion_m": 2.4882552511484857e-09
+      },
+      "attempts": 2,
+      "independent_acceptance_claim": false
+    },
+    "controller_decisions": [
+      {
+        "kind": "DECISION",
+        "monotonic_ns": 17082614290197,
+        "utc_ns": 1794477028872316806,
+        "decision": "push",
+        "net_along_m": 0.0,
+        "net_planar_m": 2.5230356855132592e-20,
+        "delta_z_m": -2.4882552511484857e-09,
+        "direction_cos": 0.0,
+        "zone_distance_m": 0.1,
+        "protected_motion_m": 2.4882552511484857e-09,
+        "distance_m": 0.03
+      },
+      {
+        "kind": "DECISION",
+        "monotonic_ns": 17099887532811,
+        "utc_ns": 1794477046145559520,
+        "decision": "push",
+        "net_along_m": 0.01098594139953249,
+        "net_planar_m": 0.011175861643328629,
+        "delta_z_m": -4.515898758584991e-07,
+        "direction_cos": 0.9830062101825042,
+        "zone_distance_m": 0.08903769765422019,
+        "protected_motion_m": 2.4882552511484857e-09,
+        "distance_m": 0.03
+      },
+      {
+        "kind": "DECISION",
+        "monotonic_ns": 17114943685920,
+        "utc_ns": 1794477061201712694,
+        "decision": "goal_geometry_reached",
+        "net_along_m": 0.1066168174718617,
+        "net_planar_m": 0.10663052046088795,
+        "delta_z_m": -4.056976307805632e-05,
+        "direction_cos": 0.9998714909299231,
+        "zone_distance_m": 0.006834061704982043,
+        "protected_motion_m": 2.4882552511484857e-09
+      }
+    ],
+    "controller_final_to_final_truth_forward_m": 4.743125535362769e-05,
+    "full_acceptance": true,
+    "terminal_passed": true,
+    "gate_pass": {
+      "terminal": true,
+      "trajectory": true,
+      "table_support": true,
+      "protected_unmoved": true,
+      "no_lift": true,
+      "pusher_contact": true,
+      "gripper": true,
+      "no_attachment": true,
+      "no_teleport": true
+    },
+    "evidence_status": "COMPLETE",
+    "peak_lift_m": 0.00023773044734134996,
+    "max_protected_excursion_m": 4.85722573273506e-17,
+    "gripper_gate": {
+      "gate": "gripper",
+      "ok": true,
+      "reason": null,
+      "evidence": {
+        "joint": "gripper_left_joint",
+        "samples": 1840,
+        "aperture_travel_rad": 0.000351,
+        "limit_rad": 0.002,
+        "min_aperture_rad": -0.0,
+        "max_aperture_rad": 0.000351
+      }
+    },
+    "physics_samples_per_object": 4244,
+    "consecutive_5ms": true,
+    "minimum_return_forward_m": 0.00013079111519648245,
+    "last_half_sim_second_xyz_range_m": [
+      1.6676043219920889e-06,
+      2.4643359653993627e-07,
+      1.5867433719000956e-06
+    ],
+    "final_truth_to_last_native_distance_m": 1.9632442521424266e-06,
+    "routes": [
+      {
+        "request_id": "feedback-00",
+        "phase": "APPROACH",
+        "valid": true,
+        "forward_m": 0.003849176124288395,
+        "before": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ],
+        "after": [
+          0.2161508238757116,
+          -0.0009243785982668658,
+          0.016678023189479287
+        ]
+      },
+      {
+        "request_id": "feedback-00",
+        "phase": "RETREATING",
+        "valid": true,
+        "forward_m": 0.00013079111519648245,
+        "before": [
+          0.2091448729001805,
+          -0.0019327148011663653,
+          0.017327419560706016
+        ],
+        "after": [
+          0.209014081784984,
+          -0.002051541225023447,
+          0.01749949309933213
+        ]
+      },
+      {
+        "request_id": "feedback-01",
+        "phase": "APPROACH",
+        "valid": true,
+        "forward_m": 0.014232742107207541,
+        "before": [
+          0.20901403584846415,
+          -0.0020516154153077774,
+          0.017499602688907615
+        ],
+        "after": [
+          0.1947812937412566,
+          -0.0013455952242239038,
+          0.014281541605382224
+        ]
+      },
+      {
+        "request_id": "feedback-01",
+        "phase": "RETREATING",
+        "valid": true,
+        "forward_m": 0.0021603618707997374,
+        "before": [
+          0.11556980809331933,
+          -0.0017733105942066682,
+          0.01578465822206037
+        ],
+        "after": [
+          0.1134094462225196,
+          -0.0017150519786600176,
+          0.017438324045468388
+        ]
+      }
+    ],
+    "waypoint_intervals": [
+      {
+        "request_id": "feedback-00",
+        "phase": "APPROACH",
+        "stage": "LIFT",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "after": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "native_alignment_error_ms": 3.690826,
+        "actual_ee_after": [
+          0.2823293730349593,
+          0.0011414150323859609,
+          0.2091139561792073
+        ]
+      },
+      {
+        "request_id": "feedback-00",
+        "phase": "APPROACH",
+        "stage": "TRANSFER",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "after": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "native_alignment_error_ms": 9.583957,
+        "actual_ee_after": [
+          0.25740875057268003,
+          0.006618672680898233,
+          0.2096343131391942
+        ]
+      },
+      {
+        "request_id": "feedback-00",
+        "phase": "APPROACH",
+        "stage": "LOWER",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.004764223885162011,
+        "before": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "after": [
+          0.215235776114838,
+          -0.000897723972709274,
+          0.0165767891247499
+        ],
+        "native_alignment_error_ms": 9.218281,
+        "actual_ee_after": [
+          0.2587183895461172,
+          -0.006048322936798035,
+          0.03407817818085621
+        ]
+      },
+      {
+        "request_id": "feedback-00",
+        "phase": "RETREATING",
+        "stage": "LIFT",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.00011464475216602099,
+        "before": [
+          0.209132520128943,
+          -0.00192817572234184,
+          0.017334248948388
+        ],
+        "after": [
+          0.209017875376777,
+          -0.00204562683671426,
+          0.0174925719722609
+        ],
+        "native_alignment_error_ms": 2.175774,
+        "actual_ee_after": [
+          0.19267002495125138,
+          -0.003060355439872163,
+          0.20574562841899857
+        ]
+      },
+      {
+        "request_id": "feedback-00",
+        "phase": "RETREATING",
+        "stage": "TRANSFER",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 3.6312471679844638e-06,
+        "before": [
+          0.209017713032152,
+          -0.00204587763700739,
+          0.0174928451248041
+        ],
+        "after": [
+          0.209014081784984,
+          -0.00205154122502345,
+          0.0174994930993321
+        ],
+        "native_alignment_error_ms": 2.209886,
+        "actual_ee_after": [
+          0.2702376918738989,
+          0.0008721244566421559,
+          0.20224464749756896
+        ]
+      },
+      {
+        "request_id": "feedback-01",
+        "phase": "APPROACH",
+        "stage": "LIFT",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 2.264374601712582e-08,
+        "before": [
+          0.209014035848464,
+          -0.00205161541530778,
+          0.0174996026889076
+        ],
+        "after": [
+          0.209014013204718,
+          -0.00205165198634423,
+          0.0174996567092629
+        ],
+        "native_alignment_error_ms": 6.703348,
+        "actual_ee_after": [
+          0.2689184274015995,
+          -0.00048812227114706835,
+          0.2045556278851199
+        ]
+      },
+      {
+        "request_id": "feedback-01",
+        "phase": "APPROACH",
+        "stage": "TRANSFER",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 2.2574184993517932e-08,
+        "before": [
+          0.209014013204718,
+          -0.00205165198634423,
+          0.0174996567092629
+        ],
+        "after": [
+          0.209013990630533,
+          -0.00205168844505191,
+          0.0174997105634697
+        ],
+        "native_alignment_error_ms": 4.582773,
+        "actual_ee_after": [
+          0.2516512661594728,
+          0.004287207043117367,
+          0.20730743968067264
+        ]
+      },
+      {
+        "request_id": "feedback-01",
+        "phase": "APPROACH",
+        "stage": "LOWER",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.014447116638649005,
+        "before": [
+          0.209013990630533,
+          -0.00205168844505191,
+          0.0174997105634697
+        ],
+        "after": [
+          0.194566873991884,
+          -0.00134688525765643,
+          0.0141906313579537
+        ],
+        "native_alignment_error_ms": 7.997461,
+        "actual_ee_after": [
+          0.24379202001770306,
+          -0.0015553370170911368,
+          0.033872299206449345
+        ]
+      },
+      {
+        "request_id": "feedback-01",
+        "phase": "RETREATING",
+        "stage": "LIFT",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.0012360259988139916,
+        "before": [
+          0.115291140824516,
+          -0.00177330118321321,
+          0.0158075587412757
+        ],
+        "after": [
+          0.114055114825702,
+          -0.00176011703067512,
+          0.016814173877874
+        ],
+        "native_alignment_error_ms": 4.759788,
+        "actual_ee_after": [
+          0.1888923108251251,
+          0.006568060510722094,
+          0.20756459183330325
+        ]
+      },
+      {
+        "request_id": "feedback-01",
+        "phase": "RETREATING",
+        "stage": "TRANSFER",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.0006419203318829975,
+        "before": [
+          0.114047628473508,
+          -0.00176008408035847,
+          0.0168222150879981
+        ],
+        "after": [
+          0.113405708141625,
+          -0.00171425076592719,
+          0.0174413306380476
+        ],
+        "native_alignment_error_ms": 4.494367,
+        "actual_ee_after": [
+          0.2541792626710619,
+          0.00241006678249592,
+          0.2084544987753356
+        ]
+      }
+    ],
+    "high_holds": [
+      {
+        "event": "REPOSITION_HIGH_HOLD",
+        "monotonic_ns": 17099440480629,
+        "wall_ts": 1794477045.6985066,
+        "phase": "RETREATING",
+        "actual_final": [
+          0.2702376918738989,
+          0.0008721244566421559,
+          0.20224464749756896
+        ],
+        "requested_original_target": [
+          0.26749999999999996,
+          2.5230356855132592e-20,
+          0.02
+        ],
+        "original_target_reached": false,
+        "original_target_error_m": 0.18226729574824294
+      },
+      {
+        "event": "REPOSITION_HIGH_HOLD",
+        "monotonic_ns": 17114336810127,
+        "wall_ts": 1794477060.594836,
+        "phase": "RETREATING",
+        "actual_final": [
+          0.2541792626710619,
+          0.00241006678249592,
+          0.2084544987753356
+        ],
+        "requested_original_target": [
+          0.2565140586004675,
+          -0.0020515786694304955,
+          0.02
+        ],
+        "original_target_reached": false,
+        "original_target_error_m": 0.18852176442213145
+      }
+    ],
+    "mechanism_checks": {
+      "final_forward_at_least_5mm": true,
+      "every_return_loses_at_most_5mm": true,
+      "protected_unmoved": true,
+      "no_attachment": true,
+      "no_lift": true,
+      "table_support": true,
+      "valid_trajectory": true,
+      "valid_post_state": true
+    },
+    "mechanism_gate_passed": true,
+    "independent_agent_claim_accuracy": "NOT_MEASURED"
+  },
+  "G1": {
+    "run": "G1",
+    "provenance": {
+      "arm": "feedback",
+      "run_label": "G1",
+      "image_base_revision": "30fa2066e787a7b06d4037261bbd9a6d90ce9078",
+      "runtime_overlay": true,
+      "ee_height_m": 0.055,
+      "motion_profile": "demo_slow",
+      "sources": {
+        "sim_profile": {
+          "path": "/opt/flexcell/repo/scripts/sim_profile.py",
+          "sha256": "6ae431fc036c9b626c681fbde9991e6c5da472cd9499c67da0c5db981a91c80c"
+        },
+        "flexcell_skills.common": {
+          "path": "/candidate/src/flexcell/flexcell_skills/flexcell_skills/common.py",
+          "sha256": "e27563b369d3bdcea372da57ff4358b0668220a1bdfcebdb853c081fad89361b"
+        },
+        "flexcell_skills.push_server": {
+          "path": "/candidate/src/flexcell/flexcell_skills/flexcell_skills/push_server.py",
+          "sha256": "c571b28d9e0e4f86752d2d6c7f4faf75219644f3587dcfba59dbb27818e392e0"
+        },
+        "flexcell_skills.contracts.push": {
+          "path": "/candidate/src/flexcell/flexcell_skills/flexcell_skills/contracts/push.py",
+          "sha256": "e8a44c7d1b5889c786e8653759861f2ebefcccc1bec435bf2e439592d4945b53"
+        },
+        "flexcell_skills.contracts.push_recover": {
+          "path": "/candidate/src/flexcell/flexcell_skills/flexcell_skills/contracts/push_recover.py",
+          "sha256": "e17f34de418c807672bee2c26db66b3ca57c92ee7865b36f0254f01983c5c54d"
+        },
+        "record_world_state.py": {
+          "path": "/candidate/scripts/diagnostics/record_world_state.py",
+          "sha256": "02f2cd5c7db9f693aa7c911865fbfbeb6a5f6eb65229ba308c9b5e3486b5a883"
+        },
+        "run_case.py": {
+          "path": "/candidate/setup/acceptance/evobot_contact_arch_audit_20261112/run_case.py",
+          "sha256": "cd4c3462c46aa02e2112c10994cbbd6779785c75ff463758dd45a4b38caaaff8"
+        }
+      },
+      "world_sha256": "41aaada28216c028e8552fffc1971cf8b37d84594a16fbccc6de2fead0bc92f9",
+      "params_sha256": "c0aa3cb5d769889414edce2931d2d8aa287614b7730ed995b2f11fb810db0677"
+    },
+    "final_signed_forward_m": 0.0,
+    "final_target": [
+      0.22,
+      2.5230356855132592e-20,
+      0.01749999751174475,
+      -2.850265839741707e-19
+    ],
+    "controller": {
+      "kind": "POST_RETURN_FEEDBACK",
+      "status": "EXHAUSTED",
+      "detail": {
+        "net_along_m": 0.0,
+        "net_planar_m": 2.5230356855132592e-20,
+        "delta_z_m": -2.4882552511484857e-09,
+        "direction_cos": 0.0,
+        "zone_distance_m": 0.1,
+        "protected_motion_m": 2.4882552511484857e-09,
+        "reason": "no attempts left"
+      },
+      "attempts": 3,
+      "independent_acceptance_claim": false
+    },
+    "controller_decisions": [
+      {
+        "kind": "DECISION",
+        "monotonic_ns": 17150053521156,
+        "utc_ns": 1794477096311547523,
+        "decision": "push",
+        "net_along_m": 0.0,
+        "net_planar_m": 2.5230356855132592e-20,
+        "delta_z_m": -2.4882552511484857e-09,
+        "direction_cos": 0.0,
+        "zone_distance_m": 0.1,
+        "protected_motion_m": 2.4882552511484857e-09,
+        "distance_m": 0.03
+      },
+      {
+        "kind": "DECISION",
+        "monotonic_ns": 17164733296164,
+        "utc_ns": 1794477110991322443,
+        "decision": "push",
+        "net_along_m": 0.0,
+        "net_planar_m": 2.5230356855132592e-20,
+        "delta_z_m": -2.4882552511484857e-09,
+        "direction_cos": 0.0,
+        "zone_distance_m": 0.1,
+        "protected_motion_m": 2.4882552511484857e-09,
+        "distance_m": 0.03
+      },
+      {
+        "kind": "DECISION",
+        "monotonic_ns": 17177849303293,
+        "utc_ns": 1794477124107329754,
+        "decision": "push",
+        "net_along_m": 0.0,
+        "net_planar_m": 2.5230356855132592e-20,
+        "delta_z_m": -2.4882552511484857e-09,
+        "direction_cos": 0.0,
+        "zone_distance_m": 0.1,
+        "protected_motion_m": 2.4882552511484857e-09,
+        "distance_m": 0.03
+      },
+      {
+        "kind": "DECISION",
+        "monotonic_ns": 17192038804319,
+        "utc_ns": 1794477138296831089,
+        "decision": "exhausted",
+        "net_along_m": 0.0,
+        "net_planar_m": 2.5230356855132592e-20,
+        "delta_z_m": -2.4882552511484857e-09,
+        "direction_cos": 0.0,
+        "zone_distance_m": 0.1,
+        "protected_motion_m": 2.4882552511484857e-09,
+        "reason": "no attempts left"
+      }
+    ],
+    "controller_final_to_final_truth_forward_m": 0.0,
+    "full_acceptance": false,
+    "terminal_passed": false,
+    "gate_pass": {
+      "terminal": false,
+      "trajectory": true,
+      "table_support": true,
+      "protected_unmoved": true,
+      "no_lift": true,
+      "pusher_contact": false,
+      "gripper": true,
+      "no_attachment": true,
+      "no_teleport": true
+    },
+    "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+    "peak_lift_m": 4.85722573273506e-17,
+    "max_protected_excursion_m": 4.85722573273506e-17,
+    "gripper_gate": {
+      "gate": "gripper",
+      "ok": true,
+      "reason": null,
+      "evidence": {
+        "joint": "gripper_left_joint",
+        "samples": 2557,
+        "aperture_travel_rad": 0.0,
+        "limit_rad": 0.002,
+        "min_aperture_rad": -0.0,
+        "max_aperture_rad": -0.0
+      }
+    },
+    "physics_samples_per_object": 5556,
+    "consecutive_5ms": true,
+    "minimum_return_forward_m": 0.0,
+    "last_half_sim_second_xyz_range_m": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "final_truth_to_last_native_distance_m": 4.85722573273506e-17,
+    "routes": [
+      {
+        "request_id": "feedback-00",
+        "phase": "APPROACH",
+        "valid": true,
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ],
+        "after": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ]
+      },
+      {
+        "request_id": "feedback-00",
+        "phase": "RETREATING",
+        "valid": true,
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ],
+        "after": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ]
+      },
+      {
+        "request_id": "feedback-01",
+        "phase": "APPROACH",
+        "valid": true,
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ],
+        "after": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ]
+      },
+      {
+        "request_id": "feedback-01",
+        "phase": "RETREATING",
+        "valid": true,
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ],
+        "after": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ]
+      },
+      {
+        "request_id": "feedback-02",
+        "phase": "APPROACH",
+        "valid": true,
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ],
+        "after": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ]
+      },
+      {
+        "request_id": "feedback-02",
+        "phase": "RETREATING",
+        "valid": true,
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ],
+        "after": [
+          0.22,
+          2.5230356855132592e-20,
+          0.01749999751174475
+        ]
+      }
+    ],
+    "waypoint_intervals": [
+      {
+        "request_id": "feedback-00",
+        "phase": "APPROACH",
+        "stage": "LIFT",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "after": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "native_alignment_error_ms": 5.152021,
+        "actual_ee_after": [
+          0.2824846995797702,
+          0.002778046355511403,
+          0.20799075667745803
+        ]
+      },
+      {
+        "request_id": "feedback-00",
+        "phase": "APPROACH",
+        "stage": "TRANSFER",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "after": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "native_alignment_error_ms": 3.980646,
+        "actual_ee_after": [
+          0.2544773652885489,
+          -0.003185876049914115,
+          0.2061096155220358
+        ]
+      },
+      {
+        "request_id": "feedback-00",
+        "phase": "APPROACH",
+        "stage": "LOWER",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "after": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "native_alignment_error_ms": 8.733708,
+        "actual_ee_after": [
+          0.2600702887563793,
+          -2.7983581673773238e-05,
+          0.06361936908869137
+        ]
+      },
+      {
+        "request_id": "feedback-00",
+        "phase": "RETREATING",
+        "stage": "LIFT",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "after": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "native_alignment_error_ms": 1.691525,
+        "actual_ee_after": [
+          0.21036400292309573,
+          -0.006593697924358105,
+          0.20365024328405174
+        ]
+      },
+      {
+        "request_id": "feedback-00",
+        "phase": "RETREATING",
+        "stage": "TRANSFER",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "after": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "native_alignment_error_ms": 5.12395,
+        "actual_ee_after": [
+          0.26747249390048894,
+          -0.003073780109234853,
+          0.21259948114050684
+        ]
+      },
+      {
+        "request_id": "feedback-01",
+        "phase": "APPROACH",
+        "stage": "LIFT",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "after": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "native_alignment_error_ms": 1.833237,
+        "actual_ee_after": [
+          0.2683644513350586,
+          -0.001406454455426083,
+          0.2126167408659643
+        ]
+      },
+      {
+        "request_id": "feedback-01",
+        "phase": "APPROACH",
+        "stage": "TRANSFER",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "after": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "native_alignment_error_ms": 1.717706,
+        "actual_ee_after": [
+          0.2650735819215963,
+          0.000838289747794706,
+          0.2118705119140247
+        ]
+      },
+      {
+        "request_id": "feedback-01",
+        "phase": "APPROACH",
+        "stage": "LOWER",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "after": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "native_alignment_error_ms": 4.182937,
+        "actual_ee_after": [
+          0.2581782667220737,
+          -0.0023934655363762962,
+          0.061479520384577296
+        ]
+      },
+      {
+        "request_id": "feedback-01",
+        "phase": "RETREATING",
+        "stage": "LIFT",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "after": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "native_alignment_error_ms": 2.417422,
+        "actual_ee_after": [
+          0.1991718511497373,
+          0.007128373899146466,
+          0.20255313096896474
+        ]
+      },
+      {
+        "request_id": "feedback-01",
+        "phase": "RETREATING",
+        "stage": "TRANSFER",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "after": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "native_alignment_error_ms": 4.621524,
+        "actual_ee_after": [
+          0.26949018566600363,
+          0.000634538415522921,
+          0.21319002455782288
+        ]
+      },
+      {
+        "request_id": "feedback-02",
+        "phase": "APPROACH",
+        "stage": "LIFT",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "after": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "native_alignment_error_ms": 2.134571,
+        "actual_ee_after": [
+          0.27040945954817763,
+          0.00017309923673345013,
+          0.21198842829962408
+        ]
+      },
+      {
+        "request_id": "feedback-02",
+        "phase": "APPROACH",
+        "stage": "TRANSFER",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "after": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "native_alignment_error_ms": 4.380302,
+        "actual_ee_after": [
+          0.26461473260790735,
+          -0.0007354432625977641,
+          0.21654560572709347
+        ]
+      },
+      {
+        "request_id": "feedback-02",
+        "phase": "APPROACH",
+        "stage": "LOWER",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "after": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "native_alignment_error_ms": 5.71733,
+        "actual_ee_after": [
+          0.2607026756122669,
+          0.0021718487321189346,
+          0.05234844043132384
+        ]
+      },
+      {
+        "request_id": "feedback-02",
+        "phase": "RETREATING",
+        "stage": "LIFT",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "after": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "native_alignment_error_ms": 1.445063,
+        "actual_ee_after": [
+          0.20381555498568601,
+          -0.0018291687966126321,
+          0.20804440367358681
+        ]
+      },
+      {
+        "request_id": "feedback-02",
+        "phase": "RETREATING",
+        "stage": "TRANSFER",
+        "outcome": "REPOSITION_WAYPOINT_RESULT",
+        "forward_m": 0.0,
+        "before": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "after": [
+          0.22,
+          2.52303568551326e-20,
+          0.0174999975117448
+        ],
+        "native_alignment_error_ms": 5.63496,
+        "actual_ee_after": [
+          0.26023179537780333,
+          -0.001634815284366734,
+          0.2080810751475961
+        ]
+      }
+    ],
+    "high_holds": [
+      {
+        "event": "REPOSITION_HIGH_HOLD",
+        "monotonic_ns": 17164238053889,
+        "wall_ts": 1794477110.49608,
+        "phase": "RETREATING",
+        "actual_final": [
+          0.26747249390048894,
+          -0.003073780109234853,
+          0.21259948114050684
+        ],
+        "requested_original_target": [
+          0.26749999999999996,
+          2.5230356855132592e-20,
+          0.055
+        ],
+        "original_target_reached": false,
+        "original_target_error_m": 0.15762945580221488
+      },
+      {
+        "event": "REPOSITION_HIGH_HOLD",
+        "monotonic_ns": 17177303387054,
+        "wall_ts": 1794477123.561413,
+        "phase": "RETREATING",
+        "actual_final": [
+          0.26949018566600363,
+          0.000634538415522921,
+          0.21319002455782288
+        ],
+        "requested_original_target": [
+          0.26749999999999996,
+          2.5230356855132592e-20,
+          0.055
+        ],
+        "original_target_reached": false,
+        "original_target_error_m": 0.15820381584396298
+      },
+      {
+        "event": "REPOSITION_HIGH_HOLD",
+        "monotonic_ns": 17191583951108,
+        "wall_ts": 1794477137.8419771,
+        "phase": "RETREATING",
+        "actual_final": [
+          0.26023179537780333,
+          -0.001634815284366734,
+          0.2080810751475961
+        ],
+        "requested_original_target": [
+          0.26749999999999996,
+          2.5230356855132592e-20,
+          0.055
+        ],
+        "original_target_reached": false,
+        "original_target_error_m": 0.15326224253803702
+      }
+    ],
+    "mechanism_checks": {
+      "final_forward_at_least_5mm": false,
+      "every_return_loses_at_most_5mm": true,
+      "protected_unmoved": true,
+      "no_attachment": true,
+      "no_lift": true,
+      "table_support": true,
+      "valid_trajectory": true,
+      "valid_post_state": true
+    },
+    "mechanism_gate_passed": false,
+    "independent_agent_claim_accuracy": "NOT_MEASURED"
+  }
+}

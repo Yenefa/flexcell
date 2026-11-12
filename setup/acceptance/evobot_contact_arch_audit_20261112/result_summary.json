@@ -1,0 +1,135 @@
+{
+  "base": "d87f1701",
+  "geometry_pair": {
+    "G0": {
+      "ee_height_m": 0.02,
+      "final_signed_forward_mm": 106.66424872721534,
+      "full_acceptance": true,
+      "terminal_passed": true,
+      "independent_gates": {
+        "terminal": true,
+        "trajectory": true,
+        "table_support": true,
+        "protected_unmoved": true,
+        "no_lift": true,
+        "pusher_contact": true,
+        "gripper": true,
+        "no_attachment": true,
+        "no_teleport": true
+      },
+      "evidence_status": "COMPLETE",
+      "primitive_stroke_passes": 0,
+      "attempts": 2,
+      "primitive_outcomes": [
+        {
+          "outcome": "1",
+          "error_code": 28,
+          "detail": "object moved 0.0110m of 0.0300m requested (short by 0.0190m); contact could not be maintained",
+          "measured_pre_return_signed_m": 0.010855127099819506
+        },
+        {
+          "outcome": "1",
+          "error_code": 36,
+          "detail": "object moved 0.0935m, 0.0635m beyond the 0.0300m requested (tolerance 0.0050m); this is a shove, not a bounded push",
+          "measured_pre_return_signed_m": 0.09344425050714818
+        }
+      ],
+      "trajectory_consecutive_5ms": true,
+      "world_sha256": "41aaada28216c028e8552fffc1971cf8b37d84594a16fbccc6de2fead0bc92f9"
+    },
+    "G1": {
+      "ee_height_m": 0.055,
+      "final_signed_forward_mm": 0.0,
+      "full_acceptance": false,
+      "terminal_passed": false,
+      "independent_gates": {
+        "terminal": false,
+        "trajectory": true,
+        "table_support": true,
+        "protected_unmoved": true,
+        "no_lift": true,
+        "pusher_contact": false,
+        "gripper": true,
+        "no_attachment": true,
+        "no_teleport": true
+      },
+      "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+      "primitive_stroke_passes": 0,
+      "attempts": 3,
+      "primitive_outcomes": [
+        {
+          "outcome": "1",
+          "error_code": 27,
+          "detail": "object moved 0.0000m (< contact floor 0.0050); no contact was made at height 0.0550",
+          "measured_pre_return_signed_m": 0.0
+        },
+        {
+          "outcome": "1",
+          "error_code": 27,
+          "detail": "object moved 0.0000m (< contact floor 0.0050); no contact was made at height 0.0550",
+          "measured_pre_return_signed_m": 0.0
+        },
+        {
+          "outcome": "1",
+          "error_code": 27,
+          "detail": "object moved 0.0000m (< contact floor 0.0050); no contact was made at height 0.0550",
+          "measured_pre_return_signed_m": 0.0
+        }
+      ],
+      "trajectory_consecutive_5ms": true,
+      "world_sha256": "41aaada28216c028e8552fffc1971cf8b37d84594a16fbccc6de2fead0bc92f9"
+    }
+  },
+  "geometry_configuration_decision": "55mm_REJECTED",
+  "default_ee_height_m": 0.02,
+  "geometry_pair_infrastructure_failures": 0,
+  "speed_pair": "NOT_RUN: retained contact data favored geometry hypothesis",
+  "initialization_probe": {
+    "kind": "INITIALIZATION_ONLY_NOT_TASK_CAPABILITY",
+    "status": "PASS",
+    "physical_task_dispatched": false,
+    "independent_acceptance_claim": false,
+    "measured_errors": {
+      "target_box_a": {
+        "position_error_m": 2.4882552511484857e-09,
+        "yaw_error_rad": 2.7755575615628914e-17
+      },
+      "target_box_b": {
+        "position_error_m": 2.4882552511484857e-09,
+        "yaw_error_rad": 5.551115123125783e-17
+      }
+    },
+    "old_default_world_guard_refusal": "measured initial pose disagrees with declaration: target_box_a",
+    "task_goal_log_rows": {
+      "push.jsonl": 0,
+      "move_to_pose.jsonl": 0
+    }
+  },
+  "initialization_is_robot_task_capability": false,
+  "existing_unit_checks_passed": 95,
+  "coordinate_checks_passed": 5,
+  "initializer_checks_passed": 8,
+  "ros_protocol_checks": {
+    "kind": "SYNTHETIC_ROS_CHECKS",
+    "physical_evidence": false,
+    "post_return_geometry_stops_before_extra_push": "PASS",
+    "legal_bounded_request_fields": "PASS",
+    "missing_joint_velocity_dispatches_no_push": "PASS",
+    "cancel_forwards_and_dispatches_no_next_shot": "PASS"
+  },
+  "superseded_proposal_generator_check": {
+    "kind": "SYNTHETIC_GENERATOR_PROTOCOL_CHECK",
+    "physical_evidence": false,
+    "generated_kind": "bounded_release_retry",
+    "reason": null,
+    "supersession_record": "actuator_stall / bounded_release_retry (basis found wrong; see its superseded_basis)",
+    "finding": "generator does not consume the existing supersession record"
+  },
+  "newly_acquired_robot_task_capability": "NONE_CLAIMED_THIS_TURN",
+  "unseen_instances": "NOT_RUN",
+  "ordinary_pick_place_regression": "NOT_REPEATED_THIS_TURN; prior outcomes retained",
+  "independent_agent_claim_accuracy": "NOT_MEASURED",
+  "known_false_rejection": "NONE_CONFIRMED_IN_THIS_PAIR",
+  "formal_baseline": "NOT_PROMOTED; CALIBRATION_UNSUPPORTED",
+  "runtime_autonomous_L4": "NOT_ACQUIRED"
+}

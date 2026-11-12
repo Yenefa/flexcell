@@ -1,5 +1,10 @@
 # ARCHITECTURE — FlexCell system
 
+For the current EvoBot contact-control and development bottlenecks, see
+[the 2026-11-12 architecture review](ARCHITECTURE_REVIEW_20261112.md), based on
+`d87f1701`, continuous native records and new isolated experiments. The runtime
+description below retains its original 2026-10-07 source scope.
+
 > Current source: merged PR [#27](https://github.com/Yenefa/flexcell/pull/27),
 > base `a9b6a62`, 2026-10-07. Runtime evidence is the archived E-020/E-021
 > record; this document does not claim a live check of either robot host.

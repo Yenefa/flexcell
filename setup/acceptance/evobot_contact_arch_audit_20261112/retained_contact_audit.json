@@ -1,0 +1,263 @@
+{
+  "B1": {
+    "run": "B1",
+    "strokes": [
+      {
+        "attempt": 0,
+        "request_id": "feedback-00",
+        "increment": 1,
+        "primitive_contact_made": false,
+        "primitive_error_code": 27,
+        "requested_m": 0.03,
+        "reported_pre_return_signed_m": 0.0016861066939058977,
+        "native_execution_object_forward_m": 0.00015949002629001008,
+        "native_execution_ee_forward_m": 0.05532906411017907,
+        "max_ee_backslide_m": 1.3559237914517741e-05,
+        "ee_z_min_m": 0.025487583548921153,
+        "ee_z_max_m": 0.029853500915063585,
+        "tool_pitch_start_deg": 37.75618951616937,
+        "tool_pitch_end_deg": 46.52496266651649,
+        "peak_object_speed_m_s": 0.008113663224055281,
+        "pusher_contact_steps": 140,
+        "pusher_colliders": {
+          "open_manipulator_x::gripper_left_link::gripper_left_link_collision": 73,
+          "open_manipulator_x::gripper_right_link::gripper_right_link_collision": 140
+        },
+        "mean_step_top_contact_fraction": 0.7785714285714286,
+        "mean_step_rear_contact_fraction": 0.004749232315021789,
+        "mean_step_vertical_normal_fraction": 0.505060070526697,
+        "forward_after_last_observed_contact_m": 0.0,
+        "native_samples": 240,
+        "sim_start_ns": 6500000000,
+        "sim_end_ns": 7695000000,
+        "endpoint_position_error_m": 0.006416231287408337,
+        "orientation_enforced": false
+      },
+      {
+        "attempt": 1,
+        "request_id": "feedback-01",
+        "increment": 1,
+        "primitive_contact_made": true,
+        "primitive_error_code": 36,
+        "requested_m": 0.03,
+        "reported_pre_return_signed_m": 0.059522738862089336,
+        "native_execution_object_forward_m": 0.056172110426945004,
+        "native_execution_ee_forward_m": 0.059864614287382906,
+        "max_ee_backslide_m": 5.121251049650111e-05,
+        "ee_z_min_m": 0.026857152661701605,
+        "ee_z_max_m": 0.03682675259804272,
+        "tool_pitch_start_deg": 29.15650468709359,
+        "tool_pitch_end_deg": 37.869114556086,
+        "peak_object_speed_m_s": 0.10475108344293296,
+        "pusher_contact_steps": 265,
+        "pusher_colliders": {
+          "open_manipulator_x::gripper_left_link::gripper_left_link_collision": 265,
+          "open_manipulator_x::gripper_right_link::gripper_right_link_collision": 263
+        },
+        "mean_step_top_contact_fraction": 1.0,
+        "mean_step_rear_contact_fraction": 0.4703830596582133,
+        "mean_step_vertical_normal_fraction": 0.8432754400693875,
+        "forward_after_last_observed_contact_m": 0.0,
+        "native_samples": 265,
+        "sim_start_ns": 13390000000,
+        "sim_end_ns": 14710000000,
+        "endpoint_position_error_m": 0.009019062748922108,
+        "orientation_enforced": false
+      }
+    ],
+    "source_sha256": {
+      "physics.jsonl": "9a44eefc24c8f8e551312a58d22c48be3f26d97577ffad8b9ba1c25a33df6788",
+      "contacts.jsonl": "7ad00a84198224a7bbdc25df60c91d629e4db7e58956e453a4d4465c87bfb2d0",
+      "sim/skills/move_to_pose.jsonl": "972d46bf33127583696f8a01f6c3d75c86220b2108574de39f5525061bf64e49",
+      "sim/skills/push.jsonl": "d32769f0259d4122bcceb7ae1eb99816aa17aac93d3324ffaa41cf1023ba2bfc"
+    }
+  },
+  "B2": {
+    "run": "B2",
+    "strokes": [
+      {
+        "attempt": 0,
+        "request_id": "feedback-00",
+        "increment": 1,
+        "primitive_contact_made": true,
+        "primitive_error_code": 36,
+        "requested_m": 0.03,
+        "reported_pre_return_signed_m": 0.03696839215053832,
+        "native_execution_object_forward_m": 0.03550182613769298,
+        "native_execution_ee_forward_m": 0.05759916672389542,
+        "max_ee_backslide_m": 4.395716038041453e-05,
+        "ee_z_min_m": 0.020979104089075468,
+        "ee_z_max_m": 0.03204771017097939,
+        "tool_pitch_start_deg": 35.43941700344379,
+        "tool_pitch_end_deg": 46.22679720479355,
+        "peak_object_speed_m_s": 0.08494787465936048,
+        "pusher_contact_steps": 246,
+        "pusher_colliders": {
+          "open_manipulator_x::gripper_left_link::gripper_left_link_collision": 246,
+          "open_manipulator_x::gripper_right_link::gripper_right_link_collision": 246
+        },
+        "mean_step_top_contact_fraction": 1.0,
+        "mean_step_rear_contact_fraction": 0.0,
+        "mean_step_vertical_normal_fraction": 0.5169583931942758,
+        "forward_after_last_observed_contact_m": 0.0,
+        "native_samples": 246,
+        "sim_start_ns": 7040000000,
+        "sim_end_ns": 8265000000,
+        "endpoint_position_error_m": 0.002927343743010896,
+        "orientation_enforced": false
+      },
+      {
+        "attempt": 1,
+        "request_id": "feedback-01",
+        "increment": 1,
+        "primitive_contact_made": true,
+        "primitive_error_code": 28,
+        "requested_m": 0.03,
+        "reported_pre_return_signed_m": 0.01583979153930712,
+        "native_execution_object_forward_m": 0.015213757417935014,
+        "native_execution_ee_forward_m": 0.06264648789846453,
+        "max_ee_backslide_m": 2.3090326447872123e-05,
+        "ee_z_min_m": 0.0201728183525689,
+        "ee_z_max_m": 0.03466735047033763,
+        "tool_pitch_start_deg": 31.30576983865904,
+        "tool_pitch_end_deg": 37.938180405579025,
+        "peak_object_speed_m_s": 0.5376112302143621,
+        "pusher_contact_steps": 271,
+        "pusher_colliders": {
+          "open_manipulator_x::gripper_left_link::gripper_left_link_collision": 261,
+          "open_manipulator_x::gripper_right_link::gripper_right_link_collision": 194
+        },
+        "mean_step_top_contact_fraction": 0.6435733858404065,
+        "mean_step_rear_contact_fraction": 0.522335282241311,
+        "mean_step_vertical_normal_fraction": 0.34074212034797785,
+        "forward_after_last_observed_contact_m": 0.0,
+        "native_samples": 272,
+        "sim_start_ns": 14955000000,
+        "sim_end_ns": 16310000000,
+        "endpoint_position_error_m": 0.0005517065875540371,
+        "orientation_enforced": false
+      }
+    ],
+    "source_sha256": {
+      "physics.jsonl": "0ca7031d69dd255952717690a8f4666a60c47b3bdd053aa6a8bcdc10924d3ac7",
+      "contacts.jsonl": "f27853b8a22a0328ef48152da1104dfd61d60d4b8456dc4c257234404622e655",
+      "sim/skills/move_to_pose.jsonl": "aaa6c6f7fc60a2ba0873bf0ba1798f05dd897f2cf9b0beb7825f318ccd98cf89",
+      "sim/skills/push.jsonl": "33c8b2eb86abe246c56e4dbe89d9d3c9eb9f28c8a152357a7f3ab3b4ddc00733"
+    }
+  },
+  "B3": {
+    "run": "B3",
+    "strokes": [
+      {
+        "attempt": 0,
+        "request_id": "feedback-00",
+        "increment": 1,
+        "primitive_contact_made": true,
+        "primitive_error_code": 36,
+        "requested_m": 0.03,
+        "reported_pre_return_signed_m": 0.07423933965876908,
+        "native_execution_object_forward_m": 0.074485340710165,
+        "native_execution_ee_forward_m": 0.04644146810700611,
+        "max_ee_backslide_m": 6.556735821922066e-05,
+        "ee_z_min_m": 0.021234102772802216,
+        "ee_z_max_m": 0.028854835847376942,
+        "tool_pitch_start_deg": 37.23908056080242,
+        "tool_pitch_end_deg": 45.55743697399449,
+        "peak_object_speed_m_s": 0.1874588735308505,
+        "pusher_contact_steps": 218,
+        "pusher_colliders": {
+          "open_manipulator_x::gripper_left_link::gripper_left_link_collision": 155,
+          "open_manipulator_x::gripper_right_link::gripper_right_link_collision": 202
+        },
+        "mean_step_top_contact_fraction": 1.0,
+        "mean_step_rear_contact_fraction": 0.20730050168727135,
+        "mean_step_vertical_normal_fraction": 0.682807712807492,
+        "forward_after_last_observed_contact_m": 0.0,
+        "native_samples": 218,
+        "sim_start_ns": 7325000000,
+        "sim_end_ns": 8410000000,
+        "endpoint_position_error_m": 0.006794954262988574,
+        "orientation_enforced": false
+      }
+    ],
+    "source_sha256": {
+      "physics.jsonl": "44f1faa4adf45a65eabc764b229d0a521bdf5cc57e73ea3b0675959a5fe9687f",
+      "contacts.jsonl": "4e9efaf8b2c667db9394dde8da9eab949e9bf6e5a6a2f56861b16c401cfe4818",
+      "sim/skills/move_to_pose.jsonl": "34ff9751901ffc39b2bef7b6eb12119b04998712061715b106c53b8610ff0960",
+      "sim/skills/push.jsonl": "90f3a79b3882ff944525a028c58aa5c34edca97845db2650bdcfefbd0a76f847"
+    }
+  },
+  "pilot2": {
+    "run": "pilot2",
+    "strokes": [
+      {
+        "attempt": 0,
+        "request_id": "feedback-00",
+        "increment": 1,
+        "primitive_contact_made": true,
+        "primitive_error_code": 0,
+        "requested_m": 0.03,
+        "reported_pre_return_signed_m": 0.02987073136415261,
+        "native_execution_object_forward_m": 0.026512450046873,
+        "native_execution_ee_forward_m": 0.045350486319099215,
+        "max_ee_backslide_m": 6.230936710899249e-05,
+        "ee_z_min_m": 0.0210515341315943,
+        "ee_z_max_m": 0.02789691778878038,
+        "tool_pitch_start_deg": 37.88523709490451,
+        "tool_pitch_end_deg": 46.263122143503445,
+        "peak_object_speed_m_s": 0.07703577511075076,
+        "pusher_contact_steps": 219,
+        "pusher_colliders": {
+          "open_manipulator_x::gripper_left_link::gripper_left_link_collision": 219,
+          "open_manipulator_x::gripper_right_link::gripper_right_link_collision": 219
+        },
+        "mean_step_top_contact_fraction": 1.0,
+        "mean_step_rear_contact_fraction": 0.0,
+        "mean_step_vertical_normal_fraction": 0.3892037676900723,
+        "forward_after_last_observed_contact_m": 0.0,
+        "native_samples": 219,
+        "sim_start_ns": 6370000000,
+        "sim_end_ns": 7460000000,
+        "endpoint_position_error_m": 0.00868266209431173,
+        "orientation_enforced": false
+      },
+      {
+        "attempt": 1,
+        "request_id": "feedback-01",
+        "increment": 1,
+        "primitive_contact_made": true,
+        "primitive_error_code": 28,
+        "requested_m": 0.03,
+        "reported_pre_return_signed_m": -0.01592646082300922,
+        "native_execution_object_forward_m": -0.016852546558208004,
+        "native_execution_ee_forward_m": 0.06260601832181475,
+        "max_ee_backslide_m": 0.00013489343151040778,
+        "ee_z_min_m": 0.020435771623697058,
+        "ee_z_max_m": 0.035303192457858304,
+        "tool_pitch_start_deg": 30.160168272625025,
+        "tool_pitch_end_deg": 38.362226319646474,
+        "peak_object_speed_m_s": 0.23345787906641266,
+        "pusher_contact_steps": 148,
+        "pusher_colliders": {
+          "open_manipulator_x::gripper_left_link::gripper_left_link_collision": 148,
+          "open_manipulator_x::gripper_right_link::gripper_right_link_collision": 101
+        },
+        "mean_step_top_contact_fraction": 0.773002842855784,
+        "mean_step_rear_contact_fraction": 0.022224770018887664,
+        "mean_step_vertical_normal_fraction": 0.5750828345497464,
+        "forward_after_last_observed_contact_m": 0.0,
+        "native_samples": 267,
+        "sim_start_ns": 13585000000,
+        "sim_end_ns": 14915000000,
+        "endpoint_position_error_m": 0.0059792328994972685,
+        "orientation_enforced": false
+      }
+    ],
+    "source_sha256": {
+      "physics.jsonl": "e88b8f1e982a71e636d127e7dbf4de947bb47b8afc2b2a384cbffd5e4a770eb3",
+      "contacts.jsonl": "2ed4ee8c88a4404b172b1e89351694e05778f9e290d75699d323747e68d6ccb7",
+      "sim/skills/move_to_pose.jsonl": "92c773dc7b68f2b6b5b9da451f75f797f923208f14682fad5020655d5d8912b8",
+      "sim/skills/push.jsonl": "c31d619a3aa1b75d54e66b4afd48f7af6bb60a09e73a9efa22b8c7daa114edbf"
+    }
+  }
+}

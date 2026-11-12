@@ -1120,3 +1120,31 @@ instance**, beyond the earlier single pass. It does not establish unseen-instanc
 generalization, precise stroke control, release reliability, or L4. Formal T08
 remains `CALIBRATION_UNSUPPORTED`; baseline NOT_PROMOTED. No held-out task,
 hardware, paid model call, main merge, PR or release. Goal remains active.
+
+---
+
+## ADDENDUM — architecture/contact audit and initial-world repair (2026-11-12)
+
+Source: `docs/ARCHITECTURE_REVIEW_20261112.md`,
+`setup/acceptance/evobot_contact_arch_audit_20261112/` and its preregistrations,
+native-record audits, geometry pair and initialization-only Gazebo evidence.
+Base d87f1701; this does not replace or pool the prior fixed B1/B2/B3 batch.
+
+| Fact | State / scope |
+| --- | --- |
+| Contact flag interpretation | **CORRECTED** — contact_made=false is displacement-floor based, not absence of collision. B1's first stroke has 140 native pusher-contact steps despite the false flag. Withdraw the general inference “contact=False means no physical contact”; unreviewed historical attempts remain unclassified |
+| Direction vs contact | **CONFIRMED observation, not unique cause** — pilot2's second stroke has actual EE +62.6 mm, object −16.9 mm, EE backslide about 0.1 mm. Five fixed-batch strokes show substantial top contact and changing pitch. Arithmetic direction error alone cannot explain that case; friction/mesh/attitude contributions remain UNKNOWN |
+| New geometry pair | **COMPLETED, no infrastructure replacement** — G0/default EE 20 mm: +106.664 mm, full 9/9 PASS, 0/2 primitive passes. G1/EE 55 mm: 0 mm, full FAIL (terminal/pusher_contact), 0/3 primitive passes and no native pusher-contact steps in its stroke intervals. Default remains 20 mm; 55 mm proxy REJECTED; no repetition batch earned |
+| Physical evidence distinctions | G0 **COMPLETE/PUSHED**. G1 raw verifier says **INCOMPLETE_OR_INVALID_EVIDENCE/UNKNOWN**; its trajectory and other gates pass, but terminal/contact fail. Actual zero-motion execution is retained, not relabeled as a missing-log infrastructure failure. No known acceptance false rejection confirmed in this pair |
+| Initial-world adapter | **IMPLEMENTED / GAZEBO VERIFIED for a synthetic fixture** — new task_world materialize/verify only sets model initial poses before launch, preserves non-pose physics, refuses unsupported models/shapes/frames or invalid declarations, validates measured xyz/yaw. No TaskSpec edits or live pose mutation |
+| Initial-world measurement | Two declared new xyz/yaw poses match Gazebo truth (about 2.5e−9 m position error); the old default scene is rejected. No pushing/moving task goals; no task grader/capability claim. Later CLI reproduces the measured world byte-for-byte; executed algorithm snapshot retained |
+| Runtime integration | **NOT COMPLETED** — composites already dispatch native PUSH and have postcondition checks. The new feedback CLI is not called by the decision/executor loop; its direct engineering expected_goal input is not the Agent public boundary. Logged retreat_failed has no matching PushObject ROS result field |
+| Autonomous development | **NOT ACQUIRED** — proposal generation/gating is not an apply/build/Gazebo/accept loop. Synthetic reproduction shows re-generation of a superseded release-retry idea; generic offline guard task published as #236. No proposal or carry-ack-only release semantics was applied |
+| Verification / invariants | 95 relevant existing unit checks, 5 frame checks, 8 initializer checks, 4 synthetic ROS protocol checks PASS. Nine frozen files, core and nine related motion/release modules unchanged. Actual pair sources match preexecution; old native hashes match the prior published archive. Ordinary pick/place NOT_REPEATED_THIS_TURN; prior outcomes retained |
+| Agent claims | **NOT_MEASURED** — no Agent claim supplied; no false-success-rate inference from default flags |
+
+The initialization seam is usable; unified-runner integration and unseen manipulation
+are still pending. No new reliable bounded-stroke capability claimed this turn.
+Prioritize actual contact modeling, constrained motion and explicit post-return
+state, then Runtime integration and frozen regression/unseen tests. T08 remains
+CALIBRATION_UNSUPPORTED; formal baseline NOT_PROMOTED; L4 NOT_ACQUIRED. Goal active.

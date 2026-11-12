@@ -127,3 +127,33 @@ release-related sources are unchanged. Next gates: release consistency, a frozen
 unused-instance test, then experience transfer. #231–#234 remain open for their
 generalized offline deliverables; local experiment-specific scripts do not close
 those work packages. Goal remains active; formal T08/L4 status is unchanged.
+
+## Checkpoint — architecture/contact audit and initial-scene adapter
+
+Review: `docs/ARCHITECTURE_REVIEW_20261112.md`; new evidence:
+`setup/acceptance/evobot_contact_arch_audit_20261112/`.
+
+The main physical bottleneck is contact/path control under position-only IK,
+not missing repeat arithmetic. Native records show substantial top contact,
+changing tool pitch, and a reverse object stroke while the EE itself advances.
+`contact_made=false` is a displacement-floor classification, not proof of absent
+physical contact. Do not interpret it as a collision sensor.
+
+One preregistered configuration pair rejected the 55 mm static EE-height proxy:
+G0/default 20 mm passes the broad task (+106.664 mm), but both strokes fail;
+G1/55 mm moves zero and fails all three strokes and the full task. Default stays
+20 mm. No favorable replacement or repetition batch was earned.
+
+Implemented `scripts/task_world.py`: materialize public initial xyz/yaw before
+launch, preserve non-pose world properties, then require measured initial agreement.
+Its synthetic new-layout Gazebo probe passes and rejects the wrong old scene;
+there are no motion task goals. CLI reproduces the measured world's exact bytes.
+This is infrastructure validation, not an unseen robot task success. Historical
+special-purpose runners remain unchanged; the unified runner still needs this seam.
+
+Prioritize an actual contact model and constrained motion interface, explicit
+post-return/arm-ready receipts, then Runtime integration and frozen regression/
+unseen experiments. Runtime already dispatches native PUSH in composites, but
+the feedback CLI is not a registered Runtime skill, and its engineering TaskSpec
+input is not the Agent's public-input boundary. Do not relabel primitive failure
+to make the composition pass. Formal baseline and L4 remain unchanged.

@@ -22,9 +22,15 @@ def main():
     parser.add_argument('task', type=Path)
     parser.add_argument('out', type=Path)
     parser.add_argument('--attempts', type=int, default=3)
+    parser.add_argument('--contact-height', type=float, default=.0200,
+                        help='world-frame EE target height in metres; not the physical contact patch')
+    parser.add_argument('--motion-profile', choices=('demo_veryslow', 'demo_slow', 'demo_default'),
+                        default='demo_slow')
     args = parser.parse_args()
     if args.attempts < 1:
         parser.error('attempts must be positive')
+    if not math.isfinite(args.contact_height):
+        parser.error('contact height must be finite')
     args.out.mkdir(exist_ok=False)
     spec = json.loads(args.task.read_text())
     target, goal = next(iter(spec['expected_goal']['push'].items()))
@@ -154,7 +160,8 @@ def main():
                 request.direction.x, request.direction.y = [float(v) for v in goal['direction']]
                 request.direction.z = 0.
                 request.distance_m = payload['distance_m']
-                request.contact_height_m = .0200
+                request.contact_height_m = args.contact_height
+                request.motion_profile_id = args.motion_profile
                 request.overdrive_m = .005
                 request.max_increments = 1
                 wrapped = action(push, request, 'PUSH', 120.)
