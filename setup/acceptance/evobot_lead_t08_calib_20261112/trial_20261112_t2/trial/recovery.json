@@ -1,0 +1,50 @@
+{
+  "verdict": {
+    "outcome": 2,
+    "achieved_m": 0.026114933420718495,
+    "attempts": 2,
+    "detail": "short by 0.0639 m after 2 attempts"
+  },
+  "attempts": [
+    {
+      "outcome": 1,
+      "error_code": 28,
+      "status": 2,
+      "displacement_m": 0.026382222265183407,
+      "displacement_along_direction_m": 0.026114933420718495,
+      "direction_cos": 0.9898686000831077,
+      "lateral_m": 0.0037454469360714273,
+      "delta_z_m": -5.9424995182744134e-05,
+      "requested_distance_m": 0.09,
+      "ee_travel_m": 0.07600000000000001,
+      "reach_error_m": 0.008310215789104345,
+      "contact_made": true,
+      "contact_lost": true,
+      "increments_executed": 2,
+      "contact_lost_at_increment": 2,
+      "carry_engaged_during": false,
+      "evidence_id": "recover-target_box_a-08509fd5",
+      "detail": "contact lost at increment 2: object moved 0.0264m of 0.0900m requested while the arm kept advancing"
+    },
+    {
+      "outcome": 1,
+      "error_code": 28,
+      "status": 2,
+      "displacement_m": 0.026922549993253025,
+      "displacement_along_direction_m": -0.026827981424726505,
+      "direction_cos": -0.9964873844212297,
+      "lateral_m": 0.0022545721120321386,
+      "delta_z_m": 3.924969429358605e-06,
+      "requested_distance_m": 0.0638850665792815,
+      "ee_travel_m": 0.06555402663171261,
+      "reach_error_m": 0.009826083574792982,
+      "contact_made": true,
+      "contact_lost": true,
+      "increments_executed": 2,
+      "contact_lost_at_increment": 2,
+      "carry_engaged_during": false,
+      "evidence_id": "recover-target_box_a-859ff679",
+      "detail": "contact lost at increment 2: object moved 0.0269m of 0.0639m requested while the arm kept advancing"
+    }
+  ]
+}
