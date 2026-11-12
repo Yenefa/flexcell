@@ -1,0 +1,50 @@
+{
+  "verdict": {
+    "outcome": 2,
+    "achieved_m": 0.0019409027725579842,
+    "attempts": 2,
+    "detail": "short by 0.0881 m after 2 attempts"
+  },
+  "attempts": [
+    {
+      "outcome": 1,
+      "error_code": 27,
+      "status": 2,
+      "displacement_m": 0.0019437453587976368,
+      "displacement_along_direction_m": 0.0019409027725579842,
+      "direction_cos": 0.9985375727191904,
+      "lateral_m": 0.00010508251026496547,
+      "delta_z_m": -3.366905062807124e-07,
+      "requested_distance_m": 0.09,
+      "ee_travel_m": 0.16000000000000003,
+      "reach_error_m": 0.004938381683039902,
+      "contact_made": false,
+      "contact_lost": false,
+      "increments_executed": 5,
+      "contact_lost_at_increment": 0,
+      "carry_engaged_during": false,
+      "evidence_id": "recover-target_box_a-887ce405",
+      "detail": "object moved 0.0019m (< contact floor 0.0050); no contact was made at height 0.0200"
+    },
+    {
+      "outcome": 1,
+      "error_code": 28,
+      "status": 2,
+      "displacement_m": 0.05849459366340673,
+      "displacement_along_direction_m": -0.058199332331580256,
+      "direction_cos": -0.9949523312611507,
+      "lateral_m": 0.0024965292077725075,
+      "delta_z_m": -0.005312489615997271,
+      "requested_distance_m": 0.08805909722744201,
+      "ee_travel_m": 0.07522363889097683,
+      "reach_error_m": 0.00977266460590972,
+      "contact_made": true,
+      "contact_lost": true,
+      "increments_executed": 2,
+      "contact_lost_at_increment": 2,
+      "carry_engaged_during": false,
+      "evidence_id": "recover-target_box_a-d4f33c93",
+      "detail": "contact lost at increment 2: object moved 0.0585m of 0.0881m requested while the arm kept advancing"
+    }
+  ]
+}
