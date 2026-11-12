@@ -60,10 +60,26 @@ want=spec['expected_goal']['push']['target_box_a']
 zone=[z for z in spec['zones'] if z['name']==want['zone']][0]
 obj='target_box_a'
 
+# STAGING GUARD. The staging move is not always effective: in the 18-run injected sweep,
+# seed3000 runs 2 and 3 ended with link5_x_z at -0.0012 and -0.0002 instead of the -0.32 the
+# move normally produces, meaning the pose was not actually changed. One of those two still
+# passed by luck and the other failed at ec 30 with zero displacement. Rather than hope, the
+# pitch is verified after the move and the move retried if it did not take.
+PITCH_TARGET = -0.20        # coarser than the achieved ~-0.32; only asks that the arm is pitched
+PITCH_TOL = 0.12            # at all, which is the property the fix depends on
+STAGE_TRIES = 3
+
 b0,ee0,q0=snap()
 st=stage_move()
 b1,ee1,q1=snap()
 pitch=(lx(q1)[2] if q1 else None)
+stage_attempts=1
+while STAGE_TRIES > stage_attempts and (pitch is None or abs(pitch) < abs(PITCH_TARGET) - PITCH_TOL):
+    stage_attempts += 1
+    st=stage_move()
+    b1,ee1,q1=snap()
+    pitch=(lx(q1)[2] if q1 else None)
+stage_ok = pitch is not None and abs(pitch) >= abs(PITCH_TARGET) - PITCH_TOL
 
 g=PushObject.Goal(); g.object_name=obj
 g.direction.x=-1.0; g.direction.y=0.0; g.direction.z=0.0
@@ -76,7 +92,8 @@ if h is not None and h.accepted:
     res={'ec':int(r.error_code),'skill_disp':round(float(r.displacement_m),5),'contact':bool(r.contact_made)}
 b2,ee2,q2=snap()
 
-out={'stage':STAGE,'stage_outcome':st,'pitch_lz':pitch,
+out={'stage':STAGE,'stage_outcome':st,'pitch_lz':pitch,'stage_attempts':stage_attempts,
+     'stage_ok':stage_ok,
      'finger_z':(ee1[2]-OFFSET*pitch) if (ee1 and pitch is not None) else None,
      'push':res}
 judged=False
