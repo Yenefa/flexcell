@@ -117,7 +117,23 @@ def push_once(i):
     if s:
         s['t'] = round(time.time()-T0, 3); s['phase'] = 'push_%d_done' % i
         timeline.append(s)
+    # DID IT ACTUALLY TRY? Round 72 found a failure mode with ZERO gripper-box contacts and ee z
+    # frozen at its start value for the whole phase: the action returned a result, a push_N phase
+    # was recorded, and no motion happened. Scoring that as a task failure conflates "could not
+    # push it" with "did not try". This mirrors stage_ok, which exists on the staging move for
+    # the same reason.
+    # A push is considered to have executed if the end effector DESCENDED by more than 10 mm
+    # during the phase. The approach always starts at the neutral height (~0.187) and the contact
+    # height is ~0.020, so a real push clears this by a factor of ten; a no-op stays at 0.000.
+    _phase = [x for x in timeline if x.get('phase') == 'push_%d' % i]
+    _zs = [x['ee'][2] for x in _phase if x.get('ee')]
+    _drop = (max(_zs) - min(_zs)) if _zs else 0.0
+    if not (_drop > 0.010):
+        sys.stderr.write('push_%d DID NOT EXECUTE: ee descended only %.4f m over %d samples\n'
+                         % (i, _drop, len(_zs)))
     return {'outcome': int(r.outcome), 'error_code': int(r.error_code),
+            'ee_descent_m': round(_drop, 4),
+            'push_executed': bool(_drop > 0.010),
             'displacement_m': round(float(r.displacement_m),5),
             'displacement_along_direction_m': round(float(r.displacement_along_direction_m),5),
             'direction_cos': round(float(r.direction_cos),5),
