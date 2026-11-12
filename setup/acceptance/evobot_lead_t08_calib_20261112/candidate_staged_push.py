@@ -92,10 +92,13 @@ if h is not None and h.accepted:
     res={'ec':int(r.error_code),'skill_disp':round(float(r.displacement_m),5),'contact':bool(r.contact_made)}
 b2,ee2,q2=snap()
 
+# Raw positions are kept because the frozen evaluator needs them: derived fields alone
+# (displacement, cosine, zone distance) are this script's own summary and cannot be fed
+# back into evaluate.py. Without these, independent acceptance is impossible.
 out={'stage':STAGE,'stage_outcome':st,'pitch_lz':pitch,'stage_attempts':stage_attempts,
      'stage_ok':stage_ok,
      'finger_z':(ee1[2]-OFFSET*pitch) if (ee1 and pitch is not None) else None,
-     'push':res}
+     'pre':b1,'post':b2,'push':res}
 judged=False
 if b1 and b2 and obj in b1 and obj in b2:
     pre=b1[obj]; post=b2[obj]
