@@ -22,6 +22,26 @@ STORE_VERSION = "0.1.0"
 # Two distinct leak channels: grading machinery, and the ANSWER itself. A test caught
 # that "expected_goal says zone_2" slipped through the original list, so answer-shaped
 # words are blocked here too. A lesson may say HOW to plan, never WHAT the plan is.
+#
+# KNOWN LIMITATION, DECIDED EXPLICITLY (2026-11-12, goal round 56) - NOT AN OVERSIGHT.
+#
+# This is a WORD denylist, not a concept test, and it has been evaded twice by a synonym:
+#   round 15  "landing spots"  passed while "placement" was blocked
+#   round 55  "20 mm accepted limit" passed in the lesson string while the identical concept
+#             written as evidence field position_tolerance_m raised 'protected topic: tolerance'.
+# The second case is the sharper one because the guard blocked the concept in `evidence` and
+# permitted it in the `lesson` string that the SAME function also governs.
+#
+# THE DECISION: the guard protects GRADING knowledge, and an executor tolerance is not grading
+# knowledge. `position_tolerance_m` is a field the PLANNER emits into plan.json - the planner's
+# own declared tolerance - whereas the evaluator's thresholds (30/150 mm displacement, 20 mm
+# vertical, cosine 0.9, 60 mm zone radius) are the answer, and none of them may appear here.
+# Independent review checked exactly this on the first ACCEPTed record and confirmed no grading
+# threshold appears in it.
+#
+# CONSEQUENCE, ACCEPTED: a record may describe an executor tolerance in prose. That is intended.
+# If this boundary needs to be tighter than a synonym list, it needs a concept test - and until
+# somebody writes one, this comment is the boundary rather than a claim that none exists.
 FORBIDDEN_TOPICS = ["evaluator", "tolerance", "threshold", "acceptance", "world_sha",
                     "verifier", "grading", "pass_threshold",
                     "expected_goal", "placement", "unmoved", "instance_sha256",
