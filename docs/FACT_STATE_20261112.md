@@ -1091,3 +1091,32 @@ one fully graded development task. Keep the opt-in candidate, preserve all failu
 and continue isolated state/finishing work. The ordinary release regression must
 be resolved before formal promotion. Formal T08 remains `CALIBRATION_UNSUPPORTED`;
 L4 has not been acquired. Goal remains active.
+
+---
+
+## ADDENDUM — measured feedback and fixed repeated T08 batch (2026-11-12)
+
+Source: `setup/acceptance/evobot_push_feedback_20261112/README.md`, preregistrations,
+exact v1/v2 source snapshots, `result_summary.json`, `run_analysis.json`, and the
+hash-verified raw archive. Isolated engineering from `4746a637`, no Runtime Agent
+autonomous-development experiment and no formal baseline promotion.
+
+| Fact | State / scope |
+| --- | --- |
+| Post-return feedback | **IMPLEMENTED / TESTED / EXECUTED** — signed net position anchored to task start, fresh Observe after measured arm quiet, 30 mm request/5 mm overdrive/one increment, maximum three attempts; stop on known geometry, not a claim of independent acceptance |
+| V1 development pilot | **FAILED / RETAINED** — final physical net **−86.016 mm**. Last online snapshot was **−56.489 mm** before further reverse motion; the v2 preregistration's shorthand cited that snapshot. Correction is retained explicitly, not a rewritten original. About 99 mm reverse movement aligns with a second retreat LOWER interval |
+| V2 development pilot | **FULL TASK FAILED / MECHANISM GATE PASSED** — final **+11.375 mm**, complete return losses within 5 mm; second stroke reverses and third approach fails reach. Pilot data is separate from the fixed batch |
+| New return mode | **EXECUTED** — optional LIFT→TRANSFER high hold on RETREATING, next APPROACH still includes LOWER. The frozen original low retreat target is honestly reported **unreached**, not faked successful. Defaults false; actual motion failures retain refusal/cancel behavior |
+| Fixed repeat batch | **CONFIRMED on exposed seed2000 only** — all six predetermined slots A1 B1 B2 A2 A3 B3 completed, no infrastructure failures or replacements. Previous recovery **0/3** full passes; combined v2 **3/3**, final net **+61.558 / +50.537 / +76.131 mm**. Same image, TaskSpec/world/validator and three-attempt cap, five actual PushObject calls per arm. This measures the combined treatment, not individual component effects or statistical superiority |
+| Candidate physical evidence | **FULL PASS, each 9/9** — native 5 ms consecutive traces, valid pusher contacts, protected/no-lift/support/gripper/no-attachment/no-teleport gates. Worst completed candidate return loss 1.678 mm. All candidate decisions stop at measured goal geometry before another push |
+| Per-stroke control | **NOT FIXED** — all five candidate primitive calls in the fixed batch still FAILED their narrower stroke contracts. Under-delivery and overshoot remain; bounded request does not imply bounded physical displacement |
+| Ordinary regression this turn | **PASS, one normal smoke** — PICK→PLACE→VERIFY, position error 10.766 mm within unchanged 60 mm tolerance, zero identity mismatches and zero model calls. Reposition modes default off in this launch |
+| Prior release failures | **RETAINED / NOT RESOLVED BY ONE PASS** — previous candidate and original-source normal failures remain. No place/release source changes. Broad release consistency/non-regression is not established |
+| Source / evaluation integrity | **HELD** — nine frozen files and push core match session start/30fa2066, actual v2 motion source hashes match preregistered sources, six related motion/release modules unchanged. Existing stale pin not refreshed. 95 relevant unit checks and four explicitly synthetic ROS protocol checks passed; test counts are not physical ability evidence |
+| Agent claim accuracy / False Success | **NOT_MEASURED** — no Agent claim supplied; default false flags and false_failure on passing probes are harness artifacts, not measured claim accuracy |
+
+This adds evidence of repeated **task completion on the current development
+instance**, beyond the earlier single pass. It does not establish unseen-instance
+generalization, precise stroke control, release reliability, or L4. Formal T08
+remains `CALIBRATION_UNSUPPORTED`; baseline NOT_PROMOTED. No held-out task,
+hardware, paid model call, main merge, PR or release. Goal remains active.

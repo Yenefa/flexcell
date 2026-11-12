@@ -133,6 +133,7 @@ class PushServer(Node):
                                list(known_objects.DEFAULT_OBJECTS))
         # Isolated candidate only. Existing launches retain the original path.
         self.declare_parameter('safe_reposition_enabled', False)
+        self.declare_parameter('safe_reposition_hold_retreat_high', False)
         self.declare_parameter('safe_reposition_min_height_m', float('nan'))
         self.declare_parameter('safe_reposition_pose_max_age_s', 0.25)
         self.declare_parameter('end_effector_link', 'end_effector_link')
@@ -155,6 +156,7 @@ class PushServer(Node):
         self._admission_wait_s = float(gp('admission_wait_s').value)
         self._seq = 0
         self._safe_reposition_enabled = bool(gp('safe_reposition_enabled').value)
+        self._hold_retreat_high = bool(gp('safe_reposition_hold_retreat_high').value)
         self._reposition_min_height = float(gp('safe_reposition_min_height_m').value)
         self._reposition_pose_age = float(gp('safe_reposition_pose_max_age_s').value)
         self._ee = gp('end_effector_link').value
@@ -330,7 +332,9 @@ class PushServer(Node):
                         emit=lambda name, **data: emit(name, phase=active_phase, **data),
                         minimum_height_m=self._reposition_min_height,
                         tracking_margin_m=self._params['arm_reach_tolerance_m'],
-                        carry_state=self._carry_engaged)
+                        carry_state=self._carry_engaged,
+                        stop_at_clearance=(active_phase == 'RETREATING'
+                                           and getattr(self, '_hold_retreat_high', False)))
                     after, after_error = self._measure(goal.object_name)
                     emit('REPOSITION_OBJECT_AFTER', phase=active_phase,
                          position=after, error=after_error)

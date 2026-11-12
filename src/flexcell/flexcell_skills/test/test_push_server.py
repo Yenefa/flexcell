@@ -238,6 +238,31 @@ def test_reposition_cancel_is_typed_canceled_and_sends_no_next_waypoint():
     assert len(node.moves) == 1
 
 
+def test_high_hold_adapter_reports_false_for_the_unreached_low_retreat(monkeypatch):
+    node = server([BOX_A] * 20)
+    _enable_reposition(node)
+    node._hold_retreat_high = True
+    node._ee_xyz = [.19, 0., .02]
+    node._ee_position = lambda: (list(node._ee_xyz), None)
+    original = node._m2p.call
+    def moving(position, **kwargs):
+        result = original(position, **kwargs)
+        node._ee_xyz = list(position)
+        return result
+    node._m2p.call = moving
+    def exercise(io, _goal, _params, **_kwargs):
+        io.phase('RETREATING')
+        ok, error, _detail = io.move_to([.27, 0., .02])
+        assert not ok and error > .17
+        return dict(outcome=contract.OUTCOME_FAILED, error_code=contract.ERR_CONTACT_LOST,
+                    detail='synthetic contract call; target not reached is retained')
+    monkeypatch.setattr(contract, 'execute_push', exercise)
+    result = node._execute(_GoalHandle(goal()))
+    assert result.outcome == contract.OUTCOME_FAILED
+    assert len(node.moves) == 2
+    assert any(e['event'] == 'REPOSITION_HIGH_HOLD' for e in node._log.records[-1]['events'])
+
+
 def test_cancellation_surfaces_as_canceled_not_failed():
     node = server([BOX_A] + [[0.210, 0.0, 0.0175]] * 8)
     handle = _GoalHandle(goal())

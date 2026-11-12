@@ -21,7 +21,8 @@ def _position(value):
 
 
 def execute_reposition(target, *, read_pose, move, canceled, emit,
-                       minimum_height_m, tracking_margin_m, carry_state):
+                       minimum_height_m, tracking_margin_m, carry_state,
+                       stop_at_clearance=False):
     """Return the last motion tuple; refuse every unsafe/unknown intermediate step.
 
     read_pose returns (fresh measured xyz, error); it must check source age.
@@ -47,8 +48,9 @@ def execute_reposition(target, *, read_pose, move, canceled, emit,
     start = measure()
     height = max(start[2], target[2], minimum_height_m + tracking_margin_m)
     waypoints = [('LIFT', [start[0], start[1], height]),
-                 ('TRANSFER', [target[0], target[1], height]),
-                 ('LOWER', target)]
+                 ('TRANSFER', [target[0], target[1], height])]
+    if not stop_at_clearance:
+        waypoints.append(('LOWER', target))
     emit('REPOSITION_PLAN', start=start, target=target, transit_z_m=height,
          minimum_measured_z_m=minimum_height_m)
     result = None
@@ -74,4 +76,11 @@ def execute_reposition(target, *, read_pose, move, canceled, emit,
              reach_error_m=reach_error, detail=detail)
         if stage in ('LIFT', 'TRANSFER') and actual_after[2] < minimum_height_m:
             raise RepositionFailed('%s endpoint below measured clearance' % stage)
+    if stop_at_clearance:
+        error = math.dist(actual_after, target)
+        reached = error <= tracking_margin_m
+        emit('REPOSITION_HIGH_HOLD', actual_final=actual_after,
+             requested_original_target=target, original_target_reached=reached,
+             original_target_error_m=error)
+        return reached, error, 'intentional high hold; original target reach is reported separately'
     return result

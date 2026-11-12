@@ -100,3 +100,30 @@ documented gripper release stall. Regression remains NOT CLEARED and prevents
 formal promotion. T08 isolated state/finishing development may continue; frozen
 release changes must follow their existing separate proposal/approval boundary.
 No hold-out run or claim of Runtime-autonomous skill development was made.
+
+## Checkpoint — measured feedback and fixed repetition batch
+
+The three-waypoint adapter's first success did not reproduce in the next pilot:
+final net −86.016 mm, with roughly 99 mm reverse motion during a retreat LOWER
+interval. Preserve that failure. The current isolated v2 adds an optional high
+return hold, fresh post-return net-state feedback, 30 mm requests/5 mm overdrive/
+one increment and geometry-based stopping, with a maximum of three attempts.
+The old low retreat point is honestly reported unreached; no core push edit.
+
+Preregistered A1 B1 B2 A2 A3 B3 completed: previous recovery **0/3**, combined v2
+**3/3** full nine-gate task passes, with candidate net **61.558 / 50.537 / 76.131 mm**.
+This is repetition on exposed seed2000, not an unseen-instance or statistical
+superiority claim. All five candidate primitive strokes still fail their narrower
+requested-distance contracts. The precise-stroke limitation remains open.
+
+This turn's ordinary PICK→PLACE→VERIFY regression is PASS with the candidate
+overlay; zero identity mismatches and no model calls. The previous two release
+failures remain retained and unresolved by this one pass. Broader non-regression
+and formal promotion are not cleared. Both motion flags default false.
+
+Source: `setup/acceptance/evobot_push_feedback_20261112/README.md`, complete raw
+archive and deterministic analysis scripts. Nine frozen files, push core and
+release-related sources are unchanged. Next gates: release consistency, a frozen
+unused-instance test, then experience transfer. #231–#234 remain open for their
+generalized offline deliverables; local experiment-specific scripts do not close
+those work packages. Goal remains active; formal T08/L4 status is unchanged.

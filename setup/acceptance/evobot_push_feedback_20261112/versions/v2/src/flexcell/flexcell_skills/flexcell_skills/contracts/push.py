@@ -1,0 +1,555 @@
+"""T08 contact-push contract: validation, measured verdict, bounded execution.
+
+WHY THIS IS A PURE MODULE AND NOT CODE INSIDE THE SERVER
+    Every decision that can be wrong lives here and is exercised without ROS:
+    which goals are legal, what counts as contact, when contact is declared
+    LOST, and whether a measured push succeeded.  push_server.py is then a thin
+    adapter that supplies measurement and motion - the same split the composite
+    executor already uses (execute() takes observe/native/emit).
+
+WHY CONTACT IS MEASURED, NEVER INFERRED
+    The T08 Step-0 probe (ci-public-window/evidence/evobot_t08_push_step0_
+    20261111/) measured the failure mode this module exists to catch: the arm
+    advanced 16 mm further and the box did not move AT ALL.  That is contact
+    loss, not slow pushing.  A skill that only checked "did the arm reach its
+    target" would have reported success there.  So the verdict is computed from
+    the OBJECT's measured pose; arm travel is used only to tell
+    "never touched it" apart from "touched it and then lost it".
+
+WHY THE PUSH IS OPEN LOOP WITH OVERDRIVE
+    If the target sits exactly on the box's far face, two different worlds look
+    identical: the box yielded and the arm arrived, or the box never moved and
+    the arm stopped against it.  Aiming past the box (overdrive) makes the arm's
+    own measured reach error carry that information: reached => the box gave
+    way; did not reach => something blocked the arm.  Removing the overdrive
+    therefore destroys the honest signal, which is why a mutation that does so
+    is required to turn the tests red.
+
+DISTANCE SEMANTICS
+    All distances are metres in the world frame.  Direction is horizontal
+    (z == 0): a push that lifts the object is a different, unmeasured action.
+"""
+
+import math
+
+# ------------------------------------------------------------------ defaults
+# Every one of these is overridable from the node's parameters; they are here
+# so the pure contract has a declared, reviewable baseline with no node.
+DEFAULTS = {
+    # goal envelope
+    'push_min_distance_m': 0.01,
+    'push_max_distance_m': 0.15,
+    'push_min_overdrive_m': 0.005,
+    'push_max_overdrive_m': 0.05,
+    # measured thresholds
+    'contact_floor_m': 0.005,       # below this the object did not move at all
+    'increment_floor_m': 0.001,     # below this one increment advanced nothing
+    'direction_cos_min': 0.9,
+    'lateral_max_m': 0.02,
+    'delta_z_max_m': 0.02,
+    'arm_reach_tolerance_m': 0.02,  # same tolerance move_to_pose uses
+    'displacement_tolerance_m': 0.005,
+    # execution shape
+    'increments': 5,
+    'max_increments': 10,
+    'approach_clearance_m': 0.02,
+    'retreat_clearance_m': 0.03,
+    # contact height: NaN means "must be supplied at request time or by the node"
+    'contact_height_m': float('nan'),
+}
+
+# error codes, mirrored from flexcell_interfaces/action/PushObject.action
+ERR_NONE = 0
+ERR_INVALID_GOAL = 1
+ERR_INTERNAL = 2
+ERR_IK_UNREACHABLE = 10
+ERR_OBJECT_NOT_FOUND = 21
+ERR_CONTACT_NOT_MADE = 27
+ERR_CONTACT_LOST = 28
+ERR_DISPLACEMENT_OFF_AXIS = 29
+ERR_MOTION_FAILED = 30
+ERR_PUSH_BLOCKED = 31
+ERR_DISPLACEMENT_OVERSHOOT = 36
+ERR_CANCELED = 32
+ERR_RESOURCE_BUSY = 41
+
+OUTCOME_SUCCEEDED = 0
+OUTCOME_FAILED = 1
+OUTCOME_CANCELED = 2
+OUTCOME_STATE_UNKNOWN = 3
+
+
+def _finite(value):
+    return type(value) in (int, float) and math.isfinite(value)
+
+
+def _is_nan(value):
+    return type(value) is float and math.isnan(value)
+
+
+def _point(value):
+    return (type(value) is list and len(value) == 3
+            and all(_finite(v) for v in value))
+
+
+def _error(code, detail):
+    return dict(ok=False, error_code=code, detail=detail)
+
+
+# ------------------------------------------------------------ goal validation
+def unit_direction(vector):
+    """World-frame horizontal unit vector, or a typed refusal.
+
+    A zero vector, a non-finite component or a non-zero z is refused. None of
+    them is silently repaired: a wrong push direction produces a wrong verdict,
+    and a default direction would be indistinguishable from a declared one.
+    """
+    if type(vector) not in (list, tuple) or len(vector) != 3:
+        return None, _error(ERR_INVALID_GOAL, 'push direction must be 3 numbers')
+    if not all(_finite(v) for v in vector):
+        return None, _error(ERR_INVALID_GOAL,
+                            'push direction has non-finite values')
+    x, y, z = (float(v) for v in vector)
+    if z != 0.0:
+        return None, _error(ERR_INVALID_GOAL,
+                            'push direction must be horizontal (z=%r)' % z)
+    norm = math.hypot(x, y)
+    if norm <= 1e-9:
+        return None, _error(ERR_INVALID_GOAL, 'push direction is zero-length')
+    return [x / norm, y / norm, 0.0], None
+
+
+def resolve_goal(goal, params=None):
+    """Validate a request into a fully-resolved, finite push plan.
+
+    Absent/NaN optional values resolve to DECLARED parameters rather than to
+    numeric literals, so "the plan omitted it" stays visible as "the node's
+    declared default was used" instead of vanishing into a hard-coded constant.
+    """
+    p = dict(DEFAULTS)
+    p.update({k: v for k, v in (params or {}).items() if k in DEFAULTS})
+
+    name = goal.get('object_name')
+    if type(name) is not str or not name:
+        return None, _error(ERR_INVALID_GOAL, 'object_name is empty')
+
+    direction, err = unit_direction(goal.get('direction'))
+    if err is not None:
+        return None, err
+
+    distance = goal.get('distance_m')
+    if not _finite(distance):
+        return None, _error(ERR_INVALID_GOAL, 'distance_m must be finite')
+    lo, hi = p['push_min_distance_m'], p['push_max_distance_m']
+    if not lo <= distance <= hi:
+        return None, _error(ERR_INVALID_GOAL,
+                            'distance_m %r outside declared range [%r, %r]'
+                            % (distance, lo, hi))
+
+    overdrive = goal.get('overdrive_m')
+    if overdrive is None or _is_nan(overdrive):
+        overdrive = p['push_max_overdrive_m']
+    elif not _finite(overdrive):
+        return None, _error(ERR_INVALID_GOAL, 'overdrive_m must be finite')
+    olo, ohi = p['push_min_overdrive_m'], p['push_max_overdrive_m']
+    if not olo <= overdrive <= ohi:
+        return None, _error(ERR_INVALID_GOAL,
+                            'overdrive_m %r outside declared range [%r, %r]'
+                            % (overdrive, olo, ohi))
+
+    height = goal.get('contact_height_m')
+    if height is None or _is_nan(height):
+        height = p['contact_height_m']
+    if not _finite(height):
+        # The parameter default is NaN on purpose: a stack where nobody
+        # declared the contact height must refuse, not guess. Step 0 measured
+        # that guessing 0.1775 misses the box by 145 mm.
+        return None, _error(
+            ERR_INVALID_GOAL,
+            'contact_height_m not declared at request time and no '
+            'contact_height_m parameter is set')
+    if height < -0.05 or height > 0.75:
+        return None, _error(ERR_INVALID_GOAL,
+                            'contact_height_m %r outside the arm workspace'
+                            % height)
+
+    increments = goal.get('max_increments') or p['increments']
+    if type(increments) is not int or isinstance(increments, bool):
+        return None, _error(ERR_INVALID_GOAL,
+                            'max_increments must be an integer')
+    if not 1 <= increments <= p['max_increments']:
+        return None, _error(ERR_INVALID_GOAL,
+                            'max_increments %r outside 1..%r'
+                            % (increments, p['max_increments']))
+
+    return dict(object_name=name, direction=direction,
+                distance_m=float(distance), overdrive_m=float(overdrive),
+                contact_height_m=float(height),
+                increments=int(increments)), None
+
+
+# ------------------------------------------------------- measured geometry
+def contact_metrics(before, after, direction):
+    """Measured displacement of the OBJECT, decomposed against direction.
+
+    Pure and total: a missing pose is reported as an error, never as zero
+    displacement (a zero would read as "contact not made" and hide the real
+    problem, which is that we could not measure).
+    """
+    if not _point(before) or not _point(after):
+        return None, _error(ERR_INTERNAL, 'before/after object pose unavailable')
+    unit, err = unit_direction(direction)
+    if err is not None:
+        return None, err
+    delta = [after[0] - before[0], after[1] - before[1], after[2] - before[2]]
+    magnitude = math.sqrt(delta[0] ** 2 + delta[1] ** 2 + delta[2] ** 2)
+    along = delta[0] * unit[0] + delta[1] * unit[1]
+    lateral = abs(delta[0] * unit[1] - delta[1] * unit[0])
+    # A direction cosine is undefined for a zero displacement. Reporting 0.0
+    # would claim the object moved sideways; NaN says "no direction exists".
+    cosine = (along / magnitude) if magnitude > 0.0 else float('nan')
+    return dict(displacement_m=magnitude, along_m=along, lateral_m=lateral,
+                delta_z_m=delta[2], direction_cos=cosine), None
+
+
+def contact_pose(center, half_along_direction, direction, height):
+    """End-effector pose at the object's near face, at the contact height."""
+    return [center[0] - direction[0] * half_along_direction,
+            center[1] - direction[1] * half_along_direction,
+            float(height)]
+
+
+def push_targets(face, direction, distance, overdrive, increments):
+    """Absolute end-effector targets for the bounded increment sequence.
+
+    The LAST target deliberately lies overdrive beyond the requested distance:
+    reaching it proves the object yielded, failing to reach it proves something
+    blocked the arm. Without that margin the two are indistinguishable and the
+    skill could not tell a successful push from a stalled one.
+    """
+    total = float(distance) + float(overdrive)
+    return [[face[0] + direction[0] * total * (i + 1) / increments,
+             face[1] + direction[1] * total * (i + 1) / increments,
+             face[2]] for i in range(int(increments))]
+
+
+# ------------------------------------------------------------------- verdict
+def judge(metrics, resolved, params, arm_travel_m, reach_error_m,
+          contact_lost_at_increment, carry_engaged, increments_executed):
+    """Turn measured facts into a typed verdict. THE only place success is decided.
+
+    Order matters and is deliberate: an object that never moved is diagnosed
+    before any displacement-shape check, because "the arm arrived but the box
+    did not move" and "the box moved sideways" are different defects.
+    """
+    p = dict(DEFAULTS)
+    p.update({k: v for k, v in (params or {}).items() if k in DEFAULTS})
+
+    if carry_engaged:
+        # A push is not a grasp. If the carry backend engaged, the object's
+        # motion is explained by being pinned to the arm and the evidence is
+        # worthless - regardless of how good the numbers look.
+        return dict(outcome=OUTCOME_FAILED, error_code=ERR_PUSH_BLOCKED,
+                    contact_made=False, contact_lost=False,
+                    detail='carry backend engaged during a push; motion is not '
+                           'contact evidence')
+
+    if metrics is None:
+        return dict(outcome=OUTCOME_FAILED, error_code=ERR_INTERNAL,
+                    contact_made=False, contact_lost=False,
+                    detail='object pose could not be measured')
+
+    moved = metrics['displacement_m']
+    contact_made = moved >= p['contact_floor_m']
+
+    if not contact_made:
+        # Two very different worlds, told apart by whether the arm got through:
+        #   travelled the requested distance -> something stopped it
+        #   stopped short                     -> it never touched the object
+        blocked = (arm_travel_m >= resolved['distance_m']
+                   and reach_error_m > p['arm_reach_tolerance_m'])
+        if blocked:
+            return dict(outcome=OUTCOME_FAILED, error_code=ERR_PUSH_BLOCKED,
+                        contact_made=False, contact_lost=False,
+                        detail='arm advanced %.4fm but the object moved %.4fm; '
+                               'blocked with reach error %.4fm'
+                               % (arm_travel_m, moved, reach_error_m))
+        return dict(outcome=OUTCOME_FAILED, error_code=ERR_CONTACT_NOT_MADE,
+                    contact_made=False, contact_lost=False,
+                    detail='object moved %.4fm (< contact floor %.4f); no '
+                           'contact was made at height %.4f'
+                           % (moved, p['contact_floor_m'],
+                              resolved['contact_height_m']))
+
+    tolerance = p['displacement_tolerance_m']
+
+    # ORDER OF DIAGNOSIS, and why it is this order:
+    #   1. vertical motion first - if the object left the table, every
+    #      horizontal quantity (distance, cosine, lateral) is meaningless.
+    #   2. contact loss at a known increment - the measured saturation
+    #      signature, and the most actionable failure.
+    #   3. total shortfall       - contact could not be held to the end.
+    #   4. lateral drift         - it moved, but not where it was sent.
+    #   5. overshoot             - it moved further than asked, i.e. a shove.
+    #   6. direction cosine      - the residual catch-all for a bent path.
+    # Each of these is a different physical story; collapsing them into one
+    # "FAILED" would throw away the diagnosis the operator needs.
+    if abs(metrics['delta_z_m']) > p['delta_z_max_m']:
+        return dict(outcome=OUTCOME_FAILED,
+                    error_code=ERR_DISPLACEMENT_OFF_AXIS,
+                    contact_made=True, contact_lost=False,
+                    detail='vertical displacement %.4fm exceeds %.4fm; the '
+                           'object was lifted or tipped, not pushed'
+                           % (metrics['delta_z_m'], p['delta_z_max_m']))
+
+    if contact_lost_at_increment:
+        return dict(outcome=OUTCOME_FAILED, error_code=ERR_CONTACT_LOST,
+                    contact_made=True, contact_lost=True,
+                    detail='contact lost at increment %d: object moved %.4fm '
+                           'of %.4fm requested while the arm kept advancing'
+                           % (contact_lost_at_increment, moved,
+                              resolved['distance_m']))
+
+    short = resolved['distance_m'] - moved
+    if short > tolerance:
+        return dict(outcome=OUTCOME_FAILED, error_code=ERR_CONTACT_LOST,
+                    contact_made=True, contact_lost=True,
+                    detail='object moved %.4fm of %.4fm requested (short by '
+                           '%.4fm); contact could not be maintained'
+                           % (moved, resolved['distance_m'], short))
+
+    if metrics['lateral_m'] > p['lateral_max_m']:
+        return dict(outcome=OUTCOME_FAILED,
+                    error_code=ERR_DISPLACEMENT_OFF_AXIS,
+                    contact_made=True, contact_lost=False,
+                    detail='lateral displacement %.4fm exceeds %.4fm'
+                           % (metrics['lateral_m'], p['lateral_max_m']))
+
+    # OVERSHOOT: the object travelled FURTHER than asked. Without this the
+    # skill would accept a shove that sends the box across the table as a
+    # success, because "at least as far as requested" is satisfied. A push is a
+    # BOUNDED displacement, so both bounds belong to the request.
+    if moved - resolved['distance_m'] > tolerance:
+        return dict(outcome=OUTCOME_FAILED,
+                    error_code=ERR_DISPLACEMENT_OVERSHOOT,
+                    contact_made=True, contact_lost=False,
+                    detail='object moved %.4fm, %.4fm beyond the %.4fm '
+                           'requested (tolerance %.4fm); this is a shove, not '
+                           'a bounded push'
+                           % (moved, moved - resolved['distance_m'],
+                              resolved['distance_m'], tolerance))
+
+    cosine = metrics['direction_cos']
+    if not _finite(cosine) or cosine < p['direction_cos_min']:
+        return dict(outcome=OUTCOME_FAILED,
+                    error_code=ERR_DISPLACEMENT_OFF_AXIS,
+                    contact_made=True, contact_lost=False,
+                    detail='displacement direction cosine %r below %r'
+                           % (cosine, p['direction_cos_min']))
+
+    return dict(outcome=OUTCOME_SUCCEEDED, error_code=ERR_NONE,
+                contact_made=True, contact_lost=False,
+                detail='pushed %.4fm along the requested direction (cos %.4f, '
+                       'lateral %.4fm, dz %.4fm) in %d increments'
+                       % (moved, cosine, metrics['lateral_m'],
+                          metrics['delta_z_m'], increments_executed))
+
+
+# ---------------------------------------------------------------- execution
+def execute_push(io, goal, params=None, half_extent_m=0.0175):
+    """Run one push against an injected world. No ROS, no clock, no globals.
+
+    io supplies, and nothing else is assumed about the robot:
+        measure()            -> (position[3] | None, error_string | None)
+        move_to(target[3])   -> (ok: bool, reach_error_m: float, detail: str)
+        carry_engaged()      -> (bool | None, error_string | None)
+        cancelled()          -> bool
+        phase(name)          -> None
+        emit(event, **data)  -> None
+    """
+    p = dict(DEFAULTS)
+    p.update({k: v for k, v in (params or {}).items() if k in DEFAULTS})
+    record = {}
+
+    def finish(outcome, error_code, detail, **extra):
+        record.update(outcome=int(outcome), error_code=int(error_code),
+                      detail=detail)
+        record.update(extra)
+        io.emit('TERMINAL', outcome=int(outcome), error_code=int(error_code),
+                detail=detail, **extra)
+        return record
+
+    io.phase('VALIDATING')
+    resolved, err = resolve_goal(goal, p)
+    if err is not None:
+        return finish(OUTCOME_FAILED, err['error_code'], err['detail'])
+    record['resolved'] = dict(resolved)
+    io.emit('PLAN', **dict(resolved))
+
+    if io.cancelled():
+        return finish(OUTCOME_CANCELED, ERR_CANCELED, 'canceled before motion')
+
+    io.phase('OBSERVING')
+    before, merr = io.measure()
+    if before is None:
+        return finish(OUTCOME_FAILED, ERR_INTERNAL,
+                      'pre-push object measurement failed: %s' % merr)
+    io.emit('MEASURED_BEFORE', position=list(before))
+
+    engaged, cerr = io.carry_engaged()
+    if engaged is None:
+        return finish(OUTCOME_FAILED, ERR_INTERNAL,
+                      'carry state unreadable: %s' % cerr)
+    if engaged:
+        return finish(OUTCOME_FAILED, ERR_PUSH_BLOCKED,
+                      'carry backend already engaged before the push')
+
+    direction = resolved['direction']
+    face = contact_pose(before, half_extent_m, direction,
+                        resolved['contact_height_m'])
+    approach = [face[0] - direction[0] * p['approach_clearance_m'],
+                face[1] - direction[1] * p['approach_clearance_m'],
+                face[2]]
+    targets = push_targets(face, direction, resolved['distance_m'],
+                           resolved['overdrive_m'], resolved['increments'])
+
+    io.phase('APPROACH')
+    ok, reach_err, detail = io.move_to(approach)
+    io.emit('APPROACH_RESULT', ok=bool(ok), reach_error_m=reach_err,
+            detail=detail)
+    if not ok:
+        return finish(OUTCOME_FAILED, ERR_MOTION_FAILED,
+                      'approach failed: %s' % detail)
+    if io.cancelled():
+        return finish(OUTCOME_CANCELED, ERR_CANCELED,
+                      'canceled during approach; no push commanded')
+
+    io.phase('PUSHING')
+    travelled = 0.0
+    previous = list(before)
+    lost_at = 0
+    executed = 0
+    carry_seen = False
+    for index, target in enumerate(targets, start=1):
+        if io.cancelled():
+            metrics_now, _m = contact_metrics(before, previous, direction)
+            return finish(
+                OUTCOME_CANCELED, ERR_CANCELED,
+                'canceled during push at increment %d' % (index - 1),
+                increments_executed=executed,
+                displacement_m=(None if metrics_now is None
+                                else metrics_now['displacement_m']))
+        ok, reach_err, detail = io.move_to(target)
+        executed = index
+        travelled = math.dist(target, approach)
+        io.emit('INCREMENT', index=index, target=list(target), ok=bool(ok),
+                reach_error_m=reach_err, detail=detail)
+
+        engaged_now, _e = io.carry_engaged()
+        if engaged_now:
+            carry_seen = True
+            return finish(OUTCOME_FAILED, ERR_PUSH_BLOCKED,
+                          'carry engaged at increment %d; the object is no '
+                          'longer being pushed by contact' % index,
+                          increments_executed=executed,
+                          carry_engaged_during=True)
+
+        current, merr = io.measure()
+        if current is None:
+            return finish(OUTCOME_FAILED, ERR_INTERNAL,
+                          'measurement at increment %d failed: %s'
+                          % (index, merr))
+        moved_step = math.dist(current, previous)
+        metrics_step, _m = contact_metrics(before, current, direction)
+        cumulative = (0.0 if metrics_step is None
+                      else metrics_step['displacement_m'])
+        io.emit('INCREMENT_MEASURED', index=index, position=list(current),
+                step_displacement_m=moved_step,
+                displacement_m=(None if metrics_step is None
+                                else metrics_step['displacement_m']))
+
+        # CONTACT LOSS, defined precisely - all four conditions:
+        #   1. the object was actually being pushed (cumulative >= contact
+        #      floor). Otherwise "no motion" means contact was never made,
+        #      which is a different diagnosis and is judged at the end;
+        #   2. this increment advanced the object by less than the floor;
+        #   3. the object has NOT yet reached the requested distance. Once it
+        #      has, an advancing arm with a still object is simply overdrive
+        #      running through - the normal shape of a completed push;
+        #   4. it is not the first increment (there is a baseline to compare).
+        # This is the measured 23 mm saturation signature, localised to the
+        # increment where it happened instead of inferred from a shortfall.
+        stalled = moved_step < p['increment_floor_m']
+        pushed = cumulative >= p['contact_floor_m']
+        unfinished = cumulative < resolved['distance_m'] - p['displacement_tolerance_m']
+        if stalled and pushed and unfinished and index > 1:
+            lost_at = index
+            break
+        if (not ok and reach_err > p['arm_reach_tolerance_m']
+                and stalled and unfinished):
+            # The arm could not complete the increment: it is blocked. Recorded
+            # only while the object is still short of the request, for the same
+            # reason as above.
+            lost_at = index
+            break
+        previous = list(current)
+
+    io.phase('VERIFYING')
+    after, merr = io.measure()
+    if after is None:
+        return finish(OUTCOME_FAILED, ERR_INTERNAL,
+                      'post-push measurement failed: %s' % merr)
+    metrics, merr = contact_metrics(before, after, direction)
+    if metrics is None:
+        return finish(OUTCOME_FAILED, ERR_INTERNAL,
+                      'post-push metrics failed: %s' % merr)
+    io.emit('MEASURED_AFTER', position=list(after), **metrics)
+
+    verdict = judge(metrics, resolved, p, travelled, reach_err,
+                    lost_at, carry_seen, executed)
+
+    io.phase('RETREATING')
+    retreat = [face[0] - direction[0] * p['retreat_clearance_m'],
+               face[1] - direction[1] * p['retreat_clearance_m'], face[2]]
+    extra = dict(
+        measured_before=list(before), measured_after=list(after),
+        displacement_m=metrics['displacement_m'],
+        displacement_along_direction_m=metrics['along_m'],
+        direction_cos=metrics['direction_cos'], lateral_m=metrics['lateral_m'],
+        delta_z_m=metrics['delta_z_m'],
+        requested_distance_m=resolved['distance_m'],
+        ee_travel_m=travelled, reach_error_m=reach_err,
+        contact_made=bool(verdict['contact_made']),
+        contact_lost=bool(verdict['contact_lost']),
+        increments_executed=int(executed),
+        contact_lost_at_increment=int(lost_at),
+        carry_engaged_during=bool(carry_seen))
+    if io.cancelled():
+        return finish(OUTCOME_CANCELED, ERR_CANCELED,
+                      'canceled before retreat; measured displacement kept',
+                      **extra)
+    r_ok, r_err, r_detail = io.move_to(retreat)
+    io.emit('RETREAT_RESULT', ok=bool(r_ok), reach_error_m=r_err,
+            detail=r_detail)
+    if verdict['outcome'] == OUTCOME_SUCCEEDED and not r_ok:
+        # The push itself succeeded; an unreachable retreat does not invalidate
+        # the measured displacement, and pretending otherwise would discard
+        # real evidence. It is reported, not converted into a push failure.
+        extra['retreat_failed'] = True
+        extra['retreat_detail'] = r_detail
+    return finish(verdict['outcome'], verdict['error_code'],
+                  verdict['detail'], **extra)
+
+
+def outcome_name(outcome):
+    return {OUTCOME_SUCCEEDED: 'SUCCEEDED', OUTCOME_FAILED: 'FAILED',
+            OUTCOME_CANCELED: 'CANCELED',
+            OUTCOME_STATE_UNKNOWN: 'STATE_UNKNOWN'}.get(int(outcome),
+                                                        'OUTCOME_%d' % outcome)
+
+
+def error_name(code):
+    for name, value in sorted(globals().items()):
+        if name.startswith('ERR_') and value == int(code):
+            return name
+    return 'ERR_%d' % int(code)

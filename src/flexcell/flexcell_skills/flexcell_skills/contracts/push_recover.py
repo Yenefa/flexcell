@@ -128,3 +128,70 @@ def accumulate(attempts, target_m):
 def is_progress(moved, floor_m=MIN_DISPLACEMENT_M):
     """A re-approach is only worth it if the previous attempt actually moved something."""
     return isinstance(moved, (int, float)) and math.isfinite(moved) and moved >= floor_m
+
+
+def measured_next_request(start, current, goal, zone, remaining_attempts, *,
+                          target_m=0.09, chunk_m=0.03, min_request_m=0.01,
+                          protected_motion_m=0.0, protected_guard_m=0.005):
+    """Opt-in feedback policy using POST-RETURN poses, never accumulated results.
+
+    The geometry condition comes from the known task goal. It is not independent
+    trajectory/contact acceptance and is deliberately not named task success.
+    Existing recovery functions and their replay semantics remain unchanged.
+    """
+    def finite(value):
+        return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+
+    direction = goal['direction']
+    scalars = [goal[k] for k in ('min_displacement_m', 'max_displacement_m',
+                                'max_vertical_m', 'min_direction_cosine')]
+    scalars += [*zone['pose'][:2], zone['radius']]
+    if (len(start) != 3 or len(current) != 3 or len(direction) != 2
+            or not all(finite(v) for v in [*start, *current, *direction, target_m,
+                                          chunk_m, min_request_m, protected_motion_m,
+                                          protected_guard_m, *scalars])
+            or not 0 < min_request_m <= chunk_m <= float(goal['max_displacement_m'])
+            or not 0 <= goal['min_displacement_m'] <= goal['max_displacement_m']
+            or zone['radius'] <= 0 or goal['max_vertical_m'] < 0
+            or type(remaining_attempts) is not int or remaining_attempts < 0
+            or target_m <= 0 or protected_motion_m < 0 or protected_guard_m < 0):
+        raise ValueError('invalid measured feedback input')
+    norm = math.hypot(*direction)
+    if norm == 0:
+        raise ValueError('zero goal direction')
+    dx, dy, dz = [current[i] - start[i] for i in range(3)]
+    magnitude = math.hypot(dx, dy)
+    along = (dx*direction[0] + dy*direction[1]) / norm
+    cosine = along / magnitude if magnitude else None
+    zone_distance = math.hypot(current[0]-zone['pose'][0], current[1]-zone['pose'][1])
+    state = dict(net_along_m=along, net_planar_m=magnitude, delta_z_m=dz,
+                 direction_cos=cosine, zone_distance_m=zone_distance,
+                 protected_motion_m=protected_motion_m)
+    if protected_motion_m > protected_guard_m:
+        return 'blocked', dict(state, reason='protected object moved')
+    if magnitude > goal['max_displacement_m'] or abs(dz) > goal['max_vertical_m']:
+        return 'blocked', dict(state, reason='measured task envelope exceeded')
+    reached = (goal['min_displacement_m'] <= magnitude <= goal['max_displacement_m']
+               and cosine is not None and cosine >= goal['min_direction_cosine']
+               and zone_distance <= zone['radius'])
+    if reached:
+        return 'goal_geometry_reached', state
+    if remaining_attempts <= 0:
+        return 'exhausted', dict(state, reason='no attempts left')
+    shortfall = target_m - along
+    if shortfall < min_request_m:
+        return 'blocked', dict(state, reason='nominal target reached but task geometry unresolved')
+    return 'push', dict(state, distance_m=min(chunk_m, shortfall))
+
+
+def arm_quiet(names, velocities, receipt_age_s, *, maximum_age_s=0.25,
+              velocity_limit=0.02):
+    """Unknown/missing velocities never masquerade as a stopped arm."""
+    if (len(names) != len(velocities) or len(names) != len(set(names))
+            or not math.isfinite(receipt_age_s) or not 0 <= receipt_age_s <= maximum_age_s):
+        return False
+    by_name = dict(zip(names, velocities))
+    return all(name in by_name and isinstance(by_name[name], (int, float))
+               and not isinstance(by_name[name], bool) and math.isfinite(by_name[name])
+               and abs(by_name[name]) <= velocity_limit
+               for name in ('joint1', 'joint2', 'joint3', 'joint4'))

@@ -22,13 +22,13 @@ class Rig:
         self.pose = list(target)
         return True, .006, 'measured success'
 
-    def run(self, target=(.27, 0., .02), move=None):
+    def run(self, target=(.27, 0., .02), move=None, high_hold=False):
         return execute_reposition(
             target, read_pose=self.read, move=move or self.move,
             canceled=lambda: self.cancel,
             emit=lambda name, **data: self.events.append((name, data)),
             minimum_height_m=.18, tracking_margin_m=.02,
-            carry_state=lambda: (self.engaged, 'test state'))
+            carry_state=lambda: (self.engaged, 'test state'), stop_at_clearance=high_hold)
 
 
 @pytest.mark.parametrize('xy', [(.27, 0.), (-.27, 0.), (0., .27), (0., -.27)])
@@ -117,3 +117,21 @@ def test_nonfinite_goal_refuses_motion():
     with pytest.raises(RepositionFailed, match='nonfinite'):
         rig.run((float('nan'), 0., .02))
     assert rig.moves == []
+
+
+def test_high_hold_omits_lowering_and_reports_original_low_target_not_reached():
+    rig = Rig()
+    ok, error, detail = rig.run(high_hold=True)
+    assert not ok
+    assert error == pytest.approx(.18)
+    assert len(rig.moves) == 2
+    assert rig.pose[2] == pytest.approx(.20)
+    assert 'high hold' in detail
+    assert rig.events[-1][0] == 'REPOSITION_HIGH_HOLD'
+    assert rig.events[-1][1]['original_target_reached'] is False
+
+
+def test_high_hold_is_not_enabled_by_default():
+    rig = Rig()
+    ok, _, _ = rig.run()
+    assert ok and len(rig.moves) == 3 and rig.pose[2] == .02

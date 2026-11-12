@@ -1,0 +1,249 @@
+{
+  "base": "4746a637",
+  "experiment": "isolated v2 combined feedback / bounded shots / high return",
+  "task": "T08-push-seed2000",
+  "fixed_batch": {
+    "control": {
+      "valid_runs": 3,
+      "complete_task_passes": 0,
+      "primitive_stroke_passes": 0,
+      "attempts": 5,
+      "runs": [
+        {
+          "label": "A1",
+          "final_signed_forward_mm": -149.29619118033884,
+          "full_acceptance": false,
+          "terminal_passed": false,
+          "failed_gates": [
+            "terminal"
+          ],
+          "attempts": 2,
+          "primitive_stroke_results": [
+            {
+              "outcome": "1",
+              "error_code": 28,
+              "detail": "contact lost at increment 3: object moved 0.0219m of 0.0900m requested while the arm kept advancing",
+              "requested_m": 0.09,
+              "measured_pre_return_signed_m": 0.02164949798802085
+            },
+            {
+              "outcome": "1",
+              "error_code": 30,
+              "detail": "LOWER failed: measured pose outside tolerance: pos=0.0262m (tol 0.020) ori=0.3459rad (tol 0.350, enforced=False)",
+              "requested_m": null,
+              "measured_pre_return_signed_m": null
+            }
+          ],
+          "minimum_return_forward_mm": 11.891525373197181,
+          "peak_lift_mm": 0.3406575609529484,
+          "max_protected_excursion_m": 4.85722573273506e-17,
+          "consecutive_5ms": true,
+          "native_steps_per_object": 4030,
+          "controller_final_to_final_truth_mm": null
+        },
+        {
+          "label": "A2",
+          "final_signed_forward_mm": 68.0322396620932,
+          "full_acceptance": false,
+          "terminal_passed": true,
+          "failed_gates": [
+            "table_support"
+          ],
+          "attempts": 2,
+          "primitive_stroke_results": [
+            {
+              "outcome": "1",
+              "error_code": 28,
+              "detail": "contact lost at increment 3: object moved 0.0620m of 0.0900m requested while the arm kept advancing",
+              "requested_m": 0.09,
+              "measured_pre_return_signed_m": 0.06200983457842396
+            },
+            {
+              "outcome": "1",
+              "error_code": 30,
+              "detail": "LOWER failed: measured pose outside tolerance: pos=0.0365m (tol 0.020) ori=0.1042rad (tol 0.350, enforced=False)",
+              "requested_m": null,
+              "measured_pre_return_signed_m": null
+            }
+          ],
+          "minimum_return_forward_mm": -0.0035827878281102787,
+          "peak_lift_mm": 0.03282784775635039,
+          "max_protected_excursion_m": 4.85722573273506e-17,
+          "consecutive_5ms": true,
+          "native_steps_per_object": 4208,
+          "controller_final_to_final_truth_mm": null
+        },
+        {
+          "label": "A3",
+          "final_signed_forward_mm": 159.53962909256464,
+          "full_acceptance": false,
+          "terminal_passed": false,
+          "failed_gates": [
+            "terminal"
+          ],
+          "attempts": 1,
+          "primitive_stroke_results": [
+            {
+              "outcome": "1",
+              "error_code": 36,
+              "detail": "object moved 0.1594m, 0.0694m beyond the 0.0900m requested (tolerance 0.0050m); this is a shove, not a bounded push",
+              "requested_m": 0.09,
+              "measured_pre_return_signed_m": 0.1593118922580096
+            }
+          ],
+          "minimum_return_forward_mm": 0.2277368345550354,
+          "peak_lift_mm": 0.9797345097667491,
+          "max_protected_excursion_m": 4.85722573273506e-17,
+          "consecutive_5ms": true,
+          "native_steps_per_object": 3961,
+          "controller_final_to_final_truth_mm": null
+        }
+      ]
+    },
+    "feedback": {
+      "valid_runs": 3,
+      "complete_task_passes": 3,
+      "primitive_stroke_passes": 0,
+      "attempts": 5,
+      "runs": [
+        {
+          "label": "B1",
+          "final_signed_forward_mm": 61.558288443432005,
+          "full_acceptance": true,
+          "terminal_passed": true,
+          "failed_gates": [],
+          "attempts": 2,
+          "primitive_stroke_results": [
+            {
+              "outcome": "1",
+              "error_code": 27,
+              "detail": "object moved 0.0017m (< contact floor 0.0050); no contact was made at height 0.0200",
+              "requested_m": 0.03,
+              "measured_pre_return_signed_m": 0.0016861066939058977
+            },
+            {
+              "outcome": "1",
+              "error_code": 36,
+              "detail": "object moved 0.0597m, 0.0297m beyond the 0.0300m requested (tolerance 0.0050m); this is a shove, not a bounded push",
+              "requested_m": 0.03,
+              "measured_pre_return_signed_m": 0.059522738862089336
+            }
+          ],
+          "minimum_return_forward_mm": 0.243644987312025,
+          "peak_lift_mm": 0.028323472893550944,
+          "max_protected_excursion_m": 4.85722573273506e-17,
+          "consecutive_5ms": true,
+          "native_steps_per_object": 3869,
+          "controller_final_to_final_truth_mm": -0.33878555284366785
+        },
+        {
+          "label": "B2",
+          "final_signed_forward_mm": 50.5372250635954,
+          "full_acceptance": true,
+          "terminal_passed": true,
+          "failed_gates": [],
+          "attempts": 2,
+          "primitive_stroke_results": [
+            {
+              "outcome": "1",
+              "error_code": 36,
+              "detail": "object moved 0.0370m, 0.0070m beyond the 0.0300m requested (tolerance 0.0050m); this is a shove, not a bounded push",
+              "requested_m": 0.03,
+              "measured_pre_return_signed_m": 0.03696839215053832
+            },
+            {
+              "outcome": "1",
+              "error_code": 28,
+              "detail": "object moved 0.0159m of 0.0300m requested (short by 0.0141m); contact could not be maintained",
+              "requested_m": 0.03,
+              "measured_pre_return_signed_m": 0.01583979153930712
+            }
+          ],
+          "minimum_return_forward_mm": -1.6780727119474759,
+          "peak_lift_mm": 4.85722573273506e-14,
+          "max_protected_excursion_m": 4.85722573273506e-17,
+          "consecutive_5ms": true,
+          "native_steps_per_object": 4438,
+          "controller_final_to_final_truth_mm": -0.1270460184902289
+        },
+        {
+          "label": "B3",
+          "final_signed_forward_mm": 76.13104946339719,
+          "full_acceptance": true,
+          "terminal_passed": true,
+          "failed_gates": [],
+          "attempts": 1,
+          "primitive_stroke_results": [
+            {
+              "outcome": "1",
+              "error_code": 36,
+              "detail": "object moved 0.0743m, 0.0443m beyond the 0.0300m requested (tolerance 0.0050m); this is a shove, not a bounded push",
+              "requested_m": 0.03,
+              "measured_pre_return_signed_m": 0.07423933965876908
+            }
+          ],
+          "minimum_return_forward_mm": 1.5186881747980552,
+          "peak_lift_mm": 0.017287487826350006,
+          "max_protected_excursion_m": 4.85722573273506e-17,
+          "consecutive_5ms": true,
+          "native_steps_per_object": 2632,
+          "controller_final_to_final_truth_mm": 0.2652281782223598
+        }
+      ]
+    }
+  },
+  "infrastructure_failures": 0,
+  "pilots_separate": true,
+  "pilot_terminal_signed_mm": {
+    "pilot1": -86.01585597946884,
+    "pilot2": 11.375390353966175
+  },
+  "pilot_full_acceptance": {
+    "pilot1": false,
+    "pilot2": false
+  },
+  "world_sha256": "41aaada28216c028e8552fffc1971cf8b37d84594a16fbccc6de2fead0bc92f9",
+  "fixed_batch_wall_seconds": 401.475417785,
+  "regression": {
+    "status": "PASS",
+    "task": {
+      "action": "task",
+      "goal_uuid": "bb4b7d511a394a5d9db8ee2bcffc36fb",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "outcome_val": 0,
+      "error_code": "ERR_NONE",
+      "detail": "task done: all assignments verified",
+      "evidence_id": "pick_place_v1-71b8de0e",
+      "wall_seconds": 26.375,
+      "fsm_trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK"
+      ],
+      "object_at_place": true,
+      "final_position_error_m": 0.01076634078198916,
+      "skip_verify": false
+    },
+    "identity_mismatches": [],
+    "imported_package": "/candidate/src/flexcell/flexcell_skills/flexcell_skills",
+    "model_calls": 0,
+    "previous_two_release_failures": "RETAINED_IN_PRIOR_ARCHIVE; NOT_RESOLVED_BY_ONE_PASS"
+  },
+  "protocol_checks": {
+    "kind": "SYNTHETIC_ROS_CHECKS",
+    "physical_evidence": false,
+    "post_return_geometry_stops_before_extra_push": "PASS",
+    "legal_bounded_request_fields": "PASS",
+    "missing_joint_velocity_dispatches_no_push": "PASS",
+    "cancel_forwards_and_dispatches_no_next_shot": "PASS"
+  },
+  "unit_checks": {
+    "v2_passed": 95,
+    "raw_log": "tests_v2.log"
+  },
+  "independent_agent_claim_accuracy": "NOT_MEASURED",
+  "formal_baseline": "NOT_PROMOTED; CALIBRATION_UNSUPPORTED",
+  "runtime_autonomous_L4": "NOT_ACQUIRED",
+  "unseen_instances": "NOT_RUN",
+  "interpretation": "Raw counts on one exposed dev instance; no statistical superiority, generalization, or precise stroke-control claim"
+}
