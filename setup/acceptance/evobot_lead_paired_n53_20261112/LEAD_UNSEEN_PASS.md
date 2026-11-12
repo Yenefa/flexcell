@@ -57,3 +57,41 @@ result in this session and would materially change P2's status.
 **Nothing yet.** T08's status remains: terminal clause 4/5 Simulation Tested, full pass achievable, **Generalization
 Tested: NOT ESTABLISHED**. What changes is that the ladder's top rung is **no longer obviously out of reach**, and
 there is a specific, cheap path to check it that does not require the simulator.
+---
+
+## 6. Refinement after reading the batch (round 45)
+
+### `U` and `U_shot` are probably closed-loop vs single-shot, not valid vs invalid
+
+`U_shot` appears **nowhere** in `run_batch_v2.sh` or the batch README — so it is ad-hoc naming. `run_batch_v2.sh`
+line 278 distinguishes *"the push itself: closed loop (or single shot)"*. **Most likely reading: `U` = unseen with
+closed-loop recovery, `U_shot` = unseen with a single shot.** That is an inference from naming and **must be
+confirmed against the run manifests**, not assumed.
+
+### The invalidity concern does not apply to this batch
+
+The README records that the **round-1** `t08_unseen` trials *"ran the dev world and were graded against unseen
+geometry, with offsets up to 70.7 mm"*. `evobot_t08_instance_pose_20261112` is the batch that **fixes** that — it
+carries `inject_instance_poses.py` and states that *"with poses actually instantiated, `t08_unseen` becomes a
+genuinely frozen unseen set for the first time"*. **So runs in this batch have the geometry instantiated**, which
+is what the earlier runs lacked.
+
+### What that would mean, if confirmed
+
+| pass | arm | significance |
+| --- | --- | --- |
+| `U/seed3000/t1`, `U/seed3002/t1` | closed-loop | unseen, recovery allowed |
+| `U_shot/seed3000/t1`, `U_shot/seed3001/t1`, `U_shot/seed3002/t1` | **single shot** | unseen, **no retries** |
+
+**Single-shot full passes on three unseen seeds would be stronger than the closed-loop ones**: they would mean
+the task was completed on unseen geometry without the retry strategy, which is exactly what a Generalization
+claim needs and what the pilot's 4/5 could not show.
+
+### Still not claimed, and the reasons have narrowed to two
+
+1. **Confirm the `U` / `U_shot` meaning** from the run manifests — naming is not evidence.
+2. **Confirm each verdict satisfied `trajectory_required` and its nine-gate evidence bundle**, rather than
+   inheriting a permissive path.
+
+n is still **3 distinct instances**, and three is not a generalization study. But it is three unseen
+instances at full pass, and that is a **categorically different claim** from everything else in this session.
