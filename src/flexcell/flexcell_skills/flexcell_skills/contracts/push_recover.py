@@ -95,6 +95,39 @@ def classify_attempt(result):
     return made, float(moved), False, None
 
 
+ERR_CONTACT_NOT_MADE = 27
+ERR_CONTACT_LOST = 28
+
+# Error codes whose reported displacement cannot be acted on.
+#
+# MEASURED, not assumed. Comparing the skill's own displacement_m against ground-truth
+# travel on 29 archived T08 runs: every ec 36 ERR_DISPLACEMENT_OVERSHOOT run reported
+# within a few millimetres of reality (ratios 1.00, 1.00, 1.02, 0.99, 0.98, 0.93), while
+# ec 28 runs reported small positive displacements -x while the box ended up FURTHER IN +x
+# than its start: 0.0079 reported against -0.0647 actual, 0.0481 against -0.0955, 0.0221
+# against -0.1156, 0.0518 against -0.1486. Mean gap over all 29 runs: -0.0209 m.
+#
+# So for these two codes both the magnitude AND the sign are unreliable. A recovery policy
+# that accumulates them is integrating a number that points the wrong way.
+UNRELIABLE_DISPLACEMENT_CODES = frozenset((ERR_CONTACT_NOT_MADE, ERR_CONTACT_LOST))
+
+
+def displacement_is_trustworthy(result):
+    """False when the reported displacement must not be used for a policy decision.
+
+    Callers should re-observe the object rather than accumulate the value. Returns
+    True for anything not in UNRELIABLE_DISPLACEMENT_CODES, including results with no
+    error_code at all, so this can only ever withhold a number, never invent one.
+    """
+    if not isinstance(result, dict):
+        return False
+    try:
+        code = int(result.get("error_code"))
+    except (TypeError, ValueError):
+        return True
+    return code not in UNRELIABLE_DISPLACEMENT_CODES
+
+
 def accumulate(attempts, target_m):
     """Walk a recorded list of attempts and produce the verdict.
 
