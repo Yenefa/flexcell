@@ -52,6 +52,9 @@ from rclpy.action import ActionServer, CancelResponse, GoalResponse
 from rclpy.callback_groups import ReentrantCallbackGroup
 from rclpy.executors import MultiThreadedExecutor
 from rclpy.node import Node
+from rclpy.duration import Duration
+from rclpy.time import Time
+from tf2_ros import Buffer, TransformListener
 
 from flexcell_interfaces.action import PushObject
 from flexcell_interfaces.srv import QueryCarry
@@ -59,6 +62,8 @@ from flexcell_interfaces.srv import QueryCarry
 from flexcell_skills import known_objects
 from flexcell_skills.contracts import push as contract
 from flexcell_skills.contracts.skill_result import derive_status
+from flexcell_skills.reposition import (
+    RepositionCanceled, RepositionFailed, execute_reposition)
 from flexcell_skills.common import (
     JsonlLog, MoveToPoseClient, crash_detail, new_evidence, sample_gz_pose,
     wait_future)
@@ -126,6 +131,11 @@ class PushServer(Node):
         self.declare_parameter('admission_wait_s', 5.0)
         self.declare_parameter('tracked_objects',
                                list(known_objects.DEFAULT_OBJECTS))
+        # Isolated candidate only. Existing launches retain the original path.
+        self.declare_parameter('safe_reposition_enabled', False)
+        self.declare_parameter('safe_reposition_min_height_m', float('nan'))
+        self.declare_parameter('safe_reposition_pose_max_age_s', 0.25)
+        self.declare_parameter('end_effector_link', 'end_effector_link')
 
         gp = self.get_parameter
         self._objects = known_objects.Registry(gp('tracked_objects').value)
@@ -144,6 +154,16 @@ class PushServer(Node):
         self._admission = threading.Lock()
         self._admission_wait_s = float(gp('admission_wait_s').value)
         self._seq = 0
+        self._safe_reposition_enabled = bool(gp('safe_reposition_enabled').value)
+        self._reposition_min_height = float(gp('safe_reposition_min_height_m').value)
+        self._reposition_pose_age = float(gp('safe_reposition_pose_max_age_s').value)
+        self._ee = gp('end_effector_link').value
+        if self._safe_reposition_enabled:
+            if (not math.isfinite(self._reposition_min_height) or self._reposition_min_height <= 0
+                    or not math.isfinite(self._reposition_pose_age) or self._reposition_pose_age <= 0):
+                raise ValueError('safe reposition requires explicit finite clearance and pose age')
+            self._tf_buffer = Buffer()
+            self._tf_listener = TransformListener(self._tf_buffer, self, spin_thread=False)
 
         # Snapshot the contract parameters ONCE at startup. A parameter edited
         # mid-run would make two pushes in the same batch incomparable.
@@ -192,6 +212,19 @@ class PushServer(Node):
         return bool(reply.state.engaged), None
 
     # ------------------------------------------------------------- adapter
+    def _ee_position(self):
+        try:
+            tr = self._tf_buffer.lookup_transform(
+                self._base, self._ee, Time(), timeout=Duration(seconds=0.5))
+            age = (self.get_clock().now().nanoseconds
+                   - Time.from_msg(tr.header.stamp).nanoseconds) / 1e9
+            if not 0 <= age <= self._reposition_pose_age:
+                return None, 'EE pose age %.6fs outside [0, %.6f]' % (age, self._reposition_pose_age)
+            p = tr.transform.translation
+            return [p.x, p.y, p.z], None
+        except Exception as exc:  # fail closed; never substitute a default pose
+            return None, str(exc)
+
     def _execute(self, goal_handle):
         t0 = time.monotonic()
         goal = goal_handle.request
@@ -209,6 +242,7 @@ class PushServer(Node):
         # contract's own INCREMENT_MEASURED events - not recomputed here, so
         # there is one arithmetic path.
         progress = {'displacement_m': 0.0}
+        active_phase = None
 
         def finish(outcome, error_code, detail, **extra):
             res.outcome = int(outcome)
@@ -248,6 +282,8 @@ class PushServer(Node):
             return res
 
         def feedback(phase):
+            nonlocal active_phase
+            active_phase = phase
             phases.append(phase)
             fb = F()
             fb.phase = PHASES.get(phase, F.PHASE_VALIDATING)
@@ -256,7 +292,22 @@ class PushServer(Node):
             goal_handle.publish_feedback(fb)
 
         def emit(event, **data):
-            rec.setdefault('events', []).append(dict(event=event, **data))
+            rec.setdefault('events', []).append(dict(
+                event=event, monotonic_ns=time.monotonic_ns(), wall_ts=time.time(), **data))
+
+        def move_direct(position):
+            result, error = self._m2p.call(
+                position, profile=rec['profile'],
+                deadline_ms=self._deadline, request_id=rid,
+                cancel_check=lambda: goal_handle.is_cancel_requested)
+            if result is None:
+                return False, float('nan'), error or 'move_to_pose failed'
+            error_code = int(getattr(result, 'error_code', 0))
+            reach = getattr(result, 'position_error_m', float('nan'))
+            ok = (int(getattr(result, 'outcome', 1)) == 0
+                  and error_code == 0 and math.isfinite(float(reach))
+                  and float(reach) <= self._params['arm_reach_tolerance_m'])
+            return ok, float(reach), str(getattr(result, 'detail', ''))
 
         class _IO:
             """Binds the contract's abstract world to this node."""
@@ -266,18 +317,27 @@ class PushServer(Node):
 
             def move_to(_self, target):
                 position = [float(v) for v in target]
-                result, error = self._m2p.call(
-                    position, profile=rec['profile'],
-                    deadline_ms=self._deadline, request_id=rid,
-                    cancel_check=lambda: goal_handle.is_cancel_requested)
-                if result is None:
-                    return False, float('nan'), error or 'move_to_pose failed'
-                error_code = int(getattr(result, 'error_code', 0))
-                reach = getattr(result, 'position_error_m', float('nan'))
-                ok = (int(getattr(result, 'outcome', 1)) == 0
-                      and error_code == 0 and math.isfinite(float(reach))
-                      and float(reach) <= self._params['arm_reach_tolerance_m'])
-                return ok, float(reach), str(getattr(result, 'detail', ''))
+                if (getattr(self, '_safe_reposition_enabled', False)
+                        and active_phase in ('APPROACH', 'RETREATING')):
+                    before, before_error = self._measure(goal.object_name)
+                    emit('REPOSITION_OBJECT_BEFORE', phase=active_phase,
+                         position=before, error=before_error)
+                    if before is None or before_error:
+                        raise RepositionFailed('object unavailable before reposition: %s' % before_error)
+                    result = execute_reposition(
+                        position, read_pose=self._ee_position, move=move_direct,
+                        canceled=lambda: goal_handle.is_cancel_requested,
+                        emit=lambda name, **data: emit(name, phase=active_phase, **data),
+                        minimum_height_m=self._reposition_min_height,
+                        tracking_margin_m=self._params['arm_reach_tolerance_m'],
+                        carry_state=self._carry_engaged)
+                    after, after_error = self._measure(goal.object_name)
+                    emit('REPOSITION_OBJECT_AFTER', phase=active_phase,
+                         position=after, error=after_error)
+                    if after is None or after_error:
+                        raise RepositionFailed('object unavailable after reposition: %s' % after_error)
+                    return result
+                return move_direct(position)
 
             def carry_engaged(_self):
                 return self._carry_engaged()
@@ -328,6 +388,12 @@ class PushServer(Node):
                      if k not in ('outcome', 'error_code', 'detail')}
             return finish(outcome['outcome'], outcome['error_code'],
                           outcome['detail'], **extra)
+        except RepositionCanceled as exc:
+            emit('REPOSITION_CANCELED', detail=str(exc))
+            return finish(contract.OUTCOME_CANCELED, contract.ERR_CANCELED, str(exc))
+        except RepositionFailed as exc:
+            emit('REPOSITION_REFUSED', detail=str(exc))
+            return finish(contract.OUTCOME_FAILED, contract.ERR_MOTION_FAILED, str(exc))
         except Exception as exc:  # crash guard: a raising execute callback
             # would leave rclpy's default Result with outcome=0 = SUCCEEDED
             return finish(contract.OUTCOME_FAILED, contract.ERR_INTERNAL,

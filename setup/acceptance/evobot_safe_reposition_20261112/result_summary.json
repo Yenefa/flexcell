@@ -1,0 +1,246 @@
+{
+  "kind": "SAFE_REPOSITION_DEVELOPMENT_PAIR",
+  "arms": {
+    "control": {
+      "net_displacement_along_minus_x_mm": -63.65543870821419,
+      "blue_net_displacement_m": 0.0,
+      "passed": false,
+      "terminal_passed": false,
+      "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+      "gates": {
+        "terminal": false,
+        "trajectory": true,
+        "table_support": false,
+        "protected_unmoved": true,
+        "no_lift": false,
+        "pusher_contact": true,
+        "gripper": true,
+        "no_attachment": true,
+        "no_teleport": true
+      },
+      "native_physics_steps": 5185,
+      "consecutive_5ms_steps": true,
+      "trajectory_dropped": {
+        "target_box_a": 0,
+        "target_box_b": 0
+      },
+      "peak_red_lift_m": 0.027050535488255253,
+      "frozen_gripper_gate": {
+        "gate": "gripper",
+        "ok": true,
+        "reason": null,
+        "evidence": {
+          "joint": "gripper_left_joint",
+          "samples": 2413,
+          "aperture_travel_rad": 0.000701,
+          "limit_rad": 0.002,
+          "min_aperture_rad": -0.000126,
+          "max_aperture_rad": 0.000575
+        }
+      },
+      "world_sha256": "41aaada28216c028e8552fffc1971cf8b37d84594a16fbccc6de2fead0bc92f9",
+      "push_source_sha256": "3295c388819077f4c0f432f0b7e8453c2ea9eeda10f8d273e730b0ccf44fc46e",
+      "core_push_sha256": "e8a44c7d1b5889c786e8653759861f2ebefcccc1bec435bf2e439592d4945b53",
+      "individual_push_outcomes": [
+        "1",
+        "1"
+      ],
+      "individual_push_details": [
+        "object moved 0.0037m (< contact floor 0.0050); no contact was made at height 0.0200",
+        "contact lost at increment 5: object moved 0.0554m of 0.0900m requested while the arm kept advancing"
+      ],
+      "driver_report": {
+        "outcome": 2,
+        "achieved_m": 0.05532172031234733,
+        "attempts": 2,
+        "detail": "short by 0.0347 m after 2 attempts"
+      }
+    },
+    "candidate_retry1": {
+      "net_displacement_along_minus_x_mm": 110.14492831367589,
+      "blue_net_displacement_m": 0.0,
+      "passed": true,
+      "terminal_passed": true,
+      "evidence_status": "COMPLETE",
+      "gates": {
+        "terminal": true,
+        "trajectory": true,
+        "table_support": true,
+        "protected_unmoved": true,
+        "no_lift": true,
+        "pusher_contact": true,
+        "gripper": true,
+        "no_attachment": true,
+        "no_teleport": true
+      },
+      "native_physics_steps": 7401,
+      "consecutive_5ms_steps": true,
+      "trajectory_dropped": {
+        "target_box_a": 0,
+        "target_box_b": 0
+      },
+      "peak_red_lift_m": 0.00335020048825525,
+      "frozen_gripper_gate": {
+        "gate": "gripper",
+        "ok": true,
+        "reason": null,
+        "evidence": {
+          "joint": "gripper_left_joint",
+          "samples": 3472,
+          "aperture_travel_rad": 0.001583,
+          "limit_rad": 0.002,
+          "min_aperture_rad": -0.000837,
+          "max_aperture_rad": 0.000746
+        }
+      },
+      "world_sha256": "41aaada28216c028e8552fffc1971cf8b37d84594a16fbccc6de2fead0bc92f9",
+      "push_source_sha256": "9c83dc732f8e2b19b18d3087d1e6b7cd1599e957b7d09bae4961cfe99d36b15f",
+      "core_push_sha256": "e8a44c7d1b5889c786e8653759861f2ebefcccc1bec435bf2e439592d4945b53",
+      "individual_push_outcomes": [
+        "1",
+        "1"
+      ],
+      "individual_push_details": [
+        "contact lost at increment 4: object moved 0.0169m of 0.0900m requested while the arm kept advancing",
+        "object moved 0.0908m, 0.0175m beyond the 0.0732m requested (tolerance 0.0050m); this is a shove, not a bounded push"
+      ],
+      "driver_report": {
+        "outcome": 1,
+        "achieved_m": 0.10752378634726806,
+        "attempts": 2,
+        "detail": null
+      },
+      "routes": [
+        {
+          "attempt": 1,
+          "phase": "APPROACH",
+          "red_reverse_x_mm": -0.3256090349328389,
+          "stages": [
+            "LIFT",
+            "TRANSFER",
+            "LOWER"
+          ]
+        },
+        {
+          "attempt": 1,
+          "phase": "RETREATING",
+          "red_reverse_x_mm": -2.6574140589404607,
+          "stages": [
+            "LIFT",
+            "TRANSFER",
+            "LOWER"
+          ]
+        },
+        {
+          "attempt": 2,
+          "phase": "APPROACH",
+          "red_reverse_x_mm": -4.2348222582341,
+          "stages": [
+            "LIFT",
+            "TRANSFER",
+            "LOWER"
+          ]
+        },
+        {
+          "attempt": 2,
+          "phase": "RETREATING",
+          "red_reverse_x_mm": 0.6248570430956307,
+          "stages": [
+            "LIFT",
+            "TRANSFER",
+            "LOWER"
+          ]
+        }
+      ],
+      "measured_clearance_endpoints": 8,
+      "minimum_actual_clearance_z_m": 0.19946531685232372,
+      "required_measured_clearance_z_m": 0.18779145321586976,
+      "return_backslide_within_5mm": true,
+      "waypoint_order_valid": true,
+      "all_measured_clearances_confirmed": true
+    }
+  },
+  "regressions": {
+    "legacy_regression": {
+      "status": "ROBOT_FAILURE",
+      "physical_tasks_dispatched": 1,
+      "task": {
+        "action": "task",
+        "goal_uuid": "f04236fa3474466c9ecb80c45aa0608d",
+        "outcome": "OUTCOME_FAILED",
+        "outcome_val": 1,
+        "error_code": "ERR_SKILL_FAILED",
+        "detail": "policy abort (NON_RECOVERABLE): place failed (ERR_PLACE_FAILED, carried box is not retried) (trace=PICK_A(attempt=1):OK,PLACE_A:FAIL); previous_skill=PLACE cause=ERR_PLACE_FAILED legacy_error_code=25",
+        "evidence_id": "pick_place_v1-95600188",
+        "wall_seconds": 30.499,
+        "fsm_trace": [
+          "PICK_A(attempt=1):OK",
+          "PLACE_A:FAIL"
+        ],
+        "object_at_place": false,
+        "final_position_error_m": null,
+        "skip_verify": false
+      },
+      "source_identity_mismatches": [],
+      "carry_release_confirmed": true,
+      "released": false,
+      "gripper_open": {
+        "reached_goal": false,
+        "stalled": true,
+        "position": -0.011000000000000062,
+        "effort": 10.0,
+        "aperture_error": 0.031000000000000062,
+        "classification": "GRASP_STALLED",
+        "reason": ""
+      }
+    },
+    "legacy_original_control": {
+      "status": "ROBOT_FAILURE",
+      "physical_tasks_dispatched": 1,
+      "task": {
+        "action": "task",
+        "goal_uuid": "786452287bc34cab9d9b6d59c9ca2b09",
+        "outcome": "OUTCOME_FAILED",
+        "outcome_val": 1,
+        "error_code": "ERR_SKILL_FAILED",
+        "detail": "policy abort (NON_RECOVERABLE): place failed (ERR_PLACE_FAILED, carried box is not retried) (trace=PICK_A(attempt=1):OK,PLACE_A:FAIL); previous_skill=PLACE cause=ERR_PLACE_FAILED legacy_error_code=25",
+        "evidence_id": "pick_place_v1-1c0f20eb",
+        "wall_seconds": 19.895,
+        "fsm_trace": [
+          "PICK_A(attempt=1):OK",
+          "PLACE_A:FAIL"
+        ],
+        "object_at_place": false,
+        "final_position_error_m": null,
+        "skip_verify": false
+      },
+      "source_identity_mismatches": [],
+      "carry_release_confirmed": true,
+      "released": false,
+      "gripper_open": {
+        "reached_goal": false,
+        "stalled": true,
+        "position": -0.011000000000000069,
+        "effort": 10.0,
+        "aperture_error": 0.03100000000000007,
+        "classification": "GRASP_STALLED",
+        "reason": ""
+      }
+    }
+  },
+  "sample_scope": "one physical control and one physical candidate; one zero-push infrastructure failure",
+  "claim_assessment": "NOT_MEASURED: probe did not supply an Agent success claim",
+  "formal_baseline_promoted": false,
+  "same_materialized_world": true,
+  "frozen_core_same_in_both_arms": true,
+  "acquisition_failure": {
+    "arm": "candidate",
+    "status": "FAILED",
+    "physical_capability_claim": false,
+    "error": "RuntimeError: required observation stream missing; no push dispatched",
+    "physical_pushes_dispatched": 0,
+    "classification": "INVALID_INFRA"
+  },
+  "regression_gate": "NOT_CLEARED: original and candidate-overlay normal tasks both failed at gripper release",
+  "archive_manifest_verified_files": 205
+}

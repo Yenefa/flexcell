@@ -1060,3 +1060,34 @@ new environment, **not pooled with the preceding nine same-condition runs**.
 
 Acquisition is **CAPTURED**; new robot capability **NONE**. T08 remains
 `CALIBRATION_UNSUPPORTED`; L4 has not been acquired. Goal remains active.
+
+---
+
+## ADDENDUM — opt-in safe reposition development and one full candidate pass (2026-11-12)
+
+Source: `setup/acceptance/evobot_safe_reposition_20261112/README.md`,
+`result_summary.json`, read-only `analyze_results.py`, and 205 hash-verified raw
+files in `raw_runs.zip`. Scope: isolated development from `fa08d8fe`, not a baseline
+promotion or Runtime-autonomous L4 experiment.
+
+| Fact | State / scope |
+| --- | --- |
+| Next-stage development plan | **RECORDED** — `docs/T08_DEVELOPMENT_PLAN_20261112.md`; public stage tracker #235; four open Junior work packages #231–#234, no individual assignee invented |
+| Implemented candidate | **IMPLEMENTED + UNIT TESTED** — opt-in lift/transfer/lower adapter for approach/retreat, fresh EE measurement, measured clearance/carry guards, cancel and failure refusal. Defaults off. Existing core push contract, targets and thresholds unchanged |
+| Physical candidate | **SIMULATION TESTED on one dev instance** — seed2000, two pushes; final signed −x displacement **+110.145 mm**, protected movement 0.0 m, all nine frozen acceptance gates true, evidence_status COMPLETE |
+| Original control | **FAILED** — same copied world SHA, image, task and validator; final signed displacement **−63.655 mm**, peak lift 27.051 mm; terminal/table-support/no-lift gates fail |
+| Candidate path evidence | **CONFIRMED** — all four routes execute LIFT→TRANSFER→LOWER; eight high endpoints ≥199.465 mm against the declared 187.791 mm minimum. First return adds 2.657 mm forward motion; second loses 0.625 mm. Both satisfy the preregistered 5 mm intermediate return-loss bound |
+| Candidate independent physical evidence | **CONFIRMED for this one run** — 7,401 native physics steps/object, consecutive 5 ms intervals, zero dropped trajectory samples, measured pusher contacts, peak red lift 3.350 mm, gripper travel 1.583 mm under unchanged 2 mm limit, no attachment/teleport |
+| Per-request push control | **NOT FIXED** — both individual PushObject calls still FAILED: contact loss then a ~17.5 mm overshoot. The final task's broader frozen band/zone passes; do not relabel the failed stroke contracts |
+| Net-state accounting | **NOT FIXED** — old driver reports +107.524 mm while actual final net motion is +110.145 mm. Post-return measured state and bounded finishing are next-stage work |
+| Acquisition failure | **INVALID_INFRA, retained** — initial candidate session sent no push. Outer preflight ended before the recorder's request timeout. One acquisition-only retry used a separate domain/output and longer outer budget; motion source unchanged. Underlying unanswered-goal cause UNKNOWN |
+| Ordinary task regression | **NOT CLEARED** — candidate-overlay normal smoke fails at PLACE; original-source diagnostic also fails at PLACE. Both: carry release confirmed, gripper_open reached_goal=false/stalled=true/GRASP_STALLED, error 25. PICK passed. Audited source matches; release-related modules byte-identical. This reproduces the documented baseline release blocker, not proof of universal non-regression |
+| Agent claim accuracy / False Success rate | **NOT MEASURED** — probe did not provide an Agent claim. Passing candidate's raw false_failure=true is a missing-claim artifact; a default false_success flag is not a measured zero rate |
+| Source and authority | **HELD** — nine frozen hashes and contracts/push.py unchanged, no shared install edits, no gate adjustment, main merge, PR, hardware or paid model call. Detailed issue drafts were blocked by automatic approval review; safe generic work packages were published instead |
+
+One successful candidate/control pair is **not** a success-rate, superiority or
+generalization result. It demonstrates an actual return-path implementation and
+one fully graded development task. Keep the opt-in candidate, preserve all failures,
+and continue isolated state/finishing work. The ordinary release regression must
+be resolved before formal promotion. Formal T08 remains `CALIBRATION_UNSUPPORTED`;
+L4 has not been acquired. Goal remains active.

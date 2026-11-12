@@ -1,0 +1,59 @@
+{
+  "kind": "PINNED_TOOL_COLLISION_ENVELOPE",
+  "scope": [
+    "link5",
+    "gripper_left_link",
+    "gripper_right_link"
+  ],
+  "covers_forearm": false,
+  "meshes": {
+    "link5": {
+      "sha256": "75e7596295dd5f5cbc68d81b2c875058f28721f98d7402d2d431ccf2334b57a6",
+      "radius_about_ee_m": 0.14779145321586976,
+      "min_xyz": [
+        -0.14598933982849122,
+        -0.06430000305175781,
+        -0.023
+      ],
+      "max_xyz": [
+        -0.05759999847412109,
+        0.06430000305175781,
+        0.03975
+      ]
+    },
+    "gripper_left_palm": {
+      "sha256": "fb4dfabe68712bbba34deb9f8469f9187009c07579dccd5401b82d08de425267",
+      "radius_about_ee_m": 0.0980291798586511,
+      "min_xyz": [
+        -0.06740000038146973,
+        -0.002149999618530272,
+        -0.029
+      ],
+      "max_xyz": [
+        0.020699999999999996,
+        0.06860000038146973,
+        0.029
+      ]
+    },
+    "gripper_right_palm": {
+      "sha256": "a5bfc10a067c806a19062e2fcb58989623a09edc0e9bbc4fd735a56d83f99752",
+      "radius_about_ee_m": 0.0980291798586511,
+      "min_xyz": [
+        -0.06740000038146973,
+        -0.06860000038146973,
+        -0.029
+      ],
+      "max_xyz": [
+        0.020699999999999996,
+        0.002149999618530272,
+        0.029
+      ]
+    }
+  },
+  "tool_radius_m": 0.14779145321586976,
+  "object_top_m": 0.035,
+  "geometric_margin_m": 0.005,
+  "arm_reach_tolerance_m": 0.02,
+  "minimum_measured_transit_z_m": 0.18779145321586976,
+  "commanded_transit_z_m": 0.20779145321586975
+}

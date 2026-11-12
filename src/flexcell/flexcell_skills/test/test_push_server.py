@@ -195,6 +195,49 @@ def test_missing_contact_height_is_refused_by_the_node():
     assert node.moves == []
 
 
+def _enable_reposition(node):
+    node._safe_reposition_enabled = True
+    node._reposition_min_height = .18
+    node._ee_position = lambda: ([.19, 0., .02], None)
+
+
+def test_reposition_with_unconfirmed_lift_is_typed_failure_not_default_success():
+    node = server([BOX_A] * 20)
+    _enable_reposition(node)
+    result = node._execute(_GoalHandle(goal()))
+    assert result.outcome == contract.OUTCOME_FAILED
+    assert result.error_code == contract.ERR_MOTION_FAILED
+    assert 'below measured clearance' in result.detail
+    assert len(node.moves) == 1
+
+
+def test_reposition_missing_pose_sends_no_motion():
+    node = server([BOX_A] * 20)
+    _enable_reposition(node)
+    node._ee_position = lambda: (None, 'stale TF')
+    result = node._execute(_GoalHandle(goal()))
+    assert result.outcome == contract.OUTCOME_FAILED
+    assert result.error_code == contract.ERR_MOTION_FAILED
+    assert node.moves == []
+
+
+def test_reposition_cancel_is_typed_canceled_and_sends_no_next_waypoint():
+    node = server([BOX_A] * 20)
+    _enable_reposition(node)
+    handle = _GoalHandle(goal())
+    original = node._m2p.call
+    def cancel_after_lift(position, **kwargs):
+        result = original(position, **kwargs)
+        handle.is_cancel_requested = True
+        return result
+    node._m2p.call = cancel_after_lift
+    result = node._execute(handle)
+    assert result.outcome == contract.OUTCOME_CANCELED
+    assert result.error_code == contract.ERR_CANCELED
+    assert handle.was_canceled
+    assert len(node.moves) == 1
+
+
 def test_cancellation_surfaces_as_canceled_not_failed():
     node = server([BOX_A] + [[0.210, 0.0, 0.0175]] * 8)
     handle = _GoalHandle(goal())
