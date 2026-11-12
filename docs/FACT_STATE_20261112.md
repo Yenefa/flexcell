@@ -951,4 +951,36 @@ pinned baseline  : 9 files, DRIFT -> benchmark/evaluators/evaluate.py
 **This is the single highest-leverage open item.** Every capability claim in this project is downstream of a file that
 does not match its own stated pin, and the project has described that baseline as authoritative throughout.
 
+---
+
+## CORRECTION — goal round 62: the evaluator "drift" is a STALE PIN, not an unauthorised change
+
+> **This downgrades the alarm in the addendum immediately above.** The drift is real; the framing was wrong.
+
+`evaluate.py` has **eight committed revisions**, the most recent being:
+
+```
+4fd36cd6  fix(t08): the evidence verifier rejected every valid push because evaluate.py never passed limits
+879d8d82  feat(t08): v0.5.0 -- the terminal verdict is no longer the whole verdict
+332b844f  fix(p0): close two audit findings -- a pkill that would kill everything, and a push clause a carry could satisfy
+0dc1245b  feat(evaluator): add the push clause, because a 60 mm push and no movement graded the same
+```
+
+`benchmark/capability_baseline.json` was last written at commit **`8e1ba83b`**, which **predates all of those.**
+
+| claim | corrected state |
+| --- | --- |
+| evaluator modified outside review | **NO.** Every change is a committed, messaged revision |
+| the ruler is unaccountable | **NO.** The ruler is accountable; **its pin was simply never refreshed** |
+| risk to the session's T08 numbers | **LOW.** They were graded by the newest committed evaluator, which is the correct one to use |
+| what is actually wrong | **the baseline still advertises 9 pinned hashes as if they described the current evaluator.** That is a bookkeeping defect, not a measurement defect |
+| remedy | **re-pin `capability_baseline.json` to the current `evaluate.py`** and record which revisions the change covers. A low-risk update **only if the archived results are declared to be generated under v0.5.0+`4fd36cd6`** — otherwise older numbers lose comparability |
+
+**I over-stated this in round 61.** "The ruler is not the one that was pinned" is true as bookkeeping and false in
+implication: the pin is stale, the evaluator's history is fully documented, and the newest revision is the one that
+fixed the very evidence-passing bug this session rediscovered from the other end.
+
+**What remains genuinely worth flagging**: a capability baseline that lists hashes it no longer describes will keep
+producing this alarm for every future reader, and the next person may act on it less carefully than this one just did.
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
