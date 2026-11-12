@@ -785,4 +785,29 @@ destination. Recovery did not rescue a task; it undid one.
 | What stands | recovery lifts the distribution floor **2.6 mm → 74.0 mm** (prior audit) — real, and independent of pass rates. A single draw lands across **20.4 mm, ~15% passing** (round 17, n=197) | — |
 | **Net honest statement** | **the recovery mechanism is real and visible in the distribution; the pass-rate improvement is one trial in five.** That is what should be written down, not 2/5 → 4/5 | same |
 
+---
+
+## ADDENDUM — goal rounds 34–38 (2026-11-12): the round-17 T08 conclusion is WITHDRAWN
+
+> **READ THIS BEFORE CITING ANY T08 NUMBER IN THIS FILE.** The round-17 entry above states that P2's
+> request-field avenue was closed by a measured capability limit (±3.44 mm repeatability against a 2.5 mm
+> cliff). **That conclusion is withdrawn.** The arm can perform T08. The measurement was of a harness that
+> withheld evidence the frozen evaluator requires.
+
+| Fact | State | Evidence |
+| --- | --- | --- |
+| The decisive code | `evaluate.py:227` reads `traj` from the state file; `:221` **fails closed** without one. `:253` `terminal_passed` is the clause conjunction. `:331-332` `passed` **additionally** requires a verified evidence bundle | pinned evaluator v0.5.0 |
+| **T08 terminal clause, independently re-graded** | **4/5** with ≤3-attempt recovery. The frozen evaluator re-run over the pilot's stored `traj_t1..t5.json` gives False,True,True,True,True. Trial 1 is a genuine failure — cosine **−0.99975**, box went **backwards**, outside zone | `VERIFIED_REGRADE.md` |
+| **T08 full pass** | **Achievable and achieved.** `t08_contact_calibration/runs/H0200/t1` and `t08_evidence_loop/evidence/S/t3` both show term=True passed=True; 9 T08 verdict files contain a true `passed`. **The 9 is not a result** — some may be the same trial re-graded | `T08_FULL_PASS_EXISTS.md` |
+| **My own paired run (0/26)** | **VOID, WITHDRAWN.** Its state files carried no `trajectory` key, so the clause failed closed **for every trial regardless of robot behaviour**. A test whose every observation is forced to one value cannot detect an effect | `RESOLVED.md` |
+| Round 20's paired **3/5 → 4/5** | **CONFIRMED** by independent re-grade; its one discordant pair is trial 5 (first attempt failed, retry succeeded) | round 37 |
+| **What was never the constraint** | displacement. Every failing trial failed the same conjunctive clause, and I modelled the wrong sub-clause for twenty rounds | rounds 27–38 |
+| **P2's real blocker** | **evidence plumbing, not robot capability.** The harnesses measuring T08 have not consistently supplied the evidence the frozen evaluator demands — mine included | same |
+| What is still NOT established | **T08 at scale on unseen instances** — no clean run at n. **Generalization Tested: NO.** | — |
+
+**The error, for the record:** for twenty rounds I reported that this arm could not perform T08, from a graded
+number produced by a harness that withheld the required evidence. The `reason` string naming exactly what was
+missing was printed in **every** verdict: *no trajectory for this object, end state alone cannot prove it was
+pushed rather than carried*. **I read that as a verdict instead of as an instruction about my harness.**
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
