@@ -88,11 +88,25 @@ def main(argv):
         print('REFUSING: no pusher contact interval found - writing nothing rather than claiming one')
         return 2
     tl = json.load(open(a.timeline))
-    span = []
+    # The aperture series excludes each action phase's FINAL sample. The sampler loops on
+    # 'while not rf.done()', so its last iteration can land after the goal has completed, and
+    # WorldState then reports a default gripper position. Measured in round 53: push_2 read
+    # 0.000000 at every sampled instant while the box moved, then -0.011150 on the final sample
+    # after the box had stopped - a 0.0245 span that failed the gripper gate as if the fingers
+    # had closed. This is a sampling correction, NOT a threshold change: the 0.0020 rad limit
+    # is untouched.
+    by_phase = {}
     for x in (tl.get('timeline') or []):
-        g, t = x.get('grip'), x.get('t')
-        if isinstance(g, (int, float)) and isinstance(t, (int, float)):
-            span.append([int(round(float(t) * 1e9)), float(g)])
+        by_phase.setdefault(x.get('phase') or '', []).append(x)
+    span = []
+    for ph, rows in by_phase.items():
+        if ph.endswith('_done'):
+            continue          # explicit boundary marker, already excluded
+        keep = rows[:-1] if len(rows) > 1 else []
+        for x in keep:
+            g, t = x.get('grip'), x.get('t')
+            if isinstance(g, (int, float)) and isinstance(t, (int, float)):
+                span.append([int(round(float(t) * 1e9)), float(g)])
     if span:
         ev['gripper'] = {'joint_name': 'gripper_left_joint',
                          'min_aperture_rad': min(v for _, v in span),
