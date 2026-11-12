@@ -1319,3 +1319,60 @@ No capability level was raised. The candidate is Simulation Tested on six seeds 
 verified. The T08 baseline remains `CALIBRATION_UNSUPPORTED`. No frozen file, threshold, TaskSpec or acceptance
 evidence was modified; the evaluator was executed, not edited.
 
+
+---
+
+## ADDENDUM — 2026-11-12, rounds 49-58: the evidence chain closed, and it produced a CONFIRMED FALSE FAILURE
+
+### What was built (all committed, all in-tree)
+
+| artefact | purpose |
+| --- | --- |
+| `instrument_world.sh` | adds the contact sensor each watched link needs; without it `component_present` is false in every record |
+| `build_evidence_bundle.py` | timeline -> `t08-evidence/1.0` bundle |
+| `derive_contact_evidence.py` | contact trace -> intervals, pusher links, teleport |
+| `run_frozen_evaluator.py` | runs `evaluate.py` on a bundle without modifying it |
+
+### Three requirements to get contact data, only the third being the gate
+
+1. `FLEXCELL_CONTACT_STEP_LOG` must be exported - found in `strings` on the `.so`; without it gz dies with `new contact step log path required`.
+2. `<contacts_entity_names>true</contacts_entity_names>` on the Physics plugin - tested, made no difference on its own.
+3. **A contact sensor on each watched link.** The plugin probes the gz `ContactSensorData` component; with no sensor that component never exists. **This is the gate.**
+
+### Round 58 result — the first `terminal_passed: True` this session
+
+`T08-push-seed3001`, single staged push, evaluator `0.5.0`, status `COMPLETE_EVIDENCE_CONTRADICTS_PUSH`:
+
+| state | verdict |
+| --- | --- |
+| `planning_correct` | yes |
+| `execution_succeeded` | yes — box 0.01725 m from zone centre, radius 0.06 |
+| `independent_evaluation_passed` | **no** — `gripper` gate, 0.0032 rad against 0.0020 |
+| `agent_claimed_success` | false |
+
+Both task clauses pass. Moved 0.1052 m (window 0.03-0.15), cosine +0.9887 (min 0.9), protected box unmoved.
+
+**Rejected by 1.2 mrad.**
+
+### Why that 1.2 mrad is a false rejection, established by code path
+
+`observe_server.py:214` reads `gripper_position` from `/joint_states` - **measured** joint position.
+`push_server.py:20-26` establishes the gripper is **never commanded** during a push, and must not be.
+Both fingers appear in the contact trace. The aperture moved because the box pressed on them.
+
+The 0.0020 rad limit is sized for a **commanded** grasp. Applied to passive fingers it measures
+contact, not intent. **This is the known gate defect, now with a run, a mechanism and a number.**
+
+### Two defects I introduced and then found
+
+1. **Two pushes per run.** `t08_timeline.py` called `push_once()` twice. `push_1` left the box 0.0372 m from the zone centre - a pass - and `push_2` moved it to 0.10981 m out with total travel 0.20865 m against a 0.15 ceiling. **The second push undid a successful first one.** Fixed: repeats default to 1.
+2. **Teleport measured in xyz, not xy.** `verify.py:_observed_max_jump` uses xy only. Including z produced a 7e-6 disagreement that failed the gate's 1e-6 agreement check.
+
+### Retraction
+
+Round 54 claimed the aperture change was a boundary artefact from a single final sample. **Wrong** - I had printed every 32nd sample of a 327-sample phase and concluded from 11 points. The full series has 50 samples ramping continuously. `GRIPPER_BOUNDARY_ARTEFACT_20261112.md` is kept, superseded by `GRIPPER_RETRACTION_20261112.md`.
+
+### Not claimed
+
+**No capability level was raised.** The run was rejected by the verifier, so it is not Independently Verified. One false failure is not a reproducible rate: n=1. The T08 baseline remains `CALIBRATION_UNSUPPORTED`. No frozen file, threshold, TaskSpec or acceptance evidence was modified - `evaluate.py` and `verify.py` were read and executed, never edited.
+
