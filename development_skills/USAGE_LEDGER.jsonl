@@ -1,0 +1,27 @@
+# Development Skill usage ledger
+#
+# WHY THIS FILE EXISTS
+#   The Skill Curator measured adoption at ZERO across the entire repository history - 295 branches,
+#   819 commits, 2104 .py, 206 .sh, 0 invocations. The cause was a missing load path, not disinterest:
+#   nothing ever told an agent the directory existed.
+#
+#   That has been fixed (AGENTS.md at the repo root). But a load path only makes skills DISCOVERABLE.
+#   It does not make their use RECORDED, and an unrecorded use is indistinguishable from no use - which
+#   is exactly how the first adoption count came out zero.
+#
+# SO: if you consult or apply a skill from registry.json, append ONE line here.
+#
+# One JSON object per line. Fields:
+#   ts        ISO-8601 timestamp
+#   skill     the skill id from registry.json
+#   episode   what development task you were doing (short label)
+#   applied   true if you actually followed it, false if you read it and rejected it
+#   note      one sentence: what it changed, or why you did not use it
+#
+# Rejecting a skill is a USEFUL record - it is the only way to learn that a skill is unhelpful.
+# Recording nothing is the one behaviour that makes this role permanently unmeasurable.
+#
+# This ledger is NOT a measure of effect. It measures USE. Effect needs a controlled comparison,
+# which needs the other three prerequisites the Curator listed: a recurring task class, a per-episode
+# outcome variable, and two-arm assignment. Do not cite a non-empty ledger as evidence that the
+# skills work.

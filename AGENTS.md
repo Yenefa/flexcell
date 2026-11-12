@@ -15,8 +15,10 @@ found **adoption is zero** — 295 branches, 819 commits, 2,104 `.py` and 206 `.
 entrypoint. See `setup/acceptance/evobot_lead_curator_measure_20261112/`.
 
 **So: this directory has never been tried.** That is not evidence it does not work, and it is certainly not
-evidence that it does. If you use a skill, record that you did — an unrecorded use is indistinguishable from no
-use, which is exactly how the adoption count came out zero.
+evidence that it does. If you consult or apply a skill, **append one line to
+`development_skills/USAGE_LEDGER.jsonl`** (schema at the top of that file) — an unrecorded use is
+indistinguishable from no use, which is exactly how the adoption count came out zero. Recording a **rejection**
+is just as useful.
 
 **The 42 unit tests in `development_skills/` are not an achievement.** They test that the skills are well-formed;
 they say nothing about whether using them helps. Do not cite the test count as a result.
