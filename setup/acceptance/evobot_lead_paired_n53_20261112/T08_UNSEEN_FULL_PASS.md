@@ -126,3 +126,47 @@ instances with full gating" is exactly what the artifacts support, and no more.*
 Round 17 said the arm could not do T08 and I treated that as settled for twenty rounds. **It was wrong in a way
 that a single filed read would have caught.** The archive contains a single-push, fully-gated, evidence-complete
 T08 success on unseen geometry, and it was recorded before I started.
+---
+
+## Correction (round 49): only TWO of the six have `evidence_status: COMPLETE` — n=2, not 3
+
+I checked every U/U_shot trial record rather than trusting the verdict scan. The verdict flag `passed: true` is
+**not** the same as valid evidence, and this is exactly where the difference bites.
+
+| trial | attempts | clause_ok | evidence_status | displacement | valid? |
+| --- | --- | --- | --- | --- | --- |
+| `U_shot/seed3000` | 1 | True | **COMPLETE** | 147.14 | **YES** |
+| `U_shot/seed3002` | 1 | True | **COMPLETE** | 140.99 | **YES** |
+| `U_shot/seed3001` | 1 | True | COMPLETE_EVIDENCE_CONTRADICTS_PUSH | 144.00 | **NO** |
+| `U/seed3000` | 1 | True | COMPLETE_EVIDENCE_CONTRADICTS_PUSH | 121.71 | **NO** |
+| `U/seed3002` | 3 | True | INCOMPLETE_OR_INVALID_EVIDENCE | 46.51 | **NO** |
+| `U/seed3001` | 1 | False | INCOMPLETE_OR_INVALID_EVIDENCE | 150.50 | no (clause failed) |
+
+## What changes
+
+| claim | before (round 47) | now |
+| --- | --- | --- |
+| valid unseen full passes | "3 seeds, plus closed-loop 3000 and 3002" | **2: `U_shot/seed3000` and `U_shot/seed3002`** |
+| level | Generalization Tested, thin | **Generalization Tested, thinner — n=2** |
+| `U` (closed-loop) runs | "same gate pattern" | **neither is valid** — one contradicts, one incomplete |
+
+**`COMPLETE_EVIDENCE_CONTRADICTS_PUSH` is not a pass.** Whatever it means precisely, it is the evaluator
+reporting that the evidence conflicts with the push claim, and treating it as a pass because a separate flag said
+`passed: true` would be precisely the error this session keeps repeating — **trusting a summary flag over the
+artifact that qualifies it.**
+
+## The claim that survives, stated at its true width
+
+**T08 is Generalization Tested at n = 2**: two unseen instances (`seed3000`, `seed3002`), each completed in a
+**single attempt**, each with `evidence_status: COMPLETE` and all nine anti-fake gates satisfied, zero false
+success, and on `seed3000` verified in full detail (6680 trajectory samples, `no_lift` 0.000788 m,
+`no_attachment` 0 events, `pusher_contact` 1176/1182 windows).
+
+**Two instances is not a generalization study.** It is two instances. The mechanism is demonstrated and the
+evidence quality is high; the breadth is two.
+
+## What I got wrong forty minutes ago
+
+Round 47 said "two further seeds pass by the same gate pattern". **That was inferred from the verdict scan's
+`passed: true`, which I had explicitly warned in round 44 was not sufficient — and then used anyway.** The
+correct check was one file per trial, which took one command.
