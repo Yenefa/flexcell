@@ -49,3 +49,11 @@ paid model, hardware command, formal baseline promotion, main merge or PR.
 A branch-scoped CI workflow attempts independent execution; build/test success
 alone is not robot ability. Formal status remains CALIBRATION_UNSUPPORTED
 until the existing promotion requirements are independently met.
+
+CI build correction, before any CI physics:
+run43274183424 stopped at package discovery because repository-root colcon
+discovered historical archived workspaces with duplicate package names. No
+robot task ran. The next revision constrains discovery to src/flexcell, adds
+Python compilation of the new harness, and accepts the standard Apache-2.0
+license text path when preparing the pinned model. No robot controller,
+trajectory, Runtime planner, task input, threshold or budget changes.

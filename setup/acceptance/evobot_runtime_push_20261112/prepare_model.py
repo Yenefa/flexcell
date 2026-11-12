@@ -37,7 +37,11 @@ def prepare(out):
     if set(p.name for p in out.glob('*.stl'))!=set(EXPECTED):raise ValueError('incomplete pinned mesh set')
     license_names=[n.text for n in ET.parse(package/'package.xml').getroot().findall('license')]
     if not any('apache' in s.casefold() for s in license_names):raise ValueError('license requires review')
-    shutil.copyfile('/usr/share/common-licenses/Apache-2',out/'LICENSE')
+    license_candidates=[package/'LICENSE',package/'LICENSE.txt',
+        Path('/usr/share/common-licenses/Apache-2.0'),Path('/usr/share/common-licenses/Apache-2')]
+    license_path=next((p for p in license_candidates if p.is_file()),None)
+    if license_path is None:raise ValueError('Apache license text unavailable')
+    shutil.copyfile(license_path,out/'LICENSE')
     value=dict(package=str(package),urdf_sha256=hashlib.sha256((out/'robot.urdf').read_bytes()).hexdigest(),
         meshes=sources,license=license_names,
         upstream_lock_sha256=hashlib.sha256(Path('/opt/flexcell/upstream.lock.repos').read_bytes()).hexdigest())

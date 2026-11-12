@@ -28,12 +28,13 @@ jobs:
         shell: bash
         run: |
           source /opt/ros/jazzy/setup.bash
-          colcon build --symlink-install --parallel-workers 2 --packages-select flexcell_interfaces flexcell_skills
+          colcon build --base-paths src/flexcell --symlink-install --parallel-workers 2 --packages-select flexcell_interfaces flexcell_skills
       - name: Relevant contact, task and existing composition contracts
         shell: bash
         run: |
           source /opt/ros/jazzy/setup.bash
           source install/setup.bash
+          python3 -m compileall -q runtime/planner/push_task.py runtime/run_public_push_task.py setup/acceptance/evobot_runtime_push_20261112 src/flexcell/flexcell_skills/flexcell_skills
           export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1
           mkdir -p artifacts
           python3 -m pytest -p no:cacheprovider -o addopts="" -q \
