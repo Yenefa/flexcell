@@ -229,7 +229,7 @@ class ContactGeometry:
         return minimum
 
     def cartesian(self,start,tcp,end_point,end_pitch,protected,gripper=(0.,0.),duration=None,
-                  avoid_target=None):
+                  avoid_target=None,abort_check=None):
         """Smooth dense TCP path; every sample has explicit orientation and IK."""
         start=np.asarray(start);frame=self.frames(start,gripper)['end_effector_link']
         initial=apply(frame,np.asarray(tcp));initial_pitch=float(sum(start[1:]))
@@ -237,6 +237,7 @@ class ContactGeometry:
         u=np.linspace(0.,1.,steps+1);s=10*u**3-15*u**4+6*u**5
         path=[];tcp_points=[];q=start
         for fraction in s:
+            if abort_check is not None and abort_check():raise InterruptedError('caller canceled during read-only geometry')
             p=initial+(end_point-initial)*fraction;pitch=initial_pitch+(end_pitch-initial_pitch)*fraction
             for _ in range(8):
                 q=self.tcp_inverse(p,pitch,tcp,q)
@@ -259,6 +260,7 @@ class ContactGeometry:
         duration=max(minimum*1.15,duration or 0.)
         if duration>20.:raise ValueError('trajectory exceeds isolated segment time budget')
         for q in path:
+            if abort_check is not None and abort_check():raise InterruptedError('caller canceled during read-only geometry')
             self.guards(q,protected,gripper)
             if avoid_target is not None:
                 for name,tri in self.world_meshes(q,gripper).items():
@@ -267,6 +269,7 @@ class ContactGeometry:
         # Screen cubic midpoint proxies as well as knots. This is not a proof
         # for every controller spline; validate actual execution in native data.
         for i in range(len(path)-1):
+            if abort_check is not None and abort_check():raise InterruptedError('caller canceled during read-only geometry')
             midpoint=(path[i]+path[i+1])/2+(d1[i]-d1[i+1])*(u[i+1]-u[i])/8
             self.guards(midpoint,protected,gripper)
             actual=apply(self.frames(midpoint,gripper)['end_effector_link'],tcp)

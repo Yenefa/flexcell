@@ -1176,3 +1176,27 @@ experiment or baseline promotion.
 This is a scoped new bounded-push/returned-state development capability. Do not
 promote it into a reliable general robot skill or L4 claim. Formal T08 remains
 CALIBRATION_UNSUPPORTED; baseline NOT_PROMOTED. Goal active.
+
+
+## 2026-11-12 — Public Runtime integration and environment-loss checkpoint
+
+Base8c3972da; isolated reconstructed recovery candidate. Previous physical
+contact results are retained separately, not reclassified as Runtime evidence.
+
+| Item | Verified status |
+|---|---|
+| Public Runtime implementation | CANDIDATE: bounded rule planner, typed ContactPush action, default-off TaskFSM registration and post-return admission. No LLM or autonomous Develop claim |
+| Local build/checks before loss | Interfaces/skills built;117 focused checks passed. Extended selection309 pass/10 old PickServer fixture errors. Does NOT validate reconstructed revision; #238 requests independent baseline reproduction |
+| R0 control | INVALID_PHYSICAL_CONTROL: missing required contact-height declaration, no motion; retained failure |
+| R0b corrected control | UNKNOWN: motion started; managed environment disconnected before final result/evidence could be read |
+| New local candidate/probe | NOT_RUN: R1/R2 had not executed before environment loss |
+| Recovery source | RECONSTRUCTED through GitHub from pinned parent and tool-visible code, not claimed byte-identical to tested local worktree |
+| Recovery acceptance | New isolated CI build/test and fixed CI_L0/CI_C1/conditional CI_C2 window prepared; only actual CI records may establish results |
+| Capability/status | NOT_PROVEN_THIS_CHECKPOINT; formal baseline NOT_PROMOTED; L4 not crossed; T08 formal status remains CALIBRATION_UNSUPPORTED |
+| Infrastructure | #237 open; environment interruption is not a demonstrated cause of full-graph scheduling stalls |
+| Evidence/cleanup | Original raw logs/worktree inaccessible. No invented raw archive. Original container/process cleanup UNKNOWN |
+| Frozen boundary | Reconstructed candidate preserves parent9 frozen files, push arithmetic, old TaskSpecs and default launch; CI independently checks hashes |
+
+Evidence/status source:
+setup/acceptance/evobot_runtime_push_20261112/README.md and
+recovery_observations.json. CI success, if obtained, needs a separate append.

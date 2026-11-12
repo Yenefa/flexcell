@@ -32,6 +32,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "action/RunDemo.action"
   "action/RunComposite.action"
   "action/PushObject.action"
+  "action/ContactPush.action"
   DEPENDENCIES geometry_msgs std_msgs moveit_msgs
 )
 

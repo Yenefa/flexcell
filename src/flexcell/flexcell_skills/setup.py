@@ -33,6 +33,7 @@ setup(
             'task_fsm_server = flexcell_skills.task_fsm_server:main',
             'carry_server = flexcell_skills.carry_server:main',
             'push_server = flexcell_skills.push_server:main',
+            'contact_push_server = flexcell_skills.contact_push_server:main',
         ],
     },
 )

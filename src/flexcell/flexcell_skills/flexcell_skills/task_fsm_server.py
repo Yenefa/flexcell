@@ -143,6 +143,10 @@ class TaskFsmServer(Node):
         self.declare_parameter('place_action', '/place_object')
         self.declare_parameter('verify_action', '/verify_object')
         self.declare_parameter('push_action', '/push_object')
+        self.declare_parameter('push_backend','legacy')
+        self.declare_parameter('contact_push_action','/contact_push')
+        self.declare_parameter('contact_task_motion_budget',40)
+        self.declare_parameter('contact_task_wall_s',600.)
         self.declare_parameter('default_place_tolerance_m', 0.05)
         self.declare_parameter('skill_wait_s', 90.0)
         self.declare_parameter('log_dir', '~/.ros/flexcell')
@@ -159,6 +163,17 @@ class TaskFsmServer(Node):
                                         callback_group=ReentrantCallbackGroup())
         self._cli_push = ActionClient(self, PushObject, gp('push_action').value,
                                       callback_group=ReentrantCallbackGroup())
+        self._push_backend=gp('push_backend').value
+        if self._push_backend not in ('legacy','finger_tcp'):raise ValueError('unsupported push backend')
+        if self._push_backend=='finger_tcp':
+            from flexcell_interfaces.action import ContactPush
+            self._contact_type=ContactPush
+            self._cli_contact=ActionClient(self,ContactPush,gp('contact_push_action').value,
+                                           callback_group=ReentrantCallbackGroup())
+        self._contact_budget=int(gp('contact_task_motion_budget').value)
+        self._contact_wall=float(gp('contact_task_wall_s').value)
+        if not 1<=self._contact_budget<=40 or not 0<self._contact_wall<=600.:
+            raise ValueError('contact task budgets exceed the development capability')
         self._tol = float(gp('default_place_tolerance_m').value)
         self._skill_wait = float(gp('skill_wait_s').value)
         self._log = JsonlLog(self, gp('log_dir').value, gp('log_file').value)
@@ -468,7 +483,7 @@ class TaskFsmServer(Node):
     #   evidence references; every step lands in the demo evidence JSONL.
     # =================================================================
 
-    def _demo_call(self, cli, goal, label, goal_handle, t0, deadline_s):
+    def _demo_call(self, cli, goal, label, goal_handle, t0, deadline_s, goal_uuid=None):
         """Run one skill for the demo; returns (result, None) or (None, err_detail).
 
         P0-A: a timeout or a cancel only *requests* a stop. This helper returns a
@@ -487,7 +502,7 @@ class TaskFsmServer(Node):
             goal_handle.publish_feedback(fb)
         if not cli.wait_for_server(timeout_sec=10.0):
             return None, "%s skill server unavailable" % label
-        send = cli.send_goal_async(goal)
+        send = cli.send_goal_async(goal) if goal_uuid is None else cli.send_goal_async(goal,goal_uuid=goal_uuid)
         t_send = time.monotonic()
         while not send.done():
             if time.monotonic() - t_send > 15.0:
@@ -583,6 +598,7 @@ class TaskFsmServer(Node):
                 goal_uuid=bytes(goal_handle.goal_id.uuid).hex(),
                 runtime_fingerprint=os.environ.get('FLEXCELL_RUNTIME_FINGERPRINT'),
                 policy=self._policy.name, policy_version=self._policy.version,
+                push_backend=getattr(self,'_push_backend','legacy'),
                 contract_version=2))
             res.evidence_id = str(journal.path)
             if not self._admission.acquire(blocking=False):
@@ -601,6 +617,7 @@ class TaskFsmServer(Node):
                                  error_code=res.error_code, detail=res.detail)
                 else:
                     goal = goal_handle.request
+                    self._contact_remaining=getattr(self,'_contact_budget',40)
 
                     def xyz(p):
                         return [p.x, p.y, p.z]
@@ -693,6 +710,7 @@ class TaskFsmServer(Node):
                             stage_id, started, len(progress))
                         request = Observe.Goal()
                         request.refresh = True
+                        if getattr(self,'_push_backend','legacy')=='finger_tcp':request.max_age_s=.5
                         reply, error = self._demo_call(
                             self._cli_observe, request,
                             'OBSERVE_' + boundary.upper(), view, started,
@@ -700,6 +718,9 @@ class TaskFsmServer(Node):
                         if reply is None:
                             raise SkillTransportError(error)
                         ws = reply.world_state
+                        if getattr(self,'_push_backend','legacy')=='finger_tcp' and any(
+                                not math.isfinite(o.pose_age_s) or not 0<=o.pose_age_s<=.5 for o in ws.objects):
+                            raise SkillTransportError('contact task observation has stale/unavailable source ages')
                         return dict(
                             outcome=int(reply.outcome),
                             error_code=int(reply.error_code),
@@ -798,6 +819,8 @@ class TaskFsmServer(Node):
         That way push stages ride the existing chain machinery (journal,
         ordering, independent postcondition) instead of a parallel path.
         """
+        if getattr(self,'_push_backend','legacy')=='finger_tcp':
+            return self._native_contact_push(stage,goal_uuid,res,goal_handle,started,plan,progress)
         request = PushObject.Goal()
         request.request_id = 'push-' + uuid.uuid4().hex
         request.object_name = stage['object_name']
@@ -853,6 +876,63 @@ class TaskFsmServer(Node):
             contact_lost=bool(skill_result.contact_lost),
             carry_engaged_during=bool(skill_result.carry_engaged_during),
             final_state=final)
+
+    def _native_contact_push(self,stage,goal_uuid,res,goal_handle,started,plan,progress):
+        from flexcell_skills.contracts.contact_task import returned_component_ready
+        request=self._contact_type.Goal()
+        request.request_id='contact-'+uuid.uuid4().hex;request.object_name=stage['object_name']
+        request.direction.x,request.direction.y,request.direction.z=map(float,stage['direction'])
+        request.distance_m=float(stage['distance_m']);request.motion_profile_id=plan['motion_profile_id']
+        request.preserve_objects=sorted(set(plan['initial_objects'])-{request.object_name})
+        remaining_wall=self._contact_wall-(time.monotonic()-started)
+        if self._contact_remaining<13 or remaining_wall<=0:
+            raise CompositeError(62,'executor contact task budget exhausted before dispatch')
+        wait=min(300.,remaining_wall);request.deadline_ms=max(1,int(wait*1000))
+        request.max_motion_goals=min(13,self._contact_remaining)
+        view=ComponentGoal(goal_handle,request,goal_uuid,stage['stage_id'],started,len(progress))
+        try:
+            reply,error=self._demo_call(self._cli_contact,request,'CONTACT_'+stage['stage_id'],view,
+                started,wait,goal_uuid=UUID(uuid=list(bytes.fromhex(goal_uuid))))
+        except Exception as exc:
+            self._quarantine_skill('CONTACT_PUSH',dict(reason='contact transport exception; ownership unknown',
+                terminated=False,result_outcome=3,result_error_code=33,result_detail=str(exc)))
+            reply,error=None,'contact transport failed with unknown acceptance or terminal: '+str(exc)
+        context=dict(parent_run_id=res.run_id,stage_id=stage['stage_id'],backend='finger_tcp',
+            goal_uuid=goal_uuid,request_id=request.request_id,run_id=request.request_id)
+        if reply is None:
+            return dict(context,terminal_status='FAILED',outcome=3 if self._quarantine.active else 1,
+                        error_code=33 if self._quarantine.active else 2,
+                        detail=error or 'contact reply unavailable',final_state=dict(goal_uuid=goal_uuid,error_code=2))
+        self._contact_remaining-=int(reply.motion_goals_used)
+        if not reply.motion_terminal_known:
+            self._quarantine_skill('CONTACT_PUSH',dict(reason='contact terminal unknown',terminated=False,
+                result_outcome=3,result_error_code=33,result_detail=reply.detail))
+        ws=reply.returned_state
+        receipt={}
+        try:receipt=json.loads(reply.receipt_json)
+        except (ValueError,TypeError):pass
+        component=dict(context,child_goal_uuid=reply.goal_uuid,receipt_request_id=receipt.get('request_id'),
+            outcome=int(reply.outcome),error_code=int(reply.error_code),detail=reply.detail,
+            evidence_id=reply.evidence_id,displacement_m=float(reply.displacement_m),
+            direction_cos=float(reply.direction_cos),lateral_m=float(reply.lateral_m),delta_z_m=float(reply.delta_z_m),
+            contact_made=bool(reply.contact_made),contact_lost=bool(reply.contact_lost),
+            carry_engaged_during=bool(reply.carry_engaged_during),stroke_outcome=int(reply.stroke_outcome),
+            stroke_error_code=int(reply.stroke_error_code),motion_terminal_known=bool(reply.motion_terminal_known),
+            return_completed=bool(reply.return_completed),arm_ready=bool(reply.arm_ready),
+            has_returned_state=bool(reply.has_returned_state),physical_contact_observed=bool(reply.physical_contact_observed),
+            returned_source=ws.source,returned_frame=ws.header.frame_id,returned_carry_engaged=bool(ws.carry.engaged),
+            returned_gripper_known=bool(ws.robot.has_gripper_state),
+            returned_objects_complete=({o.name for o in ws.objects}==set(plan['initial_objects']) and all(o.available for o in ws.objects)),
+            returned_object_age_s=max((o.pose_age_s for o in ws.objects),default=float('inf')),
+            receipt_age_s=(time.monotonic_ns()-int(reply.observed_monotonic_ns))/1e9,
+            motion_goals_used=int(reply.motion_goals_used))
+        if not reply.motion_terminal_known:
+            component.update(outcome=3,error_code=33,detail='contact motion terminal is unknown')
+        elif component['outcome']==0 and (not returned_component_ready(component) or self._contact_remaining<0):
+            component.update(outcome=1,error_code=62,detail='contact success lacks a fresh known ready return or budget')
+        component['terminal_status']='SUCCEEDED' if component['outcome']==0 else 'CANCELED' if component['outcome']==2 else 'FAILED'
+        component['final_state']=dict(goal_uuid=goal_uuid,error_code=component['error_code'])
+        return component
 
     def _execute_plan(self, goal_handle, single=False, admission_held=False,
                       component=None):

@@ -1,0 +1,53 @@
+{
+  "kind": "TRANSCRIPT_OBSERVATIONS_AFTER_ENVIRONMENT_LOSS",
+  "original_raw_logs_retrieved": false,
+  "not_raw_evidence_archive": true,
+  "parent_commit": "8c3972daf68fbe216490db2723b14abe9068a6d6",
+  "local_source_saved_to_github_before_loss": false,
+  "reconstructed_source_requires_new_build_and_acceptance": true,
+  "interface_build": "PASS_BEFORE_LOSS",
+  "skills_build": "PASS_BEFORE_LOSS",
+  "local_focused_unit_result": {
+    "passed": 117,
+    "failed": 0,
+    "applies_to_reconstructed_revision": false
+  },
+  "local_extended_unit_result": {
+    "passed": 309,
+    "failed": 10,
+    "known_failure": "PickServer __new__ fixtures missing _admission_wait_s",
+    "baseline_reproduction": "NOT_RUN",
+    "issue": 238
+  },
+  "local_slots": [
+    {
+      "label": "R0",
+      "backend": "legacy",
+      "runtime_status": "RUNTIME_TASK_FAILED",
+      "agent_claimed_success": false,
+      "physical_control_valid": false,
+      "reason": "required contact-height parameter omitted; no actuator motion"
+    },
+    {
+      "label": "R0b",
+      "backend": "legacy",
+      "last_verified": "real motion started",
+      "terminal_status": "UNKNOWN",
+      "reason": "execution environment unavailable/offline"
+    },
+    {
+      "label": "R1",
+      "backend": "finger_tcp",
+      "status": "NOT_RUN"
+    },
+    {
+      "label": "R2",
+      "backend": "finger_tcp",
+      "status": "NOT_RUN"
+    }
+  ],
+  "new_physical_task_capability": "NOT_PROVEN_THIS_CHECKPOINT",
+  "original_process_cleanup": "UNKNOWN",
+  "formal_baseline": "NOT_PROMOTED",
+  "simulation_issue": "https://github.com/Yenefa/flexcell/issues/237"
+}

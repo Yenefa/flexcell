@@ -30,6 +30,7 @@ class ConstrainedMotion:
         self.registration=node.create_client(RegisterMtcTrajectory,'/flexcell/attached_point/register_trajectory')
         self.validity=node.create_client(GetStateValidity,'/check_state_validity')
         self.blocked=False;self.terminal_known=True;self.calls=0;self.last_result=None
+        self.any_execution_started=False
 
     def unknown(self,detail):
         self.blocked=True;self.terminal_known=False
@@ -42,7 +43,10 @@ class ConstrainedMotion:
         if not future.done():
             if physical:self.unknown('motion goal response unavailable; no further goal or cleanup allowed')
             raise MotionFailed('read-only/registration response timeout; no actuator goal dispatched')
-        return future.result()
+        try:return future.result()
+        except Exception as exc:
+            if physical:self.unknown('motion transport failed: '+str(exc))
+            raise MotionFailed('read-only/registration transport failed: '+str(exc))
 
     def plan_observed(self,planner,timeout=90.,guard=None):
         """Keep ROS/clock/contact callbacks alive during expensive pure geometry.
@@ -51,7 +55,7 @@ class ConstrainedMotion:
         by execute(); cancellation or stale/changed observations never dispatch
         the completed path.
         """
-        if self.blocked:self.unknown('planning refused after prior unknown terminal')
+        if self.blocked or not self.terminal_known:self.unknown('planning refused after prior unknown terminal')
         if self.canceled():raise MotionCanceled('caller canceled before planning')
         planning_guard=self.guard if guard is None else guard
         end=time.monotonic()+timeout
@@ -63,12 +67,13 @@ class ConstrainedMotion:
                 reason=planning_guard()
                 if reason:raise MotionFailed('observation guard during planning: '+str(reason))
                 if time.monotonic()>end:raise MotionFailed('read-only planning budget exhausted; no goal dispatched')
+            if self.canceled():raise MotionCanceled('caller canceled while geometry completed')
             return future.result()
 
     def execute(self,plan,phase):
-        if self.blocked:self.unknown('executor latched after prior unknown terminal')
+        if self.blocked or not self.terminal_known:self.unknown('executor latched after prior unknown terminal')
         if self.canceled():raise MotionCanceled('caller canceled before dispatch')
-        if self.calls>=40:raise MotionFailed('frozen task motion budget exhausted')
+        if self.calls>=min(40,getattr(self,'call_limit',40)):raise MotionFailed('frozen task motion budget exhausted')
         if (not self.action.wait_for_server(timeout_sec=5.)
                 or not self.registration.wait_for_service(timeout_sec=3.)
                 or not self.validity.wait_for_service(timeout_sec=3.)):
@@ -109,6 +114,11 @@ class ConstrainedMotion:
         response=self.wait(self.registration.call_async(registration),4.)
         if not response.success:raise MotionFailed('handoff refused: '+response.detail)
         if self.canceled():raise MotionCanceled('caller canceled before actuator goal')
+        current_q,_=self.state()
+        if np.max(np.abs(current_q-plan['positions'][0]))>.005:
+            raise MotionFailed('state changed during registration; no actuator goal dispatched')
+        reason=self.guard()
+        if reason:raise MotionFailed('guard refuses registered actuator dispatch: '+str(reason))
         goal=MoveToPose.Goal(request_id=registration.request_id,target=target,
                              motion_profile_id='demo_veryslow',deadline_ms=60000)
         self.calls+=1;self.terminal_known=False
@@ -117,7 +127,9 @@ class ConstrainedMotion:
                    points=len(plan['positions']),duration_s=float(plan['times'][-1]),
                    tcp_start=plan['tcp_start'],tcp_end=plan['tcp_end'],pitch_start=plan['pitch_start'],
                    pitch_end=plan['pitch_end'],self_collision_samples=len(samples))
-        handle=self.wait(self.action.send_goal_async(goal),15.,physical=True)
+        try:send=self.action.send_goal_async(goal)
+        except Exception as exc:self.unknown('actuator send failed with unknown acceptance: '+str(exc))
+        handle=self.wait(send,15.,physical=True)
         if handle is None:self.unknown('empty goal response')
         if not handle.accepted:
             self.terminal_known=True;raise MotionFailed('constrained actuator goal rejected')
@@ -135,9 +147,10 @@ class ConstrainedMotion:
         wrapped=future.result()
         if wrapped is None or wrapped.status not in (4,5,6):self.unknown('unconfirmed action terminal status')
         result=wrapped.result;self.last_result=result
+        self.any_execution_started=self.any_execution_started or bool(result.execution_started)
         if result.outcome==3 or result.error_code==33:self.unknown(result.detail)
-        if wrapped.status==5 and result.execution_started and not result.stop_confirmed:
-            self.unknown('canceled motion has no strict stop confirmation')
+        if wrapped.status in (5,6) and result.execution_started and not result.stop_confirmed:
+            self.unknown('canceled/aborted motion has no strict stop confirmation')
         self.terminal_known=True
         self.event('CONSTRAINED_TERMINAL',phase=phase,action_status=wrapped.status,
                    outcome=int(result.outcome),error_code=int(result.error_code),

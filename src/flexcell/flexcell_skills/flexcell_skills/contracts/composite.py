@@ -12,6 +12,7 @@ import os
 from pathlib import Path
 import re
 import uuid
+from flexcell_skills.contracts.contact_task import returned_component_ready
 
 
 class CompositeError(ValueError):
@@ -236,6 +237,8 @@ def push_native_success(component, goal_uuid, tolerance, stage):
     missing, NaN, or off-axis is refused here rather than trusted.
     """
     if type(component) is not dict:
+        return False
+    if component.get('backend')=='finger_tcp' and not returned_component_ready(component):
         return False
     final = component.get('final_state') or {}
     moved = component.get('displacement_m')

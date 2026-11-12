@@ -1,0 +1,95 @@
+name: t08-runtime-recovery
+on:
+  push:
+    branches: [develop/t08-runtime-recovery-20261112]
+    paths: [.github/workflows/t08-runtime-recovery.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: t08-runtime-recovery-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  interfaces-and-contracts:
+    runs-on: ubuntu-24.04
+    container: ros:jazzy
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: ROS interface and offline test dependencies
+        shell: bash
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq python3-pytest python3-jsonschema python3-yaml python3-numpy \
+            ros-jazzy-moveit-msgs ros-jazzy-control-msgs ros-jazzy-tf2-ros \
+            ros-jazzy-ros2-control ros-jazzy-joint-state-broadcaster ros-jazzy-joint-trajectory-controller
+      - name: Build new interface and Python package
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          colcon build --symlink-install --parallel-workers 2 --packages-select flexcell_interfaces flexcell_skills
+      - name: Relevant contact, task and existing composition contracts
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          source install/setup.bash
+          export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1
+          mkdir -p artifacts
+          python3 -m pytest -p no:cacheprovider -o addopts="" -q \
+            src/flexcell/flexcell_skills/test/test_public_contact_runtime.py \
+            src/flexcell/flexcell_skills/test/test_contact_control.py \
+            src/flexcell/flexcell_skills/test/test_push_composite.py \
+            src/flexcell/flexcell_skills/test/test_composite_server.py \
+            src/flexcell/flexcell_skills/test/test_composite.py \
+            src/flexcell/flexcell_skills/test/test_composite_checkpoint.py \
+            src/flexcell/flexcell_skills/test/test_composite_prepare.py \
+            src/flexcell/flexcell_skills/test/test_budget_lifecycle.py \
+            src/flexcell/flexcell_skills/test/test_mtc_motion.py \
+            src/flexcell/flexcell_skills/test/test_push_stage_dispatch.py \
+            src/flexcell/flexcell_skills/test/test_task_result.py \
+            src/flexcell/flexcell_skills/test/test_push_contract.py \
+            src/flexcell/flexcell_skills/test/test_push_recover.py \
+            src/flexcell/flexcell_skills/test/test_push_server.py \
+            src/flexcell/flexcell_skills/test/test_contact_observation.py \
+            --junitxml=artifacts/contracts.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: t08-runtime-contracts-${{ github.run_id }}
+          path: artifacts/
+
+  physical-runtime-tasks:
+    needs: interfaces-and-contracts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/Dockerfile.sim
+          load: true
+          tags: flexcell-sim:runtime
+          build-args: SOURCE_REV=${{ github.sha }}
+          cache-from: type=gha,scope=flexcell-sim
+      - name: Image and host provenance
+        run: |
+          mkdir -p artifacts
+          docker image inspect flexcell-sim:runtime > artifacts/image.json
+          uname -a > artifacts/host.txt
+          lscpu >> artifacts/host.txt
+      - name: One declared Runtime task window; no replacement trials
+        run: |
+          docker run --init --rm --cpus=2 --shm-size=512m \
+            -v "$PWD:/candidate:ro" -v "$PWD/artifacts:/artifacts" \
+            -e OPENBLAS_NUM_THREADS=1 -e OMP_NUM_THREADS=1 flexcell-sim:runtime \
+            python3 /candidate/setup/acceptance/evobot_runtime_push_20261112/ci_window.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: t08-runtime-physical-${{ github.run_id }}
+          path: artifacts/
+          retention-days: 14
+          if-no-files-found: warn
