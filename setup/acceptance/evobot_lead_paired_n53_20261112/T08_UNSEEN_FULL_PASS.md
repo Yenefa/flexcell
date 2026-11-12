@@ -59,3 +59,70 @@ The archive held this the entire time. I was reading a graded number from my own
    something else, the "without retries" part of this claim weakens (the gates themselves stand regardless).
 2. **The three seeds are 3, not more.** No claim beyond "three unseen instances passed with full gating".
 3. I have **not** re-run anything. Every number above is read from committed artifacts.
+---
+
+## Confirmation (round 47): `U_shot` is single-shot, from the trial record — not from naming
+
+The one thing marked unverified above is now verified from the artifact that records it:
+
+`runs/U_shot/seed3000/t1/logs/evidence.log`
+
+```json
+TRIAL_RECORD {
+  "arm": "U_shot/seed3000",
+  "attempts": 1,                       <-- SINGLE ATTEMPT, confirmed
+  "attempt_error_codes": [36],
+  "bundle_component_present": true,
+  "bundle_contact_intervals": 10,
+  "bundle_problems": [],
+  "clause_ok": true,
+  "contact_height_m": 0.02,
+  "contact_rows": 3344,
+  "contact_trace_in_world": true,
+  "direction_cos": 0.9963,
+  "displacement_mm": 147.14,
+  "dist_to_zone_mm": 48.28,
+  "evidence_status": "COMPLETE",
+  "failed_clauses": [],
+  "failed_gates": [],
+  "failure_category": null
+}
+```
+
+**`attempts: 1`.** No retry. The task was completed on the first push, on an unseen instance.
+
+## What the numbers say, read against the frozen bounds
+
+| quantity | value | bound | verdict |
+| --- | --- | --- | --- |
+| attempts | **1** | — | **single shot** |
+| displacement | **147.14 mm** | [30, 150] | inside, **2.86 mm under the ceiling** |
+| direction cosine | **0.9963** | ≥ 0.90 | passes |
+| distance to zone | **48.28 mm** | ≤ 60 | passes |
+| evidence status | **COMPLETE** | required | passes |
+| failed clauses / gates | **[] / []** | empty | passes |
+
+**Note `attempt_error_codes: [36]`** — `ERR_DISPLACEMENT_OVERSHOOT`. The skill flagged its *own* push as an
+overshoot; the evaluator graded the outcome and it was inside the bound at 147.14 mm. **The skill was
+conservative about itself and the final state was correct.** That is worth recording: it is the opposite of a
+false success claim.
+
+## The claim, at the level the evidence supports
+
+| claim | level |
+| --- | --- |
+| **T08 completed on an unseen instance in a single push**, all nine anti-fake gates satisfied, evidence COMPLETE | **Generalization Tested — single instance confirmed directly; two further seeds (3001, 3002) pass by the same gate pattern** |
+| quantity of generalization evidence | **3 unseen instances** — thin |
+| false success on this trial | **none** — `agent_claimed_success: false`, `false_success: false`, and the skill actually reported its own error |
+
+**I am calling this Generalization Tested for T08, and stating immediately that n=3 is thin.** The distinction I
+am drawing: the *quality* of the evidence is high — nine independent physical gates over a 6680-sample
+trajectory, plus a separately recorded trial record showing `attempts: 1` — while the *breadth* is three
+instances. A generalization study needs more. **A generalization claim of "it has been done on three unseen
+instances with full gating" is exactly what the artifacts support, and no more.**
+
+## The final correction to my own record
+
+Round 17 said the arm could not do T08 and I treated that as settled for twenty rounds. **It was wrong in a way
+that a single filed read would have caught.** The archive contains a single-push, fully-gated, evidence-complete
+T08 success on unseen geometry, and it was recorded before I started.
