@@ -20,6 +20,12 @@ Rules:
 
 TOOL_SPEC = {
     "read_file": '{"tool": "read_file", "path": "<relative path>"}',
+    # AUDIT FIX (new, not in the supplied report): arms B and B2 both declare list_dir
+    # and edit_file in manifest.json, but TOOL_SPEC lacked both, so _system() raised
+    # KeyError before the first model call. The archived B2 results therefore cannot be
+    # reproduced from this file - whatever version produced them accepted these tools.
+    "list_dir": '{"tool": "list_dir", "path": "<relative dir or .>"}',
+    "edit_file": '{"tool": "edit_file", "path": "<relative path>", "old": "<exact existing text>", "new": "<replacement>"}',
     "write_file": '{"tool": "write_file", "path": "<relative path>", "content": "<full file>"}',
     "run_checks": '{"tool": "run_checks"}',
     "run_execution": '{"tool": "run_execution"}',
@@ -73,6 +79,11 @@ class LLMAgent:
             try:
                 if name == "read_file":
                     observations.append(name + ": " + str(toolbox.read_file(item["path"])))
+                elif name == "list_dir":
+                    observations.append(name + ": " + str(toolbox.list_dir(item.get("path", "."))))
+                elif name == "edit_file":
+                    toolbox.edit_file(item["path"], item["old"], item["new"])
+                    observations.append(name + ": edited " + str(item["path"]))
                 elif name == "write_file":
                     toolbox.write_file(item["path"], item["content"])
                     observations.append(name + ": wrote " + str(item["path"]))
