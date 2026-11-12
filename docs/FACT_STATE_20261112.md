@@ -831,4 +831,36 @@ pushed rather than carried*. **I read that as a verdict instead of as an instruc
 said *done*. I believed the number. The verdict printed the reason on every single failure — *no trajectory for
 this object* — and I read it as a verdict instead of as a diagnosis of my own harness.
 
+---
+
+## CORRECTION — goal round 50 (2026-11-12): T08 Generalization is **n=2**, not 3
+
+> **This corrects the addendum immediately above.** That addendum said n=3 thin. The correct width is **two**.
+
+Checking **every** U / U_shot trial record rather than the verdict scan (whose `passed: true` is not the same as
+valid evidence):
+
+| trial | attempts | clause_ok | `evidence_status` | valid? |
+| --- | --- | --- | --- | --- |
+| `U_shot/seed3000` | 1 | True | **COMPLETE** | **YES** |
+| `U_shot/seed3002` | 1 | True | **COMPLETE** | **YES** |
+| `U_shot/seed3001` | 1 | True | `COMPLETE_EVIDENCE_CONTRADICTS_PUSH` | **NO** |
+| `U/seed3000` | 1 | True | `COMPLETE_EVIDENCE_CONTRADICTS_PUSH` | **NO** |
+| `U/seed3002` | 3 | True | `INCOMPLETE_OR_INVALID_EVIDENCE` | **NO** |
+| `U/seed3001` | 1 | False | `INCOMPLETE_OR_INVALID_EVIDENCE` | no |
+
+**`COMPLETE_EVIDENCE_CONTRADICTS_PUSH` is not a pass.** It reports that the evidence conflicts with the push
+claim. Counting it because a separate flag said `passed: true` is the error this session keeps repeating —
+**trusting a summary flag over the artifact that qualifies it.**
+
+| fact | corrected state |
+| --- | --- |
+| valid unseen full passes | **2: `U_shot/seed3000`, `U_shot/seed3002`** — both single-attempt, `evidence_status: COMPLETE`, all nine anti-fake gates, zero false success |
+| T08 evidence level | **Generalization Tested at n = 2** — the mechanism is demonstrated, the evidence quality is high, **the breadth is two instances** |
+| closed-loop `U` runs | **neither valid** |
+| what may NOT be quoted | "three unseen instances", and any Generalization claim wider than **two** |
+
+**Sequence of my own widths for this claim: 9 → 5 → 3 → 2.** Each reduction came from reading one more
+qualifying artifact. The honest number is **two**, and two is not a generalization study.
+
 **The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
