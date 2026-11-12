@@ -114,3 +114,9 @@ task_fsm_server:
     jev_backend: clef
     hybrid_threshold: 0.7
     decision_log_file: decisions.jsonl
+
+push_server:
+  ros__parameters:
+    use_sim_time: true
+    log_dir: ~/.ros/flexcell
+    log_file: push.jsonl
