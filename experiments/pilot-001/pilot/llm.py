@@ -50,7 +50,16 @@ GATE = ("/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/"
 
 
 def _looks_like_a_credential(name):
-    return "API_KEY" in name.upper() or "TOKEN" in name.upper()
+    # A token COUNT is configuration, not a credential. The original substring test
+    # matched FLEXCELL_PILOT_MAX_TOKENS on "TOKEN", routed it to the budget gate, and the
+    # gate returns the API key -- so Chat.__init__ did int("<sk-...>") and every LLM run
+    # died with ValueError before the first request. Measured while restarting B2.
+    up = name.upper()
+    if up.endswith("_MAX_TOKENS") or up.endswith("_TOKENS"):
+        return False
+    if up.endswith("_TOKEN_BUDGET") or up.endswith("_TOKENS_PER_RUN"):
+        return False
+    return "API_KEY" in up or "TOKEN" in up
 
 
 def _from_gate():
