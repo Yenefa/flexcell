@@ -1194,3 +1194,63 @@ both change a threshold-shaped quantity that this session is forbidden from tuni
 is a primitive-definition defect in a file this session may not edit. Every further round spent searching for an
 in-scope fix for the reversal is a round spent against an impossibility.**
 
+
+---
+
+## ADDENDUM — 2026-11-12, round 33: two of this session's own headline numbers are NARROWED, and the recovery line
+## is closed out honestly
+
+### Narrowing 1 — re-observe corrects 4 percent of decisions, not 14
+
+Round 16 reported that re-observing ground truth after each push would change 4 of 28 recovery decisions, and the
+recovery change was implemented partly on the strength of that. Recomputing on 26 of this session's own runs at the
+**operationally relevant target**:
+
+| Recovery target | Decisions changed |
+| --- | --- |
+| **0.040 m — entering the zone, which is what the task requires** | **1 of 26 (4%)** |
+| 0.100 m — reaching the zone centre, which is what round 16 used | 4 of 28 (14%) |
+
+The round-16 figure is not wrong; it answers a question the recovery layer does not need to ask. **At the target that
+matches the task the benefit is 4 percent.** The change stays in place - it is harmless and correct in principle -
+but it is not the significant repair round 16 described.
+
+### Narrowing 2 — the skill's displacement is accurate, not broken
+
+Round 11 described the push skill as under-reporting displacement by a factor of 4.6. That case (0.0306 reported
+against 0.1403 actual) is the retreat-transit case, a minority. Across the 26 runs, signed skill value against
+ground truth:
+
+```
++0.1527 / +0.1520     +0.1621 / +0.1620     +0.1531 / +0.1532
++0.1490 / +0.1489     +0.1045 / +0.1048     +0.0765 / +0.0762
++0.1198 / +0.1203
+```
+
+**Seven runs agree to within 1 mm.** The instrument is sound; what is sometimes wrong is *when* it is read
+(before the retreat). Saying "the measurement is unreliable" was a generalisation from one error family - the same
+mistake I made in round 14 with retreat transit, and corrected there for that mechanism but not for this one.
+
+### Closing out the recovery line, with its actual numbers
+
+| Claim | Status |
+| --- | --- |
+| `contracts/push_recover.py` logic is correct | **YES** - 3 of 4 archived contact-loss instances stopped after one attempt using the signed-displacement rule |
+| The re-observe change works mechanically | **YES** - it caught a -0.078 m sign error the skill alone did not surface |
+| The re-observe change improves task success | **UNMEASURED** - the paired run was void when both arms failed; the offline projection is 1 decision in 26 |
+| The recovery layer causes the T08 failures | **NO** - the failures are 44 percent direction reversal caused by a primitive defect in `contracts/push.py` |
+
+**So the recovery line is closed**: the code is correct, the mechanism is verified, the effect is 4 percent, and the
+failure it was built to repair is not in its layer. Continuing to invest rounds there would be working on the wrong
+file.
+
+### What this session has, at round 33, stated plainly
+
+**No new robot task capability.** The deliverable is an *explanation* - a root cause supported by geometry, by 204
+archived approaches, and by camera frames - plus an excluded class of fix, plus an acceptance test that will score
+any future fix. **That is worth handing over and it is not the same thing as a capability.**
+
+**The one thing that would move the project forward is outside this session's scope**: `contracts/push.py`, where the
+push TCP is defined 44.3 mm ahead of the fingers. I have written what to change and how to verify it; I have not
+changed it.
+
