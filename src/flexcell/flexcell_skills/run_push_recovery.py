@@ -49,11 +49,45 @@ def send_push(node_and_client, object_name, distance_m, contact_z):
     return {n: getattr(r, n) for n in fields if not hasattr(getattr(r, n), "__slots__")}
 
 
+def _target_from_spec(spec):
+    """Derive how far to push from the task's own geometry.
+
+    THE LITERAL 0.09 THAT USED TO BE HERE HAD NO RELATION TO THE TASK. The T08 spec
+    does not ask for a 90 mm push; it asks for target_box_a to end up inside
+    zone_push, which is a disc of radius 0.06 centred at x=0.12, with the box
+    starting at x=0.22. Any displacement that lands the box centre on that disc
+    satisfies the task, i.e. anything from about 0.04 to 0.16 m. The hardcoded 0.09
+    happened to fall inside that window and was then treated as a requirement.
+
+    Measured consequence, from this repository's own archived evidence: on
+    U_shot/seed3002 the push moved the box 0.0306 m, the frozen evaluator returned
+    passed=True because 0.0306 clears its 0.030 floor, and the recovery layer
+    nonetheless reported "short by 0.0596 m" against 0.09 - it wanted to push a
+    further 60 mm that the task never asked for.
+
+    Only public task geometry is used here: object initial poses and zone poses.
+    expected_goal is deliberately NOT read, because min_displacement_m and
+    max_displacement_m there are the evaluator's acceptance bounds, and a recovery
+    policy that reads them would be fitting itself to the answer key.
+    """
+    import math as _m
+    obj = spec["objects"][0]
+    zone = spec["zones"][0]
+    box = [float(v) for v in obj["initial_pose"]]
+    centre = [float(v) for v in zone["pose"]]
+    radius = float(zone["radius"])
+    # Distance that brings the box centre onto the zone centre: maximum margin
+    # inside the disc, and independent of the evaluator's tolerance band.
+    return _m.hypot(box[0] - centre[0], box[1] - centre[1]), radius, centre
+
+
 def main(argv):
     task_path, outdir, contact_z, max_attempts = argv[1], argv[2], float(argv[3]), int(argv[4])
     spec = json.load(open(task_path, encoding="utf-8"))
     target_object = spec["objects"][0]["name"]
-    target_m = 0.09
+    target_m, zone_radius, zone_centre = _target_from_spec(spec)
+    print("  target from task geometry: %.4f m to zone centre %s (radius %.3f)"
+          % (target_m, zone_centre[:2], zone_radius))
 
     import rclpy
     from rclpy.action import ActionClient
