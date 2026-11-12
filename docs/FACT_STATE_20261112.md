@@ -1613,3 +1613,85 @@ satisfy displacement, direction, zone and vertical simultaneously on four seeds.
 raised. No threshold, TaskSpec, frozen evaluator file or acceptance evidence was modified - both
 blocking thresholds are inside the frozen evaluator and changing either requires human approval.
 
+
+---
+
+## ADDENDUM — 2026-11-12, rounds 88-90: the lift bound is ARITHMETICALLY unsatisfiable, not empirically hard
+
+### The box tips over
+
+Measured from the contact trace quaternion, seed 3001, one push:
+
+| sim_ns | box z | rotation from upright |
+| --- | --- | --- |
+| 4855 ms | 0.01750 | 0.00 deg |
+| 5825 ms | 0.02000 | 12.06 deg |
+| 7765 ms | **0.02469** | 50.38 deg |
+| 8735 ms | 0.01726 | **92.13 deg** |
+
+**It does not tilt, it rolls a quarter turn and lands on its side.**
+
+### The rise is fixed by the box's dimensions
+
+A cube of side `s` rotating about a bottom edge lifts its centre by `(sqrt(2)-1)/2 * s`.
+With `s = 0.035`:
+
+```
+predicted rise = 0.2071 * 0.035 = 0.00725 m
+measured rise  = 0.00708 to 0.00723 m   (every contact height tried)
+```
+
+**`max_lift_during_m` is 0.005 m. The bound sits 31% below a value fixed by the object alone.**
+
+### No contact height satisfies both constraints
+
+| contact_height | lift | vs 5 mm | displacement |
+| --- | --- | --- | --- |
+| 0.0200 | 0.00712 | OVER | **0.107** |
+| 0.0150 | 0.00721 | OVER | moves |
+| 0.0125 | 0.00708 | OVER | moves |
+| 0.0080 | 0.00149 | **UNDER** | **0.0000** |
+| 0.0050 | 0.00256 | **UNDER** | **0.0000** |
+
+`push_server` logs `contact_floor=0.0050m`, so the whole admissible range has been sampled. **It
+contains no point that both moves the box and keeps it under 5 mm.**
+
+### The task's physical contradiction
+
+- **Push it** - a 35 mm cube tips over, rising 7.25 mm, against a 5 mm no-grasp bound.
+- **Do not tip it** - push low, the fingers pass under, displacement 0 against a 0.03 m floor.
+
+**This is not a control problem and no parameter change resolves it. It is `(sqrt(2)-1)/2 * s`
+against `max_lift_during_m`.**
+
+### The two independent blockers, final form
+
+| blocker | mechanism | value |
+| --- | --- | --- |
+| `gripper` | passive fingers deflected by the box | 0.004-0.014 rad vs limit 0.0020 |
+| `max_lift` | the arc of a 35 mm cube tipping over | **7.25 mm vs limit 5** |
+
+**Both are thresholds calibrated for deliberate manipulation, both are triggered by the physical
+consequences of contact that is not deliberate.**
+
+### What the robot can actually do
+
+On the five configurations that push, it lands the box in the zone on four seeds. Rounds 81-82
+reported 18/18 for this and that figure was withdrawn in round 84 - but the underlying observation
+survives: `terminal_passed` was True on 7 of 18 runs, and the reason the other 11 failed is the
+7 mm tip, not the placement.
+
+### What would have to change, and by whom
+
+1. Raise `max_lift_during_m` above 7.25 mm for this object - **frozen evaluator, human approval**.
+2. Or widen the box base so tipping raises less than 5 mm - **TaskSpec, frozen**.
+
+Neither is mine to make. The engineering statement is: **a no-grasp bound must be calibrated
+against the object it is applied to, and `max_lift_during_m` states its value without stating what
+it was calibrated on.**
+
+### Status
+
+**T08 remains `CALIBRATION_UNSUPPORTED`. 0 of 18 Independently Verified.** No threshold, TaskSpec,
+frozen evaluator file or acceptance evidence was modified. No capability level was raised.
+
