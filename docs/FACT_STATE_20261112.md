@@ -1038,3 +1038,61 @@ author, with a commit message describing the reason.
 find**, and the baseline was never re-pinned afterwards. That remains one of the three decisions owed to a human.
 
 ---,,## ADDENDUM — audit triage (2026-11-12): five findings confirmed, one corrected, and two published conclusions are unsupported by their own artifacts,,An external audit of the repository archive was supplied. **I re-diagnosed every finding against the code myself before acting**, rather than accepting the report.,,### Confirmed, with the line that proves it,,| # | finding | proof |,| --- | --- | --- |,| 1 | `verify.py` hashes raw bytes, so CRLF vs LF breaks it | `verify.py:18-19` `read_bytes()` then `sha256` compare, no normalisation |,| 2 | W5 action counts inflated 2–5× | `toolbox.py:21` `self.calls = []` once per episode, append-only; `runner.py:112` records `list(toolbox.calls)` **every** iteration, so per-iteration summing re-counts each call |,| 3 | **B2 never measured `read_diagnosis`** | it is in `TOOL_SPEC`, in `DESCRIPTIONS`, in `SPECS`, and `toolbox.read_diagnosis` exists — but **no dispatch branch in either agent**, so calls returned `unknown tool` |,| 4a | `judge.evaluate()` fires every iteration | `runner.py:120` and `:145`, both inside the `for it in range(...)` loop at `:90` |,| 4c | `run_execution` destroys `verdict.json` | `w5.py:178-179` writes only `{passed, returncode}` |,| 5 | `planning_audit` written, never read | `mtc_motion.py:45` init, `:76`, `:82` append; no reader anywhere |,| 6b | C6 medians mis-transcribed | `C_SUBSTRATE_SYNTHESIS.md:26` says 14.173 / 16.235 s; aggregate records **14.219 / 16.281** — both absolute values off by 0.046 s, **though the +2.062 s delta happens to agree** |,,**One correction to the audit**: it states `agent_llm.py` implements `list_dir` and `edit_file`. It implements **neither** — six branches only.,,### Fixed and verified this round,,| fix | verification |,| --- | --- |,| CRLF tolerance in all four `p1.5-*/verify.py` | executed under Linux: **4/4 `AssertionError` → 4/4 `exit 0`** |,| `read_diagnosis` dispatch in `agent_llm.py` and `agent_fc.py`, plus prompt documentation | both files parse; branch present in each |,,### NOT fixed, and why,,| item | reason |,| --- | --- |,| **`false_success` hardcoded False on the FCAgent arm** | **not a patchable bug.** FCAgent's model output is `tool_calls` only — there is **no field in which the model could claim success**. The constant is a property of the interface. Adding a claim channel changes the arm's capability **and requires the affected runs to be re-executed**; a hardcoded value cannot be corrected retroactively. Reasoning recorded at the line. |,| findings 2, 4a, 4c, 5 | **methodological** — correcting them requires **re-running experiments**, not editing files. Editing the reports to match corrected numbers without re-running is exactly the document-instead-of-verification failure the efficiency directive forbids. |,,### The two conclusions that must not be cited until re-run,,| conclusion | why it is unsupported |,| --- | --- |,| **"`read_diagnosis` adds no gain" (B2, 7/9 vs 8/9)** | the treatment was **never administered**. A comparison in which the intervention cannot occur measures nothing. Its *negative* result is not evidence of no effect — it is evidence of no experiment |,| **"0 false success" on any FCAgent arm** (P1.4, W5, W6) | `claim_success` is hardcoded False, so `false_success = claim_success and not success` **cannot** be True. The zero is produced by the code, not observed. **A metric that cannot fail cannot inform** |,,**Both are marked `UNSUPPORTED_BY_ITS_OWN_ARTIFACTS`.** They may be restored only by re-running with the treatment actually administered (B2) or with a genuine claim channel (false success).,,**The fix location is unchanged from round 1** (`place_server.py`, the release predicate — not the contract), but it now has a mechanism, a frequency, a historical reach and a cost attached. **Still NOT applied: `place_server.py` is a frozen skill contract.**
+
+---
+
+## ADDENDUM — 2026-11-12, round 24: the first mechanism in this record that is supported by an IMAGE rather than
+## by a correlation
+
+Every previous attribution in this file for the T08 direction defect was inferred from numbers: contact geometry,
+arm prior state, sampling order, retreat transit, request distance, contact height. **All of those are wrong or
+partial.** The camera shows the actual cause, and it is simpler than any of them.
+
+| Fact | State |
+| --- | --- |
+| Evidence | `setup/acceptance/evobot_lead_t08_calib_20261112/reversal_visual_20261112/` — frames `f_670.78.png`,
+| | `f_671.88.png`, captured with 382 pose samples on one clock during a run whose push 2 returned **cos −0.9999** |
+| **What the frames show** | the gripper arrives **above** the box with **one jaw on each side of it**; the box sits
+| | **underneath the gripper body, between the fingers** — never in front of a jaw face |
+| **So the primitive is** | **a friction drag across the top face, not a face push against a side face** |
+| Why that produces the defect | friction through a top face has **no fixed direction**; it follows contact asymmetry
+| | and the descent trajectory, which is why the outcome is near-random at fixed commanded pose |
+| Measured rate | **44% of single-shot pushes reversed** (7 of 16, cosine ≈ −1.000, `contact_made` True) |
+| Non-finding that this explains | contact height made **no monotonic difference** across 0.0150/0.0175/0.0200/0.0225/0.0250 —
+| | every one of those heights places the gripper above the top face, so every one is friction-driven |
+| Second observation | **push 1 was direction-correct in 3 of 3 runs**; both observed failures occurred on **push 2**, whose
+| | descent starts low and beside the box and therefore lands squarely on the top face |
+| **Which theory this retires** | the `approach_clearance_m 0.02 < finger offset 0.021` hypothesis of round 22 — the
+| | fingers do not need to strike the box on a return approach, because they are already straddling it |
+| **Scope** | approach pose, contact-height semantics and clearance parameters are all in `contracts/push.py`:
+| | **outside this session's granted scope, and not modified** |
+
+**What this makes of the earlier record.** The reversal is not caused by the arm returning through the box, by a
+stale sample, by an unreachable approach, or by the wrong requested distance. Those effects exist and two of them
+are separately measured (the pre/post-retreat gap is −0.0823 m on ec 28 runs and 0.0000 on ec 36), but none of them
+is the reason a push goes backwards. The reason a push goes backwards is that **the gripper is on top of the box**.
+
+**What is still not established.** Two frames from one reversed run are a demonstration, not a sampled proportion.
+To claim the mechanism accounts for all 44% would need frames from several reversed runs and several
+direction-correct runs, compared. That has not been done.
+
+### Theories this session raised and then refuted, with the refuting evidence
+
+| # | Theory | Refuted by |
+| --- | --- | --- |
+| 1 | ROS domain IDs above 232 caused failures | 183/200/232 work; 233+ fail — that is a real limit, and it was **my** invalid IDs, not the harness |
+| 2 | the arm physically cannot perform T08 | pushes delivering 155-163 mm in −x |
+| 3 | 0/26 attempts | recount |
+| 4 | "Generalization Tested n=3" | denominator chosen after seeing outcomes |
+| 5 | descent-to-contact knocks the box | box moved 0.23 mm over 2 s of descent |
+| 6 | a few millimetres of residual error abandoned the push | unreachable geometry, not residual error |
+| 7 | returning to a neutral pose before each push fixes ec 30 | 3/3 failed in **both** arms; the neutral arm drifted further |
+| 8 | `ec 27/28` identifies untrustworthy displacements | 15% disagreement vs 13% for other codes — no discriminative power |
+| 9 | retreat transit explains the 4.6x gap generally | ec 36 runs show gap 0.0000 in 4 of 4 |
+| 10 | request 0.10 improves on 0.09 | 0.10 delivers 0.152 against a 0.150 ceiling; **0.09 was already marginal** |
+| 11 | `approach_clearance 0.02 < finger offset 0.021` explains reversal | **the frames above: the fingers straddle the box, they do not strike it** |
+
+**The pattern in that table is the finding about this session, not about the robot**: eleven hypotheses, and the
+ones that survived were the ones that were **looked at** rather than **reasoned about**. The camera settled in one
+round what twenty-two rounds of inference did not.
+
