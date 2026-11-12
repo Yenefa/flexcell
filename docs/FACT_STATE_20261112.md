@@ -1254,3 +1254,68 @@ any future fix. **That is worth handing over and it is not the same thing as a c
 push TCP is defined 44.3 mm ahead of the fingers. I have written what to change and how to verify it; I have not
 changed it.
 
+
+---
+
+## ADDENDUM — 2026-11-12, round 43: the frozen evaluator now judges the candidate, and it REFUSES it — correctly
+
+### What changed
+
+`run_frozen_evaluator.py` wires a candidate run into `benchmark/evaluators/evaluate.py` **0.5.0** without
+modifying it. First real verdict, on `T08-push-seed3001` with the staged candidate that my own criteria scored
+`cos +0.997, zone 0.0160`:
+
+```
+evaluator_version  0.5.0
+passed             False
+terminal_passed    True
+false_success      False
+false_failure      False
+clause unmoved:target_box_b  -> True
+clause push:target_box_a     -> True
+```
+
+**Both clauses pass and the verdict is still not PASS.** That is not a defect. My evaluator state carries
+`contacts: []`, `gripper: {}`, `manifest: {}` — the candidate records positions and results, and no evidence
+chain. **The evaluator will not certify what it cannot corroborate.**
+
+### This is the first time the evidence ladder was enforced by machinery rather than by my own caution
+
+| Claim | Level, honestly |
+| --- | --- |
+| Candidate passes its own recomputed clauses, 17/18 then 9/10 with the guard | **Simulation Tested** |
+| Frozen evaluator accepts those runs | **NO — it refuses them** |
+| Independently Verified | **NOT REACHED** |
+
+**Ten passing runs of my own summary statistics never were independent acceptance, and now the evaluator says so
+in its own output rather than in my prose.**
+
+### What the evaluator actually requires, read from an archived accepted run
+
+| evidence key | shape |
+| --- | --- |
+| `objects` | per-object **sample series** — the accepted run carries 3340 samples with timestamps and poses |
+| `contacts` | contact partners seen, e.g. `open_manipulator_x::gripper_left_link::...` and `target_box_a::link::...` |
+| `gripper` | joint name, aperture span, min/max |
+| `manifest` | per-file sha256 including the task spec and `contact_steps.jsonl` |
+| `teleport` | max single-step jump per object, against a 0.03 m threshold |
+| `source` | `trusted_source_id: "flexcell::PhysicsTrace/v1"` |
+| `schema_version` | `t08-evidence/1.0` |
+
+**My candidate writes none of it.** That — not the pass rate — is the distance between 17/18 and a verified
+capability. Producing a physics trace needs a continuous sampler; `t08_timeline.py` in this directory already
+samples at ~30 Hz and reached 382 samples, which is two orders of magnitude short of the archived runs and has
+no contact events.
+
+### Related defect fixed this round
+
+`candidate_staged_push.py` stored only derived fields (displacement, cosine, zone distance). **Derived fields
+cannot be fed back into `evaluate.py`** — it needs raw positions. It now records `pre` and `post`. Likewise
+`move_to_pose.jsonl` sits under `sim/skills/`, not at the run root, which my runner silently assumed.
+
+### What is NOT claimed
+
+No capability level was raised. The candidate is Simulation Tested on six seeds and is **not** independently
+verified. The T08 baseline remains `CALIBRATION_UNSUPPORTED`. No frozen file, threshold, TaskSpec or acceptance
+evidence was modified; the evaluator was executed, not edited.
+
