@@ -1,71 +1,105 @@
-Runtime capability checkpoint — incomplete physical acceptance
-==============================================================
+Public Runtime task acceptance — two bounded tasks completed
+============================================================
 
-This branch adds an opt-in public instruction execution path:
-Observe -> public rule planner -> RunComposite -> ContactPush -> measured
-finger-TCP motion -> typed post-return state -> independent task grading.
+Actual execution source:22f873bae82ce61270a63397fbecdd3a119a115e.
+CI run:https://github.com/Yenefa/flexcell/actions/runs/43274720654.
+Default execution backend remains legacy; formal baseline NOT_PROMOTED.
 
-Default backend remains legacy. New action and source are an isolated
-development candidate; formal baseline is NOT_PROMOTED. Earlier finger-contact
-evidence remains at commit8c3972da and must not be attributed to this integration.
+What the system can now do
+-------------------------
+A public English instruction and live Observe result drive a bounded rule
+planner, RunComposite and the registered ContactPush action. Each task below
+completed two30mm contact primitives and their measured returns. TaskFSM
+consumed correlated fresh typed returned states, committed both stages, then
+Runtime checked the public region and protected object before claiming success.
+Expected_goal is used by the independent grader, not passed to this planner or
+primitive. This is an engineered rule-policy execution path, not LLM planning,
+Runtime self-development or L4 acquisition.
 
-The hardest interfaces
----------------------
-- The reusable executor takes an object, primitive distance and protected
-  objects. It has no TaskSpec, destination or expected_goal input. It reuses the
-  pinned actual-triangle finger registration and constrained trajectory engine.
-- ContactPush separates stroke outcome, physical contact, terminal knowledge,
-  completed return and arm readiness. The returned WorldState and monotonic
-  observation time are typed. Readiness service means execution-owner
-  availability; it is not a physical arm-ready lease.
-- TaskFSM correlates the actual child action UUID and request ID, checks source,
-  frame, complete objects, released carry, gripper knowledge and freshness,
-  charges a shared task motion budget, and re-observes before committing stages.
-- Unknown actuator acceptance/terminal or transport failures quarantine the
-  owner and prohibit later cleanup/dispatch. Receipt-only stroke success cannot
-  complete a stage when return failed.
+| Fixed slot | Actual task | Runtime / frozen9 gates | Net signed -x | Task wall time | Actuator goals |
+|---|---|---|---|---|---|
+| CI_C1 | Original exposed red-block task, protect blue | PASS /9 of9 |60.9318mm |162.08s |24 of40 |
+| CI_C2 | Blue target, changed start/region, protect red | PASS /9 of9 |60.9383mm |171.57s |24 of40 |
 
-Observed before environment loss
---------------------------------
-The initial local version built its interfaces and skills;117 focused checks
-passed. A broader selection reported309 passes/10 failures in old PickServer
-fixtures missing _admission_wait_s. Those source/test files were unchanged;
-independent baseline reproduction is assigned in #238. This is not a clean
-full-regression claim.
+Both stayed within600s. All four30mm primitives returned about30.465–30.470mm;
+all four live returned states were accepted with26.5–107.1ms receipt age under
+the250ms limit. Raw selected-finger monitoring reported contact on the actual
+registered patch, no unexpected robot collider and maximum patch distance
+0.04222mm. These last numbers are the online monitor's records; the independent
+full-task verifier separately replayed trajectory, table support, protected
+motion, no lift, legal pusher contact, gripper, attachment and no teleport.
 
-R0 refused for a missing legacy contact-height declaration; its zero-motion
-failure is retained and excluded as a valid physical control. R0b started real
-motion after that configuration correction. The environment then became
-unavailable/offline. Its final result, evidence integrity and process cleanup
-are UNKNOWN. New candidate R1 and blue probe R2 had not run.
+Each task has ONE current Runtime trial. Blue is a development-declared probe,
+not a sealed held-out test. Do not pool these with the previous engineering
+K-series trials or claim population success rate, broad repeatability,
+statistical superiority, regression closure or transfer learning.
 
-The raw local directory and uncommitted worktree could no longer be accessed.
-This checkpoint was RECONSTRUCTED from the pinned parent and tool-visible
-source. It is not asserted byte-identical to the version that passed117 tests.
-Original raw logs are not fabricated or replaced with these observations.
-See recovery_observations.json for this explicit boundary.
+Architecture and scope
+----------------------
+The reusable executor receives object/distance/protected names, no TaskSpec or
+goal region. It reuses the pinned actual collision-triangle TCP registration
+and dense constrained trajectory engine. ContactPush separates stroke outcome,
+physical contact, known motion terminal, completed return, arm readiness and
+post-return WorldState. Actual ROS UUID/request correlation, freshness and the
+shared task motion budget are checked at Runtime admission. Unknown transport
+or unconfirmed executed stops quarantine the owner and block further motion.
 
-Current verification
---------------------
-The branch-scoped t08-runtime-recovery workflow attempts a new interface build,
-relevant tests, then exactly one declared three-slot physical window. Only the
-workflow's actual logs/artifacts may establish results for this reconstructed
-revision. CI_C2 runs only after original-task Runtime AND full9/9 acceptance.
-At checkpoint creation this execution is NOT_RUN/PENDING, not a success.
+The task-scoped graph keeps Observe,Carry,TaskFSM,physics/controllers/MoveIt
+and one push backend. Coordinators use wall clock; the worker uses simulation
+clock and its own node name. The full default graph's #237 issue is still open.
+The same newly built pinned-dependency image was used in all three CI slots.
+It is a separate measurement from the previous local-image results.
 
-The CI image rebuild keeps Dockerfile.sim and upstream lock unchanged and
-records its own identity. Every physical slot uses that same image, unchanged
-frozen grading, raw native physics/contact streams, joints, WorldState and
-actual Runtime claims. OriginalTask/frozen-nine/push arithmetic are untouched.
-The blue probe is an explicit new development validation, not formal held-out.
+All failures and limits remain visible
+------------------------------------
+CI_L0 legacy Runtime failed its fresh postcondition(error63). Its recorder also
+rejected2 zero-duration contact intervals among15, so there was NO valid full
+physical acceptance for that control. It is excluded from physical success-rate
+comparison. No contact event was dropped and no duration or threshold was
+changed. See #239, CI_L0/bundle_build.log in the raw ZIP and offline_verification.
 
-Resumption
-----------
-When the original environment returns, first preserve R0/R0b and the old
-worktree, inspect only owned container evobot-runtime-push-20261112 and its
-process groups, and establish terminal/cleanup state. Do not overwrite old
-directories or replay an unknown accepted goal. Compare recovered source with
-that worktree and re-run appropriate checks before any further physical slot.
+Local R0 omitted the legacy contact-height declaration and refused with no
+motion: invalid physical control. R0b corrected the configuration and failed
+Runtime(error62); its complete frozen acceptance also fails. Its status was
+initially UNKNOWN during environment loss and became known only after recovery.
+These two earlier-image runs remain separate from the CI window.
 
-Related: #235 main line; #237 simulation scheduling/environment interruption;
-#238 old test fixture repair. Actual task completion is the acceptance standard.
+The first CI build failed because root colcon discovery scanned archived duplicate
+packages. Its full log is retained; no physical task ran. Discovery was then
+restricted to current source. The executed revision built both packages and
+passed289 relevant checks. The older local broad selection's10 PickServer
+fixture failures remain tracked in #238, not hidden as a clean full regression.
+
+Permanent evidence and read-only replay
+--------------------------------------
+- ci_43274720654_physical.zip: original GitHub artifact bytes,18,526,560 bytes,
+  SHA25633fbead803028d16d451c180e5d0a80c18bd28c5825b9e8f4607bd10db13d28c.
+  Contains native physics/contact streams, joints, WorldState, live action
+  results/receipts, source/image/model/task provenance and original verdicts.
+- All306 manifest entries and complete coverage were independently checked.
+  Rebuilding evidence from the raw streams and running the unchanged grader
+  reproduces both9/9 passes. Four recorded typed returned-state admissions
+  also pass their contract on replay. See offline_verification.json.
+- local_R0_R0b_raw.zip retains both local failures, logs/preregistrations and
+  the pre-loss source. The original worktree was saved locally at8cfb484c;
+  this obsolete prototype is not the executed CI candidate.
+- archives.json records both ZIP digests. CI job logs, results.json and
+  recovered_local_results.json preserve the distinction between successful
+  tasks, invalid control evidence and recovered failures.
+
+From the repository root, no ROS/simulator is started:
+
+    python3 setup/acceptance/evobot_runtime_push_20261112/verify_archive.py \
+      setup/acceptance/evobot_runtime_push_20261112/ci_43274720654_physical.zip \
+      /tmp/t08-runtime-replay-UNIQUE
+
+The output directory must be new. This replay does not repair invalid CI_L0
+intervals; it preserves its recorder rejection. Nine frozen files, push
+arithmetic, old TaskSpecs, gripper acceptance and shipped default launches
+remain unchanged. After environment recovery no owned container or simulator
+process remains in the selected environment.
+
+Remaining main-line work: fixed Runtime repetitions, ordinary physical task
+regression, broader validated inputs and formal held-out evaluation before
+any baseline promotion. Main issue #235 remains active. Auxiliary issues:
+#237 full-graph scheduling, #238 old fixtures, #239 contact-interval evidence.

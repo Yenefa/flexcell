@@ -183,3 +183,25 @@ instances before experience-transfer claims. The CLI reads engineering
 expected_goal and is not the autonomous Agent boundary. Historical release
 failures are still open. Formal T08 CALIBRATION_UNSUPPORTED, baseline
 NOT_PROMOTED, L4 NOT_ACQUIRED; goal active.
+
+
+## Checkpoint — public Runtime task path verified
+
+The isolated implementation at22f873ba now executes public instructions through
+Observe -> bounded rule planner -> RunComposite -> typed ContactPush -> measured
+post-return admission. It completed original red-block and changed-role blue-block
+validation tasks, each with two30mm primitives,24 actuator goals, fresh returned
+states and unchanged full9/9 physical acceptance. Net signed-x60.9318/60.9383mm;
+wall162.08/171.57s. Four live returned-state receipts were consumed and replayed.
+
+CI_L0 failed Runtime postconditions and has invalid contact-interval evidence;
+exclude it from a physical success-rate comparison. Local R0/R0b failures and the
+first duplicate-package CI build failure are preserved. Environment recovery
+allowed permanent archival and independent raw regrading; all306 CI manifest
+entries match. See evobot_runtime_push_20261112/README.md and verify_archive.py.
+
+This is a bounded engineered Runtime capability, not Runtime-generated skill code
+or L4. One trial per task does not prove repeatability or formal held-out transfer.
+Default backend and formal baseline remain unchanged. Next main line: fixed
+Runtime repetitions, ordinary physical regression, then broader frozen inputs.
+Infrastructure/auxiliary work remains separately available in #237/#238/#239.

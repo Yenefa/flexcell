@@ -1,0 +1,588 @@
+{
+  "source_revision": "22f873bae82ce61270a63397fbecdd3a119a115e",
+  "ci_run_id": 43274720654,
+  "ci_url": "https://github.com/Yenefa/flexcell/actions/runs/43274720654",
+  "image_id": "sha256:24a90399d623ad6a01a280a66d926ba381bd7d7b0f9d50a115e37fd2e6470749",
+  "model_calls": 0,
+  "formal_baseline": "NOT_PROMOTED",
+  "formal_held_out": false,
+  "cases": [
+    {
+      "label": "CI_L0",
+      "task_completed": false,
+      "runtime": {
+        "kind": "PUBLIC_TASK_RUNTIME",
+        "agent_claimed_success": false,
+        "status": "RUNTIME_TASK_FAILED",
+        "model_calls": 0,
+        "runtime_result": {
+          "outcome": 1,
+          "error_code": 63,
+          "run_id": "composite-fe486d78d8d54d7c",
+          "completed_stage_ids": [],
+          "component_run_ids": [
+            "push-e5c2e08be6f640628af6b0d7d232d946"
+          ],
+          "component_goal_uuids": [
+            "ecbc435daa504aaf99ea2653364b845a"
+          ],
+          "evidence_id": "/artifacts/CI_L0/sim/skills/composites/composite-fe486d78d8d54d7c.jsonl",
+          "detail": "measured postcondition failed for push_00",
+          "resumed_from_run_id": "",
+          "inherited_stages": 0
+        },
+        "runtime_action_status": 6,
+        "runtime_goal_uuid": "1682b0df6ad94c39acc551dd1cb39e13",
+        "wall_s": 23.51195775399998
+      },
+      "independent_verdict": null,
+      "comparison_eligible": false,
+      "evidence_status": "INVALID_EVIDENCE",
+      "recorder_failure": {
+        "ok": false,
+        "out": "/artifacts/CI_L0/evidence_bundle.json",
+        "samples": {
+          "target_box_a": 5683,
+          "target_box_b": 5683
+        },
+        "dropped": {
+          "target_box_a": 0,
+          "target_box_b": 0
+        },
+        "contact_intervals": 15,
+        "component_present": true,
+        "problems": [
+          "contacts.intervals[1]: empty or inverted interval",
+          "contacts.intervals[13]: empty or inverted interval"
+        ]
+      },
+      "issue": 239
+    },
+    {
+      "label": "CI_C1",
+      "task_completed": true,
+      "runtime": {
+        "kind": "PUBLIC_TASK_RUNTIME",
+        "agent_claimed_success": true,
+        "status": "TASK_COMPLETED",
+        "model_calls": 0,
+        "runtime_result": {
+          "outcome": 0,
+          "error_code": 0,
+          "run_id": "composite-13701cc91d43432a",
+          "completed_stage_ids": [
+            "push_00",
+            "push_01"
+          ],
+          "component_run_ids": [
+            "contact-709f31c1babf4cd18985366e714b810a",
+            "contact-2db06d46a00e4a7b9b9ef1744763fced"
+          ],
+          "component_goal_uuids": [
+            "a839a5ef6c2e41a4b090eb3e6f475389",
+            "05acf57b26744340bd6764473e2bff6b"
+          ],
+          "evidence_id": "/artifacts/CI_C1/sim/skills/composites/composite-13701cc91d43432a.jsonl",
+          "detail": "all native stages and fresh joint conditions confirmed",
+          "resumed_from_run_id": "",
+          "inherited_stages": 0
+        },
+        "runtime_action_status": 4,
+        "runtime_goal_uuid": "77b15a2234fe4be896631e766bd4b565",
+        "wall_s": 162.08132770300006
+      },
+      "independent_verdict": {
+        "evaluator_version": "0.5.0",
+        "task_id": "T08-push-seed2000",
+        "template_id": "T08_push_manipulation",
+        "passed": true,
+        "terminal_passed": true,
+        "clauses": [
+          {
+            "clause": "unmoved:target_box_b",
+            "ok": true,
+            "evidence": {
+              "distance_m": 0.0,
+              "tolerance_m": 0.015
+            }
+          },
+          {
+            "clause": "push:target_box_a",
+            "ok": true,
+            "evidence": {
+              "displacement_m": 0.06093,
+              "min_displacement_m": 0.03,
+              "max_displacement_m": 0.15,
+              "vertical_m": 0.0,
+              "max_vertical_m": 0.02,
+              "direction_cosine": 1.0,
+              "min_direction_cosine": 0.9,
+              "zone": "zone_push",
+              "distance_m": 0.03907,
+              "radius_m": 0.06,
+              "inside_zone": true,
+              "max_lift_m": 2e-05,
+              "max_lift_allowed_m": 0.005
+            }
+          }
+        ],
+        "failed_clauses": [],
+        "agent_claimed_success": true,
+        "false_success": false,
+        "false_failure": false,
+        "evidence": {
+          "verifier_version": "1.0.0",
+          "physical_outcome": "PUSHED",
+          "evidence_status": "COMPLETE",
+          "failure_reason": null,
+          "passed": true,
+          "gates": [
+            {
+              "gate": "terminal",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "evaluator_version": null,
+                "passed": true
+              }
+            },
+            {
+              "gate": "trajectory",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "objects": [
+                  "target_box_a",
+                  "target_box_b"
+                ],
+                "total_samples": 55276
+              }
+            },
+            {
+              "gate": "table_support",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "off_table_samples": 0,
+                "tolerance_m": 0.01
+              }
+            },
+            {
+              "gate": "protected_unmoved",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_excursion_m": 0.0,
+                "tolerance_m": 0.005
+              }
+            },
+            {
+              "gate": "no_lift",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_lift_m": 1.8e-05,
+                "allowed_m": 0.02
+              }
+            },
+            {
+              "gate": "pusher_contact",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "motion_windows": 4345,
+                "overlapping_windows": 4345,
+                "contact_intervals": 2,
+                "pusher_links": [
+                  "open_manipulator_x::gripper_left_link::gripper_left_link_collision",
+                  "open_manipulator_x::gripper_right_link::gripper_right_link_collision",
+                  "open_manipulator_x::link5::link5_collision"
+                ]
+              }
+            },
+            {
+              "gate": "gripper",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "joint": "gripper_left_joint",
+                "samples": 13543,
+                "aperture_travel_rad": 0.0,
+                "limit_rad": 0.002,
+                "min_aperture_rad": -0.0,
+                "max_aperture_rad": -0.0
+              }
+            },
+            {
+              "gate": "no_attachment",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "events": 0
+              }
+            },
+            {
+              "gate": "no_teleport",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_jump_m": 3.1e-05,
+                "threshold_m": 0.03,
+                "declared_jump_m": 3.1e-05,
+                "measured_jump_m": 3.1e-05
+              }
+            }
+          ],
+          "failed_gates": []
+        }
+      },
+      "net_signed_m": 0.06093178114582368,
+      "motion_goals_used": 24,
+      "returned_components": [
+        {
+          "request_id": "contact-709f31c1babf4cd18985366e714b810a",
+          "goal_uuid": "a839a5ef6c2e41a4b090eb3e6f475389",
+          "child_goal_uuid": "a839a5ef6c2e41a4b090eb3e6f475389",
+          "receipt_age_s": 0.107113585,
+          "return_completed": true,
+          "arm_ready": true,
+          "motion_terminal_known": true,
+          "physical_contact_observed": true,
+          "displacement_m": 0.030466904882572664
+        },
+        {
+          "request_id": "contact-2db06d46a00e4a7b9b9ef1744763fced",
+          "goal_uuid": "05acf57b26744340bd6764473e2bff6b",
+          "child_goal_uuid": "05acf57b26744340bd6764473e2bff6b",
+          "receipt_age_s": 0.089714228,
+          "return_completed": true,
+          "arm_ready": true,
+          "motion_terminal_known": true,
+          "physical_contact_observed": true,
+          "displacement_m": 0.030464896934467956
+        }
+      ],
+      "online_native_contact": [
+        {
+          "physical_contact_observed": true,
+          "contact_steps": 3189,
+          "rear_fraction": 1.0,
+          "horizontal_normal_fraction": 1.0,
+          "maximum_patch_distance_m": 3.626631840880316e-05,
+          "unexpected_robot_colliders": [],
+          "source_problem": null,
+          "protected_peak_m": 0.0,
+          "freshness": {
+            "physics": {
+              "wall_age_s": 0.00881991,
+              "source_sim_ns": 52840000000,
+              "clock_minus_source_ns": -5000000
+            },
+            "contacts": {
+              "wall_age_s": 0.008603395,
+              "source_sim_ns": 52840000000,
+              "clock_minus_source_ns": -5000000
+            },
+            "raw_physics": {
+              "wall_age_s": 0.00881991,
+              "source_sim_ns": 52840000000,
+              "clock_minus_source_ns": -5000000
+            }
+          },
+          "pre_robot_contact_prefix_records": 0
+        },
+        {
+          "physical_contact_observed": true,
+          "contact_steps": 2704,
+          "rear_fraction": 1.0,
+          "horizontal_normal_fraction": 1.0,
+          "maximum_patch_distance_m": 4.2218700802700947e-05,
+          "unexpected_robot_colliders": [],
+          "source_problem": null,
+          "protected_peak_m": 0.0,
+          "freshness": {
+            "physics": {
+              "wall_age_s": 0.032658152,
+              "source_sim_ns": 112915000000,
+              "clock_minus_source_ns": 0
+            },
+            "contacts": {
+              "wall_age_s": 0.003793623,
+              "source_sim_ns": 112915000000,
+              "clock_minus_source_ns": 0
+            },
+            "raw_physics": {
+              "wall_age_s": 0.032658152,
+              "source_sim_ns": 112915000000,
+              "clock_minus_source_ns": 0
+            }
+          },
+          "pre_robot_contact_prefix_records": 0
+        }
+      ]
+    },
+    {
+      "label": "CI_C2",
+      "task_completed": true,
+      "runtime": {
+        "kind": "PUBLIC_TASK_RUNTIME",
+        "agent_claimed_success": true,
+        "status": "TASK_COMPLETED",
+        "model_calls": 0,
+        "runtime_result": {
+          "outcome": 0,
+          "error_code": 0,
+          "run_id": "composite-a0ff9fd2017d4372",
+          "completed_stage_ids": [
+            "push_00",
+            "push_01"
+          ],
+          "component_run_ids": [
+            "contact-db3416ca2ceb43eb8c979984b02bdc22",
+            "contact-140e288e168149d993b63c75feb8921f"
+          ],
+          "component_goal_uuids": [
+            "5d383980ae9b4948bf20788f2d02c3ad",
+            "20ced44a000544c0be191718854c25c3"
+          ],
+          "evidence_id": "/artifacts/CI_C2/sim/skills/composites/composite-a0ff9fd2017d4372.jsonl",
+          "detail": "all native stages and fresh joint conditions confirmed",
+          "resumed_from_run_id": "",
+          "inherited_stages": 0
+        },
+        "runtime_action_status": 4,
+        "runtime_goal_uuid": "fa4d8bf0f7fe4b01a5acb7bb4661b3fb",
+        "wall_s": 171.567690996
+      },
+      "independent_verdict": {
+        "evaluator_version": "0.5.0",
+        "task_id": "T08-runtime-blue-probe-v1",
+        "template_id": "T08_push_manipulation",
+        "passed": true,
+        "terminal_passed": true,
+        "clauses": [
+          {
+            "clause": "unmoved:target_box_a",
+            "ok": true,
+            "evidence": {
+              "distance_m": 0.0,
+              "tolerance_m": 0.015
+            }
+          },
+          {
+            "clause": "push:target_box_b",
+            "ok": true,
+            "evidence": {
+              "displacement_m": 0.06094,
+              "min_displacement_m": 0.03,
+              "max_displacement_m": 0.15,
+              "vertical_m": 0.0,
+              "max_vertical_m": 0.02,
+              "direction_cosine": 1.0,
+              "min_direction_cosine": 0.9,
+              "zone": "blue_probe_goal",
+              "distance_m": 0.03906,
+              "radius_m": 0.06,
+              "inside_zone": true,
+              "max_lift_m": 2e-05,
+              "max_lift_allowed_m": 0.005
+            }
+          }
+        ],
+        "failed_clauses": [],
+        "agent_claimed_success": true,
+        "false_success": false,
+        "false_failure": false,
+        "evidence": {
+          "verifier_version": "1.0.0",
+          "physical_outcome": "PUSHED",
+          "evidence_status": "COMPLETE",
+          "failure_reason": null,
+          "passed": true,
+          "gates": [
+            {
+              "gate": "terminal",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "evaluator_version": null,
+                "passed": true
+              }
+            },
+            {
+              "gate": "trajectory",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "objects": [
+                  "target_box_a",
+                  "target_box_b"
+                ],
+                "total_samples": 56436
+              }
+            },
+            {
+              "gate": "table_support",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "off_table_samples": 0,
+                "tolerance_m": 0.01
+              }
+            },
+            {
+              "gate": "protected_unmoved",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_excursion_m": 0.0,
+                "tolerance_m": 0.005
+              }
+            },
+            {
+              "gate": "no_lift",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_lift_m": 2e-05,
+                "allowed_m": 0.02
+              }
+            },
+            {
+              "gate": "pusher_contact",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "motion_windows": 4210,
+                "overlapping_windows": 4210,
+                "contact_intervals": 2,
+                "pusher_links": [
+                  "open_manipulator_x::gripper_left_link::gripper_left_link_collision",
+                  "open_manipulator_x::gripper_right_link::gripper_right_link_collision",
+                  "open_manipulator_x::link5::link5_collision"
+                ]
+              }
+            },
+            {
+              "gate": "gripper",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "joint": "gripper_left_joint",
+                "samples": 13867,
+                "aperture_travel_rad": 0.0,
+                "limit_rad": 0.002,
+                "min_aperture_rad": -0.0,
+                "max_aperture_rad": -0.0
+              }
+            },
+            {
+              "gate": "no_attachment",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "events": 0
+              }
+            },
+            {
+              "gate": "no_teleport",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_jump_m": 3.2e-05,
+                "threshold_m": 0.03,
+                "declared_jump_m": 3.2e-05,
+                "measured_jump_m": 3.2e-05
+              }
+            }
+          ],
+          "failed_gates": []
+        }
+      },
+      "net_signed_m": 0.06093831730605531,
+      "motion_goals_used": 24,
+      "returned_components": [
+        {
+          "request_id": "contact-db3416ca2ceb43eb8c979984b02bdc22",
+          "goal_uuid": "5d383980ae9b4948bf20788f2d02c3ad",
+          "child_goal_uuid": "5d383980ae9b4948bf20788f2d02c3ad",
+          "receipt_age_s": 0.087723695,
+          "return_completed": true,
+          "arm_ready": true,
+          "motion_terminal_known": true,
+          "physical_contact_observed": true,
+          "displacement_m": 0.030468015206742447
+        },
+        {
+          "request_id": "contact-140e288e168149d993b63c75feb8921f",
+          "goal_uuid": "20ced44a000544c0be191718854c25c3",
+          "child_goal_uuid": "20ced44a000544c0be191718854c25c3",
+          "receipt_age_s": 0.026526931,
+          "return_completed": true,
+          "arm_ready": true,
+          "motion_terminal_known": true,
+          "physical_contact_observed": true,
+          "displacement_m": 0.03047031006148311
+        }
+      ],
+      "online_native_contact": [
+        {
+          "physical_contact_observed": true,
+          "contact_steps": 2764,
+          "rear_fraction": 1.0,
+          "horizontal_normal_fraction": 1.0,
+          "maximum_patch_distance_m": 4.1826452915761647e-05,
+          "unexpected_robot_colliders": [],
+          "source_problem": null,
+          "protected_peak_m": 0.0,
+          "freshness": {
+            "physics": {
+              "wall_age_s": 0.007685345,
+              "source_sim_ns": 114600000000,
+              "clock_minus_source_ns": -5000000
+            },
+            "contacts": {
+              "wall_age_s": 0.008678676,
+              "source_sim_ns": 114600000000,
+              "clock_minus_source_ns": -5000000
+            },
+            "raw_physics": {
+              "wall_age_s": 0.007685345,
+              "source_sim_ns": 114600000000,
+              "clock_minus_source_ns": -5000000
+            }
+          },
+          "pre_robot_contact_prefix_records": 0
+        },
+        {
+          "physical_contact_observed": true,
+          "contact_steps": 3072,
+          "rear_fraction": 1.0,
+          "horizontal_normal_fraction": 1.0,
+          "maximum_patch_distance_m": 3.3873318397803686e-05,
+          "unexpected_robot_colliders": [],
+          "source_problem": null,
+          "protected_peak_m": 0.0,
+          "freshness": {
+            "physics": {
+              "wall_age_s": 0.002267329,
+              "source_sim_ns": 52465000000,
+              "clock_minus_source_ns": -10000000
+            },
+            "contacts": {
+              "wall_age_s": 0.002450108,
+              "source_sim_ns": 52465000000,
+              "clock_minus_source_ns": -10000000
+            },
+            "raw_physics": {
+              "wall_age_s": 0.002267329,
+              "source_sim_ns": 52465000000,
+              "clock_minus_source_ns": -10000000
+            }
+          },
+          "pre_robot_contact_prefix_records": 0
+        }
+      ]
+    }
+  ]
+}

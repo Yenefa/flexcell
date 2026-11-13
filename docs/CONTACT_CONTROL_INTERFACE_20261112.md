@@ -93,3 +93,38 @@ Model files/license, executed source versions, logs, failed experiments and
 source hashes belong in the evidence archive. See its README for measured
 outcomes and exact replay commands. Do not infer robot capability from unit or
 synthetic protocol tests.
+
+
+## Opt-in public Runtime action and live consumption
+
+The public-only entrypoint runtime/run_public_push_task.py uses live Observe,
+a bounded English rule planner and the public object/region registry to build
+RunComposite stages. The planner/primitive do not accept expected_goal. This is
+engineered execution, not LLM planning or autonomous skill development.
+
+TaskFSM push_backend defaults to legacy. Opt-in finger_tcp uses
+contact_push_action=/contact_push, contact_task_motion_budget<=40 and
+contact_task_wall_s<=600. ContactPush owns one persistent worker, accepts only
+registered -x30mm/demo_veryslow requests and limits each to13 actuator handoffs
+and300s. Its readiness service means owner availability, not a physical lease.
+
+Typed results distinguish stroke outcome, known/observed physical contact,
+known terminal/stop state, completed return, arm readiness, returned WorldState,
+post-return displacement and same-host monotonic observation time. Runtime
+correlates actual wire UUID/request and checks frame/source, complete objects,
+released carry, known gripper, receipt age<=250ms and object source age<=500ms.
+Normal fresh before/after observations and measured stage postconditions remain.
+A successful stroke with failed/stale return cannot commit a stage.
+
+Unknown acceptance/terminal, contact transport exceptions or executed aborted/
+canceled motion without stop confirmation quarantine the owner and prohibit
+another motion/cleanup trajectory. The worker keeps its own node name and
+simulation clock; task coordinators use wall clock. Default launches are intact.
+
+At immutable source22f873ba, four real correlated returned states were consumed
+in two publicly instructed physical tasks. Both original red and development
+blue probe completed two stages and full frozen9/9 acceptance. Receipt ages were
+26.5–107.1ms. These are one trial per task in the declared task-scoped graph,
+not default-graph repair, formal held-out performance or a promotion decision.
+See evobot_runtime_push_20261112/ for raw ZIPs, executed source, failures and
+independent replay. Old engineering CLI K-series measurements remain separate.

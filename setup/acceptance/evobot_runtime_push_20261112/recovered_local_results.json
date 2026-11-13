@@ -1,0 +1,368 @@
+{
+  "recovered_on": "2026-11-13",
+  "status": "RECOVERED_AFTER_ENVIRONMENT_LOSS",
+  "cases": {
+    "R0": {
+      "run_status.json": {
+        "backend": "legacy",
+        "label": "R0",
+        "status": "EXECUTED",
+        "agent_claimed_success": false,
+        "driver_exit": 2,
+        "runtime_status": "RUNTIME_TASK_FAILED"
+      },
+      "runtime/runtime_result.json": {
+        "kind": "PUBLIC_TASK_RUNTIME",
+        "agent_claimed_success": false,
+        "status": "RUNTIME_TASK_FAILED",
+        "model_calls": 0,
+        "runtime_result": {
+          "outcome": 1,
+          "error_code": 62,
+          "run_id": "composite-d03399ca4afc4bbb",
+          "completed_stage_ids": [],
+          "component_run_ids": [
+            "push-427a6a6ef26b46b8b08c7f0157c42299"
+          ],
+          "component_goal_uuids": [
+            "741d9c3df3d94c5d89de764f68fd3964"
+          ],
+          "evidence_id": "/artifacts/R0/sim/skills/composites/composite-d03399ca4afc4bbb.jsonl",
+          "detail": "native terminal/verification unconfirmed for push_00",
+          "resumed_from_run_id": "",
+          "inherited_stages": 0
+        },
+        "runtime_action_status": 6,
+        "runtime_goal_uuid": "280541d9deb14e0cbc8c5927c3e35630",
+        "wall_s": 0.30514755000331206
+      },
+      "verdict.json": {
+        "evaluator_version": "0.5.0",
+        "task_id": "T08-push-seed2000",
+        "template_id": "T08_push_manipulation",
+        "passed": false,
+        "terminal_passed": false,
+        "clauses": [
+          {
+            "clause": "unmoved:target_box_b",
+            "ok": true,
+            "evidence": {
+              "distance_m": 0.0,
+              "tolerance_m": 0.015
+            }
+          },
+          {
+            "clause": "push:target_box_a",
+            "ok": false,
+            "evidence": {
+              "displacement_m": 0.0,
+              "min_displacement_m": 0.03,
+              "max_displacement_m": 0.15,
+              "vertical_m": 0.0,
+              "max_vertical_m": 0.02,
+              "direction_cosine": null,
+              "min_direction_cosine": 0.9,
+              "zone": "zone_push",
+              "distance_m": 0.1,
+              "radius_m": 0.06,
+              "inside_zone": false,
+              "max_lift_m": -0.0,
+              "max_lift_allowed_m": 0.005
+            }
+          }
+        ],
+        "failed_clauses": [
+          "push:target_box_a"
+        ],
+        "agent_claimed_success": false,
+        "false_success": false,
+        "false_failure": false,
+        "evidence": {
+          "verifier_version": "1.0.0",
+          "physical_outcome": "UNKNOWN",
+          "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+          "failure_reason": "terminal: terminal evaluator did not pass (failed: None)",
+          "passed": false,
+          "gates": [
+            {
+              "gate": "terminal",
+              "ok": false,
+              "reason": "terminal evaluator did not pass (failed: None)",
+              "evidence": {
+                "evaluator_version": null,
+                "passed": false
+              }
+            },
+            {
+              "gate": "trajectory",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "objects": [
+                  "target_box_a",
+                  "target_box_b"
+                ],
+                "total_samples": 2542
+              }
+            },
+            {
+              "gate": "table_support",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "off_table_samples": 0,
+                "tolerance_m": 0.01
+              }
+            },
+            {
+              "gate": "protected_unmoved",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_excursion_m": 0.0,
+                "tolerance_m": 0.005
+              }
+            },
+            {
+              "gate": "no_lift",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_lift_m": -0.0,
+                "allowed_m": 0.02
+              }
+            },
+            {
+              "gate": "pusher_contact",
+              "ok": false,
+              "reason": "the object never moved, so there is no push to attribute",
+              "evidence": {}
+            },
+            {
+              "gate": "gripper",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "joint": "gripper_left_joint",
+                "samples": 416,
+                "aperture_travel_rad": 0.0,
+                "limit_rad": 0.002,
+                "min_aperture_rad": -0.0,
+                "max_aperture_rad": -0.0
+              }
+            },
+            {
+              "gate": "no_attachment",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "events": 0
+              }
+            },
+            {
+              "gate": "no_teleport",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_jump_m": 0.0,
+                "threshold_m": 0.03,
+                "declared_jump_m": 0.0,
+                "measured_jump_m": 0.0
+              }
+            }
+          ],
+          "failed_gates": [
+            "terminal",
+            "pusher_contact"
+          ]
+        }
+      }
+    },
+    "R0b": {
+      "run_status.json": {
+        "backend": "legacy",
+        "label": "R0b",
+        "status": "EXECUTED",
+        "agent_claimed_success": false,
+        "driver_exit": 2,
+        "runtime_status": "RUNTIME_TASK_FAILED"
+      },
+      "runtime/runtime_result.json": {
+        "kind": "PUBLIC_TASK_RUNTIME",
+        "agent_claimed_success": false,
+        "status": "RUNTIME_TASK_FAILED",
+        "model_calls": 0,
+        "runtime_result": {
+          "outcome": 1,
+          "error_code": 62,
+          "run_id": "composite-10193ef35a55433f",
+          "completed_stage_ids": [],
+          "component_run_ids": [
+            "push-b8f3ca7e9f4643a4a9daeb94dedaf880"
+          ],
+          "component_goal_uuids": [
+            "80339504604c4eaaa2c10298cd489b03"
+          ],
+          "evidence_id": "/artifacts/R0b/sim/skills/composites/composite-10193ef35a55433f.jsonl",
+          "detail": "native terminal/verification unconfirmed for push_00",
+          "resumed_from_run_id": "",
+          "inherited_stages": 0
+        },
+        "runtime_action_status": 6,
+        "runtime_goal_uuid": "5d1509e357f24034856bed010fd9ecd1",
+        "wall_s": 27.95519359800528
+      },
+      "verdict.json": {
+        "evaluator_version": "0.5.0",
+        "task_id": "T08-push-seed2000",
+        "template_id": "T08_push_manipulation",
+        "passed": false,
+        "terminal_passed": false,
+        "clauses": [
+          {
+            "clause": "unmoved:target_box_b",
+            "ok": true,
+            "evidence": {
+              "distance_m": 0.0,
+              "tolerance_m": 0.015
+            }
+          },
+          {
+            "clause": "push:target_box_a",
+            "ok": false,
+            "evidence": {
+              "displacement_m": 0.00717,
+              "min_displacement_m": 0.03,
+              "max_displacement_m": 0.15,
+              "vertical_m": 0.0,
+              "max_vertical_m": 0.02,
+              "direction_cosine": -0.81594,
+              "min_direction_cosine": 0.9,
+              "zone": "zone_push",
+              "distance_m": 0.10593,
+              "radius_m": 0.06,
+              "inside_zone": false,
+              "max_lift_m": 0.00497,
+              "max_lift_allowed_m": 0.005
+            }
+          }
+        ],
+        "failed_clauses": [
+          "push:target_box_a"
+        ],
+        "agent_claimed_success": false,
+        "false_success": false,
+        "false_failure": false,
+        "evidence": {
+          "verifier_version": "1.0.0",
+          "physical_outcome": "UNKNOWN",
+          "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+          "failure_reason": "terminal: terminal evaluator did not pass (failed: None)",
+          "passed": false,
+          "gates": [
+            {
+              "gate": "terminal",
+              "ok": false,
+              "reason": "terminal evaluator did not pass (failed: None)",
+              "evidence": {
+                "evaluator_version": null,
+                "passed": false
+              }
+            },
+            {
+              "gate": "trajectory",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "objects": [
+                  "target_box_a",
+                  "target_box_b"
+                ],
+                "total_samples": 9362
+              }
+            },
+            {
+              "gate": "table_support",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "off_table_samples": 0,
+                "tolerance_m": 0.01
+              }
+            },
+            {
+              "gate": "protected_unmoved",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_excursion_m": 0.0,
+                "tolerance_m": 0.005
+              }
+            },
+            {
+              "gate": "no_lift",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_lift_m": 0.004971,
+                "allowed_m": 0.02
+              }
+            },
+            {
+              "gate": "pusher_contact",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "motion_windows": 634,
+                "overlapping_windows": 576,
+                "contact_intervals": 2,
+                "pusher_links": [
+                  "open_manipulator_x::gripper_left_link::gripper_left_link_collision",
+                  "open_manipulator_x::gripper_right_link::gripper_right_link_collision",
+                  "open_manipulator_x::link5::link5_collision"
+                ]
+              }
+            },
+            {
+              "gate": "gripper",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "joint": "gripper_left_joint",
+                "samples": 2073,
+                "aperture_travel_rad": 1e-06,
+                "limit_rad": 0.002,
+                "min_aperture_rad": -0.0,
+                "max_aperture_rad": 1e-06
+              }
+            },
+            {
+              "gate": "no_attachment",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "events": 0
+              }
+            },
+            {
+              "gate": "no_teleport",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_jump_m": 0.001026,
+                "threshold_m": 0.03,
+                "declared_jump_m": 0.001026,
+                "measured_jump_m": 0.001026
+              }
+            }
+          ],
+          "failed_gates": [
+            "terminal"
+          ]
+        }
+      }
+    }
+  },
+  "current_owned_simulator_processes": 0,
+  "current_owned_containers": 0
+}

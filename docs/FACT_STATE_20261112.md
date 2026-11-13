@@ -1200,3 +1200,29 @@ contact results are retained separately, not reclassified as Runtime evidence.
 Evidence/status source:
 setup/acceptance/evobot_runtime_push_20261112/README.md and
 recovery_observations.json. CI success, if obtained, needs a separate append.
+
+
+## 2026-11-13 — Public Runtime task execution confirmed; raw evidence recovered
+
+This supplements the environment-loss checkpoint above. It does not erase its
+then-UNKNOWN state or pool earlier engineering-driver runs into Runtime results.
+
+| Item | Current verified status |
+|---|---|
+| Actual execution source |22f873bae82ce61270a63397fbecdd3a119a115e, CI43274720654, immutable during all slots |
+| Public original red-block task |CONFIRMED: Runtime completed2 stages,24/40 actuator goals,162.08/600s; frozen full9/9 PASS; final signed-x60.9318mm |
+| Public blue-object probe |CONFIRMED: same implementation, changed target/start/region;2 stages,24 goals,171.57s; full9/9 PASS; final signed-x60.9383mm |
+| Returned-state interface |LIVE_CONSUMED:4 correlated real action results with completed returns/arm readiness; recorded receipt ages26.5–107.1ms; replay contract passes all4 |
+| Claim agreement |Both Runtime claims agree with independent full physical acceptance; false_success=false in both |
+| Legacy CI_L0 control |Runtime postcondition failure63;2 zero-duration contact intervals rejected by recorder. INVALID_EVIDENCE; excluded from physical success-rate comparison; #239 |
+| Recovered local R0/R0b |R0 invalid zero-motion control; R0b now CONFIRMED Runtime failure62 and full acceptance FAIL. Former UNKNOWN superseded only after recovery; separate earlier image/source |
+| Integrity/replay |Original18,526,560-byte ZIP SHA33fbead803028d16d451c180e5d0a80c18bd28c5825b9e8f4607bd10db13d28c; all306 manifest files and complete coverage match; unchanged source/task hashes; independent raw replay reproduces both9/9 passes |
+| Build/checks |New revision built interfaces/skills, compiled harness and passed289 relevant checks. No full-regression claim; old fixtures #238 remain open |
+| Boundary |ONE trial per current Runtime task; blue probe is development-declared, not formal held-out. No statistical superiority, broad repeatability, ordinary-task regression closure, transfer or L4 claim |
+| Defaults/formal status |Legacy remains default; formal baseline NOT_PROMOTED; T08 formal CALIBRATION_UNSUPPORTED; main goal active |
+| Cleanup |After environment recovery current selected environment has0 owned containers/simulator processes. CI --rm container/job completed; full-graph scheduling issue #237 not resolved |
+
+Evidence:setup/acceptance/evobot_runtime_push_20261112/README.md,
+results.json,offline_verification.json,archives.json and both permanent raw ZIPs.
+The next capability gate is fixed Runtime repetitions plus ordinary physical
+regression before wider inputs and formal held-out evaluation.
