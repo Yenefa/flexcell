@@ -26,3 +26,5 @@ python3 setup/acceptance/physical_reachable_contact_20261113/verify_archive.py \
 ```
 
 只证明已登记的直立 35 mm 方块、世界 −x 方向下，一个此前不可达起点的工程能力扩展。LONG 已用于诊断，是暴露开发任务；两次重复不证明总体可靠性、盲测泛化或硬件能力。普通 smoke 使用仿真专用搬运后端，且不是完整任务回归。未证明 Runtime 自主开发技能、经验迁移或 L4。Legacy 仍为默认，正式基线 **NOT_PROMOTED**，正式 T08 仍 **CALIBRATION_UNSUPPORTED**；主目标保持 active。
+
+证据提交：`c0ed8b27f8731d89efe75ba728731bddf55eda3a`。独立离线 CI [43461083976](https://github.com/Yenefa/flexcell/actions/runs/43461083976) **PASS**；仓库版本/构建边界 CI 43461084005 **PASS**。后续任务是补全普通回归并冻结更多初始条件验证；当前三段任务已用 36/40 动作预算，不能据此承诺更长程任务。

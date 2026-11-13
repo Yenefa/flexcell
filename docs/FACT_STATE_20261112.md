@@ -1380,3 +1380,11 @@ failure case after an engineering repair, with only two candidate repetitions.
 No blind generalization, broad reliability, precise displacement, hardware,
 autonomous Develop/L4, transfer or full-regression claim. Formal baseline
 NOT_PROMOTED; formal T08 CALIBRATION_UNSUPPORTED; main goal active.
+
+
+### Reachable-contact evidence commit and independent CI confirmation
+
+Evidence c0ed8b27f8731d89efe75ba728731bddf55eda3a is pushed. Independent
+offline CI43461083976 PASS; repository-layout CI43461084005 PASS. These
+checks execute no physical task and add no trials. Version index separates
+implementation3c6292f8, physically executed31a002f6 and evidencec0ed8b27.
