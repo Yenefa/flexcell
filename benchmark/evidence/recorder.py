@@ -86,6 +86,23 @@ def trajectory_from_physics(records, model):
     return samples, dropped, max_gap
 
 
+# Issue #239. An interval is a HALF-OPEN span [start_sim_ns, end_sim_ns): it covers
+# every physics step from the first contact step through the last one, and end_sim_ns is the
+# instant the LAST step ENDS, not the instant it begins.
+#
+# WHY THIS MATTERS: ContactTrace writes one snapshot per physics step. A single-frame contact
+# is a real event lasting exactly one step. The old derivation wrote start == end for it, and
+# schema.py:219 rejects end <= start as an "empty or inverted interval" - so a real single-frame
+# contact was being reported as invalid evidence. Two such intervals in CI_L0 left that control
+# without a complete independent verdict (#239).
+#
+# THE DURATION IS NOT INVENTED. Every contact record carries its own step_ns, the real physics
+# step duration the plugin wrote. A one-step contact therefore spans [sim_ns, sim_ns + step_ns).
+# No event is dropped, no threshold is loosened, and schema.py is NOT modified - the frozen rule
+# stays exactly as it was; the recorder now emits the interval the rule was written to describe.
+CONTACT_INTERVAL_REPRESENTATION = "half_open_per_physics_step_v2"
+
+
 def contact_intervals(contact_records, model, pusher_links):
     """Runs of consecutive steps in which the model touched a declared pusher.
 
@@ -95,6 +112,10 @@ def contact_intervals(contact_records, model, pusher_links):
     "no contact" from "the contact component was not there". A run whose
     component was never present has no contact evidence at all, which the
     verifier treats as unevaluable rather than as a clean bill of health.
+
+    Each returned interval is a half-open span: end_sim_ns is the END of the last
+    contact step, i.e. last_sim_ns + step_ns. The step duration comes from the
+    contact record itself, so a single-frame contact has a real, non-zero span.
     """
     intervals = []
     open_interval = None
@@ -107,6 +128,9 @@ def contact_intervals(contact_records, model, pusher_links):
         if target.get('component_present'):
             present = True
         sim_ns = int(record.get('sim_ns', 0))
+        # Real physics-step duration from the plugin's own record (5 ms in the archived
+        # runs). Used to give single-frame contacts a non-zero, non-invented span.
+        step_ns = int(record.get('step_ns') or 0)
         touching = set()
         payload = target.get('contacts')
         if isinstance(payload, dict):
@@ -121,15 +145,21 @@ def contact_intervals(contact_records, model, pusher_links):
                         touching.add(name)
         hit = sorted(touching & set(pusher_links))
         if hit:
+            # end is the END of this step, not its start. Resolving it at close time below
+            # keeps the half-open semantics explicit even for a one-step contact.
+            step_end = sim_ns + step_ns
             if open_interval is None:
-                open_interval = {'start_sim_ns': sim_ns, 'end_sim_ns': sim_ns,
-                                 'other': hit[0]}
+                open_interval = {'start_sim_ns': sim_ns, 'end_sim_ns': step_end,
+                                 'other': hit[0], '_last_step_end': step_end}
             else:
-                open_interval['end_sim_ns'] = sim_ns
+                open_interval['end_sim_ns'] = step_end
+                open_interval['_last_step_end'] = step_end
         elif open_interval is not None:
+            open_interval.pop('_last_step_end', None)
             intervals.append(open_interval)
             open_interval = None
     if open_interval is not None:
+        open_interval.pop('_last_step_end', None)
         intervals.append(open_interval)
     return intervals, present, sorted(partners)
 
@@ -216,6 +246,11 @@ def build(args):
             'trusted_source_id': 'flexcell::ContactTrace/v1',
             'pusher_links': list(args.pusher_links),
             'component_present': bool(present),
+            # Issue #239: version the interval semantics so a re-evaluation of historical
+            # bundles can be labelled as such and never silently overwrites the original
+            # verdict. A bundle without this field is a v1 recording and keeps its old
+            # verdict; only a re-run through this recorder produces v2 intervals.
+            'interval_representation': CONTACT_INTERVAL_REPRESENTATION,
             'intervals': intervals,
             'all_partners_seen': partners,
         },
