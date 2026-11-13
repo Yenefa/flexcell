@@ -547,6 +547,9 @@ class TestPickEngageFailure(unittest.TestCase):
 
     def test_planning_scene_attach_failure_is_typed_and_releases(self):
         node = PickServer.__new__(PickServer)
+        # issue #238: mirror the constructor default (pick_server.py:164,
+        # move_to_pose_server.py:185). __new__ skipped __init__.
+        node._admission_wait_s = 5.0
         node._backend_consistent = lambda: (True, '')
         node._seq = 0
         node._admission = threading.Lock()
@@ -620,6 +623,9 @@ class TestJointFollowStop(unittest.TestCase):
 
     def pick_node(self, watch, stop_confirmed, *, already_completed=False):
         node = PickServer.__new__(PickServer)
+        # issue #238: mirror the constructor default (pick_server.py:164,
+        # move_to_pose_server.py:185). __new__ skipped __init__.
+        node._admission_wait_s = 5.0
         node._backend_consistent = lambda: (True, '')
         for name, value in dict(_seq=0, _admission=threading.Lock(),
             _profiles=['demo_slow'], _default_profile='demo_slow', _deadline=30000,
@@ -713,6 +719,9 @@ class TestJointFollowStop(unittest.TestCase):
     def test_place_follow_fault_blocks_release_and_cleanup(self):
         watch = self.Watch()
         node = PlaceServer.__new__(PlaceServer)
+        # issue #238: mirror the constructor default (pick_server.py:164,
+        # move_to_pose_server.py:185). __new__ skipped __init__.
+        node._admission_wait_s = 5.0
         node._backend_consistent = lambda: (True, '')
         for name, value in dict(_seq=0, _admission=threading.Lock(),
             _profiles=['demo_slow'], _default_profile='demo_slow', _deadline=30000,
@@ -769,6 +778,9 @@ class TestJointFollowStop(unittest.TestCase):
 
     def test_fault_detected_while_waiting_for_motion_server_sends_no_goal(self):
         client = MoveToPoseClient.__new__(MoveToPoseClient)
+        # issue #238: mirror the constructor default (pick_server.py:164,
+        # move_to_pose_server.py:185). __new__ skipped __init__.
+        client._admission_wait_s = 5.0
         client._cli = unittest.mock.Mock()
         client._cli.wait_for_server.return_value = True
         checks = iter([False, True])
@@ -783,6 +795,9 @@ class TestPickLiftCleanup(unittest.TestCase):
 
     def drive(self, scene_ok=True, gripper_ok=True, cancel=False, samples=None):
         node = PickServer.__new__(PickServer)
+        # issue #238: mirror the constructor default (pick_server.py:164,
+        # move_to_pose_server.py:185). __new__ skipped __init__.
+        node._admission_wait_s = 5.0
         node._backend_consistent = lambda: (True, '')
         values = dict(_seq=0, _admission=threading.Lock(),
                       _profiles=['demo_slow'], _default_profile='demo_slow',
