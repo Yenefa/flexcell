@@ -46,5 +46,9 @@ class RepositoryLayoutTest(unittest.TestCase):
         (self.root/'src/skill/package.xml').write_text('<package><name>renamed</name></package>')
         self.assertFalse(self.check()['passed'])
 
+    def test_git_enumeration_failure_keeps_diagnostic(self):
+        with self.assertRaisesRegex(RuntimeError,'git ls-files failed:'):
+            module.tracked_manifests(self.root)
+
 
 if __name__=='__main__':unittest.main()

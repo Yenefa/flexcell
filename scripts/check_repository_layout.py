@@ -13,9 +13,13 @@ ROOT=Path(__file__).resolve().parents[1]
 
 
 def tracked_manifests(root):
-    listed=subprocess.run(['git','-C',str(root),'ls-files','-z','--','**/package.xml'],
-                          check=True,capture_output=True).stdout
-    return [p.decode() for p in listed.split(b'\0') if p]
+    # Container checkouts can have a different filesystem owner. Trust only
+    # this explicitly selected checkout for this read, never all directories.
+    process=subprocess.run(['git','-c','safe.directory='+str(root),'-C',str(root),
+                            'ls-files','-z','--','**/package.xml'],capture_output=True)
+    if process.returncode:
+        raise RuntimeError('git ls-files failed: '+process.stderr.decode(errors='replace').strip())
+    return [p.decode() for p in process.stdout.split(b'\0') if p]
 
 
 def audit(root,layout,manifests):
