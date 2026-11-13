@@ -1,0 +1,124 @@
+{
+  "schema_version": 1,
+  "source_checkpoint": "3e81f956e4559edc4d7d17e8ef6df6f3eb798f27",
+  "integration_target": "refactor/skill-layer-boundaries-20261113",
+  "formal_baseline": "NOT_PROMOTED",
+  "active_workstream": "physical",
+  "rules": [
+    "Reserved branches have no assigned running agent.",
+    "One module change per branch; shared interfaces and infrastructure changes require cross-module review.",
+    "Preserve frozen evaluators, TaskSpecs, thresholds and original evidence.",
+    "Integrate reviewed commits with their dependencies; do not merge historical experiment branches wholesale."
+  ],
+  "workstreams": [
+    {
+      "id": "physical",
+      "branch": "develop/physical-capabilities-20261113",
+      "modules": [
+        "既有物理技能",
+        "接触推动"
+      ],
+      "primary_paths": [
+        "src/flexcell/flexcell_capabilities",
+        "src/flexcell/flexcell_skills/flexcell_skills/contact_*",
+        "src/flexcell/flexcell_skills/flexcell_skills/pick_server.py",
+        "src/flexcell/flexcell_skills/flexcell_skills/place_server.py",
+        "experiments/physical_capabilities"
+      ],
+      "status": "ACTIVE"
+    },
+    {
+      "id": "runtime",
+      "branch": "develop/runtime-execution-20261113",
+      "modules": [
+        "Runtime 执行",
+        "决策与任务编排"
+      ],
+      "primary_paths": [
+        "runtime",
+        "src/flexcell/flexcell_skills/flexcell_skills/task_fsm_server.py",
+        "src/flexcell/flexcell_skills/flexcell_skills/task_components",
+        "src/flexcell/flexcell_skills/flexcell_skills/*policy.py"
+      ],
+      "status": "RESERVED"
+    },
+    {
+      "id": "agent",
+      "branch": "develop/agent-development-20261113",
+      "modules": [
+        "开发 Agent"
+      ],
+      "primary_paths": [
+        "evolution/proposals",
+        "experiments/pilot-001/pilot"
+      ],
+      "status": "RESERVED"
+    },
+    {
+      "id": "development_skills",
+      "branch": "develop/development-skills-20261113",
+      "modules": [
+        "开发 Skill"
+      ],
+      "primary_paths": [
+        "development_skills"
+      ],
+      "status": "RESERVED"
+    },
+    {
+      "id": "experience",
+      "branch": "develop/experience-learning-20261113",
+      "modules": [
+        "经验与学习"
+      ],
+      "primary_paths": [
+        "evolution/experience",
+        "evolution/diagnosis",
+        "evolution/transfer"
+      ],
+      "status": "RESERVED"
+    },
+    {
+      "id": "perception_data",
+      "branch": "develop/perception-data-20261113",
+      "modules": [
+        "感知与数据"
+      ],
+      "primary_paths": [
+        "data",
+        "src/flexcell/flexcell_skills/flexcell_skills/observe_server.py",
+        "src/flexcell/flexcell_skills/flexcell_skills/vision_geometry.py",
+        "scripts/export_lerobot.py",
+        "scripts/record_sim_data.py"
+      ],
+      "status": "RESERVED"
+    },
+    {
+      "id": "validation",
+      "branch": "develop/validation-infrastructure-20261113",
+      "modules": [
+        "验证与工程"
+      ],
+      "primary_paths": [
+        ".github",
+        "infra",
+        "scripts"
+      ],
+      "status": "RESERVED"
+    },
+    {
+      "id": "architecture",
+      "branch": "refactor/skill-layer-boundaries-20261113",
+      "modules": [
+        "模块化架构"
+      ],
+      "primary_paths": [
+        "config",
+        "docs/SKILL_ARCHITECTURE.md",
+        "docs/REPOSITORY_MODULES.md",
+        "scripts/check_skill_boundaries.py"
+      ],
+      "status": "CHECKPOINTED"
+    }
+  ]
+}

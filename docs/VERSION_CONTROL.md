@@ -56,3 +56,5 @@
 独立提取物理模型包并限制开发与执行的依赖方向，范围见
 [SKILL_ARCHITECTURE.md](SKILL_ARCHITECTURE.md)。后续集成需包含新能力包、执行包依赖、
 兼容入口和构建配置，不能只取路径调整的一部分。独立诊断分支的提交仍需另外审查。
+
+模块工作线的实际分支、共同源码基线和当前 active 状态见 [DEVELOPMENT_BRANCHES.md](DEVELOPMENT_BRANCHES.md)。
