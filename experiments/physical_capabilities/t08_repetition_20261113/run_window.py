@@ -38,6 +38,17 @@ def unknown(value):
     return False
 
 
+
+def ordinary_result(directory, expected_case):
+    paths = list(Path(directory).glob('run-*/result.json'))
+    if len(paths) != 1:
+        raise ValueError('ordinary result requires exactly one run directory')
+    result = read(paths[0])
+    if not isinstance(result, dict) or result.get('case') != expected_case:
+        raise ValueError('ordinary result case differs from declared slot')
+    return result, paths[0]
+
+
 def production_hashes(root):
     paths = list((root / 'src/flexcell').rglob('*.py'))
     paths += list((root / 'src/flexcell/flexcell_interfaces').rglob('*.action'))
@@ -110,8 +121,8 @@ def main():
                 if unknown([runtime, components]):
                     stopped = 'unknown executed motion terminal'
             else:
-                result = read(directory / 'result.json')
-                row = dict(label=label, kind=kind, driver_exit=exit_code, result=result,
+                result, result_path = ordinary_result(directory, slot['case'])
+                row = dict(label=label, kind=kind, driver_exit=exit_code, result=result, result_path=str(result_path),
                            task_completed=bool(exit_code == 0 and result and result.get('status') == 'PASS'))
                 if unknown(result):
                     stopped = 'unknown ordinary-task motion terminal'
