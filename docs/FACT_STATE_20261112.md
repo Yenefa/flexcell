@@ -1695,3 +1695,73 @@ it was calibrated on.**
 **T08 remains `CALIBRATION_UNSUPPORTED`. 0 of 18 Independently Verified.** No threshold, TaskSpec,
 frozen evaluator file or acceptance evidence was modified. No capability level was raised.
 
+
+---
+
+## RETRACTION — 2026-11-14: rounds 88-91 ("T08 is arithmetically unsatisfiable") are WITHDRAWN
+
+### What is withdrawn
+
+All four of these claims from rounds 88-91 are **withdrawn as statements about the task**:
+
+- "the box tips 92 degrees and 7.25 mm is the exact geometry of that"
+- "the lift bound is arithmetically unsatisfiable, not empirically hard"
+- "no contact height satisfies both constraints"
+- "the task has a physical contradiction for this object; the fix requires raising
+  `max_lift_during_m` or widening the box base"
+
+**They remain valid as observations of MY OWN HARNESS ONLY** (`t08_timeline.py` +
+`candidate_staged_push.py`, a fixed `contact_height` sweep, a fixed contact posture).
+The error was generalising from that harness to the task: I asserted that a 35 mm cube
+**must** roll about its bottom edge when pushed, so `(sqrt(2)-1)/2 * 0.035 = 0.00725 m`
+was an invariant. It is not. It is what that one failed posture produced.
+
+### The refutation, from the repository's own independently verified evidence
+
+Branch `develop/physical-capabilities-20261113` (commits `9550aaac`, `c0ed8b27`,
+`81eed33c`; CI 43421358107, 43455056965, 43461083976):
+
+- **5 fixed repetitions (RED_1..3, BLUE_1..2) + 2 ordinary tasks, all 9/9 independent
+  gates PASS**, on the frozen evaluator, from rebuilt evidence bundles.
+- `max_lift_m = 2e-05` (0.02 mm) and `vertical_m = 0.0` in
+  `setup/acceptance/physical_repetition_20261113/offline_verification.json`
+  — against the **unchanged** 0.005 m bound. **The box slides; it does not tip.**
+- Two further trials (LONG_1 / LONG_2) on the SAME previously refused task also 9/9,
+  net displacement 91.389 / 91.408 mm.
+- `frozen_files_and_push_core_match: true`; 9 frozen files, `contracts/push.py`,
+  TaskSpecs, thresholds and the default backend **all unchanged**.
+
+The repair is `register_reachable_finger` (3c6292f8): prefer 85 degrees, search
+85->73 degrees in 1-degree steps for a **reachable contact posture**, with every candidate
+still passing the existing collision-mesh / normal / joint / floor / protected-object guards.
+No threshold was relaxed and no task-specific exception was added.
+
+### The four states, kept separate
+
+For those runs: `planning_correct = yes` (posture was reachable), `execution_succeeded = yes`
+(three bounded stages completed), `independent_evaluation_passed = yes` (9/9 rebuilt
+offline, `physical_executions: 0`), `agent_claimed_success = true` with
+`false_success: false`. This is **Independently Verified** evidence, not a self-report.
+
+### What is NOT being claimed now either
+
+The physical branch states its own limits and I do not widen them: formal T08 remains
+**`CALIBRATION_UNSUPPORTED`**, formal baseline **NOT_PROMOTED**, legacy still default;
+LONG is an exposed development failure case with only two candidate repetitions, so no
+blind generalisation, broad reliability, precise displacement, hardware, autonomous
+Develop / L4, transfer or full-regression claim; ordinary tasks were FUNCTIONAL_SMOKE_ONLY.
+My earlier "0 of 18 verified" described my harness, not the repository.
+
+### This file has forked
+
+`docs/FACT_STATE_20261112.md` now has two divergent heads: this branch (with rounds 88-91
+above) and `develop/physical-capabilities-20261113` (with the 9/9 records). Both are
+retained. **This addendum is the current authority for what may be cited from rounds 88-91:**
+the arithmetic may be cited only as a harness-specific observation, never as a task limit.
+Converging the two heads is a separate cross-branch decision.
+
+### Method note
+
+This is the same failure mode as the withdrawn 18/18 (round 84): measuring one's own
+instrument and reporting the instrument as the world. A harness is not a task spec.
+
