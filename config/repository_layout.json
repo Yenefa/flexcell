@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "ros_source_root": "src/flexcell",
+  "ros_packages": {
+    "flexcell_interfaces": "src/flexcell/flexcell_interfaces",
+    "flexcell_skills": "src/flexcell/flexcell_skills",
+    "flexcell_mtc": "src/flexcell/flexcell_mtc",
+    "flexcell_gazebo": "src/flexcell/flexcell_gazebo"
+  },
+  "archive_roots": [
+    "setup/acceptance",
+    "experiments/pilot-001/runs"
+  ],
+  "generated_roots": ["artifacts", "build", "install", "log"],
+  "modules": [
+    {"id": "task_runtime", "paths": ["runtime"], "role": "Public input, planning and task clients; no independent grading authority"},
+    {"id": "robot_interfaces", "paths": ["src/flexcell/flexcell_interfaces"], "role": "Typed ROS actions, services and state messages"},
+    {"id": "robot_skills", "paths": ["src/flexcell/flexcell_skills"], "role": "Task execution, skill servers and safety/return contracts"},
+    {"id": "native_motion", "paths": ["src/flexcell/flexcell_mtc"], "role": "Native manipulation planning below the skill interface"},
+    {"id": "simulation", "paths": ["src/flexcell/flexcell_gazebo", "worlds"], "role": "Physics plugins, simulator assets and native telemetry"},
+    {"id": "benchmark", "paths": ["benchmark"], "role": "Task definitions, isolation and independent evaluation"},
+    {"id": "datasets", "paths": ["data"], "role": "Dataset schemas/export and data-only tooling; separate from robot execution"},
+    {"id": "evolution", "paths": ["evolution"], "role": "Diagnosis, proposals, experience and controlled development"},
+    {"id": "development_practices", "paths": ["development_skills"], "role": "Coding-agent practices; separate from robot skills"},
+    {"id": "infrastructure", "paths": ["infra", "scripts", "config", ".github"], "role": "Build, launch, deployment and repository checks"},
+    {"id": "legacy_tools", "paths": ["setup", "plan_execute.py"], "exclude": ["setup/acceptance"], "role": "Existing numbered/root compatibility tools; new reusable tools belong in scripts"},
+    {"id": "evidence", "paths": ["setup/acceptance", "experiments/pilot-001/runs"], "role": "Immutable historical evidence and snapshots; excluded from workspace package discovery"},
+    {"id": "research_specs", "paths": ["experiments"], "exclude": ["experiments/pilot-001/runs"], "role": "Research definitions and drivers, separate from captured runs"},
+    {"id": "documentation", "paths": ["docs", "competition"], "role": "Architecture, decisions, development status and presentation"}
+  ]
+}

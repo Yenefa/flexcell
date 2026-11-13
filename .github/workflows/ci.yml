@@ -91,7 +91,7 @@ jobs:
         shell: bash
         run: |
           source /opt/ros/jazzy/setup.bash
-          colcon build --symlink-install \
+          colcon build --base-paths src/flexcell --symlink-install \
             --packages-select flexcell_interfaces flexcell_skills
 
       - name: trusted-simulation evidence and failed-example audits

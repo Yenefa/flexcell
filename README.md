@@ -1,5 +1,9 @@
 # Agentic Flexible Robotic Workcell
 
+Repository organization: [module/build/evidence boundaries](docs/REPOSITORY_MODULES.md)
+and [version/branch conventions](docs/VERSION_CONTROL.md). Executed-source and
+evidence checkpoints are indexed separately in [version_baselines.json](config/version_baselines.json).
+
 2026-10-27: [trusted simulation, MTC and data implementation](docs/TRUSTED_SIMULATION_20261027.md)
 and [portable CPU reproduction](REPRODUCE.md#portable-cpu-simulation-plane-2026-10-27).
 

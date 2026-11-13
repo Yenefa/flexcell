@@ -1,5 +1,11 @@
 # ARCHITECTURE — FlexCell system
 
+Current repository/module boundaries are recorded in
+[REPOSITORY_MODULES.md](REPOSITORY_MODULES.md) and
+[ADR-005](ADR/ADR-005-repository-module-and-evidence-boundaries.md).
+Source/evidence identities and development branches are indexed in
+[VERSION_CONTROL.md](VERSION_CONTROL.md).
+
 For the current EvoBot contact-control and development bottlenecks, see
 [the 2026-11-12 architecture review](ARCHITECTURE_REVIEW_20261112.md), based on
 `d87f1701`, continuous native records and new isolated experiments. The runtime

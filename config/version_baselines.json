@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "repository_default_branch": "main",
+  "mission_research_branch": "autonomous/flexcell-remediation",
+  "refactoring": {
+    "branch": "refactor/module-boundaries-20261113",
+    "base_commit": "83ffafe117208dc82d2e02320e3cd7204ec8b97c",
+    "issue": 240,
+    "scope": "Repository/build boundaries and version indexing; no robot behavior change"
+  },
+  "checkpoints": {
+    "t08_public_runtime_ci43274720654": {
+      "development_branch": "develop/t08-runtime-recovery-20261112",
+      "executed_source_commit": "22f873bae82ce61270a63397fbecdd3a119a115e",
+      "evidence_commit": "83ffafe117208dc82d2e02320e3cd7204ec8b97c",
+      "ci_run": 43274720654,
+      "report": "setup/acceptance/evobot_runtime_push_20261112/README.md",
+      "status": "SCOPED_TASK_VALIDATION",
+      "scope": "One original red-block trial and one development-declared blue probe; both full9/9 in the task-scoped Gazebo graph",
+      "default_backend": "legacy",
+      "formal_baseline": "NOT_PROMOTED",
+      "formal_t08_status": "CALIBRATION_UNSUPPORTED",
+      "formal_held_out_validation": false,
+      "full_regression_complete": false
+    }
+  }
+}

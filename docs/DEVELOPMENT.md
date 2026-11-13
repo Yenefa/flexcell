@@ -1,5 +1,11 @@
 # DEVELOPMENT — execution calendar & maintenance policy
 
+Repository organization work is isolated under [issue #240](https://github.com/Yenefa/flexcell/issues/240):
+[version and branch conventions](VERSION_CONTROL.md),
+[module/build/evidence boundaries](REPOSITORY_MODULES.md), and ADR-005.
+Its base is the scoped T08 evidence checkpoint83ffafe1; it does not promote
+that candidate or modify the current robot execution behavior.
+
 > Milestone/task-based, no fixed dates. This file is the operational layer between
 > [ROADMAP.md](ROADMAP.md) (long-term) and Issues (per-work tracking). Update it as work
 > progresses — checkboxes here mirror issue states.
