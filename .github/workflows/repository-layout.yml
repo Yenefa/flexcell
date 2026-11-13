@@ -1,0 +1,38 @@
+name: repository-layout
+on:
+  push:
+    paths:
+      - '.github/workflows/repository-layout.yml'
+      - 'config/repository_layout.json'
+      - 'config/version_baselines.json'
+      - 'scripts/check_repository_layout.py'
+      - 'scripts/tests/test_repository_layout.py'
+      - 'src/**/package.xml'
+      - 'setup/acceptance/**/COLCON_IGNORE'
+      - 'experiments/**/COLCON_IGNORE'
+  pull_request:
+    paths:
+      - '.github/workflows/repository-layout.yml'
+      - 'config/repository_layout.json'
+      - 'config/version_baselines.json'
+      - 'scripts/check_repository_layout.py'
+      - 'scripts/tests/test_repository_layout.py'
+      - 'src/**/package.xml'
+      - 'setup/acceptance/**/COLCON_IGNORE'
+      - 'experiments/**/COLCON_IGNORE'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  package-boundaries:
+    runs-on: ubuntu-24.04
+    container: ros:jazzy
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Module boundaries and real root-workspace package discovery
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          python3 scripts/check_repository_layout.py --colcon "$(command -v colcon)"
+          python3 -m unittest discover -s scripts/tests -p 'test_repository_layout.py' -v
