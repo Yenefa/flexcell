@@ -1,0 +1,26 @@
+{
+  "experiment": "T08_RETURN_REPETITION_AND_ORDINARY_REGRESSION",
+  "source_baseline": "3e81f956e4559edc4d7d17e8ef6df6f3eb798f27",
+  "push_slots": [
+    {"label":"RED_1","task":"original","domain":191},
+    {"label":"RED_2","task":"original","domain":192},
+    {"label":"RED_3","task":"original","domain":193},
+    {"label":"BLUE_1","task":"probe_blue.json","domain":194},
+    {"label":"BLUE_2","task":"probe_blue.json","domain":195}
+  ],
+  "ordinary_slots": [
+    {"label":"REG_NORMAL","case":"normal","domain":196},
+    {"label":"REG_DUAL","case":"dual_object","domain":197}
+  ],
+  "backend": "finger_tcp",
+  "push_timeout_s": 900,
+  "ordinary_timeout_s": 360,
+  "window_budget_s": 2700,
+  "motion_goals_per_push_task": 40,
+  "push_task_budget_s": 600,
+  "replacement_trials": false,
+  "stop_on_unknown_terminal": true,
+  "formal_held_out": false,
+  "baseline_promoted": false,
+  "claim": "Small fixed replication after package extraction, not a population success rate or autonomous skill development. Ordinary regressions use the shipped full graph and unchanged verdicts."
+}

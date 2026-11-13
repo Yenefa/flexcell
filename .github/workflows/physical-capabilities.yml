@@ -1,0 +1,46 @@
+name: physical-capabilities
+on:
+  push:
+    branches: [develop/physical-capabilities-20261113]
+    paths:
+      - '.github/workflows/physical-capabilities.yml'
+      - 'experiments/physical_capabilities/t08_repetition_20261113/run_window.py'
+      - 'experiments/physical_capabilities/t08_repetition_20261113/preregistration.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: physical-capabilities
+  cancel-in-progress: false
+jobs:
+  declared-physical-window:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/Dockerfile.sim
+          load: true
+          tags: flexcell-sim:physical
+          build-args: SOURCE_REV=${{ github.sha }}
+          cache-from: type=gha,scope=flexcell-sim
+      - name: Image provenance
+        run: |
+          mkdir -p artifacts
+          docker image inspect flexcell-sim:physical > artifacts/image.json
+          lscpu > artifacts/host.txt
+      - name: Fixed repetitions and ordinary physical regressions
+        run: |
+          docker run --init --rm --cpus=2 --shm-size=512m \
+            -v "$PWD:/candidate:ro" -v "$PWD/artifacts:/artifacts" \
+            -e OPENBLAS_NUM_THREADS=1 -e OMP_NUM_THREADS=1 flexcell-sim:physical \
+            python3 /candidate/experiments/physical_capabilities/t08_repetition_20261113/run_window.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: physical-capabilities-${{ github.run_id }}
+          path: artifacts/
+          retention-days: 30
