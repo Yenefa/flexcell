@@ -1,0 +1,46 @@
+{
+  "experiment": "FROZEN_POSITION_AND_CONTACT_PROBES",
+  "frozen_code_commit": "059fde5c687163e76d9a677a6c46e9494221f5c9",
+  "push_slots": [
+    {
+      "label": "ANCHOR",
+      "task": "original",
+      "domain": 201
+    },
+    {
+      "label": "OFFSET_NEG",
+      "task": "tasks/OFFSET_NEG.json",
+      "domain": 202
+    },
+    {
+      "label": "LONG_POS",
+      "task": "tasks/LONG_POS.json",
+      "domain": 203
+    },
+    {
+      "label": "YAW_POS",
+      "task": "tasks/YAW_POS.json",
+      "domain": 204
+    },
+    {
+      "label": "YAW_NEG",
+      "task": "tasks/YAW_NEG.json",
+      "domain": 205
+    }
+  ],
+  "ordinary_slots": [
+    {
+      "label": "REG_NORMAL",
+      "case": "normal",
+      "domain": 206
+    }
+  ],
+  "push_timeout_s": 900,
+  "ordinary_timeout_s": 360,
+  "window_budget_s": 2700,
+  "replacement_trials": false,
+  "stop_on_unknown_terminal": true,
+  "formal_held_out": false,
+  "baseline_promoted": false,
+  "claim": "Predeclared new probes after implementation freeze; not a sealed blind test, population reliability or autonomous skill-development result."
+}

@@ -1,0 +1,48 @@
+name: physical-position-contact
+on:
+  push:
+    branches: [develop/physical-capabilities-20261113]
+    paths:
+      - '.github/workflows/physical-position-contact.yml'
+      - 'experiments/physical_capabilities/t08_position_contact_20261113/run_window.py'
+      - 'experiments/physical_capabilities/t08_position_contact_20261113/preregistration.json'
+      - 'experiments/physical_capabilities/t08_position_contact_20261113/source_freeze.json'
+      - 'experiments/physical_capabilities/t08_position_contact_20261113/tasks/*.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: physical-capabilities
+  cancel-in-progress: false
+jobs:
+  frozen-probes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/Dockerfile.sim
+          load: true
+          tags: flexcell-sim:position-contact
+          build-args: SOURCE_REV=${{ github.sha }}
+          cache-from: type=gha,scope=flexcell-sim
+      - name: Image provenance
+        run: |
+          mkdir -p artifacts
+          docker image inspect flexcell-sim:position-contact > artifacts/image.json
+          lscpu > artifacts/host.txt
+      - name: Fixed position, longer task and contact attitude probes
+        run: |
+          docker run --init --rm --cpus=2 --shm-size=512m \
+            -v "$PWD:/candidate:ro" -v "$PWD/artifacts:/artifacts" \
+            -e OPENBLAS_NUM_THREADS=1 -e OMP_NUM_THREADS=1 flexcell-sim:position-contact \
+            python3 /candidate/experiments/physical_capabilities/t08_position_contact_20261113/run_window.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: physical-position-contact-${{ github.run_id }}
+          path: artifacts/
+          retention-days: 30
