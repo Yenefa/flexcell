@@ -46,8 +46,20 @@
       "scope": "Separate development skills, execution and capability development; extract ROS-independent contact geometry and telemetry package",
       "physical_requalification": "NOT_RUN",
       "formal_baseline": "NOT_PROMOTED",
-      "validation": "AST_PARITY_AND_IMPORT_BOUNDARIES_PASS_ROS_REGRESSIONS_PENDING",
-      "legacy_import_dependencies": 13
+      "validation": "AST_PARITY_INDEPENDENT_INSTALL_AND_ROS_REGRESSIONS_PASS",
+      "legacy_import_dependencies": 13,
+      "implementation_commit": "c4c11ff21ea24ebe21c0087861f9e321cc5e7df8",
+      "boundary_enforcement_commit": "441118e5611599f0cc3b5d298c8977a86acc29b1",
+      "ci_run": 43405626430,
+      "regressions_passed": 165,
+      "boundary_regressions_passed": 12,
+      "independent_installation": "PASS",
+      "static_python_files_checked": 94,
+      "extracted_algorithm_ast_parity": true,
+      "execution_changes_imports_only": true,
+      "frozen_files_unchanged": 9,
+      "push_core_unchanged": true,
+      "local_duplicate_build": "STOPPED_AFTER_SAME_CODE_PASSED_CI"
     }
   ]
 }

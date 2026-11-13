@@ -84,3 +84,9 @@ python3 -m pytest -q -o addopts="" \
 ```
 
 精确验证状态以 `config/version_baselines.json` 的本次 source_refactors 记录和对应 CI 为准。
+
+本轮 [CI 43405626430](https://github.com/Yenefa/flexcell/actions/runs/43405626430)
+在 `441118e5` 三项作业全部通过：无 ROS 独立安装、94 个 Python 文件的依赖扫描与
+12 项边界回归、接口/能力/执行包构建及 165 项既有与兼容回归。实际 colcon 根发现为
+5 个当前包。原算法 AST 对齐；旧入口的类型和函数保持同一对象。
+两个本地反例通过 CLI 得到非零退出码。未运行新的物理任务，完整拆分仍有上述迁移项。

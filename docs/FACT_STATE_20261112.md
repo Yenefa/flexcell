@@ -1263,3 +1263,31 @@ This is an offline-verified refactor, not a new physical acceptance. No Gazebo
 trial was repeated and old raw evidence remains bound to original source22f873ba.
 Formal baseline and default backend remain unchanged; broader extraction and
 integration remain separate work.
+
+
+## 2026-11-13 — Separate development, execution and physical capability domains
+
+User clarified the architectural boundary: Development Skills for the coding
+agent, Execution Skills for task runtime, and Physical Capability Development
+as a separate candidate/build/validation workflow. Issue #242 tracks migration.
+Branch refactor/skill-layer-boundaries-20261113 starts atfc12431f.
+
+Implementationc4c11ff2 extracts contact_geometry/contact_trace into independently
+installable flexcell_capabilities. Existing import paths remain compatibility
+exports; the execution package declares a one-way dependency. Geometry and trace
+ASTs match the base after import normalization; the three execution consumers
+have import-only changes. Nine frozen files and contracts/push.py match the
+original physical archive hashes.
+
+CI43405626430 at441118e5 PASSED all three jobs: independent installation without
+ROS/execution packages; dependency-direction scan of94 Python files plus12
+boundary regression cases; ROS interfaces/capability/skills build, actual5-package
+root discovery and165 contact/returned-state/ownership/composition regressions.
+Two local CLI mutation cases reject new reverse dependencies with exit1. A local
+independent installation also passed. The redundant local ROS build was stopped
+after the same execution source passed CI; it is not counted as a completed build.
+
+The guard registers13 exact legacy experiment-loader dependencies. These remain
+migration debt; complete source separation is NOT_CLAIMED. No physical task was
+run for this structural change. Existing physical evidence remains bound to its
+original source; formal baseline NOT_PROMOTED, main goal active.
