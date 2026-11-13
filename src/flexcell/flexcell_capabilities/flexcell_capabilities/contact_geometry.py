@@ -215,6 +215,37 @@ class ContactGeometry:
                     gripper_positions=list(gripper),minimum_floor_clearance_m=clearance,
                     source_sha256=self.sources)
 
+    def register_reachable_finger(self,center,protected,gripper=(0.,0.),distance_m=.03,abort_check=None):
+        """Prefer the established pose, then search a bounded contact-pitch grid.
+
+        Every candidate passes the unchanged triangle, normal, joint and floor
+        checks in register_finger(). Screen the stroke at ten knots as well;
+        the existing dense trajectory planner and execution owner still decide
+        whether any motion may be dispatched. This is not a continuous-path
+        collision certificate.
+        """
+        if (type(distance_m) not in (int,float) or not math.isfinite(distance_m)
+                or not .01<=distance_m<=.15):
+            raise ValueError('invalid contact distance')
+        rejected=[]
+        for degree in range(85,72,-1):
+            if abort_check is not None and abort_check():
+                raise ValueError('contact registration canceled')
+            try:
+                reg=self.register_finger(center,protected,gripper,pitch=math.radians(degree))
+                q=reg['approach_joints']
+                start=apply(self.frames(q,gripper)['end_effector_link'],reg['tcp'])
+                for distance in np.linspace(0.,distance_m+.005,10):
+                    if abort_check is not None and abort_check():
+                        raise ValueError('contact registration canceled')
+                    q=self.tcp_inverse(start+[-distance,0.,0.],reg['pitch_rad'],reg['tcp'],q)
+                    self.guards(q,protected,gripper)
+                return dict(reg,pitch_selection='GEOMETRY_FEASIBLE_PREFERRED_85',
+                            rejected_pitches=rejected)
+            except ValueError as exc:
+                rejected.append(dict(pitch_deg=degree,reason=str(exc)))
+        raise ValueError('no registered contact pitch on the declared grid: '+repr(rejected))
+
     def guards(self,joints,protected,gripper=(0.,0.),floor=.001):
         frames=self.frames(joints,gripper);minimum=float('inf')
         for name,vertices in self.vertices.items():

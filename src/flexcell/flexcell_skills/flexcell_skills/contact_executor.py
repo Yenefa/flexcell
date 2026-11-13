@@ -154,7 +154,10 @@ def execute_contact_push(node,model,native,out,request_id,target,distance_m,
         try:
             if any(abs(v)>.04 for v in current['attitudes'][target]):
                 raise MotionFailed('object attitude outside registered upright calibration')
-            q,g=state();reg=model.register_finger(start,list(protected.values()),g);registry[0]=reg
+            q,g=state()
+            reg=motion.plan_observed(lambda:model.register_reachable_finger(
+                start,list(protected.values()),g,distance_m=requested,abort_check=canceled))
+            registry[0]=reg
             (out/('contact_frame_%02d.json'%attempt)).write_text(json.dumps(reg,indent=2))
             tcp=reg['tcp'];native.begin(reg)
             hover=list(reg['support_world']['point']);hover[2]=.115
