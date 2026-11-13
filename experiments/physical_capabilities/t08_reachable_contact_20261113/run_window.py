@@ -83,7 +83,7 @@ def main():
     before = production_hashes(ROOT)
     metadata = dict(config=config, source_revision=os.environ.get('FLEXCELL_SOURCE_REV'),
                     model=model, sources=before, freeze=freeze, model_calls=0,
-                    source_policy='Implementation frozen before probe declaration; preserve every slot and do not pool earlier repetitions.')
+                    source_policy='Candidate frozen before this repair window; task already exposed and original failure retained.')
     (out / 'preexecution.json').write_text(json.dumps(metadata, indent=2))
     rows = []
     started = time.monotonic()
