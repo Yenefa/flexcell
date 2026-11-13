@@ -1226,3 +1226,22 @@ Evidence:setup/acceptance/evobot_runtime_push_20261112/README.md,
 results.json,offline_verification.json,archives.json and both permanent raw ZIPs.
 The next capability gate is fixed Runtime repetitions plus ordinary physical
 regression before wider inputs and formal held-out evaluation.
+
+
+## 2026-11-13 — Repository version/build/evidence boundaries, first phase
+
+User-selected scope: version, build and evidence organization before robot-source
+extraction. Isolated branch refactor/module-boundaries-20261113 starts at83ffafe1;
+original T08 worktree/branch is retained. Issue #240 tracks integration separately.
+
+Current modules and executed-source/evidence identities are indexed under config/;
+live documentation is docs/VERSION_CONTROL.md and docs/REPOSITORY_MODULES.md.
+Historical package parents gain COLCON_IGNORE without changing existing data.
+Same-environment colcon discovery changes12 ->4 current packages; original root
+build rejects duplicates, organized root builds interfaces/skills successfully.
+CI43396846900 at96df00f2 passes real root discovery and8 regression cases.
+Earlier boundary-CI failures remain visible. This is not physical task evidence.
+
+Source trees src/runtime/benchmark/evolution and existing evidence contents match
+83ffafe1. No robot API/behavior, frozen threshold, formal baseline, branch deletion,
+history rewrite, release, PR or main merge is part of this first phase.
