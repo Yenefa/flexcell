@@ -1,0 +1,51 @@
+name: runtime-components
+on:
+  push:
+    paths:
+      - '.github/workflows/runtime-components.yml'
+      - 'src/flexcell/flexcell_skills/flexcell_skills/task_components/**'
+      - 'src/flexcell/flexcell_skills/flexcell_skills/task_fsm_server.py'
+      - 'src/flexcell/flexcell_skills/test/test_push_results.py'
+  pull_request:
+    paths:
+      - '.github/workflows/runtime-components.yml'
+      - 'src/flexcell/flexcell_skills/flexcell_skills/task_components/**'
+      - 'src/flexcell/flexcell_skills/flexcell_skills/task_fsm_server.py'
+      - 'src/flexcell/flexcell_skills/test/test_push_results.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  result-adapters:
+    runs-on: ubuntu-24.04
+    container: ros:jazzy
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install offline ROS contract dependencies
+        shell: bash
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq python3-pytest python3-jsonschema python3-yaml python3-numpy \
+            ros-jazzy-moveit-msgs ros-jazzy-control-msgs ros-jazzy-tf2-ros \
+            ros-jazzy-ros2-control ros-jazzy-joint-state-broadcaster ros-jazzy-joint-trajectory-controller
+      - name: Build interfaces and skills with component package
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          colcon build --base-paths src/flexcell --symlink-install --parallel-workers 2 --packages-select flexcell_interfaces flexcell_skills
+      - name: Result adapter and existing task/ownership regressions
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          source install/setup.bash
+          export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1
+          python3 -m pytest -p no:cacheprovider -o addopts="" -q \
+            src/flexcell/flexcell_skills/test/test_push_results.py \
+            src/flexcell/flexcell_skills/test/test_public_contact_runtime.py \
+            src/flexcell/flexcell_skills/test/test_push_stage_dispatch.py \
+            src/flexcell/flexcell_skills/test/test_push_composite.py \
+            src/flexcell/flexcell_skills/test/test_composite_server.py \
+            src/flexcell/flexcell_skills/test/test_composite.py \
+            src/flexcell/flexcell_skills/test/test_composite_checkpoint.py \
+            src/flexcell/flexcell_skills/test/test_budget_lifecycle.py
