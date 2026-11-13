@@ -1322,3 +1322,61 @@ This adds small fixed repeated task evidence and two ordinary functional
 regressions. It does not prove broad reliability, generalization or autonomous
 skill development; old release fluctuations are not declared repaired. Formal
 baseline NOT_PROMOTED; default legacy; main goal active.
+
+
+## 2026-11-13 — Position probes expose a real reach limit; geometry repair executes it
+
+This appends to, and does not replace, the preceding fixed repetition evidence.
+Physical work remains on develop/physical-capabilities-20261113.
+
+Frozen source89d7eba8 in CI43448943203: ANCHOR, OFFSET_NEG, YAW_POS and YAW_NEG
+all full9/9 PASS (net60.921–61.057mm); LONG_POS at(0.235,0.025,0.0175)m
+FAILED before any actuator goal,0mm. Its native detail is ValueError:
+fixed-pitch target unreachable; terminal known,0 motion goals. Normal legacy
+pick/place functional smoke PASS. This is a kinematic registration refusal,
+not evidence of lost physical contact or reverse pushing.
+
+The original frozen canonical TaskSpec schema does not admit the existing T08
+push form. New probe declarations therefore use a separate explicit structural
+schema; old schemas, TaskSpecs and acceptance thresholds remain unchanged.
+Cancelled CI43448470658 stopped during image build before physics and is not a
+physical sample. Versioned declaration compatibility is auxiliary issue #243.
+Probe evidence6a1bd3bf retains the refusal and all successes; independent offline
+CI43454769703 PASS. These probes are development-declared, not sealed held-out.
+
+Implementation3c6292f8 adds bounded geometry-feasible pitch selection in the pure
+capability module, retaining85 degrees as preferred. Each candidate passes the
+existing real collision-mesh registration/normal/joint/floor/protected-object
+checks plus ten stroke screening knots. The original dense trajectory checks
+remain dispatch authority. Execution uses existing plan_observed to retain
+observation service while doing geometry work; ownership/budgets unchanged.
+Only two production files change, plus focused tests. No guessed task-specific
+79-degree exception or relaxed contact gate is added.
+
+CI43455056965 executed31a002f6 on a fixed, preregistered window with no sample
+replacement: anchor full9/9, LONG_1 and LONG_2 full9/9, normal functional smoke
+PASS. The two LONG trials have identical TaskSpec and materialized-world hashes
+to the refused baseline. Each completes3 bounded stages,36/40 motion goals,
+with pitch sequence79->85->85. Net signed displacement91.3890225/91.4078218mm;
+Runtime327.534/325.217s within600s. Anchor retains85 degrees and60.9451059mm.
+All8 native returns meet readiness at recorded consumption, ages46.2–139.8ms.
+Normal pick/place final error5.650mm; task18.740s. Ordinary smoke is not full9/9.
+
+Same-image142 relevant checks PASS. Boundary CI43455056891 PASS includes170 ROS
+regressions and independent capability installation/direction checks. Test sets
+overlap; do not sum them or count them as physical runs.
+
+Raw candidate ZIP32,440,491 bytes, SHA256
+5bc6ae24e5c24be0f5d0acf185230e87c1565ab75b082c0414d905598cba09d4,
+archived under setup/acceptance/physical_reachable_contact_20261113/.
+Offline replay covers all462 manifest files, rebuilds three evidence bundles,
+reproduces all9/9 passes, checks8 consumed return receipts and normal smoke.
+Nine frozen files, push arithmetic, existing TaskSpecs/thresholds and legacy
+default remain unchanged.
+
+Actual gain: a previously refused registered starting position can now complete
+three physical push/return stages in Gazebo. LONG is an exposed development
+failure case after an engineering repair, with only two candidate repetitions.
+No blind generalization, broad reliability, precise displacement, hardware,
+autonomous Develop/L4, transfer or full-regression claim. Formal baseline
+NOT_PROMOTED; formal T08 CALIBRATION_UNSUPPORTED; main goal active.

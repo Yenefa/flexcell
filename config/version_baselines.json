@@ -76,6 +76,38 @@
       "formal_held_out_validation": false,
       "full_regression_complete": false,
       "evidence_commit": "9550aaacba0dd8d08ddb377ba12b22aee47490cb"
+    },
+    {
+      "development_branch": "develop/physical-capabilities-20261113",
+      "default_backend": "legacy",
+      "formal_baseline": "NOT_PROMOTED",
+      "formal_t08_status": "CALIBRATION_UNSUPPORTED",
+      "formal_held_out_validation": false,
+      "full_regression_complete": false,
+      "id": "position_contact_probes",
+      "executed_source_commit": "89d7eba8c0c9413a4abc63235374d3c99fae5cc9",
+      "evidence_commit": "6a1bd3bf3de86888c5f9286dbaa825232db9fd16",
+      "ci_run": 43448943203,
+      "evidence_ci_run": 43454769703,
+      "report": "setup/acceptance/physical_position_contact_20261113/README.md",
+      "status": "SCOPED_PROBES_WITH_KINEMATIC_REFUSAL",
+      "scope": "Anchor and three new declared probes full9/9; LONG_POS refused at fixed-pitch registration before motion; normal functional smoke PASS. Includes all slots and original refusal."
+    },
+    {
+      "development_branch": "develop/physical-capabilities-20261113",
+      "default_backend": "legacy",
+      "formal_baseline": "NOT_PROMOTED",
+      "formal_t08_status": "CALIBRATION_UNSUPPORTED",
+      "formal_held_out_validation": false,
+      "full_regression_complete": false,
+      "id": "reachable_contact_posture",
+      "executed_source_commit": "31a002f6cf4980750207fc7b09def6483ccfb971",
+      "implementation_commit": "3c6292f82fd8d70d9beb5da40aa04210294bc45b",
+      "ci_run": 43455056965,
+      "boundary_ci_run": 43455056891,
+      "report": "setup/acceptance/physical_reachable_contact_20261113/README.md",
+      "status": "SCOPED_REACH_EXTENSION_VALIDATED",
+      "scope": "Same previously refused LONG_POS task/world completes three stages twice at 91.389/91.408mm with full9/9; anchor full9/9 and ordinary normal functional smoke PASS. Exposed development task; not population reliability or formal held-out."
     }
   ]
 }
