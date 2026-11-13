@@ -1,0 +1,39 @@
+{
+  "experiment": "REACHABLE_CONTACT_POSTURE_CANDIDATE",
+  "frozen_code_commit": "3c6292f82fd8d70d9beb5da40aa04210294bc45b",
+  "failed_baseline_run": 43448943203,
+  "push_slots": [
+    {
+      "label": "ANCHOR",
+      "task": "original",
+      "domain": 211
+    },
+    {
+      "label": "LONG_1",
+      "task": "../t08_position_contact_20261113/tasks/LONG_POS.json",
+      "domain": 212
+    },
+    {
+      "label": "LONG_2",
+      "task": "../t08_position_contact_20261113/tasks/LONG_POS.json",
+      "domain": 213
+    }
+  ],
+  "ordinary_slots": [
+    {
+      "label": "REG_NORMAL",
+      "case": "normal",
+      "domain": 214
+    }
+  ],
+  "push_timeout_s": 900,
+  "ordinary_timeout_s": 360,
+  "window_budget_s": 2700,
+  "replacement_trials": false,
+  "stop_on_unknown_terminal": true,
+  "formal_held_out": false,
+  "baseline_promoted": false,
+  "prediction": "A geometry-feasible posture will execute the previously rejected start and complete three bounded stages. Keep the established 85-degree posture on the anchor.",
+  "refutation": "Any independent acceptance failure, unknown terminal, preserved-object violation or regression refutes the candidate for that slot.",
+  "claim": "Seen failed development task after an engineering repair; not blind generalization or Runtime autonomous skill development."
+}
