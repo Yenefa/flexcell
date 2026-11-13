@@ -61,5 +61,20 @@
       "push_core_unchanged": true,
       "local_duplicate_build": "STOPPED_AFTER_SAME_CODE_PASSED_CI"
     }
+  ],
+  "physical_experiments": [
+    {
+      "development_branch": "develop/physical-capabilities-20261113",
+      "executed_source_commit": "66b53f51c73ea3d02ab4147ceabf2580a0ee9fb3",
+      "ci_run": 43421358107,
+      "report": "setup/acceptance/physical_repetition_20261113/README.md",
+      "status": "REPEATED_SCOPED_TASK_VALIDATION",
+      "scope": "Three original red tasks and two exposed blue probes, each full9/9; ordinary normal and dual_object functional smoke PASS. Raw CI red due aggregator path bug; offline correction retained.",
+      "default_backend": "legacy",
+      "formal_baseline": "NOT_PROMOTED",
+      "formal_t08_status": "CALIBRATION_UNSUPPORTED",
+      "formal_held_out_validation": false,
+      "full_regression_complete": false
+    }
   ]
 }

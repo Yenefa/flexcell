@@ -1,0 +1,126 @@
+{
+  "executed_source": "66b53f51c73ea3d02ab4147ceabf2580a0ee9fb3",
+  "ci_run": 43421358107,
+  "ci_conclusion": "failure",
+  "raw_summary_preserved": true,
+  "correction": "Ordinary results are in the unique run-* child directory; original aggregator read the parent path.",
+  "source_unchanged": true,
+  "push_tasks_completed": 5,
+  "ordinary_smoke_tasks_completed": 2,
+  "results": [
+    {
+      "label": "RED_1",
+      "kind": "push",
+      "driver_exit": 0,
+      "task_completed": true,
+      "net_signed_m": 0.06092363985238608,
+      "runtime_status": "TASK_COMPLETED",
+      "full_gates_passed": 9,
+      "runtime_wall_s": 134.04289194399996
+    },
+    {
+      "label": "RED_2",
+      "kind": "push",
+      "driver_exit": 0,
+      "task_completed": true,
+      "net_signed_m": 0.06094458232483069,
+      "runtime_status": "TASK_COMPLETED",
+      "full_gates_passed": 9,
+      "runtime_wall_s": 134.225839919
+    },
+    {
+      "label": "RED_3",
+      "kind": "push",
+      "driver_exit": 0,
+      "task_completed": true,
+      "net_signed_m": 0.06093483114910844,
+      "runtime_status": "TASK_COMPLETED",
+      "full_gates_passed": 9,
+      "runtime_wall_s": 134.198492225
+    },
+    {
+      "label": "BLUE_1",
+      "kind": "push",
+      "driver_exit": 0,
+      "task_completed": true,
+      "net_signed_m": 0.060923712015166026,
+      "runtime_status": "TASK_COMPLETED",
+      "full_gates_passed": 9,
+      "runtime_wall_s": 131.85465262500009
+    },
+    {
+      "label": "BLUE_2",
+      "kind": "push",
+      "driver_exit": 0,
+      "task_completed": true,
+      "net_signed_m": 0.060926270373603236,
+      "runtime_status": "TASK_COMPLETED",
+      "full_gates_passed": 9,
+      "runtime_wall_s": 131.93526772799987
+    },
+    {
+      "label": "REG_NORMAL",
+      "kind": "ordinary",
+      "driver_exit": 0,
+      "task_completed": true,
+      "net_signed_m": null,
+      "result_path": "REG_NORMAL/run-310d2edb3932/result.json",
+      "original_status": "PASS",
+      "task": {
+        "action": "task",
+        "goal_uuid": "6ece860a22da488e82fee9c440e81655",
+        "outcome": "OUTCOME_SUCCEEDED",
+        "outcome_val": 0,
+        "error_code": "ERR_NONE",
+        "detail": "task done: all assignments verified",
+        "evidence_id": "pick_place_v1-a588801c",
+        "wall_seconds": 14.6,
+        "fsm_trace": [
+          "PICK_A(attempt=1):OK",
+          "PLACE_A:OK",
+          "VERIFY_A(attempt=1):OK"
+        ],
+        "object_at_place": true,
+        "final_position_error_m": 0.00982801673083423,
+        "skip_verify": false
+      }
+    },
+    {
+      "label": "REG_DUAL",
+      "kind": "ordinary",
+      "driver_exit": 0,
+      "task_completed": true,
+      "net_signed_m": null,
+      "result_path": "REG_DUAL/run-7d39612782e7/result.json",
+      "original_status": "PASS",
+      "task": {
+        "action": "demo",
+        "goal_uuid": "e926cd988b7f4d8895c9b7ade4ae8d21",
+        "outcome": "OUTCOME_SUCCEEDED",
+        "outcome_val": 0,
+        "error_code": "ERR_NONE",
+        "detail": "task done: all assignments verified",
+        "evidence_id": "week1_demo_v1-d46b377a",
+        "wall_seconds": 29.857,
+        "fsm_trace": [
+          "PICK_A(attempt=1):OK",
+          "PLACE_A:OK",
+          "VERIFY_A(attempt=1):OK",
+          "PICK_B(attempt=1):OK",
+          "PLACE_B:OK",
+          "VERIFY_B(attempt=1):OK"
+        ],
+        "object_a_at_zone": true,
+        "object_b_at_zone": true,
+        "zone_a_error_m": 0.003612127007841196,
+        "zone_b_error_m": 0.010549306722179373,
+        "run_id": "week1_demo_v1-3346444d",
+        "scenario_id": "week1_demo_v1"
+      }
+    }
+  ],
+  "independent_raw_replay": "PASS",
+  "formal_baseline": "NOT_PROMOTED",
+  "formal_held_out": false,
+  "population_reliability_claim": false
+}

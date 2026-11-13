@@ -1291,3 +1291,34 @@ The guard registers13 exact legacy experiment-loader dependencies. These remain
 migration debt; complete source separation is NOT_CLAIMED. No physical task was
 run for this structural change. Existing physical evidence remains bound to its
 original source; formal baseline NOT_PROMOTED, main goal active.
+
+
+## 2026-11-13 — Module workstreams allocated; fixed physical replication completed
+
+All ten capability areas are assigned across eight workstreams in
+config/development_branches.json; allocation735a74c1, source baseline3e81f956.
+Only develop/physical-capabilities-20261113 is active; other feature branches
+are reserved, not running agents. No existing experiment history was deleted.
+
+CI43421358107 executed66b53f51: RED_1/2/3 and BLUE_1/2 all completed public
+Runtime tasks and frozen full9/9. Net signed displacement60.92364–60.94458mm;
+10 returned components accepted, receipt ages17.0–107.2ms;24/40 motion goals
+per task. Normal and dual_object full-graph functional smoke also PASS, with
+14.6s/29.857s task times. No physical controller or frozen rule changed.
+
+The CI job remains red: this agent's aggregator read parent result.json instead
+of the unique run-* subdirectory and labelled the two successful ordinary runs
+false. Original ZIP and original erroneous results.json remain unchanged.
+364f7543 fixes only aggregation, verified by five cases including ambiguous
+and missing runs. corrected_results.json separately records the correction.
+No new physical run was used to replace this window or obtain a green job.
+
+Independent offline replay validates all675 manifest entries, source/frozen
+hashes, reconstructs five bundles and reproduces all five9/9 verdicts. All ten
+returned-component consumption checks pass. Raw evidence, replayer and report:
+setup/acceptance/physical_repetition_20261113/.
+
+This adds small fixed repeated task evidence and two ordinary functional
+regressions. It does not prove broad reliability, generalization or autonomous
+skill development; old release fluctuations are not declared repaired. Formal
+baseline NOT_PROMOTED; default legacy; main goal active.

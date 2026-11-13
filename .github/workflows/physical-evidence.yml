@@ -1,0 +1,37 @@
+name: physical-evidence
+on:
+  push:
+    paths:
+      - '.github/workflows/physical-evidence.yml'
+      - 'setup/acceptance/physical_repetition_20261113/archive.json'
+      - 'setup/acceptance/physical_repetition_20261113/verify_archive.py'
+      - 'experiments/physical_capabilities/t08_repetition_20261113/test_window.py'
+  pull_request:
+    paths:
+      - '.github/workflows/physical-evidence.yml'
+      - 'setup/acceptance/physical_repetition_20261113/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  raw-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Evidence schema dependency
+        run: python3 -m pip install jsonschema
+      - name: Aggregator regression cases
+        run: python3 -m unittest discover -s experiments/physical_capabilities/t08_repetition_20261113 -p 'test_window.py' -v
+      - name: Raw manifest, unchanged source, five independent task regrades
+        run: |
+          python3 setup/acceptance/physical_repetition_20261113/verify_archive.py \
+            setup/acceptance/physical_repetition_20261113/physical-capabilities-43421358107.zip /tmp/physical-replay
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: physical-offline-replay-${{ github.run_id }}
+          path: /tmp/physical-replay/verification.json
