@@ -1,0 +1,158 @@
+{
+  "schema_version": 1,
+  "areas": {
+    "development_skills": [
+      "development_skills"
+    ],
+    "capability_development": [
+      "evolution"
+    ],
+    "execution_skills": [
+      "runtime",
+      "src/flexcell/flexcell_skills"
+    ],
+    "physical_capability_core": [
+      "src/flexcell/flexcell_capabilities"
+    ]
+  },
+  "rules": [
+    {
+      "id": "execution_without_development",
+      "roots": [
+        "runtime",
+        "src/flexcell/flexcell_skills/flexcell_skills"
+      ],
+      "forbidden_imports": [
+        "development_skills",
+        "evolution",
+        "benchmark",
+        "experiments",
+        "setup.acceptance"
+      ],
+      "forbidden_path_parts": [
+        "development_skills",
+        "evolution",
+        "benchmark",
+        "experiments",
+        "acceptance"
+      ]
+    },
+    {
+      "id": "physical_core_without_execution",
+      "roots": [
+        "src/flexcell/flexcell_capabilities/flexcell_capabilities"
+      ],
+      "allowed_external_imports": [
+        "numpy",
+        "flexcell_capabilities"
+      ],
+      "forbid_python_path_changes": true
+    }
+  ],
+  "legacy_exceptions": [
+    {
+      "rule": "execution_without_development",
+      "path": "runtime/planner/agent_planner.py",
+      "kind": "loader_path",
+      "expression": "sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'experiments' / 'pilot-001'))",
+      "count": 1,
+      "reason": "Legacy experiment client imports research helpers; migrate into the development experiment runner before removing this exact exception."
+    },
+    {
+      "rule": "execution_without_development",
+      "path": "runtime/planner/prepare_baseline_b.py",
+      "kind": "loader_path",
+      "expression": "sys.path.insert(0, str(WT / 'experiments' / 'pilot-001'))",
+      "count": 1,
+      "reason": "Legacy experiment client imports research helpers; migrate into the development experiment runner before removing this exact exception."
+    },
+    {
+      "rule": "execution_without_development",
+      "path": "runtime/planner/prepare_baseline_b.py",
+      "kind": "loader_path",
+      "expression": "sys.path.insert(0, str(WT / 'experiments' / 'baselines'))",
+      "count": 1,
+      "reason": "Legacy experiment client imports research helpers; migrate into the development experiment runner before removing this exact exception."
+    },
+    {
+      "rule": "execution_without_development",
+      "path": "runtime/planner/prepare_baseline_c.py",
+      "kind": "loader_path",
+      "expression": "sys.path.insert(0, str(WT / 'experiments' / 'pilot-001'))",
+      "count": 1,
+      "reason": "Legacy experiment client imports research helpers; migrate into the development experiment runner before removing this exact exception."
+    },
+    {
+      "rule": "execution_without_development",
+      "path": "runtime/planner/prepare_baseline_c.py",
+      "kind": "loader_path",
+      "expression": "sys.path.insert(0, str(WT / 'experiments' / 'baselines'))",
+      "count": 1,
+      "reason": "Legacy experiment client imports research helpers; migrate into the development experiment runner before removing this exact exception."
+    },
+    {
+      "rule": "execution_without_development",
+      "path": "runtime/planner/run_baseline_b.py",
+      "kind": "loader_path",
+      "expression": "sys.path.insert(0, str(ROOT / 'experiments' / 'baselines'))",
+      "count": 1,
+      "reason": "Legacy experiment client imports research helpers; migrate into the development experiment runner before removing this exact exception."
+    },
+    {
+      "rule": "execution_without_development",
+      "path": "runtime/recovery/recover.py",
+      "kind": "loader_path",
+      "expression": "sys.path.insert(0, str(WT / 'evolution' / 'diagnosis'))",
+      "count": 1,
+      "reason": "Legacy experiment client imports research helpers; migrate into the development experiment runner before removing this exact exception."
+    },
+    {
+      "rule": "execution_without_development",
+      "path": "runtime/recovery/recover.py",
+      "kind": "loader_path",
+      "expression": "sys.path.insert(0, str(WT / 'experiments' / 'baselines'))",
+      "count": 1,
+      "reason": "Legacy experiment client imports research helpers; migrate into the development experiment runner before removing this exact exception."
+    },
+    {
+      "rule": "execution_without_development",
+      "path": "runtime/verifier/fill_self_assess.py",
+      "kind": "loader_path",
+      "expression": "sys.path.insert(0, str(WT / 'experiments' / 'pilot-001'))",
+      "count": 1,
+      "reason": "Legacy experiment client imports research helpers; migrate into the development experiment runner before removing this exact exception."
+    },
+    {
+      "rule": "execution_without_development",
+      "path": "runtime/verifier/reassess_v2.py",
+      "kind": "loader_path",
+      "expression": "sys.path.insert(0, str(WT / 'experiments' / 'pilot-001'))",
+      "count": 1,
+      "reason": "Legacy experiment client imports research helpers; migrate into the development experiment runner before removing this exact exception."
+    },
+    {
+      "rule": "execution_without_development",
+      "path": "runtime/verifier/reassess_v3.py",
+      "kind": "loader_path",
+      "expression": "sys.path.insert(0, str(WT / 'experiments' / 'pilot-001'))",
+      "count": 1,
+      "reason": "Legacy experiment client imports research helpers; migrate into the development experiment runner before removing this exact exception."
+    },
+    {
+      "rule": "execution_without_development",
+      "path": "runtime/verifier/reassess_v4.py",
+      "kind": "loader_path",
+      "expression": "sys.path.insert(0, str(WT / 'experiments' / 'pilot-001'))",
+      "count": 1,
+      "reason": "Legacy experiment client imports research helpers; migrate into the development experiment runner before removing this exact exception."
+    },
+    {
+      "rule": "execution_without_development",
+      "path": "runtime/verifier/self_assess.py",
+      "kind": "loader_path",
+      "expression": "sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'experiments' / 'pilot-001'))",
+      "count": 1,
+      "reason": "Legacy experiment client imports research helpers; migrate into the development experiment runner before removing this exact exception."
+    }
+  ]
+}

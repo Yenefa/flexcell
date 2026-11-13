@@ -28,7 +28,7 @@ jobs:
         shell: bash
         run: |
           source /opt/ros/jazzy/setup.bash
-          colcon build --base-paths src/flexcell --symlink-install --parallel-workers 2 --packages-select flexcell_interfaces flexcell_skills
+          colcon build --base-paths src/flexcell --symlink-install --parallel-workers 2 --packages-up-to flexcell_skills
       - name: Relevant contact, task and existing composition contracts
         shell: bash
         run: |

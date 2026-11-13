@@ -50,3 +50,9 @@
 源码提取分支在 `version_baselines.json` 的 `source_refactors` 单独登记。
 当前推进结果模块分支 `refactor/runtime-push-results-20261113` 基于 `0c3cf175`，
 通过离线等价与 ROS 回归；原物理 checkpoint 的执行源码和证据 SHA 保持原值。
+
+按三职责域解耦的分支 `refactor/skill-layer-boundaries-20261113` 基于 `fc12431f`，
+跟踪 [issue #242](https://github.com/Yenefa/flexcell/issues/242)。它接续前两阶段，
+独立提取物理模型包并限制开发与执行的依赖方向，范围见
+[SKILL_ARCHITECTURE.md](SKILL_ARCHITECTURE.md)。后续集成需包含新能力包、执行包依赖、
+兼容入口和构建配置，不能只取路径调整的一部分。独立诊断分支的提交仍需另外审查。

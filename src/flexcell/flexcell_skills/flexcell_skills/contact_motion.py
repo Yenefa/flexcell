@@ -14,7 +14,7 @@ from rclpy.serialization import serialize_message
 from trajectory_msgs.msg import JointTrajectoryPoint
 from flexcell_interfaces.action import MoveToPose
 from flexcell_interfaces.srv import RegisterMtcTrajectory
-from flexcell_skills.contact_geometry import ARM
+from flexcell_capabilities.contact_geometry import ARM
 
 
 class MotionFailed(RuntimeError):pass

@@ -1,5 +1,9 @@
 # DEVELOPMENT — execution calendar & maintenance policy
 
+Skill development and runtime dependencies are separated in
+[SKILL_ARCHITECTURE.md](SKILL_ARCHITECTURE.md); current physical model code is in
+the independently installable `flexcell_capabilities` package.
+
 Repository organization work is isolated under [issue #240](https://github.com/Yenefa/flexcell/issues/240):
 [version and branch conventions](VERSION_CONTROL.md),
 [module/build/evidence boundaries](REPOSITORY_MODULES.md), and ADR-005.

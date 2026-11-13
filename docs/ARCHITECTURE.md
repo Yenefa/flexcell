@@ -1,5 +1,8 @@
 # ARCHITECTURE — FlexCell system
 
+Development skills, execution skills and physical capability development follow
+the dependency boundaries in [SKILL_ARCHITECTURE.md](SKILL_ARCHITECTURE.md).
+
 Current repository/module boundaries are recorded in
 [REPOSITORY_MODULES.md](REPOSITORY_MODULES.md) and
 [ADR-005](ADR/ADR-005-repository-module-and-evidence-boundaries.md).

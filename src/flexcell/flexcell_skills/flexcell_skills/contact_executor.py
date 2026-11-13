@@ -12,10 +12,10 @@ from rosidl_runtime_py.convert import message_to_ordereddict
 from sensor_msgs.msg import JointState
 from std_msgs.msg import String
 from flexcell_interfaces.action import Observe
-from flexcell_skills.contact_geometry import ARM,ContactGeometry,apply
+from flexcell_capabilities.contact_geometry import ARM,ContactGeometry,apply
 from flexcell_skills.contact_motion import ConstrainedMotion,MotionCanceled,MotionFailed,MotionUnknown
 from flexcell_skills.contact_receipt import ContactReceipt,ReturnedState
-from flexcell_skills.contact_trace import NativeContact,fresh_joint_values
+from flexcell_capabilities.contact_trace import NativeContact,fresh_joint_values
 from flexcell_skills.contracts import push,push_recover
 
 

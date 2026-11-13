@@ -16,8 +16,8 @@ from rclpy.parameter import Parameter
 from std_srvs.srv import Trigger
 from flexcell_interfaces.action import ContactPush
 from flexcell_skills.contact_executor import execute_contact_push
-from flexcell_skills.contact_geometry import ContactGeometry
-from flexcell_skills.contact_trace import NativeContact
+from flexcell_capabilities.contact_geometry import ContactGeometry
+from flexcell_capabilities.contact_trace import NativeContact
 from flexcell_skills.contracts import push
 
 

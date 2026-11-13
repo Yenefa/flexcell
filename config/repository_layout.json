@@ -4,6 +4,7 @@
   "ros_packages": {
     "flexcell_interfaces": "src/flexcell/flexcell_interfaces",
     "flexcell_skills": "src/flexcell/flexcell_skills",
+    "flexcell_capabilities": "src/flexcell/flexcell_capabilities",
     "flexcell_mtc": "src/flexcell/flexcell_mtc",
     "flexcell_gazebo": "src/flexcell/flexcell_gazebo"
   },
@@ -15,7 +16,8 @@
   "modules": [
     {"id": "task_runtime", "paths": ["runtime"], "role": "Public input, planning and task clients; no independent grading authority"},
     {"id": "robot_interfaces", "paths": ["src/flexcell/flexcell_interfaces"], "role": "Typed ROS actions, services and state messages"},
-    {"id": "robot_skills", "paths": ["src/flexcell/flexcell_skills"], "role": "Task execution, skill servers and safety/return contracts"},
+    {"id": "robot_skills", "paths": ["src/flexcell/flexcell_skills"], "role": "Runtime skill servers, task ownership and safety/return contracts; consumes physical capability models"},
+    {"id": "physical_capability_core", "paths": ["src/flexcell/flexcell_capabilities"], "role": "ROS-independent physical models and read-only telemetry; no task execution or development dependencies"},
     {"id": "native_motion", "paths": ["src/flexcell/flexcell_mtc"], "role": "Native manipulation planning below the skill interface"},
     {"id": "simulation", "paths": ["src/flexcell/flexcell_gazebo", "worlds"], "role": "Physics plugins, simulator assets and native telemetry"},
     {"id": "benchmark", "paths": ["benchmark"], "role": "Task definitions, isolation and independent evaluation"},

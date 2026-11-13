@@ -1,5 +1,7 @@
 # Agentic Flexible Robotic Workcell
 
+Skill architecture: [development skills, execution skills and physical capability development](docs/SKILL_ARCHITECTURE.md).
+
 Repository organization: [module/build/evidence boundaries](docs/REPOSITORY_MODULES.md)
 and [version/branch conventions](docs/VERSION_CONTROL.md). Executed-source and
 evidence checkpoints are indexed separately in [version_baselines.json](config/version_baselines.json).

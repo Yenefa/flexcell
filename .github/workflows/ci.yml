@@ -1,6 +1,6 @@
 # FlexCell CI (audit P3): the offline test ladder runs on every push/PR.
 #
-# Scope: interfaces + skills offline; sim.yml separately builds all four
+# Scope: interfaces + skills and dependencies offline; sim.yml builds all
 # first-party packages and runs headless native/MoveIt/MTC runtime fixtures.
 # Historical delivery batteries remain available in REPRODUCE.md. Steps mirror
 # ladder: colcon build -> colcon test (all suites, 0 failures required) ->
@@ -26,7 +26,7 @@ jobs:
         run: |
           apt-get update -qq
           apt-get install -y -qq \
-            python3-pytest python3-jsonschema \
+            python3-pytest python3-jsonschema python3-numpy \
             ros-jazzy-moveit-msgs \
             ros-jazzy-control-msgs \
             ros-jazzy-tf2-ros \
@@ -92,7 +92,7 @@ jobs:
         run: |
           source /opt/ros/jazzy/setup.bash
           colcon build --base-paths src/flexcell --symlink-install \
-            --packages-select flexcell_interfaces flexcell_skills
+            --packages-up-to flexcell_skills
 
       - name: trusted-simulation evidence and failed-example audits
         shell: bash

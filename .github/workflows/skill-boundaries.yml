@@ -1,0 +1,86 @@
+name: skill-boundaries
+on:
+  push:
+    paths:
+      - '.github/workflows/skill-boundaries.yml'
+      - 'config/skill_boundaries.json'
+      - 'scripts/check_skill_boundaries.py'
+      - 'scripts/tests/test_skill_boundaries.py'
+      - 'src/flexcell/flexcell_capabilities/**'
+      - 'src/flexcell/flexcell_skills/**'
+      - 'runtime/**/*.py'
+  pull_request:
+    paths:
+      - '.github/workflows/skill-boundaries.yml'
+      - 'config/skill_boundaries.json'
+      - 'scripts/check_skill_boundaries.py'
+      - 'scripts/tests/test_skill_boundaries.py'
+      - 'src/flexcell/flexcell_capabilities/**'
+      - 'src/flexcell/flexcell_skills/**'
+      - 'runtime/**/*.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  dependency-direction:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check import direction and existing dependency debt
+        run: |
+          python3 scripts/check_skill_boundaries.py
+          python3 scripts/check_repository_layout.py
+          python3 -m unittest discover -s scripts/tests -p 'test_*boundaries.py' -v
+  independent-capability:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install capability package without ROS or execution skills
+        run: |
+          python3 -m venv /tmp/capability-venv
+          /tmp/capability-venv/bin/pip install ./src/flexcell/flexcell_capabilities pytest
+          cd /tmp
+          /tmp/capability-venv/bin/python -I -c 'import flexcell_capabilities.contact_geometry, flexcell_capabilities.contact_trace'
+      - name: Refuse runtime, ROS and development imports
+        run: |
+          /tmp/capability-venv/bin/python -m pytest -q -o addopts="" src/flexcell/flexcell_capabilities/test
+  execution-compatibility:
+    runs-on: ubuntu-24.04
+    container: ros:jazzy
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ROS contract dependencies
+        shell: bash
+        run: |
+          apt-get update -qq
+          apt-get install -y -qq python3-pytest python3-jsonschema python3-yaml python3-numpy \
+            ros-jazzy-moveit-msgs ros-jazzy-control-msgs ros-jazzy-tf2-ros \
+            ros-jazzy-ros2-control ros-jazzy-joint-state-broadcaster ros-jazzy-joint-trajectory-controller
+      - name: Build execution skills and declared dependencies
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          colcon build --base-paths src/flexcell --symlink-install --parallel-workers 2 --packages-up-to flexcell_skills
+          python3 scripts/check_repository_layout.py --colcon "$(command -v colcon)"
+      - name: Existing contact, returned-state, ownership and composition regressions
+        shell: bash
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          source install/setup.bash
+          export OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1
+          python3 -m pytest -p no:cacheprovider -o addopts="" -q \
+            src/flexcell/flexcell_capabilities/test \
+            src/flexcell/flexcell_skills/test/test_capability_compatibility.py \
+            src/flexcell/flexcell_skills/test/test_contact_control.py \
+            src/flexcell/flexcell_skills/test/test_push_results.py \
+            src/flexcell/flexcell_skills/test/test_public_contact_runtime.py \
+            src/flexcell/flexcell_skills/test/test_push_stage_dispatch.py \
+            src/flexcell/flexcell_skills/test/test_push_composite.py \
+            src/flexcell/flexcell_skills/test/test_composite_server.py \
+            src/flexcell/flexcell_skills/test/test_composite.py \
+            src/flexcell/flexcell_skills/test/test_composite_checkpoint.py \
+            src/flexcell/flexcell_skills/test/test_budget_lifecycle.py

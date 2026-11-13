@@ -37,6 +37,17 @@
       "validation": "AST_EXTRACTION_PARITY_AND_ROS_REGRESSIONS_PASS",
       "ci_run": 43399498185,
       "regressions_passed": 127
+    },
+    {
+      "id": "skill_layer_boundaries",
+      "branch": "refactor/skill-layer-boundaries-20261113",
+      "base_commit": "fc12431f2d6e6dfbaa6a28729c3b0b91a1a4f453",
+      "issue": 242,
+      "scope": "Separate development skills, execution and capability development; extract ROS-independent contact geometry and telemetry package",
+      "physical_requalification": "NOT_RUN",
+      "formal_baseline": "NOT_PROMOTED",
+      "validation": "AST_PARITY_AND_IMPORT_BOUNDARIES_PASS_ROS_REGRESSIONS_PENDING",
+      "legacy_import_dependencies": 13
     }
   ]
 }

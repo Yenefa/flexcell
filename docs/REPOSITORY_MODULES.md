@@ -1,6 +1,7 @@
 # 模块、构建与证据边界
 
-目录和构建边界已建立；源码从推进结果适配模块开始逐步提取，整体拆分仍在进行。
+目录和构建边界已建立；推进结果适配与物理模型已开始提取，整体拆分仍在进行。
+开发技能、执行技能与物理能力研发的依赖方向见 [SKILL_ARCHITECTURE.md](SKILL_ARCHITECTURE.md)。
 目录归属以 [repository_layout.json](../config/repository_layout.json) 为准，
 版本索引和分支约定见 [VERSION_CONTROL.md](VERSION_CONTROL.md)。
 
@@ -10,10 +11,12 @@
 |---|---|---|
 | 任务 Runtime | `runtime/` | 公开输入、规划和任务客户端 |
 | 机器人接口与执行 | `src/flexcell/flexcell_interfaces/`、`flexcell_skills/` | ROS 接口、任务执行、技能和安全/返回状态契约 |
+| 物理能力核心 | `src/flexcell/flexcell_capabilities/` | 独立的接触几何、约束轨迹计算与只读遥测；不依赖执行包或开发工具 |
 | 原生运动与仿真 | `src/flexcell/flexcell_mtc/`、`flexcell_gazebo/`、`worlds/` | 底层运动规划、物理插件、环境与原生遥测 |
 | 独立验收 | `benchmark/` | 任务、隔离、独立评分；冻结规则继续按原约束维护 |
 | 数据格式与导出 | `data/` | 数据集格式和离线工具，与实时执行分开 |
-| 研发与经验 | `evolution/`、`development_skills/` | 提案和经验；编码 Agent 的开发实践与机器人技能分别记录 |
+| 能力研发与经验 | `evolution/` | 诊断、候选开发和经验；产出固定候选版本供验证与后续集成 |
+| 开发技能 | `development_skills/` | 编码 Agent 的开发实践、工具与使用记录 |
 | 工程基础设施 | `infra/`、`scripts/`、`config/`、`.github/` | 构建、启动、部署、配置和仓库检查 |
 | 历史证据 | `setup/acceptance/`、`experiments/pilot-001/runs/` | 原始记录、失败、执行快照和复核资料 |
 
@@ -22,8 +25,9 @@
 
 ## 构建边界已执行
 
-当前第一方 ROS 包只有四个：`flexcell_interfaces`、`flexcell_skills`、
-`flexcell_mtc`、`flexcell_gazebo`，统一位于 `src/flexcell/`。
+当前第一方构建包为五个：`flexcell_interfaces`、`flexcell_skills`、
+`flexcell_capabilities`、`flexcell_mtc`、`flexcell_gazebo`，统一位于 `src/flexcell/`。
+其中 `flexcell_capabilities` 使用 ament 参与构建，但其 Python 实现不依赖 ROS。
 
 归档目录中还存在七份历史 `flexcell_skills` 包快照。它们保留原位置与内容，
 由父目录的 `COLCON_IGNORE` 排除出根工作区的包发现。进入历史子工作区单独复现时，
@@ -35,7 +39,7 @@
 ```bash
 source /opt/ros/jazzy/setup.bash
 colcon build --base-paths src/flexcell --symlink-install \
-  --packages-select flexcell_interfaces flexcell_skills
+  --packages-up-to flexcell_skills
 ```
 
 需要原生插件时按目标增加 `flexcell_mtc`、`flexcell_gazebo`，并使用既有锁定的上游工作区。
