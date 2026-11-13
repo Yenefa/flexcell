@@ -44,7 +44,8 @@
   colcon 当前包数由 4 增为 5；构建技能包使用 `--packages-up-to flexcell_skills`。
 - [边界配置](../config/skill_boundaries.json) 和
   [检查脚本](../scripts/check_skill_boundaries.py) 检查静态导入、常见字面量动态导入、
-  `sys.path` 修改和文件加载调用。能力核心只允许标准库、NumPy 和自身依赖。
+  `sys.path` 修改和文件加载调用。Runtime 客户端不能直接导入物理能力或执行包实现；
+  能力核心只允许标准库、NumPy 和自身依赖。
 
 检查覆盖现有 Runtime 和 ROS 执行源码。旧实验客户端还存在 13 处加载研发/实验目录的
 路径注入，均按文件、表达式和次数精确登记。新增依赖失败；删去旧依赖时必须一并清理

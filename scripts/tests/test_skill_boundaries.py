@@ -31,6 +31,14 @@ class SkillBoundariesTest(unittest.TestCase):
         self.source('from development_skills.tools import run\n')
         self.assertFalse(module.audit(self.root, self.config)['passed'])
 
+    def test_runtime_cannot_import_the_physical_implementation(self):
+        config = deepcopy(self.config)
+        config['rules'][0]['forbidden_imports'] = ['flexcell_capabilities', 'flexcell_skills']
+        for dependency in ['flexcell_capabilities.contact_geometry', 'flexcell_skills.contact_executor']:
+            with self.subTest(dependency=dependency):
+                self.source('import ' + dependency + '\n')
+                self.assertFalse(module.audit(self.root, config)['passed'])
+
     def test_literal_dynamic_import_alias_is_rejected(self):
         self.source('from importlib import import_module as load\nload("evolution.proposals")\n')
         self.assertFalse(module.audit(self.root, self.config)['passed'])

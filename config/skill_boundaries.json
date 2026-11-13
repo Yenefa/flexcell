@@ -38,6 +38,20 @@
       ]
     },
     {
+      "id": "runtime_uses_execution_interfaces",
+      "roots": [
+        "runtime"
+      ],
+      "forbidden_imports": [
+        "flexcell_capabilities",
+        "flexcell_skills"
+      ],
+      "forbidden_path_parts": [
+        "flexcell_capabilities",
+        "flexcell_skills"
+      ]
+    },
+    {
       "id": "physical_core_without_execution",
       "roots": [
         "src/flexcell/flexcell_capabilities/flexcell_capabilities"
