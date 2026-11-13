@@ -61,6 +61,10 @@ def main():
     out = Path('/artifacts')
     out.mkdir(exist_ok=True)
     config = read(HERE / 'preregistration.json')
+    import jsonschema
+    for slot in config['push_slots']:
+        if slot['task'] != 'original':
+            jsonschema.validate(read(HERE / slot['task']), read(HERE / 'probe.schema.json'))
     freeze = read(HERE / 'source_freeze.json')
     for root in (ROOT, Path('/opt/flexcell/repo')):
         for path, digest in freeze['sha256'].items():

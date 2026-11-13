@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evobot.local/physical-probe/1",
+  "title": "EvoBot TaskSpec v0.1",
+  "description": "One executable task instance. Produced by the generator, consumed by the runtime and the INDEPENDENT evaluator. The evaluator never reads agent output.",
+  "type": "object",
+  "required": [
+    "task_id",
+    "template_id",
+    "random_seed",
+    "instruction",
+    "objects",
+    "zones",
+    "expected_goal",
+    "evaluator_version",
+    "execution_budget",
+    "split"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "pattern": "^[A-Z0-9]+-[a-z0-9_-]+$"
+    },
+    "template_id": {
+      "const": "T08_push"
+    },
+    "random_seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "instruction": {
+      "type": "string",
+      "minLength": 8,
+      "description": "Natural language only. MUST NOT name skills, source files, or fixes."
+    },
+    "objects": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "size",
+          "initial_pose"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^target_box_[a-z]$"
+          },
+          "color": {
+            "type": "string"
+          },
+          "size": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": 0.005
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "initial_pose": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 4,
+            "maxItems": 4,
+            "description": "x y z yaw"
+          }
+        }
+      }
+    },
+    "zones": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "pose",
+          "radius"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^zone_[0-9]+$"
+          },
+          "pose": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "radius": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "order": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "must_not_move": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "expected_goal": {
+      "type": "object",
+      "required": [
+        "push",
+        "unmoved"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "push": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "min_displacement_m",
+              "max_displacement_m",
+              "max_vertical_m",
+              "direction",
+              "min_direction_cosine",
+              "zone"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "min_displacement_m": {
+                "const": 0.03
+              },
+              "max_displacement_m": {
+                "const": 0.15
+              },
+              "max_vertical_m": {
+                "const": 0.02
+              },
+              "direction": {
+                "const": [
+                  -1.0,
+                  0.0
+                ]
+              },
+              "min_direction_cosine": {
+                "const": 0.9
+              },
+              "zone": {
+                "const": "zone_1"
+              }
+            }
+          }
+        },
+        "unmoved": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "evaluator_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "execution_budget": {
+      "type": "object",
+      "required": [
+        "max_steps",
+        "max_wall_s"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "max_steps": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_wall_s": {
+          "type": "number",
+          "minimum": 1
+        }
+      }
+    },
+    "split": {
+      "enum": [
+        "train",
+        "val",
+        "held_out"
+      ]
+    }
+  },
+  "$comment": "Experiment probe declaration only. Frozen benchmark schema lacks push; no evaluator or acceptance rule is changed."
+}

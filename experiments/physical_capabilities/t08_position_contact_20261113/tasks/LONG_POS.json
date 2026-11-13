@@ -1,6 +1,6 @@
 {
   "task_id": "T08-position-contact-long_pos",
-  "template_id": "T08_push_manipulation",
+  "template_id": "T08_push",
   "random_seed": 4102,
   "instruction": "Push the blue block into the marked zone without picking it up. Do not move the red block.",
   "objects": [
@@ -37,7 +37,7 @@
   ],
   "zones": [
     {
-      "name": "zone_push",
+      "name": "zone_1",
       "pose": [
         0.105,
         0.025,
@@ -63,7 +63,7 @@
           0.0
         ],
         "min_direction_cosine": 0.9,
-        "zone": "zone_push"
+        "zone": "zone_1"
       }
     },
     "unmoved": [
