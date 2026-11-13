@@ -1,6 +1,6 @@
 # 模块、构建与证据边界
 
-本轮是目录和构建边界整理。现有机器人源码尚未按这些职责完成进一步内部拆分。
+目录和构建边界已建立；源码从推进结果适配模块开始逐步提取，整体拆分仍在进行。
 目录归属以 [repository_layout.json](../config/repository_layout.json) 为准，
 版本索引和分支约定见 [VERSION_CONTROL.md](VERSION_CONTROL.md)。
 
@@ -76,3 +76,21 @@ python3 -m unittest discover -s scripts/tests -p 'test_repository_layout.py' -v
   归档目录只增加父级忽略标记，既有证据文件未移动、未修改。
 
 这是工程边界检查，不产生新的机器人能力验收结果。更深入的源码职责拆分属于下一阶段。
+
+
+## 源码拆分：推进结果适配
+
+工作分支 `refactor/runtime-push-results-20261113` 从第一阶段 `0c3cf175` 建立，
+跟踪 issue #241。首个组件为
+`flexcell_skills.task_components.push_results`：
+
+- `legacy_push_result` 将旧 PushObject 测量结果转换为阶段记录。
+- `contact_push_result` 转换 ContactPush 返回状态并沿用既有返回就绪检查；时钟显式传入。
+- 模块只依赖标准库和纯契约，可在没有 ROS 的环境中导入，且不修改输入对象。
+- TaskFsmServer 保留原方法入口，以及请求构造、所有权、预算扣减、取消、通信和隔离职责。
+
+提取体与原实现的 AST 对齐，本地 8 项纯模块检查通过。接口/技能包构建及 127 项
+结果、调用链、取消/隔离和组合回归通过；检查源码为 `78ab43f6`。验证见
+[runtime-components CI](https://github.com/Yenefa/flexcell/actions/runs/43399498185)。
+该分支没有新的物理验收，原 T08 成绩仍绑定其原执行源码；在新源码下直接要求旧
+原始证据的源码哈希匹配会被拒绝，旧证据复核应使用原 source/evidence checkpoint。

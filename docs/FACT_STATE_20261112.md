@@ -1245,3 +1245,21 @@ Earlier boundary-CI failures remain visible. This is not physical task evidence.
 Source trees src/runtime/benchmark/evolution and existing evidence contents match
 83ffafe1. No robot API/behavior, frozen threshold, formal baseline, branch deletion,
 history rewrite, release, PR or main merge is part of this first phase.
+
+
+## 2026-11-13 — First source module extraction: push result adapters
+
+Branch refactor/runtime-push-results-20261113 starts at0c3cf175; issue #241.
+Implementation78ab43f6 extracts legacy/ContactPush result conversion into pure
+flexcell_skills.task_components.push_results. TaskFsmServer retains compatible
+entrypoints, requests, ownership, budget debits, cancellation and quarantine.
+
+Normalized extracted bodies and remaining executor class match the base AST.
+Eight no-ROS contract cases pass locally; CI43399498185 builds interfaces/skills
+and passes127 existing/new task/ownership/composition regressions. Frozen files,
+push arithmetic and physical trajectory implementation are unchanged.
+
+This is an offline-verified refactor, not a new physical acceptance. No Gazebo
+trial was repeated and old raw evidence remains bound to original source22f873ba.
+Formal baseline and default backend remain unchanged; broader extraction and
+integration remain separate work.

@@ -23,5 +23,20 @@
       "formal_held_out_validation": false,
       "full_regression_complete": false
     }
-  }
+  },
+  "source_refactors": [
+    {
+      "id": "runtime_push_results",
+      "branch": "refactor/runtime-push-results-20261113",
+      "base_commit": "0c3cf1759afee56e45d223576804bee65a7421f7",
+      "issue": 241,
+      "scope": "Pure result conversion and return-state admission extracted; executor retains ownership/transport/budgets",
+      "physical_requalification": "NOT_RUN",
+      "formal_baseline": "NOT_PROMOTED",
+      "implementation_commit": "78ab43f6c323929b67a4296079af416912380244",
+      "validation": "AST_EXTRACTION_PARITY_AND_ROS_REGRESSIONS_PASS",
+      "ci_run": 43399498185,
+      "regressions_passed": 127
+    }
+  ]
 }
