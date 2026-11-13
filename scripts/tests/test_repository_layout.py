@@ -3,6 +3,8 @@ import importlib.util
 from pathlib import Path
 import tempfile
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 
 SPEC=importlib.util.spec_from_file_location('repository_layout',Path(__file__).parents[1]/'check_repository_layout.py')
 module=importlib.util.module_from_spec(SPEC);SPEC.loader.exec_module(module)
@@ -49,6 +51,16 @@ class RepositoryLayoutTest(unittest.TestCase):
     def test_git_enumeration_failure_keeps_diagnostic(self):
         with self.assertRaisesRegex(RuntimeError,'git ls-files failed:'):
             module.tracked_manifests(self.root)
+
+    def test_real_discovery_accepts_registry_mapping_keys_as_names(self):
+        reply=SimpleNamespace(returncode=0,stdout='skill\n',stderr='')
+        with patch.object(module.subprocess,'run',return_value=reply):
+            self.assertTrue(module.check_colcon(self.root,'colcon',self.layout['ros_packages'])['passed'])
+
+    def test_real_discovery_rejects_duplicate_names(self):
+        reply=SimpleNamespace(returncode=0,stdout='skill\nskill\n',stderr='')
+        with patch.object(module.subprocess,'run',return_value=reply):
+            self.assertFalse(module.check_colcon(self.root,'colcon',self.layout['ros_packages'])['passed'])
 
 
 if __name__=='__main__':unittest.main()

@@ -57,7 +57,7 @@ def check_colcon(root,binary,expected_names):
         process=subprocess.run([binary,'--log-base',logs,'list','--base-paths',str(root),'--names-only'],
                                cwd=root,capture_output=True,text=True,timeout=90.)
     names=process.stdout.split()
-    ok=(process.returncode==0 and Counter(names)==Counter(expected_names))
+    ok=(process.returncode==0 and Counter(names)==Counter(list(expected_names)))
     return dict(passed=ok,exit_code=process.returncode,names=names,stderr=process.stderr.strip())
 
 
