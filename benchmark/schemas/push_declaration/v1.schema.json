@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evobot.org/schemas/push-declaration-1.0-legacy.json",
+  "title": "EvoBot PUSH task declaration v1.0 (legacy, read-only)",
+  "description": "Describes the EXISTING frozen T08 TaskSpecs exactly as they are, so they can be validated without being rewritten. This contract is a compatibility record, not permission to emit new v1 declarations.",
+  "$comment": "Issue #243. The frozen canonical benchmark/schemas/taskspec.schema.json requires expected_goal.placement and forbids additionalProperties, so it does not admit the push form. These frozen TaskSpecs therefore have NEVER matched it: template_id T08_push_manipulation, expected_goal.push, zone_push, and instance_sha256. v1 records that shape truthfully. No frozen file is changed. Split is deliberately NOT an enum: 12 frozen push TaskSpecs carry train / t08_fresh_20261112 / t08_unseen, and a guessed enum wrongly rejected t08_unseen during development. v1 records history; strictness belongs to v2.",
+  "type": "object",
+  "required": [
+    "task_id",
+    "template_id",
+    "random_seed",
+    "instruction",
+    "objects",
+    "zones",
+    "expected_goal",
+    "evaluator_version",
+    "execution_budget",
+    "split"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "declaration_version": {
+      "const": "1.0"
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^[A-Z0-9]+-[a-z0-9_-]+$"
+    },
+    "template_id": {
+      "const": "T08_push_manipulation"
+    },
+    "random_seed": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "instruction": {
+      "type": "string",
+      "minLength": 8
+    },
+    "objects": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 6,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "size",
+          "initial_pose"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^target_box_[a-z]$"
+          },
+          "color": {
+            "type": "string"
+          },
+          "size": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": 0.005
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "initial_pose": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 4,
+            "maxItems": 4
+          }
+        }
+      }
+    },
+    "zones": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "pose",
+          "radius"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^zone_[a-z0-9_]+$"
+          },
+          "pose": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            },
+            "minItems": 3,
+            "maxItems": 3
+          },
+          "radius": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          }
+        }
+      }
+    },
+    "constraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "order": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "must_not_move": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "expected_goal": {
+      "type": "object",
+      "required": [
+        "push",
+        "unmoved"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "push": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 1,
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "min_displacement_m",
+              "max_displacement_m",
+              "max_vertical_m",
+              "direction",
+              "min_direction_cosine",
+              "zone"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "min_displacement_m": {
+                "type": "number",
+                "minimum": 0
+              },
+              "max_displacement_m": {
+                "type": "number",
+                "exclusiveMinimum": 0
+              },
+              "max_vertical_m": {
+                "type": "number",
+                "minimum": 0
+              },
+              "direction": {
+                "type": "array",
+                "items": {
+                  "type": "number"
+                },
+                "minItems": 2,
+                "maxItems": 2
+              },
+              "min_direction_cosine": {
+                "type": "number",
+                "minimum": -1,
+                "maximum": 1
+              },
+              "zone": {
+                "type": "string",
+                "pattern": "^zone_[a-z0-9_]+$"
+              }
+            }
+          }
+        },
+        "unmoved": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "evaluator_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "execution_budget": {
+      "type": "object",
+      "required": [
+        "max_steps",
+        "max_wall_s"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "max_steps": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_wall_s": {
+          "type": "number",
+          "minimum": 1
+        }
+      }
+    },
+    "split": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Legacy split labels are recorded verbatim; observed values are train, t08_fresh_20261112 and t08_unseen. This contract must not reject a frozen historical file for a label it already carries."
+    },
+    "instance_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8,64}$"
+    }
+  }
+}
