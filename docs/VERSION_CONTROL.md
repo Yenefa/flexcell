@@ -4,16 +4,22 @@
 机器可读的版本索引见 [version_baselines.json](../config/version_baselines.json)。
 整理任务：[issue #240](https://github.com/Yenefa/flexcell/issues/240)。
 
+2026-11-15 当前架构整理分支为 `refactor/modular-workspace-20261115`，基于最新物理
+checkpoint `81eed33c`，使用 `/workspace/worktrees/architecture`。
+物理任务最近实际执行源为 `31a002f6`，独立证据提交为 `c0ed8b27`；
+架构分支上的源码整理不改变这些历史身份，也不自动成为新的物理验收。
+工作树、构建环境与实时状态入口见 [WORKTREES.md](WORKTREES.md)。
+
 ## 四种身份分别记录
 
 | 身份 | 当前引用 | 含义 |
 |---|---|---|
 | 仓库默认分支 | `main` | GitHub 默认入口；不能由此推断某项物理能力已通过验收 |
 | Mission 研发线 | `autonomous/flexcell-remediation` | Mission 声明的研发分支；不等于本次已执行版本 |
-| T08 执行源码 | `22f873bae82ce61270a63397fbecdd3a119a115e` | CI 43274720654 实际执行的固定源码 |
-| T08 证据 checkpoint | `83ffafe117208dc82d2e02320e3cd7204ec8b97c` | 同一候选的报告、原始 ZIP 和离线复核；正式基线未提升 |
+| 早期 T08 执行源码 | `22f873bae82ce61270a63397fbecdd3a119a115e` | CI 43274720654 实际执行的固定源码 |
+| 早期 T08 证据 checkpoint | `83ffafe117208dc82d2e02320e3cd7204ec8b97c` | 同一候选的报告、原始 ZIP 和离线复核；正式基线未提升 |
 
-当前整理分支 `refactor/module-boundaries-20261113` 从证据 checkpoint 建立，
+第一阶段整理分支 `refactor/module-boundaries-20261113` 从证据 checkpoint 建立，
 使用独立工作树。原 `develop/t08-runtime-recovery-20261112` 保留。
 两例任务各一次通过，只能记录为限定范围验证；不能命名为正式发布、整体稳定版或未见集通过。
 

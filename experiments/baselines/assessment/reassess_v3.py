@@ -12,11 +12,11 @@ import sys
 from pathlib import Path
 
 os.environ.setdefault("FLEXCELL_PILOT_MAX_TOKENS", "16384")
-WT = Path(__file__).resolve().parents[2]
+WT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(WT / "experiments" / "pilot-001"))
 
 spec = importlib.util.spec_from_file_location(
-    "sa", WT / "runtime" / "verifier" / "self_assess.py")
+    "sa", WT / "experiments" / "baselines" / "assessment" / "self_assess.py")
 sa = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(sa)
 from pilot.llm import Chat                        # noqa: E402
@@ -34,7 +34,7 @@ def main():
             keep = d / "self_assessment_v1.json"
             if old.exists() and not keep.exists():
                 old.rename(keep)
-            out = d / "self_assessment_v4.json"
+            out = d / "self_assessment_v3.json"
             if out.exists():
                 skip += 1
                 continue
@@ -67,10 +67,10 @@ def main():
                 payload = {"task_id": task["task_id"], "success": bool(v.get("success")),
                            "because": str(v.get("because", ""))[:400], "raw": raw,
                            "source": "agent_self_assessment",
-                           "prompt_version": "v4_robot_frame_stated"}
+                           "prompt_version": "v3_intent_labelled_without_blanket_distrust"}
                 break
             if payload is None:
-                (d / "self_assess_v4_failed.json").write_text(
+                (d / "self_assess_v3_failed.json").write_text(
                     json.dumps({"raw": raw[:600]}, indent=2) + "\n", encoding="utf-8")
                 print("FAIL", d.name)
                 fail += 1
@@ -78,7 +78,7 @@ def main():
                 out.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
                 ok += 1
     print()
-    print("v4 written:", ok, "skipped:", skip, "failed:", fail)
+    print("v3 written:", ok, "skipped:", skip, "failed:", fail)
     return 0
 
 

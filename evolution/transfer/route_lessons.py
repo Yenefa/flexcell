@@ -25,7 +25,7 @@ RULES = [
     ("harness", ("domain", "participant", "admission", "launch", "stalled"),
      "config/cyclonedds.xml"),
     ("spread_policy", ("landing", "spot", "centre", "center", "same bin"),
-     "experiments/baselines/spread_destinations.py"),
+     "runtime/planner/spread_destinations.py"),
     ("planner", ("object", "unmoved", "zone", "order", "further", "except"),
      "runtime/planner/agent_planner.py"),
 ]

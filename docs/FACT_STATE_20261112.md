@@ -1388,3 +1388,48 @@ Evidence c0ed8b27f8731d89efe75ba728731bddf55eda3a is pushed. Independent
 offline CI43461083976 PASS; repository-layout CI43461084005 PASS. These
 checks execute no physical task and add no trials. Version index separates
 implementation3c6292f8, physically executed31a002f6 and evidencec0ed8b27.
+
+
+## 2026-11-15 — Worktrees isolated; research tools removed from Runtime
+
+User requested workspace organization and architectural decoupling. New isolated
+branch refactor/modular-workspace-20261115 starts at physical checkpoint81eed33c.
+The three existing linked worktrees were moved with git worktree move under
+/workspace/worktrees; former paths remain symlink aliases. Their branch heads
+are unchanged. The base repository and historical experiment data are retained.
+Physical development remains at81eed33c; architecture is the current workstream.
+Remote validation source65814292 was observed and not automatically integrated;
+branch presence is not a claim of another running Agent.
+
+Twelve research entrypoints are migrated out of runtime into experiments/baselines
+and assessment/. Reusable agent planning stays in Runtime with explicit chat;
+recovery now uses Runtime-owned pure failure classification and destination
+spacing. Development paths retain compatibility exports of the same functions.
+Experience routing follows the actual spacing implementation. All13 exact old
+runtime->development dependency exceptions are removed; current guard scans85
+Python files with0 violations and0 exceptions. This is a static dependency check,
+not a dynamic filesystem sandbox or complete extraction of all execution code.
+
+Fourteen extracted/retained pure function ASTs match the base. All src/ files,
+ROS interfaces, physical controllers, public push runner, physical harnesses,
+nine frozen files and contracts/push.py remain unchanged. Two benchmark test
+imports/paths follow migrated modules; their assertions are unchanged.
+The old v1 research CLI also had a pre-existing three-vs-four return unpack bug;
+its relocated adapter now retains usage, verified with a model stub.
+
+Local repository/boundary/worktree/entrypoint checks31 PASS, independent capability
+checks6 PASS, legacy verifier mutations all caught. Full offline benchmark at
+base and candidate:352 collected,339 passed, the same13 failures. No added
+failure or lost test. This is differential compatibility, NOT a full-suite pass.
+Initial introduced lesson-routing failure was corrected to point to the moved
+implementation; existing failures were not silenced. A reused old venv initially
+loaded an obsolete capability package; the new worktree now has its own venv.
+An existing full-suite test rewrites CAPABILITY_LADDER.md; test-created edits were
+restored, and subsequent full checks use disposable worktrees. Physical tree is
+clean again; original evidence is unchanged.
+
+Version inventory, migration map and local verification are under config/ and
+docs/architecture/20261115/. Independent CI is pending at this append; completion
+requires a separate confirmation. No physical trial, paid model call, hardware
+motion, main merge, baseline promotion or new robot capability is claimed.
+Formal baseline NOT_PROMOTED; main goal active.

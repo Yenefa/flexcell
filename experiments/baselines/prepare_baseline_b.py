@@ -28,12 +28,11 @@ CLEARANCE_MAX = 0.25
 from pathlib import Path
 
 WT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(WT / "runtime" / "planner"))
+sys.path.insert(0, str(WT))
 sys.path.insert(0, str(WT / "experiments" / "pilot-001"))
 
-import agent_planner as ap
-sys.path.insert(0, str(WT / "experiments" / "baselines"))
-import spread_destinations as sd
+from runtime.planner import agent_planner as ap
+from runtime.planner import spread_destinations as sd
 
 SCENE_FILE = WT / "benchmark" / "generators" / "generate.py"
 

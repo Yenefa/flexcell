@@ -9,6 +9,14 @@ on:
       - 'src/flexcell/flexcell_capabilities/**'
       - 'src/flexcell/flexcell_skills/**'
       - 'runtime/**/*.py'
+      - 'experiments/baselines/**/*.py'
+      - 'evolution/diagnosis/classify.py'
+      - 'evolution/transfer/route_lessons.py'
+      - 'config/research_entrypoints.json'
+      - 'scripts/compare_test_reports.py'
+      - 'scripts/tests/test_research_boundaries.py'
+      - 'scripts/tests/test_differential_regression.py'
+      - 'benchmark/tests/**'
   pull_request:
     paths:
       - '.github/workflows/skill-boundaries.yml'
@@ -18,6 +26,14 @@ on:
       - 'src/flexcell/flexcell_capabilities/**'
       - 'src/flexcell/flexcell_skills/**'
       - 'runtime/**/*.py'
+      - 'experiments/baselines/**/*.py'
+      - 'evolution/diagnosis/classify.py'
+      - 'evolution/transfer/route_lessons.py'
+      - 'config/research_entrypoints.json'
+      - 'scripts/compare_test_reports.py'
+      - 'scripts/tests/test_research_boundaries.py'
+      - 'scripts/tests/test_differential_regression.py'
+      - 'benchmark/tests/**'
   workflow_dispatch:
 permissions:
   contents: read
@@ -30,7 +46,43 @@ jobs:
         run: |
           python3 scripts/check_skill_boundaries.py
           python3 scripts/check_repository_layout.py
-          python3 -m unittest discover -s scripts/tests -p 'test_*boundaries.py' -v
+          python3 -m unittest discover -s scripts/tests -v
+  research-compatibility:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python3 -m pip install pytest jsonschema pyyaml numpy
+      - name: Compare complete offline benchmark suites in disposable checkouts
+        shell: bash
+        run: |
+          git fetch --depth=1 origin 81eed33c5c536e31ea4806fc4d3363f724b96300
+          git worktree add --detach /tmp/architecture-baseline 81eed33c5c536e31ea4806fc4d3363f724b96300
+          git worktree add --detach /tmp/architecture-candidate HEAD
+          mkdir -p /tmp/architecture-reports
+          set +e
+          (cd /tmp/architecture-baseline && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest \
+            -p no:cacheprovider -o addopts="" -q benchmark/tests \
+            --junitxml=/tmp/architecture-reports/before.xml) > /tmp/architecture-reports/before.log 2>&1
+          before_rc=$?
+          (cd /tmp/architecture-candidate && PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest \
+            -p no:cacheprovider -o addopts="" -q benchmark/tests \
+            --junitxml=/tmp/architecture-reports/after.xml) > /tmp/architecture-reports/after.log 2>&1
+          after_rc=$?
+          set -e
+          test "$before_rc" -le 1
+          test "$after_rc" -le 1
+          python3 scripts/compare_test_reports.py /tmp/architecture-reports/before.xml \
+            /tmp/architecture-reports/after.xml --out /tmp/architecture-reports/comparison.json
+          python3 experiments/baselines/verify_baseline_b.py > /tmp/architecture-reports/mutation-checks.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: architecture-compatibility-${{ github.run_id }}
+          path: /tmp/architecture-reports
   independent-capability:
     runs-on: ubuntu-24.04
     steps:

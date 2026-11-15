@@ -7,6 +7,9 @@ on:
       - 'config/version_baselines.json'
       - 'scripts/check_repository_layout.py'
       - 'scripts/tests/test_repository_layout.py'
+      - 'config/development_branches.json'
+      - 'scripts/worktree_inventory.py'
+      - 'scripts/tests/test_worktree_inventory.py'
       - 'src/**/package.xml'
       - 'setup/acceptance/**/COLCON_IGNORE'
       - 'experiments/**/COLCON_IGNORE'
@@ -17,6 +20,9 @@ on:
       - 'config/version_baselines.json'
       - 'scripts/check_repository_layout.py'
       - 'scripts/tests/test_repository_layout.py'
+      - 'config/development_branches.json'
+      - 'scripts/worktree_inventory.py'
+      - 'scripts/tests/test_worktree_inventory.py'
       - 'src/**/package.xml'
       - 'setup/acceptance/**/COLCON_IGNORE'
       - 'experiments/**/COLCON_IGNORE'
@@ -36,3 +42,5 @@ jobs:
           source /opt/ros/jazzy/setup.bash
           python3 scripts/check_repository_layout.py --colcon "$(command -v colcon)"
           python3 -m unittest discover -s scripts/tests -p 'test_repository_layout.py' -v
+          python3 scripts/worktree_inventory.py --out /tmp/worktree-inventory.json
+          python3 -m unittest discover -s scripts/tests -p 'test_worktree_inventory.py' -v

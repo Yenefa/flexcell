@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "source_checkpoint": "81eed33c5c536e31ea4806fc4d3363f724b96300",
+  "migrations": {
+    "runtime/planner/prepare_baseline_b.py": "experiments/baselines/prepare_baseline_b.py",
+    "runtime/planner/prepare_baseline_c.py": "experiments/baselines/prepare_baseline_c.py",
+    "runtime/planner/run_baseline_b.py": "experiments/baselines/run_baseline_b.py",
+    "runtime/planner/run_baseline_a_prime.py": "experiments/baselines/run_baseline_a_prime.py",
+    "runtime/planner/verify_baseline_b.py": "experiments/baselines/verify_baseline_b.py",
+    "runtime/verifier/self_assess.py": "experiments/baselines/assessment/self_assess.py",
+    "runtime/verifier/fill_self_assess.py": "experiments/baselines/assessment/fill_self_assess.py",
+    "runtime/verifier/reassess_v2.py": "experiments/baselines/assessment/reassess_v2.py",
+    "runtime/verifier/reassess_v3.py": "experiments/baselines/assessment/reassess_v3.py",
+    "runtime/verifier/reassess_v4.py": "experiments/baselines/assessment/reassess_v4.py",
+    "runtime/verifier/aggregate_claims.py": "experiments/baselines/assessment/aggregate_claims.py",
+    "runtime/planner/agent_planner.py:main": "experiments/baselines/plan_v1.py"
+  },
+  "compatibility": "Reusable planner/recovery APIs retained. Research CLIs use the new paths; original paths remain in historical evidence and are reproducible at their checkpoints."
+}

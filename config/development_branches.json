@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
   "source_checkpoint": "3e81f956e4559edc4d7d17e8ef6df6f3eb798f27",
-  "integration_target": "refactor/skill-layer-boundaries-20261113",
+  "integration_target": "refactor/modular-workspace-20261115",
   "formal_baseline": "NOT_PROMOTED",
-  "active_workstream": "physical",
+  "active_workstream": "architecture",
   "rules": [
     "Reserved branches have no assigned running agent.",
     "One module change per branch; shared interfaces and infrastructure changes require cross-module review.",
@@ -25,7 +25,8 @@
         "src/flexcell/flexcell_skills/flexcell_skills/place_server.py",
         "experiments/physical_capabilities"
       ],
-      "status": "ACTIVE"
+      "status": "CHECKPOINTED",
+      "worktree_directory": "physical"
     },
     {
       "id": "runtime",
@@ -104,11 +105,13 @@
         "infra",
         "scripts"
       ],
-      "status": "RESERVED"
+      "status": "REMOTE_UPDATED_ACTIVITY_UNKNOWN",
+      "observed_origin_commit": "658142926427faee1860dd65b234f3f899843290",
+      "note": "Remote source has advanced; no running-agent status inferred and no automatic integration."
     },
     {
       "id": "architecture",
-      "branch": "refactor/skill-layer-boundaries-20261113",
+      "branch": "refactor/modular-workspace-20261115",
       "modules": [
         "模块化架构"
       ],
@@ -116,9 +119,36 @@
         "config",
         "docs/SKILL_ARCHITECTURE.md",
         "docs/REPOSITORY_MODULES.md",
-        "scripts/check_skill_boundaries.py"
+        "scripts/check_skill_boundaries.py",
+        "scripts/worktree_inventory.py",
+        "config/research_entrypoints.json"
       ],
-      "status": "CHECKPOINTED"
+      "status": "ACTIVE",
+      "worktree_directory": "architecture"
+    }
+  ],
+  "previous_integration_target": "refactor/skill-layer-boundaries-20261113",
+  "architecture_base_commit": "81eed33c5c536e31ea4806fc4d3363f724b96300",
+  "worktree_roles": [
+    {
+      "directory": "architecture",
+      "branch": "refactor/modular-workspace-20261115",
+      "role": "DEVELOPMENT"
+    },
+    {
+      "directory": "physical",
+      "branch": "develop/physical-capabilities-20261113",
+      "role": "PHYSICAL_CHECKPOINT"
+    },
+    {
+      "directory": "architecture-checkpoint",
+      "branch": "refactor/skill-layer-boundaries-20261113",
+      "role": "ARCHITECTURE_CHECKPOINT"
+    },
+    {
+      "directory": "evidence-t08",
+      "branch": "develop/t08-runtime-recovery-20261112",
+      "role": "EVIDENCE_CHECKPOINT"
     }
   ]
 }

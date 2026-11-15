@@ -27,10 +27,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "runtime" / "planner"))
+sys.path.insert(0, str(ROOT))
 
-import agent_planner_v2 as ap
-import public_observation as po
+from runtime.planner import agent_planner_v2 as ap
+from runtime.planner import public_observation as po
 
 # Paths the agent runtime must never open. Kept as a list so the guard below and
 # the test that checks the guard both read the same source of truth.
@@ -71,8 +71,7 @@ def to_executor_plan(task_public, observation, agent_plan):
     avoid = [[obj["position"][0], obj["position"][1]]
              for obj in observation["objects"] if obj["name"] not in moved]
 
-    sys.path.insert(0, str(ROOT / "experiments" / "baselines"))
-    import spread_destinations as sd
+    from runtime.planner import spread_destinations as sd
 
     stages = sd.spread(composite["stages"], avoid=avoid)
 
@@ -120,7 +119,7 @@ def run_one(task_path, out_dir, dry=False, chat=None):
         return result
 
     if chat is None:
-        from gated_chat import GatedChat
+        from runtime.planner.gated_chat import GatedChat
         chat = GatedChat(caller="baseline-b-harness")
 
     try:

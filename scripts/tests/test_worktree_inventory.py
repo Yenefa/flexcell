@@ -1,0 +1,64 @@
+"""Inventory real Git worktrees, including dirty and missing checkouts."""
+import importlib.util
+import json
+from pathlib import Path
+import shutil
+import subprocess
+import tempfile
+import unittest
+
+SPEC = importlib.util.spec_from_file_location('inventory', Path(__file__).parents[1] / 'worktree_inventory.py')
+inventory = importlib.util.module_from_spec(SPEC)
+SPEC.loader.exec_module(inventory)
+
+
+class WorktreeInventoryTest(unittest.TestCase):
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name) / 'base'
+        self.root.mkdir()
+        self.command('init', '-q', '-b', 'base')
+        self.command('config', 'user.name', 'Fixture')
+        self.command('config', 'user.email', 'fixture@example.invalid')
+        (self.root / 'tracked').write_text('original\n')
+        self.command('add', 'tracked')
+        self.command('commit', '-qm', 'fixture')
+        self.other = self.root.parent / 'tree with spaces'
+        self.command('worktree', 'add', '-qb', 'architecture', str(self.other))
+        self.config = dict(workstreams=[dict(id='architecture', branch='architecture', status='ACTIVE'),
+                                        dict(id='reserved', branch='reserved', status='RESERVED')],
+                           worktree_roles=[dict(branch='architecture', role='DEVELOPMENT')])
+
+    def command(self, *args):
+        return subprocess.run(['git', '-C', str(self.root), *args], check=True,
+                              capture_output=True, text=True).stdout
+
+    def test_dirty_worktree_and_space_in_path_are_reported_without_mutation(self):
+        (self.other / 'tracked').write_text('edit\n')
+        before = self.command('worktree', 'list', '--porcelain')
+        report = inventory.collect(self.root, self.config)
+        row = next(t for t in report['worktrees'] if t['branch'] == 'architecture')
+        self.assertEqual(row['path'], str(self.other))
+        self.assertTrue(row['dirty'])
+        self.assertEqual(self.command('worktree', 'list', '--porcelain'), before)
+        self.assertEqual((self.other / 'tracked').read_text(), 'edit\n')
+
+    def test_reserved_branch_is_not_invented_as_a_worktree_or_agent(self):
+        row = inventory.collect(self.root, self.config)['workstreams'][1]
+        self.assertEqual(row['worktrees'], [])
+        self.assertIsNone(row['local_head'])
+        self.assertIsNone(row['observed_origin_head'])
+
+    def test_missing_worktree_is_reported_without_pruning_its_branch(self):
+        head = inventory.revision(self.root, 'refs/heads/architecture')
+        shutil.rmtree(self.other)
+        row = next(t for t in inventory.collect(self.root, self.config)['worktrees']
+                   if t['branch'] == 'architecture')
+        self.assertFalse(row['exists'])
+        self.assertIsNone(row['dirty'])
+        self.assertEqual(inventory.revision(self.root, 'refs/heads/architecture'), head)
+
+
+if __name__ == '__main__':
+    unittest.main()

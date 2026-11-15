@@ -60,6 +60,21 @@
       "frozen_files_unchanged": 9,
       "push_core_unchanged": true,
       "local_duplicate_build": "STOPPED_AFTER_SAME_CODE_PASSED_CI"
+    },
+    {
+      "id": "modular_workspace",
+      "branch": "refactor/modular-workspace-20261115",
+      "base_commit": "81eed33c5c536e31ea4806fc4d3363f724b96300",
+      "issue": 242,
+      "scope": "Separate research CLIs from runtime, share pure recovery/spacing policy, remove 13 legacy import exceptions, isolate worktrees and environments.",
+      "physical_requalification": "NOT_RUN_PHYSICAL_SOURCE_UNCHANGED",
+      "formal_baseline": "NOT_PROMOTED",
+      "validation": "LOCAL_BOUNDARY_PARITY_AND_DIFFERENTIAL_CHECKS_PASS_CI_PENDING",
+      "report": "docs/architecture/20261115/local_validation.json",
+      "legacy_import_dependencies": 0,
+      "physical_source_unchanged": true,
+      "frozen_files_unchanged": 9,
+      "push_core_unchanged": true
     }
   ],
   "physical_experiments": [

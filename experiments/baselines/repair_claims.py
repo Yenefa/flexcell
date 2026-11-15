@@ -45,7 +45,7 @@ def main():
                    FLEXCELL_PILOT_MAX_TOKENS=os.environ.get("ASSESS_MAX_TOKENS",
                                                                   "16384"))
         r = subprocess.run(
-            [sys.executable, str(WT / "runtime" / "verifier" / "self_assess.py"),
+            [sys.executable, str(WT / "experiments" / "baselines" / "assessment" / "self_assess.py"),
              "--run", str(d), "--spec", str(pub),
              "--out", str(d / "self_assessment.json")],
             cwd=str(WT), env=env, capture_output=True, text=True)

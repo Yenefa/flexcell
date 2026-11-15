@@ -11,7 +11,7 @@ import os
 import sys
 from pathlib import Path
 
-WT = Path(__file__).resolve().parents[2]
+WT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(WT / "experiments" / "pilot-001"))
 
 # MEASURED: with the default 2048-token budget this reasoning model spends the whole
@@ -23,7 +23,7 @@ from pilot.llm import Chat                       # noqa: E402
 import importlib.util                            # noqa: E402
 
 spec = importlib.util.spec_from_file_location(
-    "sa", WT / "runtime" / "verifier" / "self_assess.py")
+    "sa", WT / "experiments" / "baselines" / "assessment" / "self_assess.py")
 sa = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(sa)
 

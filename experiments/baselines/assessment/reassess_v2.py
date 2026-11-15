@@ -12,11 +12,11 @@ import sys
 from pathlib import Path
 
 os.environ.setdefault("FLEXCELL_PILOT_MAX_TOKENS", "16384")
-WT = Path(__file__).resolve().parents[2]
+WT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(WT / "experiments" / "pilot-001"))
 
 spec = importlib.util.spec_from_file_location(
-    "sa", WT / "runtime" / "verifier" / "self_assess.py")
+    "sa", WT / "experiments" / "baselines" / "assessment" / "self_assess.py")
 sa = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(sa)
 from pilot.llm import Chat                        # noqa: E402

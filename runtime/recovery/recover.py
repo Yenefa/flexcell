@@ -18,10 +18,9 @@ import sys
 from pathlib import Path
 
 WT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(WT / "evolution" / "diagnosis"))
-sys.path.insert(0, str(WT / "experiments" / "baselines"))
-import classify as diagnosis
-import spread_destinations as sd
+sys.path.insert(0, str(WT))
+from runtime.recovery import failure_classification as diagnosis
+from runtime.planner import spread_destinations as sd
 
 MAX_RETRIES = 1
 

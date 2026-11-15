@@ -1,0 +1,196 @@
+{
+  "source_base": "81eed33c5c536e31ea4806fc4d3363f724b96300",
+  "qualification": "STRUCTURAL_REFACTOR_NOT_PHYSICAL_VALIDATION",
+  "algorithm_parity": [
+    {
+      "before": "runtime/planner/agent_planner.py",
+      "after": "runtime/planner/agent_planner.py",
+      "function": "describe",
+      "ast_sha256": "6e3d8530e9de5df33dac09c2dfeabbb5f4bfa75de1489c7e127e8c4ae91eb27b",
+      "equal": true
+    },
+    {
+      "before": "runtime/planner/agent_planner.py",
+      "after": "runtime/planner/agent_planner.py",
+      "function": "build_prompt",
+      "ast_sha256": "a873e40166bacc8a583813dada1756cef38b972635ad3fa7118177c85ee78436",
+      "equal": true
+    },
+    {
+      "before": "runtime/planner/agent_planner.py",
+      "after": "runtime/planner/agent_planner.py",
+      "function": "parse_reply",
+      "ast_sha256": "bfdbcf424d4d373026e4563c98d95282e3f9315c741b3068cd89386c35d91468",
+      "equal": true
+    },
+    {
+      "before": "runtime/planner/agent_planner.py",
+      "after": "runtime/planner/agent_planner.py",
+      "function": "validate_plan",
+      "ast_sha256": "2bc9da0a2ec6d8786790233f4bd06e339611a50420164b7961e4002243f43e3a",
+      "equal": true
+    },
+    {
+      "before": "runtime/planner/agent_planner.py",
+      "after": "runtime/planner/agent_planner.py",
+      "function": "plan",
+      "ast_sha256": "eaf35d7856332d388ee048b220bf5e4633c777536574e52a568eb90baee083ba",
+      "equal": true
+    },
+    {
+      "before": "runtime/planner/agent_planner.py",
+      "after": "runtime/planner/agent_planner.py",
+      "function": "to_composite_plan",
+      "ast_sha256": "7e1455e62d677820596f57a47de92073d679c5b491cc4ed8ea1be620bba30797",
+      "equal": true
+    },
+    {
+      "before": "runtime/recovery/recover.py",
+      "after": "runtime/recovery/recover.py",
+      "function": "decide",
+      "ast_sha256": "34ca5575a494668d8746527b87879090cf832d18bef24bf4080cbe97524eb25a",
+      "equal": true
+    },
+    {
+      "before": "runtime/recovery/recover.py",
+      "after": "runtime/recovery/recover.py",
+      "function": "apply_respread",
+      "ast_sha256": "b4ac0a1b48eb09f7b0c7f68fdf195ef378a21da3fd56af22b56e52937fa56207",
+      "equal": true
+    },
+    {
+      "before": "runtime/recovery/recover.py",
+      "after": "runtime/recovery/recover.py",
+      "function": "record",
+      "ast_sha256": "7875b9669137d59d240967b6d5f7d937adac235ee82f1b3214a008fe7ba154ba",
+      "equal": true
+    },
+    {
+      "before": "runtime/recovery/recover.py",
+      "after": "runtime/recovery/recover.py",
+      "function": "build_resume_plan",
+      "ast_sha256": "490248eec232bf44a18d7cafc1410e5b64e6c19189ed377f22584110004283cc",
+      "equal": true
+    },
+    {
+      "before": "evolution/diagnosis/classify.py",
+      "after": "runtime/recovery/failure_classification.py",
+      "function": "classify",
+      "ast_sha256": "1c6892e86442c0e421a51ad110d647529681d8a12272475b247145bb17fed14b",
+      "equal": true
+    },
+    {
+      "before": "experiments/baselines/spread_destinations.py",
+      "after": "runtime/planner/spread_destinations.py",
+      "function": "spread",
+      "ast_sha256": "eb9990d0a8f8657e5a2752665f311e6f195876ac146ff3ea659b762d19984cbb",
+      "equal": true
+    },
+    {
+      "before": "runtime/verifier/self_assess.py",
+      "after": "experiments/baselines/assessment/self_assess.py",
+      "function": "build_user",
+      "ast_sha256": "9650d4b0381a19f27ca21fdc78297b94dd4f6843581e036814b88691caf9f04b",
+      "equal": true
+    },
+    {
+      "before": "runtime/verifier/self_assess.py",
+      "after": "experiments/baselines/assessment/self_assess.py",
+      "function": "parse",
+      "ast_sha256": "28041ab18f855c47695f805b86781fb5edd508eb75d960c057040648c73af57f",
+      "equal": true
+    }
+  ],
+  "physical_source_tree_unchanged": true,
+  "frozen_files_and_push_core_unchanged": {
+    "benchmark/evaluators/evaluate.py": "441903f15e50555311a9ead9c1426689ad4799294fdc51750c8e276b36279654",
+    "benchmark/evaluators/sealed_evaluate.py": "fa330e69ac6a35aec4b1313638b458885e93c8877ea5dc53f642859783e3acad",
+    "benchmark/evaluators/observe_from_run.py": "c9b910cde2b93da9c5dae1760c1e731d7679eb20b52b3b5fc19b9028973c5250",
+    "benchmark/evaluators/capture_ground_truth.py": "faec24ae921acdbef25114fbd20e7c435453fd8d7bdf8190f9cacecbd59cb608",
+    "benchmark/schemas/taskspec.schema.json": "29aae267b157efc2f91d48578ed849c4427e79b629cb3fdea7f892dc7a57563e",
+    "benchmark/generators/generate.py": "5c1324db5d7156c4f94b9e5725be07722931b3ad90106cc055513d9236140cb2",
+    "benchmark/generators/seal_held_out.py": "b4c63360db75a603e798e44a614baeedde0e5086b0f4aae2be65355e98d53a8f",
+    "benchmark/generators/unseen_tasks.py": "db646d1e02fd946a8f28d1e435f12eca012e9a74a5d72ffd324a956883dfb10f",
+    "evolution/validation/regress.py": "a3d8bf5246a95695a37ddf0a25f2565b6198f2acc132f84ec1e3dbae7d107d9b",
+    "src/flexcell/flexcell_skills/flexcell_skills/contracts/push.py": "e8a44c7d1b5889c786e8653759861f2ebefcccc1bec435bf2e439592d4945b53"
+  },
+  "benchmark_assertions": [
+    {
+      "path": "benchmark/tests/test_baseline_b_v2.py",
+      "assertions_unchanged": true
+    },
+    {
+      "path": "benchmark/tests/test_self_assess_prompt.py",
+      "assertions_unchanged": true
+    }
+  ],
+  "legacy_development_dependencies_before": 13,
+  "legacy_development_dependencies_after": 0,
+  "local_offline_benchmark": {
+    "collected": 352,
+    "passed_before": 339,
+    "passed_after": 339,
+    "unchanged_failures": [
+      "benchmark/tests/test_baseline_b_v2.py::test_skills_named_in_the_observation_are_backed_by_real_actions",
+      "benchmark/tests/test_benchmark_skeleton.py::test_each_implemented_template_generates_a_valid_spec",
+      "benchmark/tests/test_benchmark_skeleton.py::test_evaluator_and_generator_versions_agree",
+      "benchmark/tests/test_capability_freeze.py::test_an_unchanged_baseline_verifies",
+      "benchmark/tests/test_capability_ladder.py::test_the_document_states_that_failures_do_not_reproduce",
+      "benchmark/tests/test_evidence_discipline.py::test_every_evobot_batch_has_a_verifier",
+      "benchmark/tests/test_evidence_discipline.py::test_every_evobot_batch_states_its_rung",
+      "benchmark/tests/test_evidence_discipline.py::test_evidence_index_json_is_current",
+      "benchmark/tests/test_freeze_change_control.py::test_no_changes_reported_when_everything_matches",
+      "benchmark/tests/test_honesty_guard.py::test_the_historical_defect_evidence_is_preserved",
+      "benchmark/tests/test_runner_hygiene.py::test_superseded_runners_keep_the_defect_as_evidence",
+      "benchmark/tests/test_runner_hygiene.py::test_the_unified_runner_declares_its_helpers_absolutely",
+      "benchmark/tests/test_runner_hygiene.py::test_the_unified_runner_exists_and_validates_the_batch"
+    ],
+    "new_failures": []
+  },
+  "local_checks": {
+    "repository_and_boundary_and_entrypoint_tests": 31,
+    "independent_capability_tests": 6,
+    "mutation_checks": {
+      "control_passes_on_unmutated_code": true,
+      "control_output": "CONTROL OK: unmutated module behaves correctly",
+      "tracked_files_unmodified": true,
+      "legend": "property_broke_under_mutation=true means the check is REAL: the mutation broke the property and the probe detected it",
+      "mutations": [
+        {
+          "mutation": "M1 leak guard disabled -> a task carrying expected_goal is accepted",
+          "detail": "NOT CAUGHT: builder accepted a task carrying expected_goal",
+          "property_broke_under_mutation": true,
+          "probe_exit_code": 1
+        },
+        {
+          "mutation": "M2 bin pose hardcoded -> observation stops being a function of the task",
+          "detail": "NOT CAUGHT: observation ignored the task pose -> {'name': 'z', 'position': [0.12, -0.15, 0.0175], 'radius': 0.06}",
+          "property_broke_under_mutation": true,
+          "probe_exit_code": 1
+        },
+        {
+          "mutation": "M3 gate refusal intercepted by an environment-key fallback -> bypass restored",
+          "detail": "NOT CAUGHT: a refusing gate was bypassed, got a 17-byte key",
+          "property_broke_under_mutation": true,
+          "probe_exit_code": 1
+        },
+        {
+          "mutation": "M4 plan validation downgraded -> a bad plan is returned instead of raised",
+          "detail": "NOT CAUGHT: invalid plan accepted, moves = [{'object': 'a', 'zone': 'z', 'via': [], 'why': ''}]",
+          "property_broke_under_mutation": true,
+          "probe_exit_code": 1
+        },
+        {
+          "mutation": "M5 declared step budget ignored -> an over-budget plan is accepted",
+          "detail": "NOT CAUGHT: 2 distinct valid moves accepted under a budget of 1",
+          "property_broke_under_mutation": true,
+          "probe_exit_code": 1
+        }
+      ],
+      "every_check_is_proven_to_be_able_to_fail": true
+    }
+  },
+  "ci": "PENDING",
+  "physical_trials": 0,
+  "formal_baseline": "NOT_PROMOTED"
+}

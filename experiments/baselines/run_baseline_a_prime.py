@@ -23,11 +23,11 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / 'runtime' / 'planner'))
+sys.path.insert(0, str(ROOT))
 
-import public_observation as po  # noqa: E402
-import rule_planner as rp  # noqa: E402
-import run_baseline_b as rb  # noqa: E402
+from runtime.planner import public_observation as po  # noqa: E402
+from runtime.planner import rule_planner as rp  # noqa: E402
+from experiments.baselines import run_baseline_b as rb  # noqa: E402
 
 
 def run_one(task_path, out_dir):

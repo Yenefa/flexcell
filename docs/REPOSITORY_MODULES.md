@@ -4,6 +4,7 @@
 开发技能、执行技能与物理能力研发的依赖方向见 [SKILL_ARCHITECTURE.md](SKILL_ARCHITECTURE.md)。
 目录归属以 [repository_layout.json](../config/repository_layout.json) 为准，
 版本索引和分支约定见 [VERSION_CONTROL.md](VERSION_CONTROL.md)。
+当前工作树和独立环境入口见 [WORKTREES.md](WORKTREES.md)。
 
 ## 当前模块
 
@@ -19,6 +20,10 @@
 | 开发技能 | `development_skills/` | 编码 Agent 的开发实践、工具与使用记录 |
 | 工程基础设施 | `infra/`、`scripts/`、`config/`、`.github/` | 构建、启动、部署、配置和仓库检查 |
 | 历史证据 | `setup/acceptance/`、`experiments/pilot-001/runs/` | 原始记录、失败、执行快照和复核资料 |
+
+实验准备、自评分和复核 CLI 已集中到 `experiments/baselines/` 及其 `assessment/`。
+Runtime 所需的失败分类和落点分散算法是 `runtime/` 内的纯模块，研发端通过兼容导出复用。
+原 13 处运行时加载研发目录的依赖例外已清零；这不代表所有策略和平台适配均已拆包。
 
 `setup/` 的既有编号工具继续提供兼容入口。新的可复用工程工具放入 `scripts/`，
 业务实现放入相应源码模块。`experiments/` 的研究定义与其 `runs/` 结果分开看待。

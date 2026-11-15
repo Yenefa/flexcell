@@ -5,6 +5,8 @@ Skill architecture: [development skills, execution skills and physical capabilit
 Repository organization: [module/build/evidence boundaries](docs/REPOSITORY_MODULES.md)
 and [version/branch conventions](docs/VERSION_CONTROL.md). Executed-source and
 evidence checkpoints are indexed separately in [version_baselines.json](config/version_baselines.json).
+Active worktrees and isolated build/Python environments: [WORKTREES.md](docs/WORKTREES.md).
+Research CLI migrations: [ENTRYPOINTS.md](experiments/baselines/ENTRYPOINTS.md).
 
 2026-10-27: [trusted simulation, MTC and data implementation](docs/TRUSTED_SIMULATION_20261027.md)
 and [portable CPU reproduction](REPRODUCE.md#portable-cpu-simulation-plane-2026-10-27).

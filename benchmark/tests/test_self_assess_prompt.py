@@ -14,7 +14,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 spec = importlib.util.spec_from_file_location(
-    "sa", ROOT / "runtime" / "verifier" / "self_assess.py")
+    "sa", ROOT / "experiments" / "baselines" / "assessment" / "self_assess.py")
 sa = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(sa)
 

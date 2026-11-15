@@ -19,9 +19,10 @@ import pytest
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "runtime" / "planner"))
 
-import agent_planner_v2 as ap
-import gated_chat as gc
-import public_observation as po
+sys.path.insert(0, str(ROOT))
+from runtime.planner import agent_planner_v2 as ap
+from runtime.planner import gated_chat as gc
+from runtime.planner import public_observation as po
 
 TRAIN = ROOT / "benchmark" / "tasks" / "train"
 
@@ -404,7 +405,7 @@ def test_composite_conversion_takes_only_positions_from_the_scene():
 
 # --------------------------------------------------------------- harness ----
 
-import run_baseline_b as hb
+from experiments.baselines import run_baseline_b as hb
 
 
 @pytest.mark.parametrize("path", [

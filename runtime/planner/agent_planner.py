@@ -21,8 +21,6 @@ It never grades itself, and a plan it produces is not evidence of anything until
 independent evaluator has seen the resulting world state.
 """
 import json
-import sys
-from pathlib import Path
 
 MAX_STAGES = 8
 
@@ -167,31 +165,5 @@ def to_composite_plan(spec_for_poses, agent_plan):
     return {"stages": stages}
 
 
-def main(argv=None):
-    argv = argv or sys.argv[1:]
-    if len(argv) < 2:
-        print("usage: agent_planner.py <observation.json> <out.plan.json> [--dry]",
-              file=sys.stderr)
-        return 2
-    obs = json.loads(Path(argv[0]).read_text(encoding="utf-8"))
-    out = Path(argv[1])
-    if "--dry" in argv:
-        system, user = build_prompt(obs)
-        print(user)
-        return 0
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "experiments" / "pilot-001"))
-    from pilot.llm import Chat
-    chat = Chat()
-    agent_plan, problems, raw = plan(obs, chat)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps({"agent_plan": agent_plan, "problems": problems,
-                               "raw_reply": raw, **chat.metadata()}, indent=2) + "\n",
-                   encoding="utf-8")
-    print(json.dumps({"problems": problems,
-                      "moves": None if agent_plan is None else agent_plan["moves"]},
-                     indent=2))
-    return 0 if not problems else 1
-
-
 if __name__ == "__main__":
-    sys.exit(main())
+    raise SystemExit("Research CLI moved to experiments/baselines/plan_v1.py; this module provides reusable planning functions.")

@@ -107,7 +107,7 @@ def main(argv=None):
     obs = json.loads((run / "observation.json").read_text(encoding="utf-8"))
     zones = {z["name"]: z["pose"] for z in spec["zones"]}
 
-    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "experiments" / "pilot-001"))
+    sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "experiments" / "pilot-001"))
     from pilot.llm import Chat
     chat = Chat()
     reply = chat.chat([{"role": "system", "content": SYSTEM},
