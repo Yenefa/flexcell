@@ -1,0 +1,60 @@
+{
+  "task_outcome": "NOT_EVALUATED_BY_THIS_TOOL",
+  "direction": [
+    -1.0,
+    0.0
+  ],
+  "attempt_count": 1,
+  "attempts": [
+    {
+      "index": 0,
+      "report": "push_00.json",
+      "status": 2,
+      "outcome": 1,
+      "error_code": 36,
+      "requested_distance_m": 0.09,
+      "reported_progress_m": 0.10567046051426134,
+      "recomputed_progress_m": 0.10567046051426134,
+      "poses_complete": true,
+      "increments_executed": 5,
+      "direction_cos": 0.9991419337046252
+    }
+  ],
+  "progress": {
+    "status": "KNOWN",
+    "reasons": [],
+    "requested_directions": "KNOWN",
+    "value_m": 0.10567046051426134
+  },
+  "net": {
+    "status": "KNOWN",
+    "reasons": [],
+    "value_m": 0.10567046051426134,
+    "magnitude_m": 0.10576115955838883,
+    "lateral_m": 0.004379114732330729,
+    "delta_z_m": -0.00010395118898142569
+  },
+  "difference": {
+    "status": "KNOWN",
+    "reasons": [],
+    "value_m": 0.0
+  },
+  "definitions": {
+    "progress_m": "sum of the per-report displacement_along_direction_m",
+    "net_m": "signed projection of (last measured_after - first measured_before) on the task direction",
+    "difference_m": "net_m - progress_m; non-zero means the reports do not partition the motion"
+  },
+  "inputs": {
+    "task": "benchmark/tasks/t08_fresh_zone_20261112/T08-push-seed5000.json",
+    "object": "target_box_a",
+    "reports": [
+      "/tmp/case_b_input/push_00.json"
+    ],
+    "digests": [
+      {
+        "path": "/tmp/case_b_input/push_00.json",
+        "sha256": "e1008c3fccdd028d0c9dcaf5861b648898bbcb2513f03f2002e2abb59fb1cd5a"
+      }
+    ]
+  }
+}

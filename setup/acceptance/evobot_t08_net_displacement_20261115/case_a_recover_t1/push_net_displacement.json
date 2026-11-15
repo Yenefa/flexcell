@@ -1,0 +1,86 @@
+{
+  "task_outcome": "NOT_EVALUATED_BY_THIS_TOOL",
+  "direction": [
+    -1.0,
+    0.0
+  ],
+  "attempt_count": 2,
+  "attempts": [
+    {
+      "index": 0,
+      "report": "push_00.json",
+      "status": 2,
+      "outcome": 1,
+      "error_code": 28,
+      "requested_distance_m": 0.09,
+      "reported_progress_m": 0.022805878598245538,
+      "recomputed_progress_m": null,
+      "poses_complete": false,
+      "increments_executed": 2,
+      "direction_cos": 0.997440662094846
+    },
+    {
+      "index": 1,
+      "report": "push_01.json",
+      "status": 2,
+      "outcome": 1,
+      "error_code": 28,
+      "requested_distance_m": 0.06719412140175446,
+      "reported_progress_m": -0.026180826184656614,
+      "recomputed_progress_m": null,
+      "poses_complete": false,
+      "increments_executed": 2,
+      "direction_cos": -0.9998813128755953
+    }
+  ],
+  "progress": {
+    "status": "UNKNOWN",
+    "reasons": [
+      "attempts were requested along different directions; their sum is not a displacement"
+    ],
+    "requested_directions": "UNKNOWN",
+    "value_m": null
+  },
+  "net": {
+    "status": "UNKNOWN",
+    "reasons": [
+      "the first report has no usable measured_before",
+      "the last report has no usable measured_after"
+    ],
+    "value_m": null,
+    "magnitude_m": null,
+    "lateral_m": null,
+    "delta_z_m": null
+  },
+  "difference": {
+    "status": "UNKNOWN",
+    "reasons": [
+      "progress is unknown",
+      "net displacement is unknown"
+    ],
+    "value_m": null
+  },
+  "definitions": {
+    "progress_m": "sum of the per-report displacement_along_direction_m",
+    "net_m": "signed projection of (last measured_after - first measured_before) on the task direction",
+    "difference_m": "net_m - progress_m; non-zero means the reports do not partition the motion"
+  },
+  "inputs": {
+    "task": "benchmark/tasks/t08_fresh_zone_20261112/T08-push-seed5000.json",
+    "object": "target_box_a",
+    "reports": [
+      "setup/acceptance/evobot_lead_t08_calib_20261112/batch_samecond_20261112/t1/trial/push_00.json",
+      "setup/acceptance/evobot_lead_t08_calib_20261112/batch_samecond_20261112/t1/trial/push_01.json"
+    ],
+    "digests": [
+      {
+        "path": "setup/acceptance/evobot_lead_t08_calib_20261112/batch_samecond_20261112/t1/trial/push_00.json",
+        "sha256": "267bc8c7e57d729efafd723c7821d1e03c3cee1cd2666431668c5ed16a167334"
+      },
+      {
+        "path": "setup/acceptance/evobot_lead_t08_calib_20261112/batch_samecond_20261112/t1/trial/push_01.json",
+        "sha256": "65b71b315607974c02f78e98fd3323acc3f62f0d358116f213706f5a9bfeda0d"
+      }
+    ]
+  }
+}
