@@ -1,0 +1,55 @@
+{
+  "qualification": "STRUCTURAL_REFACTOR_NOT_PHYSICAL_VALIDATION",
+  "implementation_commit": "18473aa8ee4d3142bf97efc29b85f5771489fa3a",
+  "worktree_fix_commit": "c504ff1de9e276b028a144949d8bc9d08f71b06c",
+  "skill_boundary_ci": {
+    "run": 43721840130,
+    "conclusion": "success",
+    "jobs": [
+      "dependency-direction",
+      "research-compatibility",
+      "independent-capability",
+      "execution-compatibility"
+    ]
+  },
+  "repository_layout_ci": {
+    "run": 43722188657,
+    "conclusion": "success"
+  },
+  "initial_repository_layout_ci": {
+    "run": 43721840143,
+    "conclusion": "failure",
+    "detail": "Git worktree inventory read exited128; selected-checkout trust and ownership negative control added before successful container rerun."
+  },
+  "offline_benchmark_comparison": {
+    "passed": true,
+    "qualification": "DIFFERENTIAL_COMPATIBILITY_ONLY",
+    "collected_before": 352,
+    "collected_after": 352,
+    "unchanged_failures": [
+      "benchmark.tests.test_baseline_b_v2::test_skills_named_in_the_observation_are_backed_by_real_actions",
+      "benchmark.tests.test_benchmark_skeleton::test_each_implemented_template_generates_a_valid_spec",
+      "benchmark.tests.test_benchmark_skeleton::test_evaluator_and_generator_versions_agree",
+      "benchmark.tests.test_capability_freeze::test_an_unchanged_baseline_verifies",
+      "benchmark.tests.test_capability_ladder::test_the_document_states_that_failures_do_not_reproduce",
+      "benchmark.tests.test_evidence_discipline::test_every_evobot_batch_has_a_verifier",
+      "benchmark.tests.test_evidence_discipline::test_every_evobot_batch_states_its_rung",
+      "benchmark.tests.test_evidence_discipline::test_evidence_index_json_is_current",
+      "benchmark.tests.test_freeze_change_control::test_no_changes_reported_when_everything_matches",
+      "benchmark.tests.test_honesty_guard::test_the_historical_defect_evidence_is_preserved",
+      "benchmark.tests.test_runner_hygiene::test_superseded_runners_keep_the_defect_as_evidence",
+      "benchmark.tests.test_runner_hygiene::test_the_unified_runner_declares_its_helpers_absolutely",
+      "benchmark.tests.test_runner_hygiene::test_the_unified_runner_exists_and_validates_the_batch"
+    ],
+    "repaired_failures": [],
+    "missing_tests": [],
+    "added_tests": [],
+    "regressions": []
+  },
+  "ros_regressions_passed": 170,
+  "independent_capability_checks_passed": 6,
+  "local_final_unit_checks_passed": 32,
+  "legacy_import_exceptions": 0,
+  "physical_trials": 0,
+  "formal_baseline": "NOT_PROMOTED"
+}

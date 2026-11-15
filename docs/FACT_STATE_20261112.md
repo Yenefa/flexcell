@@ -1433,3 +1433,27 @@ docs/architecture/20261115/. Independent CI is pending at this append; completio
 requires a separate confirmation. No physical trial, paid model call, hardware
 motion, main merge, baseline promotion or new robot capability is claimed.
 Formal baseline NOT_PROMOTED; main goal active.
+
+
+### 2026-11-15 — Independent architecture validation confirmed
+
+Implementation18473aa8: skill-boundaries CI43721840130 PASS, all4 jobs. Isolated
+capability install/import and6 checks PASS; ROS interfaces/capability/skills
+build PASS, real root discovery5 packages,170 regressions PASS. Disposable
+baseline/candidate benchmark check: each352 collected,339 passed and the SAME13
+failed;0 new failures, missing tests, added tests or skips. This confirms
+compatibility under this comparison, not a clean full suite or robot capability.
+
+First repository-layout CI43721840143 failed at the new inventory Git read,
+exit128. Selected-checkout Git trust and an ownership negative control were
+added in c504ff1d. Repository-layout CI43722188657 now PASS; local final unit
+checks32 PASS. Python-generated egg-info is excluded from source status.
+Original first-failure records are retained on CI; no evaluator/threshold fix.
+
+Original CI artifact14164678289,35,670 bytes, SHA256
+b82b82bbc3f8e0460cd1bc1b9034981b2403db2345f7bd545664bc20c7163a63,
+contains full before/after logs, JUnit XML, comparison and mutation-check output.
+It is preserved under docs/architecture/20261115/ with member hashes and an
+offline comparison replayer. Physical source and frozen boundary remain
+byte-identical to81eed33c; old physical results keep their original identities.
+No new Gazebo/hardware/model run, formal baseline promotion or main merge.
