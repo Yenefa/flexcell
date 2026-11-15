@@ -1,11 +1,12 @@
 """Inventory real Git worktrees, including dirty and missing checkouts."""
 import importlib.util
-import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 
 SPEC = importlib.util.spec_from_file_location('inventory', Path(__file__).parents[1] / 'worktree_inventory.py')
 inventory = importlib.util.module_from_spec(SPEC)
@@ -58,6 +59,14 @@ class WorktreeInventoryTest(unittest.TestCase):
         self.assertFalse(row['exists'])
         self.assertIsNone(row['dirty'])
         self.assertEqual(inventory.revision(self.root, 'refs/heads/architecture'), head)
+
+    def test_container_ownership_check_trusts_only_the_selected_checkout(self):
+        with patch.dict(os.environ, {'GIT_TEST_ASSUME_DIFFERENT_OWNER': 'true',
+                                    'GIT_CONFIG_COUNT': '1', 'GIT_CONFIG_KEY_0': 'safe.directory',
+                                    'GIT_CONFIG_VALUE_0': ''}):
+            report = inventory.collect(self.root, self.config)
+        self.assertEqual(len(report['worktrees']), 2)
+        self.assertTrue(all(not t['dirty'] for t in report['worktrees']))
 
 
 if __name__ == '__main__':

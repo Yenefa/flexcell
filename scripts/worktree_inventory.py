@@ -9,13 +9,16 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 def git(root, *args):
-    result = subprocess.run(['git', '-C', str(root), *args], capture_output=True,
-                            text=True, check=True)
+    result = subprocess.run(['git', '-c', 'safe.directory=' + str(Path(root).resolve()),
+                             '-C', str(root), *args], capture_output=True, text=True)
+    if result.returncode:
+        raise RuntimeError('git read failed: ' + result.stderr.strip())
     return result.stdout
 
 
 def revision(root, ref):
-    result = subprocess.run(['git', '-C', str(root), 'rev-parse', '--verify', ref],
+    result = subprocess.run(['git', '-c', 'safe.directory=' + str(Path(root).resolve()),
+                             '-C', str(root), 'rev-parse', '--verify', ref],
                             capture_output=True, text=True)
     return result.stdout.strip() if result.returncode == 0 else None
 
