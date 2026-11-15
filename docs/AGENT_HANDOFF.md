@@ -3,6 +3,7 @@
 > 生成时间：2026-11-11（会话结束时）。**本文件只记录状态，不改动任何核心代码。**
 > 最后更新：2026-11-11 16:2x（补入仓库布局陷阱、预算/key 未完成项、更新启动提示词）。
 > 上一任 Agent 的工作分支：`autonomous/flexcell-remediation`，HEAD `724350ef`。
+> 当前状态导航（2026-11-16）：[STATUS_INDEX_CURRENT.md](STATUS_INDEX_CURRENT.md)（权威目标 / 证据 / 已撤回判断 / 当前主线 / 待验证）· [D3_STATUS_CURRENT.md](D3_STATUS_CURRENT.md)（D3 六条判据与证据边界）。
 
 ---
 
