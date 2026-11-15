@@ -1,5 +1,6 @@
 """Reject forged summaries and missing/ambiguous transported receipts."""
 import json
+import os
 from pathlib import Path
 import shutil
 import sys
@@ -8,13 +9,15 @@ import tarfile
 import pytest
 
 ROOT = Path(__file__).resolve().parents[4]
+# The archive may be relocated outside the repository: docs/EVIDENCE_ARCHIVE.md
+EVIDENCE_ROOT = Path(os.environ.get('FLEXCELL_EVIDENCE_ROOT', str(ROOT)))
 sys.path.insert(0, str(ROOT / 'scripts'))
 from parity_report import CASES, compare
 
 
 @pytest.fixture
 def sealed(tmp_path):
-    with tarfile.open(ROOT/'setup/acceptance/native_portable_20261101/legacy-review-source.tar') as archive:
+    with tarfile.open(EVIDENCE_ROOT/'setup/acceptance/native_portable_20261101/legacy-review-source.tar') as archive:
         for member in archive.getmembers():
             if member.isfile() and member.name.startswith(('setup/acceptance/legacy_parity_20261031/',
                                                            'setup/acceptance/legacy_skill_matrix_20261031/')):
@@ -50,7 +53,7 @@ def test_original_receipts_keep_pass_and_use_actual_60mm_tolerance(sealed):
     assert report['max_verified_error_m']['detachable_joint']==pytest.approx(.012252028927226412)
     assert set(report['attempts']['teleport'])=={c+'/'+o for c,o in CASES}
     for p in paths(sealed):
-        original=ROOT/'setup/acceptance/legacy_parity_20261031'/p.parent.name/'window.json'
+        original=EVIDENCE_ROOT/'setup/acceptance/legacy_parity_20261031'/p.parent.name/'window.json'
         assert p.read_bytes()==original.read_bytes()
 
 
@@ -142,7 +145,7 @@ def test_tolerance_cannot_be_replaced_by_caller(sealed):
 
 
 def test_bare_archived_summaries_do_not_supply_missing_raw_receipts():
-    with pytest.raises(ValueError,match='receipt'):compare(paths(ROOT/'setup/acceptance'))
+    with pytest.raises(ValueError,match='receipt'):compare(paths(EVIDENCE_ROOT/'setup/acceptance'))
 
 
 @pytest.mark.parametrize('selection', [[], [0], [0, 0]])

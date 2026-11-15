@@ -4,6 +4,7 @@ import hashlib
 import importlib.util
 import itertools
 import json
+import os
 from pathlib import Path
 import re
 import sys
@@ -11,7 +12,9 @@ import sys
 import pytest
 
 ROOT = Path(__file__).resolve().parents[4]
-CAPSULE = ROOT/'setup/acceptance/native_audit_20261031'
+# The archive may be relocated outside the repository: docs/EVIDENCE_ARCHIVE.md
+EVIDENCE_ROOT = Path(os.environ.get('FLEXCELL_EVIDENCE_ROOT', str(ROOT)))
+CAPSULE = EVIDENCE_ROOT/'setup/acceptance/native_audit_20261031'
 RECEIPT = json.loads((CAPSULE/'receipt.json').read_text())
 BINDING = json.loads((CAPSULE/'source-binding.json').read_text())
 SOURCES = tuple(RECEIPT['verification_sources'])

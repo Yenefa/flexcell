@@ -1,6 +1,7 @@
 """Public input isolation and returned-state admission; not physical evidence."""
 import copy
 import json
+import os
 from pathlib import Path
 import sys
 import time
@@ -11,6 +12,8 @@ import numpy as np
 import pytest
 
 ROOT=Path(__file__).resolve().parents[4];sys.path.insert(0,str(ROOT))
+# The archive may be relocated outside the repository: docs/EVIDENCE_ARCHIVE.md
+EVIDENCE_ROOT=Path(os.environ.get('FLEXCELL_EVIDENCE_ROOT',str(ROOT)))
 from runtime.planner.public_observation import reduce_to_public,LeakError
 from runtime.planner.push_task import plan,PushTaskRejected
 from flexcell_skills.contracts.composite import push_native_success
@@ -18,7 +21,7 @@ from flexcell_skills.contracts.contact_task import returned_component_ready
 
 
 def inputs():
-    task=reduce_to_public(json.loads((ROOT/'benchmark/tasks/t08_dev/T08-push-seed2000.json').read_text()))
+    task=reduce_to_public(json.loads((EVIDENCE_ROOT/'benchmark/tasks/t08_dev/T08-push-seed2000.json').read_text()))
     world=dict(source='SIMULATION_GROUND_TRUTH',header=dict(frame_id='world'),carry=dict(engaged=False),
         objects=[dict(name=o['name'],available=True,pose_age_s=.01,
             pose=dict(position=dict(zip(('x','y','z'),o['initial_pose'][:3])))) for o in task['objects']])
