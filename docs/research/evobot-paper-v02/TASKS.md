@@ -30,7 +30,7 @@
 | --- | --- | --- |
 | 缺陷实例 ID | `DEF-F1-REG` | DRAFT-FIXED |
 | 注入位置 | 工作区配置中感知服务的对象注册参数（`tracked_objects` 一类键） | DRAFT-FIXED |
-| 注入实现 | `TBD`（由 #252 落成可复现的覆盖文件，并记录覆盖文件的 sha256） | TBD |
+| 注入实现 | `experiments/repair_eval_v02/defects/DEF-F1-REG/override.yaml`（由 #252 落成；覆盖文件 sha256 `91fa50b3fd471670…`，原始配置 sha256 `7107bd766aaa1206…`） | DRAFT-FIXED |
 | 机制 | 注册表缺失 → 感知层不发布 B → 任务层取不到 B | DRAFT-FIXED |
 
 ### 2.2 不可变目标
@@ -74,7 +74,7 @@
 | --- | --- | --- |
 | 缺陷实例 ID | `DEF-F2-MAP` | DRAFT-FIXED |
 | 注入位置 | 规划/放置技能中「物体 → 目标区」的映射来源（源码） | DRAFT-FIXED |
-| 注入实现 | `TBD`（由 #252 落成带 sha256 的补丁文件，并记录受影响文件清单） | TBD |
+| 注入实现 | `experiments/repair_eval_v02/defects/DEF-F2-MAP/inject.patch`（由 #252 落成；补丁 sha256 `db1c48d3b94c330b…`；受影响文件见 manifest） | DRAFT-FIXED |
 | 机制 | 映射源取错 → 目标区错误 / 不可达 → `PLACE_B` 失败或落错区 | DRAFT-FIXED |
 | 备选但**不使用** | 配置坐标错（如把某 zone 的 x 写成不可达值）属**另一种机制**，不在 24 槽矩阵内；若要使用必须新预注册 | DRAFT-FIXED |
 

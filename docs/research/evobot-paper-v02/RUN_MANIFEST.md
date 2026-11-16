@@ -98,6 +98,10 @@ D = 真实反馈 + 显式指导。定义见 [PROTOCOL.md](PROTOCOL.md) §2。
 
 ## 7. 已知限制
 
+- **合成 fixture 的跑批不能顶替本表的槽位。** `experiments/repair_eval_v02/` 里有一套合成 fixture（`skill/registry.py`、`skill/mapping.py`），它验证的是跑批机制本身，不是 `DEF-F1-REG` / `DEF-F2-MAP`。用它跑出的记录（`evidence/real_matrix.json`、`confirmatory_f1bc.json`）在结论表里按 stand-in 标注，**本表 24 行的状态不得据此改动**。
+- 本表槽位的 `seed` 仍为 `TBD`：只有对真实缺陷实例的批才填，填了就要能对着 `DEF-*` 的注入文件复现。
+
+
 - 表里**一个运行结果都没有**；`NOT_RUN` × 24 就是当前全部事实。
 - 派发顺序固定且串行，存在残余时间漂移混淆（§3）。
 - C 条件的 donor 绑定存在**结构性依赖**：批 1 的 C 行必须等对应族的 B 条件先出结果，
