@@ -16,6 +16,7 @@ Run: python3 experiments/physical_capabilities/pick_place_reliability/run_window
         --out /artifacts/pick-place
 """
 import argparse
+import contextlib
 import hashlib
 import json
 import os
@@ -77,6 +78,55 @@ def _ignore_during_cleanup():
         except (OSError, ValueError):
             pass
     return previous
+
+
+class _DeferredSignals:
+    """Collect termination signals instead of raising, so cleanup can finish."""
+
+    def __init__(self):
+        self.names = []
+
+    def __call__(self, signum, _frame):
+        self.names.append(signal.Signals(signum).name)
+
+
+@contextlib.contextmanager
+def _defer_signals(signals=(signal.SIGINT, signal.SIGTERM, signal.SIGHUP)):
+    """Record signals raised inside the block and replay nothing.
+
+    Cleanup between slots must not be interrupted halfway: the slot's processes
+    have to be stopped and its row written first. The caller turns a non-empty
+    `names` into an INTERRUPTED slot and stops the window.
+    """
+    state = _DeferredSignals()
+    previous = {}
+    for signum in signals:
+        try:
+            previous[signum] = signal.getsignal(signum)
+            signal.signal(signum, state)
+        except (OSError, ValueError):
+            previous.pop(signum, None)
+    try:
+        yield state
+    finally:
+        _restore_signal_handlers(previous)
+
+
+def reap_after_slot(marker, row, label):
+    """Reap leftovers after a slot without losing the slot to a Ctrl+C.
+
+    The per-slot reaper can wait for a `TERM`-ignoring process. If a signal
+    arrives during that wait it is recorded instead of unwinding the window, the
+    reap still finishes, and the caller keeps the slot's evidence as INTERRUPTED.
+    """
+    with _defer_signals() as pending:
+        orphans, killed = reap(marker)
+    if orphans:
+        row['orphans_stopped'] = orphans
+        row['orphans_needed_sigkill'] = killed
+    if pending.names:
+        return pending.names[0]
+    return None
 
 
 
@@ -390,10 +440,14 @@ def run_window(prereg, out, runner=None):
                 row['slot_id'] = slot_id
                 row['timeout_cleanup'] = cleanup
             if runner is None:
-                orphans, orphans_killed = reap(slot_id)
-                if orphans:
-                    row['orphans_stopped'] = orphans
-                    row['orphans_needed_sigkill'] = orphans_killed
+                signal_name = reap_after_slot(slot_id, row, label)
+                if signal_name:
+                    interrupted_now = True
+                    interrupted = signal_name
+                    stopped = 'interrupted by %s during cleanup after %s' % (
+                        signal_name, label)
+                    row['status'] = 'INTERRUPTED'
+                    row['reason'] = stopped
             try:
                 result, result_path = one_result(slot_out, case)
                 task = result.get('task') or {}

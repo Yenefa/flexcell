@@ -378,5 +378,38 @@ class InterruptedWindowTest(unittest.TestCase):
             self.assertTrue((root / 'out' / 'results.partial.json').is_file())
 
 
+class ReapInterruptTest(unittest.TestCase):
+    """A Ctrl+C during the post-slot reap must not erase the executed slot."""
+
+    def test_sigint_during_reap_keeps_the_slot_as_interrupted(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            prereg = dict(
+                slots=[dict(label='A', case='normal'), dict(label='B', case='normal')],
+                slot_timeout_s=5, window_budget_s=1000,
+                backend='velocity_servo', skill_backend='legacy',
+                experiment='unit-test')
+
+            def fake_command(*_args, **_kwargs):
+                return [sys.executable, '-c', 'pass']
+
+            def fake_reap(marker, grace_s=10.0):
+                os.kill(os.getpid(), signal.SIGINT)
+                return 0, 0
+
+            with mock.patch.object(rw, 'slot_command', fake_command), \
+                    mock.patch.object(rw, 'reap', fake_reap):
+                payload = rw.run_window(prereg, root / 'out')
+
+            first, second = payload['results']
+            self.assertEqual(first['status'], 'INTERRUPTED')
+            self.assertIn('SIGINT', first['reason'])
+            self.assertIn('during cleanup', first['reason'])
+            self.assertEqual(second['status'], 'NOT_RUN')
+            self.assertTrue(payload['interrupted'])
+            self.assertEqual(payload['interrupt_signal'], 'SIGINT')
+            self.assertFalse(payload['all_slots_completed'])
+
+
 if __name__ == '__main__':
     unittest.main()

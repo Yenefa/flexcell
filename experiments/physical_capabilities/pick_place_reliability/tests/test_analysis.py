@@ -344,5 +344,57 @@ class CorruptLogTest(unittest.TestCase):
                             for e in row['log_errors']))
 
 
+class WindowFreezeTest(unittest.TestCase):
+    """A window whose source changed is evidence, but not a frozen sample."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = pathlib.Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _window(self, source_unchanged, source_changed=()):
+        make_slot(self.root, 'NORMAL_1', 0.008, 'drop error 0.008m', 'err=0.008',
+                  [(0.12, -0.15, 0.1895)])
+        (self.root / 'results.json').write_text(json.dumps(dict(
+            results=[dict(label='NORMAL_1', case='normal',
+                          driver_exit=0, status='OK')],
+            source_unchanged=source_unchanged,
+            source_changed=list(source_changed))))
+
+    def test_changed_source_makes_the_slot_not_comparable(self):
+        self._window(False, ['worlds/flexcell_velocity_servo.sdf'])
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'NOT_COMPARABLE')
+        self.assertIn('source changed', row['reason'])
+        self.assertIn('worlds/flexcell_velocity_servo.sdf', row['reason'])
+
+        summary = aw.summarize([row])
+        self.assertEqual(summary['slots_completed'], 0)
+        self.assertEqual(summary['slots_not_comparable'], 1)
+        self.assertEqual(summary['windows_not_frozen'], 1)
+        self.assertEqual(summary['excluded'][0]['status'], 'NOT_COMPARABLE')
+
+    def test_frozen_source_keeps_the_slot(self):
+        self._window(True)
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'OK')
+        summary = aw.summarize([row])
+        self.assertEqual(summary['slots_completed'], 1)
+        self.assertEqual(summary['windows_not_frozen'], 0)
+
+    def test_cli_exit_code_reports_the_unfrozen_window(self):
+        import contextlib
+        import io
+
+        self._window(False, ['worlds/flexcell_velocity_servo.sdf'])
+        with contextlib.redirect_stdout(io.StringIO()):
+            code = aw.main([str(self.root)])
+        self.assertEqual(code, 1)
+
+
 if __name__ == '__main__':
     unittest.main()

@@ -32,10 +32,11 @@ slot, own output directory, sequential. 360 s per slot, 1440 s per window.
 python3 -m unittest discover -s experiments/physical_capabilities/pick_place_reliability/tests -v
 ```
 
-49 tests: one-result parsing, the single-run rule, the source-change scope,
+53 tests: one-result parsing, the single-run rule, the source-change scope,
 unknown-terminal detection, window stop behaviour, the completion flag, timeout
 and signal cleanup, the driver-verdict gate, non-finite values, corrupt-log
-isolation, and the artifact aggregator. No simulator, no ROS.
+isolation, the window-freeze gate, and the artifact aggregator. No simulator, no
+ROS.
 
 ## Results (6 windows, 24 slot attempts)
 
@@ -82,6 +83,12 @@ The freeze covers what the slot can execute or load, not only Python packages:
 preregistration and tests. A changed `worlds/*.sdf` therefore changes the
 `source_before` / `source_after` comparison instead of passing as an unchanged
 scene (386 files, 0.07 s on this host).
+
+A window whose `source_unchanged` is `false` is reported as `NOT_COMPARABLE`
+rather than silently pooled with the frozen runs: its slots are listed in
+`excluded` with the changed files, `summary.windows_not_frozen` counts such
+windows, and the analyzer exits non-zero. A changed scene can still be evidence,
+but it is not a frozen regression sample.
 
 ## Finding 1 — the command is fixed, the result is not
 

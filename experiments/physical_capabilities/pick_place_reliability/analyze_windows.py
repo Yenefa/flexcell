@@ -156,16 +156,28 @@ def slot_status(runs, result, driver=None, metadata_error=None):
     return 'OK', None
 
 
-def slot_row(window_dir, label, drivers=None, metadata_error=None):
+def slot_row(window_dir, label, drivers=None, metadata_error=None, meta=None):
     if drivers is None and metadata_error is None:
         drivers, metadata_error = window_driver_rows(window_dir)
+    if meta is None:
+        meta = read_json(pathlib.Path(window_dir) / 'results.json')
     runs = run_directories(window_dir, label)
     result = read_json(runs[0] / 'result.json') if len(runs) == 1 else None
     status, reason = slot_status(runs, result, drivers.get(label) if drivers else None,
                                  metadata_error)
     driver = drivers.get(label) if drivers else None
 
-    row = dict(window=str(window_dir), label=label, status=status)
+    if status == 'OK' and isinstance(meta, dict) and meta.get('source_unchanged') is False:
+        changed = meta.get('source_changed') or []
+        status = 'NOT_COMPARABLE'
+        reason = 'window source changed during the run (%s)' % (
+            ', '.join(changed) if changed else 'files unknown')
+
+    row = dict(window=str(window_dir), label=label, status=status,
+               window_source_unchanged=(meta.get('source_unchanged')
+                                        if isinstance(meta, dict) else None),
+               window_source_changed=(list(meta.get('source_changed') or [])
+                                      if isinstance(meta, dict) else []))
     if reason:
         row['reason'] = reason
     if metadata_error:
@@ -246,6 +258,19 @@ def summarize(rows):
         excluded.append(dict(label=row.get('label'), window=row.get('window'),
                              status=row.get('status'), reason=reason))
 
+    windows = {}
+    for row in rows:
+        entry = windows.setdefault(row.get('window'), dict(
+            window=row.get('window'),
+            source_unchanged=row.get('window_source_unchanged'),
+            source_changed=row.get('window_source_changed') or [],
+            slots_completed=0, slots_not_comparable=0))
+        if row.get('status') == 'OK':
+            entry['slots_completed'] += 1
+        elif row.get('status') == 'NOT_COMPARABLE':
+            entry['slots_not_comparable'] += 1
+    windows = [windows[key] for key in sorted(windows)]
+
     return dict(
         slots_attempted=len(rows),
         slots_completed=len(valid),
@@ -257,6 +282,9 @@ def summarize(rows):
         slots_ambiguous=count('AMBIGUOUS'),
         slots_no_result=count('NO_RESULT'),
         slots_metadata_missing=sum(1 for r in rows if r.get('metadata_error')),
+        slots_not_comparable=count('NOT_COMPARABLE'),
+        windows_not_frozen=sum(1 for w in windows if w['source_unchanged'] is False),
+        windows=windows,
         slots_unmeasured=sum(1 for r in rows if r.get('status') == 'OK'
                              and r.get('final_error_mm') is None),
         excluded=excluded,
@@ -293,12 +321,16 @@ def main(argv=None):
             window=str(window),
             metadata_error=metadata_error,
             stop_reason=meta.get('stop_reason') if isinstance(meta, dict) else None,
+            source_unchanged=(meta.get('source_unchanged')
+                              if isinstance(meta, dict) else None),
+            source_changed=(list(meta.get('source_changed') or [])
+                            if isinstance(meta, dict) else []),
             all_slots_completed=(meta.get('all_slots_completed')
                                  if isinstance(meta, dict) else None),
             interrupted=(meta.get('interrupted') if isinstance(meta, dict) else None),
         ))
         for label in NORMAL_LABELS:
-            rows.append(slot_row(window, label, drivers, metadata_error))
+            rows.append(slot_row(window, label, drivers, metadata_error, meta))
 
     summary = summarize(rows)
     payload = dict(windows=windows, rows=rows, summary=summary)
@@ -306,7 +338,7 @@ def main(argv=None):
     if args.out:
         args.out.write_text(text + '\n')
     print(text)
-    return 0 if summary['slots_completed'] else 1
+    return 0 if summary['slots_completed'] and not summary['windows_not_frozen'] else 1
 
 
 if __name__ == '__main__':
