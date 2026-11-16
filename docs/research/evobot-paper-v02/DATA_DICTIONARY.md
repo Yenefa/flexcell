@@ -78,12 +78,16 @@
 | `tokens_total` | int | token | `tokens_in + tokens_out` | 是 |
 | `tokens_cap` | int | token | 固定 20,000 | 是 |
 | `tokens_source` | enum | — | `provider_split` 或 `provider_total_only`；后者表示提供方只给了总数，`tokens_in`/`tokens_out` 记 `null` | 是 |
+| `task_variant` | enum | — | `v1` 或 `v2`；v1 的题面写出要注册的物体名与期望配对，v2 只写症状、名字改由执行反馈给出。两批不得混池：v2 下无反馈条件按设计拿不到名字。 | 是 |
 | `candidate_executions` | int | 次 | 本记录触发的场景执行次数（见 §1） | 是 |
 | `final_scenes` | int | 个 | 本记录产生的最终场景轮数（0 或 1） | 是 |
 | `wall_clock_s` | float | 秒 | 从派发到终态 | 是 |
 | `budget_exhausted_at` | string | — | 如 `interaction:7` / `token:20013`；未耗尽为 `null` | 是 |
 
-### 3.5 判定面
+#
+> **截断**：`interactions_used` 等于该批的交互上限时，该观测是**截断值**，不是「用完了」。`summarise.py` 把「耗尽」与「顶在上限」分开计数，并在整格全顶时标注该行描述的是天花板而非工作量。
+
+## 3.5 判定面
 
 | 字段 | 类型 | 单位 | 说明 | 必填 |
 | --- | --- | --- | --- | --- |
