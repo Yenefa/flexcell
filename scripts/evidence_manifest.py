@@ -15,20 +15,50 @@ This tool makes the archive relocatable without giving up verifiability:
 
 verify exits non-zero when a file is missing, added or changed, so the manifest
 - not the bytes - can live in the repository. See docs/EVIDENCE_ARCHIVE.md.
+
+WHICH archive is read: docs/EVIDENCE_ARCHIVE.md makes FLEXCELL_EVIDENCE_ROOT a
+repository-root-shaped evidence root (default: this checkout) and the archive lives
+at <that root>/setup/acceptance. An explicit --root still outranks both. Before
+this, the default was the bare relative path 'setup/acceptance' and the environment
+variable was only mentioned in an error message, so a relocated archive could be
+"verified" against the in-tree copy and report OK for bytes nobody checked. Both
+subcommands now resolve the root through the same function, and both print the
+resolved root so a reader can see which directory was actually hashed.
 """
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import os
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
 SCHEMA_VERSION = 1
-DEFAULT_ROOT = 'setup/acceptance'
+REPO_ROOT = Path(__file__).resolve().parents[1]
+EVIDENCE_ROOT_ENV = 'FLEXCELL_EVIDENCE_ROOT'
+ARCHIVE_RELATIVE = Path('setup') / 'acceptance'
 DEFAULT_MANIFEST = 'config/evidence_manifest.json'
 CHUNK = 1 << 20
+
+
+def default_archive_root() -> Path:
+    """Archive root used when --root is not given.
+
+    The evidence root is repository-root shaped and defaults to this checkout, so
+    an in-tree archive keeps working unchanged while a relocated one is found by
+    the same command. Reading the variable is the whole point: it used to be
+    advertised in an error message but never honoured, which let a relocated
+    archive be reported OK against the in-tree copy.
+    """
+    evidence_root = Path(os.environ.get(EVIDENCE_ROOT_ENV) or REPO_ROOT)
+    return evidence_root / ARCHIVE_RELATIVE
+
+
+def resolve_archive_root(args: argparse.Namespace) -> Path:
+    """--root wins; otherwise the evidence-root default. One rule for both commands."""
+    return Path(args.root) if args.root else default_archive_root()
 
 
 def sha256_file(path: Path) -> str:
@@ -64,10 +94,12 @@ def build(root: Path) -> dict:
 
 
 def cmd_generate(args: argparse.Namespace) -> int:
-    root = Path(args.root)
+    root = resolve_archive_root(args)
     if not root.is_dir():
-        print(f'archive root not found: {root}', file=sys.stderr)
+        print(f'archive root not found: {root} (set {EVIDENCE_ROOT_ENV} or pass --root)',
+              file=sys.stderr)
         return 2
+    print(f'archive root: {root}')
     manifest = build(root)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -78,14 +110,16 @@ def cmd_generate(args: argparse.Namespace) -> int:
 
 
 def cmd_verify(args: argparse.Namespace) -> int:
-    root = Path(args.root)
+    root = resolve_archive_root(args)
     path = Path(args.manifest)
     if not path.is_file():
         print(f'manifest not found: {path}', file=sys.stderr)
         return 2
     if not root.is_dir():
-        print(f'archive root not found: {root} (set FLEXCELL_EVIDENCE_ROOT)', file=sys.stderr)
+        print(f'archive root not found: {root} (set {EVIDENCE_ROOT_ENV} or pass --root)',
+              file=sys.stderr)
         return 2
+    print(f'archive root: {root}')
     expected = json.loads(path.read_text(encoding='utf-8'))
     if expected.get('schema_version') != SCHEMA_VERSION:
         print(f'unsupported schema_version: {expected.get("schema_version")}', file=sys.stderr)
@@ -117,13 +151,16 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     sub = parser.add_subparsers(dest='command', required=True)
 
+    root_help = (f'archive root (default: <{EVIDENCE_ROOT_ENV} or this checkout>'
+                 f'/{ARCHIVE_RELATIVE.as_posix()})')
+
     gen = sub.add_parser('generate', help='write the manifest for the archive')
-    gen.add_argument('--root', default=DEFAULT_ROOT)
+    gen.add_argument('--root', help=root_help)
     gen.add_argument('--out', default=DEFAULT_MANIFEST)
     gen.set_defaults(func=cmd_generate)
 
     ver = sub.add_parser('verify', help='check the archive against the manifest')
-    ver.add_argument('--root', default=DEFAULT_ROOT)
+    ver.add_argument('--root', help=root_help)
     ver.add_argument('--manifest', default=DEFAULT_MANIFEST)
     ver.set_defaults(func=cmd_verify)
 

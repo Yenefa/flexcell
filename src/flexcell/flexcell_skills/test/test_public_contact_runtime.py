@@ -3,6 +3,7 @@ import copy
 import json
 import os
 from pathlib import Path
+import subprocess
 import sys
 import time
 from types import SimpleNamespace as NS
@@ -12,8 +13,10 @@ import numpy as np
 import pytest
 
 ROOT=Path(__file__).resolve().parents[4];sys.path.insert(0,str(ROOT))
-# The archive may be relocated outside the repository: docs/EVIDENCE_ARCHIVE.md
-EVIDENCE_ROOT=Path(os.environ.get('FLEXCELL_EVIDENCE_ROOT',str(ROOT)))
+# A TaskSpec is SOURCE, not archived evidence: docs/EVIDENCE_ARCHIVE.md relocates only
+# setup/acceptance, so resolving it through FLEXCELL_EVIDENCE_ROOT aimed the read at a
+# directory the migration never moves and broke as soon as the archive was external.
+TASK_SPEC=ROOT/'benchmark/tasks/t08_dev/T08-push-seed2000.json'
 from runtime.planner.public_observation import reduce_to_public,LeakError
 from runtime.planner.push_task import plan,PushTaskRejected
 from flexcell_skills.contracts.composite import push_native_success
@@ -21,11 +24,38 @@ from flexcell_skills.contracts.contact_task import returned_component_ready
 
 
 def inputs():
-    task=reduce_to_public(json.loads((EVIDENCE_ROOT/'benchmark/tasks/t08_dev/T08-push-seed2000.json').read_text()))
+    task=reduce_to_public(json.loads(TASK_SPEC.read_text()))
     world=dict(source='SIMULATION_GROUND_TRUTH',header=dict(frame_id='world'),carry=dict(engaged=False),
         objects=[dict(name=o['name'],available=True,pose_age_s=.01,
             pose=dict(position=dict(zip(('x','y','z'),o['initial_pose'][:3])))) for o in task['objects']])
     return task,world,dict(push_backend='finger_tcp',motion_budget=40,wall_s=600.)
+
+
+def test_task_spec_is_read_from_source():
+    # the path itself, pinned: a TaskSpec inside the checkout cannot be relocated by a
+    # migration that only moves setup/acceptance
+    assert TASK_SPEC.is_file() and ROOT in TASK_SPEC.parents
+
+
+def test_inputs_survive_relocating_only_setup_acceptance(tmp_path):
+    # Review #10 counter-example: with only setup/acceptance external, the TaskSpec read
+    # through FLEXCELL_EVIDENCE_ROOT raised FileNotFoundError although the real TaskSpec was
+    # present under ROOT. A subprocess is used because the defect resolved the evidence root
+    # when the module was imported, so setting the variable inside this process would not
+    # reproduce it: the evidence root here deliberately has no benchmark/.
+    relocated=tmp_path/'relocated-evidence';(relocated/'setup/acceptance').mkdir(parents=True)
+    assert not (relocated/'benchmark').exists()
+    environment=dict(os.environ,**{'FLEXCELL_EVIDENCE_ROOT':str(relocated),
+        'PYTHONPATH':os.pathsep.join(p for p in sys.path if p)})
+    probe=("import importlib.util,sys;"
+           "spec=importlib.util.spec_from_file_location('public_contact_runtime',sys.argv[1]);"
+           "module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module);"
+           "task,world,cap=module.inputs();"
+           "print(task['objects'][0]['name'],task['objects'][0]['initial_pose'][0],cap['push_backend'])")
+    result=subprocess.run([sys.executable,'-c',probe,str(Path(__file__))],env=environment,
+        capture_output=True,text=True,cwd=str(ROOT))
+    assert result.returncode==0,result.stderr
+    assert result.stdout.strip()=='target_box_a 0.22 finger_tcp',result.stdout
 
 
 def test_public_goal_uses_live_geometry_and_instruction_not_task_answers():
