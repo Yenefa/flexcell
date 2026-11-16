@@ -35,16 +35,48 @@ def build_f1():
     """Config injection: the perception service registers no objects.
 
     TASKS.md says the repair surface for F1 is configuration, so the injection is
-    a configuration file, not a source edit. Removing the key rather than
-    emptying the list is the sharper form: a node that reads a missing parameter
-    falls back to its declared default, so the operator sees the defect as
-    "the objects are not there" rather than "the list is empty".
+    a configuration file, not a source edit.
+
+    The first version of this function DELETED the tracked_objects key, on the
+    reasoning that a missing registry is the defect. That reasoning was wrong and
+    it would have produced a run with no defect in it at all: observe_server
+    declares
+
+        declare_parameter('tracked_objects', ['target_box_a', 'target_box_b'])
+
+    so removing the key makes the node fall back to its default, which tracks
+    both objects. The candidates would have been handed a healthy system labelled
+    broken, and every condition would have looked equally capable.
+
+    An explicitly empty list does not work either, and that was measured rather
+    than assumed. All three of these were run against the built node on
+    2026-11-16:
+
+        params file with tracked_objects: []            -> ParameterUninitializedException
+        --ros-args -p "tracked_objects:=[]"             -> ParameterUninitializedException
+        --ros-args -p "tracked_objects:=['ghost_object']" -> starts, logs tracked=['ghost_object']
+
+    An empty YAML list is not a typed rclpy parameter override, so it leaves the
+    parameter uninitialised and the node dies at startup. A node that dies is a
+    different mechanism from a node that runs without any usable registry, and
+    the difference is visible to the repairer.
+
+    So the injection registers an object the world does not contain. The declared
+    mechanism in TASKS.md ("registry missing") is not expressible through this
+    parameter, and RUN_MANIFEST records that deviation instead of letting the
+    artifact quietly stand in for it.
     """
     source = CONFIG.read_text(encoding="utf-8")
     lines = source.splitlines(keepends=True)
-    kept = [l for l in lines if not l.lstrip().startswith("tracked_objects:")]
-    assert len(kept) == len(lines) - 1, "expected exactly one tracked_objects line"
-    override = "".join(kept)
+    hits = [i for i, l in enumerate(lines) if l.lstrip().startswith("tracked_objects:")]
+    assert len(hits) == 1, "expected exactly one tracked_objects line"
+    i = hits[0]
+    indent = lines[i][:len(lines[i]) - len(lines[i].lstrip())]
+    # a name that does not exist in the world: the registry is populated, but
+    # with nothing the perception layer can ever observe
+    lines[i] = indent + "tracked_objects: ['ghost_object']" + chr(10)
+    override = "".join(lines)
+    assert override != source, "override did not change anything"
     F1_DIR.mkdir(parents=True, exist_ok=True)
     (F1_DIR / "override.yaml").write_text(override, encoding="utf-8")
     (F1_DIR / "manifest.json").write_text(json.dumps({
@@ -52,8 +84,16 @@ def build_f1():
         "family": "F1_OBJECT_REGISTRATION",
         "repair_surface": "configuration",
         "injection_point": str(CONFIG.relative_to(ROOT)),
-        "mechanism": "registry missing -> the perception layer publishes no B -> "
-                     "the task layer cannot fetch B",
+        "mechanism": "no real object is registered -> the perception layer publishes "
+                     "no B for the demo objects -> the task layer cannot fetch B",
+        "declared_mechanism_deviation":
+            "TASKS.md says 'registry missing'. Measured 2026-11-16: an empty "
+            "tracked_objects list (params file or CLI) raises "
+            "ParameterUninitializedException, so the node dies instead of running "
+            "without a registry. The realization therefore registers a name the "
+            "world does not contain, which leaves the node running and no real "
+            "object observed. The difference is visible to the repairer and is "
+            "recorded rather than glossed.",
         "artifact": "override.yaml",
         "artifact_sha256": sha(override),
         "pristine_sha256": sha(source),

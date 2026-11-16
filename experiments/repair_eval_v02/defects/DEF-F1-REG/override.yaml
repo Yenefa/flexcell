@@ -1,6 +1,7 @@
 observe_server:
   ros__parameters:
     use_sim_time: true
+    tracked_objects: ['ghost_object']
     object_target_box_a_size: [0.035, 0.035, 0.035]
     object_target_box_b_size: [0.035, 0.035, 0.035]
     move_epsilon_m: 0.002
