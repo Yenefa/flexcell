@@ -7,6 +7,7 @@ checked from both sides, broken and repaired, and the answers must differ.
 """
 import json
 import sys
+import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
