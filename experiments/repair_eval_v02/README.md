@@ -466,3 +466,16 @@ all budget numbers changed in DATA_DICTIONARY   KILLED   ← 之前 SURVIVED
 ```
 
 这条已经写进代码注释：**合并两份文档再检查，等于让一份的正确掩盖另一份的错误。**
+### 补充：不只查「码存在」，还查「级别对不对」
+
+原来的交叉检查只验证 16 个理由码在 `TASK_CONTRACT.md` 里**出现过**。这不够——一个被文档写成 `REJECT`、而代码返回 `UNKNOWN` 的码，两份文件各自读起来都正常。
+
+现在解析文档表格的级别列，与 `acceptance.REASONS` 逐条比对：
+
+```
+baseline : documents and code agree
+mutation : reason code 'GOAL_NOT_MET' is documented as UNKNOWN but the evaluator returns it as REJECT
+restore  : documents and code agree
+```
+
+写这条时又犯了一次同类错误：正则里把 `{3,}` 写成了 `{{3,}}`（下意识按 f-string 转义），结果两个码被误报为「文档里没有那一行」。**是回头查了文档实际内容才确认那是我的正则错，不是文档缺行。**

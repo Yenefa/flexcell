@@ -92,11 +92,19 @@ def check():
             problems.append("denial code %r is in visibility.py but not in the "
                             "interface table (ASSUMPTIONS.md)" % code)
 
-    # 5. every reason code the evaluator can emit is documented
-    for code in acceptance.REASONS:
-        if code not in contract_doc:
-            problems.append("reason code %r is in acceptance.py but not in "
+    # 5. every reason code the evaluator can emit is documented, and the level the
+    #    document assigns it is the level the evaluator gives it. Presence alone is
+    #    not enough: a code documented as REJECT while the evaluator returns UNKNOWN
+    #    is the kind of drift that reads correctly in both files.
+    documented = dict(re.findall(r"^\| `([A-Z][A-Z_]{3,})` \| (REJECT|UNKNOWN) \|",
+                                 contract_doc, re.MULTILINE))
+    for code, (level, _description) in acceptance.REASONS.items():
+        if code not in documented:
+            problems.append("reason code %r is in acceptance.py but has no row in "
                             "TASK_CONTRACT.md" % code)
+        elif documented[code] != level:
+            problems.append("reason code %r is documented as %s but the evaluator "
+                            "returns it as %s" % (code, documented[code], level))
     return problems
 
 
