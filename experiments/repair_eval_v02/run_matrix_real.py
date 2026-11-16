@@ -13,6 +13,7 @@ BUDGET
     preventing one, which is why it is checked at all.
 """
 import argparse
+import hashlib
 import json
 import subprocess
 import sys
@@ -80,16 +81,29 @@ def refresh_feedback(candidate):
 
 
 def run_slot(family, condition, rep, workdir, policy, donor, model, max_interactions,
-             seed=None, donor_run_id=None, source_sha=None):
+             seed=None, donor_run_id=None, source_sha=None, donor_log_path=None):
     candidate = build_candidate(workdir / "candidate", family, seed=seed)
+    slot_id = "%s-%s-r%d" % (family.split("_")[0], condition[0], rep)
     verdict_dir = workdir / "verdict"; verdict_dir.mkdir()
     hidden = workdir / "hidden"; hidden.mkdir()
+    if condition == "C_MISMATCHED_FEEDBACK" and donor_log_path and Path(donor_log_path).exists():
+        # The mismatch has to be somebody's real output. A sentence invented here
+        # would make C identical to A with extra steps.
+        (donor / "telemetry").mkdir(parents=True, exist_ok=True)
+        (donor / "telemetry" / "execution.log").write_text(
+            Path(donor_log_path).read_text())
     boundary = vis.RunBoundary(policy, workdir, candidate, verdict_dir, hidden,
                                condition=condition, mismatch_dir=donor)
     boundary.assert_fresh_run()
     (candidate / "telemetry").mkdir(exist_ok=True)
 
-    refresh_feedback(candidate)
+    first_log = refresh_feedback(candidate)
+    donor_log = None
+    if condition == "B_REAL_FEEDBACK":
+        donor_dir = Path(__file__).resolve().parent / "evidence" / "donor"
+        donor_dir.mkdir(parents=True, exist_ok=True)
+        donor_log = donor_dir / ("%s.log" % slot_id)
+        donor_log.write_text((candidate / "telemetry" / "execution.log").read_text())
 
     transport = GatedTransport(model=model, timeout=300)
     ledger = B.Ledger(transport, max_interactions=max_interactions)
@@ -158,7 +172,11 @@ def run_slot(family, condition, rep, workdir, policy, donor, model, max_interact
     )
     record["qualification"] = "REAL_MODEL_RUN"
     record["seed"] = seed
+    record["contract_sha256"] = hashlib.sha256(json.dumps(
+        contract_for(family), sort_keys=True, separators=(",", ":"),
+        ensure_ascii=False).encode()).hexdigest()
     record["source_sha"] = source_sha
+    record["donor_log"] = str(donor_log) if donor_log else None
     record["model"] = transport.metadata()["requested_model"]
     record["key_fingerprint"] = transport.metadata()["key_fingerprint"]
     record["contract_verdict"] = verdict["status"]
@@ -212,10 +230,13 @@ def main(argv=None):
                     # such run the C slot stays NOT_RUN - it is not filled in with
                     # somebody else's feedback.
                     borrowed = None
+                    borrowed_log = None
                     if condition == "C_MISMATCHED_FEEDBACK":
                         for other_rep in rep_sel:
                             if other_rep != rep and (family, other_rep) in produced:
-                                borrowed = produced[(family, other_rep)]
+                                entry = produced[(family, other_rep)]
+                                borrowed = entry.get("run_id")
+                                borrowed_log = entry.get("donor_log")
                                 break
                         if not borrowed:
                             rows.append({"slot_id": slot_id, "condition": condition,
@@ -230,7 +251,8 @@ def main(argv=None):
                     try:
                         row = run_slot(family, condition, rep, workdir, policy, donor,
                                        args.model, args.max_interactions, seed=seed,
-                                       donor_run_id=borrowed, source_sha=source_sha)
+                                       donor_run_id=borrowed, source_sha=source_sha,
+                                       donor_log_path=borrowed_log)
                     except Exception as exc:                       # noqa: BLE001
                         # One dead call must not take the batch with it. The
                         # failure is a record of its own: the environment broke,
@@ -245,7 +267,9 @@ def main(argv=None):
                                "edited_paths": []}
                     rows.append(row)
                     if condition == "B_REAL_FEEDBACK":
-                        produced[(family, rep)] = row.get("run_id") or row["slot_id"]
+                        produced[(family, rep)] = {
+                            "run_id": row.get("run_id") or row["slot_id"],
+                            "donor_log": row.get("donor_log")}
                     spent += row.get("tokens_total", 0)
                     # persist every slot: a crash after the loop must not lose
                     # work that has already been paid for

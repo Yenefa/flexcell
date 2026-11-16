@@ -1,0 +1,15 @@
+exit=1
+F                                                                        [100%]
+=================================== FAILURES ===================================
+________________________________ test_registry _________________________________
+
+    def test_registry():
+>       assert registered_objects(['obj0', 'obj1', 'obj2', 'obj3']) == ['obj0', 'obj1', 'obj2', 'obj3']
+E       AssertionError: assert [] == ['obj0', 'obj...obj2', 'obj3']
+E         Right contains 4 more items, first extra item: 'obj0'
+E         Use -v to get more diff
+
+skill/test_fix.py:5: AssertionError
+=========================== short test summary info ============================
+FAILED skill/test_fix.py::test_registry - AssertionError: assert [] == ['obj0...
+1 failed in 0.01s

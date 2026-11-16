@@ -1,0 +1,112 @@
+{
+  "summary": {
+    "slots_attempted": 2,
+    "slots_planned": 2,
+    "tokens_spent": 2518,
+    "batch_budget": 20000,
+    "model": "deepseek-flash",
+    "stopped": null,
+    "terminal_states": {
+      "UNKNOWN": 2
+    },
+    "by_condition": {
+      "B_REAL_FEEDBACK": [
+        "UNKNOWN",
+        "UNKNOWN"
+      ]
+    },
+    "qualification": "REAL_MODEL_RUN"
+  },
+  "rows": [
+    {
+      "slot_id": "F1-B-r1",
+      "condition": "B_REAL_FEEDBACK",
+      "feedback_source": "own_run",
+      "feedback_payload_sha256": "e148dd4e549d5b41fbbf8b4494df068992a64cb450baa92b55950cb41a70fdc9",
+      "guidance_sha256": null,
+      "donor_run_id": null,
+      "visibility_policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "visibility_policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "interactions_used": 1,
+      "interactions_cap": 6,
+      "tokens_in": null,
+      "tokens_out": null,
+      "tokens_total": 986,
+      "tokens_source": "provider_total_only",
+      "tokens_cap": 20000,
+      "candidate_executions": 0,
+      "final_scenes": 0,
+      "wall_clock_s": 3.987,
+      "budget_exhausted_at": null,
+      "terminal_status": "UNKNOWN",
+      "claim_success": true,
+      "gate_target": "PASS",
+      "gate_regression": {},
+      "gate_contract": "PASS",
+      "gate_contract_codes": [],
+      "gate_independent": "NOT_RUN",
+      "false_accept": true,
+      "false_reject": false,
+      "edited_paths": [
+        "skill/registry.py"
+      ],
+      "first_edit_after_execution": true,
+      "deviation_codes": [],
+      "evidence_path": "experiments/repair_eval_v02/evidence",
+      "notes": "",
+      "qualification": "REAL_MODEL_RUN",
+      "seed": 5101,
+      "source_sha": "5458f1df6272e9a798e1e8092ffcfdd79829128f",
+      "donor_log": "/home/ros/wt/run252/experiments/repair_eval_v02/evidence/donor/F1-B-r1.log",
+      "model": "deepseek-flash",
+      "key_fingerprint": "0f17904e",
+      "contract_verdict": "ACCEPT",
+      "regression_exit": 0
+    },
+    {
+      "slot_id": "F1-B-r2",
+      "condition": "B_REAL_FEEDBACK",
+      "feedback_source": "own_run",
+      "feedback_payload_sha256": "e148dd4e549d5b41fbbf8b4494df068992a64cb450baa92b55950cb41a70fdc9",
+      "guidance_sha256": null,
+      "donor_run_id": null,
+      "visibility_policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "visibility_policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "interactions_used": 1,
+      "interactions_cap": 6,
+      "tokens_in": null,
+      "tokens_out": null,
+      "tokens_total": 1532,
+      "tokens_source": "provider_total_only",
+      "tokens_cap": 20000,
+      "candidate_executions": 0,
+      "final_scenes": 0,
+      "wall_clock_s": 6.499,
+      "budget_exhausted_at": null,
+      "terminal_status": "UNKNOWN",
+      "claim_success": true,
+      "gate_target": "PASS",
+      "gate_regression": {},
+      "gate_contract": "PASS",
+      "gate_contract_codes": [],
+      "gate_independent": "NOT_RUN",
+      "false_accept": true,
+      "false_reject": false,
+      "edited_paths": [
+        "skill/registry.py"
+      ],
+      "first_edit_after_execution": true,
+      "deviation_codes": [],
+      "evidence_path": "experiments/repair_eval_v02/evidence",
+      "notes": "",
+      "qualification": "REAL_MODEL_RUN",
+      "seed": 5102,
+      "source_sha": "5458f1df6272e9a798e1e8092ffcfdd79829128f",
+      "donor_log": "/home/ros/wt/run252/experiments/repair_eval_v02/evidence/donor/F1-B-r2.log",
+      "model": "deepseek-flash",
+      "key_fingerprint": "0f17904e",
+      "contract_verdict": "ACCEPT",
+      "regression_exit": 0
+    }
+  ]
+}
