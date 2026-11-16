@@ -159,6 +159,10 @@ def _a_reads_diagnosis(doc):
     doc["conditions"]["A_STATIC"]["visible"]["diagnosis"] = True
 
 
+def _a_reads_verification(doc):
+    doc["conditions"]["A_STATIC"]["visible"]["verification"] = True
+
+
 def _a_feedback_source_without_visibility(doc):
     doc["conditions"]["A_STATIC"]["feedback_source"] = "own_run"
 
@@ -215,6 +219,7 @@ def _visible_misses_a_category(doc):
 @pytest.mark.parametrize("change, expected", [
     (_a_reads_feedback, "A_STATIC must not expose"),
     (_a_reads_diagnosis, "A_STATIC must not expose"),
+    (_a_reads_verification, "A_STATIC must not expose"),
     (_a_feedback_source_without_visibility, "disagrees with execution_feedback"),
     (_drop_condition, "conditions must be exactly"),
     (_add_condition, "conditions must be exactly"),
@@ -236,6 +241,22 @@ def test_loader_refuses_a_policy_that_breaks_the_design(tmp_path, change, expect
     with pytest.raises(vis.PolicyError) as caught:
         vis.load_policy(path)
     assert expected in str(caught.value), str(caught.value)
+
+
+def test_policy_loading_fails_closed_instead_of_silently_allowing(tmp_path):
+    """A widened policy is refused at load time, not merely at read time.
+
+    The same widening applied to an already loaded policy object is honoured by
+    the gate (test_verification_access_is_policy_driven), so this asserts the
+    *loader* is the guard: no Policy object is built, nothing runs half-open.
+    """
+    doc = json.loads(POLICY_PATH.read_text(encoding="utf-8"))
+    doc["conditions"]["A_STATIC"]["visible"]["verification"] = True
+    path = tmp_path / "a_can_see_the_verdict.json"
+    path.write_text(json.dumps(doc), encoding="utf-8")
+    with pytest.raises(vis.PolicyError) as caught:
+        vis.load_policy(path)
+    assert "A_STATIC must not expose verification" in str(caught.value)
 
 
 def test_only_the_guided_condition_carries_guidance(policy):
@@ -260,6 +281,7 @@ def test_a_reads_static_input_and_candidate_source(policy, tmp_path):
     assert "frozen regression contract" in tools.read_file("tests/test_regression.py")
     listing = tools.list_dir(".").splitlines()
     assert {"gate/", "skill/", "task.md", "tests/"} <= set(listing)
+    assert not {"verdict", "verdict.json", "answers.txt"} & set(listing)
     hits = tools.search_code("next_action")
     assert "skill/recovery.py:4" in hits
     # reading does not rewrite the material
@@ -307,6 +329,35 @@ def test_a_read_through_a_symlink_alias_is_refused(policy, tmp_path):
         tools.read_file("alias.txt")
     assert caught.value.reason == vis.SYMLINK_ALIAS
     assert "verdict" in (caught.value.detail or "")
+
+
+def test_a_read_through_a_repointed_symlink_is_still_refused(policy, tmp_path):
+    """Every read resolves the link afresh, so swapping the target does not work.
+
+    The first read goes through a link to an allowed file inside the candidate;
+    the link is then repointed at a sealed file under the same name.  The gate
+    must refuse on the second read, which is what shows it re-resolves per read
+    instead of trusting a validation done once.
+    """
+    tree = make_run(tmp_path)
+    swap = tree["candidate"] / "swap.txt"
+    os.symlink("skill/recovery.py", swap)
+    gate = boundary(policy, tree, "A_STATIC")
+    tools = vis.ToolFacade(gate)
+    assert "def next_action" in tools.read_file("swap.txt")
+    swap.unlink()
+    os.symlink("../verdict/verdict.json", swap)
+    with pytest.raises(vis.AccessDenied) as caught:
+        tools.read_file("swap.txt")
+    assert caught.value.reason == vis.SYMLINK_ALIAS
+    assert gate.denials()[-1]["path"] == "swap.txt"
+    swap.unlink()
+    os.symlink("../hidden/answers.txt", swap)
+    with pytest.raises(vis.AccessDenied) as caught:
+        tools.read_file("swap.txt")
+    assert caught.value.reason == vis.SYMLINK_ALIAS
+    assert "LEAK_MARKER" not in "".join(
+        entry.get("detail", "") for entry in gate.attempts)
 
 
 def test_a_symlink_to_hidden_material_is_refused(policy, tmp_path):
