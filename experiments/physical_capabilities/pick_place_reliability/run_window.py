@@ -92,6 +92,7 @@ SOURCE_PATTERNS = (
     'src/flexcell/**/*',
     'scripts/*.py',
     'config/**/*',
+    'experiments/physical_capabilities/pick_place_reliability/*.py',
 )
 
 
@@ -182,6 +183,24 @@ def signal_group(pid, sig):
             pass
 
 
+def reap(marker, grace_s=10.0):
+    """Stop every process still carrying this slot id; return (found, needed_kill)."""
+    if not marker:
+        return 0, 0
+    strays = owned_pids(marker)
+    if not strays:
+        return 0, 0
+    signal_pids(strays, signal.SIGTERM)
+    deadline = time.monotonic() + grace_s
+    while time.monotonic() < deadline and owned_pids(marker):
+        time.sleep(0.2)
+    stubborn = owned_pids(marker)
+    if stubborn:
+        signal_pids(stubborn, signal.SIGKILL)
+        time.sleep(0.2)
+    return len(strays), len(stubborn)
+
+
 def run_slot(argv, env, log, timeout_s, grace_s=30.0):
     """Run one slot and return (exit_code, cleanup).
 
@@ -216,18 +235,7 @@ def run_slot(argv, env, log, timeout_s, grace_s=30.0):
     if not marker:
         return 124, cleanup
 
-    strays = owned_pids(marker)
-    cleanup['survivors'] = len(strays)
-    if strays:
-        signal_pids(strays, signal.SIGTERM)
-        deadline = time.monotonic() + 10
-        while time.monotonic() < deadline and owned_pids(marker):
-            time.sleep(0.2)
-        left = owned_pids(marker)
-        if left:
-            signal_pids(left, signal.SIGKILL)
-            time.sleep(0.2)
-        cleanup['killed'] = len(left)
+    cleanup['survivors'], cleanup['killed'] = reap(marker)
     cleanup['left'] = len(owned_pids(marker))
     return 124, cleanup
 
@@ -235,6 +243,8 @@ def run_slot(argv, env, log, timeout_s, grace_s=30.0):
 def run_window(prereg, out, runner=None):
     """Execute the declared slots. runner(label, case, slot_out, index) -> exit_code."""
     slots = prereg['slots']
+    if not slots:
+        raise ValueError('preregistration declares no slots')
     slot_timeout = float(prereg['slot_timeout_s'])
     cleanup_grace = float(prereg.get('cleanup_grace_s', 30.0))
     budget = float(prereg['window_budget_s'])
@@ -278,6 +288,11 @@ def run_window(prereg, out, runner=None):
         if cleanup is not None:
             row['slot_id'] = slot_id
             row['timeout_cleanup'] = cleanup
+        if runner is None:
+            orphans, orphans_killed = reap(slot_id)
+            if orphans:
+                row['orphans_stopped'] = orphans
+                row['orphans_needed_sigkill'] = orphans_killed
         try:
             result, result_path = one_result(slot_out, case)
             task = result.get('task') or {}
@@ -311,6 +326,7 @@ def run_window(prereg, out, runner=None):
     payload = dict(
         experiment=prereg.get('experiment'),
         scope='FUNCTIONAL_SMOKE_ONLY',
+        preregistration=prereg,
         results=rows,
         source_unchanged=(before == after),
         source_changed=changed,

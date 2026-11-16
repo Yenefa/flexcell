@@ -156,8 +156,15 @@ class WindowTest(unittest.TestCase):
         payload = rw.run_window(self.prereg, self.root / 'out', runner=runner)
         out = self.root / 'out'
         self.assertTrue(payload['all_slots_completed'])
+        self.assertEqual(payload['preregistration']['experiment'], 'unit-test')
         self.assertTrue((out / 'results.json').is_file())
         self.assertTrue((out / 'SHA256_MANIFEST.json').is_file())
+        self.assertTrue((out / 'source_before.json').is_file())
+        self.assertTrue((out / 'source_after.json').is_file())
+
+    def test_empty_preregistration_is_rejected(self):
+        with self.assertRaises(ValueError):
+            rw.run_window(dict(self.prereg, slots=[]), self.root / 'out')
 
 
 class CompletionTest(unittest.TestCase):
@@ -208,6 +215,27 @@ class CompletionTest(unittest.TestCase):
 
 class TimeoutCleanupTest(unittest.TestCase):
     """A slot must not leave processes behind when the outer timeout fires."""
+
+    def test_reap_stops_a_process_that_carries_the_marker(self):
+        marker = 'reap-unit-%d' % os.getpid()
+        env = dict(os.environ, FLEXCELL_WINDOW_SLOT_ID=marker)
+        decoy = subprocess.Popen(
+            [sys.executable, '-c', 'import time; time.sleep(60)'],
+            env=env, start_new_session=True)
+        try:
+            found, killed = rw.reap(marker, grace_s=1.0)
+
+            self.assertEqual(found, 1)
+            self.assertEqual(killed, 0)
+            deadline = time.monotonic() + 10
+            while decoy.poll() is None and time.monotonic() < deadline:
+                time.sleep(0.1)
+            self.assertIsNotNone(decoy.poll(), 'marked process survived reap')
+            self.assertEqual(rw.reap(marker), (0, 0))
+        finally:
+            if decoy.poll() is None:
+                decoy.kill()
+                decoy.wait()
 
     def test_process_that_escaped_into_its_own_session_is_stopped(self):
         marker = 'unit-slot-%d' % os.getpid()

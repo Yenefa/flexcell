@@ -32,9 +32,9 @@ slot, own output directory, sequential. 360 s per slot, 1440 s per window.
 python3 -m unittest discover -s experiments/physical_capabilities/pick_place_reliability/tests -v
 ```
 
-17 tests: one-result parsing, the single-run rule, the source-change scope,
-unknown-terminal detection, window stop behaviour, and the artifact aggregator.
-No simulator, no ROS.
+32 tests: one-result parsing, the single-run rule, the source-change scope,
+unknown-terminal detection, window stop behaviour, the completion flag, timeout
+cleanup, and the artifact aggregator. No simulator, no ROS.
 
 ## Results (6 windows, 24 slot attempts)
 
@@ -60,6 +60,13 @@ python3 experiments/physical_capabilities/pick_place_reliability/analyze_windows
 `analysis.json` recomputes, from artifacts only: per-slot drop/verify error, the
 last two `move_to_pose` targets, the error distribution, and whether any two runs
 used a different release target.
+
+A slot enters the statistics only when it has exactly one `run-*` directory, a
+readable `result.json`, no unknown terminal state, a `PASS` harness status, a
+succeeded task outcome and a numeric final error. Everything else is counted
+separately and listed in `excluded` with a reason, so a failed or unmeasured slot
+never becomes a zero-error sample. Two run directories for one slot are reported
+as `AMBIGUOUS` instead of silently reduced to the first one.
 
 ## Finding 1 — the command is fixed, the result is not
 
