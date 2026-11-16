@@ -113,12 +113,15 @@ FORBIDDEN_CANDIDATE_KEYS = frozenset({
     "editable_fields", "protected_paths", "evidence_required", "run_id_pattern",
     "tolerance", "target", "goal", "expected_goal", "expected_objects",
     "reported_goal", "reported_thresholds", "reported_tolerance",
-    # The contract's identity is part of the ruler: a report naming which contract
-    # version or digest judged it is asserting the rulebook, which is the
-    # harness's job. Same rule as "version" above, applied to the names a Verdict
-    # actually uses.
-    "contract_version", "contract_sha256",
 })
+
+# NOT forbidden, checked for equality instead: contract_version and
+# contract_sha256 are provenance. The collector - not the repaired agent - writes
+# the candidate state, and stamping "this report was produced under contract v1"
+# is a reasonable thing for it to do. They were briefly members of the set above,
+# which made every run from an echoing collector a REJECT: a false failure that
+# silently lowers the reported success rate, the mirror image of a false
+# acceptance. Absence is normal, a match is recorded, a mismatch is TASK_MISMATCH.
 
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
 _PASS_TEXT_RE = re.compile(r"\b(pass|passed|passing|success|succeeded)\b",
@@ -250,12 +253,16 @@ def evaluate(contract, candidate_state):
     checks = []
     reasons = []
 
-    def check(name, ok, code=None, detail=None, **evidence):
+    def check(name, ok, code=None, detail=None, informational=False, **evidence):
         """Record one gate. A failing gate without a code is a programming error."""
         ok = bool(ok)
         if not ok and not code:
             raise AssertionError("gate %r failed without a reason code" % (name,))
         entry = {"check": name, "ok": ok, "evidence": evidence}
+        if informational:
+            # Recorded, never decisive: the invariant guard in _verdict() must
+            # not mistake an informational record for a gate.
+            entry["informational"] = True
         checks.append(entry)
         if not ok:
             reasons.append({"code": code, "detail": detail or name})
@@ -292,6 +299,37 @@ def evaluate(contract, candidate_state):
               "candidate reports task %r but the contract is %r"
               % (declared_task, contract.task_id),
               declared=declared_task, contract=contract.task_id)
+
+    # ------------------------------------------------------- contract identity
+    # Same shape as the task identity above, for the same reason: identity is
+    # compared, not forbidden. A mismatch is decisive, and its code is
+    # TASK_MISMATCH - the report and the contract disagree about which rulebook
+    # is in force - rather than TAMPERED_IMMUTABLE, which means the candidate
+    # edited the ruler. Merging those two would collapse defect classes the
+    # corpus keeps apart.
+    declared_version = state.get("contract_version")
+    declared_digest = state.get("contract_sha256")
+    if declared_version is not None or declared_digest is not None:
+        mismatches = []
+        if declared_version is not None:
+            usable = (isinstance(declared_version, int)
+                      and not isinstance(declared_version, bool))
+            if not usable or declared_version != contract.version:
+                mismatches.append("contract_version %r != %r"
+                                  % (declared_version, contract.version))
+        if declared_digest is not None:
+            if (not isinstance(declared_digest, str)
+                    or declared_digest != contract.sha256()):
+                mismatches.append("contract_sha256 %r != %r"
+                                  % (declared_digest, contract.sha256()))
+        check("contract_identity_echo", not mismatches, "TASK_MISMATCH",
+              "the report echoes a different contract: %s"
+              % ("; ".join(mismatches),),
+              declared={"contract_version": declared_version,
+                        "contract_sha256": declared_digest},
+              expected={"contract_version": contract.version,
+                        "contract_sha256": contract.sha256()},
+              informational=not mismatches)
 
     # ------------------------------------------------------- tampering / freeze
     hits = _forbidden_key_hits(state)

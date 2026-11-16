@@ -88,6 +88,10 @@
 它和 `cases/` 里的负例同等重要，所以由 `test_a_wrong_schema_can_never_be_accepted`
 逐例做负控。
 
+还有一个更实际的理由：短路让**配置错误不会伪装成修复失败**。错 schema 且目标未达时结论是
+`UNKNOWN` 而不是 `REJECT` —— 在 n=3 这类探索性矩阵里，"采集器配错"变成 REJECT 是最坏的情况：
+它会静默拉低成功率，而且没人会回头查一条已经判成 REJECT 的记录。单列成 UNKNOWN 才会被看见。
+
 ---
 
 ## 3. 边界：哪些能改，哪些不能
@@ -106,8 +110,11 @@
   取更严的读法）。
 - **member 级授权是精确的**：`config/controller.yaml:kp` 只授权 `kp` 这一个参数，
   不授权整个文件，也不授权同文件的 `kd`。这是"可以调增益"和"可以重写控制器"的区别。
-- **契约身份也不由候选声明**：候选报告里出现 `contract_version` / `contract_sha256`
-  同样记为 `TAMPERED_IMMUTABLE` —— 说明"是哪一版契约在判我"属于执行侧，不属于被评对象。
+- **契约身份是等值检查，不是禁止项**：候选报告可以带 `contract_version` / `contract_sha256`
+  —— 写报告的是采集器而不是被修的 agent，记录 provenance 是正当的。没声明 → 照常判定；
+  相等 → 记一条信息性 check `contract_identity_echo`（`ok=True`，不影响 status）；
+  不等 → `TASK_MISMATCH`（身份不符），**不是** `TAMPERED_IMMUTABLE`（那是改尺子，这里
+  是报错版本号；混用会让"六类负例各自独立理由码"这条塌掉）。
 - **目标本身不可改**：`immutable` 里的任何东西都不能由候选提供。候选报告里出现
   同名字段（`thresholds`、`zones`、`reported_goal`、`tolerance` …）时，
   **判定仍然只用契约的数字**，同时该行为本身记为 `TAMPERED_IMMUTABLE` —— 忽略数值
@@ -156,7 +163,7 @@
 | `NONZERO_EXIT` | REJECT | 验收子进程退出码非 0 |
 | `UNAUTHORIZED_EDIT` | REJECT | 改了 `editable_fields` 之外的路径 |
 | `TAMPERED_IMMUTABLE` | REJECT | 候选重述了不可变的目标/阈值字段 |
-| `TASK_MISMATCH` | REJECT | 候选报告的是另一个任务 |
+| `TASK_MISMATCH` | REJECT | 候选报告的是另一个任务，或回显的契约版本/摘要与本契约不符 |
 | `GOAL_UNMEASURED` | UNKNOWN | 契约物体没有测到的最终位置 |
 | `REGRESSION_MISSING` | UNKNOWN | 可用的回归记录少于契约要求 |
 | `PROTECTED_UNVERIFIABLE` | UNKNOWN | 保护文件没有给出摘要 |
@@ -170,7 +177,8 @@
 每个 check 都带 `evidence`，写明测到的数与用的界（例如目标门写
 `distance_m / tolerance_m / tolerance_source="contract"`），所以失败可归因，而不是
 一个不透明的 FAIL。`claim_success` 只出现在一个**信息性** check 里，字段
-`used_for_decision: false`，并记录 `false_success` / `false_failure`。
+`used_for_decision: false`，并记录 `false_success` / `false_failure`。另一个信息性 check 是
+`contract_identity_echo`：候选回显契约身份且相等时出现，`ok=True`，不参与判定。
 
 ---
 
@@ -268,6 +276,10 @@ summary 命令的输出固定为：
    回归自身的可信度取决于执行侧。
 6. **未接入 CI。** 仓库 `.github/` 不在本 issue 的授权路径内；接入建议见下一节。
 7. **UNKNOWN 既不是通过也不是失败**，统计时必须单列。把它折进任何一边都会改变结论。
+8. **证据摘要在本层是声明值，不是校验值。** `evaluate()` 只检查格式（64 位小写十六进制）与
+   条目名齐全，不重算，也不读文件系统，因此 `"0" * 64` 这类占位摘要会通过。真实摘要必须由
+   采集器在跑完后重算并写入，本层不替代它；在这里加"拒绝全零"只会挡住最笨的伪造，却会让人
+   以为摘要已经被校验过。
 
 ---
 

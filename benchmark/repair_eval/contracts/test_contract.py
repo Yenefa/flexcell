@@ -605,13 +605,48 @@ def test_a_wrong_schema_can_never_be_accepted():
         assert verdict.status != acceptance.ACCEPT, case["case_id"]
 
 
-def test_the_contract_identity_is_not_the_candidates_to_declare():
-    for key, value in (("contract_version", 2), ("contract_sha256", "0" * 64)):
+def test_an_equal_contract_identity_echo_is_recorded_not_punished():
+    # The collector may stamp the report with the contract it believes it ran
+    # under. That is provenance: a match must be visible and must change nothing.
+    contract = contract_of()
+    candidate = candidate_of()
+    candidate["contract_version"] = contract.version
+    candidate["contract_sha256"] = contract.sha256()
+    verdict = verdict_for(candidate)
+    assert verdict.status == acceptance.ACCEPT
+    assert verdict.reasons == []
+    echo = check_named(verdict, "contract_identity_echo")
+    assert echo["ok"] is True
+    assert echo["informational"] is True
+    assert echo["evidence"]["declared"] == {
+        "contract_version": contract.version,
+        "contract_sha256": contract.sha256()}
+
+
+def test_a_mismatched_contract_identity_is_a_task_mismatch():
+    # Reusing TAMPERED_IMMUTABLE here would merge "the report names another
+    # rulebook" with "the candidate edited the ruler", and the six defect classes
+    # would stop being separable by code. True is included because it compares
+    # equal to 1 as an int and must still be refused.
+    for key, value in (("contract_version", 2),
+                       ("contract_sha256", "0" * 64),
+                       ("contract_version", True)):
         candidate = candidate_of()
         candidate[key] = value
         verdict = verdict_for(candidate)
-        assert verdict.status == acceptance.REJECT, key
-        assert verdict.codes == ["TAMPERED_IMMUTABLE"], key
+        assert verdict.status == acceptance.REJECT, (key, value)
+        assert verdict.codes == ["TASK_MISMATCH"], (key, value)
+
+
+def test_an_absent_contract_identity_changes_nothing():
+    # The seven corpus cases declare neither field, which must stay normal.
+    for case_path in CASES:
+        case = casefile.load(case_path)
+        contract = task_contract.TaskContract.from_mapping(case["contract"])
+        verdict = acceptance.evaluate(contract, case["candidate"])
+        names = [entry["check"] for entry in verdict.checks]
+        assert "contract_identity_echo" not in names, case["case_id"]
+    assert verdict_for(candidate_of()).status == acceptance.ACCEPT
 
 
 # ------------------------------------------------------- importability contract
