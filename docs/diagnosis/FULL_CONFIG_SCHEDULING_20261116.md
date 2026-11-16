@@ -128,3 +128,69 @@ which sets `FLEXCELL_REPO=/opt/flexcell/repo` and
 `FLEXCELL_INSTALL=/opt/flexcell/ws/install` and has a single overlay. Run the
 three isolation experiments from the previous section there, with the original
 failure data preserved. Until then #237 must stay open and unclaimed as fixed.
+
+
+## Simulation runs completed (2026-11-16, WSL2 / ROS 2 Jazzy)
+
+The identity gate that blocked E2-E5 was an **install-layout mistake on this
+host**, not a repository defect: `infra/runtime_identity.py` expects the CI
+merge-install layout (`$FLEXCELL_INSTALL/share/flexcell_skills/launch/...`),
+while the first local build used colcon's isolated layout
+(`install/flexcell_skills/share/...`). Rebuilding with
+`colcon build --merge-install --symlink-install --install-base install_merged`
+(which is what `infra/Dockerfile.sim` does) made identity report
+`mismatches = 0`, and real tasks could then be dispatched.
+
+All runs below are one declared, bounded task each. No replacement attempts,
+no model calls, no hardware.
+
+| run | graph / world | backend | outcome |
+| --- | --- | --- | --- |
+| CONTROL-1 | repo-owned `trusted_sim.launch.py`, declared world `f78a469d…` | `velocity_servo` / legacy | `physical_tasks_dispatched: 1`, `ROBOT_FAILURE`: `PICK_A(attempt=1) ... skill/carry backend configuration mismatch`. Harness completed, `owned_launch_exit: 0`. A typed failure, **not** a harness error |
+| CONTROL-2 | repo-owned `trusted_sim.launch.py`, declared world `422f5a6a…` | `teleport` / legacy | **PASS** - `OUTCOME_SUCCEEDED`, `ERR_NONE`, `PICK_A:OK / PLACE_A:OK / VERIFY_A:OK`, `final_position_error_m = 0.0092`, 14.9 s. `qualification: FUNCTIONAL_SMOKE_ONLY`: teleport is a non-physical shortcut, so this is a graph/harness control, **not a physical capability claim** |
+| E7 (discarded) | complete config + skill layer | velocity_servo | confounded: leftover skill processes from an earlier run produced duplicate nodes and a "more than one action server for /run_pick_place" warning. Not used for any conclusion |
+| E10 (clean) | `open_manipulator_x_gazebo.launch.py` (`empty_world.sdf`) + `week1.launch.py` + `move_to_pose.launch.py`, no duplicate skill nodes | velocity_servo | **`ERR_SKILL_FAILED`: `policy abort (OBSERVE_FAILED): leg-start observe failed ... cause=ERR_WORLD_STATE_UNAVAILABLE`**, 13.5 s. 12 actions were available, so the action surface itself is fine |
+| E10-bridge | same graph, `ros_gz_bridge parameter_bridge /flexcell/physics_trace` added | - | topic created, **0 messages** in the observation window (`echo_bytes = 0`). Adding a bridge cannot conjure a producer |
+| E10-world | same graph before bridge | - | `/flexcell/physics_trace` absent from `ros2 topic list` (count 0) |
+
+### What is now established
+
+1. **The observation interruption is a missing producer, not a missing ROS
+   bridge.** Under the task config the declared world feeds the observation
+   layer and a task reaches PICK (CONTROL-1) or completes (CONTROL-2). Under the
+   complete config the world is `empty_world.sdf`, no `physics_trace` topic
+   exists, and the task is rejected at OBSERVE with
+   `ERR_WORLD_STATE_UNAVAILABLE`. Bridging the topic creates it but produces no
+   messages. This is a graph-composition difference, reproducible in ~1 minute.
+2. **The action surface is not the problem.** With the skill layer started on
+   top of the complete config, all 12 actions are listed and a goal is accepted;
+   the failure occurs inside the first OBSERVE stage. E1's empty action list was
+   a stale-discovery/leftover-process artifact and is withdrawn.
+3. **The skipped hardware component does not stop the graph.** It warns on
+   every complete-config start, yet 3 controllers are active and `/clock` runs
+   at 200 Hz. It is not, by itself, a scheduling failure.
+
+### What is still NOT established
+
+- **No scheduling stall was reproduced.** Every dispatched run terminated in
+  13-15 s with a typed result (PASS, ROBOT_FAILURE, or OBSERVE_FAILED); nothing
+  hung. The stall #237 describes may belong to the environment disconnection
+  the issue itself asks to keep separate ("运行时失联" vs "图内调度停顿") -
+  that separation is still required and this host cannot reproduce the former.
+- **No physical-backend PASS was obtained.** CONTROL-1 (`velocity_servo`)
+  failed at the backend-parameter check; CONTROL-2's PASS used `teleport` and
+  is explicitly `FUNCTIONAL_SMOKE_ONLY`. So "the task config completes the
+  physical task" is **not** a claim this page makes.
+
+### Reproduce
+
+```bash
+colcon build --base-paths src/flexcell --merge-install --symlink-install \
+  --install-base install_merged --packages-up-to flexcell_skills
+source install_merged/setup.bash
+export FLEXCELL_REPO=$PWD FLEXCELL_WS=$PWD FLEXCELL_INSTALL=$PWD/install_merged
+python3 scripts/sim_smoke.py --out /tmp/control --backend teleport --skill-backend legacy
+```
+
+#237 remains open: the graph-composition cause of the observation break is
+measured, the scheduling stall is not reproduced, and no fix has been accepted.
