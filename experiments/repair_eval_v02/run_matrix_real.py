@@ -261,6 +261,17 @@ def main(argv=None):
 
     policy = vis.load_policy(ROOT / "benchmark" / "repair_eval" / "visibility_policy.json")
     fam_sel = [x for x in args.families.split(",") if x] or list(FAMILIES)
+    # A family is a name like F1_OBJECT_REGISTRATION, not an instance id like
+    # DEF-F1-REG. Passing the instance silently ran the wrong instance: seeds
+    # fell back to 5000+, the slot ids carried the instance name, and the gate
+    # answered for a different family. Sixty-three thousand tokens went into
+    # three slots before anyone read the code. Refuse instead.
+    unknown = [f for f in fam_sel if f not in FAMILIES]
+    if unknown:
+        raise SystemExit(
+            "unknown family %s; known families are %s (an instance id like "
+            "DEF-F1-REG is not a family name)"
+            % (", ".join(unknown), ", ".join(FAMILIES)))
     con_sel = [x for x in args.conditions.split(",") if x] or list(CONDITIONS)
     rep_sel = [int(x) for x in args.reps.split(",") if x] or list(REPEATS)
     rows = []
