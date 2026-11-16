@@ -1,0 +1,35 @@
+{
+  "schema_version": "skill-catalog/1",
+  "skills": [
+    {
+      "id": "contact_push.finger_tcp.v1",
+      "kind": "ROBOT_ACTION",
+      "interface": "flexcell_interfaces/action/ContactPush",
+      "implementation_state": "IMPLEMENTED",
+      "availability": "OPT_IN",
+      "default_enabled": false,
+      "parameter_constraints": {
+        "direction": {"const": [-1.0, 0.0, 0.0]},
+        "distance_m": {"const": 0.03},
+        "motion_profile_id": {"const": "demo_veryslow"}
+      },
+      "preconditions": [
+        "Registered upright 35 mm box geometry and pinned robot model",
+        "Fresh world-frame observations and exclusive arm ownership",
+        "Motion budget and request fields must still pass the action server admission"
+      ],
+      "limitations": [
+        "Hand-curated example metadata; not connected to runtime dispatch",
+        "Scoped Gazebo evidence; no broad reliability or hardware qualification",
+        "One bounded 30 mm world -x primitive per request",
+        "Readiness and source freshness must be rechecked after return",
+        "Default backend remains legacy; formal baseline NOT_PROMOTED"
+      ],
+      "validation": {
+        "level": "SCOPED_SIMULATION",
+        "executed_source_commit": "31a002f6cf4980750207fc7b09def6483ccfb971",
+        "evidence_ref": "setup/acceptance/physical_reachable_contact_20261113/README.md"
+      }
+    }
+  ]
+}

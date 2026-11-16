@@ -1,0 +1,51 @@
+name: team-handoff
+on:
+  push:
+    branches: [chore/team-handoff-20261116]
+    paths:
+      - '.github/workflows/team-handoff.yml'
+      - 'docs/team_handoff/20261116/**'
+      - 'config/team_delegation_20261116.json'
+      - 'config/skill_catalog/**'
+      - 'config/run_log_required.json'
+      - 'scripts/*audit*.py'
+      - 'scripts/*pose_stage_timeline.py'
+  pull_request:
+    branches: [chore/team-handoff-20261116]
+permissions:
+  contents: read
+jobs:
+  offline-checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check repository and dependency boundaries
+        run: |
+          python3 scripts/check_repository_layout.py
+          python3 scripts/check_skill_boundaries.py
+          python3 -m unittest discover -s scripts/tests -v
+      - name: Reused offline tool regressions
+        run: |
+          python3 scripts/test_push_progress_audit.py
+          python3 scripts/test_pose_stage_timeline.py
+          python3 scripts/test_run_log_audit.py
+      - name: Require the assigned module tests on its pull request
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import subprocess
+          import sys
+          branch = os.environ.get('GITHUB_HEAD_REF', '')
+          if branch == 'feat/runtime-skill-catalog-20261116':
+              path = Path('runtime/skill_catalog/tests')
+              assert path.is_dir() and list(path.glob('test*.py')), 'catalog tests are required'
+              subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s', str(path), '-v'], check=True)
+          elif branch == 'feat/offline-audit-entry-20261116':
+              assert Path('scripts/tests/test_offline_audit.py').is_file(), 'audit integration tests are required'
+              subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s', 'scripts/tests',
+                              '-p', 'test_offline_audit.py', '-v'], check=True)
+          else:
+              print('Preparation checks only; both new modules are still awaiting implementation.')
+          PY

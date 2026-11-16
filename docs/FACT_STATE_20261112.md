@@ -1457,3 +1457,28 @@ It is preserved under docs/architecture/20261115/ with member hashes and an
 offline comparison replayer. Physical source and frozen boundary remain
 byte-identical to81eed33c; old physical results keep their original identities.
 No new Gazebo/hardware/model run, formal baseline promotion or main merge.
+
+
+## 2026-11-16 — Two bounded modules prepared for human developers
+
+User requested modules their collaborators can start immediately. Live GitHub
+inspection found #231–234 already implemented on open, unmerged PR244; #232
+also has an independent implementation on aux/232-push-net-displacement. No
+old issue was labelled unclaimed solely because its state remained open.
+
+Isolated chore/team-handoff-20261116 starts at architecturefbf6245c. Three
+pure tooling commits from PR244 are cherry-picked with source attribution:
+4676775(progress),2ba87fe(timeline),13afd29(retention). Their existing local
+checks pass:23 progress fixtures,21 timeline fixtures and13 retention unittests.
+Only these tool/config/doc/test changes are brought across; the PR's recorder,
+proposal, runtime-test and other changes are not implicitly integrated.
+
+Two NEW incremental modules are specified: A robot-action metadata catalog
+(list/get, declaration-only; no dispatch), B offline evidence audit entrypoint
+(reuse supplied tools, preserve UNKNOWN, adapter for one archived format).
+Independent feature branches and non-overlapping ownership are declared in
+config/team_delegation_20261116.json. No collaborator username was supplied;
+READY_UNASSIGNED means prepared, not claimed or implemented. No agent spawned.
+Source/frozen evidence and physical control remain unchanged. Preparation and
+synthetic tool checks are not physical validation, robot capability growth or
+baseline promotion; no paid-model/robot run or main merge this checkpoint.

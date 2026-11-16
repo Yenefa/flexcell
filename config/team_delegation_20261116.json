@@ -1,0 +1,75 @@
+{
+  "architecture_base": "fbf6245c66e45a0a161a3cb103dc2751b9fa8300",
+  "preparation_branch": "chore/team-handoff-20261116",
+  "status": "READY_UNASSIGNED",
+  "new_modules_implemented": false,
+  "review_and_integration_target": "chore/team-handoff-20261116",
+  "later_integration_target": "refactor/modular-workspace-20261115",
+  "tasks": [
+    {
+      "slot": "A",
+      "module": "robot_action_skill_catalog",
+      "priority": "P1",
+      "difficulty": "D1_FIRST_PR_D2_MODULE",
+      "branch": "feat/runtime-skill-catalog-20261116",
+      "spec": "docs/team_handoff/20261116/A_SKILL_CATALOG.md",
+      "owned_paths": [
+        "runtime/skill_catalog/",
+        "config/skill_catalog/",
+        "docs/SKILL_CATALOG.md"
+      ],
+      "status": "READY_UNASSIGNED",
+      "assignee": null
+    },
+    {
+      "slot": "B",
+      "module": "offline_execution_evidence_audit",
+      "priority": "P0",
+      "difficulty": "D1_FIRST_PR_D2_MODULE",
+      "branch": "feat/offline-audit-entry-20261116",
+      "spec": "docs/team_handoff/20261116/B_OFFLINE_AUDIT.md",
+      "owned_paths": [
+        "scripts/offline_audit/",
+        "scripts/tests/test_offline_audit.py",
+        "config/offline_audit_profiles/",
+        "docs/OFFLINE_AUDIT.md"
+      ],
+      "status": "READY_UNASSIGNED",
+      "assignee": null
+    }
+  ],
+  "seed_tools": [
+    {
+      "issue": 232,
+      "original_commit": "4676775eaead6a89880ae3a9198a1d502136a1f2",
+      "prepared_commit": "d97e55a15c80ca9d136a8b0b6d92f9d05df08216"
+    },
+    {
+      "issue": 233,
+      "original_commit": "2ba87fe8251dfdc17e5616b46d4a87905b84a654",
+      "prepared_commit": "f20d84e01f101e155ea177b6af636c0d265bb5af"
+    },
+    {
+      "issue": 231,
+      "original_commit": "13afd29c080867dd0b6d62ad3ea7fb17017a3e6f",
+      "prepared_commit": "3a840e5cd35cc11d63d273fc562e3d155b4cb6ed"
+    }
+  ],
+  "source_pr": 244,
+  "source_pr_merged": false,
+  "checks": {
+    "push_progress_fixtures": 23,
+    "timeline_fixtures": 21,
+    "retention_unittests": 13,
+    "all_three_exit_zero": true,
+    "physical_runs": 0,
+    "paid_model_calls": 0
+  },
+  "rules": [
+    "One feature branch and exclusive code paths per developer.",
+    "Do not rewrite tools already supplied by PR244.",
+    "Do not import development tools or robot implementation into Runtime.",
+    "No changes to frozen criteria, robot control or original evidence in these two tasks.",
+    "Preparation CI does not establish implementation of either new module."
+  ]
+}
