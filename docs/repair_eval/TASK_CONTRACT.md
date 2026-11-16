@@ -76,6 +76,18 @@
 `sha256()` 是对它的摘要。同一份契约无论键序如何都得到同一摘要，可以写进 run 记录
 与实验清单做"事后没被改过"的对照。
 
+### 2.1 候选报告的格式标签（`candidate_schema`）
+
+候选状态必须声明 `candidate_schema`，且必须**恰好**等于
+`flexcell.repair_eval.candidate/1`。缺失或不符 → `UNKNOWN`（`CANDIDATE_MALFORMED`），
+而且**只读这一个字段就停**：格式不明的报告里，`objects` 或 `regressions` 未必是本层理解的
+语义，用它判 `REJECT` 等于从读不懂的数据里编出指控，判 `ACCEPT` 等于编造通过。
+
+这条门曾经只是常量声明（`CANDIDATE_SCHEMA` 被定义但没有任何函数读取），于是别的 harness
+出的报告、或不带格式标签的报告都会被当成合法候选判定 —— 属于"声明的检查没有落地"。
+它和 `cases/` 里的负例同等重要，所以由 `test_a_wrong_schema_can_never_be_accepted`
+逐例做负控。
+
 ---
 
 ## 3. 边界：哪些能改，哪些不能
@@ -94,6 +106,8 @@
   取更严的读法）。
 - **member 级授权是精确的**：`config/controller.yaml:kp` 只授权 `kp` 这一个参数，
   不授权整个文件，也不授权同文件的 `kd`。这是"可以调增益"和"可以重写控制器"的区别。
+- **契约身份也不由候选声明**：候选报告里出现 `contract_version` / `contract_sha256`
+  同样记为 `TAMPERED_IMMUTABLE` —— 说明"是哪一版契约在判我"属于执行侧，不属于被评对象。
 - **目标本身不可改**：`immutable` 里的任何东西都不能由候选提供。候选报告里出现
   同名字段（`thresholds`、`zones`、`reported_goal`、`tolerance` …）时，
   **判定仍然只用契约的数字**，同时该行为本身记为 `TAMPERED_IMMUTABLE` —— 忽略数值
@@ -150,7 +164,7 @@
 | `RUN_ID_MISMATCH` | UNKNOWN | run id 不匹配契约的 `run_id_pattern` |
 | `EXIT_CODE_MISSING` | UNKNOWN | 没有记录到退出码 |
 | `CHANGED_FILES_UNREPORTED` | UNKNOWN | 候选没有声明改了哪些路径 |
-| `CANDIDATE_MALFORMED` | UNKNOWN | 候选状态不是可用报告 |
+| `CANDIDATE_MALFORMED` | UNKNOWN | 候选状态不是可用报告，或候选格式标签缺失/不是 `flexcell.repair_eval.candidate/1` |
 | `UNATTRIBUTED_FAILURE` | UNKNOWN | 内部不变量：门失败却没给理由码 |
 
 每个 check 都带 `evidence`，写明测到的数与用的界（例如目标门写
@@ -197,6 +211,8 @@
 硬规则（由 `casefile.load()` 强制）：
 
 - `case_schema` 必须是 `flexcell.repair_eval.case/1`；
+- `candidate.candidate_schema` 必须是 `flexcell.repair_eval.candidate/1`（缺失或写错会被
+  判成 `UNKNOWN`，这一例就测不到它本来要测的东西）；
 - `contract` 必须自己通过 `validate()`（否则这一例"证明"的是契约非法，不是验收行为）；
 - `expect.status` 必须是三种状态之一；`ACCEPT` 不能带理由码，非 `ACCEPT` 必须带；
 - 所有 `codes` 必须是 `acceptance.REASONS` 里登记过的码。

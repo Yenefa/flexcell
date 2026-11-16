@@ -64,8 +64,11 @@ else:
     import task_contract
     from task_contract import TaskContract
 
-# The candidate format is versioned separately from the contract: a report from
-# another generation of the harness must be recognisable, not "close enough".
+# The candidate format is versioned separately from the contract, and the tag is
+# a GATE in evaluate(), not a comment: a report that does not declare this format
+# is UNKNOWN, never ACCEPT. It used to be declared and never read, which meant a
+# report from another harness - or one with no format tag at all - was judged as
+# if its fields meant what they mean here.
 CANDIDATE_SCHEMA = "flexcell.repair_eval.candidate/1"
 
 ACCEPT = "ACCEPT"
@@ -110,6 +113,11 @@ FORBIDDEN_CANDIDATE_KEYS = frozenset({
     "editable_fields", "protected_paths", "evidence_required", "run_id_pattern",
     "tolerance", "target", "goal", "expected_goal", "expected_objects",
     "reported_goal", "reported_thresholds", "reported_tolerance",
+    # The contract's identity is part of the ruler: a report naming which contract
+    # version or digest judged it is asserting the rulebook, which is the
+    # harness's job. Same rule as "version" above, applied to the names a Verdict
+    # actually uses.
+    "contract_version", "contract_sha256",
 })
 
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
@@ -261,6 +269,20 @@ def evaluate(contract, candidate_state):
         return _verdict(contract, checks, reasons)
 
     state = candidate_state
+
+    # ------------------------------------------------------ report format gate
+    # A report from another generation of the harness cannot be read: its field
+    # names may mean something else. So this gate stops BEFORE reading anything
+    # else - an ACCEPT from an unreadable report is an invention, and a REJECT
+    # built from fields we just admitted we cannot interpret is an accusation.
+    declared_schema = state.get("candidate_schema")
+    if not check("candidate_schema", declared_schema == CANDIDATE_SCHEMA,
+                 "CANDIDATE_MALFORMED",
+                 "candidate report declares format %r; this evaluator reads %r, "
+                 "so its fields cannot be interpreted"
+                 % (declared_schema, CANDIDATE_SCHEMA),
+                 declared=declared_schema, expected=CANDIDATE_SCHEMA):
+        return _verdict(contract, checks, reasons)
 
     # ---------------------------------------------------------------- identity
     declared_task = state.get("task_id")

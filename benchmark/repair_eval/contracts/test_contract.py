@@ -554,6 +554,66 @@ def test_editing_the_goal_changes_the_frozen_digest():
     assert widened.sha256() != baseline
 
 
+# --------------------------------------------------- candidate report format
+def test_every_case_declares_the_candidate_schema():
+    # A case that lost its format tag would be judged UNKNOWN and would stop
+    # testing the defect class it was written for.
+    for case_path in CASES:
+        candidate = casefile.load(case_path)["candidate"]
+        assert candidate.get("candidate_schema") == acceptance.CANDIDATE_SCHEMA, (
+            case_path.name)
+
+
+def test_a_report_from_another_harness_is_unknown():
+    candidate = candidate_of()
+    candidate["candidate_schema"] = "some-other-harness/7"
+    verdict = verdict_for(candidate)
+    assert verdict.status == acceptance.UNKNOWN
+    assert verdict.codes == ["CANDIDATE_MALFORMED"]
+    assert verdict.accepted is False
+
+
+def test_a_report_without_a_schema_is_unknown():
+    candidate = candidate_of()
+    candidate.pop("candidate_schema")
+    verdict = verdict_for(candidate)
+    assert verdict.status == acceptance.UNKNOWN
+    assert verdict.codes == ["CANDIDATE_MALFORMED"]
+
+
+def test_an_unknown_schema_stops_before_reading_the_rest():
+    # The formats we do not know may use "objects" for something else, so nothing
+    # in such a report may decide anything - not even to reject it.
+    candidate = candidate_of()
+    candidate["candidate_schema"] = "some-other-harness/7"
+    candidate["objects"]["block_a"] = [0.30, 0.30, 0.0]    # looks like a goal miss
+    candidate["exit_code"] = 1                             # looks like a failure
+    verdict = verdict_for(candidate)
+    assert verdict.status == acceptance.UNKNOWN
+    assert verdict.codes == ["CANDIDATE_MALFORMED"]
+    assert verdict.failed_checks() == ["candidate_schema"]
+
+
+def test_a_wrong_schema_can_never_be_accepted():
+    # Negative control: deleting the format gate makes this fail, on every case.
+    for case_path in CASES:
+        case = casefile.load(case_path)
+        contract = task_contract.TaskContract.from_mapping(case["contract"])
+        candidate = copy.deepcopy(case["candidate"])
+        candidate["candidate_schema"] = "some-other-harness/7"
+        verdict = acceptance.evaluate(contract, candidate)
+        assert verdict.status != acceptance.ACCEPT, case["case_id"]
+
+
+def test_the_contract_identity_is_not_the_candidates_to_declare():
+    for key, value in (("contract_version", 2), ("contract_sha256", "0" * 64)):
+        candidate = candidate_of()
+        candidate[key] = value
+        verdict = verdict_for(candidate)
+        assert verdict.status == acceptance.REJECT, key
+        assert verdict.codes == ["TAMPERED_IMMUTABLE"], key
+
+
 # ------------------------------------------------------- importability contract
 REPO_ROOT = HERE.parents[2]
 
