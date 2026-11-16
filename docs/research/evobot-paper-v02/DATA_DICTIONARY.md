@@ -77,6 +77,7 @@
 | `tokens_out` | int | token | 输出 token | 是 |
 | `tokens_total` | int | token | `tokens_in + tokens_out` | 是 |
 | `tokens_cap` | int | token | 固定 20,000 | 是 |
+| `tokens_source` | enum | — | `provider_split` 或 `provider_total_only`；后者表示提供方只给了总数，`tokens_in`/`tokens_out` 记 `null` | 是 |
 | `candidate_executions` | int | 次 | 本记录触发的场景执行次数（见 §1） | 是 |
 | `final_scenes` | int | 个 | 本记录产生的最终场景轮数（0 或 1） | 是 |
 | `wall_clock_s` | float | 秒 | 从派发到终态 | 是 |
@@ -167,7 +168,7 @@
 
 - 字段清单是**计划**：实际运行记录 schema 由 #252 落成，落成后若与本表不符，以**本表的口径**为准，
   差异回写到本表并升版本。
-- `tokens_in` / `tokens_out` 的统计口径依赖提供方 usage；若提供方不给分项，只记 `tokens_total` 并在备注写明，
-  不得由 `tokens_total` 反推分项。
+- `tokens_in` / `tokens_out` 的统计口径依赖提供方 usage。若提供方不给分项，两者记 `null`、`tokens_source` 记 `provider_total_only`，
+  **不得**由 `tokens_total` 反推分项。`null` 表示「提供方没给」，与 `0` 不是一回事。
 - `false_reject` 需要人工复核才可靠，可能被低估；报告时必须说明复核方法。
 - `final_scenes` 上限为 1，但允许为 0（中途停止）；为 0 的记录不计入 D3。
