@@ -110,6 +110,7 @@ VERDICT_MATERIAL = "verdict_material"
 HIDDEN_MATERIAL = "hidden_material"
 HARDLINK_ALIAS = "hardlink_alias"
 HARDLINK_UNVERIFIED = "hardlink_unverified"
+SEALED_MATERIAL = "sealed_material"
 PROTECTED_WRITE = "protected_write"
 STALE_ARTIFACT = "stale_artifact"
 ROOT_OVERLAP = "root_overlap"
@@ -125,6 +126,7 @@ REASON_CODES = (
     VERDICT_MATERIAL,
     HIDDEN_MATERIAL,
     HARDLINK_ALIAS,
+    SEALED_MATERIAL,
     PROTECTED_WRITE,
     STALE_ARTIFACT,
     ROOT_OVERLAP,
@@ -240,6 +242,14 @@ def _sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def _normalise_prefix(prefix: str) -> str:
+    """Directory prefixes end in exactly one slash; file entries end in none."""
+    value = _posix_rel(prefix)
+    if value.endswith("/"):
+        return value.rstrip("/") + "/"
+    return value
+
+
 def _split_parts(raw: str) -> list:
     return [part for part in re.split(r"[\\/]+", raw) if part not in ("", ".")]
 
@@ -280,6 +290,7 @@ class Policy:
     conditions: Mapping[str, ConditionAccess]
     reserved_names: tuple
     static_prefixes: tuple
+    sealed_prefixes: tuple
     paths: Mapping[str, str]
     freshness_forbidden: tuple
     freshness_max_depth: int
@@ -314,8 +325,8 @@ class Policy:
 
 TOP_LEVEL_KEYS = frozenset({
     "schema_version", "policy_id", "comment", "reserved_names", "static_prefixes",
-    "paths", "freshness", "protected_writes", "guidance_max_chars", "diagnosis",
-    "conditions", "model_interface",
+    "sealed_prefixes", "paths", "freshness", "protected_writes", "guidance_max_chars",
+    "diagnosis", "conditions", "model_interface",
 })
 CONDITION_REQUIRED_KEYS = frozenset({"visible", "feedback_source"})
 CONDITION_OPTIONAL_KEYS = frozenset({"guidance", "comment"})
@@ -475,8 +486,21 @@ def load_policy(path=POLICY_PATH) -> Policy:
             raise PolicyError("reserved_names entries must be file names, got %r" % name)
 
     static_prefixes = _require_string_list(raw["static_prefixes"], "static_prefixes")
-    static_prefixes = tuple(_posix_rel(prefix) + ("/" if prefix.endswith("/") else "")
-                            for prefix in static_prefixes)
+    static_prefixes = tuple(_normalise_prefix(prefix) for prefix in static_prefixes)
+
+    sealed_prefixes = _require_string_list(raw["sealed_prefixes"], "sealed_prefixes")
+    sealed_prefixes = tuple(_normalise_prefix(prefix) for prefix in sealed_prefixes)
+    for prefix in sealed_prefixes:
+        if prefix.strip("/") in ("", "."):
+            raise PolicyError(
+                "sealed_prefixes must name a path inside the candidate, got %r" % prefix)
+    for sealed in sealed_prefixes:
+        for static in static_prefixes:
+            left, right = sealed.rstrip("/"), static.rstrip("/")
+            if left == right or left.startswith(right + "/") or right.startswith(left + "/"):
+                raise PolicyError(
+                    "sealed_prefixes and static_prefixes overlap at %r/%r: a path is "
+                    "either a static input or sealed, never both" % (sealed, static))
 
     paths_doc = _require_keys(raw["paths"], {"telemetry", "telemetry_prefix", "verdict"}, "paths")
     paths = {
@@ -499,6 +523,13 @@ def load_policy(path=POLICY_PATH) -> Policy:
                 "freshness.forbidden must cover the reserved name %r" % name)
 
     protected_writes = _require_string_list(raw["protected_writes"], "protected_writes")
+    for prefix in sealed_prefixes:
+        bare = prefix.rstrip("/")
+        if not any(entry.rstrip("/") == bare or entry.rstrip("/").startswith(bare + "/")
+                   for entry in protected_writes):
+            raise PolicyError(
+                "sealed path %r must also be listed in protected_writes: sealed material "
+                "that stays writable is still tamperable" % prefix)
 
     diagnosis_doc = _require_keys(
         raw["diagnosis"], {"projection", "truncate_chars", "max_tail_lines"}, "diagnosis")
@@ -523,6 +554,7 @@ def load_policy(path=POLICY_PATH) -> Policy:
         conditions=conditions,
         reserved_names=reserved_names,
         static_prefixes=static_prefixes,
+        sealed_prefixes=sealed_prefixes,
         paths=paths,
         freshness_forbidden=freshness_forbidden,
         freshness_max_depth=freshness_max_depth,
@@ -716,6 +748,7 @@ class RunBoundary:
         # rule then covers sealed names that are requested by a plain relative
         # path (for example verdict.json inside a candidate root).
         resolved = self._resolve(operation, rel_text, category, root)
+        self._refuse_sealed_prefix(operation, rel_text, category)
         self._refuse_reserved_name(operation, rel_text, category)
         self._refuse_sealed_root(operation, rel_text, category, resolved)
         self._refuse_hardlink_alias(operation, rel_text, category, resolved)
@@ -723,6 +756,23 @@ class RunBoundary:
             self._record(operation, rel_text, category, "allow", root=self._root_name(category),
                          resolved=resolved)
         return resolved
+
+    def _refuse_sealed_prefix(self, operation, rel, category):
+        """Sealed prefixes are unreadable for every condition, evaluator source included.
+
+        They stay physically inside the candidate because the gate subprocess is
+        executed there; sealing is a tool-facade property, not a filesystem one.
+        """
+        if self._root_for(category) != self.candidate:
+            return
+        for prefix in self.policy.sealed_prefixes:
+            bare = prefix.rstrip("/")
+            if rel == bare or rel.startswith(bare + "/"):
+                raise self._deny(
+                    operation, rel, category, SEALED_MATERIAL,
+                    "%r is sealed in every condition: the evaluator source and its "
+                    "thresholds stay in the candidate only so the gate subprocess can "
+                    "run them" % prefix)
 
     def _refuse_reserved_name(self, operation, rel, category):
         if category not in AGENT_FILE_CATEGORIES:
