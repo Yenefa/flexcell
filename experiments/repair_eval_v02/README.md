@@ -517,3 +517,35 @@ F2 的 12 个槽位全部 6 次交互、13,527~13,647 tokens、BUDGET_EXHAUSTED
 ### 另一个陷阱：陈旧字节码
 
 给反馈刷新写回归测试时发现：Python 的 `.pyc` 用「修改时间秒数 + 文件大小」判有效，**同一秒内写入等长内容会命中旧字节码**。测试里 `return 0` 改成 `return 7` 长度相同，pytest 仍读到 0。现在 `refresh_feedback` 每次评估前清 `__pycache__`。
+
+## 真实缺陷实例（DEF-F1-REG / DEF-F2-MAP）
+
+`instances.py` 把 `defects/` 下的两个工件变成修复者可以对着干的候选工作区：
+
+| 族 | 可编辑面 | 封印面 |
+| --- | --- | --- |
+| F1 | `config/week1.yaml` | `gate/check.py` + `gate/observe_server.py` |
+| F2 | `src/task_fsm_server.py` | `gate/check.py` |
+
+```
+python3 experiments/repair_eval_v02/dry_run_instances.py
+```
+
+它给每个实例同时递上**坏的工作区**和**修好的工作区**，要求两次判定不同：
+
+```
+DEF-F1-REG   injected=OBJECT_NOT_REGISTERED repaired=PASS   discriminates=True
+DEF-F2-MAP   injected=WRONG_ZONE_ASSIGNMENT repaired=PASS   discriminates=True
+```
+
+### 这个 dry run 当场抓到一个致命错误
+
+F1 的门第一版写的是 `ok = not (set(tracked) & real)`——意思是「没有真实物体被注册就通过」。
+而**注入状态正是那个样子**，于是：
+
+```
+injected=PASS  repaired=OBJECT_STILL_REGISTERED   ← 符号反了
+```
+
+如果没跑这一步，24 个 F1 槽位会在**什么都不修**的情况下全部判过，而且所有条件看起来一样好。
+凡是一个门只输出一种值（全过或全不过），从外面看是一样的；唯一能分辨的办法就是同时递上坏的和好的，要求答案不同。
