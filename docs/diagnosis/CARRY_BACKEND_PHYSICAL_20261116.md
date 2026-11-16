@@ -58,11 +58,21 @@ Each run is one bounded task, one attempt, no replacement, no model calls.
   (`ECM_POST_PHYSICS`, 2 ms, 21,489 rows): `ground_plane ↔ target_box_b` in
   every row, `ground_plane ↔ target_box_a` in **17,241** rows - i.e. the box
   left the ground for about **8.5 s** of the 43 s run.
-- **The reproducible defect**: `PLACE_A` fails with
+- **`PLACE_A` fails with an already-documented condition, not a new one**:
   `gripper did not open (position=-0.011 requested=0.02 stalled=True)`
-  (`ERR_PLACE_FAILED`, legacy code 25). The box is held by a physics joint, so
-  opening the gripper is a no-op and the place release never confirms. This
-  reproduces twice.
+  (`ERR_PLACE_FAILED`, legacy code 25). This is the known gripper-aperture
+  defect recorded in `docs/MISSION_UPDATE_20261112_R5.md` §19.2 and
+  `setup/acceptance/evobot_gripper_false_negative_measured_20261112/`:
+  `place` judges release by aperture with a 0.005 m tolerance while a free-space
+  open only reaches 0.0104 m, so the aperture error is ~0.0096 m and only
+  `reached_goal` saves the check. It reproduces deterministically here.
+
+**Why `velocity_servo` PASSes while `detachable_joint` does not is a hypothesis, not
+a finding.** The two backends take different place paths
+(`place_server.py`: `joint_targets = carry_backend == 'detachable_joint'`), and a
+physics joint holding the box against the fingers is a plausible reason the
+fingers cannot open - but no finger force, joint force or aperture trace was
+collected, so this page does not claim a cause.
 
 ## What this establishes
 
@@ -70,9 +80,10 @@ Each run is one bounded task, one attempt, no replacement, no model calls.
    end to end and passes the independent verifier: 2/2, errors 4.07 mm and
    12.26 mm against a 60 mm tolerance.
 2. The `detachable_joint` backend really attaches and lifts (engine-side joint
-   rows plus ECM contact gaps), and its **release path is broken for pick/place**:
-   `PLACE_A` fails deterministically because the gripper cannot open while the
-   object is attached by a joint.
+   rows plus ECM contact gaps), then `PLACE_A` fails deterministically on the
+   **already-known gripper-aperture defect** documented in R5 §19.2. This run is
+   another instance of that defect at task level, not evidence that the
+   detachable backend is uniquely broken.
 3. `teleport` PASS must not be quoted as physical evidence, and the physics
    trace alone cannot distinguish it from `velocity_servo`; the discriminator is
    the backend parameter and the plugin, not the pose series.
