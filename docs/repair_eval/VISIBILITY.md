@@ -21,7 +21,7 @@
 |---|---|
 | `benchmark/repair_eval/visibility.py` | 策略加载、目录边界、工具门面、反馈包、demo/审计 CLI；纯标准库 |
 | `benchmark/repair_eval/visibility_policy.json` | 版本化策略（`schema_version` + 条件表 + 受保护写入清单 + 诊断投影） |
-| `benchmark/repair_eval/test_visibility.py` | 离线负例/正例回归（pytest，52 项） |
+| `benchmark/repair_eval/test_visibility.py` | 离线负例/正例回归（pytest，61 项） |
 | `docs/repair_eval/VISIBILITY.md` | 本文：条件表、理由码、负例清单、已知限制、集成注意点 |
 
 本 issue 的写入范围只有 `benchmark/repair_eval/` 和 `docs/repair_eval/`。
@@ -33,7 +33,10 @@
 
 ```
 <run_root>/
-  candidate/       候选工作副本：静态输入(task.md, gate/, tests/) + 候选源码(skill/)
+  candidate/       候选工作副本：
+                    静态输入  task.md, tests/    （四条件均可读）
+                    sealed    gate/              （四条件均不可读；留在盘上只为子进程能跑）
+                    候选源码  skill/ 等          （可读、可写）
   verdict/         独立裁决：verdict.json（agent 侧只有 verification 类别可达，本策略全 false）
   hidden/          隐藏答案：hidden_answer 类别，本策略全 false
 <另一条已完成 run>/  mismatch 源：telemetry/execution.log + verdict.json，仅 C 条件可达
@@ -53,8 +56,17 @@
 | `C_MISMATCHED_FEEDBACK` | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | `mismatch_run` | ❌ |
 | `D_GUIDED` | ✅ | ✅ | ✅ | ✅ | ❌ | ❌ | `own_run` | ✅（策略内声明，≤1200 字符） |
 
+`gate/` 不属于上表的任何一类：它是**封印材料**（`sealed_prefixes`），四个条件一致不可读，
+因此不参与条件间差异。`tests/` 是回归定义，四个条件一致可读，同样不参与差异。
+
 设计取舍：
 
+- **`gate/` 四条件封印**（2026-11-16 修订，见第 6.2 节）：验收命令与阈值就是"尺子"。
+  读到 `PASS_IF = {"max_error": 0.02}` 的修复者可以照着阈值调参而不是修好任务，所以
+  `gate/` 在 A/B/C/D 下一律 `sealed_material`。它仍物理留在候选目录里，因为验收子进程
+  要在那里运行——封印是**工具门面**的属性，不是文件系统属性。
+- `tests/` 保持可读：它是"不许弄坏什么"的回归定义，不含验收阈值；封掉它会让修复者看不见
+  自己必须保住的契约。四条件一致可见，因此不引入组间差异。
 - `verification`（裁决原文）和 `hidden_answer` 在**所有**条件下为 false，加载器强制
   `hidden_answer` 永不可见，并强制 `A_STATIC` 的 feedback/diagnosis/verification/hidden
   全 false；写了 `feedback_source` 却不开放 `execution_feedback`（或反之）直接拒绝。
@@ -84,6 +96,7 @@
 | `hidden_material` | 解析结果落入隐藏材料根 | — |
 | `hardlink_alias` | 文件 `st_nlink>1` 且在裁决/隐藏/mismatch 根内找到同 `(st_dev, st_ino)` | `test_a_cross_root_hard_link_is_refused` |
 | `hardlink_unverified` | `st_nlink>1` 但有界扫描未发现跨根同 inode：记 note，不拒绝（见限制） | — |
+| `sealed_material` | 请求命中 `sealed_prefixes`（当前为 `gate/`），四个条件一致拒绝 | `test_the_evaluator_source_is_sealed_in_every_condition` |
 | `protected_write` | 写入命中 `protected_writes`（`task.md`、`gate/`、`tests/test_regression.py`、`verdict.json`、`result.json`、`telemetry/`、`experience/`、`diagnosis.json`） | `test_protected_writes_are_refused` |
 | `stale_artifact` | `assert_fresh_run` 在候选目录发现上一轮残留（`verdict.json`、`result.json`、`evidence.json`、`episode.json`、`fingerprint.json`、`diagnosis.json`、`telemetry/`、`experience/` 等） | `test_stale_candidate_is_refused` |
 | `root_overlap` | 构造期根目录重叠 | `test_overlapping_roots_are_rejected` |
@@ -99,7 +112,7 @@ cd /home/ros/wt/visibility
 python3 -m pytest benchmark/repair_eval/test_visibility.py -q
 ```
 
-当前结果：`52 passed`。负例与正例（测试名可检索）：
+当前结果：`61 passed`。负例与正例（测试名可检索）：
 
 - **A 读不到裁决**：`test_a_read_verdict_json_is_refused`（`reserved_name`）；
   `test_a_telemetry_and_diagnosis_tools_are_refused`（三个反馈工具 + 经 `read_file` 读
@@ -138,6 +151,16 @@ python3 -m pytest benchmark/repair_eval/test_visibility.py -q
   （`A ⊂ B` 且差集恰为 `{execution_feedback, diagnosis}`），并有行为层对照
   `test_the_same_tree_exposes_different_material_under_a_and_b`（同一棵树：A 调 `read_telemetry`
   被拒、B 返回真实日志；两者 `read_verification` 都被拒）。
+- **验收门四条件封印**：`test_the_evaluator_source_is_sealed_in_every_condition`
+  （A/B/C/D 读 `gate/acceptance.py`、`gate/sim.py` 全部 `sealed_material`，并核对拒绝记录里的
+  condition）、`test_sealed_material_is_not_reachable_by_listing_or_search`
+  （`list_dir("gate")` 被拒、`search_code("PASS_IF")` 返回 `(no matches)`）、
+  `test_writing_the_sealed_gate_is_still_refused`（写仍是 `protected_write`，原文不变）。
+- **封印不阻断执行**：`test_sealed_files_still_exist_for_the_gate_subprocess`——门面拒读的同时，
+  普通子进程仍能执行 `gate/acceptance.py` 并拿到输出，说明封印只约束 agent 的读取通道。
+- **回归定义保持可读**：`test_the_regression_definition_stays_readable_in_every_condition`。
+- **分类不串味**：`test_categories_put_the_gate_and_the_regression_definition_apart`
+  （`task.md`/`tests/` → `static_input`，`gate/` 非静态，`telemetry/` → `execution_feedback`）。
 - **策略本身可拒绝**：`test_loader_refuses_a_policy_that_breaks_the_design`（15 个用例：
   A 开放反馈/诊断、来源与可见性不一致、缺条件、多条件、错版本、指导文本越界、指导挂在
   mismatched 上、两个条件都带指导、hidden 可见、freshness 漏保留名、保留名带路径、绝对
@@ -175,6 +198,32 @@ sealed 材料"。结果：**无一类读到**，全部落在上表的理由码�
 "策略加载期自校验"（`test_policy_loading_fails_closed_instead_of_silently_allowing`），
 两条都做过反向验证：去掉对应的机制，用例会失败。
 
+### 与 #251 协议文本的交叉核对（2026-11-16，修订）
+
+#251 的 `PROTOCOL.md` §2 写"A 仅获得任务目标文本与允许修改的字段清单"，第 60 行的拒绝列
+明确列出"读评估器源码"。而 r1 策略把 `gate/` 放进了 `static_prefixes`，使 A/B/C/D 都能读到
+`gate/acceptance.py` 里的 `PASS_IF` 阈值——**两份交付物互相矛盾**。
+
+判断：**改 #249 这一边**，不动协议。理由：
+
+1. 协议那句话是对的：读到阈值就能照尺子调参，这正是契约层要防的"改尺子"；
+2. 修复成本低且不改变对照：`gate/` 四条件一致封印，A 与 B 的差仍是"执行反馈 + 诊断"；
+3. 反过来改协议（把 `gate/` 写成四条件共同可见）会把可证伪的陈述写进论文——审稿人只要
+   发现 A 能读 `PASS_IF`，"A 只拿到任务目标文本"就是假的。
+
+落实（`policy_id` 升到 `...-issue249-r2`）：
+
+- 策略新增 `sealed_prefixes: ["gate/"]`，`static_prefixes` 收窄为 `["task.md", "tests/"]`；
+- 加载期校验：sealed 与 static 前缀不得重叠、sealed 必须被 `protected_writes` 覆盖（可读可写
+  等于没封）、sealed 不得是整个候选目录；
+- 三个读取工具对 sealed 前缀一律 `AccessDenied / sealed_material`；写仍走 `protected_write`；
+- 新增 9 条用例（第 6 节），并对"去掉封印""去掉 protected_writes 校验"各做一次变异验证，两次用例都失败。
+
+顺带修掉一个由此暴露的缺陷：前缀规范化把目录前缀写成了 `tests//`、`gate//`，导致
+`static_prefixes` 实际上从未匹配成功——r1 里 `task.md`/`tests/` 一直被当作
+`candidate_source` 而非 `static_input`（可见性结论未变，但分类是错的）。已改为单斜杠，
+并有用例 `test_categories_put_the_gate_and_the_regression_definition_apart` 盯住。
+
 ## 7. 可执行检查与允许/拒绝例子
 
 一条命令打印"允许读 / 拒绝读 / 拒绝继承旧反馈"（输出为 JSON，路径均相对临时树，可 diff）：
@@ -190,7 +239,7 @@ python3 -m benchmark.repair_eval.visibility --demo
 {
   "policy": {"policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249",
              "schema_version": "repair-eval-visibility/1",
-             "fingerprint": "0dd92501...e2e6769"},
+             "fingerprint": "a48651c0...f71ea951a"},
   "visibility": {
     "A_STATIC": ["candidate_source", "static_input"],
     "B_REAL_FEEDBACK": ["candidate_source", "diagnosis", "execution_feedback", "static_input"]
@@ -236,7 +285,9 @@ python3 -m benchmark.repair_eval.visibility \
    要把裁决写到 `verdict/` 根，而不是候选 workspace；否则 `assert_fresh_run` 会在下一轮
    直接 fail-closed。该改动属于 `experiments/`，需 owner 提独立 PR，本 issue 未动。
 3. **执行仍发生在候选副本内**：`gate/`、`tests/` 必须留在候选目录里供子进程运行，
-   所以它们按 `static_prefixes` 归类为静态输入（可读、写入受保护），而不是搬到根外。
+   不搬到根外。区别在读取通道：`tests/` 按 `static_prefixes` 归类为静态输入（四条件可读、
+   写入受保护），`gate/` 按 `sealed_prefixes` 四条件封印（写入受保护、agent 不可读）。
+   门面不参与执行，所以封印不影响子进程——`test_sealed_files_still_exist_for_the_gate_subprocess` 盯这一点。
 4. **旧工具的语义差异**：`toolbox.read_verification()` 在 A 臂上以前返回 `None`（文件不存在），
    现在一律 `AccessDenied(policy_denied)`；调用方要按"被拒"处理，不能当成"无内容"。
 5. **不替换证据链**：`evidence.py` 的 `REQUIRED` 清单、`hash_guard`、冻结评估器与阈值都不变；
@@ -244,6 +295,9 @@ python3 -m benchmark.repair_eval.visibility \
 
 ## 9. 已知限制（必须随结果一起报告）
 
+- **封印只在门面层**：`gate/` 在四个条件下都不可读，但文件仍在候选目录里、权限未收紧。
+  绕过门面的代码（直接 `open()`、shell、子进程）照样能读它——因此"A 看不到评估器源码"
+  只能在"通过工具门面访问"这一层陈述，不能写成文件系统级保证。
 - **这是路径门，不是运行时沙箱**。它只约束通过 `ToolFacade`/`RunBoundary` 的访问。
   同一用户直接用 shell、`open()`、`/proc/<pid>/root` 或任何绕过门面的代码都能读裁决目录；
   同机 root、容器逃逸、绑定挂载（bind mount）同理。**不能**把"A 条件无反馈"表述为
@@ -269,6 +323,9 @@ python3 -m benchmark.repair_eval.visibility \
 ## 10. 版本与变更规则
 
 - `schema_version` = `repair-eval-visibility/1`；不认识的版本加载器直接拒绝。
+- 当前 `policy_id` = `flexcell.repair_eval.visibility/2026-11-16-issue249-r2`（r2：`gate/` 转为
+  `sealed_prefixes`，`static_prefixes` 收窄；原因见第 6.2 节）。r1 的指纹
+  `0dd92501…` 只对应"gate/ 可读"的旧约定，不要与新记录混用。
 - 改条件表、保留名、受保护写入清单、诊断投影 = **协议变更**：必须同时改
   `policy_id`、更新本文第 4/5 节与负例清单，并在提交信息里说明原因。
 - `RunBoundary.describe()` 里的 `policy_fingerprint`（策略 JSON 的规范化 SHA-256）应与
