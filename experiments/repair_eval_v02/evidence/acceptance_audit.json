@@ -28,7 +28,7 @@
       "issue": "249",
       "criterion": "候选副本与裁决/隐藏材料分离，重叠被拒",
       "status": "MET",
-      "evidence": "overlap refused: verdict is not a directory: /tmp/tmpkkg457rp/candidate/v"
+      "evidence": "overlap refused: verdict is not a directory: /tmp/tmp2t6aapuk/candidate/v"
     },
     {
       "issue": "249",
@@ -91,6 +91,12 @@
       "evidence": "false_accept derived independently: True"
     },
     {
+      "issue": "254",
+      "criterion": "固定跨平台摘要口径与复算入口",
+      "status": "MET",
+      "evidence": "convention=utf8-lf-sha256/1 lf==crlf=True bytes_raw=True doc=True"
+    },
+    {
       "issue": "249",
       "criterion": "PR 附离线检查命令与允许/拒绝/不继承旧反馈的例子",
       "status": "MANUAL",
@@ -140,7 +146,7 @@
     }
   ],
   "counts": {
-    "MET": 15,
+    "MET": 16,
     "MANUAL": 8
   }
 }

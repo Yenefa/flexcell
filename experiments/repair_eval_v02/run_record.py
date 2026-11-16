@@ -52,8 +52,42 @@ class RecordError(Exception):
     """Raised when a record would not match the declared schema."""
 
 
+# The digest convention is part of the record, not an implementation detail.
+# Without it the same delivered feedback hashes differently on Windows and Linux,
+# because the two produce different line endings, and two records that should be
+# comparable become two different numbers. Measured before this was fixed:
+#
+#     sha256("line one\nline two\n")        -> e9024f1a...
+#     sha256("line one\r\nline two\r\n")    -> 6612d9c9...
+#
+# So the convention is: decode as UTF-8, map CRLF and bare CR to LF, encode as
+# UTF-8, then sha256. It is written here and in DATA_DICTIONARY 3.3 so a reader
+# of a record can reproduce the number instead of guessing how it was made.
+DIGEST_CONVENTION = "utf8-lf-sha256/1"
+
+
 def sha256_text(text):
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+    """Digest of a text payload under DIGEST_CONVENTION.
+
+    Line endings are normalised on purpose: they are an artefact of the platform
+    that wrote the file, not part of what was said to the repairer.
+    """
+    if not isinstance(text, str):
+        raise TypeError("sha256_text expects str, got %s" % type(text).__name__)
+    normalised = text.replace("\r\n", "\n").replace("\r", "\n")
+    return hashlib.sha256(normalised.encode("utf-8")).hexdigest()
+
+
+def sha256_bytes(payload):
+    """Digest of a byte payload, with no normalisation whatsoever.
+
+    Use this when the bytes themselves are the evidence - an archive member, a
+    binary, a file whose exact content matters. Normalising bytes would change
+    what was measured.
+    """
+    if not isinstance(payload, (bytes, bytearray)):
+        raise TypeError("sha256_bytes expects bytes")
+    return hashlib.sha256(bytes(payload)).hexdigest()
 
 
 def feedback_source_for(condition_access):

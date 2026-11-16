@@ -232,6 +232,40 @@ def test_the_feedback_digest_is_of_the_text_actually_delivered():
     assert other["feedback_payload_sha256"] != record["feedback_payload_sha256"]
 
 
+# --------------------------------------------------------- digest convention
+def test_the_digest_does_not_depend_on_the_line_endings_of_the_platform():
+    """Windows and Linux must not record different numbers for one payload.
+
+    Measured before this existed: the same two lines hashed to e9024f1a with LF
+    and 6612d9c9 with CRLF, so a record written on one platform could not be
+    compared with a record written on the other.
+    """
+    lf = "line one" + chr(10) + "line two" + chr(10)
+    crlf = "line one" + chr(13) + chr(10) + "line two" + chr(13) + chr(10)
+    cr = "line one" + chr(13) + "line two" + chr(13)
+    assert R.sha256_text(lf) == R.sha256_text(crlf) == R.sha256_text(cr)
+    assert R.DIGEST_CONVENTION == "utf8-lf-sha256/1"
+
+
+def test_a_byte_payload_is_never_normalised():
+    """Bytes are the evidence; normalising them would change what was measured."""
+    assert R.sha256_bytes(b"a" + bytes([13]) + bytes([10]) + b"b") != \
+        R.sha256_bytes(b"a" + bytes([10]) + b"b")
+
+
+def test_text_and_bytes_are_not_interchangeable():
+    with pytest.raises(TypeError):
+        R.sha256_text(b"bytes")
+    with pytest.raises(TypeError):
+        R.sha256_bytes("text")
+
+
+def test_the_record_digests_follow_the_documented_convention():
+    text = "REAL FAILURE: registry returned []" + chr(10)
+    record = a_record(condition="B_REAL_FEEDBACK", feedback_text=text)
+    assert record["feedback_payload_sha256"] == R.sha256_text(text)
+
+
 # ------------------------------------------------------------ gate surface
 def test_an_invented_gate_value_is_refused():
     with pytest.raises(R.RecordError):

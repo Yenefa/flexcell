@@ -223,6 +223,20 @@ def c254_archive_recompute():
         payload.get("records"), payload.get("disagreements"))
 
 
+def c254_digest_convention():
+    """Cross-platform digest: LF and CRLF must give one number, bytes must not."""
+    lf = "a" + chr(10) + "b"
+    crlf = "a" + chr(13) + chr(10) + "b"
+    same = REC.sha256_text(lf) == REC.sha256_text(crlf)
+    raw_bytes = REC.sha256_bytes(b"a" + bytes([13]) + bytes([10]) + b"b") != \
+        REC.sha256_bytes(b"a" + bytes([10]) + b"b")
+    documented = "utf8-lf-sha256/1" in (
+        DOCS / "DATA_DICTIONARY.md").read_text(encoding="utf-8")
+    ok = same and raw_bytes and documented
+    return (MET if ok else UNMET), "convention=%s lf==crlf=%s bytes_raw=%s doc=%s" % (
+        REC.DIGEST_CONVENTION, same, raw_bytes, documented)
+
+
 def c254_false_accept_distinct():
     policy = vis.load_policy(POLICY_PATH)
     ledger = B.Ledger(_T())
@@ -251,6 +265,7 @@ CHECKS = [
     ("251", "保留场景 2 布局 × 3 初态", c251_retained_plan),
     ("254", "关键表格从原始记录重算", c254_archive_recompute),
     ("254", "错误接纳与旧 claim_success 字段区分", c254_false_accept_distinct),
+    ("254", "固定跨平台摘要口径与复算入口", c254_digest_convention),
 ]
 
 MANUAL_ITEMS = [
