@@ -16,6 +16,10 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[4]
 SCRIPT = (ROOT.parent / 'ci-public-window' / 'scripts' / 'evobot_z_tracker.py')
+if not SCRIPT.is_file():
+    pytest.skip('external ci-public-window artefact is absent',
+                allow_module_level=True)
+
 
 
 def tracker():
