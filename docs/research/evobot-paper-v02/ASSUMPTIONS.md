@@ -132,8 +132,9 @@ verdict  = contracts.check(candidate_dir: str, contract: TaskContract,
 
 | 项 | 本协议期望 | 实际交付 | 差异 | 处理 | 状态 |
 | --- | --- | --- | --- | --- | --- |
-| visibility 策略版本字段 | `policy_id` | `policy_id = flexcell.repair_eval.visibility/2026-11-16-issue249`、`schema_version = repair-eval-visibility/1`，运行期另有 `Policy.fingerprint`（sha256） | 比期望多一个 `fingerprint` | run record 同时记 `policy_id` 与 `fingerprint` | **已回填** |
-| visibility 拒绝码命名 | 见 §2.3 | `reserved_name` / `parent_traversal` / `absolute_path` / `symlink_alias` / `hardlink_alias` / `policy_denied` / `protected_write`；残留产物抛 `StaleArtifact` | 命名一致；`stale` 以异常类型表达，不是拒绝码 | 映射不改义；数据字典登记为 `stale_artifact` 时写明来源类型 | **已回填** |
+| visibility 策略版本字段 | `policy_id` | `policy_id = flexcell.repair_eval.visibility/2026-11-16-issue249-r2`、`schema_version = repair-eval-visibility/1`，运行期另有 `Policy.fingerprint`（sha256，r2 实测 `a48651c0…f71ea951a`） | 比期望多一个 `fingerprint`；r2 增加了 `sealed_prefixes` | run record 同时记 `policy_id` 与 `fingerprint` | **已回填** |
+| visibility 拒绝码命名 | 见 §2.3 | `reserved_name` / `parent_traversal` / `absolute_path` / `symlink_alias` / `hardlink_alias` / `policy_denied` / `protected_write` / `sealed_material`（r2 新增）；残留产物抛 `StaleArtifact` | 命名一致；`stale` 以异常类型表达，不是拒绝码 | 映射不改义；数据字典登记为 `stale_artifact` 时写明来源类型 | **已回填** |
+| 评估器源码（`gate/`）的可见性 | 协议 §2 拒绝"A 读评估器源码" | r1 把 `gate/` 归入 `static_input`，A 条件**可读**；r2 改为 `sealed_prefixes`，四条件一律 `sealed_material` | r1 与协议矛盾，r2 一致 | 采纳 r2（改实现不改协议）；`tests/` 保持四条件可读（回归契约，不含验收阈值） | **已回填（r2）** |
 | contracts 契约版本字段 | `contract_version` | `TaskContract.schema = flexcell.repair_eval.task_contract/1`，实例另有 `version`、`canonical_json()`、`sha256()` | 版本分散在 `schema` 与 `version` 两处 | 记录时三件一起写：`schema` + `version` + `sha256` | **已回填** |
 | contracts 理由码命名 | 见 [TASKS.md](TASKS.md) §5.1 | REJECT：`GOAL_NOT_MET` `REGRESSION_FAILED` `PROTECTED_MODIFIED` `NONZERO_EXIT` `UNAUTHORIZED_EDIT` `TAMPERED_IMMUTABLE` `TASK_MISMATCH`；UNKNOWN：`GOAL_UNMEASURED` `REGRESSION_MISSING` `PROTECTED_UNVERIFIABLE` `EVIDENCE_MISSING` `RUN_ID_MISMATCH` `EXIT_CODE_MISSING` `CHANGED_FILES_UNREPORTED` `CANDIDATE_MALFORMED` `UNATTRIBUTED_FAILURE` | 未采用 `CONTRACT_*` 前缀；**UNKNOWN 码占多数** | 映射不改义；论文里不得把 `UNKNOWN` 并入成功或失败 | **已回填** |
 | `check()` 的入参形状 | `(candidate_dir, contract, evaluation, evidence)` | 没有单一 `check()`：可见性侧是 `assert_fresh_run(policy, candidate_dir)` + `RunBoundary` / `ToolFacade`，验收侧是 `acceptance.evaluate(contract, candidate_state)` | 验收与可见性分层；`candidate_state` 是测量报告，不是目录 | 适配层由 #252 写：先新鲜度检查 → 再读受限材料 → 再 `evaluate`；两侧语义不改 | **已回填** |
@@ -144,6 +145,7 @@ verdict  = contracts.check(candidate_dir: str, contract: TaskContract,
 | --- | --- | --- |
 | 2026-11-16 | PR #257（`codex/evobot-paper-v02-visibility`，3 提交，49 用例） | 交付可见性边界与策略 JSON；回填前两行；新增"run record 必须记 `Policy.fingerprint`" |
 | 2026-11-16 | PR #258（`codex/evobot-paper-v02-task-contract`，4 提交，109 用例） | 交付任务契约、七例语料、理由码表；回填后三行；确认 `REJECT` 优先于 `UNKNOWN` 与本协议判读一致 |
+| 2026-11-16 | 交叉复核（#251 × #249） | 发现 r1 的 `gate/` 归类与协议 §2 矛盾；#249 已改为 `sealed_prefixes` 并升 `policy_id` 至 `-r2`。本表相应回填，协议正文**未改** |
 | 待办 | 两份 PR 合并时 | 复核签名与码表是否被合并过程改动；有改动则本文件升版本并重新登记 |
 
 ## 6. 允许与拒绝的例子（依赖层）
