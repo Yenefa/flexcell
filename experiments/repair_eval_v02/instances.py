@@ -34,6 +34,7 @@ HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
 DEFECTS = HERE / "defects"
 
+from task_variants import VARIANTS, TASK_TEXT_V2
 CONFIG_REL = "src/flexcell/flexcell_skills/config/week1.yaml"
 OBSERVE_REL = "src/flexcell/flexcell_skills/flexcell_skills/observe_server.py"
 FSM_REL = "src/flexcell/flexcell_skills/flexcell_skills/task_fsm_server.py"
@@ -48,6 +49,7 @@ from pathlib import Path
 
 root = Path(sys.argv[1])
 family = sys.argv[2]
+variant = sys.argv[3] if len(sys.argv) > 3 else "v1"
 
 
 def emit(ok, code, **extra):
@@ -87,7 +89,14 @@ if family == "DEF-F1-REG":
         emit(False, "CONFIG_BAD_TYPE", detail="tracked_objects is %s" % type(tracked).__name__)
     real = {"target_box_a", "target_box_b"}
     ok = real.issubset(set(tracked))
-    emit(ok, "PASS" if ok else "OBJECT_NOT_REGISTERED", tracked=[str(t) for t in tracked])
+    # v2 withholds the names from the task text, so the failure has to
+    # report what the workcell expected. That is execution feedback: B, C
+    # and D may read it, A may not, and the boundary is what enforces that.
+    extra = {}
+    if variant == "v2" and not ok:
+        extra["expected_objects"] = sorted(real)
+    ok = real.issubset(set(tracked))
+    emit(ok, "PASS" if ok else "OBJECT_NOT_REGISTERED", tracked=[str(t) for t in tracked], **extra)
 
 text = (root / "src" / "task_fsm_server.py").read_text(encoding="utf-8")
 try:
@@ -121,6 +130,12 @@ TASK_TEXT = {
         "the demo assignment pairs target_box_a with zone_1 and target_box_b "
         "with zone_2."),
 }
+
+
+def task_text(family, variant="v1"):
+    if variant not in VARIANTS:
+        raise ValueError("unknown task variant %r" % (variant,))
+    return TASK_TEXT[family] if variant == "v1" else TASK_TEXT_V2[family]
 
 
 def artifact(family):
@@ -157,7 +172,7 @@ def editable_path(family, root):
     return Path(root) / editable_rel(family)
 
 
-def materialize(family, root):
+def materialize(family, root, variant="v1"):
     """Write an injected candidate workspace. Returns the workspace root.
 
     It used to return the editable file path, and the caller that wanted a
@@ -170,7 +185,7 @@ def materialize(family, root):
     target = root / rel
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(injected_text(family), encoding="utf-8")
-    (root / "task.md").write_text(TASK_TEXT[family], encoding="utf-8")
+    (root / "task.md").write_text(task_text(family, variant), encoding="utf-8")
     gate = root / "gate"
     gate.mkdir(exist_ok=True)
     (gate / "check.py").write_text(GATE, encoding="utf-8")
@@ -179,10 +194,10 @@ def materialize(family, root):
     return root
 
 
-def check(family, root):
+def check(family, root, variant="v1"):
     """Run the sealed gate. Returns (ok, payload)."""
     root = Path(root)
-    ran = subprocess.run([sys.executable, str(root / "gate" / "check.py"), str(root), family],
+    ran = subprocess.run([sys.executable, str(root / "gate" / "check.py"), str(root), family, variant],
                          capture_output=True, text=True)
     if ran.returncode != 0:
         return False, {"code": "GATE_FAILED", "detail": (ran.stderr or ran.stdout)[-300:]}

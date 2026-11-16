@@ -99,12 +99,12 @@ def replace_editable_fields(contract, fields):
 
 def run_slot(family, condition, rep, workdir, policy, donor, model, max_interactions,
              seed=None, donor_run_id=None, source_sha=None, donor_log_path=None,
-             source="synthetic"):
+             source="synthetic", task_variant="v1"):
     instance = ("DEF-F1-REG" if family.startswith("F1") else "DEF-F2-MAP") \
         if source == "instances" else None
     if instance:
-        candidate = IN.materialize(instance, workdir / "candidate")
-        task_text = IN.TASK_TEXT[instance]
+        candidate = IN.materialize(instance, workdir / "candidate", task_variant)
+        task_text = IN.task_text(instance, task_variant)
     else:
         candidate = build_candidate(workdir / "candidate", family, seed=seed)
         task_text = TASKS[family]
@@ -133,7 +133,7 @@ def run_slot(family, condition, rep, workdir, policy, donor, model, max_interact
         new source of truth was added without switching the path that reads it.
         """
         if instance:
-            _ok, payload = IN.check(instance, candidate)
+            _ok, payload = IN.check(instance, candidate, task_variant)
             (candidate / "telemetry" / "execution.log").write_text(
                 json.dumps(payload, ensure_ascii=False) + chr(10))
             return payload
@@ -198,7 +198,7 @@ def run_slot(family, condition, rep, workdir, policy, donor, model, max_interact
                       "sha256": "a" * 64}],
     }
     if instance:
-        gate_ok, gate_payload = IN.check(instance, candidate)
+        gate_ok, gate_payload = IN.check(instance, candidate, task_variant)
         verdict = {"status": "ACCEPT" if gate_ok else "REJECT",
                    "reasons": [] if gate_ok else [{"code": gate_payload.get("code", "UNKNOWN")}]}
     else:
@@ -231,6 +231,7 @@ def run_slot(family, condition, rep, workdir, policy, donor, model, max_interact
     )
     record["qualification"] = "REAL_MODEL_RUN" + ("|INSTANCE" if instance else "|SYNTHETIC")
     record["seed"] = seed
+    record["task_variant"] = task_variant
     record["contract_sha256"] = hashlib.sha256(json.dumps(
         contract_for(family), sort_keys=True, separators=(",", ":"),
         ensure_ascii=False).encode()).hexdigest()
@@ -250,6 +251,8 @@ def main(argv=None):
     ap.add_argument("--model", default="deepseek-flash")
     ap.add_argument("--out", default=str(HERE / "evidence" / "real_matrix.json"))
     ap.add_argument("--source", choices=("synthetic", "instances"), default="synthetic")
+    ap.add_argument("--task-variant", choices=("v1", "v2"), default="v1",
+                    help="v1 names the answer in the task text; v2 withholds it")
     ap.add_argument("--limit", type=int, default=0, help="stop after N slots (smoke)")
     ap.add_argument("--families", default="", help="comma separated subset")
     ap.add_argument("--conditions", default="", help="comma separated subset")
@@ -313,7 +316,7 @@ def main(argv=None):
                                        args.model, args.max_interactions, seed=seed,
                                        donor_run_id=borrowed, source_sha=source_sha,
                                        donor_log_path=borrowed_log,
-                                       source=args.source)
+                                       source=args.source, task_variant=args.task_variant)
                     except Exception as exc:                       # noqa: BLE001
                         # One dead call must not take the batch with it. The
                         # failure is a record of its own: the environment broke,
