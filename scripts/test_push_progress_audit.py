@@ -97,14 +97,22 @@ class Fixture(unittest.TestCase):
         target.write_text(text, encoding='utf-8')
         return target
 
-    def audit(self, argv=(), direction=None):
-        out = self.root / ('out-%02d' % STATS['cases'])
+    def audit(self, argv=(), direction=None, out_name=None):
+        out = self.root / (out_name or ('out-%02d' % STATS['cases']))
         args = [str(self.run), '--out', str(out)]
         if direction is not None:
             args += ['--direction', direction]
         args += list(argv)
         code = AUDIT.main(args)
         return code, out
+
+    def expect_failure(self, argv):
+        stderr = io.StringIO()
+        with contextlib.redirect_stderr(stderr):
+            code = AUDIT.main(argv)
+        self.assertEqual(code, 2)
+        self.assertTrue(stderr.getvalue().strip(), 'a failure must say why')
+        return stderr.getvalue()
 
     def read_summary(self, out):
         return json.loads((out / 'summary.json').read_text(encoding='utf-8'))
@@ -349,14 +357,6 @@ class ReadOnlyInvariants(Fixture):
 
 
 class FailureModes(Fixture):
-    def expect_failure(self, argv):
-        stderr = io.StringIO()
-        with contextlib.redirect_stderr(stderr):
-            code = AUDIT.main(argv)
-        self.assertEqual(code, 2)
-        self.assertTrue(stderr.getvalue().strip(), 'a failure must say why')
-        return stderr.getvalue()
-
     def test_missing_run_directory(self):
         self.expect_failure([str(self.root / 'nope'), '--out', str(self.root / 'o')])
         record('failure_missing_run')
@@ -411,6 +411,119 @@ class FailureModes(Fixture):
         message = self.expect_failure([str(self.run), '--out', str(self.root / 'o')])
         self.assertIn('recognised displacement', message)
         record('failure_wrong_shape')
+
+
+class AliasInterpretation(Fixture):
+    """A supported alias must reach the contract, not be read by the audit alone.
+
+    Reading along_m in the audit while classify_attempt() sees no canonical field is
+    two interpretations of one input: the CSV would claim progress that the counted
+    column and the code both call missing.
+    """
+
+    def test_alias_only_displacement_is_classified_not_dropped(self):
+        rows = [attempt(pose(0.20, 0.10), pose(0.23, 0.10), extra={'along_m': 0.03})]
+        self.write(rows)
+        code, out = self.audit(direction='1,0')
+        self.assertEqual(code, 0)
+        header, csv_rows = self.read_csv(out)
+        self.assertEqual(csv_rows[0]['reported_progress_m'], '0.03')
+        self.assertEqual(csv_rows[0]['reported_counted_m'], '0.03',
+                         'the contract must see the alias, not zero it')
+        self.assertEqual(csv_rows[0]['code'], 'OK')
+        self.assertEqual(csv_rows[0]['contact_made'], 'true',
+                         'an unread displacement used to flip the contact flag to false')
+        summary = self.read_summary(out)
+        self.assertAlmostEqual(summary['reported_counted_total_m'], 0.03, places=12)
+        self.assertNotIn('MISSING_REPORTED', summary['reasons'])
+        self.assertEqual((summary['status'], summary['code']), ('MEASURED', 'OK'))
+        record('alias_along', 1, ['OK'])
+
+    def test_alias_and_canonical_agreeing_is_accepted(self):
+        rows = [attempt(pose(0.20, 0.10), pose(0.23, 0.10), along=0.03, magnitude=0.03,
+                        extra={'along_m': 0.03, 'stroke_displacement_m': 0.03})]
+        self.write(rows)
+        code, out = self.audit(direction='1,0')
+        self.assertEqual(code, 0)
+        _, csv_rows = self.read_csv(out)
+        self.assertEqual(csv_rows[0]['reported_counted_m'], '0.03')
+        self.assertEqual(csv_rows[0]['code'], 'OK')
+        record('alias_agreeing', 1, ['OK'])
+
+    def test_alias_and_canonical_disagreeing_is_refused(self):
+        rows = [attempt(pose(0.20, 0.10), pose(0.23, 0.10), along=0.03, extra={'along_m': 0.01})]
+        self.write(rows)
+        message = self.expect_failure([str(self.run), '--out', str(self.root / 'o'),
+                                       '--direction', '1,0'])
+        self.assertIn('displacement_along_direction_m', message)
+        self.assertIn('along_m', message)
+        self.assertIn('two interpretations', message)
+        rows = [attempt(pose(0.20, 0.10), pose(0.23, 0.10), magnitude=0.03,
+                        extra={'stroke_displacement_m': 0.031})]
+        self.write(rows)
+        message = self.expect_failure([str(self.run), '--out', str(self.root / 'o2'),
+                                       '--direction', '1,0'])
+        self.assertIn('stroke_displacement_m', message)
+        record('alias_conflict')
+
+
+class IncompleteAndMixedEvidence(Fixture):
+    """A measured net is not a completed comparison, and a bad line is not a crash."""
+
+    def test_measurable_net_without_report_is_unknown_but_keeps_net_and_sign(self):
+        rows = [attempt(pose(0.00, 0.00), pose(0.03, 0.00))]
+        self.write(rows)
+        stdout = io.StringIO()
+        with contextlib.redirect_stdout(stdout):
+            code, out = self.audit(direction='1,0')
+        self.assertEqual(code, 0)
+        summary = self.read_summary(out)
+        self.assertEqual((summary['status'], summary['code']), ('UNKNOWN', 'INCOMPLETE_REPORT'))
+        # the two halves are reported apart, and the measured half survives
+        self.assertEqual(summary['sign'], 'POSITIVE')
+        self.assertAlmostEqual(summary['signed_net_total_m'], 0.03, places=12)
+        self.assertTrue(summary['net_measurable'])
+        self.assertFalse(summary['reporting_complete'])
+        self.assertFalse(summary['comparison_complete'])
+        self.assertEqual(summary['missing'], ['reported_progress_m'])
+        self.assertIsNone(summary['difference_total_m'])
+        self.assertEqual(summary['reasons'], {'MISSING_REPORTED': 1, 'INCOMPLETE_REPORT': 1})
+        printed = json.loads(stdout.getvalue())
+        self.assertEqual((printed['status'], printed['code']), ('UNKNOWN', 'INCOMPLETE_REPORT'))
+        self.assertEqual(printed['sign'], 'POSITIVE')
+        self.assertAlmostEqual(printed['signed_net_total_m'], 0.03, places=12)
+        self.assertEqual(printed['missing'], ['reported_progress_m'])
+        record('net_without_report', 1, ['INCOMPLETE_REPORT', 'MISSING_REPORTED'])
+
+    def test_valid_row_followed_by_null_is_diagnosed_not_crashed(self):
+        self.write([attempt(pose(0.20, 0.10), pose(0.23, 0.10), along=0.03, magnitude=0.03)],
+                   raw=['null'])
+        code, out = self.audit(direction='1,0')
+        self.assertEqual(code, 0, 'a mixed file must produce a summary, not exit 1')
+        _, csv_rows = self.read_csv(out)
+        self.assertEqual(len(csv_rows), 2)
+        self.assertEqual(csv_rows[1]['code'], 'UNREADABLE_RESULT')
+        self.assertEqual(csv_rows[1]['net_code'], 'MISSING_ENDPOINT')
+        self.assertEqual(csv_rows[1]['reported_progress_m'], '')
+        summary = self.read_summary(out)
+        self.assertEqual(summary['status'], 'UNKNOWN')
+        self.assertEqual(summary['reasons']['UNREADABLE_RESULT'], 1)
+        self.assertGreaterEqual(summary['reasons']['MISSING_ENDPOINT'], 1)
+        self.assertEqual(summary['endpoints']['reason'], 'MISSING_ENDPOINT')
+        record('mixed_null', 2, ['UNREADABLE_RESULT', 'MISSING_ENDPOINT'])
+
+    def test_null_first_row_still_yields_a_sub_window(self):
+        self.write([], raw=['null',
+                            json.dumps(attempt(pose(0.20, 0.10), pose(0.23, 0.10),
+                                               along=0.03, magnitude=0.03))])
+        code, out = self.audit(direction='1,0')
+        self.assertEqual(code, 0)
+        summary = self.read_summary(out)
+        self.assertEqual(summary['endpoints']['reason'], 'MISSING_ENDPOINT')
+        self.assertEqual(summary['partial_window']['start_row'], 2)
+        self.assertEqual(summary['partial_window']['end_row'], 2)
+        self.assertEqual(summary['reasons']['UNREADABLE_RESULT'], 1)
+        record('mixed_null_first', 2, ['UNREADABLE_RESULT', 'MISSING_ENDPOINT'])
 
 
 class ContractReuse(Fixture):

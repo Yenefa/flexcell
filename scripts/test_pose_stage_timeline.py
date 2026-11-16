@@ -79,8 +79,8 @@ class Fixture(unittest.TestCase):
             text += ''.join(line + chr(10) for line in raw_phases)
             (self.run / 'phases.jsonl').write_text(text, encoding='utf-8')
 
-    def build(self, argv=()):
-        out = self.root / ('out-%02d' % STATS['cases'])
+    def build(self, argv=(), out_name=None):
+        out = self.root / (out_name or ('out-%02d' % STATS['cases']))
         code = TIMELINE.main([str(self.run), '--out', str(out)] + list(argv))
         return code, out
 
@@ -128,6 +128,9 @@ class AlignmentGroups(Fixture):
                          ('STROKE', 100 * MS, True))
         self.assertEqual((stroke['last_sample_before'], stroke['first_sample_after']), (3, 4))
         self.assertFalse(summary['phase_boundaries'][0]['bounded'])
+        self.assertEqual(summary['phase_clock_rollbacks'], [])
+        self.assertIsNone(summary['phase_ambiguous_from_source_stamp_ns'])
+        self.assertEqual([record_['epoch'] for record_ in summary['phase_records']], [1, 1])
         record('normal', 5)
 
     def test_repeated_snapshot_is_one_measurement_not_two(self):
@@ -226,6 +229,53 @@ class AlignmentGroups(Fixture):
         self.assertEqual(summary['reasons'], {'MISSING_POSE': 1, 'NON_FINITE_POSE': 1})
         self.assertEqual(summary['rows_counted'], 2)
         record('missing_pose', 4, ['MISSING_POSE', 'NON_FINITE_POSE'])
+
+    def test_phase_clock_rollback_is_not_repaired_by_sorting(self):
+        # The phase clock restarts: RETURN arrives after PUSH but carries the earlier
+        # stamp. Sorting by stamp alone puts RETURN before PUSH, so the superseded
+        # PUSH would govern the later sample and the timeline would look aligned.
+        self.write([observation(60, 0.200), observation(95, 0.205), observation(105, 0.210)],
+                   [phase(50, 'APPROACH'), phase(100, 'PUSH'), phase(90, 'RETURN')])
+        code, out = self.build()
+        self.assertEqual(code, 0, 'a rollback is diagnostic output, not a tool failure')
+        _, rows = self.read_csv(out)
+        self.assertEqual([row['reason'] for row in rows],
+                         ['', 'PHASE_CLOCK_ROLLBACK', 'PHASE_CLOCK_ROLLBACK'])
+        self.assertEqual([row['phase'] for row in rows], ['APPROACH', '', ''])
+        self.assertEqual([row['alignable'] for row in rows], ['true', 'false', 'false'])
+        summary = self.read_summary(out)
+        self.assertEqual((summary['rows_counted'], summary['rows_unalignable']), (1, 2))
+        self.assertEqual(summary['reasons'], {'PHASE_CLOCK_ROLLBACK': 2})
+        self.assertEqual(summary['phase_clock_rollbacks'],
+                         [dict(index=3, line=3, phase='RETURN',
+                               source_stamp_ns=BASE_NS + 90 * MS, epoch=2)])
+        self.assertEqual(summary['phase_ambiguous_from_source_stamp_ns'], BASE_NS + 90 * MS)
+        # arrival order decides the epoch; the sort order in the summary is by stamp
+        self.assertEqual([(record['phase'], record['epoch'])
+                          for record in summary['phase_records']],
+                         [('APPROACH', 1), ('RETURN', 2), ('PUSH', 1)])
+        # A boundary at or above the overlap start could belong to either epoch; the
+        # one below it cannot, so only that one stays usable.
+        boundaries = {entry['phase']: entry for entry in summary['phase_boundaries']}
+        self.assertTrue(boundaries['RETURN']['ambiguous'])
+        self.assertTrue(boundaries['PUSH']['ambiguous'])
+        self.assertFalse(boundaries['APPROACH']['ambiguous'])
+        record('phase_rollback', 3, ['PHASE_CLOCK_ROLLBACK'])
+
+    def test_phase_rollback_reproduction_reports_unknown_not_the_old_phase(self):
+        # The review's reproduction, verbatim: PUSH(100) then RETURN(90), sample(105).
+        self.write([observation(105, 0.210)],
+                   [phase(100, 'PUSH'), phase(90, 'RETURN')])
+        code, out = self.build()
+        self.assertEqual(code, 0)
+        _, rows = self.read_csv(out)
+        self.assertEqual(rows[0]['alignable'], 'false')
+        self.assertEqual(rows[0]['reason'], 'PHASE_CLOCK_ROLLBACK')
+        self.assertEqual(rows[0]['phase'], '', 'the old epoch phase must not be reported')
+        summary = self.read_summary(out)
+        self.assertEqual(summary['rows_counted'], 0)
+        self.assertEqual(summary['phase_ambiguous_from_source_stamp_ns'], BASE_NS + 90 * MS)
+        record('phase_rollback_repro', 1, ['PHASE_CLOCK_ROLLBACK'])
 
     def test_a_conflicting_duplicate_stamp_is_not_a_copy(self):
         self.write([observation(0, 0.20), observation(100, 0.21), observation(100, 0.25)],

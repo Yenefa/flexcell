@@ -30,6 +30,13 @@ WHAT "UNKNOWN" MEANS
     (NO_MOTION, ZERO_PROJECTION, MISSING_ENDPOINT, NON_FINITE, NO_DIRECTION).
     UNKNOWN describes the evidence, not the push.
 
+    A measurable net does not by itself make the audit complete: reported progress
+    and net displacement come from different evidence, and the difference between
+    them is only meaningful when both exist. When an attempt carries no usable
+    reported displacement the run keeps its measured net and sign, but the status
+    stays UNKNOWN with code INCOMPLETE_REPORT and the absent input named in
+    "missing" - the two halves are reported apart rather than blurred together.
+
 READ-ONLY
     Inputs are hashed before and after the write and the hashes are compared;
     the only writes go to a freshly created output directory, which is never an
@@ -70,6 +77,12 @@ BEFORE_KEYS = ('measured_before', 'pre_pose', 'start_pose', 'before_pose', 'befo
 AFTER_KEYS = ('measured_after', 'post_pose', 'end_pose', 'after_pose', 'after')
 ALONG_KEYS = ('displacement_along_direction_m', 'along_m')
 MAGNITUDE_KEYS = ('displacement_m', 'stroke_displacement_m')
+# The audit reads these aliases; the frozen contract only reads canonical names.
+# Mapping them here keeps ONE interpretation: the row classify_attempt() judges is
+# the same row the CSV quotes. Without it an archive written with along_m would be
+# reported as having progress while the contract counted none of it.
+ALIAS_TO_CANONICAL = {'along_m': 'displacement_along_direction_m',
+                      'stroke_displacement_m': 'displacement_m'}
 # The contract speaks prose; the audit writes codes. Keys must stay in sync with
 # classify_attempt(), and an unknown code fails loudly instead of guessing.
 CONTRACT_CODES = {
@@ -166,7 +179,14 @@ def pose_xy(value):
 
 
 def endpoint_pose(row, keys):
-    """First pose-like field among keys -> (x, y, reason)."""
+    """First pose-like field among keys -> (x, y, reason).
+
+    A JSONL line can be any JSON value. A non-object line is not a pose, and it must
+    not be able to abort the audit of the rows around it: it keeps the established
+    MISSING_ENDPOINT code and the row keeps its UNREADABLE_RESULT report code.
+    """
+    if not isinstance(row, dict):
+        return None, 'MISSING_ENDPOINT'
     for key in keys:
         if key in row:
             pair = pose_xy(row[key])
@@ -197,6 +217,34 @@ def reported_value(row):
                     return None, 'fallback', 'NON_FINITE'
                 return float(row[key]), 'fallback', None
     return None, None, 'MISSING'
+
+
+def same_value(left, right):
+    """Equality that treats two NaNs as the same missing measurement."""
+    if isinstance(left, float) and isinstance(right, float):
+        if math.isnan(left) or math.isnan(right):
+            return math.isnan(left) and math.isnan(right)
+    return left == right
+
+
+def canonical_view(row, line):
+    """Copy of the row with supported aliases mapped onto the canonical fields.
+
+    Two disagreeing spellings of the same quantity make the audit ambiguous, so that
+    input is refused instead of being resolved by a silent preference; the original
+    row is never modified.
+    """
+    if not isinstance(row, dict):
+        return row
+    view = dict(row)
+    for alias, canonical in sorted(ALIAS_TO_CANONICAL.items()):
+        if alias not in row:
+            continue
+        if canonical in row and not same_value(row[canonical], row[alias]):
+            fail('attempts line %d carries both %s=%r and its alias %s=%r; refusing to choose '
+                 'between two interpretations' % (line, canonical, row[canonical], alias, row[alias]))
+        view[canonical] = row[alias]
+    return view
 
 
 def normalise_direction(dx, dy):
@@ -289,8 +337,9 @@ def audit_attempts(rows, direction, direction_source):
     unit = direction
     attempts = []
     for index, (number, row) in enumerate(rows, start=1):
-        value, signed_source, report_reason = reported_value(row)
-        made, counted, carry, code = classify_attempt(row)
+        view = canonical_view(row, number)
+        value, signed_source, report_reason = reported_value(view)
+        made, counted, carry, code = classify_attempt(view)
         if code not in CONTRACT_CODES:
             fail('push_recover.classify_attempt returned an unmapped code %r; '
                  'update CONTRACT_CODES together with the contract' % (code,))
@@ -345,14 +394,29 @@ def summarise(attempts, endpoints, direction, direction_source, partial):
         projection, magnitude = project(endpoints['start_pose'], endpoints['end_pose'], direction)
         net_total = projection
         sign, measured_code = classify_sign(projection, magnitude)
+    # A measured net with an incomplete report is still not a completed audit: the
+    # two sides of the comparison come from different evidence, and only both
+    # present makes the difference meaningful. Report which is missing instead of
+    # letting a measurable net stand in for the whole answer.
+    net_measurable = net_total is not None
+    comparison_complete = net_measurable and reported_complete
+    missing = []
+    if not reported_complete:
+        missing.append('reported_progress_m')
+    if not net_measurable:
+        missing.append('signed_net_m')
     # Primary code, most fundamental blocker first; every code is still counted in
     # reasons, so nothing is hidden by this ordering.
-    for candidate in ('NO_DIRECTION', 'NON_FINITE'):
-        if measured_code == candidate or (candidate == 'NON_FINITE' and non_finite):
-            code = candidate
-            break
-    else:
-        code = measured_code
+    blocked = []
+    if direction is None:
+        blocked.append('NO_DIRECTION')
+    if non_finite:
+        blocked.append('NON_FINITE')
+    if endpoints['reason'] is not None and endpoints['reason'] != 'NON_FINITE':
+        blocked.append(endpoints['reason'])
+    if not reported_complete:
+        blocked.append('INCOMPLETE_REPORT')
+    code = blocked[0] if blocked else measured_code
     reasons = {}
     for attempt in attempts:
         for key in (attempt['report_code'], attempt['net_code']):
@@ -375,12 +439,14 @@ def summarise(attempts, endpoints, direction, direction_source, partial):
         caveats.append('endpoint poses missing; partial_window is a sub-window measurement '
                        'and is not the run net')
     return dict(
-        # MEASURED means the audit completed with a usable sign; UNKNOWN means at
-        # least one piece of evidence could not support the comparison.
+        # MEASURED needs both halves of the comparison; a measurable net alone keeps
+        # its value and sign but the status stays UNKNOWN and names what is missing.
         status='MEASURED' if code == 'OK' else 'UNKNOWN', sign=sign, code=code,
+        net_measurable=net_measurable, reporting_complete=reported_complete,
+        comparison_complete=comparison_complete, missing=missing,
         reported_total_m=reported_total, reported_total_complete=reported_complete,
         reported_counted_total_m=counted_total,
-        signed_net_total_m=net_total, net_complete=net_total is not None,
+        signed_net_total_m=net_total,
         difference_total_m=((reported_total - net_total)
                             if net_total is not None and reported_complete else None),
         counted_minus_net_m=(counted_total - net_total) if net_total is not None else None,
@@ -473,7 +539,15 @@ def audit(run, attempts_path, out_dir, direction):
             signed_net_m='endpoint pose pair of that attempt projected onto the direction',
             difference_m='reported_progress_m - signed_net_m',
             difference_total_m='sum of reported - net over the whole run',
-            counted_minus_net_m='sum of counted - net; the policy accumulation error'))
+            counted_minus_net_m='sum of counted - net; the policy accumulation error',
+            status='MEASURED only when the net is measured and the report is complete; '
+                   'UNKNOWN names the blocking code and keeps whatever was measured',
+            net_measurable='the run net was measured from the endpoint poses, independently '
+                           'of the report',
+            reporting_complete='every attempt carried a usable reported displacement',
+            comparison_complete='both sides of reported - net exist, so the difference is a '
+                                'real comparison',
+            missing='comparison inputs that are absent; the rest of the summary still stands'))
     write_csv(out_dir / 'attempts.csv', attempts)
     after = sha256_file(attempts_path)
     summary['inputs_unchanged'] = after == before[str(attempts_path)]
@@ -509,7 +583,9 @@ def main(argv=None):
         return 2
     print(json.dumps(dict(kind=summary['kind'], status=summary['status'],
                           sign=summary['sign'], code=summary['code'],
-                          attempts=summary['attempts'],
+                          net_measurable=summary['net_measurable'],
+                          comparison_complete=summary['comparison_complete'],
+                          missing=summary['missing'], attempts=summary['attempts'],
                           signed_net_total_m=summary['signed_net_total_m'],
                           out=str(out_dir)), allow_nan=False))
     return 0

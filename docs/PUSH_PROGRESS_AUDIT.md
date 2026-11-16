@@ -33,6 +33,16 @@ without ROS), and the test file asserts the imported functions are the same obje
 | `sign` | `POSITIVE` / `NEGATIVE` only when the measured projection clears `MIN_DISPLACEMENT_M`; otherwise `UNKNOWN` with the measured reason in `net_code`. |
 | `difference_total_m` | `sum(reported_progress_m) - signed_net_total_m`; empty unless the report is complete and the net is measured. |
 | `counted_minus_net_m` | `sum(reported_counted_m) - signed_net_total_m`: the accumulation error the policy would introduce. |
+| `net_measurable` | the run net was measured from the endpoint poses, independently of the report |
+| `reporting_complete` | every attempt carried a usable reported displacement |
+| `comparison_complete` | both sides exist, so `difference_total_m` is a real comparison rather than a partial sum |
+| `missing` | the comparison inputs that are absent (`reported_progress_m`, `signed_net_m`, or both) |
+
+A measurable net is not a completed audit. When an attempt carries no usable reported displacement,
+`signed_net_total_m` and `sign` are still reported (they are genuinely measured), while
+`comparison_complete=false`, `missing` names the gap and the overall code becomes
+`INCOMPLETE_REPORT`. The two halves of the comparison are reported apart instead of one standing in
+for the other.
 
 `MIN_DISPLACEMENT_M` (5 mm, from the contract) is reused as the noise floor for sign assignment and
 for "off by more than the floor" counts. No new threshold is introduced.
@@ -75,9 +85,22 @@ A pose may be a ROS-style `{"position": {"x": .., "y": ..}}`, a flat `{"x": .., 
 `contact_push_server.py` initialises the displacement fields to NaN before it measures them; they
 become `UNKNOWN`, never a silent zero.
 
+The aliases are mapped onto the contract's canonical fields before the frozen
+`classify_attempt()` sees the row (`along_m` -> `displacement_along_direction_m`,
+`stroke_displacement_m` -> `displacement_m`). There is exactly one interpretation: the row the
+contract classifies is the row the CSV quotes, so an archive written with `along_m` is judged as
+having progress instead of being read by the audit and dropped by the policy. The original row is
+never modified. A row carrying both spellings with **different** values is refused (exit 2), because
+choosing one of two answers is exactly the ambiguity this tool exists to expose.
+
+A JSONL line is allowed to be any JSON value. A line that is not an object keeps its
+`UNREADABLE_RESULT` report code and `MISSING_ENDPOINT` measurement code, and the rest of the file is
+still audited and summarised: a mixed file is diagnosed, not crashed.
+
 The tool refuses (exit 2, message on stderr) rather than guessing: a missing or empty attempts file,
-a line that is not JSON, a file where no row carries any recognised field, and a run whose attempts
-span more than one `object_name`. Rows whose object identity is absent are accepted.
+a line that is not JSON, a file where no row carries any recognised field, a run whose attempts span
+more than one `object_name`, and a row whose canonical field and alias disagree. Rows whose object
+identity is absent are accepted.
 
 ## Output contract
 
@@ -102,10 +125,11 @@ paths with their sha256, and the deliberate negatives `task_success_claim=false`
 
 ### Status, sign and reason codes
 
-`status` is `MEASURED` only when `code == "OK"`; every other code means at least one piece of
-evidence could not support the comparison. `sign` is a statement about the measured projection and
-can be `POSITIVE` while `status` is `UNKNOWN` (for example: the net is measurable but the
-report contains a NaN).
+`status` is `MEASURED` only when `code == "OK"`, i.e. when the net is measured **and** the report
+is complete; every other code means at least one piece of evidence could not support the comparison.
+`sign` is a statement about the measured projection and can be `POSITIVE` while `status` is
+`UNKNOWN` (for example: the net is measurable but the report contains a NaN, or an attempt reported
+no displacement at all).
 
 | code | meaning |
 | --- | --- |
@@ -120,9 +144,11 @@ report contains a NaN).
 | `MISSING_REPORTED` | neither displacement field is present |
 | `NON_FINITE_REPORT` | the reported displacement is NaN / Infinity |
 | `UNREADABLE_RESULT` | the JSON line is not an object the contract can read |
+| `INCOMPLETE_REPORT` | an attempt carried no usable reported displacement, so the comparison is partial even though the net may be measured |
 
 When several codes apply, `code` is the most fundamental blocker in the order `NO_DIRECTION`,
-`NON_FINITE`, then the measurement status. Every code still appears in `reasons`.
+`NON_FINITE`, `MISSING_ENDPOINT`, `INCOMPLETE_REPORT`, then the measurement status
+(`NO_MOTION` / `ZERO_PROJECTION` / `OK`). Every code still appears in `reasons`.
 
 ## The six boundary classes
 
@@ -144,6 +170,16 @@ the fallback over-report by 16 mm), and a deliberately over-reported attempt (40
 25 mm measured, difference +15 mm, counted in
 `rows_reported_off_by_more_than_floor`).
 
+Five regression fixtures guard the boundaries found in review:
+
+| fixture | asserted result |
+| --- | --- |
+| alias only (`along_m` alone) | the contract sees it: `reported_counted_m=0.03`, `code=OK`, `contact_made=true` (before the fix: counted 0, `MISSING_REPORTED`, contact flipped to false) |
+| alias and canonical agreeing | accepted, counted once |
+| alias and canonical disagreeing | refused with exit 2 naming both spellings; no silent preference |
+| poses only, no reported displacement | `status=UNKNOWN`, `code=INCOMPLETE_REPORT`, but `sign=POSITIVE` and `signed_net_total_m=0.03` preserved, `missing=["reported_progress_m"]` |
+| valid row followed by `null` | exit 0 with a summary: row 2 is `UNREADABLE_RESULT` / `MISSING_ENDPOINT`, run code `MISSING_ENDPOINT` (before the fix: TypeError, exit 1, no summary) |
+
 ## Example
 
 A three-attempt fixture (the "forward" case above), direction `0.6,0.8`:
@@ -151,7 +187,8 @@ A three-attempt fixture (the "forward" case above), direction `0.6,0.8`:
 ```
 $ python scripts/push_progress_audit.py RUN --direction 0.6,0.8
 {"kind": "PUSH_PROGRESS_AUDIT", "status": "MEASURED", "sign": "POSITIVE", "code": "OK",
- "attempts": 3, "signed_net_total_m": 0.05299999999999999,
+ "net_measurable": true, "comparison_complete": true, "missing": [], "attempts": 3,
+ "signed_net_total_m": 0.05299999999999999,
  "out": "...\\run-001-audit-20261115T172639Z"}
 
 attempts.csv
@@ -188,10 +225,10 @@ Run from the repository root, with the interpreter that ships with this host (no
 Observed output (Windows, Python 3.12.14):
 
 ```
-Ran 26 tests in 0.246s
+Ran 32 tests in 0.253s
 OK
-push_progress_audit fixtures: 23 cases, 27 attempt rows written, 0 assertions failed
-reason codes exercised: CARRIED, MISSING_ENDPOINT, MOVED_BACKWARDS, NON_FINITE, NON_FINITE_REPORT, NO_MOTION, OK, UNREADABLE_RESULT, ZERO_PROJECTION
+push_progress_audit fixtures: 29 cases, 34 attempt rows written, 0 assertions failed
+reason codes exercised: CARRIED, INCOMPLETE_REPORT, MISSING_ENDPOINT, MISSING_REPORTED, MOVED_BACKWARDS, NON_FINITE, NON_FINITE_REPORT, NO_MOTION, OK, UNREADABLE_RESULT, ZERO_PROJECTION
 boundary classes: forward, backward, lateral, static, missing_endpoint, non_finite (+ fallback, derived, over-report, unreadable, carried, refused inputs)
 ```
 

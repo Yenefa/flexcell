@@ -23,7 +23,7 @@ measurement, so only the first copy is counted.
 
 | output field | definition |
 | --- | --- |
-| `phase` | the last phase record whose source stamp is at or before the sample's source stamp. Causal, never interpolated; empty when no such record exists. |
+| `phase` | the last phase record whose source stamp is at or before the sample's source stamp, within one clock epoch. Causal, never interpolated; empty when no such record exists or when the epoch is ambiguous. |
 | `source_stamp_ns` | the stamp the sample itself carries (simulator / ROS clock). |
 | `recv_stamp_ns` | the host receipt stamp. A different clock domain from the source. |
 | `offset_ms` | `(recv - source) / 1e6`, raw and possibly negative. It is a boundary offset between two clocks, not a latency claim. |
@@ -44,8 +44,30 @@ clock and is the only one of the two that can be called an age.
 A sample belongs to the last phase record at or before its source stamp. A phase that starts between
 two samples is therefore known only to the width of that gap. `summary.json` reports this per
 boundary in `phase_boundaries`: the row of the last sample before, the row of the first sample after,
-and `window_ns` - the raw gap between them. No row is created at the boundary, nothing is
-interpolated, and `window_ns` is not narrowed.
+and `window_ns` - the raw gap between them (plus `epoch` and `ambiguous`). No row is created at the
+boundary, nothing is interpolated, and `window_ns` is not narrowed.
+
+### A phase stream can roll back, and sorting must not hide it
+
+Phase records carry the clock of the process that emitted them, and that clock can restart mid-run
+(simulator reset, new epoch). A record that arrives later then carries an **earlier** stamp. Sorting
+by stamp alone would place it before the record it superseded, and the older epoch's phase would then
+govern samples it never saw - a perfectly aligned-looking timeline that is wrong.
+
+Arrival order is the only evidence of which record is newer, so epochs are assigned in arrival order:
+
+- every record gets an `epoch` (1 until a record arrives carrying a stamp earlier than one already
+  seen, then 2, and so on);
+- each such arrival is listed in `phase_clock_rollbacks` with its line, phase, stamp and new epoch;
+- `phase_ambiguous_from_source_stamp_ns` is the lowest stamp any post-rollback epoch can reach. At or
+  above it, records from two epochs overlap in stamp space, so "the last phase at or before the
+  sample" has more than one defensible answer;
+- every sample at or above that stamp is emitted with `alignable=false` and
+  `reason=PHASE_CLOCK_ROLLBACK`, and with **no** phase. Below it the phase is still unambiguous and
+  the normal rule applies.
+
+The ambiguity is reported, never repaired: no epoch is assumed to win, and no sample silently keeps
+the older epoch's phase.
 
 ## Input contract
 
@@ -92,7 +114,9 @@ the issue asks for, in its order.
 
 `summary.json` keys: `rows_total`, `rows_counted`, `rows_unalignable`, `reasons` (primary code
 counts), `duplicates` (`copies`, `conflicting_stamps`), `phases` (rows and first/last source
-stamp per phase), `phase_records`, `phase_boundaries`, `sampling` (min/median/max of positive
+stamp per phase), `phase_records` (each with its `epoch`), `phase_boundaries` (each with `epoch`
+and `ambiguous`), `phase_clock_rollbacks` and `phase_ambiguous_from_source_stamp_ns`,
+`sampling` (min/median/max of positive
 counted intervals, span, zero intervals), `offset_ms` (min/max/negative count), `freshness_s`
 (min/max over counted rows), the input paths with sha256, and the deliberate negations
 `interpolation="none"`, `resampling="none"`, `row_creation="none"`, `causality_claim=false`,
@@ -112,6 +136,7 @@ twice for one row.
 | `DUPLICATE_SOURCE_STAMP` | same source stamp, different pose: a conflicting measurement, not a copy |
 | `OUT_OF_ORDER` | source stamp earlier than the last counted sample |
 | `CLOCK_ROLLBACK` | receipt stamp earlier than the previous row's receipt stamp |
+| `PHASE_CLOCK_ROLLBACK` | the phase stream itself restarted: the sample's stamp lies where two phase epochs overlap, so no phase can be assigned without assuming which epoch it belongs to |
 | `NO_PHASE_YET` | no phase record at or before the sample |
 
 ## The six fixture groups
@@ -132,6 +157,13 @@ A seventh fixture covers the conflicting-stamp case (`DUPLICATE_SOURCE_STAMP`, `
 a further one asserts that nothing is interpolated: one output row per input row, every
 `interval_ns` equal to the raw source-stamp difference, and the phase boundary at 150 ms reported
 with a 100 ms window rather than a narrowed one.
+
+Two regression fixtures cover the phase stream's own clock:
+
+| fixture | asserted result |
+| --- | --- |
+| phases arrive `APPROACH(50)`, `PUSH(100)`, `RETURN(90)`; samples at 60, 95, 105 ms | the sample at 60 ms keeps `APPROACH` and stays alignable; 95 and 105 ms are `PHASE_CLOCK_ROLLBACK` with no phase; `phase_clock_rollbacks=[{index:3, phase:RETURN, source_stamp_ns:90 ms, epoch:2}]`, `phase_ambiguous_from_source_stamp_ns=90 ms`; `RETURN` and `PUSH` boundaries are `ambiguous=true`, `APPROACH` is not |
+| the review's reproduction: `PUSH(100)` then `RETURN(90)`, one sample at 105 ms | `alignable=false`, `reason=PHASE_CLOCK_ROLLBACK`, `phase` empty (before the fix: `phase=PUSH`, `alignable=true`) |
 
 ## Example
 
@@ -180,11 +212,11 @@ Run from the repository root, with the interpreter that ships with this host (no
 Observed output (Windows, Python 3.12.14):
 
 ```
-Ran 22 tests in 0.237s
+Ran 24 tests in 0.263s
 OK
-pose_stage_timeline fixtures: 21 cases, 39 observation rows written, 0 assertions failed
-reason codes exercised: CLOCK_ROLLBACK, DUPLICATE_COPY, DUPLICATE_SOURCE_STAMP, MISSING_POSE, NON_FINITE_POSE, NO_PHASE_YET, OUT_OF_ORDER
-alignment groups: normal, duplicate_copy, out_of_order, clock_rollback, missing_phase, missing_pose (+ conflicting_stamp, no_interpolation, refused inputs)
+pose_stage_timeline fixtures: 23 cases, 43 observation rows written, 0 assertions failed
+reason codes exercised: CLOCK_ROLLBACK, DUPLICATE_COPY, DUPLICATE_SOURCE_STAMP, MISSING_POSE, NON_FINITE_POSE, NO_PHASE_YET, OUT_OF_ORDER, PHASE_CLOCK_ROLLBACK
+alignment groups: normal, duplicate_copy, out_of_order, clock_rollback, missing_phase, missing_pose (+ conflicting_stamp, no_interpolation, phase_rollback, refused inputs)
 ```
 
 Exit code 0. A failing assertion makes the script exit 1 (verified by injecting a failing test

@@ -24,6 +24,17 @@ DUPLICATE SNAPSHOTS ARE NOT MEASUREMENTS
     DUPLICATE_SOURCE_STAMP instead. Neither is silently dropped: both stay in the
     CSV, only out of the totals.
 
+A PHASE STREAM CAN ROLL BACK, AND SORTING MUST NOT HIDE IT
+    Phase records carry the clock of the process that emitted them, and that
+    clock can restart mid-run (simulator reset, a new epoch). A record that
+    arrives later then carries an earlier stamp. Sorting by stamp alone would
+    place it before the record it superseded, and the older epoch's phase would
+    govern samples it never saw - the timeline would look perfectly aligned and
+    be wrong. Arrival order is the only evidence of which record is newer, so
+    epochs are assigned in arrival order, and any sample whose stamp falls where
+    two epochs overlap is marked unalignable with PHASE_CLOCK_ROLLBACK rather
+    than guessed. Epochs and the overlap start are reported in the summary.
+
 WHAT THIS IS NOT
     A time window in which two things happened is not evidence that one caused
     the other, and no phase boundary here is a contact or physics acceptance
@@ -63,7 +74,8 @@ RECV_STAMP_KEYS = ('recv_stamp_ns', 'observed_monotonic_ns', 'rx_mono_ns', 'mono
                    'recv_ns')
 PHASE_NAME_KEYS = ('phase', 'stage', 'name')
 PRIORITY = ('MISSING_SOURCE_STAMP', 'NON_FINITE_POSE', 'MISSING_POSE', 'DUPLICATE_COPY',
-            'DUPLICATE_SOURCE_STAMP', 'OUT_OF_ORDER', 'CLOCK_ROLLBACK', 'NO_PHASE_YET')
+            'DUPLICATE_SOURCE_STAMP', 'OUT_OF_ORDER', 'CLOCK_ROLLBACK',
+            'PHASE_CLOCK_ROLLBACK', 'NO_PHASE_YET')
 CSV_COLUMNS = ('index', 'phase', 'source_stamp_ns', 'recv_stamp_ns', 'offset_ms',
                'x', 'y', 'z', 'delta_from_prev', 'dup_of', 'interval_ns', 'freshness_s',
                'alignable', 'reason')
@@ -181,7 +193,19 @@ def distance(a, b):
 
 
 def phase_records(rows):
+    """Read phase records in ARRIVAL order and detect the stream's own clock rollback.
+
+    Sorting by source stamp alone would silently repair the phase stream: a record
+    that arrives later but carries an earlier stamp (a new clock epoch, a simulator
+    reset) would be placed before the record it superseded, and the older epoch's
+    phase would then govern samples it never saw. Arrival order is the only evidence
+    of which record is newer, so epochs are assigned here, before sorting, and the
+    ambiguous stamp range is handed to build().
+    """
     records = []
+    rollbacks = []
+    epoch = 1
+    highest = None
     for line, row in rows:
         name = None
         for key in PHASE_NAME_KEYS:
@@ -193,13 +217,29 @@ def phase_records(rows):
         stamp = stamp_of(row, SOURCE_STAMP_KEYS)
         if stamp is None:
             fail('phase row %d has no integer source stamp' % line)
+        if highest is not None and stamp < highest:
+            epoch += 1
+            rollbacks.append(dict(index=len(records) + 1, line=line, phase=name.strip(),
+                                  source_stamp_ns=stamp, epoch=epoch))
+        highest = stamp if highest is None else max(highest, stamp)
         recv = stamp_of(row, RECV_STAMP_KEYS)
         records.append(dict(line=line, phase=name.strip(), source_stamp_ns=stamp,
-                            recv_stamp_ns=recv, index=len(records) + 1))
+                            recv_stamp_ns=recv, index=len(records) + 1, epoch=epoch))
     if not records:
         fail('the phase file has no records; without phases nothing can be aligned')
     records.sort(key=lambda record: (record['source_stamp_ns'], record['index']))
-    return records
+    return records, rollbacks
+
+
+def ambiguous_from(records):
+    """Lowest source stamp that a post-rollback epoch can reach.
+
+    Below it no later-epoch record can govern a sample, so the phase is still
+    unambiguous; at or above it two epochs overlap in stamp space and "the last
+    phase at or before the sample" has more than one defensible answer.
+    """
+    later = [record['source_stamp_ns'] for record in records if record['epoch'] > 1]
+    return min(later) if later else None
 
 
 def assign_phase(stamps, phases, stamp):
@@ -208,7 +248,7 @@ def assign_phase(stamps, phases, stamp):
     return None if position < 0 else phases[position]
 
 
-def build(rows, phases):
+def build(rows, phases, overlap_from):
     stamps = [record['source_stamp_ns'] for record in phases]
     snapshots = {}
     stamped = {}
@@ -250,16 +290,22 @@ def build(rows, phases):
         if rollback:
             reasons.append('CLOCK_ROLLBACK')
 
-        phase = age = None
-        if not reasons:
+        phase = age = epoch = None
+        if not reasons and overlap_from is not None and source >= overlap_from:
+            # Two phase epochs are reachable at this stamp, so the sample's own epoch
+            # is unknown and any phase we picked would be an assumption, not a fact.
+            reasons.append('PHASE_CLOCK_ROLLBACK')
+        elif not reasons:
             record = assign_phase(stamps, phases, source)
             if record is None:
                 reasons.append('NO_PHASE_YET')
             else:
                 phase = record['phase']
+                epoch = record['epoch']
                 age = (source - record['source_stamp_ns']) / 1e9
 
-        entry = dict(index=index, line=line, phase=phase, source_stamp_ns=source,
+        entry = dict(index=index, line=line, phase=phase, phase_epoch=epoch,
+                     source_stamp_ns=source,
                      recv_stamp_ns=recv, offset_ms=offset_ms, x=x, y=y, z=z,
                      delta_from_prev=None, dup_of=dup_of, interval_ns=interval,
                      freshness_s=age, alignable=not reasons,
@@ -273,7 +319,7 @@ def build(rows, phases):
     return timeline
 
 
-def stage_summary(timeline, phases):
+def stage_summary(timeline, phases, rollbacks, overlap_from):
     counted = [entry for entry in timeline if entry['alignable']]
     reasons = {}
     for entry in timeline:
@@ -308,7 +354,9 @@ def stage_summary(timeline, phases):
             if record['recv_stamp_ns'] is not None else None,
             last_sample_before=before['index'] if before else None,
             first_sample_after=after['index'] if after else None,
-            window_ns=window, bounded=window is not None))
+            window_ns=window, bounded=window is not None,
+            epoch=record['epoch'],
+            ambiguous=overlap_from is not None and boundary >= overlap_from))
     return dict(
         rows_total=len(timeline), rows_counted=len(counted),
         rows_unalignable=len(timeline) - len(counted), reasons=reasons,
@@ -317,8 +365,13 @@ def stage_summary(timeline, phases):
         phases=grouped,
         phase_records=[dict(index=r['index'], phase=r['phase'],
                             source_stamp_ns=r['source_stamp_ns'],
-                            recv_stamp_ns=r['recv_stamp_ns']) for r in phases],
+                            recv_stamp_ns=r['recv_stamp_ns'], epoch=r['epoch']) for r in phases],
         phase_boundaries=boundaries,
+        # The phase stream's own clock is evidence too: report where it went backwards.
+        phase_clock_rollbacks=[dict(index=r['index'], line=r['line'], phase=r['phase'],
+                                    source_stamp_ns=r['source_stamp_ns'], epoch=r['epoch'])
+                               for r in rollbacks],
+        phase_ambiguous_from_source_stamp_ns=overlap_from,
         sampling=dict(
             counted=len(intervals),
             intervals_ns=dict(min=min(intervals), median=statistics.median(intervals),
@@ -370,8 +423,9 @@ def timeline(run, observations, phases_path, out_dir):
     rows = read_jsonl(observations_path)
     if not rows:
         fail('%s has no rows; an empty timeline is not a timeline' % observations_path)
-    phases = phase_records(read_jsonl(phases_file))
-    entries = build(rows, phases)
+    phases, rollbacks = phase_records(read_jsonl(phases_file))
+    overlap_from = ambiguous_from(phases)
+    entries = build(rows, phases, overlap_from)
     if not any(entry['source_stamp_ns'] is not None for entry in entries):
         fail('no observation row carries an integer source stamp (%s); this does not look '
              'like an observation stream' % ', '.join(SOURCE_STAMP_KEYS))
@@ -381,13 +435,19 @@ def timeline(run, observations, phases_path, out_dir):
         columns=list(CSV_COLUMNS),
         inputs=[dict(path=str(path), sha256=before[str(path)], bytes=path.stat().st_size,
                      rows=len(read_jsonl(path))) for path in (observations_path, phases_file)],
-        generated_utc_ns=time.time_ns(), **stage_summary(entries, phases))
+        generated_utc_ns=time.time_ns(),
+        **stage_summary(entries, phases, rollbacks, overlap_from))
     summary.update(
         # Stated as data so the file cannot be quoted as something it is not.
         interpolation='none', resampling='none', row_creation='none',
         causality_claim=False, independent_acceptance_claim=False,
         definitions=dict(
-            phase='last phase record at or before the sample source stamp; never interpolated',
+            phase='last phase record at or before the sample source stamp within one clock '
+                  'epoch; never interpolated',
+            phase_epoch='epoch of the phase record, counted from arrival order; a new epoch starts '
+                        'when a record arrives carrying a stamp earlier than one already seen',
+            phase_ambiguous_from_source_stamp_ns='lowest stamp reachable by a post-rollback epoch; '
+                                                 'samples at or above it cannot be aligned',
             source_stamp_ns='stamp carried by the sample itself (simulator/ROS clock)',
             recv_stamp_ns='host receipt stamp; a different clock domain from the source',
             offset_ms='recv_stamp_ns - source_stamp_ns, raw; not a latency claim across clocks',
@@ -397,7 +457,8 @@ def timeline(run, observations, phases_path, out_dir):
             freshness_s='source-clock age of the phase record governing this sample, i.e. how '
                         'precisely the boundary is known without interpolation'),
         notes=['a shared time window is not contact causality',
-               'phase alignment bounds are reported as window_ns, not tightened'])
+               'phase alignment bounds are reported as window_ns, not tightened',
+               'a phase clock rollback is reported, never repaired by sorting'])
     write_csv(out_dir / 'timeline.csv', entries)
     changed = [path for path in (observations_path, phases_file)
                if sha256_file(path) != before[str(path)]]
