@@ -147,6 +147,7 @@ What that requires (identified, **not yet executed** in this round):
 | a model directory containing `robot.urdf` | `run_contact_push.py --model` expects `<dir>/robot.urdf` for `ContactGeometry`; CI ships it at `/artifacts/model`, and it is **not** in this repository, so it has to be generated from `open_manipulator_description` before the push adapter can run |
 | a running task-scoped stack | pass one push task at a time; the historical acceptance used a task-scoped graph, not the full default graph |
 
-So the n >= 5 push repetitions are a separate piece of work with its own
-prerequisite (model directory + stack orchestration), and they are deliberately
-not claimed here.
+These prerequisites were resolved in this session and five declared push attempts
+were run; three reached the goal with measured engine contact. See
+`docs/diagnosis/PUSH_CHAIN_CONTACT_20261116.md` for the numbers and for the two
+attempts that failed before dispatching any motion.
