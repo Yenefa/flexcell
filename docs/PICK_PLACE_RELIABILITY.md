@@ -32,9 +32,10 @@ slot, own output directory, sequential. 360 s per slot, 1440 s per window.
 python3 -m unittest discover -s experiments/physical_capabilities/pick_place_reliability/tests -v
 ```
 
-32 tests: one-result parsing, the single-run rule, the source-change scope,
+44 tests: one-result parsing, the single-run rule, the source-change scope,
 unknown-terminal detection, window stop behaviour, the completion flag, timeout
-cleanup, and the artifact aggregator. No simulator, no ROS.
+and interrupt cleanup, the driver-verdict gate, corrupt-log isolation, and the
+artifact aggregator. No simulator, no ROS.
 
 ## Results (6 windows, 24 slot attempts)
 
@@ -63,10 +64,22 @@ used a different release target.
 
 A slot enters the statistics only when it has exactly one `run-*` directory, a
 readable `result.json`, no unknown terminal state, a `PASS` harness status, a
-succeeded task outcome and a numeric final error. Everything else is counted
-separately and listed in `excluded` with a reason, so a failed or unmeasured slot
-never becomes a zero-error sample. Two run directories for one slot are reported
-as `AMBIGUOUS` instead of silently reduced to the first one.
+succeeded task outcome and a numeric final error. The window's own `results.json`
+is checked first: a slot the driver marked `UNKNOWN` (outer timeout, interrupt,
+unknown terminal) is not reclassified as `OK` even when a raw `PASS` result
+survived on disk, and unreadable window metadata leaves the slot `UNKNOWN`.
+Everything else is counted separately and listed in `excluded` with a reason, so a
+failed or unmeasured slot never becomes a zero-error sample. Two run directories
+for one slot are reported as `AMBIGUOUS` instead of silently reduced to the first
+one. A truncated JSONL line is recorded against its slot (`log_errors`) and its
+measurement stays `null`; the remaining windows are still analyzed.
+
+The freeze covers what the slot can execute or load, not only Python packages:
+`src/flexcell/**`, `infra/**`, `scripts/**`, `worlds/**`, `config/**`,
+`setup/flexcell_admin.py`, `plan_execute.py` and the window's own driver,
+preregistration and tests. A changed `worlds/*.sdf` therefore changes the
+`source_before` / `source_after` comparison instead of passing as an unchanged
+scene (386 files, 0.07 s on this host).
 
 ## Finding 1 — the command is fixed, the result is not
 

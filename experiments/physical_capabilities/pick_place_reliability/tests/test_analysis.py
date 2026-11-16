@@ -9,8 +9,21 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 import analyze_windows as aw  # noqa: E402
 
 
+def write_driver_row(root, label, status='OK', exit_code=None):
+    """Record the window driver's verdict, as run_window does in results.json."""
+    path = pathlib.Path(root) / 'results.json'
+    data = json.loads(path.read_text()) if path.exists() else {'results': []}
+    rows = [r for r in data.get('results', []) if r.get('label') != label]
+    rows.append(dict(label=label, status=status,
+                     driver_exit=(0 if status == 'OK' else 1)
+                     if exit_code is None else exit_code))
+    data['results'] = rows
+    path.write_text(json.dumps(data))
+
+
 def make_slot(root, label, error_m, place_detail, verify_detail, targets,
-              run_name='run-test', status='PASS', outcome='OUTCOME_SUCCEEDED'):
+              run_name='run-test', status='PASS', outcome='OUTCOME_SUCCEEDED',
+              driver_status='OK'):
     run = pathlib.Path(root) / label / run_name
     (run / 'skills').mkdir(parents=True, exist_ok=True)
     (run / 'result.json').write_text(json.dumps({
@@ -24,6 +37,7 @@ def make_slot(root, label, error_m, place_detail, verify_detail, targets,
         (run / 'skills/verify.jsonl').write_text(json.dumps({'detail': verify_detail}) + '\n')
     (run / 'skills/move_to_pose.jsonl').write_text(
         ''.join(json.dumps({'target': {'position': list(t)}}) + '\n' for t in targets))
+    write_driver_row(root, label, driver_status)
 
 
 class ParseTest(unittest.TestCase):
@@ -110,6 +124,7 @@ class ValidityTest(unittest.TestCase):
             'task': dict(outcome='OUTCOME_FAILED', error_code='ERR_ROBOT_FAILED',
                          final_position_error_m=0.0),
         }))
+        write_driver_row(self.root, 'NORMAL_1', 'TASK_FAILED')
 
         row = aw.slot_row(self.root, 'NORMAL_1')
         self.assertEqual(row['status'], 'TASK_FAILED')
@@ -177,6 +192,94 @@ class ValidityTest(unittest.TestCase):
         self.assertEqual(summary['slots_completed'], 0)
         self.assertEqual(summary['slots_unmeasured'], 1)
         self.assertEqual(summary['excluded'][0]['reason'], 'no final_position_error_m')
+
+
+class DriverVerdictTest(unittest.TestCase):
+    """The analyzer must not overrule the window driver's stop decision."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = pathlib.Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_driver_unknown_overrides_a_raw_pass(self):
+        make_slot(self.root, 'NORMAL_1', 0.008, 'drop error 0.008m', 'err=0.008',
+                  [(0.12, -0.15, 0.1895)])
+        write_driver_row(self.root, 'NORMAL_1', 'UNKNOWN', exit_code=124)
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'UNKNOWN')
+        self.assertIn('window driver status', row['reason'])
+
+        summary = aw.summarize([row])
+        self.assertEqual(summary['slots_completed'], 0)
+        self.assertEqual(summary['slots_unknown'], 1)
+
+    def test_unreadable_window_metadata_keeps_the_slot_unknown(self):
+        make_slot(self.root, 'NORMAL_1', 0.008, 'drop error 0.008m', 'err=0.008',
+                  [(0.12, -0.15, 0.1895)])
+        (self.root / 'results.json').write_text('{"results": [')
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'UNKNOWN')
+        self.assertIn('results.json', row['reason'])
+
+        summary = aw.summarize([row])
+        self.assertEqual(summary['slots_completed'], 0)
+        self.assertEqual(summary['slots_metadata_missing'], 1)
+
+    def test_missing_window_metadata_keeps_the_slot_unknown(self):
+        make_slot(self.root, 'NORMAL_1', 0.008, 'drop error 0.008m', 'err=0.008',
+                  [(0.12, -0.15, 0.1895)])
+        (self.root / 'results.json').unlink()
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'UNKNOWN')
+        self.assertEqual(aw.summarize([row])['slots_completed'], 0)
+
+
+class CorruptLogTest(unittest.TestCase):
+    """A truncated JSONL line belongs to one slot, not to the whole report."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = pathlib.Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_truncated_line_is_recorded_and_other_slots_still_analyze(self):
+        make_slot(self.root, 'NORMAL_1', 0.008, 'drop error 0.008m', 'err=0.008',
+                  [(0.12, -0.15, 0.1895)])
+        make_slot(self.root, 'NORMAL_2', 0.014, 'drop error 0.014m', 'err=0.014',
+                  [(0.12, -0.15, 0.1895)])
+        with (self.root / 'NORMAL_1/run-test/skills/place.jsonl').open('a') as handle:
+            handle.write('{"detail":\n')
+
+        rows = [aw.slot_row(self.root, label) for label in ('NORMAL_1', 'NORMAL_2')]
+        self.assertEqual(rows[0]['status'], 'OK')
+        self.assertIsNone(rows[0]['place_drop_mm'])
+        self.assertEqual(rows[0]['log_errors'][0]['file'], 'place.jsonl')
+        self.assertIn('invalid JSON', rows[0]['log_errors'][0]['error'])
+        self.assertEqual(rows[1]['place_drop_mm'], 14.0)
+
+        summary = aw.summarize(rows)
+        self.assertEqual(summary['slots_completed'], 2)
+        self.assertEqual(summary['place_verify_delta_mm']['n'], 1)
+        self.assertEqual(summary['max_place_verify_delta_mm'], 0.0)
+
+    def test_non_object_line_is_recorded(self):
+        make_slot(self.root, 'NORMAL_1', 0.008, None, 'err=0.008',
+                  [(0.12, -0.15, 0.1895)])
+        (self.root / 'NORMAL_1/run-test/skills/move_to_pose.jsonl').write_text('[1, 2, 3]\n')
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'OK')
+        self.assertEqual(row['last_targets'], [])
+        self.assertTrue(any('not a JSON object' in e['error']
+                            for e in row['log_errors']))
 
 
 if __name__ == '__main__':

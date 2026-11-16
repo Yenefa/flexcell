@@ -7,9 +7,10 @@ tolerances or task budgets. Keeps every failure; stops the window on an unknown
 terminal state instead of dispatching another goal.
 
 A slot counts as completed only when its classified status is `OK`. On an outer
-timeout the whole slot is asked to exit, and any process that escaped into its
-own session is found by the slot-id environment marker and stopped before the
-manifest is written.
+timeout or a user interrupt the whole slot is asked to exit, and any process
+that escaped into its own session is found by the slot-id environment marker and
+stopped before the manifest is written. A partial `results.json` is still written
+so an interrupted window is evidence instead of a silent gap.
 
 Run: python3 experiments/physical_capabilities/pick_place_reliability/run_window.py \
         --out /artifacts/pick-place
@@ -27,6 +28,55 @@ import uuid
 
 HERE = Path(__file__).resolve().parent
 SLOT_MARKER = 'FLEXCELL_WINDOW_SLOT_ID'
+INTERRUPT_EXITS = {130: 'SIGINT', 129: 'SIGHUP', 143: 'SIGTERM'}
+
+
+class WindowSignal(Exception):
+    """SIGTERM/SIGHUP delivered to the driver while a slot is running."""
+
+    def __init__(self, signum):
+        self.signum = signum
+        self.name = signal.Signals(signum).name
+        self.exit_code = 128 + signum
+        super().__init__(self.name)
+
+
+def _raise_window_signal(signum, _frame):
+    raise WindowSignal(signum)
+
+
+def _install_signal_handlers(signals=(signal.SIGTERM, signal.SIGHUP)):
+    """Turn termination signals into an exception the cleanup path can see."""
+    previous = {}
+    for signum in signals:
+        try:
+            previous[signum] = signal.getsignal(signum)
+            signal.signal(signum, _raise_window_signal)
+        except (OSError, ValueError):
+            # Not the main thread: the slot still has its own timeout.
+            previous.pop(signum, None)
+    return previous
+
+
+def _restore_signal_handlers(previous):
+    for signum, handler in previous.items():
+        try:
+            signal.signal(signum, handler)
+        except (OSError, ValueError):
+            pass
+
+
+def _ignore_during_cleanup():
+    """A second Ctrl+C must not skip stopping the slot's processes."""
+    previous = {}
+    for signum in (signal.SIGINT, signal.SIGTERM, signal.SIGHUP):
+        try:
+            previous[signum] = signal.getsignal(signum)
+            signal.signal(signum, signal.SIG_IGN)
+        except (OSError, ValueError):
+            pass
+    return previous
+
 
 
 def _repo_root():
@@ -90,18 +140,26 @@ def one_result(directory, expected_case):
 
 SOURCE_PATTERNS = (
     'src/flexcell/**/*',
-    'scripts/*.py',
+    'infra/**/*',
+    'scripts/**/*',
+    'worlds/**/*',
     'config/**/*',
+    'setup/flexcell_admin.py',
+    'plan_execute.py',
     'experiments/physical_capabilities/pick_place_reliability/*.py',
+    'experiments/physical_capabilities/pick_place_reliability/*.json',
+    'experiments/physical_capabilities/pick_place_reliability/tests/*.py',
 )
 
 
 def source_hashes():
-    """Hash everything the slot can execute, not only the Python skill sources.
+    """Hash everything the slot can execute or load, not only Python sources.
 
-    `scripts/sim_smoke.py` starts the run and `config/` selects behaviour, so a
-    change there must show up as a changed source set. Build products and byte
-    caches are skipped.
+    `scripts/sim_smoke.py` starts the run, `config/` selects behaviour and
+    `sim_profile.py` parses `worlds/*.sdf` directly, so a changed world must
+    change the frozen source set. This mirrors the first-party scope used by
+    `infra/runtime_identity.py` and adds the window's own definition. Build
+    products and byte caches are skipped.
     """
     files = set()
     for pattern in SOURCE_PATTERNS:
@@ -201,6 +259,30 @@ def reap(marker, grace_s=10.0):
     return len(strays), len(stubborn)
 
 
+def stop_slot(proc, marker, cleanup, grace_s=30.0):
+    """Ask one slot to exit, then stop anything that escaped its session."""
+    if proc.poll() is None:
+        signal_group(proc.pid, signal.SIGINT)
+        try:
+            proc.wait(timeout=grace_s)
+            cleanup['graceful'] = True
+        except subprocess.TimeoutExpired:
+            signal_group(proc.pid, signal.SIGTERM)
+            try:
+                proc.wait(timeout=5)
+                cleanup['graceful'] = True
+            except subprocess.TimeoutExpired:
+                signal_group(proc.pid, signal.SIGKILL)
+                try:
+                    proc.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    pass
+    if not marker:
+        return
+    cleanup['survivors'], cleanup['killed'] = reap(marker)
+    cleanup['left'] = len(owned_pids(marker))
+
+
 def run_slot(argv, env, log, timeout_s, grace_s=30.0):
     """Run one slot and return (exit_code, cleanup).
 
@@ -208,36 +290,36 @@ def run_slot(argv, env, log, timeout_s, grace_s=30.0):
     cleanup never runs; the stack and the recorder start in separate sessions and
     stay alive. Every descendant inherits the slot marker, so after the window
     gives up they can be found and stopped, and the count is recorded.
+
+    A timeout, Ctrl+C (130) and SIGTERM/SIGHUP all take the same bounded cleanup
+    path. The exit code tells `run_window` to stop the window and keep partial
+    evidence instead of continuing to the next slot.
     """
     marker = env.get(SLOT_MARKER)
     proc = subprocess.Popen(argv, env=env, stdout=log, stderr=subprocess.STDOUT,
                             start_new_session=True)
     cleanup = dict(graceful=False, survivors=0, killed=0, left=0)
+    previous = _install_signal_handlers()
     try:
-        proc.wait(timeout=timeout_s)
-        return proc.returncode, cleanup
-    except subprocess.TimeoutExpired:
-        pass
-
-    signal_group(proc.pid, signal.SIGINT)
-    try:
-        proc.wait(timeout=grace_s)
-        cleanup['graceful'] = True
-    except subprocess.TimeoutExpired:
-        signal_group(proc.pid, signal.SIGTERM)
         try:
-            proc.wait(timeout=5)
-            cleanup['graceful'] = True
+            proc.wait(timeout=timeout_s)
+            return proc.returncode, cleanup
         except subprocess.TimeoutExpired:
-            signal_group(proc.pid, signal.SIGKILL)
-            proc.wait()
+            exit_code, reason = 124, 'timeout'
+        except KeyboardInterrupt:
+            exit_code, reason = 130, 'SIGINT'
+        except WindowSignal as exc:
+            exit_code, reason = exc.exit_code, exc.name
 
-    if not marker:
-        return 124, cleanup
-
-    cleanup['survivors'], cleanup['killed'] = reap(marker)
-    cleanup['left'] = len(owned_pids(marker))
-    return 124, cleanup
+        cleanup['reason'] = reason
+        ignored = _ignore_during_cleanup()
+        try:
+            stop_slot(proc, marker, cleanup, grace_s)
+        finally:
+            _restore_signal_handlers(ignored)
+        return exit_code, cleanup
+    finally:
+        _restore_signal_handlers(previous)
 
 
 def run_window(prereg, out, runner=None):
@@ -257,65 +339,96 @@ def run_window(prereg, out, runner=None):
     rows = []
     started = time.monotonic()
     stopped = None
+    interrupted = None
+    previous_handlers = _install_signal_handlers()
+    try:
+        for index, slot in enumerate(slots):
+            label, case = slot['label'], slot['case']
+            if stopped:
+                rows.append(dict(label=label, case=case, status='NOT_RUN', reason=stopped))
+                continue
+            if time.monotonic() - started + slot_timeout > budget:
+                rows.append(dict(label=label, case=case, status='NOT_RUN', reason='window budget'))
+                continue
 
-    for index, slot in enumerate(slots):
-        label, case = slot['label'], slot['case']
-        if stopped:
-            rows.append(dict(label=label, case=case, status='NOT_RUN', reason=stopped))
-            continue
-        if time.monotonic() - started + slot_timeout > budget:
-            rows.append(dict(label=label, case=case, status='NOT_RUN', reason='window budget'))
-            continue
+            slot_out = out / label
+            slot_id = None
+            cleanup = None
+            interrupted_now = False
+            if runner is None:
+                slot_id = '%s-%d-%s' % (label, index, uuid.uuid4().hex[:8])
+                argv = slot_command(label, case, slot_out, backend, skill_backend)
+                with (out / (label + '_driver.log')).open('x') as log:
+                    exit_code, cleanup = run_slot(argv, slot_env(label, index, slot_id),
+                                                  log, slot_timeout, cleanup_grace)
+                if exit_code in INTERRUPT_EXITS:
+                    interrupted_now = True
+                    interrupted = INTERRUPT_EXITS[exit_code]
+                    stopped = 'interrupted by %s during %s' % (interrupted, label)
+                    if cleanup['left']:
+                        stopped += '; %d owned processes survived cleanup' % cleanup['left']
+                elif exit_code == 124:
+                    stopped = 'outer timeout; action terminal requires reconciliation'
+                    if cleanup['left']:
+                        stopped += '; %d owned processes survived cleanup' % cleanup['left']
+            else:
+                exit_code = runner(label, case, slot_out, index)
+                if exit_code in INTERRUPT_EXITS:
+                    interrupted_now = True
+                    interrupted = INTERRUPT_EXITS[exit_code]
+                    stopped = 'interrupted by %s during %s' % (interrupted, label)
 
-        slot_out = out / label
-        slot_id = None
-        cleanup = None
-        if runner is None:
-            slot_id = '%s-%d-%s' % (label, index, uuid.uuid4().hex[:8])
-            argv = slot_command(label, case, slot_out, backend, skill_backend)
-            with (out / (label + '_driver.log')).open('x') as log:
-                exit_code, cleanup = run_slot(argv, slot_env(label, index, slot_id),
-                                              log, slot_timeout, cleanup_grace)
-            if exit_code == 124:
-                stopped = 'outer timeout; action terminal requires reconciliation'
-                if cleanup['left']:
-                    stopped += '; %d owned processes survived cleanup' % cleanup['left']
-        else:
-            exit_code = runner(label, case, slot_out, index)
+            row = dict(label=label, case=case, driver_exit=exit_code, status='UNKNOWN',
+                       task_completed=False)
+            if interrupted_now:
+                row['status'] = 'INTERRUPTED'
+                row['reason'] = stopped
+            if cleanup is not None:
+                row['slot_id'] = slot_id
+                row['timeout_cleanup'] = cleanup
+            if runner is None:
+                orphans, orphans_killed = reap(slot_id)
+                if orphans:
+                    row['orphans_stopped'] = orphans
+                    row['orphans_needed_sigkill'] = orphans_killed
+            try:
+                result, result_path = one_result(slot_out, case)
+                task = result.get('task') or {}
+                row.update(result_path=str(result_path),
+                           harness_status=result.get('status'),
+                           outcome=task.get('outcome'),
+                           error_code=task.get('error_code'),
+                           wall_seconds=task.get('wall_seconds'),
+                           err_m=task.get('final_position_error_m'),
+                           task_reported_pass=(exit_code == 0 and result.get('status') == 'PASS'))
+                if not interrupted_now:
+                    row['status'] = classify(result, exit_code)
+                    row['task_completed'] = row['status'] == 'OK'
+                    if row['status'] == 'UNKNOWN' and not stopped:
+                        stopped = 'unknown terminal state in %s' % label
+            except ValueError as exc:
+                row['error'] = str(exc)
+                if not interrupted_now:
+                    row['status'] = 'UNKNOWN'
+                    if not stopped:
+                        stopped = 'unknown terminal state in %s (%s)' % (label, exc)
 
-        row = dict(label=label, case=case, driver_exit=exit_code, status='UNKNOWN',
-                   task_completed=False)
-        if cleanup is not None:
-            row['slot_id'] = slot_id
-            row['timeout_cleanup'] = cleanup
-        if runner is None:
-            orphans, orphans_killed = reap(slot_id)
-            if orphans:
-                row['orphans_stopped'] = orphans
-                row['orphans_needed_sigkill'] = orphans_killed
-        try:
-            result, result_path = one_result(slot_out, case)
-            task = result.get('task') or {}
-            row.update(result_path=str(result_path),
-                       harness_status=result.get('status'),
-                       outcome=task.get('outcome'),
-                       error_code=task.get('error_code'),
-                       wall_seconds=task.get('wall_seconds'),
-                       err_m=task.get('final_position_error_m'),
-                       task_reported_pass=(exit_code == 0 and result.get('status') == 'PASS'))
-            row['status'] = classify(result, exit_code)
-            row['task_completed'] = row['status'] == 'OK'
-            if row['status'] == 'UNKNOWN' and not stopped:
-                stopped = 'unknown terminal state in %s' % label
-        except ValueError as exc:
-            row['status'] = 'UNKNOWN'
-            row['error'] = str(exc)
-            if not stopped:
-                stopped = 'unknown terminal state in %s (%s)' % (label, exc)
-
-        rows.append(row)
+            rows.append(row)
+            (out / 'results.partial.json').write_text(
+                json.dumps(rows, indent=2, ensure_ascii=False))
+    except (KeyboardInterrupt, WindowSignal) as exc:
+        interrupted = getattr(exc, 'name', 'SIGINT')
+        stopped = 'interrupted by %s between slots' % interrupted
+        seen = {r.get('label') for r in rows}
+        for slot in slots:
+            if slot['label'] in seen:
+                continue
+            rows.append(dict(label=slot['label'], case=slot['case'],
+                             status='NOT_RUN', reason=stopped))
         (out / 'results.partial.json').write_text(
             json.dumps(rows, indent=2, ensure_ascii=False))
+    finally:
+        _restore_signal_handlers(previous_handlers)
 
     after = source_hashes()
     changed = sorted(k for k in set(before) | set(after) if before.get(k) != after.get(k))
@@ -333,6 +446,8 @@ def run_window(prereg, out, runner=None):
         source_files=len(before),
         source_scope=list(SOURCE_PATTERNS),
         stop_reason=stopped,
+        interrupted=interrupted is not None,
+        interrupt_signal=interrupted,
         all_slots_completed=(len(rows) == len(slots)
                              and stopped is None
                              and all(r.get('status') == 'OK' for r in rows)),
@@ -358,7 +473,10 @@ def main(argv=None):
     print('WINDOW ' + json.dumps(dict(
         all_slots_completed=payload['all_slots_completed'],
         source_unchanged=payload['source_unchanged'],
+        interrupted=payload['interrupted'],
         stop_reason=payload['stop_reason']), ensure_ascii=False))
+    if payload['interrupted']:
+        return 130 if payload['interrupt_signal'] == 'SIGINT' else 143
     return 0 if payload['all_slots_completed'] and payload['source_unchanged'] else 2
 
 

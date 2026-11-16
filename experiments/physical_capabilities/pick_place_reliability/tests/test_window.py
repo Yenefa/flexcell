@@ -8,11 +8,13 @@ timeout cleanup that stops processes which escaped into their own session.
 import json
 import os
 import pathlib
+import signal
 import subprocess
 import sys
 import tempfile
 import time
 import unittest
+from unittest import mock
 
 sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 import run_window as rw  # noqa: E402
@@ -85,7 +87,7 @@ class OneResultTest(unittest.TestCase):
 
 
 class SourceScopeTest(unittest.TestCase):
-    """The change check must cover what the slot actually executes."""
+    """The change check must cover what the slot actually executes or loads."""
 
     def test_execution_entry_is_hashed(self):
         self.assertIn('scripts/sim_smoke.py', rw.source_hashes())
@@ -93,6 +95,36 @@ class SourceScopeTest(unittest.TestCase):
     def test_configuration_is_hashed(self):
         hashes = rw.source_hashes()
         self.assertTrue(any(key.startswith('config/') for key in hashes))
+
+    def test_world_scene_is_hashed(self):
+        self.assertIn('worlds/flexcell_velocity_servo.sdf', rw.source_hashes())
+
+    def test_runtime_dependencies_are_hashed(self):
+        hashes = rw.source_hashes()
+        self.assertTrue(any(key.startswith('infra/') for key in hashes))
+        self.assertIn('setup/flexcell_admin.py', hashes)
+        self.assertIn('plan_execute.py', hashes)
+
+    def test_window_definition_is_hashed(self):
+        self.assertIn('experiments/physical_capabilities/pick_place_reliability/preregistration.json',
+                      rw.source_hashes())
+
+    def test_world_change_changes_the_frozen_set(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            (root / 'worlds').mkdir()
+            world = root / 'worlds' / 'flexcell_velocity_servo.sdf'
+            world.write_text('<world name="a"/>')
+            previous = rw.ROOT
+            rw.ROOT = root
+            try:
+                before = rw.source_hashes()
+                world.write_text('<world name="b"/>')
+                after = rw.source_hashes()
+            finally:
+                rw.ROOT = previous
+            self.assertIn('worlds/flexcell_velocity_servo.sdf', before)
+            self.assertNotEqual(before, after)
 
 
 class UnknownTest(unittest.TestCase):
@@ -262,6 +294,85 @@ class TimeoutCleanupTest(unittest.TestCase):
             if decoy.poll() is None:
                 decoy.kill()
                 decoy.wait()
+
+
+class InterruptCleanupTest(unittest.TestCase):
+    """Ctrl+C and SIGTERM must clean the slot before the driver exits."""
+
+    def _interrupt_case(self, sig, expected_code, expected_name):
+        marker = 'unit-interrupt-%d-%s' % (os.getpid(), sig)
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            driver = pathlib.Path(__file__).resolve().parents[1]
+            helper = root / 'driver.py'
+            helper.write_text(
+                'import json, os, sys\n'
+                'sys.path.insert(0, %r)\n' % str(driver) +
+                'import run_window as rw\n'
+                'marker = %r\n' % marker +
+                'env = dict(os.environ, FLEXCELL_WINDOW_SLOT_ID=marker)\n'
+                'with open(%r, "wb") as log:\n' % str(root / 'slot.log') +
+                '    code, cleanup = rw.run_slot(\n'
+                '        [sys.executable, "-c", "import time; time.sleep(60)"],\n'
+                '        env, log, timeout_s=120, grace_s=2)\n'
+                'print(json.dumps(dict(code=code, cleanup=cleanup)))\n')
+            proc = subprocess.Popen([sys.executable, str(helper)], stdout=subprocess.PIPE,
+                                    stderr=subprocess.PIPE, text=True)
+            try:
+                deadline = time.monotonic() + 15
+                while not rw.owned_pids(marker) and time.monotonic() < deadline:
+                    time.sleep(0.1)
+                self.assertTrue(rw.owned_pids(marker), 'slot child never started')
+
+                os.kill(proc.pid, sig)
+                out, err = proc.communicate(timeout=30)
+
+                self.assertEqual(proc.returncode, 0, err)
+                payload = json.loads(out.strip().splitlines()[-1])
+                self.assertEqual(payload['code'], expected_code)
+                self.assertEqual(payload['cleanup']['reason'], expected_name)
+                self.assertEqual(payload['cleanup']['left'], 0)
+                deadline = time.monotonic() + 10
+                while rw.owned_pids(marker) and time.monotonic() < deadline:
+                    time.sleep(0.1)
+                self.assertEqual(rw.owned_pids(marker), [])
+            finally:
+                if proc.poll() is None:
+                    proc.kill()
+                    proc.wait()
+                for pid in rw.owned_pids(marker):
+                    try:
+                        os.kill(pid, signal.SIGKILL)
+                    except OSError:
+                        pass
+
+    def test_sigint_cleans_up_before_exit(self):
+        self._interrupt_case(signal.SIGINT, 130, 'SIGINT')
+
+    def test_sigterm_cleans_up_before_exit(self):
+        self._interrupt_case(signal.SIGTERM, 143, 'SIGTERM')
+
+
+class InterruptedWindowTest(unittest.TestCase):
+    def test_interrupted_slot_is_kept_and_partial_results_are_written(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            prereg = dict(
+                slots=[dict(label='A', case='normal'), dict(label='B', case='normal')],
+                slot_timeout_s=1, window_budget_s=1000,
+                backend='velocity_servo', skill_backend='legacy',
+                experiment='unit-test')
+            cleanup = dict(graceful=True, survivors=0, killed=0, left=0, reason='SIGINT')
+            with mock.patch.object(rw, 'run_slot', return_value=(130, cleanup)):
+                payload = rw.run_window(prereg, root / 'out')
+
+            self.assertEqual([r['status'] for r in payload['results']],
+                             ['INTERRUPTED', 'NOT_RUN'])
+            self.assertTrue(payload['interrupted'])
+            self.assertEqual(payload['interrupt_signal'], 'SIGINT')
+            self.assertFalse(payload['all_slots_completed'])
+            self.assertTrue((root / 'out' / 'results.json').is_file())
+            self.assertTrue((root / 'out' / 'results.partial.json').is_file())
 
 
 if __name__ == '__main__':
