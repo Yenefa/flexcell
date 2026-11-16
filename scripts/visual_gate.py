@@ -17,6 +17,7 @@ WHY A GATE ON TOP OF THE PAIRING REPORT
       * frames_0          -> NO_FRAMES
       * no truth at all   -> NO_TRUTH_SAMPLES
       * no wall-clock stamp on a frame -> FRAME_WITHOUT_CAPTURE_STAMP
+* a recorded capture time that could not be derived -> CAPTURE_TIME_UNKNOWN
       * a frame no sample comes near   -> FRAME_UNPAIRED (the tool's own reason)
       * a pose that is not a number    -> POSE_NOT_FINITE
       * a declared object absent       -> OBJECT_MISSING_FROM_TRUTH
@@ -65,6 +66,8 @@ RECEIPT_NAME = 'visual_receipt.json'
 NO_FRAMES = 'NO_FRAMES'
 NO_TRUTH_SAMPLES = 'NO_TRUTH_SAMPLES'
 FRAME_WITHOUT_CAPTURE_STAMP = 'FRAME_WITHOUT_CAPTURE_STAMP'
+CAPTURE_TIME_UNKNOWN = 'CAPTURE_TIME_UNKNOWN'
+STALE_RECEIPT_REMOVED = 'STALE_RECEIPT_REMOVED'
 FRAME_UNPAIRED = 'FRAME_UNPAIRED'
 POSE_NOT_FINITE = 'POSE_NOT_FINITE'
 OBJECT_MISSING_FROM_TRUTH = 'OBJECT_MISSING_FROM_TRUTH'
@@ -223,6 +226,20 @@ def declared_objects(run, override):
     return sorted({str(name) for name in blob if str(name)})
 
 
+def superseded_path(out):
+    """A name for the previous receipt that is not the current pass signal.
+
+    Timestamped so repeated re-checks never overwrite each other's history.
+    """
+    stamp = time.strftime('%Y%m%dT%H%M%S', time.gmtime())
+    candidate = out.with_name('%s.superseded-%s.json' % (out.stem, stamp))
+    suffix = 1
+    while candidate.exists():
+        candidate = out.with_name('%s.superseded-%s-%d.json' % (out.stem, stamp, suffix))
+        suffix += 1
+    return candidate
+
+
 def check_frames(records, samples, pairing, declared, max_gap_s):
     """Per-frame verdicts, in the order the frames appear in the manifest.
 
@@ -237,11 +254,20 @@ def check_frames(records, samples, pairing, declared, max_gap_s):
         name = frame_id(record, index)
         captured = record.get('captured_wall_ns')
         if isinstance(captured, bool) or not isinstance(captured, int):
-            failures.append(dict(code=FRAME_WITHOUT_CAPTURE_STAMP, frame=name,
-                                 detail='frame record has no integer '
-                                        'captured_wall_ns (found %r); a simulation '
-                                        'stamp is not a wall clock and cannot be '
-                                        'paired with wall-time truth' % (captured,)))
+            # A recorder that could not derive the capture instant is saying so.
+            # That is a different fact from a manifest that never carried one, and
+            # the two must not be reported under the same code: the first means
+            # "the mapping could not be built", the second "nothing was recorded".
+            unknown = record.get('capture_time_source') == 'UNKNOWN'
+            failures.append(dict(
+                code=CAPTURE_TIME_UNKNOWN if unknown else FRAME_WITHOUT_CAPTURE_STAMP,
+                frame=name,
+                detail=(('%s; ' % record['capture_time_reason'])
+                        if unknown and isinstance(record.get('capture_time_reason'), str)
+                        else '') +
+                       'frame record has no integer captured_wall_ns (found %r); a '
+                       'simulation stamp is not a wall clock and cannot be paired '
+                       'with wall-time truth' % (captured,)))
             continue
         carried = pairing.truth_from_sidecar(record)
         one_pairing, reason = pairing.pair_one(record, carried or samples, max_gap_s)
@@ -355,6 +381,7 @@ def main(argv=None):
         print('REFUSED: %s already exists; a receipt records what was checked, so '
               'overwriting it would erase that (use --force)' % out, file=sys.stderr)
         return EXIT_USAGE
+    superseded = None
 
     script = pairing_script(args.pairing_script)
     if script is None:
@@ -432,13 +459,28 @@ def main(argv=None):
               'write %s' % (NO_DECLARED_OBJECTS, run / OBJECTS_REL), file=sys.stderr)
         return EXIT_USAGE
 
+    # A re-check replaces the verdict. The old receipt is kept as history under a
+    # name that cannot be mistaken for a current pass, because "a receipt exists"
+    # is this tool's pass signal - leaving a stale one in place after a refusal
+    # would report a pass that the latest inputs no longer support.
+    #
+    # This happens AFTER every "cannot grade" precondition, on purpose: a refusal
+    # to grade is not a verdict about the run, and must not destroy a receipt
+    # that the last gradable inputs actually supported.
+    if out.exists():
+        superseded = superseded_path(out)
+        out.replace(superseded)
+
     pairs, failures = check_frames(records, samples, pairing, declared, args.max_gap)
     if failures:
         for failure in failures:
             print('FAILED: %s frame=%s: %s'
                   % (failure['code'], failure.get('frame', '-'), failure['detail']))
-        print('REFUSED: %d of %d frame(s) did not satisfy the gate; no receipt was '
-              'written' % (len(failures), len(records)), file=sys.stderr)
+        print('REFUSED: %d of %d frame(s) did not satisfy the gate; no current receipt '
+              'was written%s' % (len(failures), len(records),
+                                 '' if superseded is None else
+                                 ' (the previous one is kept as %s and is not a pass '
+                                 'for these inputs)' % superseded), file=sys.stderr)
         return EXIT_REFUSED
 
     receipt = build_receipt(run, pairs, declared, args.max_gap, counts)

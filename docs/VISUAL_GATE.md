@@ -265,3 +265,64 @@ anything: no pixel was inspected, `visual_appearance_judged` is false, and the
 scope sentence in the receipt states this. A frame whose image is wrong but whose
 timing is right still passes - that is a separate check (image hash and content),
 and it is not implemented.
+
+
+## Correction: the capture instant is derived, never assumed (2026-11-16)
+
+A review of this work found a real defect in what feeds the gate, and it is worth
+recording because the failure was silent.
+
+`scripts/record_sim_data.py` used to write the **callback** time into
+`captured_wall_ns`. The callback runs whenever delivery finishes, not when the
+camera captured the image. Measured on this host, that delay is **not small**:
+
+```
+capture->receipt delay over 562 frames
+  min 89.8 ms | median 2,901.2 ms | max 5,915.3 ms
+```
+
+So every frame was being dated up to ~5.9 s after the instant it depicts. A
+two-second-delayed frame paired with truth measured two seconds later would look
+*perfect* (gap 0) while describing a world that had already moved. The gate was
+working correctly on a wrong input, which is the worst kind of pass.
+
+What changed:
+
+- `scripts/capture_time.py` (new, ROS-free) derives the capture instant from the
+  frame's **own simulation stamp**, interpolated through the physics trace, which
+  records `sim_ns` and the producer's `monotonic_ns` for every step. Those pairs
+  are the run's only measured simulation-to-real-clock relation.
+- `received_wall_ns` is recorded separately, so the delivery delay stays visible
+  instead of being lost.
+- A frame whose stamp falls outside the traced range is written with
+  `captured_wall_ns = null`, `capture_time_source = UNKNOWN` and a named reason.
+  It is not extrapolated: a guess in a manifest is indistinguishable from a
+  measurement to whoever reads it next.
+- `scripts/visual_gate.py` reports those frames under a distinct code,
+  `CAPTURE_TIME_UNKNOWN`, rather than folding them into
+  `FRAME_WITHOUT_CAPTURE_STAMP`. "The mapping could not be built" and "nothing
+  was recorded" are different facts.
+
+Re-run after the fix, same task and world:
+
+```
+562 frames, all capture_time_source = derived_from_physics_trace
+visual_gate -> ok, 411 frames paired, pairing_rate 1.0,
+               max_pairing_gap_s = 0.0248
+```
+
+That 24.8 ms is a *measured* pairing gap. The previous 42.9 ms was measured
+against stamps that were themselves wrong.
+
+### The second correction: a refusal must revoke a pass
+
+The same review found that re-checking with `--force` and failing left the old
+`visual_receipt.json` in place, unchanged. Since "a receipt exists" is this tool's
+pass signal, that reported a pass the current inputs contradict.
+
+A re-check now moves the previous receipt to
+`visual_receipt.superseded-<UTC timestamp>.json` immediately before the verdict is
+produced, so the pass signal is gone while the history is kept. It does this
+*after* every "cannot grade" precondition on purpose: a refusal to grade is not a
+verdict about the run, and must not revoke a receipt that the last gradable inputs
+supported.

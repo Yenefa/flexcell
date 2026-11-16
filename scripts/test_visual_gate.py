@@ -355,6 +355,50 @@ class GateCase(unittest.TestCase):
         forced = self.gate('--objects', 'target_box_a', '--force')
         self.assertEqual(forced.returncode, 0, forced.stdout + forced.stderr)
 
+    def test_a_forced_failing_recheck_invalidates_the_previous_pass(self):
+        """A pass that the latest inputs no longer support must stop being a pass.
+
+        WHY: this tool's pass signal IS the existence of the receipt. Re-checking
+        with different inputs and failing while leaving the old receipt untouched
+        reports a pass that the current inputs contradict.
+        """
+        self.passing_run()
+        self.assertEqual(self.gate('--objects', 'target_box_a').returncode, 0)
+        before = self.receipt()
+        # Move the frame away from its truth so the same run can no longer pair.
+        self.truth([truth_sample(1_000_000_000, objects={'target_box_a': [0., 0., 0.]})])
+        self.frames([frame_row(captured_wall_ns=9_000_000_000, index=0,
+                               label='task_start', image='images/000000.png')])
+        proc = self.gate('--objects', 'target_box_a', '--force')
+        self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+        self.assertIn('REFUSED:', proc.stderr)
+        # No current receipt: the refusal removed the pass signal.
+        self.assertFalse(self.receipt_path().exists(), 'a stale pass survived a refusal')
+        # ...but the old receipt is kept as history, unchanged and clearly named.
+        history = sorted(self.run_dir.glob('visual_receipt.superseded-*.json'))
+        self.assertEqual(len(history), 1, history)
+        self.assertEqual(json.loads(history[0].read_text(encoding='utf-8')), before)
+
+    def test_a_forced_passing_recheck_replaces_the_receipt(self):
+        self.passing_run()
+        self.assertEqual(self.gate('--objects', 'target_box_a').returncode, 0)
+        first = self.receipt()
+        second = self.gate('--objects', 'target_box_a', '--force')
+        self.assertEqual(second.returncode, 0, second.stdout + second.stderr)
+        self.assertNotEqual(self.receipt()['written_wall_ns'],
+                            first['written_wall_ns'])
+        self.assertEqual(len(list(self.run_dir.glob('visual_receipt.superseded-*.json'))), 1)
+
+    def test_an_unreadable_run_does_not_destroy_an_existing_receipt(self):
+        """A refusal to grade is not a verdict, so it must not revoke one."""
+        self.passing_run()
+        self.assertEqual(self.gate('--objects', 'target_box_a').returncode, 0)
+        (self.run_dir / 'data' / 'frames.jsonl').unlink()
+        proc = self.gate('--objects', 'target_box_a', '--force')
+        self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+        self.assertTrue(self.receipt_path().exists(),
+                        'an ungradable run revoked a receipt it never judged')
+
     # -- the tool the gate imports ---------------------------------------
     def test_a_missing_pairing_tool_refuses_by_name_instead_of_passing(self):
         self.passing_run()

@@ -23,6 +23,7 @@ from rclpy.signals import SignalHandlerOptions
 from sensor_msgs.msg import Image, JointState
 from control_msgs.msg import JointTrajectoryControllerState
 from std_msgs.msg import String
+from capture_time import capture_times
 from frame_writer import FrameWriter, LineWriter
 
 JOINTS = ['joint1', 'joint2', 'joint3', 'joint4', 'gripper_left_joint']
@@ -171,10 +172,14 @@ class Recorder(Node):
 
     def frame(self, msg):
         stamp = stamp_ns(msg.header)
-        # captured_wall_ns is what a visual-vs-truth pairing needs: a frame the
-        # truth cannot be placed next to in time cannot be checked at all.
+        # The callback time is when this process got the image, NOT when the
+        # camera captured it: a delayed delivery would otherwise be recorded as
+        # a capture instant and pair the frame with a world that had already
+        # moved. Only the receipt time is known here; captured_wall_ns is
+        # derived after the run from the frame's own simulation stamp, and stays
+        # UNKNOWN when that mapping cannot be built.
         row = dict(frame_index=self.index, sim_ns=stamp, monotonic_ns=time.monotonic_ns(),
-                   captured_wall_ns=time.time_ns(),
+                   received_wall_ns=time.time_ns(),
                    image='images/%06d.png' % self.index, valid=False, reasons=[])
         self.index += 1
         try:
@@ -254,13 +259,14 @@ def main():
                 reconcile = dict(status='ERROR', error=str(exc))
                 node.errors.append('camera_reconcile_failed: ' + str(exc))
         log.close()
+        capture = capture_times(args.out, node.clock_offset_ns)
         truth = truth_sidecar(args.out, node.clock_offset_ns)
         frames_total = reconcile.get('frames_total', node.index) if reconcile else node.index
         valid_total = reconcile.get('valid_total', writer['valid_frames']) if reconcile else writer['valid_frames']
         (args.out / 'collection.json').write_text(json.dumps(dict(
             schema_version=1, frames=frames_total, valid_frames=valid_total, errors=node.errors,
             image_writer=writer, physics_writer=physics, reconcile=reconcile,
-            truth=truth, clock_offset_ns=node.clock_offset_ns,
+            truth=truth, capture_time=capture, clock_offset_ns=node.clock_offset_ns,
             rosbag_exit=bag.returncode, joints=JOINTS,
             action_semantics='arm controller reference positions + held accepted gripper position target',
             synchronization='causal source stamps; state/reference age <=50ms; backfilled rows from bag',
