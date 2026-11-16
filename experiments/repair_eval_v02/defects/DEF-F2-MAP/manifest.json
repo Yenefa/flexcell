@@ -1,0 +1,16 @@
+{
+  "defect_id": "DEF-F2-MAP",
+  "family": "F2_GOAL_MAPPING",
+  "repair_surface": "source",
+  "injection_point": "src/flexcell/flexcell_skills/flexcell_skills/task_fsm_server.py",
+  "mechanism": "the mapping source resolves an object to the wrong zone -> PLACE_B fails or lands in the wrong zone",
+  "artifact": "inject.patch",
+  "artifact_sha256": "db1c48d3b94c330bd64fdda3f188dd2614ee6988b8efd3169aa5c65dfffd8b0d",
+  "pristine_sha256": "d1d0e74d139cf779b7e44ce8eea60213e8d8e45fe62f2b71755c118c6e2df228",
+  "affected_files": [
+    "src/flexcell/flexcell_skills/flexcell_skills/task_fsm_server.py"
+  ],
+  "expected_observable": "the demo assignment pairs target_box_a with zone_2",
+  "pinned_by": [],
+  "not_used": "a wrong zone coordinate in configuration is a different mechanism and is explicitly excluded by TASKS.md 2.3"
+}

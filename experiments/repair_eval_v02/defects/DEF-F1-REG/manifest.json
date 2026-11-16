@@ -1,0 +1,18 @@
+{
+  "defect_id": "DEF-F1-REG",
+  "family": "F1_OBJECT_REGISTRATION",
+  "repair_surface": "configuration",
+  "injection_point": "src/flexcell/flexcell_skills/config/week1.yaml",
+  "mechanism": "registry missing -> the perception layer publishes no B -> the task layer cannot fetch B",
+  "artifact": "override.yaml",
+  "artifact_sha256": "91fa50b3fd4716702268df712da9e8b10567dc320e4ce6122233db7efd5719c5",
+  "pristine_sha256": "7107bd766aaa1206069c87f77b4df182ebedf9865e1f0dccf4dbad6c850a4bdd",
+  "affected_files": [
+    "src/flexcell/flexcell_skills/config/week1.yaml"
+  ],
+  "expected_observable": "observe_server has an empty tracked list, so no object state is published for the demo objects",
+  "pinned_by": [
+    "src/flexcell/flexcell_skills/test/test_level_release_profile.py:76",
+    "src/flexcell/flexcell_skills/test/test_three_object_scene.py:30"
+  ]
+}

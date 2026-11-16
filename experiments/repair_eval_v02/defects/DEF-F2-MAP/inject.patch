@@ -1,0 +1,11 @@
+--- a/src/flexcell/flexcell_skills/flexcell_skills/task_fsm_server.py
++++ b/src/flexcell/flexcell_skills/flexcell_skills/task_fsm_server.py
+@@ -1029,7 +1029,7 @@
+                 goal_id=run_id,
+                 scenario_id=scenario,
+                 assignments=(((goal.object_name, 'task_place'),) if single else
+-                             ((self._obj_a, 'zone_1'), (self._obj_b, 'zone_2'))),
++                             ((self._obj_a, 'zone_2'), (self._obj_b, 'zone_1'))),
+             )
+             constraints = Constraints(
+                 allowed_actions=frozenset((
