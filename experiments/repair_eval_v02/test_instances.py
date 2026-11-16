@@ -5,6 +5,7 @@ which is exactly the injected state - so an unrepaired slot would have been
 graded a pass. That is the failure these tests exist to prevent: each instance is
 checked from both sides, broken and repaired, and the answers must differ.
 """
+import json
 import sys
 from pathlib import Path
 
@@ -75,3 +76,45 @@ def test_materialize_writes_the_task_text(tmp_path):
     I.materialize("DEF-F1-REG", root)
     text = (root / "task.md").read_text(encoding="utf-8")
     assert "config/week1.yaml" in text, "the repairer must be told the editable surface"
+
+
+# ---------------------------------------------------------------- known defect
+def test_the_task_text_still_hands_over_the_answer_known_defect():
+    """Characterisation test: this passes today because the defect is real.
+
+    The F1 task text names the two objects the repair has to register, and the F2
+    text names the expected pairing. That is why all four conditions came out 3/3
+    on F1 and why F2 differed only in search cost: there was nothing left for the
+    feedback conditions to supply.
+
+    The test asserts the leak on purpose, so that whoever fixes the task text
+    sees a red test naming this file rather than silence. Deleting it without
+    changing the texts would hide the defect again; changing the texts turns it
+    red and that is the signal to delete it and update DEFECT_DESIGN.md.
+    """
+    f1 = I.TASK_TEXT["DEF-F1-REG"]
+    f2 = I.TASK_TEXT["DEF-F2-MAP"]
+    assert "target_box_a" in f1 and "target_box_b" in f1, \
+        "F1 no longer leaks the object names - update DEFECT_DESIGN.md and drop this test"
+    assert "zone_1" in f2 and "zone_2" in f2, \
+        "F2 no longer leaks the expected pairing - update DEFECT_DESIGN.md and drop this test"
+
+
+def test_the_leak_is_not_in_the_gate_answer_it_is_in_the_question():
+    """The names come from task.md, not from the feedback a condition receives.
+
+    No-feedback condition A is given task.md and nothing else, so if it can
+    repair F1 the names must have arrived through the task text. That is the
+    whole diagnosis, stated as a check on where the information lives.
+    """
+    f1 = I.TASK_TEXT["DEF-F1-REG"]
+    for name in ("target_box_a", "target_box_b"):
+        assert name in f1
+    # the gate's own answer names only what it saw, not what was expected
+    import tempfile
+    from pathlib import Path
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp) / "c"
+        I.materialize("DEF-F1-REG", root)
+        _ok, payload = I.check("DEF-F1-REG", root)
+    assert "target_box_a" not in json.dumps(payload), payload
