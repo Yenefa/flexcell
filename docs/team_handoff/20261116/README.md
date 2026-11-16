@@ -10,11 +10,15 @@ PR 先指向交接分支；审阅后再将需要的提交集成到 `refactor/mod
 
 | 槽位 | 模块 | 难度 / 优先级 | 功能分支 | 交付说明 |
 |---|---|---|---|---|
-| A | 机器人动作技能目录与适用条件查询 | D1 起步、整体 D2 / P1 | `feat/runtime-skill-catalog-20261116` | [A_SKILL_CATALOG.md](A_SKILL_CATALOG.md) |
-| B | 离线执行证据审计入口 | D1 起步、整体 D2 / P0 | `feat/offline-audit-entry-20261116` | [B_OFFLINE_AUDIT.md](B_OFFLINE_AUDIT.md) |
+| A | 机器人动作技能目录与适用条件查询 · [#245](https://github.com/Yenefa/flexcell/issues/245) | D1 起步、整体 D2 / P1 | `feat/runtime-skill-catalog-20261116` | [A_SKILL_CATALOG.md](A_SKILL_CATALOG.md) |
+| B | 离线执行证据审计入口 · [#246](https://github.com/Yenefa/flexcell/issues/246) | D1 起步、整体 D2 / P0 | `feat/offline-audit-entry-20261116` | [B_OFFLINE_AUDIT.md](B_OFFLINE_AUDIT.md) |
 
 A 提供执行 Agent 将来可查询的动作说明；B 提供开发 Agent 将来可读取的诊断报告。
 首版都是离线模块，不连接在线调度。输入、输出和文件归属分开，双方无需等待对方接口。
+
+交接基线 `7fd115d9` 的 [team-handoff CI](https://github.com/Yenefa/flexcell/actions/runs/43806522767)
+和 [repository-layout CI](https://github.com/Yenefa/flexcell/actions/runs/43806522701) 均通过。
+这只证明准备资料与复用工具的检查完成；两个新模块由认领人实现，其 PR 必须带自己的测试。
 
 ## 已有工作不再重写
 

@@ -19,7 +19,8 @@
         "docs/SKILL_CATALOG.md"
       ],
       "status": "READY_UNASSIGNED",
-      "assignee": null
+      "assignee": null,
+      "issue": 245
     },
     {
       "slot": "B",
@@ -35,7 +36,8 @@
         "docs/OFFLINE_AUDIT.md"
       ],
       "status": "READY_UNASSIGNED",
-      "assignee": null
+      "assignee": null,
+      "issue": 246
     }
   ],
   "seed_tools": [
@@ -71,5 +73,13 @@
     "Do not import development tools or robot implementation into Runtime.",
     "No changes to frozen criteria, robot control or original evidence in these two tasks.",
     "Preparation CI does not establish implementation of either new module."
-  ]
+  ],
+  "preparation_validation": {
+    "source_commit": "7fd115d9d377fb2b597d8e051985d66e09383da5",
+    "team_handoff_ci": 43806522767,
+    "repository_layout_ci": 43806522701,
+    "conclusion": "success",
+    "repository_and_boundary_unittests": 32,
+    "qualification": "PREPARATION_AND_REUSED_TOOLS_ONLY"
+  }
 }

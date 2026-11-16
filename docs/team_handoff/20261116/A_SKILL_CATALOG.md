@@ -5,6 +5,7 @@
 这里的技能目录描述机器人动作接口；任务方法 Skill 的生成不属于此首版。
 
 分支：`feat/runtime-skill-catalog-20261116`。PR base：`chore/team-handoff-20261116`。
+认领与提交关联：[issue #245](https://github.com/Yenefa/flexcell/issues/245)。
 
 ## 独占修改范围
 
@@ -20,6 +21,9 @@
 实现加载目录、按 ID 获取记录、列出记录；以 `schema_version` 明确格式版本。
 建议 API：`load_catalog(path)`、`list_skills(catalog)`、`get_skill(catalog, skill_id)`。
 加载或查询不修改传入对象；无效输入用明确异常/错误码返回。
+`load_catalog` 返回校验后的顶层字典，`list_skills` 返回记录列表，`get_skill` 返回一条记录或
+抛出 `KeyError`。CLI 的 list 输出包含 `declaration_only: true` 和 `skills`，get 输出包含
+`declaration_only: true` 和 `skill`；错误输出含明确 `error` 与 `reason`，不能混入成功列表。
 
 ```bash
 python3 -m runtime.skill_catalog list --catalog config/skill_catalog/contact_push.example.json

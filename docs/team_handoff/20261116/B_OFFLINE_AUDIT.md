@@ -4,6 +4,7 @@
 可供开发 Agent 消费的诊断入口；它不产生机器人任务 PASS/FAIL。
 
 分支：`feat/offline-audit-entry-20261116`。PR base：`chore/team-handoff-20261116`。
+认领与提交关联：[issue #246](https://github.com/Yenefa/flexcell/issues/246)。
 
 ## 独占修改范围
 
