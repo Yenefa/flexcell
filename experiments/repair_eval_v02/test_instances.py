@@ -118,3 +118,32 @@ def test_the_leak_is_not_in_the_gate_answer_it_is_in_the_question():
         I.materialize("DEF-F1-REG", root)
         _ok, payload = I.check("DEF-F1-REG", root)
     assert "target_box_a" not in json.dumps(payload), payload
+
+
+def test_deleting_the_key_is_not_a_repair():
+    """ROS would inherit the node default, and that default happens to be healthy.
+
+    Measured 2026-11-17: with the fallback in place, deleting tracked_objects made
+    the gate report PASS with ['target_box_a','target_box_b'] - a repair that
+    requires knowing nothing. The acceptance rule is that the configuration states
+    the objects, so absence has its own code.
+    """
+    import re
+    with tempfile.TemporaryDirectory() as tmp:
+        root = I.materialize("DEF-F1-REG", Path(tmp) / "c", "v2")
+        cfg = root / "config" / "week1.yaml"
+        cfg.write_text(re.sub(r"\n\s*tracked_objects:.*", "", cfg.read_text()), encoding="utf-8")
+        ok, payload = I.check("DEF-F1-REG", root, "v2")
+    assert not ok
+    assert payload["code"] == "TRACKED_OBJECTS_ABSENT", payload
+
+
+def test_an_empty_list_and_a_missing_key_are_different_failures():
+    import re
+    with tempfile.TemporaryDirectory() as tmp:
+        root = I.materialize("DEF-F1-REG", Path(tmp) / "c", "v2")
+        cfg = root / "config" / "week1.yaml"
+        cfg.write_text(re.sub(r"tracked_objects:.*", "tracked_objects: []", cfg.read_text()), encoding="utf-8")
+        ok, payload = I.check("DEF-F1-REG", root, "v2")
+    assert not ok
+    assert payload["code"] == "OBJECT_NOT_REGISTERED", payload

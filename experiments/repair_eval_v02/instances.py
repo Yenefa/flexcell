@@ -59,12 +59,6 @@ def emit(ok, code, **extra):
     sys.exit(0)
 
 
-def declared_default():
-    text = (root / "gate" / "observe_server.py").read_text(encoding="utf-8")
-    m = re.search(r"declare_parameter\('tracked_objects',\s*(\[[^\]]*\])\)", text)
-    return eval(m.group(1))
-
-
 if family == "DEF-F1-REG":
     import yaml
     raw = (root / "config" / "week1.yaml").read_text(encoding="utf-8")
@@ -84,7 +78,16 @@ if family == "DEF-F1-REG":
     params = node["ros__parameters"]
     if not isinstance(params, dict):
         emit(False, "CONFIG_PARAMS_MALFORMED", detail="ros__parameters is not a mapping")
-    tracked = params.get("tracked_objects", declared_default())
+    # An absent key is not a repair. ROS would fall back to the node's
+    # declared default - which happens to be the healthy list - so deleting the
+    # line used to pass the gate without knowing anything. Measured on
+    # 2026-11-17: delete the line -> PASS with the default; empty list ->
+    # OBJECT_NOT_REGISTERED. The acceptance rule is that the configuration states
+    # the objects, so absence is its own failure code.
+    if "tracked_objects" not in params:
+        emit(False, "TRACKED_OBJECTS_ABSENT",
+             detail="the configuration does not set tracked_objects")
+    tracked = params["tracked_objects"]
     if not isinstance(tracked, list):
         emit(False, "CONFIG_BAD_TYPE", detail="tracked_objects is %s" % type(tracked).__name__)
     real = {"target_box_a", "target_box_b"}
