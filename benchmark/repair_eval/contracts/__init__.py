@@ -9,9 +9,11 @@ task?" - without reading the candidate's opinion of itself.
     casefile       the seven-case corpus and the false-accept / false-reject count
     cases/         one self-contained JSON per defect class, plus a valid repair
 
-Modules are imported flat (import task_contract), matching benchmark/evidence:
-each module puts its own directory on sys.path so the package works both under
-pytest and when a module is run as a script.
+Import forms: the package works as a package (import
+benchmark.repair_eval.contracts.acceptance), as a pytest target, and as a script
+run by path. Each module puts its own directory on sys.path and then prefers a
+relative import, so a package import sees ONE task_contract rather than two - two
+copies would make the isinstance check in evaluate() reject a caller's contract.
 
 Scope note: this is an offline policy layer over synthetic fixtures. It is not a
 simulator run and it is not evidence that a robot performed the task.

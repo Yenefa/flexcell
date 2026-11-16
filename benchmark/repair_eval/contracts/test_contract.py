@@ -39,9 +39,12 @@ HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
-import acceptance                                        # noqa: E402
-import casefile                                          # noqa: E402
-import task_contract                                     # noqa: E402
+if __package__:
+    from . import acceptance, casefile, task_contract
+else:
+    import acceptance
+    import casefile
+    import task_contract
 
 CASES = casefile.case_paths()
 CASE_IDS = [path.stem for path in CASES]
@@ -549,6 +552,52 @@ def test_editing_the_goal_changes_the_frozen_digest():
     mapping["immutable"]["thresholds"]["max_position_error_m"] = 0.5
     widened = task_contract.TaskContract.from_mapping(mapping)
     assert widened.sha256() != baseline
+
+
+# ------------------------------------------------------- importability contract
+REPO_ROOT = HERE.parents[2]
+
+
+def run_from_repository_root(argv):
+    return subprocess.run(argv, cwd=str(REPO_ROOT), capture_output=True,
+                          text=True, timeout=180)
+
+
+def test_the_package_imports_from_the_repository_root():
+    # A flat "import task_contract" made this fail: a module imported by package
+    # path cannot see its siblings. #252 consumes this as a library, so the
+    # package form is the one that has to work.
+    proc = run_from_repository_root(
+        [sys.executable, "-c",
+         "import benchmark.repair_eval.contracts.acceptance"])
+    assert proc.returncode == 0, proc.stderr
+
+
+def test_the_package_entry_point_prints_the_summary():
+    proc = run_from_repository_root(
+        [sys.executable, "-m", "benchmark.repair_eval.contracts.test_contract",
+         "--summary"])
+    assert proc.returncode == 0, proc.stderr
+    assert json.loads(proc.stdout.strip()) == {
+        "false_accept": 0, "false_reject": 0, "cases": 7}
+
+
+def test_package_level_objects_share_one_class():
+    # Package import must not create a second TaskContract: two copies would make
+    # evaluate() raise TypeError on the caller's own contract, which is exactly
+    # the silent wiring failure this follow-up closes.
+    script = (
+        "from benchmark.repair_eval.contracts import acceptance, casefile, "
+        "task_contract\n"
+        "case = casefile.load("
+        "'benchmark/repair_eval/contracts/cases/p1_valid_repair.json')\n"
+        "contract = task_contract.TaskContract.from_mapping(case['contract'])\n"
+        "verdict = acceptance.evaluate(contract, case['candidate'])\n"
+        "print(verdict.status)\n"
+    )
+    proc = run_from_repository_root([sys.executable, "-c", script])
+    assert proc.returncode == 0, proc.stderr
+    assert proc.stdout.strip() == "ACCEPT"
 
 
 # -------------------------------------------------------------------------- cli

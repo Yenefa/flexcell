@@ -44,9 +44,25 @@ Everything here is stdlib-only, deterministic and side-effect free.
 import dataclasses
 import math
 import re
+import sys
+from pathlib import Path
 
-import task_contract
-from task_contract import TaskContract
+_HERE = Path(__file__).resolve().parent
+if str(_HERE) not in sys.path:
+    sys.path.insert(0, str(_HERE))
+
+# Imported package-first on purpose. A caller who does
+# "from benchmark.repair_eval.contracts.task_contract import TaskContract" and
+# then hands that instance to evaluate() must hit the SAME class object; a flat
+# import here would load a second copy of the module, and the isinstance check
+# below would then reject the caller's own contract. That is a silent wiring
+# bug, not an error message, so the fallback is only for script execution.
+if __package__:
+    from . import task_contract
+    from .task_contract import TaskContract
+else:
+    import task_contract
+    from task_contract import TaskContract
 
 # The candidate format is versioned separately from the contract: a report from
 # another generation of the harness must be recognisable, not "close enough".

@@ -216,6 +216,12 @@ python3 -m pytest benchmark/repair_eval/contracts -q
 
 # 只打印汇总：错误接纳 / 错误拒绝 / 用例数
 python3 benchmark/repair_eval/contracts/test_contract.py --summary
+
+# 按包导入（#252 以库方式使用；必须在仓库根成功）
+python3 -c "import benchmark.repair_eval.contracts.acceptance"
+
+# 按模块运行
+python3 -m benchmark.repair_eval.contracts.test_contract --summary
 ```
 
 summary 命令的输出固定为：
@@ -223,6 +229,10 @@ summary 命令的输出固定为：
 ```text
 {"false_accept": 0, "false_reject": 0, "cases": 7}
 ```
+
+三种调用形式都必须工作：包导入、按模块运行（python3 -m）、直接跑脚本。模块顶部把自身
+目录放进 sys.path，并**优先使用相对导入**，保证包导入时 task_contract 只有一份 ——
+否则 isinstance(contract, TaskContract) 会拒绝调用方自己构造的契约。
 
 `pytest` 结束时 `conftest.py` 也会打印同一行（前缀 `repair-eval cases:`）。
 不需要网络、模型、ROS 或 Gazebo；只用到 Python 3 标准库与 pytest。

@@ -16,7 +16,10 @@ HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
-import casefile                                          # noqa: E402
+if __package__:
+    from . import casefile
+else:
+    import casefile
 
 
 def pytest_terminal_summary(terminalreporter, exitstatus, config):

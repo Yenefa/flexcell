@@ -23,7 +23,6 @@ Everything here is stdlib-only.
 """
 
 import json
-import os
 import sys
 from pathlib import Path
 
@@ -31,8 +30,13 @@ HERE = Path(__file__).resolve().parent
 if str(HERE) not in sys.path:
     sys.path.insert(0, str(HERE))
 
-import acceptance                                        # noqa: E402
-import task_contract                                     # noqa: E402
+# Package-first, flat only when run as a script: see acceptance.py for why two
+# copies of task_contract would be a bug rather than an inconvenience.
+if __package__:
+    from . import acceptance, task_contract
+else:
+    import acceptance
+    import task_contract
 
 CASE_SCHEMA = "flexcell.repair_eval.case/1"
 CASES_DIRNAME = "cases"
