@@ -7,7 +7,14 @@
 
 | # | 结论（一句话） | 研究问题 | 分组 | 单位 | 分子/分母（D1/D2/D3） | 源码 SHA | 模型 / 协议身份 | 证据位置 | 状态 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| — | *（待 #252 填入）* | — | — | — | — | — | — | — | `NOT_RUN` |
+| R1 | F1 族、B 条件（真实执行反馈）：2 次重复均被契约门判 `ACCEPT` | 反馈类型是否影响是否修好 | B | D1 | 分子 2 / 分母 0（终态 `UNKNOWN`，不入 D1） | `5458f1d` | `deepseek-flash`；`a48651c0…`；`flexcell.repair_eval.task_contract/1` v1 `6628e64f…` | `experiments/repair_eval_v02/evidence/confirmatory_f1bc.json`（F1-B-r1/r2） | `UNKNOWN` |
+| R2 | F1 族、C 条件（失配反馈）：2 次重复均被判 `ACCEPT`，donor 为同族另一 seed 的 B 记录 | 不匹配的反馈是否足以支持修复 | C | D1 | 分子 2 / 分母 0（同上） | `5458f1d` | 同上；donor `F1-B-r2`（seed 5102）、`F1-B-r1`（seed 5101） | `confirmatory_f1bc.json`（F1-C-r1/r2）+ `evidence/donor/*.log` | `UNKNOWN` |
+
+**为什么这两行不是 `SUPPORTED`**：契约门判了 `ACCEPT`，但**独立裁决门从未运行**（`gate_independent = NOT_RUN`），所以终态一律 `UNKNOWN`，按 §3 的分母规则不进 D1。把它们写成 `SUPPORTED` 就等于把「契约说对了」当成「独立复核说对了」，这正是本表要防的事。独立门需要 #253 的 6 个保留场景跑起来。
+
+**这 4 条记录满足的身份条件**：源码 `5458f1d`（提交后才跑的批）、配对 seed（5101/5102，四条件共用）、C 的 donor 是同族**不同 seed** 的 B 记录且在任何 C 运行之前绑定、模型 `deepseek-flash`、策略指纹、契约 schema/version/sha256。缺一项都不能进表。
+
+**24 槽探索批（`real_matrix.json`）为什么不在主表**：那一批没有记录 seed（当时的 `build_candidate` 根本不接受 seed，三次重复其实是同一个输入）、C 的 donor 是合成文本、且运行时代码尚未提交因而没有源码 SHA。它作为**探索性观测**保留在 `experiments/repair_eval_v02/README.md`，不构成结论行。
 
 填写规则：
 
