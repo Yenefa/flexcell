@@ -1,4 +1,4 @@
-"""The acceptance audit must not silently acquire an UNMET."""
+"""The acceptance audit must cover every criterion and never acquire an UNMET."""
 import json
 import subprocess
 import sys
@@ -6,6 +6,9 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
+
+# the six issues carry 46 checkboxes between them; this number is the whole point
+EXPECTED_CRITERIA = 46
 
 
 def run_audit():
@@ -15,36 +18,56 @@ def run_audit():
     return json.loads((HERE / "evidence" / "acceptance_audit.json").read_text(encoding="utf-8"))
 
 
+def test_the_audit_covers_every_criterion_the_issues_list():
+    """The first version audited 24 rows and called itself an acceptance audit.
+
+    The issues carry 46 checkboxes, so 22 criteria had no row at all and the
+    audit still looked complete. That is the failure this case exists to stop.
+    """
+    payload = run_audit()
+    assert payload["criteria"] == EXPECTED_CRITERIA
+    assert len(payload["rows"]) == EXPECTED_CRITERIA
+
+
 def test_no_criterion_is_silently_unmet():
     payload = run_audit()
     unmet = [r for r in payload["rows"] if r["status"] == "UNMET"]
-    assert not unmet, "criteria regressed to UNMET: %s" % [
-        (r["issue"], r["criterion"], r["evidence"]) for r in unmet]
+    assert not unmet, [(r["id"], r["evidence"]) for r in unmet]
 
 
-def test_every_manual_item_says_why_it_cannot_be_checked():
+def test_every_row_has_a_unique_criterion_id():
+    payload = run_audit()
+    ids = [r["id"] for r in payload["rows"]]
+    assert len(ids) == len(set(ids))
+    # the ids must name the issue they came from
+    for row in payload["rows"]:
+        assert row["id"].split(".")[0] == str(row["issue"]), row["id"]
+
+
+def test_every_manual_row_says_why_it_cannot_be_checked():
     payload = run_audit()
     for row in payload["rows"]:
         if row["status"] == "MANUAL":
-            assert row["evidence"].strip(), row["criterion"]
+            assert row["evidence"].strip(), row["id"]
+            assert len(row["evidence"]) > 8, row["id"]
 
 
-def test_the_audit_covers_every_issue_it_claims_to():
-    payload = run_audit()
-    covered = {row["issue"] for row in payload["rows"]}
-    for issue in ("249", "250", "251", "252", "253", "254"):
-        assert issue in covered, issue
+def test_a_criterion_with_no_check_and_no_reason_is_unmet():
+    """Missing coverage has to fail loudly rather than vanish."""
+    sys.path.insert(0, str(HERE))
+    import audit_acceptance as A
+    row = A.run_one("999.9", 999, "a criterion nobody covered")
+    assert row["status"] == A.UNMET
+    assert "no check and no stated reason" in row["evidence"]
 
 
 def test_a_status_that_is_not_a_word_is_caught():
-    """The audit found three of its own bugs by refusing a non-status.
-
-    Two checks returned a bool where a status word was expected, and one raised
-    because PolicyError has no as_dict. If the runner had stringified whatever it
-    got, all three would have printed as something plausible.
-    """
     sys.path.insert(0, str(HERE))
     import audit_acceptance as A
-    row = A.check("x", "999", lambda: (True, "bool status"))
+    A.COVERED["999.8"] = lambda: (True, "bool status")
+    try:
+        row = A.run_one("999.8", 999, "x")
+    finally:
+        A.COVERED.pop("999.8", None)
     assert row["status"] == A.UNMET
     assert "as a status" in row["evidence"]

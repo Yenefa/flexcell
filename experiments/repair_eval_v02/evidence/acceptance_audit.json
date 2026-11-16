@@ -1,152 +1,331 @@
 {
   "rows": [
     {
-      "issue": "249",
-      "criterion": "静态输入/候选/反馈/裁决/隐藏答案的可见范围已定义",
+      "id": "249.1",
+      "issue": 249,
+      "criterion": "定义静态输入、候选文件、执行反馈、独立裁决及隐藏答案的可见范围",
       "status": "MET",
       "evidence": "visible categories: candidate_source, diagnosis, execution_feedback, static_input"
     },
     {
-      "issue": "249",
-      "criterion": "无反馈条件不能从别名/相邻/裁决/残留取到结果",
+      "id": "249.2",
+      "issue": 249,
+      "criterion": "无反馈条件不能从 read_file/list_dir/遥测/裁决/别名/相邻/残留得到结果",
       "status": "MET",
-      "evidence": "denied reasons: reserved_name, parent_traversal, absolute_path; source read: yes"
+      "evidence": "denied: reserved_name, parent_traversal, absolute_path; source readable: True"
     },
     {
-      "issue": "249",
-      "criterion": "真实反馈等条件记录反馈来源与摘要",
+      "id": "249.3",
+      "issue": 249,
+      "criterion": "真实反馈、失配反馈和显式指导只获得协议允许的信息，记录来源与摘要",
       "status": "MET",
       "evidence": "source=own_run digest=f6dad5c24a16"
     },
     {
-      "issue": "249",
-      "criterion": "执行结果按条件路由",
+      "id": "249.4",
+      "issue": 249,
+      "criterion": "执行结果按条件路由；静态组不因外部裁决或对话回流获得答案",
       "status": "MET",
       "evidence": "{\"A_STATIC\": \"none\", \"B_REAL_FEEDBACK\": \"own_run\", \"C_MISMATCHED_FEEDBACK\": \"donor_run\", \"D_GUIDED\": \"own_run_plus_guidance\"}"
     },
     {
-      "issue": "249",
-      "criterion": "候选副本与裁决/隐藏材料分离，重叠被拒",
+      "id": "249.5",
+      "issue": 249,
+      "criterion": "候选副本与裁决/隐藏材料分离；规范化路径检查并验证受保护文件机制",
       "status": "MET",
-      "evidence": "overlap refused: verdict is not a directory: /tmp/tmpiki17_nf/candidate/v"
+      "evidence": "overlap refused (verdict is not a directory: /tmp/tmpg8m8fv2r/candidate/v); protected write refused (protected_write)"
     },
     {
-      "issue": "249",
-      "criterion": "记录接口版本与已知限制",
-      "status": "MET",
-      "evidence": "VISIBILITY.md limits section present: True"
+      "id": "249.6",
+      "issue": 249,
+      "criterion": "PR 附离线检查命令与允许/拒绝/不继承旧反馈的例子",
+      "status": "MANUAL",
+      "evidence": "PR #257 正文里的命令与例子，不在代码里"
     },
     {
-      "issue": "250",
-      "criterion": "不可变目标/物体/容差在候选之外，允许修改字段已列出",
+      "id": "249.7",
+      "issue": 249,
+      "criterion": "记录涉及的模型/工具/提示接口版本与已知限制",
+      "status": "MET",
+      "evidence": "VISIBILITY.md records fingerprint and limits: True"
+    },
+    {
+      "id": "250.1",
+      "issue": 250,
+      "criterion": "不可变目标/物体/容差在候选之外；显式列出允许修改字段",
       "status": "MET",
       "evidence": "editable_fields=['config/controller.yaml:kp', 'config/controller.yaml:kv', 'scripts/grasp_timing.py:approach_dwell_s']"
     },
     {
-      "issue": "250",
-      "criterion": "至少六类负例",
+      "id": "250.2",
+      "issue": 250,
+      "criterion": "不能通过移动目标、删掉对象或放宽阈值获得接受",
       "status": "MET",
-      "evidence": "6 negative cases, codes: EVIDENCE_MISSING, GOAL_NOT_MET, NONZERO_EXIT, PROTECTED_MODIFIED, REGRESSION_FAILED, RUN_ID_MISMATCH, TAMPERED_IMMUTABLE"
+      "evidence": "relaxed threshold -> REJECT ['TAMPERED_IMMUTABLE']"
     },
     {
-      "issue": "250",
-      "criterion": "保留合法正例，分别记录错误接纳/错误拒绝",
+      "id": "250.3",
+      "issue": 250,
+      "criterion": "至少覆盖六类负例",
+      "status": "MET",
+      "evidence": "6 cases, 7 codes: EVIDENCE_MISSING, GOAL_NOT_MET, NONZERO_EXIT, PROTECTED_MODIFIED, REGRESSION_FAILED, RUN_ID_MISMATCH, TAMPERED_IMMUTABLE"
+    },
+    {
+      "id": "250.4",
+      "issue": 250,
+      "criterion": "保留合法修复正例，分别记录错误接纳和错误拒绝",
       "status": "MET",
       "evidence": "{\"false_accept\": 0, \"false_reject\": 0, \"cases\": 7}"
     },
     {
-      "issue": "250",
-      "criterion": "UNKNOWN 不转换为通过",
+      "id": "250.5",
+      "issue": 250,
+      "criterion": "核对退出码/结果/证据/run ID；UNKNOWN 不转换为通过",
       "status": "MET",
       "evidence": "missing exit code -> UNKNOWN ['EXIT_CODE_MISSING']"
     },
     {
-      "issue": "251",
-      "criterion": "24 个槽位保持 NOT_RUN 且自检通过",
-      "status": "MET",
-      "evidence": "[ OK ] slot status: 24 NOT_RUN, 0 terminal"
+      "id": "250.6",
+      "issue": 250,
+      "criterion": "给出可执行命令与每例预期/实际/来源；合成与真实分开标识",
+      "status": "MANUAL",
+      "evidence": "PR #258 正文里的逐例预期/实际与来源"
     },
     {
-      "issue": "251",
-      "criterion": "6 次交互 / 20,000 tokens 上限已落实",
+      "id": "251.1",
+      "issue": 251,
+      "criterion": "任务规格、允许修改范围、不可变目标、目标及回归场景",
       "status": "MET",
-      "evidence": "cap refused: interaction:2"
+      "evidence": "TASKS.md states the task and editable scope: True"
     },
     {
-      "issue": "251",
-      "criterion": "保留场景 2 布局 × 3 初态",
-      "status": "MET",
-      "evidence": "6 slots, all ['NOT_RUN']"
+      "id": "251.2",
+      "issue": 251,
+      "criterion": "完整源码 SHA、构建来源、依赖/镜像/配置、模型接口与提示摘要",
+      "status": "MANUAL",
+      "evidence": "需要锁定执行源码 40 位 SHA、镜像 digest 与提示摘要；尚未冻结"
     },
     {
-      "issue": "254",
-      "criterion": "关键表格从原始记录重算",
+      "id": "251.3",
+      "issue": 251,
+      "criterion": "每条最多 6 次交互 / 20,000 tokens；落实预算统计与超限处理",
+      "status": "MET",
+      "evidence": "cap refused at interaction:2; tokens also capped"
+    },
+    {
+      "id": "251.4",
+      "issue": 251,
+      "criterion": "固定槽位/顺序/种子；列明基础设施失败、取消、未知终态与 NOT_RUN 处理",
+      "status": "MET",
+      "evidence": "24 slots, statuses in vocabulary: True"
+    },
+    {
+      "id": "251.5",
+      "issue": 251,
+      "criterion": "主要结果与过程结果字段（写入、迭代、token、耗时、人工介入）",
+      "status": "MET",
+      "evidence": "process fields present: all"
+    },
+    {
+      "id": "251.6",
+      "issue": 251,
+      "criterion": "明确修复运行/候选执行/最终场景的单位与分母，不重复计数",
+      "status": "MET",
+      "evidence": "denominators D1/D1'/D2/D3/N1/N2 documented: True"
+    },
+    {
+      "id": "251.7",
+      "issue": 251,
+      "criterion": "保留场景为 2 个未参与开发的布局 × 3 个预定初态，冻结后执行",
+      "status": "MET",
+      "evidence": "6 slots, all NOT_RUN: True"
+    },
+    {
+      "id": "251.8",
+      "issue": 251,
+      "criterion": "对比较、样本解释和协议偏差预先声明",
+      "status": "MET",
+      "evidence": "deviation and sample limits declared: True"
+    },
+    {
+      "id": "251.9",
+      "issue": 251,
+      "criterion": "沿用现有费用账本与运行资格；本轮不新增资源授权",
+      "status": "MANUAL",
+      "evidence": "沿用既有费用账本需负责人确认；本任务卡声明不新增授权"
+    },
+    {
+      "id": "252.1",
+      "issue": 252,
+      "criterion": "启动前核对源码/构建/模型/配置身份与健康状态",
+      "status": "MANUAL",
+      "evidence": "需要真实运行环境与模型身份；缺凭据"
+    },
+    {
+      "id": "252.2",
+      "issue": 252,
+      "criterion": "按预定槽位与顺序派发；每条保留反馈来源、工具序列、用量与逐门判定",
+      "status": "MANUAL",
+      "evidence": "24 槽派发依赖凭据；机制已在 DRY RUN 中验证"
+    },
+    {
+      "id": "252.3",
+      "issue": 252,
+      "criterion": "所有失败、预算耗尽与异常进台账；剩余槽位标 NOT_RUN，不以补跑替换失败",
+      "status": "MANUAL",
+      "evidence": "记账规则已实现（reconcile.py），但没有真实运行可记入台账"
+    },
+    {
+      "id": "252.4",
+      "issue": 252,
+      "criterion": "遇未确认终态或不健康状态按协议停止派发并保全证据",
+      "status": "MANUAL",
+      "evidence": "没有正在进行的派发，停止条件无法被行使或观察"
+    },
+    {
+      "id": "252.5",
+      "issue": 252,
+      "criterion": "每条用外部固定任务与验收检查候选，分别保留目标与回归失败原因",
+      "status": "MANUAL",
+      "evidence": "没有候选产生，无外部固定任务可判"
+    },
+    {
+      "id": "252.6",
+      "issue": 252,
+      "criterion": "分组核对分母、迭代、用量与端到端时间",
+      "status": "MANUAL",
+      "evidence": "没有真实运行，token 与端到端时间无数据可核对"
+    },
+    {
+      "id": "252.7",
+      "issue": 252,
+      "criterion": "与历史 E2 各版本分开报告；不同源码/模型/协议身份不合池",
+      "status": "MANUAL",
+      "evidence": "本轮没有记录，与历史 E2 分池无从执行"
+    },
+    {
+      "id": "252.8",
+      "issue": 252,
+      "criterion": "报告完整矩阵、停止与偏差，以及结果对研究问题的支持范围",
+      "status": "MANUAL",
+      "evidence": "没有矩阵结果，完整矩阵与支持范围无内容可写"
+    },
+    {
+      "id": "253.1",
+      "issue": 253,
+      "criterion": "固定候选源码/配置完整 SHA，记录来源运行与选择依据",
+      "status": "MET",
+      "evidence": "freeze carries sha, source run and basis"
+    },
+    {
+      "id": "253.2",
+      "issue": 253,
+      "criterion": "保留材料与答案评估前不提供；运行前留存清单摘要",
+      "status": "MANUAL",
+      "evidence": "保留材料与答案清单未提供，无摘要可留存"
+    },
+    {
+      "id": "253.3",
+      "issue": 253,
+      "criterion": "按协议适配执行；不临时调参/改代码/重新调用模型后计同一次结果",
+      "status": "MET",
+      "evidence": "a second result on one slot is refused"
+    },
+    {
+      "id": "253.4",
+      "issue": 253,
+      "criterion": "核对不可变目标、候选合法性、任务结果与回归；所有失败保留",
+      "status": "MET",
+      "evidence": "a recorded failure keeps its identity: True"
+    },
+    {
+      "id": "253.5",
+      "issue": 253,
+      "criterion": "普通任务回归与 #247 协调，明确后端/技能/环境来源",
+      "status": "MANUAL",
+      "evidence": "需与 #247 的持有者协调后端/技能/环境来源"
+    },
+    {
+      "id": "253.6",
+      "issue": 253,
+      "criterion": "记录 6 个槽位实际状态；修复运行数与保留场景执行数分别报告",
+      "status": "MET",
+      "evidence": "{\"repair_runs\": 24, \"holdout_executions\": 0, \"holdout_planned\": 6, \"reported_separately\": true}"
+    },
+    {
+      "id": "253.7",
+      "issue": 253,
+      "criterion": "与预先指定参考版本比较；仅描述该保留集，不宣称泛化",
+      "status": "MANUAL",
+      "evidence": "无保留场景结果，无法与参考版本比较"
+    },
+    {
+      "id": "254.1",
+      "issue": 254,
+      "criterion": "关键表格从原始记录重算，对应单位/分母/SHA/身份/证据位置",
       "status": "MET",
       "evidence": "19 records, 0 disagreements"
     },
     {
-      "issue": "254",
-      "criterion": "错误接纳与旧 claim_success 字段区分",
-      "status": "MET",
-      "evidence": "false_accept derived independently: True"
+      "id": "254.2",
+      "issue": 254,
+      "criterion": "旧 6/6、3/3 与本轮结果分开；补全失败/未知/未执行与偏差",
+      "status": "MANUAL",
+      "evidence": "文件在 #259（paper 分支），本分支不含；合并树上是 MET"
     },
     {
-      "issue": "254",
-      "criterion": "固定跨平台摘要口径与复算入口",
+      "id": "254.3",
+      "issue": 254,
+      "criterion": "比较四种反馈条件，结论与实验可识别的作用相符",
+      "status": "MANUAL",
+      "evidence": "四条件比较依赖 #252/#253 的结果"
+    },
+    {
+      "id": "254.4",
+      "issue": 254,
+      "criterion": "区分最终错误接纳/拒绝与旧 claim_success/false_success 字段",
+      "status": "MET",
+      "evidence": "false_accept derived separately from claim_success"
+    },
+    {
+      "id": "254.5",
+      "issue": 254,
+      "criterion": "保留目标语义、有限回归、样本量限制；来源（合成/仿真/真机）清楚",
+      "status": "MANUAL",
+      "evidence": "文件在 #259（paper 分支），本分支不含；合并树上是 MET"
+    },
+    {
+      "id": "254.6",
+      "issue": 254,
+      "criterion": "固定原始字节与跨平台摘要口径；代码/数据/复算入口可追溯",
       "status": "MET",
       "evidence": "convention=utf8-lf-sha256/1 lf==crlf=True bytes_raw=True doc=True"
     },
     {
-      "issue": "249",
-      "criterion": "PR 附离线检查命令与允许/拒绝/不继承旧反馈的例子",
+      "id": "254.7",
+      "issue": 254,
+      "criterion": "更新必要相关工作与方法；统计表述符合样本条件",
       "status": "MANUAL",
-      "evidence": "PR #257 正文"
+      "evidence": "文件在 #259（paper 分支），本分支不含；合并树上是 MET"
     },
     {
-      "issue": "250",
-      "criterion": "每个例子给出可执行命令、预期/实际与来源",
+      "id": "254.8",
+      "issue": 254,
+      "criterion": "作者、单位、贡献与授权由参与者核实；未提供信息保留待填写",
       "status": "MANUAL",
-      "evidence": "PR #258 正文"
+      "evidence": "作者、单位、贡献与授权需实际参与者提供"
     },
     {
-      "issue": "251",
-      "criterion": "批次总费用额度、运行窗口与超时",
+      "id": "254.9",
+      "issue": 254,
+      "criterion": "论文/计划书/PPT 使用相同数据口径；标明文稿实际状态",
       "status": "MANUAL",
-      "evidence": "协议 §5.3 标 TBD，需负责人签字"
-    },
-    {
-      "issue": "252",
-      "criterion": "按协议执行 24 个槽位并保留全部结果",
-      "status": "MANUAL",
-      "evidence": "缺模型凭据；见 issue #252"
-    },
-    {
-      "issue": "253",
-      "criterion": "冻结候选后执行 6 个保留场景",
-      "status": "MANUAL",
-      "evidence": "依赖 #252 的冻结候选"
-    },
-    {
-      "issue": "254",
-      "criterion": "比较四种反馈条件并给出结论",
-      "status": "MANUAL",
-      "evidence": "依赖 #252/#253 的结果"
-    },
-    {
-      "issue": "254",
-      "criterion": "相关工作章节",
-      "status": "MANUAL",
-      "evidence": "方法已写（METHOD.md）；相关工作需真实文献，留待作者"
-    },
-    {
-      "issue": "254",
-      "criterion": "作者、单位、贡献与授权",
-      "status": "MANUAL",
-      "evidence": "需实际参与者提供"
+      "evidence": "论文/计划书/PPT 尚未成稿，无从核对同一口径"
     }
   ],
   "counts": {
-    "MET": 16,
-    "MANUAL": 8
-  }
+    "MET": 25,
+    "MANUAL": 21
+  },
+  "criteria": 46
 }
