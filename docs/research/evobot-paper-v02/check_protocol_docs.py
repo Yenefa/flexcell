@@ -248,6 +248,43 @@ def check_doc_shape():
     return ok
 
 
+def check_verdict_is_never_delivered():
+    """No condition may promise the judge's own verdict as an input.
+
+    This was wrong once: condition B listed the evaluator verdict among the
+    information the repairer receives, while #249 seals verification in all four
+    conditions. The reason the seal matters is incentive, not secrecy - an agent
+    that can see the verdict can tune to the ruler instead of fixing the task,
+    and the four-condition comparison stops measuring what it claims to measure.
+    """
+    text = read("PROTOCOL.md")
+    lines = [line for line in text.splitlines() if line.startswith("| **")]
+    rows = {}
+    for line in lines:
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        if len(cells) < 3:
+            continue
+        name = cells[0].strip("*").strip()
+        if name in ("A", "B", "C", "D"):
+            rows[name] = cells[2]
+    # The cells always contain a negation for the repair direction, so testing for
+    # "no 不含 nearby" can never fire. The precise rule is: rows B/C/D must state
+    # that the verdict original is excluded, and must not mention "verdict" at all
+    # (mentioning it there is how it was offered before).
+    for name in ("B", "C", "D"):
+        cell = rows.get(name, "")
+        if "verdict" in cell.lower():
+            fail("verdict sealed", "condition %s mentions the verdict in what it gives" % name)
+            return
+        if "裁决原件" not in cell:
+            fail("verdict sealed", "condition %s does not state that the verdict is excluded" % name)
+            return
+    if "裁决原件在四个条件下都不下发" not in text:
+        fail("verdict sealed", "PROTOCOL.md no longer states that the verdict is never delivered")
+        return
+    print("[ OK ] verdict sealed: no condition offers the judge's verdict")
+
+
 def report():
     if failures:
         print("")
@@ -271,6 +308,7 @@ def main():
     check_claims()
     check_history_markers()
     check_doc_shape()
+    check_verdict_is_never_delivered()
     report()
     return 1 if failures else 0
 

@@ -1,6 +1,6 @@
 # EvoBot 论文 v0.2 · 研究协议包（#251）
 
-> **状态：DRAFT v0.1.2 — 未冻结，未执行。**（v0.1.1 回填接口差异表；v0.1.2 记录 #249 封印评估器源码的交叉核对，见 ASSUMPTIONS.md §5）
+> **状态：DRAFT v0.1.3 — 未冻结，未执行。**（v0.1.1 回填接口差异表；v0.1.2 记录 #249 封印评估器源码；v0.1.3 修正 §2 条件表：裁决原件在四个条件下都不下发，见 ASSUMPTIONS.md §5）
 > 本目录只包含协议、任务定义、槽位清单与判读规则，**没有任何一条实验记录**。
 > 24 个槽位初始状态全部为 `NOT_RUN`。本文档出现的每个数字，要么是**计划参数**，
 > 要么是**历史证据**（标注为「历史」，且声明不可合池），没有第三种。
@@ -41,7 +41,7 @@
 | [#248](https://github.com/Yenefa/flexcell/issues/248) | 论文 v0.2 父任务 | 全包 | DRAFT 子集 |
 | [#249](https://github.com/Yenefa/flexcell/issues/249) | 反馈读取通道的信息边界 | [ASSUMPTIONS.md](ASSUMPTIONS.md) §2（计划接口）；[PROTOCOL.md](PROTOCOL.md) §2 条件 A 的可达性前提 | 未验收 → 开工前提 |
 | [#250](https://github.com/Yenefa/flexcell/issues/250) | 固定任务约束与验收负例契约 | [TASKS.md](TASKS.md) §5（计划接口）；[PROTOCOL.md](PROTOCOL.md) §7 判定 | 未验收 → 开工前提 |
-| **#251** | **本协议包** | **本目录 8 份文档 + 1 个离线自检脚本** | **DRAFT v0.1** |
+| **#251** | **本协议包** | **本目录 8 份文档 + 1 个离线自检脚本** | **DRAFT v0.1.3** |
 | [#252](https://github.com/Yenefa/flexcell/issues/252) | 执行实验 | [RUN_MANIFEST.md](RUN_MANIFEST.md) 的槽位与状态列；[ADMISSION.md](ADMISSION.md) 准入清单 | 未开始 |
 | [#253](https://github.com/Yenefa/flexcell/issues/253) | 保留场景 | [TASKS.md](TASKS.md) §4 回归场景清单与保留规则 | 未开始 |
 | [#254](https://github.com/Yenefa/flexcell/issues/254) | 论文更新 | [ANALYSIS.md](ANALYSIS.md) §6 报告模板（预先声明口径） | 未开始 |
