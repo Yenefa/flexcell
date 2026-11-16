@@ -1,0 +1,99 @@
+"""End-to-end dry run of a real instance with a scripted agent. No model tokens.
+
+WHY
+    The runner has just been wired to the pre-registered instances. Wiring that
+    has never been exercised is a plan, not a pipeline: the round-2 lesson from
+    the synthetic fixtures was that four defects only appeared once the whole
+    loop ran with something standing in for the model.
+
+    This substitutes a transport that always replies with the reference repair,
+    which is the repair a perfect agent would produce on its first interaction.
+    If the slot does not come back ACCEPT, the pipeline is wrong - not the model,
+    because there is no model.
+
+WHAT IT PROVES
+    materialize -> boundary -> agent write -> gate -> record, for both
+    pre-registered instances, including the sealed gate reading the file the
+    agent wrote through the boundary.
+
+WHAT IT CANNOT PROVE
+    Anything about how a real model behaves. A scripted agent that already knows
+    the answer says nothing about whether a repairer can find it.
+"""
+import json
+import sys
+import tempfile
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+for path in (str(HERE), str(HERE.parents[1]),
+             str(HERE.parents[1] / "benchmark" / "repair_eval" / "contracts")):
+    if path not in sys.path:
+        sys.path.insert(0, path)
+
+import instances as IN              # noqa: E402
+import run_matrix_real as R         # noqa: E402
+from benchmark.repair_eval import visibility as vis  # noqa: E402
+
+
+class ScriptedTransport:
+    """Replies with the reference repair for whichever instance it is inside."""
+
+    def __init__(self, family, *args, **kwargs):
+        self.family = "DEF-F1-REG" if family.startswith("F1") else "DEF-F2-MAP"
+        self.calls = 0
+
+    def metadata(self):
+        return {"requested_model": "scripted", "base_url": "-", "temperature": 0,
+                "max_tokens": 0, "key_fingerprint": "scripted", "key_source": "none",
+                "gate": "none", "adapter": "ScriptedTransport/1"}
+
+    def chat(self, messages, **kwargs):
+        self.calls += 1
+        instance = self.family
+        rel = IN.editable_rel(instance)
+        body = IN.healthy_text(instance)
+        return {"text": json.dumps({"actions": [{"write_file": [rel, body]}],
+                                    "claim_success": True, "done": True}),
+                "usage": {"total_tokens": 0, "split_available": False},
+                "model_returned": "scripted", "seconds": 0.0}
+
+
+def main():
+    policy = vis.load_policy(Path(HERE.parents[1]) / "benchmark" / "repair_eval"
+                             / "visibility_policy.json")
+    original = R.GatedTransport
+    report = {}
+    ok = True
+    for family in ("F1_OBJECT_REGISTRATION", "F2_GOAL_MAPPING"):
+        def factory(model=None, base_url=None, timeout=None, caller="x", _f=family):
+            return ScriptedTransport(_f)
+        R.GatedTransport = factory
+        with tempfile.TemporaryDirectory() as tmp:
+            tmp = Path(tmp)
+            donor = tmp / "donor"
+            (donor / "telemetry").mkdir(parents=True)
+            (donor / "telemetry" / "execution.log").write_text("DONOR" + chr(10))
+            work = tmp / "slot"
+            work.mkdir()
+            row = R.run_slot(family, "B_REAL_FEEDBACK", 1, work, policy, donor,
+                             "scripted", 3, seed=5101, source_sha="scripted",
+                             source="instances")
+        R.GatedTransport = original
+        entry = {"terminal": row["terminal_status"],
+                 "verdict": row.get("contract_verdict"),
+                 "qualification": row.get("qualification"),
+                 "writes": row.get("edited_paths"),
+                 "codes": row.get("gate_contract_codes")}
+        report[family] = entry
+        good = entry["verdict"] == "ACCEPT" and entry["writes"]
+        if not good:
+            ok = False
+        print("%-24s verdict=%-6s terminal=%-8s writes=%s"
+              % (family, entry["verdict"], entry["terminal"], entry["writes"]))
+    print(json.dumps({"ok": ok, "slots": report}, indent=2, ensure_ascii=False))
+    return 0 if ok else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

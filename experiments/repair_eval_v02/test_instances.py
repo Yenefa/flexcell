@@ -64,7 +64,8 @@ def test_the_gate_lives_outside_the_editable_surface(tmp_path):
     """A repairer must not be able to edit the thing that grades it."""
     for family in I.FAMILIES:
         root = tmp_path / family
-        editable = I.materialize(family, root)
+        I.materialize(family, root)
+        editable = I.editable_path(family, root)
         assert not str(editable).startswith(str(root / "gate")), family
         assert (root / "gate" / "check.py").exists()
 

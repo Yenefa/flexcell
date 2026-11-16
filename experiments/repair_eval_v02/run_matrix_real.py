@@ -27,6 +27,7 @@ for path in (str(HERE), str(ROOT), str(ROOT / "benchmark" / "repair_eval" / "con
         sys.path.insert(0, path)
 
 import acceptance                                       # noqa: E402
+import instances as IN                                   # noqa: E402
 import budget as B                                      # noqa: E402
 import run_record as REC                                # noqa: E402
 import task_contract                                    # noqa: E402
@@ -81,8 +82,16 @@ def refresh_feedback(candidate):
 
 
 def run_slot(family, condition, rep, workdir, policy, donor, model, max_interactions,
-             seed=None, donor_run_id=None, source_sha=None, donor_log_path=None):
-    candidate = build_candidate(workdir / "candidate", family, seed=seed)
+             seed=None, donor_run_id=None, source_sha=None, donor_log_path=None,
+             source="synthetic"):
+    instance = ("DEF-F1-REG" if family.startswith("F1") else "DEF-F2-MAP") \
+        if source == "instances" else None
+    if instance:
+        candidate = IN.materialize(instance, workdir / "candidate")
+        task_text = IN.TASK_TEXT[instance]
+    else:
+        candidate = build_candidate(workdir / "candidate", family, seed=seed)
+        task_text = TASKS[family]
     slot_id = "%s-%s-r%d" % (family.split("_")[0], condition[0], rep)
     verdict_dir = workdir / "verdict"; verdict_dir.mkdir()
     hidden = workdir / "hidden"; hidden.mkdir()
@@ -97,7 +106,12 @@ def run_slot(family, condition, rep, workdir, policy, donor, model, max_interact
     boundary.assert_fresh_run()
     (candidate / "telemetry").mkdir(exist_ok=True)
 
-    first_log = refresh_feedback(candidate)
+    if instance:
+        gate_ok, gate_payload = IN.check(instance, candidate)
+        (candidate / "telemetry" / "execution.log").write_text(
+            json.dumps(gate_payload, ensure_ascii=False) + chr(10))
+    else:
+        refresh_feedback(candidate)
     donor_log = None
     if condition == "B_REAL_FEEDBACK":
         donor_dir = Path(__file__).resolve().parent / "evidence" / "donor"
@@ -108,7 +122,7 @@ def run_slot(family, condition, rep, workdir, policy, donor, model, max_interact
     transport = GatedTransport(model=model, timeout=300)
     ledger = B.Ledger(transport, max_interactions=max_interactions)
     contract = task_contract.TaskContract.from_mapping(contract_for(family))
-    agent = RepairAgent(ledger, boundary, TASKS[family], contract.editable_fields)
+    agent = RepairAgent(ledger, boundary, task_text, contract.editable_fields)
 
     # Drive the loop here rather than calling agent.run(), so that the feedback
     # for the next interaction is refreshed from a real execution after every
@@ -143,7 +157,12 @@ def run_slot(family, condition, rep, workdir, policy, donor, model, max_interact
         "evidence": [{"name": "termination_log", "path": "evidence/termination.log",
                       "sha256": "a" * 64}],
     }
-    verdict = acceptance.evaluate(contract, state).to_dict()
+    if instance:
+        gate_ok, gate_payload = IN.check(instance, candidate)
+        verdict = {"status": "ACCEPT" if gate_ok else "REJECT",
+                   "reasons": [] if gate_ok else [{"code": gate_payload.get("code", "UNKNOWN")}]}
+    else:
+        verdict = acceptance.evaluate(contract, state).to_dict()
 
     if result["terminal_state"] == B.BUDGET_EXHAUSTED:
         terminal = "BUDGET_EXHAUSTED"
@@ -170,7 +189,7 @@ def run_slot(family, condition, rep, workdir, policy, donor, model, max_interact
         edited_paths=result["writes"], first_edit_after_execution=True,
         evidence_path="experiments/repair_eval_v02/evidence",
     )
-    record["qualification"] = "REAL_MODEL_RUN"
+    record["qualification"] = "REAL_MODEL_RUN" + ("|INSTANCE" if instance else "|SYNTHETIC")
     record["seed"] = seed
     record["contract_sha256"] = hashlib.sha256(json.dumps(
         contract_for(family), sort_keys=True, separators=(",", ":"),
@@ -190,6 +209,7 @@ def main(argv=None):
     ap.add_argument("--max-interactions", type=int, default=6)
     ap.add_argument("--model", default="deepseek-flash")
     ap.add_argument("--out", default=str(HERE / "evidence" / "real_matrix.json"))
+    ap.add_argument("--source", choices=("synthetic", "instances"), default="synthetic")
     ap.add_argument("--limit", type=int, default=0, help="stop after N slots (smoke)")
     ap.add_argument("--families", default="", help="comma separated subset")
     ap.add_argument("--conditions", default="", help="comma separated subset")
@@ -252,7 +272,8 @@ def main(argv=None):
                         row = run_slot(family, condition, rep, workdir, policy, donor,
                                        args.model, args.max_interactions, seed=seed,
                                        donor_run_id=borrowed, source_sha=source_sha,
-                                       donor_log_path=borrowed_log)
+                                       donor_log_path=borrowed_log,
+                                       source=args.source)
                     except Exception as exc:                       # noqa: BLE001
                         # One dead call must not take the batch with it. The
                         # failure is a record of its own: the environment broke,

@@ -133,8 +133,19 @@ def healthy_text(family):
     return (ROOT / FSM_REL).read_text(encoding="utf-8")
 
 
+def editable_path(family, root):
+    """Where the repairer is allowed to write, for this instance."""
+    return Path(root) / editable_rel(family)
+
+
 def materialize(family, root):
-    """Write an injected candidate workspace. Returns the editable path."""
+    """Write an injected candidate workspace. Returns the workspace root.
+
+    It used to return the editable file path, and the caller that wanted a
+    directory spent one round passing a YAML file where a workspace belonged.
+    Returning the root and offering editable_path() for the other need removes
+    the ambiguity instead of leaving a note about it.
+    """
     root = Path(root)
     rel = editable_rel(family)
     target = root / rel
@@ -146,7 +157,7 @@ def materialize(family, root):
     (gate / "check.py").write_text(GATE, encoding="utf-8")
     (gate / "observe_server.py").write_text((ROOT / OBSERVE_REL).read_text(encoding="utf-8"),
                                             encoding="utf-8")
-    return target
+    return root
 
 
 def check(family, root):
