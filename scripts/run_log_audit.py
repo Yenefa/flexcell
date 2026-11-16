@@ -709,8 +709,11 @@ def print_report(report: dict) -> None:
             print("MISSING: %s/%s (%s)" % (run["run_id"], item["path"],
                                           item["reason"]))
     totals = report["totals"]
-    print("audit summary: %d run(s), %d audit-complete, %d audit-incomplete, "
-          "%d missing item(s)"
+    # "passed" is kept as the audit-completeness word it always was (it is the
+    # word the acceptance tests and docs quote); the run's own robot-task result
+    # is reported on the next line so the two are never read as one.
+    print("audit summary: %d run(s), %d passed (audit-complete), "
+          "%d audit-incomplete, %d missing item(s)"
           % (totals["runs"], totals["audit_complete"],
              totals["audit_incomplete"], totals["missing_items"]))
     print("task outcomes: %d succeeded, %d failed, %d unknown"

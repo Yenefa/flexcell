@@ -226,8 +226,10 @@ class AuditCase(unittest.TestCase):
                          ["crash_detail", "failure_evidence"])
         self.assertEqual(
             self.missing_paths(run_report),
+            # the failure-phase candidate list has a layered twin now, so the
+            # "checked everywhere" string names task.stdout:detail as well
             ["crash_detail.txt|failure_evidence.json:detail|task.out:detail"
-             "|launch.out:markers",
+             "|task.stdout:detail|launch.out:markers",
              "failure_evidence.json"])
         self.assertIn("MISSING: run_exec_failure/failure_evidence.json (",
                       proc.stdout)
