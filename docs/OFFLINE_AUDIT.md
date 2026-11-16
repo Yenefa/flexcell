@@ -1,4 +1,4 @@
-# 离线执行证据审计入口（issue #246，第一个 PR）
+# 离线执行证据审计入口（issue #246，第一个 / 第二个 PR）
 
 一个**只读**的诊断入口：调用仓库里已有的三个工具，把它们的报告聚合到输入目录之外
 的一个新目录。它不计算任务是否成功，也不改物理控制、任务定义、验收规则或原始证据。
@@ -51,15 +51,57 @@ profile 里的 `requires` 只说明该 check 需要哪类日志。没有匹配�
 
 中途失败仍保留已生成的产物；已有输出目录会被拒绝，不覆盖既有证据。
 
+## 第二个 PR：接一条真实归档（LONG_1）
+
+```bash
+python3 -m scripts.offline_audit \
+  --archive-zip setup/acceptance/physical_reachable_contact_20261113/raw-43455056965.zip \
+  --manifest  setup/acceptance/physical_reachable_contact_20261113/archive.json \
+  --out /path/to/NEW_output --tool-sha "$(git rev-parse HEAD)"
+```
+
+`--archive-zip` 与 `--run` 互斥。流程：核对 ZIP 的 SHA256 与 `archive.json`
+记录值 → 拒绝绝对路径 / `..` / 盘符成员 → 解压到**仓库外**临时目录 → 定位 `LONG_1`
+→ 生成 `normalized/` → 按第一个 PR 的契约写 `report.json`。
+
+`normalized/` 的五个文件（全部是只读字段映射，没有计算）：
+
+| 文件 | 内容 |
+| --- | --- |
+| `identity.json` | 标签、task SHA、执行源码修订、归档 SHA、**当前工具版本** |
+| `composite_sequence.json` | 原生 `seq` 排序的事件序列；`goal_uuid` / `component_goal_uuid` / `component_run_id` |
+| `contact_goals.json` | 用 `request_id` / `goal_uuid` 与运行时清单关联的子目标，目录名不用于排序 |
+| `source_claims.json` | 四个来源的结论**并列**为 `source_reference`，分歧不合成 |
+| `observations.json` | 世界状态记录数、通道计数、原生 summary 状态；不生成阶段或接触证据 |
+
+字段不存在写 `UNKNOWN`，并记 `SOURCE_FIELD_ABSENT`；关联不上记 `SOURCE_LINK_ABSENT`。
+归档源码修订与当前工具版本分别存于 `source.normalization`，二者不同不是篡改证据。
+
+原生归档不含三个旧工具认识的日志名，所以 `long1.json` profile 让三项检查记为
+`NOT_APPLICABLE` + `INPUT_ABSENT`，而不是伪装成工具异常；诊断退出码为 1
+（数据不适用），仍不是机器人任务结论。
+
 ## 边界
 
-- 这是第一个 PR：统一入口、报告聚合、错误传播。**没有接 LONG_1 真实归档**，
-  没有格式适配，因此 `derived_inputs` 为空。
 - 不输出任何由本工具计算的任务通过结论；原验收结论如需展示必须标明是来源引用。
 - profile 是日志格式清单，不是新的验收阈值。
+- 只支持当前 ContactPush 原生格式，不兼容所有历史实验。
+- 适配器只读原始证据；输出必须是新目录，已有目录拒绝覆盖。
 
 ## 验证记录
 
 `python3 -m unittest discover -s scripts/tests -p 'test_offline_audit.py' -v`
-覆盖：完整报告契约、UNKNOWN 退出 0 不得冒充完整、缺输入显式失败、子工具异常传播、
-已有/输入内的输出目录拒绝、真实 `run_log_audit.py` 的端到端调用。
+共 10 例，覆盖：完整报告契约、UNKNOWN 退出 0 不得冒充完整、缺输入显式失败、
+子工具异常传播、已有/输入内的输出目录拒绝、真实 `run_log_audit.py` 的端到端调用；
+以及 ZIP SHA 校验与路径穿越拒绝、原生 ID 关联与 `seq` 排序、来源分歧并列、
+缺字段写 UNKNOWN、归档 CLI 端到端且输入前后哈希不变。
+
+真实样本（2026-11-17）：
+
+- 命令见上；ZIP SHA 前后均为
+  `5bc6ae24e5c24be0f5d0acf185230e87c1565ab75b082c0414d905598cba09d4`。
+- 输出：`issues=4`、`exit_code=1`、`robot_task_outcome=NOT_EVALUATED`，
+  四项 issue = 三个 `INPUT_ABSENT` + 一个 `SOURCE_CLAIM_CONFLICT`。
+- 原生来源互相分歧：`verdict.passed=true`、
+  `runtime_result.status=TASK_COMPLETED`、`run_status.status=EXECUTED`、
+  `worldstate/summary.status=INTERRUPTED`。四个值并列保留，本工具不判定机器人任务成败。

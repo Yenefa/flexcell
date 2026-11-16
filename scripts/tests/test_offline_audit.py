@@ -49,7 +49,7 @@ PROFILE = {
         "timeline": [["observations.jsonl"], ["phases.jsonl"]],
     },
 }
-OK_RETENTION = {"schema_version": 1, "status": "COMPLETE", "runs": [],
+OK_RETENTION = {"schema_version": 1, "runs": [],
                 "totals": {"runs": 0, "missing_items": 0}}
 OK_PROGRESS = {"status": "MEASURED", "code": "OK", "reason_codes": [],
                "inputs_unchanged": True}
@@ -75,7 +75,8 @@ class OfflineAuditCase(unittest.TestCase):
             write(self.run / name, "")
 
     def use_stubs(self, retention=(OK_RETENTION, 0), progress=(OK_PROGRESS, 0),
-                  timeline=(OK_TIMELINE, 0)):
+                  timeline=(OK_TIMELINE, 0), real=()):
+        """``real`` names checks that must call their genuine tool instead."""
         specs = {
             "retention": ("audit.json",) + retention,
             "progress": ("summary.json",) + progress,
@@ -83,6 +84,8 @@ class OfflineAuditCase(unittest.TestCase):
         }
         paths = {}
         for name, (report, summary, code) in specs.items():
+            if name in real:
+                continue
             paths[name] = stub(self.stubs / (name + ".py"), report, summary, code)
         driver = """
 import sys
@@ -204,7 +207,7 @@ sys.exit(cli.main(%r))
                            ("verify.jsonl", [{"event": "request"}])):
             write(run / name, "".join(json.dumps(r) + "\n" for r in rows))
         write_json(run / "verdict.json", {"passed": True})
-        driver = self.use_stubs()
+        driver = self.use_stubs(real=("retention",))
         proc = self.invoke(driver)
         # progress/timeline have no inputs in this fixture -> aggregate exit 1,
         # but the REAL retention tool must have produced a COMPLETE check.
@@ -215,6 +218,151 @@ sys.exit(cli.main(%r))
         self.assertEqual(retention["exit_code"], 0)
         self.assertEqual(retention["sub_report"], "retention/audit.json")
         self.assertTrue((self.out / "retention" / "audit.json").is_file())
+
+
+class Long1AdapterCase(unittest.TestCase):
+    """Second PR: native archive verification, safe extraction and mapping.
+
+    These fixtures are tiny on purpose: the 32 MB acceptance ZIP is exercised
+    manually, while CI checks the contract against a deterministic mini archive.
+    """
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory(prefix="long1-adapter-")
+        self.addCleanup(self.tmp.cleanup)
+        self.base = Path(self.tmp.name)
+        self.zip = self.base / "LONG_1.zip"
+        self.out = self.base / "out"
+        self.files = {
+            "LONG_1/provenance.json": {
+                "label": "LONG_1", "backend": "finger_tcp",
+                "task_sha256": "aaa", "image_source_revision": "bbb"},
+            "LONG_1/runtime/runtime_result.json": {
+                "status": "TASK_COMPLETED",
+                "runtime_result": {
+                    "component_run_ids": ["contact-AAA"],
+                    "component_goal_uuids": ["1111"]}},
+            "LONG_1/verdict.json": {"passed": True},
+            "LONG_1/run_status.json": {"status": "EXECUTED"},
+            "LONG_1/worldstate/summary.json": {"status": "INTERRUPTED"},
+            "LONG_1/worldstate/world_state.jsonl": [
+                {"channel": "topic", "rx_utc_ns": 1},
+                {"channel": "result", "rx_utc_ns": 2}],
+            "LONG_1/worldstate/events.jsonl": [{"kind": "READY"}],
+            "LONG_1/contact_goals/contact-AAA-1111/action_result.json": {
+                "request_id": "contact-AAA", "goal_uuid": "1111",
+                "outcome": 0, "error_code": 0, "arm_ready": True,
+                "return_completed": True, "motion_terminal_known": True,
+                "motion_goals_used": 12},
+            # Deliberately written out of seq order: ordering must use native seq.
+            "LONG_1/sim/skills/composites/c.jsonl": [
+                {"seq": 2, "event": "OBSERVATION", "stage_id": "push_00",
+                 "boundary": "after"},
+                {"seq": 1, "event": "PLAN", "goal_uuid": "root"},
+            ],
+        }
+        self.make_zip(self.files)
+
+    def make_zip(self, files):
+        import zipfile
+        with zipfile.ZipFile(self.zip, "w") as bundle:
+            for name, content in files.items():
+                if isinstance(content, str):
+                    body = content
+                elif isinstance(content, list):
+                    body = "".join(json.dumps(r) + "\n" if isinstance(r, dict)
+                                   else r + "\n" for r in content)
+                else:
+                    body = json.dumps(content)
+                bundle.writestr(name, body)
+
+    def normalized(self, name):
+        return json.loads((self.out / "normalized" / name).read_text(encoding="utf-8"))
+
+    def test_zip_sha_is_verified_and_traversal_is_refused(self):
+        from scripts.offline_audit import long1
+        digest = long1.sha256_file(self.zip)
+        self.assertEqual(long1.verify_zip(self.zip)[0], digest)
+        manifest = write_json(self.base / "archive.json",
+                              {"sha256": "0" * 64, "executed_source": "deadbeef"})
+        with self.assertRaises(long1.AdapterError):
+            long1.verify_zip(self.zip, manifest)
+        evil = self.base / "evil.zip"
+        self.make_zip({"LONG_1/../../escape.txt": "no"})
+        with self.assertRaises(long1.AdapterError):
+            long1.safe_extract(evil, self.base / "escaped")
+
+    def test_native_ids_order_and_conflicts_are_preserved(self):
+        from scripts.offline_audit import long1
+        root = long1.safe_extract(self.zip, self.base / "extracted")
+        run = long1.find_long1(root)
+        norm_dir = self.base / "norm-only"
+        norm_dir.mkdir()
+        derived, issues, meta = long1.normalize(
+            run, norm_dir, archive_sha="abc", executed_source="deadbeef",
+            tool_sha="toolhead")
+        seq = json.loads((norm_dir / "normalized" / "composite_sequence.json").read_text())
+        self.assertEqual([e["seq"] for e in seq["events"]], [1, 2])
+        self.assertEqual(seq["order_basis"],
+                         "native composite.seq (not file name or line order)")
+        goals = json.loads((norm_dir / "normalized" / "contact_goals.json").read_text())
+        self.assertFalse(goals["directory_name_used_for_order"])
+        self.assertEqual(goals["goals"][0]["native_links"],
+                         ["request_id=component_run_ids",
+                          "goal_uuid=component_goal_uuids"])
+        claims = json.loads((norm_dir / "normalized" / "source_claims.json").read_text())
+        self.assertEqual(claims["robot_task_outcome"], "NOT_EVALUATED")
+        self.assertTrue(all(c["kind"] == "source_reference" for c in claims["claims"]))
+        self.assertEqual(len(claims["conflicts"]), 1)
+        self.assertTrue(any(i["code"] == "SOURCE_CLAIM_CONFLICT" for i in issues))
+        self.assertEqual(meta["archive_sha256"], "abc")
+        self.assertEqual(meta["current_tool_version"], "toolhead")
+        self.assertNotEqual(meta["archive_executed_source"],
+                            meta["current_tool_version"])
+        self.assertTrue(all(d["note"].startswith("read-only") for d in derived))
+
+    def test_absent_field_is_unknown_and_explained(self):
+        from scripts.offline_audit import long1
+        files = dict(self.files)
+        goal = dict(files["LONG_1/contact_goals/contact-AAA-1111/action_result.json"])
+        goal.pop("error_code")
+        files["LONG_1/contact_goals/contact-AAA-1111/action_result.json"] = goal
+        self.make_zip(files)
+        root = long1.safe_extract(self.zip, self.base / "extracted2")
+        norm_dir = self.base / "norm-unknown"
+        norm_dir.mkdir()
+        _derived, issues, _meta = long1.normalize(root, norm_dir)
+        goals = json.loads((norm_dir / "normalized" / "contact_goals.json").read_text())
+        self.assertEqual(goals["goals"][0]["error_code"], "UNKNOWN")
+        self.assertTrue(any(i["code"] == "SOURCE_FIELD_ABSENT"
+                            and "error_code" in i["detail"] for i in issues))
+
+    def test_archive_cli_end_to_end_keeps_inputs_and_separates_shas(self):
+        from scripts.offline_audit import long1
+        digest = long1.sha256_file(self.zip)
+        manifest = write_json(self.base / "archive.json",
+                              {"sha256": digest, "executed_source": "oldsource"})
+        proc = subprocess.run(
+            [sys.executable, "-m", "scripts.offline_audit",
+             "--archive-zip", str(self.zip), "--manifest", str(manifest),
+             "--out", str(self.out), "--tool-sha", "newtool"],
+            cwd=str(ROOT), capture_output=True, text=True, timeout=180)
+        self.assertEqual(long1.sha256_file(self.zip), digest)
+        report = json.loads((self.out / "report.json").read_text(encoding="utf-8"))
+        self.assertEqual(report["schema_version"], "offline-run-audit/1")
+        self.assertEqual(report["robot_task_outcome"], "NOT_EVALUATED")
+        self.assertEqual(report["source"]["source_sha256"], digest)
+        self.assertEqual(report["source"]["normalization"]["archive_sha256"], digest)
+        self.assertEqual(report["source"]["normalization"]["archive_executed_source"],
+                         "oldsource")
+        self.assertEqual(report["source"]["normalization"]["current_tool_version"],
+                         "newtool")
+        self.assertTrue((self.out / "normalized" / "identity.json").is_file())
+        self.assertTrue(any(d["path"].startswith("normalized/")
+                            for d in report["derived_inputs"]))
+        self.assertFalse(any(i["code"] == "NORMALIZER_ERROR"
+                             for i in report["issues"]), proc.stderr)
+        self.assertIn(proc.returncode, (0, 1, 2))
 
 
 if __name__ == "__main__":

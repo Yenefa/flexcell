@@ -17,10 +17,12 @@ import hashlib
 import json
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 DEFAULT_PROFILE = ROOT / "config" / "offline_audit_profiles" / "native.json"
+LONG1_PROFILE = ROOT / "config" / "offline_audit_profiles" / "long1.json"
 SCHEMA = "offline-run-audit/1"
 
 # Each check runs only when at least one of its input patterns is present.
@@ -148,9 +150,15 @@ def _issue(check, code, detail, **extra):
     return item
 
 
-def _summary_status(summary):
-    status = summary.get("status") or summary.get("code") or "UNKNOWN"
-    status = str(status)
+def _summary_status(name, summary):
+    status = summary.get("status") or summary.get("code")
+    if not status and name == "retention":
+        # The real run_log_audit writes a COMPLETENESS total, not a status
+        # field. Use only that retention metric: never read its `passed` flag,
+        # which belongs to a different layer of meaning.
+        totals = summary.get("totals") or {}
+        return "COMPLETE" if not totals.get("missing_items") else "INCOMPLETE"
+    status = str(status or "UNKNOWN")
     if status.upper() in OK_STATUSES:
         return "COMPLETE"
     return status
@@ -184,7 +192,8 @@ def run_check(name, run, out, profile, build_cmd):
                              % (requires,)))
         return dict(check=check, issues=issues), 1
 
-    check_dir.mkdir(parents=True, exist_ok=True)
+    # Each existing tool requires a NEW output directory and refuses to
+    # overwrite. Do NOT pre-create it here; let the child create its own.
     command = build_cmd(run, check_dir)
     check["executed"] = True
     try:
@@ -208,7 +217,7 @@ def run_check(name, run, out, profile, build_cmd):
             issues.append(_issue(name, "SUBTOOL_REPORT_UNREADABLE", str(exc)))
             return dict(check=check, issues=issues), 2
         check["reason_codes"] = _reason_codes(name, summary)
-        check["status"] = _summary_status(summary)
+        check["status"] = _summary_status(name, summary)
         if summary.get("inputs_unchanged") is False:
             check["status"] = "ERROR"
             issues.append(_issue(name, "INPUT_CHANGED",
@@ -246,8 +255,14 @@ def run_check(name, run, out, profile, build_cmd):
     return dict(check=check, issues=issues), 0
 
 
-def build_report(run, out, profile=None, source_sha=None, subtools=None):
-    """Run all checks into a NEW out directory; return (report, exit_code)."""
+def build_report(run, out, profile=None, source_sha=None, subtools=None,
+                 normalizer=None):
+    """Run all checks into a NEW out directory; return (report, exit_code).
+
+    ``normalizer`` is optional: a callable(run, out, source_sha) returning
+    (derived_inputs, issues, meta). It is used by the LONG_1 archive adapter.
+    The first-PR contract is unchanged when it is omitted.
+    """
     run, out = validate_paths(run, out)
     profile = load_profile(profile)
     builders = dict(SUBTOOLS)
@@ -272,6 +287,19 @@ def build_report(run, out, profile=None, source_sha=None, subtools=None):
         report["checks"].append(result["check"])
         report["issues"].extend(result["issues"])
         exit_code = max(exit_code, severity)
+    if normalizer is not None:
+        try:
+            derived, extra_issues, meta = normalizer(run, out, source_sha)
+        except Exception as exc:
+            report["issues"].append(_issue("normalize", "NORMALIZER_ERROR",
+                                           "%s: %s" % (type(exc).__name__, exc)))
+            exit_code = 2
+        else:
+            report["derived_inputs"].extend(derived)
+            report["issues"].extend(extra_issues)
+            report["source"]["normalization"] = meta
+            if extra_issues:
+                exit_code = max(exit_code, 1)
     after = input_digests(run)
     if before != after:
         report["issues"].append(_issue("aggregate", "INPUT_CHANGED",
@@ -283,17 +311,59 @@ def build_report(run, out, profile=None, source_sha=None, subtools=None):
     return report, exit_code
 
 
+def audit_archive(zip_path, out, manifest=None, profile=None, tool_sha="UNKNOWN"):
+    """Second PR: verify, safely extract and audit one native LONG_1 archive.
+
+    The archive is extracted OUTSIDE the repository. Its SHA (and the source
+    revision recorded at execution time) are kept apart from the current tool
+    version: a difference between them is not evidence tampering.
+    """
+    from . import long1
+    try:
+        archive_sha, executed_source = long1.verify_zip(zip_path, manifest)
+        scratch = Path(tempfile.mkdtemp(prefix="flexcell-long1-audit-"))
+        extracted = long1.safe_extract(zip_path, scratch / "extracted")
+        run = long1.find_long1(extracted)
+
+        def normalizer(run_dir, out_dir, _source_sha):
+            return long1.normalize(run_dir, out_dir, archive_sha=archive_sha,
+                                   executed_source=executed_source,
+                                   tool_sha=tool_sha)
+    except long1.AdapterError as exc:
+        raise UsageError(str(exc)) from exc
+    if profile is None:
+        profile = LONG1_PROFILE if LONG1_PROFILE.is_file() else DEFAULT_PROFILE
+    return build_report(run, out, profile=profile, source_sha=archive_sha,
+                        normalizer=normalizer)
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
         description="Read-only offline execution-evidence audit (diagnostic only).")
-    parser.add_argument("--run", required=True, help="existing run directory (read-only)")
+    parser.add_argument("--run", help="existing run directory (read-only)")
     parser.add_argument("--out", required=True, help="NEW output directory outside --run")
     parser.add_argument("--profile", help="evidence-format profile JSON")
     parser.add_argument("--source-sha", help="known execution-source SHA, else UNKNOWN")
+    parser.add_argument("--archive-zip",
+                        help="native ContactPush archive ZIP; verify, extract outside "
+                             "the repo and audit LONG_1 in one step")
+    parser.add_argument("--manifest",
+                        help="archive.json carrying the recorded ZIP sha256")
+    parser.add_argument("--tool-sha", default="UNKNOWN",
+                        help="current audit-tool version, recorded separately")
     args = parser.parse_args(argv)
     try:
-        report, exit_code = build_report(args.run, args.out, args.profile,
-                                         args.source_sha)
+        if args.archive_zip:
+            if args.run:
+                raise UsageError("--run and --archive-zip are mutually exclusive")
+            report, exit_code = audit_archive(args.archive_zip, args.out,
+                                              args.manifest, args.profile,
+                                              args.tool_sha)
+        else:
+            if not args.run:
+                raise UsageError("either --run or --archive-zip is required")
+            report, exit_code = build_report(args.run, args.out, args.profile,
+                                             args.source_sha)
     except UsageError as exc:
         print("error: %s" % exc, file=sys.stderr)
         return 2

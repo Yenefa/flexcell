@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "description": [
+    "Evidence-format profile for the native ContactPush LONG_1 archive (issue #246, second PR).",
+    "These are ONLY the file names the THREE EXISTING tools know how to read;",
+    "a native archive does not contain them, so those checks are disclosed as",
+    "NOT_APPLICABLE instead of being reported as tool failures. The native layout",
+    "is mapped separately by scripts/offline_audit/long1.py into normalized/.",
+    "This profile contains NO task threshold, acceptance rule or motion parameter."
+  ],
+  "requires": {
+    "retention": ["task.out", "task.stdout", "decisions.jsonl"],
+    "progress": [
+      "push_attempts.jsonl", "attempts.jsonl", "contact_push.jsonl",
+      "skills/push.jsonl", "skills/push_object.jsonl"
+    ],
+    "timeline": [
+      ["observations.jsonl", "world_state.jsonl", "poses.jsonl",
+       "data/observations.jsonl"],
+      ["phases.jsonl", "stages.jsonl", "action_phases.jsonl",
+       "data/phases.jsonl"]
+    ]
+  }
+}
