@@ -174,9 +174,19 @@ def k249_5():
 
 
 def k249_7():
+    """The doc is not trusted on its word: the fingerprint it prints is compared."""
+    import re
     text = (ROOT / "docs" / "repair_eval" / "VISIBILITY.md").read_text(encoding="utf-8")
-    ok = "限制" in text and "policy_fingerprint" in text
-    return (MET if ok else UNMET), "VISIBILITY.md records fingerprint and limits: %s" % ok
+    live = _policy().fingerprint()
+    mentioned = re.findall(r"[0-9a-f]{8,64}", text)
+    matches = [m for m in mentioned if live.startswith(m[:8])]
+    limits = "限制" in text and "policy_fingerprint" in text
+    if limits and matches:
+        return MET, "documented fingerprint %s matches the live %s; limits stated" % (
+            matches[0][:8], live[:8])
+    if limits:
+        return UNMET, "the fingerprint printed in VISIBILITY.md is not the live one (%s)" % live[:8]
+    return UNMET, "VISIBILITY.md does not state the fingerprint or the limits"
 
 
 # ------------------------------------------------------------------ 250
@@ -242,7 +252,8 @@ def k250_5():
 def k251_1():
     tasks = (DOCS / "TASKS.md").read_text(encoding="utf-8")
     ok = "editable" in tasks.lower() or "允许修改" in tasks
-    return (MET if ok else UNMET), "TASKS.md states the task and editable scope: %s" % ok
+    # finding the words is not proof the scope is right
+    return (PARTIAL if ok else UNMET), "TASKS.md mentions the task and editable scope: %s" % ok
 
 
 def k251_3():
@@ -264,17 +275,32 @@ def k251_4():
 
 
 def k251_5():
-    text = (DOCS / "DATA_DICTIONARY.md").read_text(encoding="utf-8")
-    wanted = ("interactions_used", "tokens_total", "candidate_executions", "wall_clock_s")
-    missing = [w for w in wanted if w not in text]
-    return (MET if not missing else UNMET), "process fields present: %s" % (
-        "all" if not missing else missing)
+    """Behavioural: the record actually carries the process fields, typed."""
+    policy = _policy()
+    ledger = B.Ledger(_T())
+    ledger.chat([])
+    ledger.count_execution()
+    ledger.finish()
+    record = REC.build_record(
+        slot_id="s", condition="B_REAL_FEEDBACK",
+        condition_access=policy.conditions["B_REAL_FEEDBACK"], policy=policy,
+        account=ledger.account(), terminal_status="NOT_RUN", claim_success=False,
+        feedback_text="x")
+    wanted = {"interactions_used": int, "tokens_total": int,
+              "candidate_executions": int, "final_scenes": int,
+              "wall_clock_s": (int, float), "tokens_in": int, "tokens_out": int}
+    bad = [k for k, kind in wanted.items()
+           if k not in record or not isinstance(record[k], kind)
+           or isinstance(record[k], bool)]
+    return (MET if not bad else UNMET), "process fields typed correctly: %s" % (
+        "all" if not bad else bad)
 
 
 def k251_6():
     text = (DOCS / "DATA_DICTIONARY.md").read_text(encoding="utf-8")
     ok = all(marker in text for marker in ("D1", "D2", "D3", "N1", "N2"))
-    return (MET if ok else UNMET), "denominators D1/D1'/D2/D3/N1/N2 documented: %s" % ok
+    # documented, not executed: nothing here counts a denominator yet
+    return (PARTIAL if ok else UNMET), "denominators documented in DATA_DICTIONARY: %s" % ok
 
 
 def k251_7():
@@ -291,7 +317,7 @@ def k251_8():
         if path.exists():
             text += path.read_text(encoding="utf-8")
     ok = "偏差" in text and ("样本" in text or "n=3" in text)
-    return (MET if ok else UNMET), "deviation and sample limits declared: %s" % ok
+    return (PARTIAL if ok else UNMET), "deviation and sample limits declared in the docs: %s" % ok
 
 
 # ------------------------------------------------------------------ 253
@@ -351,7 +377,7 @@ def k254_2():
         return MANUAL, ELSEWHERE
     text = path.read_text(encoding="utf-8")
     ok = "不可合池" in text or "不进" in text
-    return (MET if ok else UNMET), "historical numbers carry a cannot-pool note: %s" % ok
+    return (PARTIAL if ok else UNMET), "historical numbers carry a cannot-pool note: %s" % ok
 
 
 def k254_4():
@@ -371,7 +397,7 @@ def k254_5():
         return MANUAL, ELSEWHERE
     text = path.read_text(encoding="utf-8")
     ok = "不能支持" in text and "合成" in text
-    return (MET if ok else UNMET), "limitations and data provenance stated: %s" % ok
+    return (PARTIAL if ok else UNMET), "METHOD.md states the limits and the data provenance: %s" % ok
 
 
 def k254_6():
@@ -392,7 +418,7 @@ def k254_7a():
         return MANUAL, ELSEWHERE
     text = path.read_text(encoding="utf-8")
     ok = "## 1." in text and "n=3" in text
-    return (MET if ok else UNMET), "method written; significance limits stated: %s" % ok
+    return (PARTIAL if ok else UNMET), "method written; significance limits stated: %s" % ok
 
 
 COVERED = {

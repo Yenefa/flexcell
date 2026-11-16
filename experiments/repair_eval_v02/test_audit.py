@@ -52,6 +52,41 @@ def test_every_manual_row_says_why_it_cannot_be_checked():
             assert len(row["evidence"]) > 8, row["id"]
 
 
+DOC_LEVEL_CHECK_IDS = ("251.1", "251.6", "251.8", "254.2", "254.5", "254.7")
+
+
+def test_document_presence_is_graded_partial_not_met():
+    """Finding a word in a document is not evidence the thing works.
+
+    Six checks can only look for the topic in prose. They must not be graded MET,
+    or the ledger claims verification where there is only a sentence.
+    """
+    sys.path.insert(0, str(HERE))
+    import audit_acceptance as A
+    rows = {r["id"]: r for r in
+            (A.run_one(cid, issue, text) for cid, issue, text in A.CRITERIA)}
+    for cid in DOC_LEVEL_CHECK_IDS:
+        row = rows[cid]
+        assert row["status"] != "MET", (
+            "%s is documentation-only but graded MET: %s" % (cid, row["evidence"]))
+
+
+def test_the_documented_fingerprint_is_compared_with_the_live_one(tmp_path):
+    """A doc can print a fingerprint that no longer matches the policy."""
+    sys.path.insert(0, str(HERE))
+    import audit_acceptance as A
+    status, evidence = A.k249_7()
+    assert status == A.MET
+    assert "matches the live" in evidence
+
+
+def test_partial_is_allowed_and_unmet_is_not():
+    payload = run_audit()
+    statuses = {r["status"] for r in payload["rows"]}
+    assert statuses <= {"MET", "PARTIAL", "MANUAL", "UNMET"}
+    assert "UNMET" not in statuses
+
+
 def test_a_criterion_with_no_check_and_no_reason_is_unmet():
     """Missing coverage has to fail loudly rather than vanish."""
     sys.path.insert(0, str(HERE))

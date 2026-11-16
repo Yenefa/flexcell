@@ -33,7 +33,7 @@
       "issue": 249,
       "criterion": "候选副本与裁决/隐藏材料分离；规范化路径检查并验证受保护文件机制",
       "status": "MET",
-      "evidence": "overlap refused (verdict is not a directory: /tmp/tmpg8m8fv2r/candidate/v); protected write refused (protected_write)"
+      "evidence": "overlap refused (verdict is not a directory: /tmp/tmp08iax1pp/candidate/v); protected write refused (protected_write)"
     },
     {
       "id": "249.6",
@@ -47,7 +47,7 @@
       "issue": 249,
       "criterion": "记录涉及的模型/工具/提示接口版本与已知限制",
       "status": "MET",
-      "evidence": "VISIBILITY.md records fingerprint and limits: True"
+      "evidence": "documented fingerprint a48651c0 matches the live a48651c0; limits stated"
     },
     {
       "id": "250.1",
@@ -95,8 +95,8 @@
       "id": "251.1",
       "issue": 251,
       "criterion": "任务规格、允许修改范围、不可变目标、目标及回归场景",
-      "status": "MET",
-      "evidence": "TASKS.md states the task and editable scope: True"
+      "status": "PARTIAL",
+      "evidence": "TASKS.md mentions the task and editable scope: True"
     },
     {
       "id": "251.2",
@@ -124,14 +124,14 @@
       "issue": 251,
       "criterion": "主要结果与过程结果字段（写入、迭代、token、耗时、人工介入）",
       "status": "MET",
-      "evidence": "process fields present: all"
+      "evidence": "process fields typed correctly: all"
     },
     {
       "id": "251.6",
       "issue": 251,
       "criterion": "明确修复运行/候选执行/最终场景的单位与分母，不重复计数",
-      "status": "MET",
-      "evidence": "denominators D1/D1'/D2/D3/N1/N2 documented: True"
+      "status": "PARTIAL",
+      "evidence": "denominators documented in DATA_DICTIONARY: True"
     },
     {
       "id": "251.7",
@@ -144,8 +144,8 @@
       "id": "251.8",
       "issue": 251,
       "criterion": "对比较、样本解释和协议偏差预先声明",
-      "status": "MET",
-      "evidence": "deviation and sample limits declared: True"
+      "status": "PARTIAL",
+      "evidence": "deviation and sample limits declared in the docs: True"
     },
     {
       "id": "251.9",
@@ -324,8 +324,9 @@
     }
   ],
   "counts": {
-    "MET": 25,
-    "MANUAL": 21
+    "MET": 22,
+    "MANUAL": 21,
+    "PARTIAL": 3
   },
   "criteria": 46
 }
