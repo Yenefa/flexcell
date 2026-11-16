@@ -352,6 +352,9 @@ class InterruptCleanupTest(unittest.TestCase):
     def test_sigterm_cleans_up_before_exit(self):
         self._interrupt_case(signal.SIGTERM, 143, 'SIGTERM')
 
+    def test_sighup_cleans_up_before_exit(self):
+        self._interrupt_case(signal.SIGHUP, 129, 'SIGHUP')
+
 
 class InterruptedWindowTest(unittest.TestCase):
     def test_interrupted_slot_is_kept_and_partial_results_are_written(self):

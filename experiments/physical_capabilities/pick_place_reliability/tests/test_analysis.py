@@ -239,6 +239,68 @@ class DriverVerdictTest(unittest.TestCase):
         self.assertEqual(row['status'], 'UNKNOWN')
         self.assertEqual(aw.summarize([row])['slots_completed'], 0)
 
+    def test_driver_ok_with_nonzero_exit_is_not_trusted(self):
+        make_slot(self.root, 'NORMAL_1', 0.008, 'drop error 0.008m', 'err=0.008',
+                  [(0.12, -0.15, 0.1895)])
+        path = self.root / 'results.json'
+        data = json.loads(path.read_text())
+        data['results'][0]['driver_exit'] = 124
+        path.write_text(json.dumps(data))
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'UNKNOWN')
+        self.assertIn('driver_exit', row['reason'])
+        self.assertEqual(aw.summarize([row])['slots_completed'], 0)
+
+    def test_duplicate_driver_rows_keep_the_window_unknown(self):
+        make_slot(self.root, 'NORMAL_1', 0.008, 'drop error 0.008m', 'err=0.008',
+                  [(0.12, -0.15, 0.1895)])
+        path = self.root / 'results.json'
+        data = json.loads(path.read_text())
+        data['results'].append(dict(data['results'][0]))
+        path.write_text(json.dumps(data))
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'UNKNOWN')
+        self.assertIn('duplicate', row['reason'])
+        self.assertEqual(aw.summarize([row])['slots_completed'], 0)
+
+
+class NonFiniteValueTest(unittest.TestCase):
+    """NaN/Inf must not become a sample, a target or a zero-error measurement."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = pathlib.Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_non_finite_final_error_is_unmeasured(self):
+        make_slot(self.root, 'NORMAL_1', float('nan'), 'drop error 0.008m', 'err=0.008',
+                  [(0.12, -0.15, 0.1895)])
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'OK')
+        self.assertIsNone(row['final_error_mm'])
+
+        summary = aw.summarize([row])
+        self.assertEqual(summary['slots_completed'], 0)
+        self.assertEqual(summary['slots_unmeasured'], 1)
+        self.assertIsNone(summary['error_mm']['mean'])
+
+    def test_non_finite_target_is_rejected(self):
+        make_slot(self.root, 'NORMAL_1', 0.008, 'drop error 0.008m', 'err=0.008',
+                  [(0.12, -0.15, 0.1895)])
+        (self.root / 'NORMAL_1/run-test/skills/move_to_pose.jsonl').write_text(
+            json.dumps({'target': {'position': [0.12, float('nan'), 0.1895]}}) + '\n')
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'OK')
+        self.assertEqual(row['last_targets'], [])
+        self.assertTrue(any('non-finite target' in error['error']
+                            for error in row['log_errors']))
+
 
 class CorruptLogTest(unittest.TestCase):
     """A truncated JSONL line belongs to one slot, not to the whole report."""

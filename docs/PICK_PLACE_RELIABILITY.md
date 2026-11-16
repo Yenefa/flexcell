@@ -32,10 +32,10 @@ slot, own output directory, sequential. 360 s per slot, 1440 s per window.
 python3 -m unittest discover -s experiments/physical_capabilities/pick_place_reliability/tests -v
 ```
 
-44 tests: one-result parsing, the single-run rule, the source-change scope,
+49 tests: one-result parsing, the single-run rule, the source-change scope,
 unknown-terminal detection, window stop behaviour, the completion flag, timeout
-and interrupt cleanup, the driver-verdict gate, corrupt-log isolation, and the
-artifact aggregator. No simulator, no ROS.
+and signal cleanup, the driver-verdict gate, non-finite values, corrupt-log
+isolation, and the artifact aggregator. No simulator, no ROS.
 
 ## Results (6 windows, 24 slot attempts)
 
@@ -69,10 +69,12 @@ is checked first: a slot the driver marked `UNKNOWN` (outer timeout, interrupt,
 unknown terminal) is not reclassified as `OK` even when a raw `PASS` result
 survived on disk, and unreadable window metadata leaves the slot `UNKNOWN`.
 Everything else is counted separately and listed in `excluded` with a reason, so a
-failed or unmeasured slot never becomes a zero-error sample. Two run directories
-for one slot are reported as `AMBIGUOUS` instead of silently reduced to the first
-one. A truncated JSONL line is recorded against its slot (`log_errors`) and its
-measurement stays `null`; the remaining windows are still analyzed.
+failed or unmeasured slot never becomes a zero-error sample. A non-finite
+(`NaN`/`Inf`) final error or target is treated as unmeasured, not rounded into the
+statistics. Two run directories for one slot are reported as `AMBIGUOUS` instead
+of silently reduced to the first one. A truncated JSONL line is recorded against
+its slot (`log_errors`) and its measurement stays `null`; the remaining windows
+are still analyzed.
 
 The freeze covers what the slot can execute or load, not only Python packages:
 `src/flexcell/**`, `infra/**`, `scripts/**`, `worlds/**`, `config/**`,

@@ -20,6 +20,7 @@ Usage:
 """
 import argparse
 import json
+import math
 import pathlib
 import statistics
 
@@ -33,6 +34,16 @@ def read_json(path):
         return json.loads(pathlib.Path(path).read_text())
     except (FileNotFoundError, ValueError):
         return None
+
+
+def finite_number(value):
+    """True only for a real, finite number; bool and NaN/Inf are rejected."""
+    if not isinstance(value, (int, float)) or isinstance(value, bool):
+        return False
+    try:
+        return math.isfinite(value)
+    except (TypeError, OverflowError):
+        return False
 
 
 def read_jsonl(path):
@@ -77,9 +88,10 @@ def parse_mm(detail, marker):
         else:
             break
     try:
-        return float(number) * 1000.0
+        value = float(number) * 1000.0
     except ValueError:
         return None
+    return value if math.isfinite(value) else None
 
 
 def run_directories(window_dir, label):
@@ -97,7 +109,10 @@ def window_driver_rows(window_dir):
     drivers = {}
     for row in rows:
         if isinstance(row, dict) and isinstance(row.get('label'), str):
-            drivers[row['label']] = row
+            label = row['label']
+            if label in drivers:
+                return None, 'window results.json has duplicate rows for %r' % label
+            drivers[label] = row
     if not drivers:
         return None, 'window results.json has no usable rows'
     return drivers, None
@@ -119,6 +134,10 @@ def slot_status(runs, result, driver=None, metadata_error=None):
                   'NOT_RUN': 'NOT_RUN', 'INTERRUPTED': 'INTERRUPTED'}
         return mapped.get(driver.get('status'), 'UNKNOWN'), \
             'window driver status %r' % driver.get('status')
+    if driver is not None:
+        driver_exit = driver.get('driver_exit')
+        if driver_exit is not None and driver_exit != 0:
+            return 'UNKNOWN', 'driver status OK but driver_exit is %r' % driver_exit
     if not runs:
         return 'MISSING', 'no run-* directory'
     if metadata_error:
@@ -173,10 +192,16 @@ def slot_row(window_dir, label, drivers=None, metadata_error=None):
         if not isinstance(pos, (list, tuple)) or len(pos) != 3:
             continue
         try:
-            targets.append(tuple(round(float(v), 6) for v in pos))
-        except (TypeError, ValueError):
+            values = [float(v) for v in pos]
+        except (TypeError, ValueError, OverflowError):
             log_errors.append(dict(file='move_to_pose.jsonl',
                                    error='invalid target position %r' % (pos,)))
+            continue
+        if not all(math.isfinite(v) for v in values):
+            log_errors.append(dict(file='move_to_pose.jsonl',
+                                   error='non-finite target position %r' % (pos,)))
+            continue
+        targets.append(tuple(round(v, 6) for v in values))
 
     measured = task.get('final_position_error_m')
     row.update(
@@ -184,7 +209,8 @@ def slot_row(window_dir, label, drivers=None, metadata_error=None):
         outcome=task.get('outcome'),
         error_code=task.get('error_code'),
         wall_seconds=task.get('wall_seconds'),
-        final_error_mm=float(measured) * 1000.0 if isinstance(measured, (int, float)) else None,
+        final_error_mm=(float(measured) * 1000.0
+                        if finite_number(measured) else None),
         place_drop_mm=(parse_mm(place[-1].get('detail'), 'drop error')
                        if place and not place_errors else None),
         verify_error_mm=(parse_mm(verify[-1].get('detail'), 'err=')

@@ -29,6 +29,7 @@ import uuid
 HERE = Path(__file__).resolve().parent
 SLOT_MARKER = 'FLEXCELL_WINDOW_SLOT_ID'
 INTERRUPT_EXITS = {130: 'SIGINT', 129: 'SIGHUP', 143: 'SIGTERM'}
+INTERRUPT_CODES = {name: code for code, name in INTERRUPT_EXITS.items()}
 
 
 class WindowSignal(Exception):
@@ -296,12 +297,13 @@ def run_slot(argv, env, log, timeout_s, grace_s=30.0):
     evidence instead of continuing to the next slot.
     """
     marker = env.get(SLOT_MARKER)
-    proc = subprocess.Popen(argv, env=env, stdout=log, stderr=subprocess.STDOUT,
-                            start_new_session=True)
+    proc = None
     cleanup = dict(graceful=False, survivors=0, killed=0, left=0)
     previous = _install_signal_handlers()
     try:
         try:
+            proc = subprocess.Popen(argv, env=env, stdout=log, stderr=subprocess.STDOUT,
+                                    start_new_session=True)
             proc.wait(timeout=timeout_s)
             return proc.returncode, cleanup
         except subprocess.TimeoutExpired:
@@ -314,7 +316,8 @@ def run_slot(argv, env, log, timeout_s, grace_s=30.0):
         cleanup['reason'] = reason
         ignored = _ignore_during_cleanup()
         try:
-            stop_slot(proc, marker, cleanup, grace_s)
+            if proc is not None:
+                stop_slot(proc, marker, cleanup, grace_s)
         finally:
             _restore_signal_handlers(ignored)
         return exit_code, cleanup
@@ -476,7 +479,7 @@ def main(argv=None):
         interrupted=payload['interrupted'],
         stop_reason=payload['stop_reason']), ensure_ascii=False))
     if payload['interrupted']:
-        return 130 if payload['interrupt_signal'] == 'SIGINT' else 143
+        return INTERRUPT_CODES.get(payload['interrupt_signal'], 130)
     return 0 if payload['all_slots_completed'] and payload['source_unchanged'] else 2
 
 
