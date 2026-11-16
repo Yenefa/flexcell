@@ -1492,3 +1492,24 @@ issues245(A catalog) and246(B audit entry) link exact scopes and first-PR
 acceptance. Both remain human collaboration reservations, not assigned users
 or completed implementations. Shared preparation CI does not certify future
 module code; its pull-request checks require the relevant module tests.
+
+
+## 2026-11-16 — User allocation changed to physical capability workstreams
+
+User assigned both245/246 to one collaborator and selected physical-capability
+ownership with a separate data/log/error-information integration role. A/B are
+module slots of that data owner, not two people. No assignee username inferred.
+
+New taskC is pick/place reliability: first deliver a fixed4-slot Gazebo window
+(normal,dual_object,normal,dual_object), bounded/serial with all failures kept;
+then make a minimal pick/place fix only if measured evidence supports it.
+Source/params/criteria remain frozen during each window. Unknown motion terminal
+stops further dispatch. Data owner links measurements, phases and errors by run
+ID; capability owner confirms root cause and repair. Contact-push ownership stays
+on the main physical branch; no contact/trajectory change is delegated here.
+
+The briefly drafted Development Skill usage-tool handoff was superseded before
+publication or branch creation when the user selected physical ownership. It is
+not an active task or completed module. Existing245/246 branches are not moved.
+TaskC instructions and offline PR checks are prepared only; no new controller,
+Gazebo run, capability result, baseline promotion or main merge this checkpoint.

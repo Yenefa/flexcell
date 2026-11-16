@@ -1,8 +1,7 @@
 {
   "architecture_base": "fbf6245c66e45a0a161a3cb103dc2751b9fa8300",
   "preparation_branch": "chore/team-handoff-20261116",
-  "status": "READY_UNASSIGNED",
-  "new_modules_implemented": false,
+  "status": "USER_ALLOCATED_AB_C_READY",
   "review_and_integration_target": "chore/team-handoff-20261116",
   "later_integration_target": "refactor/modular-workspace-20261115",
   "tasks": [
@@ -18,9 +17,11 @@
         "config/skill_catalog/",
         "docs/SKILL_CATALOG.md"
       ],
-      "status": "READY_UNASSIGNED",
+      "status": "USER_ALLOCATED_IDENTITY_UNSPECIFIED",
       "assignee": null,
-      "issue": 245
+      "issue": 245,
+      "developer_group": "data_and_evidence_owner",
+      "implementation_status": "NOT_VERIFIED_IN_THIS_HANDOFF"
     },
     {
       "slot": "B",
@@ -35,9 +36,31 @@
         "config/offline_audit_profiles/",
         "docs/OFFLINE_AUDIT.md"
       ],
-      "status": "READY_UNASSIGNED",
+      "status": "USER_ALLOCATED_IDENTITY_UNSPECIFIED",
       "assignee": null,
-      "issue": 246
+      "issue": 246,
+      "developer_group": "data_and_evidence_owner",
+      "implementation_status": "NOT_VERIFIED_IN_THIS_HANDOFF"
+    },
+    {
+      "slot": "C",
+      "module": "pick_place_reliability",
+      "priority": "P0",
+      "difficulty": "D2_REPRODUCTION_D3_EVIDENCE_SUPPORTED_FIX",
+      "branch": "feat/physical-pick-place-reliability-20261116",
+      "spec": "docs/team_handoff/20261116/C_PICK_PLACE_RELIABILITY.md",
+      "owned_paths": [
+        "experiments/physical_capabilities/pick_place_reliability/",
+        ".github/workflows/pick-place-reliability.yml",
+        "docs/PICK_PLACE_RELIABILITY.md",
+        "src/flexcell/flexcell_skills/flexcell_skills/pick_server.py",
+        "src/flexcell/flexcell_skills/flexcell_skills/place_server.py",
+        "src/flexcell/flexcell_skills/test/test_pick_place_reliability.py"
+      ],
+      "status": "READY_UNASSIGNED",
+      "implementation_status": "NOT_IMPLEMENTED",
+      "developer_group": "pick_place_capability_owner",
+      "assignee": null
     }
   ],
   "seed_tools": [
@@ -81,5 +104,13 @@
     "conclusion": "success",
     "repository_and_boundary_unittests": 32,
     "qualification": "PREPARATION_AND_REUSED_TOOLS_ONLY"
+  },
+  "handoff_implements_modules": false,
+  "assignment_note": "User allocated issues245 and246 to one collaborator and requested physical-capability workstreams plus a data/log/error integration owner. No GitHub username was supplied.",
+  "physical_organization": {
+    "push": "main physical capability workstream; contact_* ownership retained",
+    "pick_place": "new taskC; fixed four-slot reproduction before any control change",
+    "data": "tasksA/B; preserve source/run IDs and UNKNOWN; physical owner confirms causes",
+    "advanced_skills": "stacking, insertion and constrained placement remain future tasks, not assigned in this handoff"
   }
 }

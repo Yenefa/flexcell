@@ -1,10 +1,12 @@
-# 两人可直接开工的模块
+# 团队可直接开工的模块
 
-这是一份开发交接，不表示以下两个新模块已实现。未指定 GitHub 用户名，A/B 是任务槽位，
-当前状态为 READY_UNASSIGNED。先在 issue 记录认领，再开始代码开发。
+这是一份开发交接，不表示以下新模块已实现。A/B/C 是模块槽位。
+用户已将 #245/#246 一并交给第一位开发者；新增 C 留给另一位开发者。
+未指定 GitHub 用户名，不更改 GitHub assignees；认领信息以用户分工与 issue 记录为准。
 
 架构基线：`fbf6245c66e45a0a161a3cb103dc2751b9fa8300`。
-交接准备分支：`chore/team-handoff-20261116`。两个功能分支从同一个交接提交出发，
+交接准备分支：`chore/team-handoff-20261116`。A/B 保留原 `bb2be782` 起点和现有分支；
+C 从本次新增交接提交出发，不移动 A/B 分支。各任务的
 PR 先指向交接分支；审阅后再将需要的提交集成到 `refactor/modular-workspace-20261115`。
 已有物理工作树及 `main` 保持原样。
 
@@ -12,13 +14,17 @@ PR 先指向交接分支；审阅后再将需要的提交集成到 `refactor/mod
 |---|---|---|---|---|
 | A | 机器人动作技能目录与适用条件查询 · [#245](https://github.com/Yenefa/flexcell/issues/245) | D1 起步、整体 D2 / P1 | `feat/runtime-skill-catalog-20261116` | [A_SKILL_CATALOG.md](A_SKILL_CATALOG.md) |
 | B | 离线执行证据审计入口 · [#246](https://github.com/Yenefa/flexcell/issues/246) | D1 起步、整体 D2 / P0 | `feat/offline-audit-entry-20261116` | [B_OFFLINE_AUDIT.md](B_OFFLINE_AUDIT.md) |
+| C | 抓取→搬运→放置闭环稳定性 | D2 复现、D3 修复 / P0 | `feat/physical-pick-place-reliability-20261116` | [C_PICK_PLACE_RELIABILITY.md](C_PICK_PLACE_RELIABILITY.md) |
 
 A 提供执行 Agent 将来可查询的动作说明；B 提供开发 Agent 将来可读取的诊断报告。
-首版都是离线模块，不连接在线调度。输入、输出和文件归属分开，双方无需等待对方接口。
+C 是独立物理能力线，先复现与保留证据，再做证据支持的抓放修复。
+A/B 归数据负责人，负责动作信息、数据、日志、异常与来源整合；物理能力负责人确认根因并闭环修复。
+主线负责人继续负责接触推动；其他新物理能力按依赖顺序另开任务，不同时铺开。
+三个模块的代码归属分开，物理开发和数据工具开发无需互相等待。
 
 交接基线 `7fd115d9` 的 [team-handoff CI](https://github.com/Yenefa/flexcell/actions/runs/43806522767)
 和 [repository-layout CI](https://github.com/Yenefa/flexcell/actions/runs/43806522701) 均通过。
-这只证明准备资料与复用工具的检查完成；两个新模块由认领人实现，其 PR 必须带自己的测试。
+这只证明准备资料与复用工具的检查完成；新模块由认领人实现，其 PR 必须带自己的测试。
 
 ## 已有工作不再重写
 
@@ -44,16 +50,18 @@ git fetch origin
 git switch --track origin/feat/runtime-skill-catalog-20261116
 # B 在另一份 clone 中使用：
 # git switch --track origin/feat/offline-audit-entry-20261116
+# 另一位开发者使用 C：
+# git switch --track origin/feat/physical-pick-place-reliability-20261116
 ```
 
 同机开发可从公共仓库执行 `git worktree add ../skill-catalog feat/runtime-skill-catalog-20261116`
 和 `git worktree add ../offline-audit feat/offline-audit-entry-20261116`，分别使用独立目录。
-各自保持独立虚拟环境、构建和运行输出。没有人在这两个分支启动 Agent 或仿真。
+各自保持独立虚拟环境、构建和运行输出。本次交接没有在功能分支启动 Agent 或仿真。
 
 ## 公共约定
 
-- A 只改 A 的目录；B 只改 B 的目录。公共接口、物理控制和验收规则的变更先交给主线负责人。
-- 两个模块都可用 Python 标准库实现；首个 PR 不要求 ROS、模型服务或新仿真。
+- A/B 的代码由第一位开发者维护，C 的代码由另一位开发者维护。公共接口、物理控制和验收规则的变更先交给主线负责人。
+- A/B 仅需要 Python 环境。C 先做离线驱动测试，再按有界窗口在现有 ROS/Gazebo 环境运行；不调用付费模型。
 - 缺数据明确报告 UNKNOWN；保持原始文件和历史判断原样；模块完成不等于机器人任务通过。
 - 每个 PR 附：运行命令、正常例子、失败例子、输入未被改写的验证、已知限制。
 - 候选代码放各自分支；开发记录放各自模块文档，公共状态和版本索引由集成负责人更新。

@@ -46,6 +46,10 @@ jobs:
               assert Path('scripts/tests/test_offline_audit.py').is_file(), 'audit integration tests are required'
               subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s', 'scripts/tests',
                               '-p', 'test_offline_audit.py', '-v'], check=True)
+          elif branch == 'feat/physical-pick-place-reliability-20261116':
+              path = Path('experiments/physical_capabilities/pick_place_reliability/tests')
+              assert path.is_dir() and list(path.glob('test*.py')), 'bounded window driver tests are required'
+              subprocess.run([sys.executable, '-m', 'unittest', 'discover', '-s', str(path), '-v'], check=True)
           else:
-              print('Preparation checks only; both new modules are still awaiting implementation.')
+              print('Preparation checks only; new modules await their developers and module tests.')
           PY
