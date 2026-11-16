@@ -1,0 +1,146 @@
+{
+  "rows": [
+    {
+      "issue": "249",
+      "criterion": "静态输入/候选/反馈/裁决/隐藏答案的可见范围已定义",
+      "status": "MET",
+      "evidence": "visible categories: candidate_source, diagnosis, execution_feedback, static_input"
+    },
+    {
+      "issue": "249",
+      "criterion": "无反馈条件不能从别名/相邻/裁决/残留取到结果",
+      "status": "MET",
+      "evidence": "denied reasons: reserved_name, parent_traversal, absolute_path; source read: yes"
+    },
+    {
+      "issue": "249",
+      "criterion": "真实反馈等条件记录反馈来源与摘要",
+      "status": "MET",
+      "evidence": "source=own_run digest=f6dad5c24a16"
+    },
+    {
+      "issue": "249",
+      "criterion": "执行结果按条件路由",
+      "status": "MET",
+      "evidence": "{\"A_STATIC\": \"none\", \"B_REAL_FEEDBACK\": \"own_run\", \"C_MISMATCHED_FEEDBACK\": \"donor_run\", \"D_GUIDED\": \"own_run_plus_guidance\"}"
+    },
+    {
+      "issue": "249",
+      "criterion": "候选副本与裁决/隐藏材料分离，重叠被拒",
+      "status": "MET",
+      "evidence": "overlap refused: verdict is not a directory: /tmp/tmpkkg457rp/candidate/v"
+    },
+    {
+      "issue": "249",
+      "criterion": "记录接口版本与已知限制",
+      "status": "MET",
+      "evidence": "VISIBILITY.md limits section present: True"
+    },
+    {
+      "issue": "250",
+      "criterion": "不可变目标/物体/容差在候选之外，允许修改字段已列出",
+      "status": "MET",
+      "evidence": "editable_fields=['config/controller.yaml:kp', 'config/controller.yaml:kv', 'scripts/grasp_timing.py:approach_dwell_s']"
+    },
+    {
+      "issue": "250",
+      "criterion": "至少六类负例",
+      "status": "MET",
+      "evidence": "6 negative cases, codes: EVIDENCE_MISSING, GOAL_NOT_MET, NONZERO_EXIT, PROTECTED_MODIFIED, REGRESSION_FAILED, RUN_ID_MISMATCH, TAMPERED_IMMUTABLE"
+    },
+    {
+      "issue": "250",
+      "criterion": "保留合法正例，分别记录错误接纳/错误拒绝",
+      "status": "MET",
+      "evidence": "{\"false_accept\": 0, \"false_reject\": 0, \"cases\": 7}"
+    },
+    {
+      "issue": "250",
+      "criterion": "UNKNOWN 不转换为通过",
+      "status": "MET",
+      "evidence": "missing exit code -> UNKNOWN ['EXIT_CODE_MISSING']"
+    },
+    {
+      "issue": "251",
+      "criterion": "24 个槽位保持 NOT_RUN 且自检通过",
+      "status": "MET",
+      "evidence": "[ OK ] slot status: 24 NOT_RUN, 0 terminal"
+    },
+    {
+      "issue": "251",
+      "criterion": "6 次交互 / 20,000 tokens 上限已落实",
+      "status": "MET",
+      "evidence": "cap refused: interaction:2"
+    },
+    {
+      "issue": "251",
+      "criterion": "保留场景 2 布局 × 3 初态",
+      "status": "MET",
+      "evidence": "6 slots, all ['NOT_RUN']"
+    },
+    {
+      "issue": "254",
+      "criterion": "关键表格从原始记录重算",
+      "status": "MET",
+      "evidence": "19 records, 0 disagreements"
+    },
+    {
+      "issue": "254",
+      "criterion": "错误接纳与旧 claim_success 字段区分",
+      "status": "MET",
+      "evidence": "false_accept derived independently: True"
+    },
+    {
+      "issue": "249",
+      "criterion": "PR 附离线检查命令与允许/拒绝/不继承旧反馈的例子",
+      "status": "MANUAL",
+      "evidence": "PR #257 正文"
+    },
+    {
+      "issue": "250",
+      "criterion": "每个例子给出可执行命令、预期/实际与来源",
+      "status": "MANUAL",
+      "evidence": "PR #258 正文"
+    },
+    {
+      "issue": "251",
+      "criterion": "批次总费用额度、运行窗口与超时",
+      "status": "MANUAL",
+      "evidence": "协议 §5.3 标 TBD，需负责人签字"
+    },
+    {
+      "issue": "252",
+      "criterion": "按协议执行 24 个槽位并保留全部结果",
+      "status": "MANUAL",
+      "evidence": "缺模型凭据；见 issue #252"
+    },
+    {
+      "issue": "253",
+      "criterion": "冻结候选后执行 6 个保留场景",
+      "status": "MANUAL",
+      "evidence": "依赖 #252 的冻结候选"
+    },
+    {
+      "issue": "254",
+      "criterion": "比较四种反馈条件并给出结论",
+      "status": "MANUAL",
+      "evidence": "依赖 #252/#253 的结果"
+    },
+    {
+      "issue": "254",
+      "criterion": "相关工作与方法章节",
+      "status": "MANUAL",
+      "evidence": "未撰写"
+    },
+    {
+      "issue": "254",
+      "criterion": "作者、单位、贡献与授权",
+      "status": "MANUAL",
+      "evidence": "需实际参与者提供"
+    }
+  ],
+  "counts": {
+    "MET": 15,
+    "MANUAL": 8
+  }
+}
