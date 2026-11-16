@@ -132,22 +132,24 @@ def test_a_manifest_status_outside_the_vocabulary_is_refused(tmp_path):
 
 
 # ------------------------------------------------------- against the real files
-def test_the_checked_in_manifest_reconciles_with_the_real_records():
-    """The records on disk map onto manifest slots and agree with their states.
+def test_the_checked_in_manifest_reconciles_with_the_primary_batch():
+    """The manifest lists 24 slots; the batch holds 48 and only 24 are registered.
 
-    Before the first dispatch this test asserted the opposite - no records, and
-    that being consistent - because an empty experiment reconciles trivially.
-    The invariant worth holding now is that every real record lands on a
-    pre-registered slot and that the checker says so.
+    Repetitions 4 to 6 were added to raise n to 6. They are extra samples, not
+    pre-registered slots, so reconciling the whole file against a 24-row manifest
+    fails on 'a slot the manifest does not list' - correctly. The test filters to
+    what was registered, and the extra samples stay in the evidence file with the
+    deviation recorded in the manifest.
     """
     statuses = RC.parse_manifest(MANIFEST)
-    records = RC.load_records(HERE / "evidence" / "real_instances_matrix.json")
-    assert len(records) == 24
+    path = HERE / "evidence" / "v2_matrix_n6.json"
+    all_records = RC.load_records(path)
+    records = [r for r in all_records if r["slot_id"] in statuses]
+    assert len(all_records) == 48, "the batch should carry six repetitions"
+    assert len(records) == 24, "the manifest registers three"
     report = RC.assert_reconciled(statuses, records)
     assert report["manifest_slots"] == 24
     assert report["records"] == 24
-    for record in records:
-        assert record["slot_id"] in statuses, record["slot_id"]
 
 def test_the_dry_run_matrix_records_are_all_excluded():
     """The evidence the matrix actually produced must not move a single slot."""

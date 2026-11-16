@@ -128,7 +128,7 @@ def build_record(*, slot_id, condition, condition_access, policy, account,
                  gate_contract_codes=None, gate_independent="NOT_RUN",
                  false_reject=False, edited_paths=None,
                  first_edit_after_execution=False, deviation_codes=None,
-                 evidence_path="", notes=""):
+                 evidence_path="", notes="", task_variant="v1"):
     """One record, in the shape the data dictionary declares."""
     source = feedback_source_for(condition_access)
 
@@ -174,6 +174,7 @@ def build_record(*, slot_id, condition, condition_access, policy, account,
         "slot_id": slot_id,
         "condition": condition,
         "feedback_source": source,
+        "task_variant": task_variant,
         "feedback_payload_sha256": payload_sha,
         "guidance_sha256": guidance_sha,
         "donor_run_id": donor_run_id,

@@ -231,7 +231,6 @@ def run_slot(family, condition, rep, workdir, policy, donor, model, max_interact
     )
     record["qualification"] = "REAL_MODEL_RUN" + ("|INSTANCE" if instance else "|SYNTHETIC")
     record["seed"] = seed
-    record["task_variant"] = task_variant
     record["contract_sha256"] = hashlib.sha256(json.dumps(
         contract_for(family), sort_keys=True, separators=(",", ":"),
         ensure_ascii=False).encode()).hexdigest()
