@@ -14,7 +14,7 @@ PR 先指向交接分支；审阅后再将需要的提交集成到 `refactor/mod
 |---|---|---|---|---|
 | A | 机器人动作技能目录与适用条件查询 · [#245](https://github.com/Yenefa/flexcell/issues/245) | D1 起步、整体 D2 / P1 | `feat/runtime-skill-catalog-20261116` | [A_SKILL_CATALOG.md](A_SKILL_CATALOG.md) |
 | B | 离线执行证据审计入口 · [#246](https://github.com/Yenefa/flexcell/issues/246) | D1 起步、整体 D2 / P0 | `feat/offline-audit-entry-20261116` | [B_OFFLINE_AUDIT.md](B_OFFLINE_AUDIT.md) |
-| C | 抓取→搬运→放置闭环稳定性 | D2 复现、D3 修复 / P0 | `feat/physical-pick-place-reliability-20261116` | [C_PICK_PLACE_RELIABILITY.md](C_PICK_PLACE_RELIABILITY.md) |
+| C | 抓取→搬运→放置闭环稳定性 · [#247](https://github.com/Yenefa/flexcell/issues/247) | D2 复现、D3 修复 / P0 | `feat/physical-pick-place-reliability-20261116` | [C_PICK_PLACE_RELIABILITY.md](C_PICK_PLACE_RELIABILITY.md) |
 
 A 提供执行 Agent 将来可查询的动作说明；B 提供开发 Agent 将来可读取的诊断报告。
 C 是独立物理能力线，先复现与保留证据，再做证据支持的抓放修复。
@@ -25,6 +25,9 @@ A/B 归数据负责人，负责动作信息、数据、日志、异常与来源�
 交接基线 `7fd115d9` 的 [team-handoff CI](https://github.com/Yenefa/flexcell/actions/runs/43806522767)
 和 [repository-layout CI](https://github.com/Yenefa/flexcell/actions/runs/43806522701) 均通过。
 这只证明准备资料与复用工具的检查完成；新模块由认领人实现，其 PR 必须带自己的测试。
+
+C 的交接源 `f58c38f7` 经 [team-handoff CI 43807961917](https://github.com/Yenefa/flexcell/actions/runs/43807961917)
+检查通过。当前只有任务说明和离线 PR 检查，尚未实现四槽驱动、运行新窗口或修复抓放能力。
 
 ## 已有工作不再重写
 

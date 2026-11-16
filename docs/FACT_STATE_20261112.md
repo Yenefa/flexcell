@@ -1513,3 +1513,12 @@ publication or branch creation when the user selected physical ownership. It is
 not an active task or completed module. Existing245/246 branches are not moved.
 TaskC instructions and offline PR checks are prepared only; no new controller,
 Gazebo run, capability result, baseline promotion or main merge this checkpoint.
+
+
+### Physical workstream task published
+
+Issue247 records pick/place capability ownership and the staged D2 reproduction /
+D3 evidence-supported fix. Its preparation sourcef58c38f7 passed team-handoff
+CI43807961917. This confirms only task preparation and existing offline checks;
+new bounded-window code, new robot runs and any repair remain NOT_IMPLEMENTED /
+NOT_RUN. Existing245/246 allocation is preserved without inferring usernames.

@@ -60,7 +60,14 @@
       "status": "READY_UNASSIGNED",
       "implementation_status": "NOT_IMPLEMENTED",
       "developer_group": "pick_place_capability_owner",
-      "assignee": null
+      "assignee": null,
+      "issue": 247,
+      "preparation_validation": {
+        "source_commit": "f58c38f797b5f2b657234871d3cbc8b7b2ee181e",
+        "ci_run": 43807961917,
+        "conclusion": "success",
+        "qualification": "HANDOFF_ONLY_NO_NEW_PHYSICAL_RUN"
+      }
     }
   ],
   "seed_tools": [
@@ -94,7 +101,7 @@
     "One feature branch and exclusive code paths per developer.",
     "Do not rewrite tools already supplied by PR244.",
     "Do not import development tools or robot implementation into Runtime.",
-    "No changes to frozen criteria, robot control or original evidence in these two tasks.",
+    "A/B do not change robot control; C may minimally repair pick/place only after evidence. Frozen criteria and original evidence stay unchanged.",
     "Preparation CI does not establish implementation of either new module."
   ],
   "preparation_validation": {

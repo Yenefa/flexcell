@@ -6,6 +6,7 @@
 
 开发分支：`feat/physical-pick-place-reliability-20261116`。
 PR base：`chore/team-handoff-20261116`。不依赖 #245/#246 完成即可开始。
+任务认领与交付：[issue #247](https://github.com/Yenefa/flexcell/issues/247)。
 
 ## 独占修改范围
 
