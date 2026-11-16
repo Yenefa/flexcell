@@ -40,6 +40,17 @@ slot, own output directory, sequential. 360 s per slot, 1440 s per window.
 Completed slots: 20. `dual_object` 10/10. Normal placement error, n = 10:
 mean **9.19 mm**, stdev 3.30, min **2.70 mm**, max **13.95 mm** (5.2x spread).
 
+## Reproduce the numbers
+
+```bash
+python3 experiments/physical_capabilities/pick_place_reliability/analyze_windows.py \
+  /artifacts/pick-place-1 /artifacts/pick-place-2 --out analysis.json
+```
+
+`analysis.json` recomputes, from artifacts only: per-slot drop/verify error, the
+last two `move_to_pose` targets, the error distribution, and whether any two runs
+used a different release target.
+
 ## Finding 1 — the command is fixed, the result is not
 
 The last two `move_to_pose` targets are byte-identical in every run:
@@ -51,6 +62,9 @@ retreat 0.120000, -0.150000, 0.289500
 
 yet the placement error spans 2.70-13.95 mm. Perception and planning are not the
 source; the variance is created during execution.
+
+Aggregated check (`unique_release_target_sets`): **1** across all ten completed
+slots — every run commanded exactly the same two poses.
 
 ## Finding 2 — the error is created at release, not after it
 
@@ -65,6 +79,9 @@ source; the variance is created during execution.
 
 The object does not slide after release. Whatever places it at +X mm places it
 there at the moment of release.
+
+Aggregated check (`max_place_verify_delta_mm`): **0.6 mm** across the ten
+completed slots, so the release measurement and the independent verify agree.
 
 ## Finding 3 — one UNKNOWN was a harness race, not a robot failure
 
