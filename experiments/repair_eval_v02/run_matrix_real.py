@@ -108,7 +108,7 @@ def run_slot(family, condition, rep, workdir, policy, donor, model, max_interact
             break
         steps += 1
         if not agent.done:
-            refresh_feedback()
+            refresh_feedback(candidate)
     ledger.finish()
     result = agent.result()
 
