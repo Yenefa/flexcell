@@ -108,8 +108,8 @@ D = 真实反馈 + 显式指导。定义见 [PROTOCOL.md](PROTOCOL.md) §2。
 | `RUNNING` | 0 |
 | `SUCCESS_VERIFIED` | 0 |
 | `FAIL` | 0 |
-| `BUDGET_EXHAUSTED` | **5** |
-| `UNKNOWN` | **19** |
+| `BUDGET_EXHAUSTED` | **11** |
+| `UNKNOWN` | **13** |
 | `INVALID` | 0 |
 | 合计 | 24 |
 
