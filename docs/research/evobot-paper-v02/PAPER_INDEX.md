@@ -28,6 +28,7 @@ v0.1 的老问题（先有结论、后找证据）：
 | [INTEGRATION_SEAM.md](INTEGRATION_SEAM.md) | #249 与 #250 的接缝实测与适配器契约 | 否 |
 | [CLAIMS_EVIDENCE_TABLE.md](CLAIMS_EVIDENCE_TABLE.md) | 一页结论—证据对应表（骨架，行待填） | 是 |
 | [FIELD_SEMANTICS.md](FIELD_SEMANTICS.md) | `claim_success` 等字段的实际含义与误用 | 否 |
+| [METHOD.md](METHOD.md) | 方法：仪器怎么造、为什么这么造，以及它不能支持什么 | 否 |
 | [tools/recompute_w5_archive.py](tools/recompute_w5_archive.py) | 重算脚本（纯 stdlib，只读归档） | 否 |
 | `archive_recompute.json` | 上一条的原始输出 | 否 |
 
