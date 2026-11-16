@@ -12,6 +12,7 @@ WHY THE REWRITE
     coverage fails instead of disappearing.
 """
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -495,11 +496,16 @@ def main():
     print("covered criteria: %d of %d" % (len(rows), len(CRITERIA)))
     print("summary:", json.dumps(counts, ensure_ascii=False))
 
-    out = HERE / "evidence" / "acceptance_audit.json"
-    out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps(dict(rows=rows, counts=counts,
-                                   criteria=len(CRITERIA)), indent=2,
-                              ensure_ascii=False), encoding="utf-8")
+    payload = dict(rows=rows, counts=counts, criteria=len(CRITERIA))
+    # The audit is a check, not an evidence generator: its output is a byproduct.
+    # Writing it into the repository by default made every run dirty the working
+    # tree, which once refused a merge. Callers that want the file ask for it.
+    out = os.environ.get("AUDIT_OUT")
+    if out:
+        path = Path(out)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(payload, indent=2, ensure_ascii=False),
+                        encoding="utf-8")
     return 0
 
 

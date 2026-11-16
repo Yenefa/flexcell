@@ -11,11 +11,16 @@ ROOT = HERE.parents[1]
 EXPECTED_CRITERIA = 46
 
 
-def run_audit():
+def run_audit(tmp_path=None):
+    """The audit writes its JSON only when asked, so runs do not dirty the tree."""
+    import os
+    import tempfile
+    target = Path(tmp_path or tempfile.mkdtemp()) / "acceptance_audit.json"
+    env = dict(os.environ, AUDIT_OUT=str(target))
     result = subprocess.run([sys.executable, str(HERE / "audit_acceptance.py")],
-                            cwd=ROOT, capture_output=True, text=True)
+                            cwd=ROOT, capture_output=True, text=True, env=env)
     assert result.returncode == 0, result.stderr[-400:]
-    return json.loads((HERE / "evidence" / "acceptance_audit.json").read_text(encoding="utf-8"))
+    return json.loads(target.read_text(encoding="utf-8"))
 
 
 def test_the_audit_covers_every_criterion_the_issues_list():
@@ -106,3 +111,20 @@ def test_a_status_that_is_not_a_word_is_caught():
         A.COVERED.pop("999.8", None)
     assert row["status"] == A.UNMET
     assert "as a status" in row["evidence"]
+
+
+def test_running_the_audit_does_not_write_into_the_repository():
+    """It once did, and a dirty evidence file refused a merge.
+
+    The audit is a check. Its output is a byproduct, so it goes to a temp path
+    unless the caller asks for a file.
+    """
+    import os
+    evidence = HERE / "evidence" / "acceptance_audit.json"
+    if evidence.exists():
+        evidence.unlink()
+    env = {k: v for k, v in os.environ.items() if k != "AUDIT_OUT"}
+    result = subprocess.run([sys.executable, str(HERE / "audit_acceptance.py")],
+                            cwd=ROOT, capture_output=True, text=True, env=env)
+    assert result.returncode == 0
+    assert not evidence.exists(), "the audit wrote into the repository again"
