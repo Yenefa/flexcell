@@ -9,16 +9,19 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 import analyze_windows as aw  # noqa: E402
 
 
-def make_slot(root, label, error_m, place_detail, verify_detail, targets):
-    run = pathlib.Path(root) / label / 'run-test'
-    (run / 'skills').mkdir(parents=True)
+def make_slot(root, label, error_m, place_detail, verify_detail, targets,
+              run_name='run-test', status='PASS', outcome='OUTCOME_SUCCEEDED'):
+    run = pathlib.Path(root) / label / run_name
+    (run / 'skills').mkdir(parents=True, exist_ok=True)
     (run / 'result.json').write_text(json.dumps({
-        'case': 'normal', 'status': 'PASS',
-        'task': dict(outcome='OUTCOME_SUCCEEDED', error_code='ERR_NONE',
+        'case': 'normal', 'status': status,
+        'task': dict(outcome=outcome, error_code='ERR_NONE',
                      wall_seconds=14.0, final_position_error_m=error_m),
     }))
-    (run / 'skills/place.jsonl').write_text(json.dumps({'detail': place_detail}) + '\n')
-    (run / 'skills/verify.jsonl').write_text(json.dumps({'detail': verify_detail}) + '\n')
+    if place_detail is not None:
+        (run / 'skills/place.jsonl').write_text(json.dumps({'detail': place_detail}) + '\n')
+    if verify_detail is not None:
+        (run / 'skills/verify.jsonl').write_text(json.dumps({'detail': verify_detail}) + '\n')
     (run / 'skills/move_to_pose.jsonl').write_text(
         ''.join(json.dumps({'target': {'position': list(t)}}) + '\n' for t in targets))
 
@@ -47,13 +50,16 @@ class SlotRowTest(unittest.TestCase):
                   'measured within 0.060m of expected (err=0.0076)',
                   [(0.12, -0.15, 0.1895), (0.12, -0.15, 0.2895)])
         row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'OK')
         self.assertEqual(row['final_error_mm'], 7.6)
         self.assertEqual(row['place_drop_mm'], 8.0)
         self.assertEqual(row['verify_error_mm'], 7.6)
         self.assertEqual(row['last_targets'][0], (0.12, -0.15, 0.1895))
 
     def test_missing_slot_is_reported(self):
-        self.assertTrue(aw.slot_row(self.root, 'NORMAL_1')['missing'])
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'MISSING')
+        self.assertTrue(row['reason'])
 
 
 class SummaryTest(unittest.TestCase):
@@ -84,6 +90,93 @@ class SummaryTest(unittest.TestCase):
                   [(0.13, -0.15, 0.1895)])
         rows = [aw.slot_row(self.root, label) for label in ('NORMAL_1', 'NORMAL_2')]
         self.assertEqual(aw.summarize(rows)['unique_release_target_sets'], 2)
+
+
+class ValidityTest(unittest.TestCase):
+    """A failed or ambiguous slot must never become a zero-error sample."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = pathlib.Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_failed_slot_with_default_zero_error_is_not_counted(self):
+        run = self.root / 'NORMAL_1' / 'run-x'
+        run.mkdir(parents=True)
+        (run / 'result.json').write_text(json.dumps({
+            'case': 'normal', 'status': 'ROBOT_FAILURE',
+            'task': dict(outcome='OUTCOME_FAILED', error_code='ERR_ROBOT_FAILED',
+                         final_position_error_m=0.0),
+        }))
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'TASK_FAILED')
+
+        summary = aw.summarize([row])
+        self.assertEqual(summary['slots_completed'], 0)
+        self.assertEqual(summary['slots_task_failed'], 1)
+        self.assertIsNone(summary['error_mm']['mean'])
+        self.assertIsNone(summary['max_place_verify_delta_mm'])
+        self.assertEqual(summary['excluded'][0]['status'], 'TASK_FAILED')
+
+    def test_unknown_slot_is_not_counted(self):
+        make_slot(self.root, 'NORMAL_1', 0.008, 'drop error 0.008m', 'err=0.008',
+                  [(0.12, -0.15, 0.1895)])
+        path = self.root / 'NORMAL_1' / 'run-test' / 'result.json'
+        payload = json.loads(path.read_text())
+        payload['motion_terminal_known'] = False
+        path.write_text(json.dumps(payload))
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'UNKNOWN')
+        self.assertEqual(aw.summarize([row])['slots_completed'], 0)
+
+    def test_two_run_directories_are_ambiguous_not_the_first(self):
+        make_slot(self.root, 'NORMAL_1', 0.008, 'drop error 0.008m', 'err=0.008',
+                  [(0.12, -0.15, 0.1895)], run_name='run-a')
+        make_slot(self.root, 'NORMAL_1', 0.009, 'drop error 0.009m', 'err=0.009',
+                  [(0.12, -0.15, 0.1895)], run_name='run-b')
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'AMBIGUOUS')
+        self.assertIn('2 run-* directories', row['reason'])
+        self.assertEqual(aw.summarize([row])['slots_completed'], 0)
+
+    def test_run_directory_without_result_is_not_silently_skipped(self):
+        make_slot(self.root, 'NORMAL_1', 0.008, 'drop error 0.008m', 'err=0.008',
+                  [(0.12, -0.15, 0.1895)])
+        (self.root / 'NORMAL_1' / 'run-empty').mkdir()
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'AMBIGUOUS')
+
+    def test_missing_verify_measurement_stays_unknown(self):
+        make_slot(self.root, 'NORMAL_1', 0.008, 'drop error 0.008m', None,
+                  [(0.12, -0.15, 0.1895)])
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'OK')
+        self.assertIsNone(row['verify_error_mm'])
+
+        summary = aw.summarize([row])
+        self.assertEqual(summary['slots_completed'], 1)
+        self.assertIsNone(summary['max_place_verify_delta_mm'])
+        self.assertEqual(summary['place_verify_delta_mm']['n'], 0)
+
+    def test_missing_final_error_is_unmeasured_not_zero(self):
+        make_slot(self.root, 'NORMAL_1', None, 'drop error 0.008m', 'err=0.008',
+                  [(0.12, -0.15, 0.1895)])
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'OK')
+        self.assertIsNone(row['final_error_mm'])
+
+        summary = aw.summarize([row])
+        self.assertEqual(summary['slots_completed'], 0)
+        self.assertEqual(summary['slots_unmeasured'], 1)
+        self.assertEqual(summary['excluded'][0]['reason'], 'no final_position_error_m')
 
 
 if __name__ == '__main__':

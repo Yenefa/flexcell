@@ -71,24 +71,47 @@ def unknown(value):
 
 
 def one_result(directory, expected_case):
-    """Exactly one run-* directory whose case matches the declared slot."""
-    paths = list(Path(directory).glob('run-*/result.json'))
-    if len(paths) != 1:
-        raise ValueError('expected exactly one run-* result, found %d' % len(paths))
-    result = read(paths[0])
+    """Exactly one run-* directory, and it must carry a readable result.
+
+    Counting only `run-*/result.json` would hide an extra attempt whose result was
+    never written, so the directory count is what gets checked.
+    """
+    runs = sorted(p for p in Path(directory).glob('run-*') if p.is_dir())
+    if len(runs) != 1:
+        raise ValueError('expected exactly one run-* directory, found %d' % len(runs))
+    result_path = runs[0] / 'result.json'
+    result = read(result_path)
     if not isinstance(result, dict):
-        raise ValueError('unreadable result: %s' % paths[0])
+        raise ValueError('unreadable result: %s' % result_path)
     if result.get('case') != expected_case:
         raise ValueError('case %r != declared %r' % (result.get('case'), expected_case))
-    return result, paths[0]
+    return result, result_path
+
+
+SOURCE_PATTERNS = (
+    'src/flexcell/**/*',
+    'scripts/*.py',
+    'config/**/*',
+)
 
 
 def source_hashes():
-    paths = list((ROOT / 'src/flexcell').rglob('*.py'))
-    paths += list((ROOT / 'src/flexcell/flexcell_interfaces').rglob('*.action'))
-    paths += list((ROOT / 'src/flexcell/flexcell_interfaces').rglob('*.msg'))
+    """Hash everything the slot can execute, not only the Python skill sources.
+
+    `scripts/sim_smoke.py` starts the run and `config/` selects behaviour, so a
+    change there must show up as a changed source set. Build products and byte
+    caches are skipped.
+    """
+    files = set()
+    for pattern in SOURCE_PATTERNS:
+        for path in ROOT.glob(pattern):
+            if not path.is_file() or path.suffix == '.pyc':
+                continue
+            if '__pycache__' in path.parts or 'node_modules' in path.parts:
+                continue
+            files.add(path)
     return {str(p.relative_to(ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in sorted(paths)}
+            for p in sorted(files)}
 
 
 def slot_command(label, case, slot_out, backend, skill_backend):
@@ -280,11 +303,19 @@ def run_window(prereg, out, runner=None):
             json.dumps(rows, indent=2, ensure_ascii=False))
 
     after = source_hashes()
+    changed = sorted(k for k in set(before) | set(after) if before.get(k) != after.get(k))
+    (out / 'source_before.json').write_text(
+        json.dumps(before, indent=2, sort_keys=True))
+    (out / 'source_after.json').write_text(
+        json.dumps(after, indent=2, sort_keys=True))
     payload = dict(
         experiment=prereg.get('experiment'),
         scope='FUNCTIONAL_SMOKE_ONLY',
         results=rows,
         source_unchanged=(before == after),
+        source_changed=changed,
+        source_files=len(before),
+        source_scope=list(SOURCE_PATTERNS),
         stop_reason=stopped,
         all_slots_completed=(len(rows) == len(slots)
                              and stopped is None

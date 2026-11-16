@@ -1,9 +1,9 @@
 """Offline driver tests for the four-slot pick/place window.
 
 Runs under `python3 -m unittest discover`, matching the team-handoff gate.
-Covers result parsing, unknown-terminal detection, window stop behaviour, the
-completion flag, and the timeout cleanup that stops processes which escaped into
-their own session.
+Covers result parsing, the single-run rule, the source-change scope,
+unknown-terminal detection, window stop behaviour, the completion flag, and the
+timeout cleanup that stops processes which escaped into their own session.
 """
 import json
 import os
@@ -69,6 +69,30 @@ class OneResultTest(unittest.TestCase):
         write_result(self.root / 'NORMAL_1', 'dual_object')
         with self.assertRaises(ValueError):
             rw.one_result(self.root / 'NORMAL_1', 'normal')
+
+    def test_run_directory_without_result_is_rejected(self):
+        write_result(self.root / 'NORMAL_1', 'normal', run_name='run-good')
+        (self.root / 'NORMAL_1' / 'run-empty').mkdir()
+        with self.assertRaises(ValueError) as ctx:
+            rw.one_result(self.root / 'NORMAL_1', 'normal')
+        self.assertIn('exactly one run-* directory', str(ctx.exception))
+
+    def test_single_run_directory_without_result_is_rejected(self):
+        (self.root / 'NORMAL_1' / 'run-empty').mkdir(parents=True)
+        with self.assertRaises(ValueError) as ctx:
+            rw.one_result(self.root / 'NORMAL_1', 'normal')
+        self.assertIn('unreadable result', str(ctx.exception))
+
+
+class SourceScopeTest(unittest.TestCase):
+    """The change check must cover what the slot actually executes."""
+
+    def test_execution_entry_is_hashed(self):
+        self.assertIn('scripts/sim_smoke.py', rw.source_hashes())
+
+    def test_configuration_is_hashed(self):
+        hashes = rw.source_hashes()
+        self.assertTrue(any(key.startswith('config/') for key in hashes))
 
 
 class UnknownTest(unittest.TestCase):

@@ -32,8 +32,9 @@ slot, own output directory, sequential. 360 s per slot, 1440 s per window.
 python3 -m unittest discover -s experiments/physical_capabilities/pick_place_reliability/tests -v
 ```
 
-17 tests: one-result parsing, unknown-terminal detection, window stop behaviour,
-and the artifact aggregator. No simulator, no ROS.
+17 tests: one-result parsing, the single-run rule, the source-change scope,
+unknown-terminal detection, window stop behaviour, and the artifact aggregator.
+No simulator, no ROS.
 
 ## Results (6 windows, 24 slot attempts)
 
@@ -75,7 +76,7 @@ source; the variance is created during execution.
 Aggregated check (`unique_release_target_sets`): **1** across all ten completed
 slots — every run commanded exactly the same two poses.
 
-## Finding 2 — the error is created at release, not after it
+## Finding 2 — the error is already present at the first post-release sample
 
 `place` drop error and `verify` final error agree in every slot:
 
@@ -86,11 +87,16 @@ slots — every run commanded exactly the same two poses.
 | branch NORMAL_1 | 12 mm | 11.7 mm |
 | branch NORMAL_2 | 8 mm | 7.7 mm |
 
-The object does not slide after release. Whatever places it at +X mm places it
-there at the moment of release.
-
 Aggregated check (`max_place_verify_delta_mm`): **0.6 mm** across the ten
-completed slots, so the release measurement and the independent verify agree.
+completed slots. Slots that lack either measurement are excluded from this delta
+instead of being filled with zero.
+
+What the number does and does not bound: `place_server` samples `drop_err` after
+the release, after the gripper opens, and after `settle_time_s`
+(`place_server.py:435-450`). The agreement therefore bounds what changed
+**between those two samples**; it does not exclude movement in the interval from
+release to the first sample. Slip during settle, servo drift and grasp offset
+stay open until there is continuous pose evidence across the release instant.
 
 ## Finding 3 — one UNKNOWN was a harness race, not a robot failure
 
