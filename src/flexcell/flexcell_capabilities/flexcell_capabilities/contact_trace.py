@@ -8,6 +8,13 @@ import time
 import numpy as np
 from flexcell_capabilities.contact_geometry import ARM
 
+# Frames retained for matching. A poll that starts after the stream already ran
+# reads the whole backlog at once, so the batch itself can be much larger than
+# this window; the cap below refuses a pathological backlog instead of growing
+# without bound.
+WINDOW_FRAMES = 4096
+MAX_BACKLOG_FRAMES = 16384
+
 
 def fresh_joint_values(samples,physical_sim_ns,now_s):
     """Newest complete measured joints at/before a coherent native frame.
@@ -60,7 +67,29 @@ def patch_distance(point,triangles):
 
 
 class JsonTail:
-    def __init__(self,path):self.path=Path(path);self.offset=0;self.pending=''
+    """A line-delimited JSON reader that resumes where it stopped.
+
+    from_end exists because a monitor that attaches to a stream which is already
+    running did not observe the earlier rows. Reading them would be replayed
+    history presented as observation; skipping them is what actually happened.
+    The skip is counted, so it is reported rather than hidden. The offset lands
+    on a line boundary, because a writer appends continuously and the last line
+    on disk may still be half-written.
+    """
+
+    def __init__(self,path,from_end=False):
+        self.path=Path(path);self.offset=0;self.pending='';self.skipped_bytes=0
+        if from_end:self.offset=self.skipped_bytes=self._tail_offset()
+
+    def _tail_offset(self):
+        try:size=self.path.stat().st_size
+        except OSError:return 0
+        if size<=0:return 0
+        with self.path.open('rb') as stream:
+            window=min(size,1<<16);stream.seek(size-window);chunk=stream.read(window)
+        cut=chunk.rfind(b'\n')
+        return 0 if cut<0 and size<=len(chunk) else size-window+cut+1
+
     def read(self):
         if not self.path.exists():return []
         with self.path.open() as stream:
@@ -71,7 +100,13 @@ class JsonTail:
 
 class NativeContact:
     def __init__(self,directory,target,protected):
-        self.physics=JsonTail(Path(directory)/'physics.jsonl');self.contacts=JsonTail(Path(directory)/'contacts.jsonl')
+        # Attach at the tail: a monitor that starts while the stream is already
+        # running cannot claim to have observed the rows written before it.
+        # Replaying them was the startup race - a large backlog read in one poll
+        # and then refused as expired, latching an error that made fresh() false
+        # forever. The skipped byte counts are reported so the gap stays visible.
+        self.physics=JsonTail(Path(directory)/'physics.jsonl',from_end=True)
+        self.contacts=JsonTail(Path(directory)/'contacts.jsonl',from_end=True)
         self.target,self.protected=target,protected;self.frames={};self.order=deque();self.pending=[]
         self.latest=None;self.latest_physics=None;self.matched_physics=None;self.error=None;self.protected_peak=0.
         self.registry=None;self.active=False;self.start_ns=0;self.steps=0;self.points=[]
@@ -87,10 +122,24 @@ class NativeContact:
 
     def poll(self):
         try:
-            for row in self.physics.read():
+            # The window is trimmed at the END of the poll, not while the physics
+            # batch is being read. A monitor that starts after the stream has a
+            # backlog reads that backlog in one batch; trimming mid-batch would
+            # evict frames whose contact rows are still ahead in the same poll and
+            # misreport them as "expired without a physics match", which latches
+            # the error and makes fresh() permanently false. Physical rows read in
+            # THIS poll can always match contacts read in this poll.
+            batch=self.physics.read()
+            if len(batch)>MAX_BACKLOG_FRAMES:
+                # Refusing is honest: a monitor this far behind never observed the
+                # early stream, and dropping the batch silently would turn a real
+                # gap into an invisible one. The error latches, so fresh() stays
+                # false and the caller sees a refusal instead of a wrong answer.
+                self.error='native backlog of %d frames exceeds %d' % (len(batch),MAX_BACKLOG_FRAMES)
+                return
+            for row in batch:
                 if self.first_physics_ns is None:self.first_physics_ns=row['sim_ns']
                 self.latest_physics=row;ns=row['sim_ns'];self.frames[ns]=row;self.order.append(ns)
-                while len(self.order)>4096:self.frames.pop(self.order.popleft(),None)
             self.pending.extend(self.contacts.read());pending=[]
             for row in self.pending:
                 for name,origin in self.protected.items():
@@ -141,6 +190,7 @@ class NativeContact:
                         self.points.append((bool(rear),float(xdom),float(error)))
                 self.steps+=int(found)
             self.pending=pending
+            while len(self.order)>WINDOW_FRAMES:self.frames.pop(self.order.popleft(),None)
         except Exception as exc:self.error='native telemetry invalid: '+str(exc)
 
     def fresh(self):
