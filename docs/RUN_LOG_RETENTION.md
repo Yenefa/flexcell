@@ -51,9 +51,21 @@ Product references, so the inventory is not invented:
 * crash detail - `crash_detail()` in `common.py`; it is retained either as its own
   file, in `failure_evidence.json:detail`, in the RESULT detail, or as launcher
   markers.
-* stage evidence - `completed_stage_ids` in the RESULT and the FSM/demo log, plus
-  stage tokens in the detail such as `PUSH_A`. A stage token `PUSH_A` requires
-  `push.jsonl`; this is the rule that would have caught the T08 omission.
+* stage evidence - where the run records which skills actually ran. Four sources
+  are read, because the writers record it in different places:
+  `completed_stage_ids`/`stage_ids`/`stages` in the RESULT, the real `fsm_trace`
+  string list (`PICK_A(attempt=1):OK`), per-step records (`steps[].skill` and
+  `episode` steps' `policy_output.action`), and stage tokens in the RESULT detail.
+  A stage token `PUSH_A` requires `push.jsonl`; this is the rule that would have
+  caught the T08 omission. The `fsm_trace`/steps sources were added after a review
+  found that a run whose only stage evidence was those fields could omit
+  `pick.jsonl` and `place.jsonl` and still pass.
+* a skill log counts as retained only when it holds at least one parseable JSONL
+  record. An absent file, an empty file, a file of nothing but unparseable lines,
+  and valid records sitting beside untolerated garbage are four distinct reported
+  reasons - the first version only asked whether the path existed, so an emptied
+  `push.jsonl` passed. The pre-existing "a truncated final line is tolerated" rule
+  is unchanged.
 
 ## Output directory, pointers and exit codes
 
@@ -90,15 +102,20 @@ Captured output on this Windows host (Python 3.12, no pytest, no ROS):
     test_batch_mode_reports_every_run_and_fails_if_any_is_incomplete ... ok
     test_complete_runs_pass_and_startup_demands_no_task_level_logs ... ok
     ...
-    Ran 13 tests in 1.6s
+    Ran 19 tests in 2.3s
     OK
 
     exit code: 0
 
-The 13 cases cover the three required fixture families twice - complete (the
+The 19 cases cover the three required fixture families twice - complete (the
 phase-aware inventory must accept them) and with items removed (exact missing set and
 exit 1) - plus output-directory policy, pointer/sha256 behaviour, jsonl and episode
-validation, batch mode, and usage/config errors.
+validation, batch mode, and usage/config errors. Six of them exist because of review
+findings: an emptied skill log, a skill log with only unparseable lines, the
+truncated-tail tolerance still holding, stage evidence that exists only as
+`fsm_trace` (single task, demo and composite shapes) still demanding `pick.jsonl`
+and `place.jsonl`, an episode naming a skill through `policy_output.action`, and a
+recovery stage still requiring its own log.
 
 A manual demonstration of the two outcomes, using the same fixture builder:
 
@@ -112,8 +129,15 @@ A manual demonstration of the two outcomes, using the same fixture builder:
 
     $ # delete run_normal/push.jsonl, then repeat
     run run_normal phase=success required=7 missing=1
-    MISSING: run_normal/push.jsonl (the run's stage evidence names this skill but its jsonl was not retained (stage PUSH_A))
+    MISSING: run_normal/push.jsonl (the run's stage evidence names this skill but its jsonl was not retained (stage PUSH_A): log file is absent)
     audit summary: 3 run(s), 2 passed, 1 failed, 1 missing item(s)
+    exit code: 1
+
+An emptied log now fails where it used to pass:
+
+    $ # empty run_normal/push.jsonl instead of deleting it, then repeat
+    MISSING: run_normal/push.jsonl (... (stage PUSH, PUSH_A): log file is empty)
+    audit summary: 1 run(s), 0 passed, 1 failed, 1 missing item(s)
     exit code: 1
 
 ## Limits (stated, not hidden)

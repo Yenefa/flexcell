@@ -23,6 +23,10 @@ Design rules, in the repository's own terms:
   * the required set is PHASE-AWARE. A run that never started cannot have an episode
     record, and demanding one would train operators to ignore the report. The phase
     is derived from the run's own evidence (see classify()), never assumed.
+  * evidence is read from the fields the writers actually persist, and "retained"
+    means usable, not merely present: a skill jsonl that was truncated to zero bytes
+    is reported missing, and the set of executed skills comes from the RESULT
+    fsm_trace, the FSM/demo log steps and the episode policy_output actions.
 
 Usage:
     python scripts/run_log_audit.py <run-dir-or-parent-dir>
@@ -46,7 +50,8 @@ SCHEMA_VERSION = 1
 DEFAULT_CONFIG = "config/run_log_required.json"
 REPO_ROOT = Path(__file__).resolve().parents[1]
 CHUNK = 1 << 20
-# stage ids look like PUSH_A / PLACE_A / MOVE_A in a RESULT detail and in the FSM log
+# stage ids look like PUSH_A / PLACE_A / MOVE_A in a RESULT detail, in the FSM log
+# and inside an fsm_trace element such as 'PICK_A(attempt=1):OK'
 STAGE_TOKEN = re.compile(r"\b[A-Z][A-Z0-9]{1,}_[A-Z]\b")
 # a skill-server jsonl cut off by a crash ends in one truncated line; the records
 # before it are still valid evidence, so exactly that line is tolerated (and
@@ -360,44 +365,172 @@ def _check_glob_json(item, ctx):
     return missing
 
 
-def stage_ids(ctx) -> dict:
-    """skill log -> set of stage ids whose evidence shows that skill ran."""
-    run_dir = ctx["run_dir"]
+# ------------------------------------------------------------ stage evidence
+# What the writers actually persist, so the audit reads the same fields a
+# reviewer does (PR #244 item 4):
+#   * RunPickPlace/RunDemo RESULT carry `fsm_trace`, the states the FSM visited:
+#     'OBSERVE_A', 'PICK_A(attempt=1):OK', 'PLACE_A:FAIL',
+#     'RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1):FAIL)';
+#   * the task_fsm.jsonl / demo_runs.jsonl record repeats `fsm_trace` and adds
+#     `steps`, each naming a skill ('pick') and a stage label ('PLACE_A');
+#   * an episode record keeps the same actions under steps[].policy_output.action.
+# Reading only completed_stage_ids/stage_ids/stages missed all three, so a run
+# that really picked and placed still passed after pick.jsonl and place.jsonl
+# were gone.
+def skill_log_for(cfg, ident):
+    """The skill jsonl a stage/skill identifier demands, or None."""
+    logs = cfg["stage_skill_logs"]
+    text = str(ident).strip()
+    if not text:
+        return None
+    upper = text.upper()
+    # a stage id names its skill in the prefix: PICK_A, PUSH_A, PICK
+    for candidate in (upper, upper.split("_", 1)[0], upper.split(":", 1)[0]):
+        if candidate in logs:
+            return logs[candidate]
+    # a step's skill field names the skill log itself: 'pick', 'move_to_pose'
+    for name, log in logs.items():
+        stem = log[:-len(".jsonl")] if log.endswith(".jsonl") else log
+        if text in (name, name.lower(), stem):
+            return log
+    # a recovery stage re-runs the skill it is named after (REOBSERVE_A observes
+    # again), so it owes that skill's log too
+    prefix = upper.split("_", 1)[0]
+    for name in sorted(logs, key=len, reverse=True):
+        if prefix.endswith(name) and prefix != name:
+            return logs[name]
+    return None
+
+
+def _step_ids(step) -> set:
+    """Stage/skill identifiers from one step record, whichever writer wrote it.
+
+    The FSM/demo log step names the skill in 'skill' and the stage in 'state'; an
+    episode step keeps the same action under 'policy_output.action'.
+    """
     ids = set()
-    result = ctx["result"] or {}
-    for value in result.get("completed_stage_ids") or []:
-        if isinstance(value, str):
+    if not isinstance(step, dict):
+        return ids
+    output = step.get("policy_output")
+    if not isinstance(output, dict):
+        output = {}
+    for value in (step.get("skill"), step.get("action"),
+                  output.get("action"), output.get("skill")):
+        if isinstance(value, str) and value.strip():
+            ids.add(value.strip())
+    state = step.get("state")
+    if isinstance(state, str):
+        ids.update(STAGE_TOKEN.findall(state))
+    return ids
+
+
+def _record_ids(record) -> set:
+    """Identifiers of executed stages/skills from one persisted record."""
+    ids = set()
+    if not isinstance(record, dict):
+        return ids
+    for key in ("completed_stage_ids", "stage_ids", "stages"):
+        value = record.get(key)
+        if isinstance(value, list):
+            ids.update(v for v in value if isinstance(v, str))
+        elif isinstance(value, str):
             ids.add(value)
-    if isinstance(result.get("detail"), str):
-        ids.update(STAGE_TOKEN.findall(result["detail"]))
+    detail = record.get("detail")
+    if isinstance(detail, str):
+        ids.update(STAGE_TOKEN.findall(detail))
+    trace = record.get("fsm_trace")
+    if isinstance(trace, list):
+        for element in trace:
+            if isinstance(element, str):
+                ids.update(STAGE_TOKEN.findall(element))
+    steps = record.get("steps")
+    if isinstance(steps, list):
+        for step in steps:
+            ids.update(_step_ids(step))
+    return ids
+
+
+def episode_paths(ctx) -> list:
+    """Episode files the inventory declares (kind glob_json, episode shape).
+
+    Taken from the config rather than hard-coded: the item that validates the
+    episode is the one that says where episodes are retained.
+    """
+    run_dir = ctx["run_dir"]
+    paths = []
+    for item in ctx["cfg"]["items"]:
+        if item.get("kind") == "glob_json" and item.get("validate") == "episode":
+            paths.extend(match for match in sorted(run_dir.glob(item["path"]))
+                         if match.is_file())
+    return paths
+
+
+def stage_ids(ctx) -> dict:
+    """skill log -> set of stage/skill ids whose evidence shows it ran."""
+    run_dir = ctx["run_dir"]
+    ids = _record_ids(ctx["result"] or {})
     for name in ("task_fsm.jsonl", "demo_runs.jsonl"):
         path = run_dir / name
         if not path.is_file():
             continue
         records, _tolerated, _bad = read_jsonl(path)
         for record in records:
-            for key in ("completed_stage_ids", "stage_ids", "stages"):
-                value = record.get(key)
-                if isinstance(value, list):
-                    ids.update(v for v in value if isinstance(v, str))
-                elif isinstance(value, str):
-                    ids.add(value)
+            ids.update(_record_ids(record))
+    for path in episode_paths(ctx):
+        ids.update(_record_ids(read_json_object(path)))
     needed = {}
     for ident in sorted(ids):
-        log = ctx["cfg"]["stage_skill_logs"].get(ident.split("_", 1)[0])
+        log = skill_log_for(ctx["cfg"], ident)
         if log:
             needed.setdefault(log, set()).add(ident)
     return needed
 
 
+def needed_skill_logs(ctx) -> dict:
+    """stage_ids() is expensive on a large run, and both callers want the same
+    answer: compute it once per audited run."""
+    if "needed_skill_logs" not in ctx:
+        ctx["needed_skill_logs"] = stage_ids(ctx)
+    return ctx["needed_skill_logs"]
+
+
+def _skill_log_problem(path: Path):
+    """Why a skill jsonl is not usable evidence, or None when it is.
+
+    Existence is not retention: emptying push.jsonl still answered is_file(), so
+    the audit waved through a run that had lost its only push records (PR #244
+    item 3). A skill log counts only when it still holds at least one parseable
+    record, with the same single-truncated-final-line tolerance the other jsonl
+    items apply.
+    """
+    if not path.is_file():
+        return "log file is absent"
+    try:
+        empty = path.stat().st_size == 0
+    except OSError:
+        return "log file is unreadable"
+    if empty:
+        return "log file is empty"
+    records, tolerated, bad = read_jsonl(path)
+    if not records:
+        # a whitespace-only file has no bad lines but also no record at all
+        return ("log file is empty" if not bad
+                else "no valid JSONL record (%d unparseable line(s))" % bad)
+    if bad and not tolerated:
+        return ("%d unparseable line(s) beside %d valid record(s)"
+                % (bad, len(records)))
+    return None
+
+
 def _check_skill_logs(item, ctx):
     run_dir = ctx["run_dir"]
     missing = []
-    for log, idents in sorted(stage_ids(ctx).items()):
-        if (run_dir / log).is_file():
+    for log, idents in sorted(needed_skill_logs(ctx).items()):
+        problem = _skill_log_problem(run_dir / log)
+        if problem is None:
             continue
-        missing.append(_miss(item, log, reason="%s (stage %s)" % (
-            item["reason"], ", ".join(sorted(idents)))))
+        missing.append(_miss(item, log, reason="%s (stage %s): %s" % (
+            item["reason"], ", ".join(sorted(idents)), problem)))
     return missing
 
 
@@ -460,7 +593,7 @@ def audit_run(run_dir: Path, cfg: dict) -> dict:
             continue
         required.append(item["id"])
         missing.extend(CHECKERS[item["kind"]](item, ctx))
-    needed = stage_ids(ctx)
+    needed = needed_skill_logs(ctx)
     return {
         "run_id": run_dir.name,
         "run_dir": str(run_dir),

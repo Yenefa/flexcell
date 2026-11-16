@@ -11,6 +11,11 @@ twice: once COMPLETE (the phase-aware inventory must accept it, which is the neg
 test that stops the auditor demanding logs a startup failure cannot have) and once
 with items removed (exact missing set and exit 1).
 
+Three more fixtures copy the fields the writers actually persist - the RESULT
+fsm_trace, the FSM/demo log steps and the episode policy_output.action - and carry
+the two retention regressions from the PR #244 review: a skill jsonl emptied in
+place, and a run whose executed skills appear only in those real fields.
+
 Run directly:  python scripts/test_run_log_audit.py
 """
 import hashlib
@@ -72,6 +77,57 @@ FAILED_RESULT = {"outcome": 1, "error_code": 25,
                  "completed_stage_ids": ["OBSERVE_A", "MOVE_A"]}
 
 
+# Shapes copied from the writers (task_fsm_server.py finish()/log_record and
+# contracts/episode.py), not invented for the test:
+#   * RunPickPlace.Result and RunDemo.Result carry fsm_trace, a list of the states
+#     the FSM visited; RunComposite.Result carries completed_stage_ids of the
+#     caller's own stage ids and no fsm_trace at all;
+#   * task_fsm.jsonl / demo_runs.jsonl repeat fsm_trace and add steps, each naming
+#     a skill ('pick') and its stage label ('PICK_A(attempt=1)');
+#   * an episode step keeps the same action under steps[].policy_output.action.
+SINGLE_FSM_TRACE = ["OBSERVE_A", "PICK_A(attempt=1):OK", "PLACE_A:OK",
+                    "VERIFY_A(attempt=1):OK"]
+DEMO_FSM_TRACE = SINGLE_FSM_TRACE + ["OBSERVE_B", "PICK_B(attempt=1):OK",
+                                     "PLACE_B:OK", "VERIFY_B(attempt=1):OK"]
+SINGLE_RESULT_FSM = {"outcome": 0, "error_code": 0,
+                     "detail": "task done: all assignments verified",
+                     "fsm_trace": SINGLE_FSM_TRACE}
+DEMO_RESULT_FSM = {"outcome": 0, "error_code": 0,
+                   "scenario_id": "week1_demo_v1",
+                   "run_id": "week1_demo_v1-0a1b2c3d",
+                   "detail": "task done: all assignments verified",
+                   "fsm_trace": DEMO_FSM_TRACE,
+                   "object_a_at_zone": True, "object_b_at_zone": True}
+COMPOSITE_RESULT_FSM = {"outcome": 0, "error_code": 0,
+                        "run_id": "composite-0123456789abcdef",
+                        "completed_stage_ids": ["one", "two"],
+                        "component_run_ids": ["pick_place_v1-0badc0de",
+                                              "pick_place_v1-0badc0df"],
+                        "detail": "all native stages and fresh joint conditions"}
+
+
+def fsm_steps(entries):
+    """Steps as task_fsm_server.py appends them: state label plus skill name."""
+    return [{"state": state, "skill": skill, "ok": True, "error_code": 0,
+             "attempt": 1}
+            for state, skill in entries]
+
+
+def episode_record_from_actions(run_id, actions, scenario="pick_place_v1"):
+    """Episode steps as contracts/episode.py writes them: the action lives under
+    policy_output, so a reader that only looks at the step's own keys sees none."""
+    return {"EpisodeSchemaVersion": 1,
+            "scenario_id": scenario,
+            "run_id": run_id,
+            "policy": {"name": "rule", "version": "0"},
+            "steps": [{"seq": index + 1,
+                       "policy_input": {"goal": {"goal_id": "t08"}},
+                       "policy_output": {"action": action, "target": "red"},
+                       "executor_result": {"outcome": 0}}
+                      for index, action in enumerate(actions)],
+            "final_state": {"outcome": 0}}
+
+
 class Fixture:
     """Writes synthetic run directories under one temporary root."""
 
@@ -126,6 +182,101 @@ class Fixture:
               "RuntimeError: Gazebo did not start\n")
         write(run / "crash_detail.txt",
               "unhandled exception: RuntimeError: Gazebo did not start\n")
+        return run
+
+    # -- real writer shapes (review #244 item 4) -------------------------
+    def single_fsm_trace(self, name="run_single_fsm_trace"):
+        """A single-object run recorded the way task_fsm_server.py writes it.
+
+        The RESULT carries fsm_trace (what the server's finish() sets) and no
+        completed_stage_ids; task_fsm.jsonl repeats that trace and adds steps; the
+        episode keeps each action under policy_output.action.
+        """
+        run = self.runs / name
+        self._result(run, SINGLE_RESULT_FSM)
+        write_json(run / "sim" / "episodes" / "pick_place_v1_one.json",
+                   episode_record_from_actions(name, ("OBSERVE", "PICK",
+                                                      "PLACE", "VERIFY")))
+        write_jsonl(run / "decisions.jsonl",
+                    [{"seq": 1, "action": "PICK", "dispatching": True}])
+        write_jsonl(run / "task_fsm.jsonl",
+                    [{"run_id": "pick_place_v1-0badc0de",
+                      "scenario_id": "pick_place_v1", "outcome": "0",
+                      "error_code": 0,
+                      "detail": SINGLE_RESULT_FSM["detail"],
+                      "fsm_trace": list(SINGLE_FSM_TRACE),
+                      "steps": fsm_steps([("OBSERVE_A", "observe"),
+                                          ("PICK_A(attempt=1)", "pick"),
+                                          ("PLACE_A", "place"),
+                                          ("VERIFY_A(attempt=1)", "verify")])}])
+        for log in ("observe.jsonl", "verify.jsonl"):
+            write_jsonl(run / log, [{"event": "request", "log": log}])
+        write_json(run / "verdict.json", {"passed": True, "run": name})
+        return run
+
+    def demo_fsm_trace(self, name="run_demo_fsm_trace"):
+        """The week-1.5 demo: two legs, one shared demo_runs.jsonl record."""
+        run = self.runs / name
+        self._result(run, DEMO_RESULT_FSM)
+        for leg in ("a", "b"):
+            write_json(run / "sim" / "episodes" / ("week1_demo_v1_%s.json" % leg),
+                       episode_record_from_actions(
+                           name, ("OBSERVE", "PICK", "PLACE", "VERIFY"),
+                           scenario="week1_demo_v1"))
+        write_jsonl(run / "decisions.jsonl",
+                    [{"seq": 1, "action": "PICK", "dispatching": True}])
+        write_jsonl(run / "demo_runs.jsonl",
+                    [{"run_id": DEMO_RESULT_FSM["run_id"],
+                      "scenario_id": "week1_demo_v1", "outcome": "0",
+                      "error_code": 0,
+                      "detail": DEMO_RESULT_FSM["detail"],
+                      "fsm_trace": list(DEMO_FSM_TRACE),
+                      "steps": fsm_steps([("OBSERVE_A", "observe"),
+                                          ("PICK_A(attempt=1)", "pick"),
+                                          ("PLACE_A", "place"),
+                                          ("VERIFY_A(attempt=1)", "verify"),
+                                          ("OBSERVE_B", "observe"),
+                                          ("PICK_B(attempt=1)", "pick"),
+                                          ("PLACE_B", "place"),
+                                          ("VERIFY_B(attempt=1)", "verify")])}])
+        for log in ("observe.jsonl", "verify.jsonl"):
+            write_jsonl(run / log, [{"event": "request", "log": log}])
+        write_json(run / "verdict.json", {"passed": True, "run": name})
+        return run
+
+    def composite_fsm_trace(self, name="run_composite_fsm_trace"):
+        """A composite run: the RESULT has no fsm_trace and its completed stage ids
+        are the caller's own ('one', 'two'), so executed skills show up only in the
+        nested native records - task_fsm.jsonl steps and per-stage episodes."""
+        run = self.runs / name
+        self._result(run, COMPOSITE_RESULT_FSM)
+        records = []
+        for index, leg in enumerate(("one", "two")):
+            component_run = "pick_place_v1-0badc0d%s" % (
+                "e" if index == 0 else "f")
+            write_json(run / "sim" / "episodes"
+                       / ("pick_place_v1_%s.json" % leg),
+                       episode_record_from_actions(
+                           component_run,
+                           ("OBSERVE", "PICK", "PLACE", "VERIFY")))
+            records.append(
+                {"run_id": component_run,
+                 "parent_run_id": COMPOSITE_RESULT_FSM["run_id"],
+                 "stage_id": leg,
+                 "execution_kind": "IN_PROCESS_COMPONENT",
+                 "scenario_id": "pick_place_v1", "outcome": "0",
+                 "error_code": 0,
+                 "fsm_trace": list(SINGLE_FSM_TRACE),
+                 "steps": fsm_steps([("OBSERVE_A", "observe"),
+                                     ("PICK_A(attempt=1)", "pick"),
+                                     ("PLACE_A", "place"),
+                                     ("VERIFY_A(attempt=1)", "verify")])})
+        write_jsonl(run / "task_fsm.jsonl", records)
+        write_jsonl(run / "decisions.jsonl",
+                    [{"seq": 1, "action": "PICK", "dispatching": True}])
+        for log in ("observe.jsonl", "verify.jsonl"):
+            write_jsonl(run / log, [{"event": "request", "log": log}])
+        write_json(run / "verdict.json", {"passed": True, "run": name})
         return run
 
 
@@ -259,6 +410,152 @@ class AuditCase(unittest.TestCase):
         run_report = self.runs_by_id(report)["run_startup_failure"]
         self.assertEqual(self.missing_ids(run_report),
                          ["crash_detail", "launch_record"])
+
+    # -- review #244 item 4: derive executed skills from the real shapes --
+    def test_real_fsm_trace_and_steps_without_pick_place_logs_exit_1(self):
+        """The regression the review reproduced: a run recorded with the fields the
+        server actually writes, with pick.jsonl and place.jsonl missing, was
+        audited as complete because only completed_stage_ids/stage_ids/stages were
+        read. All three persisted shapes must now name the lost logs."""
+        single = self.fx.single_fsm_trace()
+        demo = self.fx.demo_fsm_trace()
+        composite = self.fx.composite_fsm_trace()
+        proc = self.audit(self.fx.runs)
+        self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+        _out, report = self.latest_report()
+        runs = self.runs_by_id(report)
+        for run_id in ("run_single_fsm_trace", "run_demo_fsm_trace",
+                       "run_composite_fsm_trace"):
+            with self.subTest(run=run_id):
+                run_report = runs[run_id]
+                self.assertFalse(run_report["passed"])
+                # one skill_logs entry per lost log file
+                self.assertEqual(set(self.missing_ids(run_report)),
+                                 {"skill_logs"})
+                self.assertEqual(self.missing_paths(run_report),
+                                 ["pick.jsonl", "place.jsonl"])
+                self.assertIn("PICK_A", run_report["stage_ids"])
+                self.assertIn("PLACE_A", run_report["stage_ids"])
+        line = [ln for ln in proc.stdout.splitlines()
+                if ln.startswith("MISSING: run_single_fsm_trace/pick.jsonl (")]
+        self.assertEqual(len(line), 1, proc.stdout)
+        self.assertIn("PICK", line[0])
+        self.assertIn("absent", line[0])
+
+        # the same runs pass once the two logs are retained, so the new derivation
+        # demands nothing the writers never produced
+        for already_there in (single, demo, composite):
+            write_jsonl(already_there / "pick.jsonl",
+                        [{"event": "request", "log": "pick.jsonl"}])
+            write_jsonl(already_there / "place.jsonl",
+                        [{"event": "request", "log": "place.jsonl"}])
+        again = self.audit(self.fx.runs)
+        self.assertEqual(again.returncode, 0, again.stdout + again.stderr)
+        _out, report = self.latest_report()
+        self.assertTrue(report["passed"])
+
+    def test_episode_policy_output_action_is_stage_evidence(self):
+        """An archive can keep the episode and lose the FSM record: the action is
+        only visible under steps[].policy_output.action."""
+        run = self.fx.normal("run_episode_only")
+        # remove every other stage source: no fsm_trace, no completed ids, no stage
+        # token in the detail, and an FSM log that names no stage
+        write(run / "task.out", "session start\nRESULT %s\n" % json.dumps(
+            {"outcome": 0, "error_code": 0, "detail": "task done"},
+            sort_keys=True))
+        write_jsonl(run / "task_fsm.jsonl",
+                    [{"run_id": "pick_place_v1-0badc0de", "outcome": "0",
+                      "error_code": 0}])
+        write_json(run / "sim" / "episodes" / "pick_place_v1_run.json",
+                   episode_record_from_actions(
+                       "run_episode_only", ("OBSERVE", "PICK", "PLACE",
+                                            "VERIFY")))
+        # normal() never wrote pick/place: the episode actions are the only source
+        for absent in ("pick.jsonl", "place.jsonl"):
+            self.assertFalse((run / absent).exists(), absent)
+        proc = self.audit(self.fx.runs)
+        self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+        _out, report = self.latest_report()
+        run_report = self.runs_by_id(report)["run_episode_only"]
+        self.assertEqual(set(self.missing_ids(run_report)), {"skill_logs"})
+        self.assertEqual(self.missing_paths(run_report),
+                         ["pick.jsonl", "place.jsonl"])
+
+    def test_recovery_observe_stage_still_demands_the_observe_log(self):
+        """REOBSERVE_A is the label the FSM writes for a recovery observation; the
+        skill that ran is still observe, so observe.jsonl is still owed even when
+        the step list did not record it."""
+        run = self.fx.single_fsm_trace("run_recovery_observe")
+        (run / "observe.jsonl").unlink()
+        trace = ["REOBSERVE_A", "PICK_A(attempt=2):OK", "PLACE_A:OK",
+                 "VERIFY_A(attempt=1):OK"]
+        write(run / "task.out", "session start\nRESULT %s\n" % json.dumps(
+            {"outcome": 0, "error_code": 0, "detail": "task done",
+             "fsm_trace": trace}, sort_keys=True))
+        write_jsonl(run / "task_fsm.jsonl",
+                    [{"run_id": "pick_place_v1-0badc0de", "outcome": "0",
+                      "error_code": 0, "fsm_trace": trace,
+                      "steps": fsm_steps([("PICK_A(attempt=2)", "pick"),
+                                          ("PLACE_A", "place"),
+                                          ("VERIFY_A(attempt=1)", "verify")])}])
+        write_json(run / "sim" / "episodes" / "pick_place_v1_one.json",
+                   episode_record_from_actions(
+                       "run_recovery_observe", ("PICK", "PLACE", "VERIFY")))
+        proc = self.audit(self.fx.runs)
+        self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+        line = [ln for ln in proc.stdout.splitlines()
+                if ln.startswith("MISSING: run_recovery_observe/observe.jsonl (")]
+        self.assertEqual(len(line), 1, proc.stdout)
+        self.assertIn("REOBSERVE_A", line[0])
+
+    # -- review #244 item 3: a retained-but-empty log is not evidence -----
+    def test_emptied_skill_log_is_reported_missing(self):
+        """The regression the review reproduced: truncating an executed skill's
+        jsonl to zero bytes left the audit at exit 0, because existence was the
+        only question asked."""
+        run = self.fx.normal()
+        (run / "push.jsonl").write_text("", encoding="utf-8")
+        proc = self.audit(self.fx.runs)
+        self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+        _out, report = self.latest_report()
+        run_report = self.runs_by_id(report)["run_normal"]
+        self.assertFalse(run_report["passed"])
+        self.assertEqual(self.missing_ids(run_report), ["skill_logs"])
+        self.assertEqual(self.missing_paths(run_report), ["push.jsonl"])
+        line = [ln for ln in proc.stdout.splitlines()
+                if ln.startswith("MISSING: run_normal/push.jsonl (")]
+        self.assertEqual(len(line), 1, proc.stdout)
+        self.assertIn("PUSH_A", line[0])
+        self.assertIn("empty", line[0])
+
+    def test_skill_log_with_only_unparseable_lines_is_reported_missing(self):
+        run = self.fx.normal()
+        (run / "push.jsonl").write_text('not json at all\n{"event": "req',
+                                        encoding="utf-8")
+        proc = self.audit(self.fx.runs)
+        self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+        line = [ln for ln in proc.stdout.splitlines()
+                if ln.startswith("MISSING: run_normal/push.jsonl (")]
+        self.assertEqual(len(line), 1, proc.stdout)
+        self.assertIn("no valid JSONL record", line[0])
+
+    def test_skill_log_tolerance_is_unchanged(self):
+        """Tightening must not punish the crash tail the other jsonl items already
+        tolerate, and a garbage line beside real records is still not a valid log."""
+        run = self.fx.normal()
+        (run / "push.jsonl").write_text('{"event": "request"}\n{"event": "res',
+                                        encoding="utf-8")
+        proc = self.audit(run)
+        self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+        (run / "push.jsonl").write_text(
+            '{"event": "request"}\nnot json\n{"event": "done"}\n',
+            encoding="utf-8")
+        proc = self.audit(run)
+        self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+        line = [ln for ln in proc.stdout.splitlines()
+                if ln.startswith("MISSING: run_normal/push.jsonl (")]
+        self.assertEqual(len(line), 1, proc.stdout)
+        self.assertIn("unparseable line(s) beside", line[0])
 
     # -- output directory policy ----------------------------------------
     def test_each_invocation_writes_a_new_output_directory(self):
