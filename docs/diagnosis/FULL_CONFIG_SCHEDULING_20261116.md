@@ -91,3 +91,40 @@ one hardware component is skipped; neither has been shown to cause the stall.**
 ros2 launch open_manipulator_bringup open_manipulator_x_gazebo.launch.py gui:=false &
 sleep 35 && ros2 node list && ros2 control list_controllers && ros2 topic hz /clock
 ```
+
+
+## Follow-up experiments (2026-11-16, same WSL host)
+
+Five bounded attempts were made to close the "is it the cause?" gap above. None
+produced a task acceptance, and the last three hit an environment gate that this
+host cannot satisfy. Recording them so nobody repeats them by accident.
+
+| run | what was tried | result |
+| --- | --- | --- |
+| E1 | start the repo skill layer (`week1.launch.py` + `move_to_pose.launch.py`) **on top of** the complete vendor launch | all seven servers logged `... server up`; but at that moment `ros2 node list` returned only the six skill nodes, `ros2 action list` was **empty**, and no `/flexcell/*` topic appeared. The `OpenManipulatorXSystem ... Skipping node creation` warning recurred. Whether the vendor nodes had exited or discovery was just late is **unresolved** |
+| E2 | control: one bounded task through `scripts/sim_smoke.py` (repo-owned task config) | `HARNESS_ERROR: installed/source identity mismatch`, `physical_tasks_dispatched: 0`. `infra/runtime_identity.py` was called without `FLEXCELL_REPO`/`FLEXCELL_INSTALL` |
+| E3 | same control with those variables declared (as in `infra/Dockerfile.sim`) | identity check now ran but reported **46 mismatches / 64 python files**; control still refused |
+| E4 | source the vendor underlay *before* this repo's overlay | mismatches dropped to **4**, all `launch/*.launch.py` in `install/share`; `find_spec('flexcell_skills')` resolved into `build/flexcell_skills`, showing a workspace overlay conflict |
+| E5 | `colcon build --symlink-install --packages-select flexcell_skills` to refresh the install copies | still 4 launch-file mismatches; build warned that `flexcell_skills` **also exists in `/home/ros/agentic_workcell_ws/install`**. Control still refused |
+
+### What this changes
+
+- **Confirmed again:** the complete config silently skips a hardware component
+  while its controllers report `active`, and it is missing the task graph's
+  bridges and skill layer. Starting the skill layer on top brings the processes
+  up but did not produce an observable action surface in E1.
+- **New finding, environment not code:** this host has two installed
+  `flexcell_skills` copies (the vendor underlay and this repo's overlay), so
+  `runtime_identity.py` cannot pass and `sim_smoke.py` refuses to dispatch any
+  task. Therefore **no control task run is possible here**, and no conclusion
+  about the scheduling stall can be drawn from E1-E5.
+- The old guesses stay guesses. In particular E1's empty action list must not be
+  reported as "the complete config breaks actions": it may be discovery timing.
+
+### Where to continue
+
+The control belongs in the declared CI container (`infra/Dockerfile.sim`),
+which sets `FLEXCELL_REPO=/opt/flexcell/repo` and
+`FLEXCELL_INSTALL=/opt/flexcell/ws/install` and has a single overlay. Run the
+three isolation experiments from the previous section there, with the original
+failure data preserved. Until then #237 must stay open and unclaimed as fixed.
