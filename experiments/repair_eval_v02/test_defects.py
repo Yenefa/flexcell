@@ -17,6 +17,7 @@ import json
 import re
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -148,3 +149,109 @@ def test_f2_pristine_source_still_carries_the_healthy_mapping():
     assert sha_of(ROOT / FSM_REL) == manifest("DEF-F2-MAP")["pristine_sha256"]
     assert "((self._obj_a, 'zone_1'), (self._obj_b, 'zone_2'))" in \
         (ROOT / FSM_REL).read_text(encoding="utf-8")
+
+
+# ------------------------------------------------- F2: does it change behaviour?
+def _declared(name):
+    """The default value a parameter is declared with, read from the node source."""
+    text = (ROOT / FSM_REL).read_text(encoding="utf-8")
+    match = re.search(r"declare_parameter\('%s',\s*'([^']*)'\)" % name, text)
+    assert match, "parameter %r is no longer declared the way this test reads it" % name
+    return match.group(1)
+
+
+def _assignments_in(source_text, a, b):
+    """Pull the demo assignment tuple out of the node source and resolve it.
+
+    The tuple is written as ((self._obj_a, 'zone_1'), (self._obj_b, 'zone_2')),
+    so it cannot be literal_eval'd directly. Substituting the two declared
+    defaults is what the running node does with them, and taking those defaults
+    from the source means this test follows the code instead of hard-coding it.
+    """
+    # the demo branch of the single-or-demo conditional; the single branch names
+    # one object taken from the request and is not what this defect is about
+    match = re.search(
+        r"\(\((self\._obj_a, 'zone_\d')\), \((self\._obj_b, 'zone_\d')\)\)",
+        source_text)
+    assert match, "the demo assignment is no longer written the way this test reads it"
+    expression = match.group(0)
+    expression = expression.replace("self._obj_a", repr(a)).replace("self._obj_b", repr(b))
+    return ast.literal_eval(expression)
+
+
+def _policy():
+    """Import the repository's own decision policy, not the installed overlay."""
+    for path in (str(ROOT / "src" / "flexcell" / "flexcell_skills"),
+                 str(ROOT / "src" / "flexcell")):
+        if path not in sys.path:
+            sys.path.insert(0, path)
+    from flexcell_skills import decision_policy as dp
+    return dp
+
+
+def _constraints(dp):
+    return dp.Constraints(
+        allowed_actions=frozenset(("OBSERVE", "PICK", "PLACE", "VERIFY", "WAIT", "ABORT")),
+        recovery_budget=1, verify_tolerance_m=0.06,
+        motion_profile_id="demo_slow", max_world_age_s=1.5)
+
+
+def _h(dp, action, target):
+    return dp.HistoryRecord(action=action, target=target, outcome=0, error_code=0,
+                            attempt=1, world_revision=3, evidence_id="e")
+
+
+def _place_target(dp, assignments):
+    """Drive the FSM to the first PLACE and report its target (the object id)."""
+    goal = dp.TaskGoal(goal_id="g", scenario_id="s", assignments=assignments)
+    first = assignments[0][0]
+    history = (_h(dp, "OBSERVE", first), _h(dp, "PICK", first))
+    decision = dp.FSMPolicy().decide(None, goal, _constraints(dp), history)
+    assert decision.action == "PLACE", decision
+    return decision.target
+
+
+def test_f2_patch_swaps_where_each_object_is_sent_without_moving_the_plan():
+    """What the patch actually changes, checked against the real decision layer.
+
+    I first wrote this as "the policy's PLACE decision names the other zone" and
+    it failed, correctly: Decision.target is the object id and nothing else. The
+    zone lives in TaskGoal.assignments and reaches the executor through it, so
+    the checkable claim is the one made here - the plan order is unchanged, the
+    zone each object is sent to is swapped, and the decision layer still walks
+    the same objects.
+
+    Round 20 found the F1 injection had never been run. This is the same check
+    for F2: the artifact's effect, observed in the module that would act on it.
+    """
+    dp = _policy()
+    a, b = _declared("object_a"), _declared("object_b")
+    healthy_text = (ROOT / FSM_REL).read_text(encoding="utf-8")
+    injured_text = healthy_text.replace(
+        "((self._obj_a, 'zone_1'), (self._obj_b, 'zone_2'))",
+        "((self._obj_a, 'zone_2'), (self._obj_b, 'zone_1'))")
+    assert injured_text != healthy_text
+
+    healthy = _assignments_in(healthy_text, a, b)
+    injured = _assignments_in(injured_text, a, b)
+    assert [o for o, _ in healthy] == [o for o, _ in injured] == [a, b]
+    assert dict(healthy)[a] == "zone_1" and dict(injured)[a] == "zone_2"
+
+    # the decision layer walks the same objects in the same order under both
+    for assignments in (healthy, injured):
+        goal = dp.TaskGoal(goal_id="g", scenario_id="s", assignments=assignments)
+        decision = dp.FSMPolicy().decide(None, goal, _constraints(dp),
+                                         (_h(dp, "OBSERVE", a), _h(dp, "PICK", a)))
+        assert decision.action == "PLACE" and decision.target == a
+
+
+def test_f2_swapping_the_mapping_moves_both_objects():
+    dp = _policy()
+    a, b = _declared("object_a"), _declared("object_b")
+    healthy = _assignments_in((ROOT / FSM_REL).read_text(encoding="utf-8"), a, b)
+    injured = _assignments_in(
+        (ROOT / FSM_REL).read_text(encoding="utf-8").replace(
+            "((self._obj_a, 'zone_1'), (self._obj_b, 'zone_2'))",
+            "((self._obj_a, 'zone_2'), (self._obj_b, 'zone_1'))"), a, b)
+    assert dict(healthy) == {a: "zone_1", b: "zone_2"}
+    assert dict(injured) == {a: "zone_2", b: "zone_1"}

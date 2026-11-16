@@ -128,6 +128,13 @@ def build_f2():
         "pristine_sha256": sha(source),
         "affected_files": [str(FSM.relative_to(ROOT))],
         "expected_observable": "the demo assignment pairs target_box_a with zone_2",
+        "verified_how": "test_defects.py extracts the demo assignment from the patched "
+                        "source, resolves it with the node's declared object_a/object_b "
+                        "defaults, and hands it to the repository's own FSMPolicy: the "
+                        "plan order is unchanged and each object is assigned the other "
+                        "zone. Decision.target carries only the object id, so the zone "
+                        "is checked where it lives - in the assignments the executor "
+                        "reads.",
         "pinned_by": [],
         "not_used": "a wrong zone coordinate in configuration is a different "
                     "mechanism and is explicitly excluded by TASKS.md 2.3",
