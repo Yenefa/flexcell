@@ -87,3 +87,64 @@ python3 experiments/repair_eval_v02/dry_run_matrix.py | head -40
 | 运行窗口与串行约定 | 缺 |
 
 在这些补齐之前，本目录的记录保持 `DRY_RUN`，不计入 `ADMISSION.md` 的任何一项。
+
+## 预算层：协议 5.1 第一次被执行
+
+上表那份 DRY RUN 用的是固定脚本 agent，**从不花 token**，所以 5.1 的三条规则
+（6 次交互上限、20,000 token 上限、BUDGET_EXHAUSTED 不计成功）在整个仓库里
+**没有一行代码在执行**。一条只存在于文档里的上限不是上限。
+
+本目录新增：
+
+| 文件 | 作用 |
+| --- | --- |
+| `budget.py` | `Ledger`：唯一能到达模型的入口。**调用前**检查交互与 token 上限（会超的那次调用根本不发出，不花钱）；token 只能在调用后知道，所以调用后再查一次。任一上限触发即**永久关闭**账本（5.1 禁止“再给一次机会”） |
+| `agent.py` | `RepairAgent`：从可见性边界**拼提示词**，且只通过 `ToolFacade` 写文件，所以评估器、裁决、隐藏答案都读不到 |
+| `test_budget.py` | 23 条用例，逐条对应 5.1 / 5.2 |
+| `budget_matrix.py` | 24 槽全部走真实 repair loop + 真实账本 |
+
+### 24 槽账本结果
+
+```
+terminal_states: {DONE: 22, BUDGET_EXHAUSTED: 2}
+counted_in_denominator: 22
+excluded_budget_exhausted: 2
+every_row_has_full_account: true
+no_row_exceeds_cap: true
+qualification: SCRIPTED_TRANSPORT_NOT_A_MODEL_RESULT
+```
+
+两槽（`r3` 的 `D_GUIDED`）**故意烧掉预算**，用真实矩阵行证明“耗尽不计入分母”，
+而不是只在单元测试里成立。
+
+### 变异验证（用例能失败）
+
+删掉规则看用例是否变红——5 条全部被杀：
+
+| 变异 | 结果 |
+| --- | --- |
+| 去掉调用前的交互检查 | 5 failed |
+| 耗尽不再压过成功声明 | 2 failed |
+| 调用后不查 token 上限 | 1 failed |
+| 关闭的账本允许再试一次 | 1 failed |
+| 循环停在 cap（旧写法） | 1 failed |
+
+第 4 条一开始**没被杀掉**（22 passed）。原因是“不可追加”此前只经过交互检查那条路，
+而它自己也会拒绝。补了一条“因执行次数关闭的账本，即使交互与 token 都还空着也必须拒绝
+新调用”之后才杀死。这条用例缺口是变异测试自己发现的。
+
+### 顺带抓到的两个真 bug
+
+1. **循环停在 cap 时永远发现不了耗尽**：`range(max_interactions)` 用完就正常退出，
+   账本没有机会拒绝，于是“用光次数但没完成”被记成 `INVALID`（像是放弃），而不是
+   `BUDGET_EXHAUSTED`（如实记录耗尽）。改成循环上界 `cap+1`——多出来的那次在到达
+   transport 之前就被拒，因此**发现耗尽不花钱**。
+2. **`_feedback()` 吞异常**：原本 `except Exception: return ""`，会把“策略拒绝”和
+   “harness 坏了”混成同一个结果，让坏掉的运行看起来像一次正常的 A 条件运行。现在只对
+   `policy_denied` 返回空，其它异常照抛。
+
+### 新鲜度门的正确用法
+
+第一版夹具把 `candidate/telemetry` 写在 `assert_fresh_run()` 之前，被 `StaleArtifact` 拒了。
+这不是 bug——门的本意就是“新 run 不得继承上一轮的反馈”。正确顺序是：
+断言新鲜 → 执行产出 telemetry → agent 读反馈。已在代码注释里写明。
