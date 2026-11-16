@@ -204,6 +204,18 @@ def _reserved_name_is_a_path(doc):
     doc["reserved_names"].append("sealed/verdict.json")
 
 
+def _sealed_also_static(doc):
+    doc["static_prefixes"].append("gate/")
+
+
+def _sealed_not_protected(doc):
+    doc["protected_writes"] = [entry for entry in doc["protected_writes"] if entry != "gate/"]
+
+
+def _sealed_is_the_whole_candidate(doc):
+    doc["sealed_prefixes"] = ["./"]
+
+
 def _absolute_policy_path(doc):
     doc["paths"]["verdict"] = "/etc/passwd"
 
@@ -231,6 +243,9 @@ def _visible_misses_a_category(doc):
     (_freshness_drops_reserved_name, "must cover the reserved name"),
     (_reserved_name_is_a_path, "must be file names"),
     (_absolute_policy_path, "must be a relative path"),
+    (_sealed_also_static, "overlap at"),
+    (_sealed_not_protected, "must also be listed in protected_writes"),
+    (_sealed_is_the_whole_candidate, "must name a path inside the candidate"),
     (_unknown_top_level_key, "unexpected="),
     (_visible_misses_a_category, "must declare exactly"),
 ])
@@ -622,3 +637,85 @@ def test_demo_command_prints_the_three_required_examples():
     assert examples["refused_stale_inheritance"]["refused"] is True
     assert examples["mismatched_feedback"]["packet"]["mismatched"] is True
     assert examples["guided_feedback"]["within_policy_bound"] is True
+
+
+# ---------------------------------------------------------------- sealed gate
+def test_the_evaluator_source_is_sealed_in_every_condition(policy, tmp_path):
+    """Reading the gate would let a repair tune to the ruler instead of the task.
+
+    #251 PROTOCOL.md forbids "reading the evaluator source" in every condition;
+    gate/ holds the acceptance command and its thresholds, so it is sealed
+    everywhere rather than being a static input.
+    """
+    tree = make_run(tmp_path)
+    _write(tree["candidate"] / "gate" / "acceptance.py", 'PASS_IF = {"max_error": 0.02}\n')
+    for condition in vis.CONDITIONS:
+        tools = vis.ToolFacade(boundary(policy, tree, condition))
+        for rel in ("gate/acceptance.py", "gate/sim.py"):
+            with pytest.raises(vis.AccessDenied) as caught:
+                tools.read_file(rel)
+            assert caught.value.reason == vis.SEALED_MATERIAL, (condition, rel)
+            assert caught.value.condition == condition
+
+
+def test_the_regression_definition_stays_readable_in_every_condition(policy, tmp_path):
+    """tests/ defines what must not break; it holds no acceptance threshold.
+
+    Sealing it too would hide the contract the repair has to preserve, so it
+    stays a static input for A/B/C/D alike -- the same set in every condition, so
+    it adds no between-group difference.
+    """
+    tree = make_run(tmp_path)
+    for condition in vis.CONDITIONS:
+        tools = vis.ToolFacade(boundary(policy, tree, condition))
+        assert "frozen regression contract" in tools.read_file("tests/test_regression.py")
+
+
+def test_sealed_material_is_not_reachable_by_listing_or_search(policy, tmp_path):
+    tree = make_run(tmp_path)
+    _write(tree["candidate"] / "gate" / "acceptance.py", 'PASS_IF = {"max_error": 0.02}\n')
+    tools = vis.ToolFacade(boundary(policy, tree, "B_REAL_FEEDBACK"))
+    # the name may appear as a directory entry, its contents may not be returned
+    with pytest.raises(vis.AccessDenied) as caught:
+        tools.list_dir("gate")
+    assert caught.value.reason == vis.SEALED_MATERIAL
+    assert tools.search_code("PASS_IF") == "(no matches)"
+    assert tools.search_code("max_error") == "(no matches)"
+
+
+def test_sealed_files_still_exist_for_the_gate_subprocess(policy, tmp_path):
+    """Sealing is a tool-facade property: the file is still on disk and runnable.
+
+    The gate runs as a subprocess inside the candidate, so the evaluator has to
+    stay there.  This asserts both halves at once -- the facade refuses to read
+    it, and an ordinary subprocess still executes it.
+    """
+    tree = make_run(tmp_path)
+    gate_file = tree["candidate"] / "gate" / "acceptance.py"
+    _write(gate_file, 'print("PASS_IF_OK")\n')
+    with pytest.raises(vis.AccessDenied):
+        vis.ToolFacade(boundary(policy, tree, "A_STATIC")).read_file("gate/acceptance.py")
+    proc = subprocess.run([sys.executable, str(gate_file)], capture_output=True, text=True)
+    assert proc.returncode == 0
+    assert "PASS_IF_OK" in proc.stdout
+
+
+def test_categories_put_the_gate_and_the_regression_definition_apart(policy, tmp_path):
+    tree = make_run(tmp_path)
+    gate = boundary(policy, tree, "A_STATIC")
+    assert gate.category_for("task.md") == "static_input"
+    assert gate.category_for("tests/test_regression.py") == "static_input"
+    assert gate.category_for("gate/acceptance.py") == "candidate_source"
+    assert gate.category_for("skill/recovery.py") == "candidate_source"
+    assert gate.category_for("telemetry/execution.log") == "execution_feedback"
+
+
+def test_writing_the_sealed_gate_is_still_refused(policy, tmp_path):
+    tree = make_run(tmp_path)
+    _write(tree["candidate"] / "gate" / "acceptance.py", 'PASS_IF = {"max_error": 0.02}\n')
+    tools = vis.ToolFacade(boundary(policy, tree, "A_STATIC"))
+    with pytest.raises(vis.AccessDenied) as caught:
+        tools.write_file("gate/acceptance.py", 'PASS_IF = {"max_error": 999}\n')
+    assert caught.value.reason == vis.PROTECTED_WRITE
+    assert (tree["candidate"] / "gate" / "acceptance.py").read_text(encoding="utf-8") == (
+        'PASS_IF = {"max_error": 0.02}\n')
