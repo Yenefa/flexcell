@@ -44,9 +44,17 @@ class RepairAgent:
             lines.append("  - " + field)
         lines.append("")
         lines.append(
+            "Two actions are available. Prefer the second for large files:"
+        )
+        lines.append('  {"write_file": [path, content]} replaces the whole file.')
+        lines.append('  {"edit_file": [path, old_text, new_text]} replaces the first')
+        lines.append("   occurrence of old_text. old_text must match the file exactly.")
+        lines.append('  {"read_file": [path]} returns the file so you can copy its text.')
+        lines.append("Reading the file you are repairing is allowed in every condition;")
+        lines.append("so is reading this workspace's tests and task.md. Nothing else is.")
+        lines.append(
             "Reply with a single JSON object: "
-            '{"actions": [{"write_file": [path, content]}], '
-            '"claim_success": bool, "done": bool}. '
+            '{"actions": [...], "claim_success": bool, "done": bool}. '
             "No prose outside the JSON."
         )
         return "\n".join(lines)
@@ -94,14 +102,57 @@ class RepairAgent:
             return False
 
         for action in payload.get("actions") or []:
-            if not isinstance(action, dict) or "write_file" not in action:
+            if not isinstance(action, dict):
                 continue
-            target = action["write_file"]
-            if not isinstance(target, (list, tuple)) or len(target) != 2:
+            if "write_file" in action:
+                target = action["write_file"]
+                if not isinstance(target, (list, tuple)) or len(target) != 2:
+                    continue
+                path, content = target
+                self.boundary.write_text(path, str(content))
+                self.writes.append(path)
                 continue
-            path, content = target
-            self.boundary.write_text(path, str(content))
-            self.writes.append(path)
+            if "read_file" in action:
+                target = action["read_file"]
+                if not isinstance(target, (list, tuple)) or len(target) != 1:
+                    continue
+                path = str(target[0])
+                try:
+                    body = self.boundary.read_text(path, "candidate_source")
+                except Exception as exc:                        # noqa: BLE001
+                    self.transcript.append({"role": "user", "content":
+                                            "read_file: cannot read %s (%s)" % (path, exc)})
+                    continue
+                # Truncated so one read cannot fill the budget; the repairer can
+                # read again with the window moved if it needs more.
+                shown = body if len(body) <= 12000 else body[:12000] + "\n... [truncated]"
+                self.transcript.append({"role": "user", "content":
+                                        "FILE %s (%d bytes)\n%s" % (path, len(body), shown)})
+                continue
+            if "edit_file" in action:
+                target = action["edit_file"]
+                if not isinstance(target, (list, tuple)) or len(target) != 3:
+                    continue
+                path, old_text, new_text = (str(x) for x in target)
+                # Reading the candidate's own source is allowed in every
+                # condition (candidate_source: true), which is what makes a
+                # targeted edit possible. Without it the only action is a
+                # whole-file rewrite, and a 1578-line node cannot be repaired
+                # that way: measured, the model replaced it with an 18-line stub.
+                try:
+                    current = self.boundary.read_text(path, "candidate_source")
+                except Exception as exc:                        # noqa: BLE001
+                    self.transcript.append({"role": "user", "content":
+                                            "edit_file: cannot read %s (%s)" % (path, exc)})
+                    continue
+                if old_text not in current:
+                    # Say so, and say it in a way the next turn can use.
+                    self.transcript.append({"role": "user", "content":
+                                            "edit_file: the old_text was not found in %s"
+                                            " - read the file and copy it exactly" % path})
+                    continue
+                self.boundary.write_text(path, current.replace(old_text, new_text, 1))
+                self.writes.append(path)
 
         if payload.get("claim_success"):
             self.claimed_success = True
