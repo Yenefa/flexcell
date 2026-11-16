@@ -32,11 +32,11 @@ slot, own output directory, sequential. 360 s per slot, 1440 s per window.
 python3 -m unittest discover -s experiments/physical_capabilities/pick_place_reliability/tests -v
 ```
 
-53 tests: one-result parsing, the single-run rule, the source-change scope,
+56 tests: one-result parsing, the single-run rule, the source-change scope,
 unknown-terminal detection, window stop behaviour, the completion flag, timeout
-and signal cleanup, the driver-verdict gate, non-finite values, corrupt-log
-isolation, the window-freeze gate, and the artifact aggregator. No simulator, no
-ROS.
+and signal cleanup, the driver-verdict gate, source-freeze admission (including
+missing/malformed metadata), non-finite values, corrupt-log isolation, and the
+artifact aggregator. No simulator, no ROS.
 
 ## Results (6 windows, 24 slot attempts)
 
@@ -69,13 +69,16 @@ succeeded task outcome and a numeric final error. The window's own `results.json
 is checked first: a slot the driver marked `UNKNOWN` (outer timeout, interrupt,
 unknown terminal) is not reclassified as `OK` even when a raw `PASS` result
 survived on disk, and unreadable window metadata leaves the slot `UNKNOWN`.
-Everything else is counted separately and listed in `excluded` with a reason, so a
-failed or unmeasured slot never becomes a zero-error sample. A non-finite
-(`NaN`/`Inf`) final error or target is treated as unmeasured, not rounded into the
-statistics. Two run directories for one slot are reported as `AMBIGUOUS` instead
-of silently reduced to the first one. A truncated JSONL line is recorded against
-its slot (`log_errors`) and its measurement stays `null`; the remaining windows
-are still analyzed.
+A window is comparable only when its `source_unchanged` flag is literally `true`:
+`false`, missing or malformed metadata makes the affected slots `NOT_COMPARABLE`,
+keeps them out of the statistics, reports `windows_not_frozen`, and makes the CLI
+exit 1. Everything else is counted separately and listed in `excluded` with a
+reason, so a failed or unmeasured slot never becomes a zero-error sample. A
+non-finite (`NaN`/`Inf`) final error or target is treated as unmeasured, not
+rounded into the statistics. Two run directories for one slot are reported as
+`AMBIGUOUS` instead of silently reduced to the first one. A truncated JSONL line
+is recorded against its slot (`log_errors`) and its measurement stays `null`; the
+remaining windows are still analyzed.
 
 The freeze covers what the slot can execute or load, not only Python packages:
 `src/flexcell/**`, `infra/**`, `scripts/**`, `worlds/**`, `config/**`,

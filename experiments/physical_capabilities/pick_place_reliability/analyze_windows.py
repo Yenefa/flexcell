@@ -32,7 +32,7 @@ NORMAL_LABELS = ('NORMAL_1', 'NORMAL_2')
 def read_json(path):
     try:
         return json.loads(pathlib.Path(path).read_text())
-    except (FileNotFoundError, ValueError):
+    except (OSError, ValueError):
         return None
 
 
@@ -156,6 +156,16 @@ def slot_status(runs, result, driver=None, metadata_error=None):
     return 'OK', None
 
 
+def source_changed_list(meta):
+    """Return a safe file list from a window's results.json."""
+    value = meta.get('source_changed') if isinstance(meta, dict) else None
+    if isinstance(value, list):
+        return [str(item) for item in value]
+    if isinstance(value, str):
+        return [value]
+    return []
+
+
 def slot_row(window_dir, label, drivers=None, metadata_error=None, meta=None):
     if drivers is None and metadata_error is None:
         drivers, metadata_error = window_driver_rows(window_dir)
@@ -167,17 +177,19 @@ def slot_row(window_dir, label, drivers=None, metadata_error=None, meta=None):
                                  metadata_error)
     driver = drivers.get(label) if drivers else None
 
-    if status == 'OK' and isinstance(meta, dict) and meta.get('source_unchanged') is False:
-        changed = meta.get('source_changed') or []
+    unchanged = meta.get('source_unchanged') if isinstance(meta, dict) else None
+    changed = source_changed_list(meta)
+    if status == 'OK' and unchanged is not True:
         status = 'NOT_COMPARABLE'
-        reason = 'window source changed during the run (%s)' % (
-            ', '.join(changed) if changed else 'files unknown')
+        if unchanged is False:
+            reason = 'window source changed during the run (%s)' % (
+                ', '.join(changed) if changed else 'files unknown')
+        else:
+            reason = 'window source tree was not verified frozen'
 
     row = dict(window=str(window_dir), label=label, status=status,
-               window_source_unchanged=(meta.get('source_unchanged')
-                                        if isinstance(meta, dict) else None),
-               window_source_changed=(list(meta.get('source_changed') or [])
-                                      if isinstance(meta, dict) else []))
+               window_source_unchanged=unchanged,
+               window_source_changed=changed)
     if reason:
         row['reason'] = reason
     if metadata_error:
@@ -283,7 +295,7 @@ def summarize(rows):
         slots_no_result=count('NO_RESULT'),
         slots_metadata_missing=sum(1 for r in rows if r.get('metadata_error')),
         slots_not_comparable=count('NOT_COMPARABLE'),
-        windows_not_frozen=sum(1 for w in windows if w['source_unchanged'] is False),
+        windows_not_frozen=sum(1 for w in windows if w['source_unchanged'] is not True),
         windows=windows,
         slots_unmeasured=sum(1 for r in rows if r.get('status') == 'OK'
                              and r.get('final_error_mm') is None),
@@ -323,8 +335,7 @@ def main(argv=None):
             stop_reason=meta.get('stop_reason') if isinstance(meta, dict) else None,
             source_unchanged=(meta.get('source_unchanged')
                               if isinstance(meta, dict) else None),
-            source_changed=(list(meta.get('source_changed') or [])
-                            if isinstance(meta, dict) else []),
+            source_changed=source_changed_list(meta),
             all_slots_completed=(meta.get('all_slots_completed')
                                  if isinstance(meta, dict) else None),
             interrupted=(meta.get('interrupted') if isinstance(meta, dict) else None),

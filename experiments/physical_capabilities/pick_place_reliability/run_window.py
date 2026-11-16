@@ -148,7 +148,7 @@ DEFAULT_PREREG = HERE / 'preregistration.json'
 def read(path):
     try:
         return json.loads(Path(path).read_text())
-    except (FileNotFoundError, ValueError):
+    except (OSError, ValueError):
         return None
 
 
@@ -448,29 +448,39 @@ def run_window(prereg, out, runner=None):
                         signal_name, label)
                     row['status'] = 'INTERRUPTED'
                     row['reason'] = stopped
-            try:
-                result, result_path = one_result(slot_out, case)
-                task = result.get('task') or {}
-                row.update(result_path=str(result_path),
-                           harness_status=result.get('status'),
-                           outcome=task.get('outcome'),
-                           error_code=task.get('error_code'),
-                           wall_seconds=task.get('wall_seconds'),
-                           err_m=task.get('final_position_error_m'),
-                           task_reported_pass=(exit_code == 0 and result.get('status') == 'PASS'))
-                if not interrupted_now:
-                    row['status'] = classify(result, exit_code)
-                    row['task_completed'] = row['status'] == 'OK'
-                    if row['status'] == 'UNKNOWN' and not stopped:
-                        stopped = 'unknown terminal state in %s' % label
-            except ValueError as exc:
-                row['error'] = str(exc)
-                if not interrupted_now:
-                    row['status'] = 'UNKNOWN'
-                    if not stopped:
-                        stopped = 'unknown terminal state in %s (%s)' % (label, exc)
+            with _defer_signals() as pending:
+                try:
+                    result, result_path = one_result(slot_out, case)
+                    task = result.get('task') or {}
+                    row.update(result_path=str(result_path),
+                               harness_status=result.get('status'),
+                               outcome=task.get('outcome'),
+                               error_code=task.get('error_code'),
+                               wall_seconds=task.get('wall_seconds'),
+                               err_m=task.get('final_position_error_m'),
+                               task_reported_pass=(exit_code == 0
+                                                   and result.get('status') == 'PASS'))
+                    if not interrupted_now and not pending.names:
+                        row['status'] = classify(result, exit_code)
+                        row['task_completed'] = row['status'] == 'OK'
+                        if row['status'] == 'UNKNOWN' and not stopped:
+                            stopped = 'unknown terminal state in %s' % label
+                except ValueError as exc:
+                    row['error'] = str(exc)
+                    if not interrupted_now and not pending.names:
+                        row['status'] = 'UNKNOWN'
+                        if not stopped:
+                            stopped = 'unknown terminal state in %s (%s)' % (label, exc)
 
-            rows.append(row)
+                rows.append(row)
+            if pending.names:
+                interrupted_now = True
+                interrupted = pending.names[0]
+                stopped = 'interrupted by %s while finalizing %s' % (
+                    interrupted, label)
+                row['status'] = 'INTERRUPTED'
+                row['reason'] = stopped
+                row['task_completed'] = False
             (out / 'results.partial.json').write_text(
                 json.dumps(rows, indent=2, ensure_ascii=False))
     except (KeyboardInterrupt, WindowSignal) as exc:

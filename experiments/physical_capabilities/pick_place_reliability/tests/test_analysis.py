@@ -18,6 +18,8 @@ def write_driver_row(root, label, status='OK', exit_code=None):
                      driver_exit=(0 if status == 'OK' else 1)
                      if exit_code is None else exit_code))
     data['results'] = rows
+    data.setdefault('source_unchanged', True)
+    data.setdefault('source_changed', [])
     path.write_text(json.dumps(data))
 
 
@@ -385,6 +387,30 @@ class WindowFreezeTest(unittest.TestCase):
         summary = aw.summarize([row])
         self.assertEqual(summary['slots_completed'], 1)
         self.assertEqual(summary['windows_not_frozen'], 0)
+
+    def test_missing_freeze_flag_is_not_comparable(self):
+        self._window(None)
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'NOT_COMPARABLE')
+        self.assertIn('not verified frozen', row['reason'])
+        summary = aw.summarize([row])
+        self.assertEqual(summary['slots_completed'], 0)
+        self.assertEqual(summary['windows_not_frozen'], 1)
+
+    def test_malformed_source_changed_does_not_crash(self):
+        make_slot(self.root, 'NORMAL_1', 0.008, 'drop error 0.008m', 'err=0.008',
+                  [(0.12, -0.15, 0.1895)])
+        (self.root / 'results.json').write_text(json.dumps(dict(
+            results=[dict(label='NORMAL_1', case='normal',
+                          driver_exit=0, status='OK')],
+            source_unchanged=False,
+            source_changed=5)))
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'NOT_COMPARABLE')
+        self.assertIn('files unknown', row['reason'])
+        self.assertEqual(row['window_source_changed'], [])
 
     def test_cli_exit_code_reports_the_unfrozen_window(self):
         import contextlib

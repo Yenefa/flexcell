@@ -255,6 +255,11 @@ class TimeoutCleanupTest(unittest.TestCase):
             [sys.executable, '-c', 'import time; time.sleep(60)'],
             env=env, start_new_session=True)
         try:
+            deadline = time.monotonic() + 10
+            while not rw.owned_pids(marker) and time.monotonic() < deadline:
+                time.sleep(0.1)
+            self.assertIn(decoy.pid, rw.owned_pids(marker), 'marked process did not start')
+
             found, killed = rw.reap(marker, grace_s=1.0)
 
             self.assertEqual(found, 1)
@@ -376,6 +381,34 @@ class InterruptedWindowTest(unittest.TestCase):
             self.assertFalse(payload['all_slots_completed'])
             self.assertTrue((root / 'out' / 'results.json').is_file())
             self.assertTrue((root / 'out' / 'results.partial.json').is_file())
+
+    def test_signal_during_result_parsing_keeps_the_slot(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = pathlib.Path(tmp)
+            prereg = dict(
+                slots=[dict(label='A', case='normal'), dict(label='B', case='normal')],
+                slot_timeout_s=1, window_budget_s=1000,
+                backend='velocity_servo', skill_backend='legacy',
+                experiment='unit-test')
+
+            def runner(label, case, slot_out, index):
+                write_result(slot_out, 'normal')
+                return 0
+
+            real_one_result = rw.one_result
+
+            def interrupt_then_parse(*args):
+                os.kill(os.getpid(), signal.SIGINT)
+                return real_one_result(*args)
+
+            with mock.patch.object(rw, 'one_result', side_effect=interrupt_then_parse):
+                payload = rw.run_window(prereg, root / 'out', runner=runner)
+
+            self.assertEqual([r['status'] for r in payload['results']],
+                             ['INTERRUPTED', 'NOT_RUN'])
+            self.assertTrue(payload['interrupted'])
+            self.assertEqual(payload['interrupt_signal'], 'SIGINT')
+            self.assertFalse(payload['all_slots_completed'])
 
 
 class ReapInterruptTest(unittest.TestCase):
