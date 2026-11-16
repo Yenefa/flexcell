@@ -99,4 +99,24 @@ def test_the_agent_can_read_the_file_it_repairs():
             "read_file": ["src/task_fsm_server.py"]}]])
         told = json.dumps(transport.seen[-1], ensure_ascii=False)
         assert "FILE src/task_fsm_server.py" in told
-        assert "zone_2" in told, "the read did not return the file's content"
+        assert "of 1578" in told or "of " in told, "the read reported no line count"
+        # the first window is the head of the file; the demo assignment sits far
+        # below it, which is exactly why search exists
+        assert "zone_2" not in told
+
+
+def test_search_finds_the_line_and_numbers_it():
+    with tempfile.TemporaryDirectory() as tmp:
+        _candidate, transport = _drive(tmp, "DEF-F2-MAP", [[{
+            "search": ["src/task_fsm_server.py", "zone_2"]}]])
+        told = json.dumps(transport.seen[-1], ensure_ascii=False)
+        assert "SEARCH src/task_fsm_server.py" in told
+        assert "hit(s)" in told and "zone_2" in told
+
+
+def test_read_file_returns_a_window_not_the_whole_file():
+    with tempfile.TemporaryDirectory() as tmp:
+        _candidate, transport = _drive(tmp, "DEF-F2-MAP", [[{
+            "read_file": ["src/task_fsm_server.py", 1000, 5]}]])
+        told = json.dumps(transport.seen[-1], ensure_ascii=False)
+        assert "lines 1000-1004" in told

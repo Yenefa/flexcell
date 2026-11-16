@@ -49,7 +49,10 @@ class RepairAgent:
         lines.append('  {"write_file": [path, content]} replaces the whole file.')
         lines.append('  {"edit_file": [path, old_text, new_text]} replaces the first')
         lines.append("   occurrence of old_text. old_text must match the file exactly.")
-        lines.append('  {"read_file": [path]} returns the file so you can copy its text.')
+        lines.append('  {"search": [path, pattern]} returns the matching lines and their')
+        lines.append("   numbers. Use it to find the place; a whole large file will not")
+        lines.append("   fit in the budget.")
+        lines.append('  {"read_file": [path, start, lines]} returns that window of the file.')
         lines.append("Reading the file you are repairing is allowed in every condition;")
         lines.append("so is reading this workspace's tests and task.md. Nothing else is.")
         lines.append(
@@ -112,22 +115,51 @@ class RepairAgent:
                 self.boundary.write_text(path, str(content))
                 self.writes.append(path)
                 continue
+            if "search" in action:
+                target = action["search"]
+                if not isinstance(target, (list, tuple)) or len(target) != 2:
+                    continue
+                path, pattern = str(target[0]), str(target[1])
+                try:
+                    body = self.boundary.read_text(path, "candidate_source")
+                except Exception as exc:                        # noqa: BLE001
+                    self.transcript.append({"role": "user", "content":
+                                            "search: cannot read %s (%s)" % (path, exc)})
+                    continue
+                hits = [(n, line) for n, line in enumerate(body.splitlines(), 1)
+                        if pattern in line]
+                if not hits:
+                    self.transcript.append({"role": "user", "content":
+                                            "search: %r does not appear in %s" % (pattern, path)})
+                    continue
+                shown = chr(10).join("%5d: %s" % (n, line.rstrip())
+                                     for n, line in hits[:40])
+                self.transcript.append({"role": "user", "content":
+                                        "SEARCH %s for %r: %d hit(s)%s%s"
+                                        % (path, pattern, len(hits), chr(10), shown)})
+                continue
             if "read_file" in action:
                 target = action["read_file"]
-                if not isinstance(target, (list, tuple)) or len(target) != 1:
+                if not isinstance(target, (list, tuple)) or not target:
                     continue
                 path = str(target[0])
+                start = int(target[1]) if len(target) > 1 else 1
+                count = int(target[2]) if len(target) > 2 else 120
+                count = max(1, min(int(count), 400))
                 try:
                     body = self.boundary.read_text(path, "candidate_source")
                 except Exception as exc:                        # noqa: BLE001
                     self.transcript.append({"role": "user", "content":
                                             "read_file: cannot read %s (%s)" % (path, exc)})
                     continue
-                # Truncated so one read cannot fill the budget; the repairer can
-                # read again with the window moved if it needs more.
-                shown = body if len(body) <= 12000 else body[:12000] + "\n... [truncated]"
+                all_lines = body.splitlines()
+                window = all_lines[max(0, start - 1): max(0, start - 1) + count]
+                numbered = chr(10).join("%5d: %s" % (start + i, line)
+                                        for i, line in enumerate(window))
                 self.transcript.append({"role": "user", "content":
-                                        "FILE %s (%d bytes)\n%s" % (path, len(body), shown)})
+                                        "FILE %s lines %d-%d of %d%s%s"
+                                        % (path, start, start + len(window) - 1,
+                                           len(all_lines), chr(10), numbered)})
                 continue
             if "edit_file" in action:
                 target = action["edit_file"]
