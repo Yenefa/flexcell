@@ -109,15 +109,33 @@ def test_the_account_carries_every_field_5_2_requires():
     assert account["budget_exhausted_at"] is None
 
 
+@pytest.mark.parametrize("which,expected", [
+    ("interactions", "interaction:7"),
+    ("tokens", "token:20013"),
+    ("candidate_executions", "candidate_executions:7"),
+])
+def test_the_exhaustion_position_uses_the_documented_string_form(which, expected):
+    exc = B.BudgetExhausted(which, 7, 20013)
+    assert exc.position_text() == expected
+
+
+def test_a_record_counts_at_most_one_final_scene():
+    ledger, _ = ledger_with()
+    assert ledger.account()["final_scenes"] == 0
+    ledger.count_final_scene()
+    assert ledger.account()["final_scenes"] == 1
+    with pytest.raises(B.BudgetExhausted):
+        ledger.count_final_scene()
+
+
 def test_an_exhausted_account_records_where_it_stopped():
     ledger, _ = ledger_with(max_interactions=2, max_tokens=10 ** 6)
     ledger.chat([])
     ledger.chat([])
     with pytest.raises(B.BudgetExhausted):
         ledger.chat([])
-    position = ledger.account()["budget_exhausted_at"]
-    assert position["on"] == "interactions"
-    assert position["interaction"] == 2
+    # DATA_DICTIONARY 3.4 fixes this as a string, not a structure
+    assert ledger.account()["budget_exhausted_at"] == "interaction:2"
 
 
 def test_closing_for_one_reason_blocks_every_other_kind_of_spend():
@@ -247,7 +265,7 @@ def test_the_loop_stops_at_the_cap_and_reports_exhaustion(tmp_path):
     result = RepairAgent(ledger, boundary, "Fix.", ["skill/"]).run()
     assert transport.calls == 3
     assert result["terminal_state"] == B.BUDGET_EXHAUSTED
-    assert result["account"]["budget_exhausted_at"]["on"] == "interactions"
+    assert result["account"]["budget_exhausted_at"] == "interaction:3"
 
 
 # ------------------------------------------------------------- json parsing

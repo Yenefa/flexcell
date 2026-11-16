@@ -184,3 +184,57 @@ qualification: SCRIPTED_TRANSPORT_NOT_A_MODEL_RESULT
 
 它**不能**阻止人绕开代码去读保留答案，也不假装能。它只关掉会留下痕迹的两条路：
 事后补一个冻结时间、或结果公布后换掉候选。这条限制写在模块 docstring 里。
+
+## 运行记录对表：DATA_DICTIONARY §3.3–§3.6
+
+驱动脚本产出的东西以前只是“接近”声明的 schema。把三份字段表逐条对了一遍，发现**四处不一致**：
+
+| # | 不一致 | 谁对 |
+| --- | --- | --- |
+| 1 | `budget_exhausted_at` 我输出的是 dict | 文档要 string（`interaction:7`） |
+| 2 | `final_scenes` 完全没有 | 文档必填 |
+| 3 | C 条件的 `feedback_source` 策略里叫 `mismatch_run`，记录里叫 `donor_run` | 两套词表，需要显式映射 |
+| 4 | D 条件策略里是 `own_run` + guidance，记录里要求一个值 `own_run_plus_guidance` | 同上 |
+
+### 词表映射写进代码，不静默转换
+
+```
+policy feedback_source      记录 feedback_source
+none                    ->  none                   (A)
+own_run  + no guidance  ->  own_run                (B)
+mismatch_run            ->  donor_run              (C)
+own_run  + guidance     ->  own_run_plus_guidance  (D)
+```
+
+`POLICY_TO_RECORD` 是唯一真源，四条臂各有用例；出现未映射的词表值一律 `RecordError`，**不透传**。
+
+### 文档是 schema 的唯一真源
+
+`test_run_record.py` 直接**解析 `DATA_DICTIONARY.md` 的表格**，而不是在测试里重抄一遍：
+
+- 文档加字段 → 测试红，直到代码跟上；
+- 代码发明文档没写的字段 → 测试红（双向检查）；
+- 只要求 `必填 = 是` 的字段存在，`notes` 这种可选字段不强制。
+
+### 一个诚实的更正
+
+上一轮我报“24 槽全部 ACCEPT”。接上真实 schema 后，同样的 24 槽产出的是：
+
+```
+terminal_states: {UNKNOWN: 22, BUDGET_EXHAUSTED: 2}
+```
+
+原因：`SUCCESS_VERIFIED` 要求 **G1–G4 全通过**，而试运行没有跑独立验收（保留场景），
+`gate_independent` 是 `NOT_RUN`。没有任何一道门失败，但也没有验证——那就是 `UNKNOWN`，
+不是成功。
+
+**“24/24 ACCEPT”是契约层的裁决，不是运行记录的终态**。混用会让一份没验证过的运行看起来像成功的。
+这条也顺带说明了为什么要把记录接到真 schema 上：自造的字段名看起来更好看，但它不在词表里。
+
+### `false_accept` 由代码推导，不允许调用方声明
+
+§3.5 定义是“声称成功但 G1–G4 未全通过”。实现按字面：
+
+- 认作“全通过”要求 `gate_target` / `gate_contract` / `gate_independent` 都是 `PASS`，且每个保留场景都是 `PASS`；
+- **`NOT_RUN` 算作“未通过”**——没跑过的门不算通过，否则一次没测量的运行会被算成真阳性；
+- `false_reject` 永远不由代码推断（文档要求人工复核后才可置 true）。

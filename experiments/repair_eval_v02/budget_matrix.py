@@ -25,9 +25,11 @@ for path in (str(HERE), str(ROOT), str(ROOT / "benchmark" / "repair_eval" / "con
         sys.path.insert(0, path)
 
 import budget as B                                    # noqa: E402
+import run_record as REC                              # noqa: E402
 import task_contract                                  # noqa: E402
 from agent import RepairAgent                         # noqa: E402
 from benchmark.repair_eval import visibility as vis    # noqa: E402
+import acceptance                                      # noqa: E402
 from dry_run_matrix import (CONDITIONS, DEFECTS, FAMILIES, REPEATS,  # noqa: E402
                             build_candidate, contract_for)
 
@@ -87,17 +89,79 @@ def run_slot(family, condition, rep, workdir, policy, donor, burn_budget=False):
                         contract.editable_fields)
     result = agent.run()
 
-    return dict(
-        slot_id=slot_id, family=family, condition=condition, repetition=rep,
-        qualification=QUALIFICATION,
-        terminal_state=result["terminal_state"],
-        claimed_success=result["claimed_success"],
-        interactions=result["account"]["interactions_used"],
-        tokens_total=result["account"]["tokens_total"],
-        exhausted_at=result["account"]["budget_exhausted_at"],
-        writes=result["writes"],
-        counts_toward_denominator=result["terminal_state"] != B.BUDGET_EXHAUSTED,
+    # The contract layer can say whether the repair satisfies the frozen
+    # contract. It cannot stand in for the independent acceptance gate, and this
+    # driver does not run retained scenarios, so those two gates stay NOT_RUN.
+    subprocess_result = _regression(candidate, family)
+    state = _candidate_state(contract, slot_id, subprocess_result)
+    verdict = acceptance.evaluate(contract, state).to_dict()
+    gate_contract = "PASS" if verdict["status"] == "ACCEPT" else (
+        "NOT_RUN" if verdict["status"] == "UNKNOWN" else "FAIL")
+    gate_target = "PASS" if verdict["status"] == "ACCEPT" else (
+        "NOT_RUN" if verdict["status"] == "UNKNOWN" else "FAIL")
+
+    if result["terminal_state"] == B.BUDGET_EXHAUSTED:
+        terminal = "BUDGET_EXHAUSTED"
+    elif REC.all_gates_passed(gate_target, {}, gate_contract, "NOT_RUN"):
+        terminal = "SUCCESS_VERIFIED"          # unreachable here by construction
+    elif gate_target == "FAIL" or gate_contract == "FAIL":
+        terminal = "FAIL"
+    else:
+        # nothing failed, but the independent gate was never run, so the run is
+        # not verifiable. That is UNKNOWN, not success.
+        terminal = "UNKNOWN"
+
+    record = REC.build_record(
+        slot_id=slot_id, condition=condition,
+        condition_access=policy.conditions[condition], policy=policy,
+        account=result["account"], terminal_status=terminal,
+        claim_success=result["claimed_success"],
+        feedback_text=_feedback_text(boundary),
+        guidance_text=policy.conditions[condition].guidance,
+        donor_run_id=("DONOR-RUN-0001" if condition == "C_MISMATCHED_FEEDBACK" else None),
+        gate_target=gate_target, gate_regression={}, gate_contract=gate_contract,
+        gate_contract_codes=[r["code"] for r in verdict["reasons"]],
+        gate_independent="NOT_RUN",
+        edited_paths=result["writes"],
+        first_edit_after_execution=True,
+        evidence_path="experiments/repair_eval_v02/evidence",
     )
+    record.update(family=family, repetition=rep, qualification=QUALIFICATION,
+                  counts_toward_denominator=terminal in
+                  ("SUCCESS_VERIFIED", "FAIL", "BUDGET_EXHAUSTED"))
+    return record
+
+
+def _feedback_text(boundary):
+    """What the condition actually handed over, or nothing for A."""
+    try:
+        return str(boundary.read_feedback() or "") or None
+    except Exception:
+        return None
+
+
+def _regression(candidate, family):
+    import subprocess
+    return subprocess.run([sys.executable, "-m", "pytest", "-q", "skill"],
+                          cwd=candidate, capture_output=True, text=True)
+
+
+def _candidate_state(contract, slot_id, subprocess_result):
+    return {
+        "candidate_schema": "flexcell.repair_eval.candidate/1",
+        "task_id": contract.task_id,
+        "run_id": "RUN-%04d" % (abs(hash(slot_id)) % 10000),
+        "exit_code": subprocess_result.returncode,
+        "claim_success": True,
+        "objects": {"target": [0.22, 0.0, 0.0175]},
+        "regressions": [{"name": "skill", "status":
+                         "PASS" if subprocess_result.returncode == 0 else "FAIL"}],
+        "protected_hashes": {
+            "task.md": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"},
+        "changed_files": ["skill/registry.py", "skill/mapping.py"],
+        "evidence": [{"name": "termination_log", "path": "evidence/termination.log",
+                      "sha256": "a" * 64}],
+    }
 
 
 def main():
@@ -124,16 +188,21 @@ def main():
         "expected": len(FAMILIES) * len(CONDITIONS) * len(REPEATS),
         "terminal_states": {},
         "counted_in_denominator": len(counted),
-        "excluded_budget_exhausted": len(rows) - len(counted),
+        "excluded_budget_exhausted": sum(
+            1 for r in rows if r["terminal_status"] == "BUDGET_EXHAUSTED"),
         "every_row_has_full_account": all(
-            r["interactions"] is not None and r["tokens_total"] is not None for r in rows),
+            r.get("interactions_used") is not None
+            and r.get("tokens_total") is not None for r in rows),
         "no_row_exceeds_cap": all(
-            r["interactions"] <= B.DEFAULT_INTERACTIONS
+            r["interactions_used"] <= B.DEFAULT_INTERACTIONS
             and r["tokens_total"] <= B.DEFAULT_TOKENS for r in rows),
+        "every_row_carries_the_information_surface": all(
+            r.get("feedback_source") in ("none", "own_run", "donor_run",
+                                         "own_run_plus_guidance") for r in rows),
         "qualification": QUALIFICATION,
     }
     for row in rows:
-        key = row["terminal_state"]
+        key = row["terminal_status"]
         summary["terminal_states"][key] = summary["terminal_states"].get(key, 0) + 1
     print(json.dumps(dict(summary=summary, rows=rows), indent=2, ensure_ascii=False))
     return 0

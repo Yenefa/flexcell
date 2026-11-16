@@ -28,6 +28,9 @@ HOW THE LIMITS ARE APPLIED
 """
 import time
 
+# Token counts use the provider's own usage figures; DATA_DICTIONARY 3.4 says a
+# provider that omits the split must report tokens_total only and must not infer
+# the split from it, so no estimation happens here.
 DEFAULT_INTERACTIONS = 6
 DEFAULT_TOKENS = 20000
 
@@ -50,10 +53,22 @@ class BudgetExhausted(Exception):
             % (which, at_interaction, at_tokens)
         )
 
+    def position_text(self):
+        """DATA_DICTIONARY 3.4 fixes this as a string, e.g. interaction:7.
+
+        The interaction count is the position for an interaction or execution
+        stop; the token total is the position for a token stop, because that is
+        the number that went over.
+        """
+        if self.which == "tokens":
+            return "token:%d" % self.at_tokens
+        if self.which == "candidate_executions":
+            return "candidate_executions:%d" % self.at_interaction
+        return "interaction:%d" % self.at_interaction
+
     def as_dict(self):
         return {"budget_exhausted": self.which,
-                "budget_exhausted_at": {"interaction": self.at_interaction,
-                                        "tokens": self.at_tokens}}
+                "budget_exhausted_at": self.position_text()}
 
 
 class Ledger:
@@ -81,6 +96,7 @@ class Ledger:
         self.tokens_in = 0
         self.tokens_out = 0
         self.candidate_executions = 0
+        self.final_scenes = 0
         self._closed = None
         self._started = clock()
         self._finished = None
@@ -137,6 +153,13 @@ class Ledger:
             raise self._closed
         self.candidate_executions += 1
 
+    def count_final_scene(self):
+        """Record the final scene round. 3.4 says this is 0 or 1 per record."""
+        if self.final_scenes >= 1:
+            raise BudgetExhausted("final_scenes", self.interactions_used,
+                                  self.tokens_total)
+        self.final_scenes += 1
+
     def finish(self):
         if self._finished is None:
             self._finished = self._clock()
@@ -162,15 +185,11 @@ class Ledger:
             "tokens_out": self.tokens_out,
             "tokens_total": self.tokens_total,
             "tokens_cap": self.max_tokens,
-            "tokens_source": "provider_usage",
             "candidate_executions": self.candidate_executions,
+            "final_scenes": self.final_scenes,
             "wall_clock_s": round(max(0.0, end - self._started), 3),
             "budget_exhausted_at": None,
         }
         if self._closed is not None:
-            payload["budget_exhausted_at"] = {
-                "on": self._closed.which,
-                "interaction": self._closed.at_interaction,
-                "tokens": self._closed.at_tokens,
-            }
+            payload["budget_exhausted_at"] = self._closed.position_text()
         return payload
