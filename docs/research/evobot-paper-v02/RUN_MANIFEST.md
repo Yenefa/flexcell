@@ -9,30 +9,30 @@
 
 | # | slot_id | 任务族 | 缺陷实例 | 条件 | 重复 | seed | donor（仅 C） | 派发批次 / 序 | 状态 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | `F1-A-r1` | F1 | `DEF-F1-REG` | A | r1 | `TBD`（#252） | — | 批 1 / 序 1 | `NOT_RUN` |
-| 2 | `F2-A-r1` | F2 | `DEF-F2-MAP` | A | r1 | `TBD`（#252） | — | 批 1 / 序 2 | `NOT_RUN` |
-| 3 | `F1-B-r1` | F1 | `DEF-F1-REG` | B | r1 | `TBD`（#252） | — | 批 1 / 序 3 | `NOT_RUN` |
-| 4 | `F2-B-r1` | F2 | `DEF-F2-MAP` | B | r1 | `TBD`（#252） | — | 批 1 / 序 4 | `NOT_RUN` |
-| 5 | `F1-C-r1` | F1 | `DEF-F1-REG` | C | r1 | `TBD`（#252） | `TBD`（#252 绑定：同族 **B** 条件、不同 seed 的 run_id） | 批 1 / 序 5 | `NOT_RUN` |
-| 6 | `F2-C-r1` | F2 | `DEF-F2-MAP` | C | r1 | `TBD`（#252） | `TBD`（#252 绑定：同族 **B** 条件、不同 seed 的 run_id） | 批 1 / 序 6 | `NOT_RUN` |
-| 7 | `F1-D-r1` | F1 | `DEF-F1-REG` | D | r1 | `TBD`（#252） | — | 批 1 / 序 7 | `NOT_RUN` |
-| 8 | `F2-D-r1` | F2 | `DEF-F2-MAP` | D | r1 | `TBD`（#252） | — | 批 1 / 序 8 | `NOT_RUN` |
-| 9 | `F2-D-r2` | F2 | `DEF-F2-MAP` | D | r2 | `TBD`（#252） | — | 批 2 / 序 9 | `NOT_RUN` |
-| 10 | `F1-D-r2` | F1 | `DEF-F1-REG` | D | r2 | `TBD`（#252） | — | 批 2 / 序 10 | `NOT_RUN` |
-| 11 | `F2-C-r2` | F2 | `DEF-F2-MAP` | C | r2 | `TBD`（#252） | `TBD`（#252 绑定：同族 **B** 条件、不同 seed 的 run_id） | 批 2 / 序 11 | `NOT_RUN` |
-| 12 | `F1-C-r2` | F1 | `DEF-F1-REG` | C | r2 | `TBD`（#252） | `TBD`（#252 绑定：同族 **B** 条件、不同 seed 的 run_id） | 批 2 / 序 12 | `NOT_RUN` |
-| 13 | `F2-B-r2` | F2 | `DEF-F2-MAP` | B | r2 | `TBD`（#252） | — | 批 2 / 序 13 | `NOT_RUN` |
-| 14 | `F1-B-r2` | F1 | `DEF-F1-REG` | B | r2 | `TBD`（#252） | — | 批 2 / 序 14 | `NOT_RUN` |
-| 15 | `F2-A-r2` | F2 | `DEF-F2-MAP` | A | r2 | `TBD`（#252） | — | 批 2 / 序 15 | `NOT_RUN` |
-| 16 | `F1-A-r2` | F1 | `DEF-F1-REG` | A | r2 | `TBD`（#252） | — | 批 2 / 序 16 | `NOT_RUN` |
-| 17 | `F1-A-r3` | F1 | `DEF-F1-REG` | A | r3 | `TBD`（#252） | — | 批 3 / 序 17 | `NOT_RUN` |
-| 18 | `F2-A-r3` | F2 | `DEF-F2-MAP` | A | r3 | `TBD`（#252） | — | 批 3 / 序 18 | `NOT_RUN` |
-| 19 | `F1-B-r3` | F1 | `DEF-F1-REG` | B | r3 | `TBD`（#252） | — | 批 3 / 序 19 | `NOT_RUN` |
-| 20 | `F2-B-r3` | F2 | `DEF-F2-MAP` | B | r3 | `TBD`（#252） | — | 批 3 / 序 20 | `NOT_RUN` |
-| 21 | `F1-C-r3` | F1 | `DEF-F1-REG` | C | r3 | `TBD`（#252） | `TBD`（#252 绑定：同族 **B** 条件、不同 seed 的 run_id） | 批 3 / 序 21 | `NOT_RUN` |
-| 22 | `F2-C-r3` | F2 | `DEF-F2-MAP` | C | r3 | `TBD`（#252） | `TBD`（#252 绑定：同族 **B** 条件、不同 seed 的 run_id） | 批 3 / 序 22 | `NOT_RUN` |
-| 23 | `F1-D-r3` | F1 | `DEF-F1-REG` | D | r3 | `TBD`（#252） | — | 批 3 / 序 23 | `NOT_RUN` |
-| 24 | `F2-D-r3` | F2 | `DEF-F2-MAP` | D | r3 | `TBD`（#252） | — | 批 3 / 序 24 | `NOT_RUN` |
+| 1 | `F1-A-r1` | F1 | `DEF-F1-REG` | A | r1 | `5101` | — | 批 1 / 序 1 | `UNKNOWN` |
+| 2 | `F2-A-r1` | F2 | `DEF-F2-MAP` | A | r1 | `5201` | — | 批 1 / 序 2 | `UNKNOWN` |
+| 3 | `F1-B-r1` | F1 | `DEF-F1-REG` | B | r1 | `5101` | — | 批 1 / 序 3 | `UNKNOWN` |
+| 4 | `F2-B-r1` | F2 | `DEF-F2-MAP` | B | r1 | `5201` | — | 批 1 / 序 4 | `BUDGET_EXHAUSTED` |
+| 5 | `F1-C-r1` | F1 | `DEF-F1-REG` | C | r1 | `5101` | `F1-B-r2` | 批 1 / 序 5 | `UNKNOWN` |
+| 6 | `F2-C-r1` | F2 | `DEF-F2-MAP` | C | r1 | `5201` | `F2-B-r2` | 批 1 / 序 6 | `UNKNOWN` |
+| 7 | `F1-D-r1` | F1 | `DEF-F1-REG` | D | r1 | `5101` | — | 批 1 / 序 7 | `UNKNOWN` |
+| 8 | `F2-D-r1` | F2 | `DEF-F2-MAP` | D | r1 | `5201` | — | 批 1 / 序 8 | `UNKNOWN` |
+| 9 | `F2-D-r2` | F2 | `DEF-F2-MAP` | D | r2 | `5202` | — | 批 2 / 序 9 | `UNKNOWN` |
+| 10 | `F1-D-r2` | F1 | `DEF-F1-REG` | D | r2 | `5102` | — | 批 2 / 序 10 | `UNKNOWN` |
+| 11 | `F2-C-r2` | F2 | `DEF-F2-MAP` | C | r2 | `5202` | `F2-B-r1` | 批 2 / 序 11 | `UNKNOWN` |
+| 12 | `F1-C-r2` | F1 | `DEF-F1-REG` | C | r2 | `5102` | `F1-B-r1` | 批 2 / 序 12 | `UNKNOWN` |
+| 13 | `F2-B-r2` | F2 | `DEF-F2-MAP` | B | r2 | `5202` | — | 批 2 / 序 13 | `BUDGET_EXHAUSTED` |
+| 14 | `F1-B-r2` | F1 | `DEF-F1-REG` | B | r2 | `5102` | — | 批 2 / 序 14 | `UNKNOWN` |
+| 15 | `F2-A-r2` | F2 | `DEF-F2-MAP` | A | r2 | `5202` | — | 批 2 / 序 15 | `BUDGET_EXHAUSTED` |
+| 16 | `F1-A-r2` | F1 | `DEF-F1-REG` | A | r2 | `5102` | — | 批 2 / 序 16 | `UNKNOWN` |
+| 17 | `F1-A-r3` | F1 | `DEF-F1-REG` | A | r3 | `5103` | — | 批 3 / 序 17 | `UNKNOWN` |
+| 18 | `F2-A-r3` | F2 | `DEF-F2-MAP` | A | r3 | `5203` | — | 批 3 / 序 18 | `UNKNOWN` |
+| 19 | `F1-B-r3` | F1 | `DEF-F1-REG` | B | r3 | `5103` | — | 批 3 / 序 19 | `UNKNOWN` |
+| 20 | `F2-B-r3` | F2 | `DEF-F2-MAP` | B | r3 | `5203` | — | 批 3 / 序 20 | `BUDGET_EXHAUSTED` |
+| 21 | `F1-C-r3` | F1 | `DEF-F1-REG` | C | r3 | `5103` | `F1-B-r1` | 批 3 / 序 21 | `UNKNOWN` |
+| 22 | `F2-C-r3` | F2 | `DEF-F2-MAP` | C | r3 | `5203` | `F2-B-r1` | 批 3 / 序 22 | `UNKNOWN` |
+| 23 | `F1-D-r3` | F1 | `DEF-F1-REG` | D | r3 | `5103` | — | 批 3 / 序 23 | `BUDGET_EXHAUSTED` |
+| 24 | `F2-D-r3` | F2 | `DEF-F2-MAP` | D | r3 | `5203` | — | 批 3 / 序 24 | `UNKNOWN` |
 
 **条件含义**：A = 无反馈（等预算重复尝试）；B = 真实执行反馈；C = 失配反馈；
 D = 真实反馈 + 显式指导。定义见 [PROTOCOL.md](PROTOCOL.md) §2。
@@ -82,14 +82,30 @@ D = 真实反馈 + 显式指导。定义见 [PROTOCOL.md](PROTOCOL.md) §2。
 
 ## 6. 状态计数（随运行更新，当前为初始值）
 
+> **2026-11-17 首次真实派发（head `6d5fd5d`，模型 `deepseek-flash`）：24 槽全部产出记录，合计 144,133 tokens。seed 已按 (族, 重复) 配对写入，C 的 donor 为同族另一 seed 的 B 记录。
+>
+> 三条必须随表读的说明：
+> 1. **派发顺序与 §3 不同**：实际按「族 × 条件 × 重复」推进，而不是 §3 的批次交错顺序。原因是 C 需要同族不同 seed 的 B 记录先存在，§3 的顺序在执行到 C-r1 时还没有 B-r2。这是对预登记顺序的偏差，登记在此。
+> 2. **`BUDGET_EXHAUSTED` 不等于修复失败**：终态取自 agent 是否宣告完成，门判定独立于它。例如 F2-A-r2 耗尽但门判 PASS；F1-D-r3 同样。逐槽的门结论见 `evidence/real_instances_matrix.json`。
+> 3. **没有一条是 `SUCCESS_VERIFIED`**：独立裁决门（G3）从未运行，契约门的 PASS 只能记 `UNKNOWN`。
+
+
+> **2026-11-17 首次真实派发（head `6d5fd5d`，模型 `deepseek-flash`）：24 槽全部产出记录，合计 144,133 tokens。seed 已按 (族, 重复) 配对写入，C 的 donor 为同族另一 seed 的 B 记录。
+>
+> 三条必须随表读的说明：
+> 1. **派发顺序与 §3 不同**：实际按「族 × 条件 × 重复」推进，而不是 §3 的批次交错顺序。原因是 C 需要同族不同 seed 的 B 记录先存在，§3 的顺序在执行到 C-r1 时还没有 B-r2。这是对预登记顺序的偏差，登记在此。
+> 2. **`BUDGET_EXHAUSTED` 不等于修复失败**：终态取自 agent 是否宣告完成，门判定独立于它。例如 F2-A-r2 耗尽但门判 PASS；F1-D-r3 同样。逐槽的门结论见 `evidence/real_instances_matrix.json`。
+> 3. **没有一条是 `SUCCESS_VERIFIED`**：独立裁决门（G3）从未运行，契约门的 PASS 只能记 `UNKNOWN`。
+
+
 | 状态 | 计数 |
 | --- | --- |
-| `NOT_RUN` | **24** |
+| `NOT_RUN` | 0 |
 | `RUNNING` | 0 |
 | `SUCCESS_VERIFIED` | 0 |
 | `FAIL` | 0 |
-| `BUDGET_EXHAUSTED` | 0 |
-| `UNKNOWN` | 0 |
+| `BUDGET_EXHAUSTED` | **5** |
+| `UNKNOWN` | **19** |
 | `INVALID` | 0 |
 | 合计 | 24 |
 
