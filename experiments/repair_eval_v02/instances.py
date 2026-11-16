@@ -35,6 +35,7 @@ ROOT = HERE.parents[1]
 DEFECTS = HERE / "defects"
 
 from task_variants import VARIANTS, TASK_TEXT_V2
+import layouts
 CONFIG_REL = "src/flexcell/flexcell_skills/config/week1.yaml"
 OBSERVE_REL = "src/flexcell/flexcell_skills/flexcell_skills/observe_server.py"
 FSM_REL = "src/flexcell/flexcell_skills/flexcell_skills/task_fsm_server.py"
@@ -92,6 +93,23 @@ if family == "DEF-F1-REG":
         emit(False, "CONFIG_BAD_TYPE", detail="tracked_objects is %s" % type(tracked).__name__)
     real = {"target_box_a", "target_box_b"}
     ok = real.issubset(set(tracked))
+    # A layout is held out when its geometry must survive the repair. A repair
+    # that rewrites the file and hardcodes one layout's coordinates is exactly
+    # what the hold-out is for, so the gate compares what the configuration says
+    # against the layout the workspace was built with.
+    layout_file = root / "layout.json"
+    if ok and layout_file.exists():
+        want = json.loads(layout_file.read_text(encoding="utf-8"))["zones"]
+        got = {}
+        for key, field in (("zone_zone_1_x", "zone_1_x"), ("zone_zone_1_y", "zone_1_y"),
+                          ("zone_zone_1_z", "zone_1_z"), ("zone_zone_2_x", "zone_2_x"),
+                          ("zone_zone_2_y", "zone_2_y"), ("zone_zone_2_z", "zone_2_z")):
+            if key in params:
+                got[field] = params[key]
+        for field, value in want.items():
+            if field in got and abs(float(got[field]) - float(value)) > 1e-9:
+                emit(False, "LAYOUT_VALUES_CHANGED",
+                     detail="%s is %s, the layout says %s" % (field, got[field], value))
     # v2 withholds the names from the task text, so the failure has to
     # report what the workcell expected. That is execution feedback: B, C
     # and D may read it, A may not, and the boundary is what enforces that.
@@ -175,7 +193,7 @@ def editable_path(family, root):
     return Path(root) / editable_rel(family)
 
 
-def materialize(family, root, variant="v1"):
+def materialize(family, root, variant="v1", layout=None):
     """Write an injected candidate workspace. Returns the workspace root.
 
     It used to return the editable file path, and the caller that wanted a
@@ -189,6 +207,17 @@ def materialize(family, root, variant="v1"):
     target.parent.mkdir(parents=True, exist_ok=True)
     target.write_text(injected_text(family), encoding="utf-8")
     (root / "task.md").write_text(task_text(family, variant), encoding="utf-8")
+    if layout is not None:
+        # The layout is the workcell geometry. It is written as data next to the
+        # workspace so the gate can check the configuration still carries it.
+        cfg = root / "config" / "week1.yaml"
+        if cfg.exists():
+            cfg.write_text(layouts.apply_to_config(cfg.read_text(encoding="utf-8"),
+                                               layout), encoding="utf-8")
+        (root / "layout.json").write_text(
+            __import__("json").dumps({"layout": layout,
+                                        "zones": layouts.layout_values(layout)}),
+            encoding="utf-8")
     gate = root / "gate"
     gate.mkdir(exist_ok=True)
     (gate / "check.py").write_text(GATE, encoding="utf-8")
@@ -209,7 +238,18 @@ def check(family, root, variant="v1"):
 
 
 def apply_reference_fix(family, root):
-    """Write the healthy content. Exists so the gate can be shown to pass."""
+    """Apply the repair the way a careful repairer would: change what is wrong."""
     target = Path(root) / editable_rel(family)
+    if family == "DEF-F1-REG":
+        # Replacing only the offending line keeps everything else the workspace
+        # was built with, including a held-out layout's coordinates. Writing the
+        # whole healthy file instead passes on the layout it was written for and
+        # silently reverts any other - which the hold-out is meant to catch.
+        import re
+        text = target.read_text(encoding="utf-8")
+        text = re.sub(r"(?m)^(\s*tracked_objects:\s*).*$",
+                      lambda m: m.group(1) + "['target_box_a', 'target_box_b']", text)
+        target.write_text(text, encoding="utf-8")
+        return target
     target.write_text(healthy_text(family), encoding="utf-8")
     return target

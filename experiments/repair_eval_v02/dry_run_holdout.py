@@ -1,25 +1,23 @@
-"""Exercise the #253 hold-out discipline end to end, without a model.
+"""Exercise the #253 hold-out discipline on real layouts, without a model.
 
 WHY
     holdout.py enforces three refusals: no plan without a freeze, no result from a
     candidate other than the frozen one, and no result timestamped before the
-    freeze. Those are the rules that make "we did not peek" checkable, and until
-    now they had not been driven through a whole six-slot run against the real
-    instances - only unit-tested in isolation.
+    freeze. This drives them through a full six-slot run, now on two real layouts
+    instead of six copies of one workspace.
 
-WHAT THIS RUNS
-    A freeze over the instance artifacts, a plan of 6 slots (2 families x 3
-    states), and one scripted repair per slot whose outcome comes from the sealed
-    gate. Then the negative paths, each of which must raise.
+WHAT A LAYOUT IS
+    The workcell geometry - the six zone coordinates the perception service
+    publishes. A repair that rewrites the configuration wholesale and hardcodes
+    one layout's coordinates passes on that layout and reverts the other; the gate
+    catches it as LAYOUT_VALUES_CHANGED. Measured here as a positive and a
+    negative case, because a hold-out that cannot fail proves nothing.
 
-WHAT IT DOES NOT DO
-    It is not the retained-scenario check. The instances carry no layout or state
-    variation yet, so the six slots differ only by label: three copies of F1 and
-    three of F2. Giving them real variation is the same design work as fixing the
-    task text, and until that exists this exercise proves the lock works, not that
-    the house is furnished.
+WHAT THIS IS NOT
+    A model run. The repairs are applied by the reference fix, so what is being
+    verified is the lock and the layout plumbing, not a hypothesis about repair
+    behaviour.
 """
-import hashlib
 import json
 import sys
 import tempfile
@@ -30,68 +28,83 @@ for path in (str(HERE), str(HERE.parents[1])):
     if path not in sys.path:
         sys.path.insert(0, path)
 
-import holdout as H  # noqa: E402
-import instances as I  # noqa: E402
+import hashlib                                            # noqa: E402
+
+import holdout as H                                       # noqa: E402
+import instances as I                                     # noqa: E402
+import layouts                                            # noqa: E402
 
 FAMILY_TO_INSTANCE = {"F1": "DEF-F1-REG", "F2": "DEF-F2-MAP"}
-STATES = ("5101", "5102", "5103")
+STATES = layouts.STATES
 
 
 def candidate_sha():
-    """A fingerprint of what would be frozen: the instance artifacts themselves."""
     h = hashlib.sha256()
     for family in I.FAMILIES:
-        info = I.artifact(family)
-        h.update(info["artifact_sha256"].encode())
+        h.update(I.artifact(family)["artifact_sha256"].encode())
         h.update((HERE / "instances.py").read_bytes())
+        h.update((HERE / "layouts.py").read_bytes())
     return h.hexdigest()
 
 
-def run_slot(instance, root):
-    """Materialise, apply the reference repair, and ask the sealed gate."""
-    I.materialize(instance, root)
-    broken_ok, _ = I.check(instance, root)
-    I.apply_reference_fix(instance, root)
-    fixed_ok, _ = I.check(instance, root)
-    return broken_ok, fixed_ok
-
-
 def _write_twice(plan, sha, freeze):
-    """Record one slot, then try again.
-
-    Writing it as one-call-or-another looked fine and never ran the second
-    call: the first returns a truthy dict, so the or short-circuits and the
-    check reports a pass it never tested.
-    """
     slot = plan.slot_ids[2]
     plan.record(slot, "PASS", evaluated_sha=sha, at=freeze.frozen_at + 1)
     return plan.record(slot, "PASS", evaluated_sha=sha)
 
 
+def _hardcode_trap():
+    """A repair that hardcodes L1's geometry must fail on L2."""
+    import re
+    with tempfile.TemporaryDirectory() as tmp:
+        root = I.materialize("DEF-F1-REG", Path(tmp) / "c", "v2", "L2")
+        cfg = root / "config" / "week1.yaml"
+        text = re.sub(r"tracked_objects:.*",
+                      "tracked_objects: ['target_box_a', 'target_box_b']",
+                      cfg.read_text(encoding="utf-8"))
+        cfg.write_text(layouts.apply_to_config(text, "L1"), encoding="utf-8")
+        ok, payload = I.check("DEF-F1-REG", root, "v2")
+    return ok, payload
+
+
 def main():
     sha = candidate_sha()
-    freeze = H.Freeze(candidate_sha=sha, source_run_id="F1-B-r1",
-                      selection_basis="best contract-gate candidate from the 24-slot matrix",
+    freeze = H.Freeze(candidate_sha=sha, source_run_id="v2-matrix",
+                      selection_basis="best contract-gate candidate after the v2 run",
                       repair_runs=24)
     plan = H.HoldoutPlan(("F1", "F2"), STATES, freeze)
 
-    problems = []
+    problems, gates = [], {}
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
+        slot_no = 0
         for slot in plan.slot_ids:
             family, state = slot.split("|")
+            layout = list(layouts.LAYOUTS)[slot_no % 2]
+            slot_no += 1
             instance = FAMILY_TO_INSTANCE[family]
             root = tmp / ("%s-%s" % (family, state))
-            broken_ok, fixed_ok = run_slot(instance, root)
+            # F2 has no configuration, so a layout is only meaningful for F1;
+            # recording that rather than pretending the slot varies is the point.
+            applied = layout if family == "F1" else None
+            I.materialize(instance, root, "v2", applied)
+            broken_ok, broken_payload = I.check(instance, root, "v2")
+            I.apply_reference_fix(instance, root)
+            fixed_ok, fixed_payload = I.check(instance, root, "v2")
+            gates[slot] = {"layout": applied, "injected": broken_payload.get("code"),
+                           "repaired": fixed_payload.get("code")}
             if broken_ok:
                 problems.append("%s: the injected workspace passed the gate" % slot)
-            outcome = "PASS" if fixed_ok else "FAIL"
-            plan.record(slot, outcome, evaluated_sha=H.assert_frozen(freeze, sha)
-                        and sha)
+            if not fixed_ok:
+                problems.append("%s: the reference repair did not pass (%s)"
+                                % (slot, fixed_payload.get("code")))
+            plan.record(slot, "PASS" if fixed_ok else "FAIL",
+                        evaluated_sha=H.assert_frozen(freeze, sha) and sha)
 
-    # The refusals, each on a fresh plan. Testing them on the finished plan made
-    # the timestamp case fail for the wrong reason - it hit "already recorded"
-    # first, so the check under test never ran and the run still looked green.
+    trap_ok, trap_payload = _hardcode_trap()
+    if trap_ok:
+        problems.append("the hardcoding trap passed; a held-out layout proved nothing")
+
     refusals = {}
     fresh = H.HoldoutPlan(("F1", "F2"), STATES, freeze)
     for name, thunk, expect in (
@@ -99,8 +112,6 @@ def main():
              "requires a freeze"),
             ("wrong candidate", lambda: H.assert_frozen(freeze, "0" * 64),
              "is not the frozen candidate"),
-            # each refusal needs an untouched slot: a refused write leaves the
-            # slot NOT_RUN, so reusing one lets the next check pass by accident
             ("result before the freeze",
              lambda: fresh.record(fresh.slot_ids[1], "PASS", evaluated_sha=sha,
                                   at=freeze.frozen_at - 1),
@@ -123,9 +134,9 @@ def main():
         report["counts"]["holdout_executions"] == 6
     print(json.dumps({
         "candidate_sha": sha[:16],
-        "slots": report["slots"],
+        "gates": gates,
         "counts": report["counts"],
-        "reported_separately": report["counts"]["reported_separately"],
+        "hardcode_trap": {"passed": trap_ok, "code": trap_payload.get("code")},
         "refusals": refusals,
         "problems": problems,
         "ok": ok,
