@@ -125,15 +125,26 @@ verdict  = contracts.check(candidate_dir: str, contract: TaskContract,
 | N5 | 不假设有真机 | 本协议只涉及仿真；真机（M3-R）不在范围内 |
 | N6 | 不假设历史结果是本协议的基线 | 见 [PROTOCOL.md](PROTOCOL.md) §10 |
 
-## 5. 接口差异表（计划；#249/#250 交付后回填）
+## 5. 接口差异表（已回填；来源 PR #257 / #258，待验收）
 
-| 项 | 本协议期望 | #249/#250 实际 | 差异 | 处理 | 状态 |
+回填日期 2026-11-16。"实际交付"取自两个候选分支；**两份 PR 尚未合并**，所以本表状态是
+**已回填、待验收**，不是 `FROZEN`。合并过程若改动代码，本表随之升版本。
+
+| 项 | 本协议期望 | 实际交付 | 差异 | 处理 | 状态 |
 | --- | --- | --- | --- | --- | --- |
-| visibility 策略版本字段 | `policy_id` | `TBD` | `TBD` | `TBD` | **未填** |
-| visibility 拒绝码命名 | 见 §2.3 | `TBD` | `TBD` | 映射不改义 | **未填** |
-| contracts 契约版本字段 | `contract_version` | `TBD` | `TBD` | `TBD` | **未填** |
-| contracts 理由码命名 | 见 [TASKS.md](TASKS.md) §5.1 | `TBD` | `TBD` | 映射不改义 | **未填** |
-| `check()` 的入参形状 | `(candidate_dir, contract, evaluation, evidence)` | `TBD` | `TBD` | 适配层，不改语义 | **未填** |
+| visibility 策略版本字段 | `policy_id` | `policy_id = flexcell.repair_eval.visibility/2026-11-16-issue249`、`schema_version = repair-eval-visibility/1`，运行期另有 `Policy.fingerprint`（sha256） | 比期望多一个 `fingerprint` | run record 同时记 `policy_id` 与 `fingerprint` | **已回填** |
+| visibility 拒绝码命名 | 见 §2.3 | `reserved_name` / `parent_traversal` / `absolute_path` / `symlink_alias` / `hardlink_alias` / `policy_denied` / `protected_write`；残留产物抛 `StaleArtifact` | 命名一致；`stale` 以异常类型表达，不是拒绝码 | 映射不改义；数据字典登记为 `stale_artifact` 时写明来源类型 | **已回填** |
+| contracts 契约版本字段 | `contract_version` | `TaskContract.schema = flexcell.repair_eval.task_contract/1`，实例另有 `version`、`canonical_json()`、`sha256()` | 版本分散在 `schema` 与 `version` 两处 | 记录时三件一起写：`schema` + `version` + `sha256` | **已回填** |
+| contracts 理由码命名 | 见 [TASKS.md](TASKS.md) §5.1 | REJECT：`GOAL_NOT_MET` `REGRESSION_FAILED` `PROTECTED_MODIFIED` `NONZERO_EXIT` `UNAUTHORIZED_EDIT` `TAMPERED_IMMUTABLE` `TASK_MISMATCH`；UNKNOWN：`GOAL_UNMEASURED` `REGRESSION_MISSING` `PROTECTED_UNVERIFIABLE` `EVIDENCE_MISSING` `RUN_ID_MISMATCH` `EXIT_CODE_MISSING` `CHANGED_FILES_UNREPORTED` `CANDIDATE_MALFORMED` `UNATTRIBUTED_FAILURE` | 未采用 `CONTRACT_*` 前缀；**UNKNOWN 码占多数** | 映射不改义；论文里不得把 `UNKNOWN` 并入成功或失败 | **已回填** |
+| `check()` 的入参形状 | `(candidate_dir, contract, evaluation, evidence)` | 没有单一 `check()`：可见性侧是 `assert_fresh_run(policy, candidate_dir)` + `RunBoundary` / `ToolFacade`，验收侧是 `acceptance.evaluate(contract, candidate_state)` | 验收与可见性分层；`candidate_state` 是测量报告，不是目录 | 适配层由 #252 写：先新鲜度检查 → 再读受限材料 → 再 `evaluate`；两侧语义不改 | **已回填** |
+
+### 5.1 回填记录
+
+| 日期 | 来源 | 变更 |
+| --- | --- | --- |
+| 2026-11-16 | PR #257（`codex/evobot-paper-v02-visibility`，3 提交，49 用例） | 交付可见性边界与策略 JSON；回填前两行；新增"run record 必须记 `Policy.fingerprint`" |
+| 2026-11-16 | PR #258（`codex/evobot-paper-v02-task-contract`，4 提交，109 用例） | 交付任务契约、七例语料、理由码表；回填后三行；确认 `REJECT` 优先于 `UNKNOWN` 与本协议判读一致 |
+| 待办 | 两份 PR 合并时 | 复核签名与码表是否被合并过程改动；有改动则本文件升版本并重新登记 |
 
 ## 6. 允许与拒绝的例子（依赖层）
 
@@ -148,9 +159,10 @@ verdict  = contracts.check(candidate_dir: str, contract: TaskContract,
 
 ## 7. 已知限制
 
-- 本文件里**没有一行**是现状；所有签名、字段、码名都是**本协议单方面的期望**。
-- 两个模块在 base `2ca40ebe` 上不存在，因此**本协议目前不可端到端执行**；
-  `ADMISSION.md` 的 F1/F2 也因此不可能被满足。
+- §2–§4 里仍有一部分是**本协议单方面的期望**；§5 已在 2026-11-16 回填为两个候选分支的实际
+  签名与码名，但那两份 PR **尚未合并**，所以"已回填"不等于"已可用"。
+- 两个模块存在于候选分支（PR #257 / #258），**不在 base `2ca40ebe` 上**；在它们合并前，
+  本协议仍**不可端到端执行**，`ADMISSION.md` 的 F1/F2 依然无法满足。
 - 若 #249/#250 交付的接口与本文件差异较大，**改本文件并升版本**，不改它们的语义。
 - 独立验收（G4）目前没有落点，只有 `TBD`；它必须由一个**未参与该条修复**的步骤执行，
   具体实现由 #252 在准入时补齐。
