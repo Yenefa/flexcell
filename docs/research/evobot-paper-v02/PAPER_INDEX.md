@@ -1,5 +1,8 @@
 # EvoBot 论文 v0.2 — 稿件工作区（#254）
 
+> 本文件是**稿件侧**索引。协议包的总索引是同一目录下的 `README.md`（#251 所有）。
+> 两者分开命名，是因为它们由不同任务并行提交，同名会在合并时产生 add/add 冲突。
+
 > **状态：DRAFT v0.2-skeleton。没有任何本轮实验结果。**
 > 本目录**不包含**论文正文结论。它包含：可复算的历史数字、结论—证据对应表骨架、
 > 字段语义澄清、以及与 #252/#253 的接口。等 #252（对照）与 #253（保留场景）产出原始
@@ -20,8 +23,9 @@ v0.1 的老问题（先有结论、后找证据）：
 
 | 文件 | 作用 | 依赖实验结果 |
 | --- | --- | --- |
-| [README.md](README.md) | 状态、边界、与 #252/#253 的接口 | 否 |
+| [PAPER_INDEX.md](PAPER_INDEX.md) | 状态、边界、与 #252/#253 的接口（本文件） | 否 |
 | [HISTORICAL_V01.md](HISTORICAL_V01.md) | v0.1 历史数字的**重算**与适用范围 | 否 |
+| [INTEGRATION_SEAM.md](INTEGRATION_SEAM.md) | #249 与 #250 的接缝实测与适配器契约 | 否 |
 | [CLAIMS_EVIDENCE_TABLE.md](CLAIMS_EVIDENCE_TABLE.md) | 一页结论—证据对应表（骨架，行待填） | 是 |
 | [FIELD_SEMANTICS.md](FIELD_SEMANTICS.md) | `claim_success` 等字段的实际含义与误用 | 否 |
 | [tools/recompute_w5_archive.py](tools/recompute_w5_archive.py) | 重算脚本（纯 stdlib，只读归档） | 否 |
