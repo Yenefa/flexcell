@@ -549,3 +549,18 @@ injected=PASS  repaired=OBJECT_STILL_REGISTERED   ← 符号反了
 
 如果没跑这一步，24 个 F1 槽位会在**什么都不修**的情况下全部判过，而且所有条件看起来一样好。
 凡是一个门只输出一种值（全过或全不过），从外面看是一样的；唯一能分辨的办法就是同时递上坏的和好的，要求答案不同。
+
+### 补：stand-in 太聪明，就测不到边界
+
+上轮的脚本化 dry run 能全绿，是因为脚本 agent **直接写 `IN.editable_rel(instance)` 这个正确路径**——它从外部知道答案，绕开了「agent 只能写它被授权的可编辑面」这一层。
+
+于是 24 槽真跑时，`editable_fields` 还是合成契约的 `skill/`，agent 照着做，四条全部 FAIL，35,140 tokens 换来一个本该由 stand-in 提前发现的 bug。
+
+现在脚本 agent **只根据自己被授予的 `editable_fields` 决定写到哪里**。把修复撤掉做变异，不需要任何额外断言，流水线自己就复现了真跑的失败：
+
+```
+F1: writes=['skill/week1.yaml']        verdict=REJECT  terminal=FAIL
+F2: writes=['skill/task_fsm_server.py'] verdict=REJECT  terminal=FAIL
+```
+
+**一个替身如果知道正确答案，它验证的是门，不是通往门的边界。**

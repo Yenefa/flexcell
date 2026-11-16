@@ -37,10 +37,23 @@ from benchmark.repair_eval import visibility as vis  # noqa: E402
 
 
 class ScriptedTransport:
-    """Replies with the reference repair for whichever instance it is inside."""
+    """Replies with the reference repair, written only inside its granted surface.
 
-    def __init__(self, family, *args, **kwargs):
+    The first version wrote IN.editable_rel(instance) - the correct path, known
+    out of band. That meant it succeeded even when the runner granted the agent
+    "skill/", the synthetic fixture's surface: a stand-in that is too clever
+    tests the gate but not the boundary the real agent actually obeys. Four real
+    slots and 35,140 tokens later that mistake surfaced for real.
+
+    It now resolves the destination from the editable_fields it was granted,
+    via surface_provider(). If the runner grants the wrong surface, the write
+    lands in the wrong place and the sealed gate fails, without needing a
+    separate assertion to notice.
+    """
+
+    def __init__(self, family, surface_provider=None, *args, **kwargs):
         self.family = "DEF-F1-REG" if family.startswith("F1") else "DEF-F2-MAP"
+        self.surface_provider = surface_provider
         self.calls = 0
 
     def metadata(self):
@@ -57,7 +70,14 @@ class ScriptedTransport:
         # with the model.
         self.seen_prompt = json.dumps(messages, ensure_ascii=False)
         instance = self.family
-        rel = IN.editable_rel(instance)
+        granted = (self.surface_provider() if self.surface_provider else None) or []
+        if not granted:
+            # no surface was communicated at all: write where it would have gone
+            # and let the gate fail, rather than silently helping the runner
+            rel = IN.editable_rel(instance)
+        else:
+            base = str(granted[0]).rstrip("/")
+            rel = base + "/" + Path(IN.editable_rel(instance)).name
         body = IN.healthy_text(instance)
         return {"text": json.dumps({"actions": [{"write_file": [rel, body]}],
                                     "claim_success": True, "done": True}),
@@ -75,7 +95,8 @@ def main():
     for family in ("F1_OBJECT_REGISTRATION", "F2_GOAL_MAPPING"):
         captured = {}
         def factory(model=None, base_url=None, timeout=None, caller="x", _f=family):
-            transport = ScriptedTransport(_f)
+            transport = ScriptedTransport(
+                _f, surface_provider=lambda: captured.get("editable_fields") or [])
             captured["transport"] = transport
             return transport
 
