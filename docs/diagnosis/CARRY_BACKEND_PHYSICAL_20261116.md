@@ -108,3 +108,45 @@ python3 scripts/sim_smoke.py --out /tmp/phys --backend velocity_servo --skill-ba
 python3 scripts/sim_smoke.py --out /tmp/dj --backend detachable_joint \
   --skill-backend legacy --contact-trace --physics-step-s 0.002
 ```
+
+
+## Decision unchanged: `detachable_joint` stays NO_GO for default admission
+
+Nothing in this round changes `docs/DETACHABLE_ADMISSION_20261027.md`. The
+decision there is `NO_GO_FOR_DEFAULT_ADMISSION`, and the runs above do not meet
+any of its six #57 criteria: no five-cycle attach/detach qualification, no
+ten-second SE(3) stability, no fitted free-fall trace, no 500 Hz step (this world
+runs 2 ms, not 2 ms of a 500 Hz *declared* profile with contact forces), no
+complete legacy parity matrix, and no integrated contact-state attach case.
+
+Two conditions before anyone reopens that decision:
+
+1. **Release path** - `PLACE_A` fails on the documented gripper-aperture defect
+   (issue #255). It has to be fixed and re-run, not worked around by dropping the
+   check or relaxing the tolerance.
+2. **Force measurement** - finger force and joint force are not measured at all
+   today. `contact_force_observed` was false in every carry run, so no statement
+   about grip force, friction or slip can be made from these runs. A real
+   attachment qualification needs those channels, plus the SE(3) and free-fall
+   traces #57 already asks for.
+
+## Next step for a stronger physical conclusion
+
+Pick/place is the wrong chain for contact evidence: the carry is a backend
+constraint, so the interesting physics never shows up as contact. The push chain
+is where contact is measured, and it is exercised through
+`src/flexcell/flexcell_skills/run_contact_push.py <task.json> <out>` against one
+declared push objective from `benchmark/tasks/t08_*/T08-push-*.json`.
+
+What that requires (identified, **not yet executed** in this round):
+
+| requirement | where it comes from |
+| --- | --- |
+| world with `libflexcell_physics_trace.so` + `libflexcell_contact_trace.so` | `scripts/sim_profile.py` with `contact_trace=True`, which also forces `backend=detachable_joint` and `physics_step_s=0.002` |
+| trace destinations | env vars read by the native plugins: `FLEXCELL_PHYSICS_STEP_LOG`, `FLEXCELL_CONTACT_STEP_LOG` (see `PhysicsTrace.cc:65`, `ContactTrace.cc:62`; `scripts/contact_probe.py` sets the contact one) |
+| a model directory containing `robot.urdf` | `run_contact_push.py --model` expects `<dir>/robot.urdf` for `ContactGeometry`; CI ships it at `/artifacts/model`, and it is **not** in this repository, so it has to be generated from `open_manipulator_description` before the push adapter can run |
+| a running task-scoped stack | pass one push task at a time; the historical acceptance used a task-scoped graph, not the full default graph |
+
+So the n >= 5 push repetitions are a separate piece of work with its own
+prerequisite (model directory + stack orchestration), and they are deliberately
+not claimed here.
