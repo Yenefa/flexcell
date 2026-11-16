@@ -122,12 +122,24 @@ def run_slot(family, condition, rep, workdir, policy, donor, model, max_interact
     boundary.assert_fresh_run()
     (candidate / "telemetry").mkdir(exist_ok=True)
 
-    if instance:
-        gate_ok, gate_payload = IN.check(instance, candidate)
-        (candidate / "telemetry" / "execution.log").write_text(
-            json.dumps(gate_payload, ensure_ascii=False) + chr(10))
-    else:
-        refresh_feedback(candidate)
+    def refresh():
+        """The feedback for the next interaction, from the source this slot uses.
+
+        An instance slot must see the sealed gate's typed answer. The first
+        version of this block refreshed the initial message from the gate but
+        left the per-step call pointing at the synthetic pytest helper, which
+        ran in a workspace with no tests and overwrote the gate's output. B and C
+        then received a pytest error instead of a reason code - the fourth time a
+        new source of truth was added without switching the path that reads it.
+        """
+        if instance:
+            _ok, payload = IN.check(instance, candidate)
+            (candidate / "telemetry" / "execution.log").write_text(
+                json.dumps(payload, ensure_ascii=False) + chr(10))
+            return payload
+        return refresh_feedback(candidate)
+
+    refresh()
     donor_log = None
     if condition == "B_REAL_FEEDBACK":
         donor_dir = Path(__file__).resolve().parent / "evidence" / "donor"
@@ -164,7 +176,7 @@ def run_slot(family, condition, rep, workdir, policy, donor, model, max_interact
             break
         steps += 1
         if not agent.done:
-            refresh_feedback(candidate)
+            refresh()
     ledger.finish()
     result = agent.result()
 

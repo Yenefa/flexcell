@@ -49,41 +49,60 @@ from pathlib import Path
 root = Path(sys.argv[1])
 family = sys.argv[2]
 
+
+def emit(ok, code, **extra):
+    payload = {"ok": ok, "code": code}
+    payload.update(extra)
+    print(json.dumps(payload))
+    sys.exit(0)
+
+
 def declared_default():
     text = (root / "gate" / "observe_server.py").read_text(encoding="utf-8")
     m = re.search(r"declare_parameter\('tracked_objects',\s*(\[[^\]]*\])\)", text)
     return eval(m.group(1))
 
+
 if family == "DEF-F1-REG":
     import yaml
-    params = yaml.safe_load((root / "config" / "week1.yaml").read_text(encoding="utf-8"))
-    params = params["observe_server"]["ros__parameters"]
+    raw = (root / "config" / "week1.yaml").read_text(encoding="utf-8")
+    try:
+        parsed = yaml.safe_load(raw)
+    except Exception as exc:
+        # The candidate's own output is unreadable. That is a property of the
+        # repair, not of the harness, and it must not be reported as a harness
+        # fault: an earlier version raised here and every slot came back
+        # GATE_FAILED, which reads the same whether the repair or the gate broke.
+        emit(False, "CONFIG_UNPARSEABLE", detail=str(exc).splitlines()[0][:120])
+    if not isinstance(parsed, dict) or "observe_server" not in parsed:
+        emit(False, "CONFIG_SECTION_MISSING", detail="no observe_server section")
+    node = parsed["observe_server"]
+    if not isinstance(node, dict) or "ros__parameters" not in node:
+        emit(False, "CONFIG_PARAMS_MISSING", detail="no ros__parameters under observe_server")
+    params = node["ros__parameters"]
+    if not isinstance(params, dict):
+        emit(False, "CONFIG_PARAMS_MALFORMED", detail="ros__parameters is not a mapping")
     tracked = params.get("tracked_objects", declared_default())
+    if not isinstance(tracked, list):
+        emit(False, "CONFIG_BAD_TYPE", detail="tracked_objects is %s" % type(tracked).__name__)
     real = {"target_box_a", "target_box_b"}
-    # The gate passes when the repair is correct, not when the defect is present.
-    # The first version of this line read "no real object is registered", which
-    # is true of the injected workspace - so every unrepaired F1 slot would have
-    # been graded as a pass. The dry run caught it because it hands the gate both
-    # a broken and a repaired workspace and requires the answers to differ.
     ok = real.issubset(set(tracked))
-    print(json.dumps({"ok": ok,
-                      "code": "PASS" if ok else "OBJECT_NOT_REGISTERED",
-                      "tracked": list(tracked)}))
-else:
-    text = (root / "src" / "task_fsm_server.py").read_text(encoding="utf-8")
+    emit(ok, "PASS" if ok else "OBJECT_NOT_REGISTERED", tracked=[str(t) for t in tracked])
+
+text = (root / "src" / "task_fsm_server.py").read_text(encoding="utf-8")
+try:
     a = re.search(r"declare_parameter\('object_a',\s*'([^']*)'\)", text).group(1)
     b = re.search(r"declare_parameter\('object_b',\s*'([^']*)'\)", text).group(1)
-    m = re.search(r"\(\((self\._obj_a, 'zone_\d')\), \((self\._obj_b, 'zone_\d')\)\)", text)
-    if not m:
-        print(json.dumps({"ok": False, "code": "ASSIGNMENT_UNPARSEABLE"}))
-        sys.exit(0)
-    expr = m.group(0).replace("self._obj_a", repr(a)).replace("self._obj_b", repr(b))
-    got = set(eval(expr))
-    expected = {("target_box_a", "zone_1"), ("target_box_b", "zone_2")}
-    ok = got == expected
-    print(json.dumps({"ok": ok,
-                      "code": "PASS" if ok else "WRONG_ZONE_ASSIGNMENT",
-                      "assignments": sorted(got)}))
+except AttributeError:
+    emit(False, "SOURCE_UNPARSEABLE", detail="object_a/object_b declaration missing")
+m = re.search(r"\(\((self\._obj_a, 'zone_\d')\), \((self\._obj_b, 'zone_\d')\)\)", text)
+if not m:
+    emit(False, "ASSIGNMENT_UNPARSEABLE", detail="the demo assignment is gone")
+expr = m.group(0).replace("self._obj_a", repr(a)).replace("self._obj_b", repr(b))
+got = set(eval(expr))
+expected = {("target_box_a", "zone_1"), ("target_box_b", "zone_2")}
+ok = got == expected
+emit(ok, "PASS" if ok else "WRONG_ZONE_ASSIGNMENT", assignments=sorted(got))
 '''
 
 TASK_TEXT = {
