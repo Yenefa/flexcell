@@ -238,3 +238,51 @@ terminal_states: {UNKNOWN: 22, BUDGET_EXHAUSTED: 2}
 - 认作“全通过”要求 `gate_target` / `gate_contract` / `gate_independent` 都是 `PASS`，且每个保留场景都是 `PASS`；
 - **`NOT_RUN` 算作“未通过”**——没跑过的门不算通过，否则一次没测量的运行会被算成真阳性；
 - `false_reject` 永远不由代码推断（文档要求人工复核后才可置 true）。
+
+## 清单对账：手写表与真记录（`reconcile.py`）
+
+`RUN_MANIFEST.md` §1 是手写的 24 行表，表头自称「状态列是权威计数」。**此前没有任何东西核对它和记录是否一致**——现有自检只断言「24 行全是 `NOT_RUN`」，那只能证明本包没执行过，看不出表和旁边的记录对不上。
+
+### 三种漂移，两个方向
+
+| 漂移 | 后果 |
+| --- | --- |
+| 槽位标了终态但没有记录 | 一个没有底账的声明 |
+| 记录到了终态但表还写 `NOT_RUN` | 做了却没被计入 |
+| **试运行记录提升了槽位** | 从「没跑过」到「跑过」的痕迹被抹掉 |
+
+第三条是这里最危险的，所以单独处理：任何 `qualification` 含 `DRY_RUN` / `SCRIPTED` 的记录**一律排除**，并在报告里列出（不静默丢弃）。
+
+```
+$ reconcile.py --manifest RUN_MANIFEST.md
+manifest slots   : 24
+records read     : 0
+excluded non-real: 0
+verdict          : CONSISTENT
+
+$ reconcile.py --manifest RUN_MANIFEST.md \
+      --records evidence/budget_matrix.json
+manifest slots   : 24
+records read     : 24
+excluded non-real: 24      <- 24 条矩阵记录一条都没能提升槽位
+verdict          : CONSISTENT
+```
+
+### 结构上直接拒绝（不是记一条警告）
+
+- 记录指向表里没有的槽位；
+- 同一槽位两条**真**记录（补跑应新增 `.re2` 行，不是盖在同一条上）；
+- 记录的状态不在 §4 词表内；
+- 表里出现词表外的状态。
+
+### 变异验证
+
+| 变异 | 结果 |
+| --- | --- |
+| 试运行当真实记录 | KILLED (4 failed) |
+| 忽略「有终态无记录」 | KILLED |
+| 放行表外槽位 | KILLED |
+| 解析器接受任意状态 | KILLED |
+| 允许同槽位两条记录 | KILLED |
+
+15 条用例，5 个变异全部被杀。其中 4 条用例专门盯「试运行不得提升槽位」。
