@@ -422,6 +422,69 @@ def k254_7a():
     return (PARTIAL if ok else UNMET), "method written; significance limits stated: %s" % ok
 
 
+def _evidence_rows():
+    """Every row of every committed batch, with the file it came from."""
+    out = []
+    for path in sorted((HERE / "evidence").glob("*.json")):
+        try:
+            doc = json.loads(path.read_text(encoding="utf-8"))
+        except Exception:                                   # noqa: BLE001
+            continue
+        for row in doc.get("rows", []):
+            out.append((path.name, row))
+    return out
+
+
+def k252_1():
+    """Identity and health are recorded before a slot starts."""
+    runner = (HERE / "run_matrix_real.py").read_text(encoding="utf-8")
+    sets_identity = all(token in runner for token in
+                        ('record["source_sha"]', 'record["seed"]',
+                         'record["model"]', 'record["contract_sha256"]'))
+    probe = (HERE / "holdout_env_probe.py").read_text(encoding="utf-8")
+    checks_health = all(token in probe for token in
+                        ("gazebo", "overlay", "robot_description"))
+    if not (sets_identity and checks_health):
+        return (UNMET, "runner does not record identity (%s) or no health probe (%s)"
+                % (sets_identity, checks_health))
+
+    rows = _evidence_rows()
+    complete = [r for _n, r in rows
+                if r.get("source_sha") and r.get("model") and r.get("seed")
+                and r.get("contract_sha256")]
+    if not rows:
+        return (UNMET, "no records at all")
+    if len(complete) == len(rows):
+        return (MET, "identity recorded for all %d records; health probe covers "
+                     "gazebo, overlay and bring-up" % len(rows))
+    # The mechanism exists and some records carry the full identity; the older
+    # batches predate it. Saying MET would claim every row is attributable.
+    return (PARTIAL, "identity recorded for %d of %d records; the rest predate the "
+                     "fields (source_sha/seed/contract_sha256 were added in later "
+                     "rounds)" % (len(complete), len(rows)))
+
+
+def k252_3():
+    """Failures, exhaustion and abnormal endings stay in the ledger."""
+    rows = [(name, row) for name, row in _evidence_rows()]
+    statuses = {}
+    for _name, row in rows:
+        statuses.setdefault(row.get("terminal_status"), 0)
+        statuses[row.get("terminal_status")] += 1
+    required = {"BUDGET_EXHAUSTED", "INVALID", "NOT_RUN", "FAIL"}
+    present = {s for s in statuses if s in required}
+    if present != required:
+        return (UNMET, "these endings are missing from the records: %s"
+                % sorted(required - present))
+    kept = [p.name for p in (HERE / "evidence").glob("*INVALIDATED*.json")]
+    if not kept:
+        return (UNMET, "a spoiled batch was deleted rather than kept as evidence")
+    return (MET, "%d records keep their endings (BUDGET_EXHAUSTED %d, INVALID %d, "
+                 "NOT_RUN %d, FAIL %d); spoiled batches retained as %s"
+            % (len(rows), statuses["BUDGET_EXHAUSTED"], statuses["INVALID"],
+               statuses["NOT_RUN"], statuses["FAIL"], ", ".join(sorted(kept))))
+
+
 COVERED = {
     "249.1": k249_1, "249.2": k249_2, "249.3": k249_3, "249.4": k249_4,
     "249.5": k249_5, "249.7": k249_7,
@@ -431,21 +494,20 @@ COVERED = {
     "253.1": k253_1, "253.3": k253_3, "253.4": k253_4, "253.6": k253_6,
     "254.1": k254_1, "254.2": k254_2, "254.4": k254_4, "254.5": k254_5,
     "254.6": k254_6, "254.7": k254_7a,
+    "252.1": k252_1, "252.3": k252_3,
 }
 
 MANUAL_REASONS = {
     "249.6": "PR #257 正文里的命令与例子，不在代码里",
     "250.6": "PR #258 正文里的逐例预期/实际与来源",
-    "251.2": "需要锁定执行源码 40 位 SHA、镜像 digest 与提示摘要；尚未冻结",
+    "251.2": "记录已带源码 40 位 SHA、模型接口参数（base_url/temperature/max_tokens）与策略/契约摘要；仍缺构建来源与镜像 digest，提示摘要未落库，协议未冻结",
     "251.9": "沿用既有费用账本需负责人确认；本任务卡声明不新增授权",
-    "252.1": "需要真实运行环境与模型身份；缺凭据",
-    "252.2": "24 槽派发依赖凭据；机制已在 DRY RUN 中验证",
-    "252.3": "记账规则已实现（reconcile.py），但没有真实运行可记入台账",
+    "252.2": "机制已被真实调用验证（24 槽 + 4 个真实例槽），但派发未按 RUN_MANIFEST 的预登记顺序执行，且无额度跑完 24 槽",
     "252.4": "没有正在进行的派发，停止条件无法被行使或观察",
-    "252.5": "没有候选产生，无外部固定任务可判",
-    "252.6": "没有真实运行，token 与端到端时间无数据可核对",
-    "252.7": "本轮没有记录，与历史 E2 分池无从执行",
-    "252.8": "没有矩阵结果，完整矩阵与支持范围无内容可写",
+    "252.5": "真实例已提供外部固定任务与封印门，4 个候选已判出区分性理由码；但目标失败与回归失败尚未分别记录（门只给一个码）",
+    "252.6": "已有 112 条真实记录的逐槽 token 与耗时；但 D1 分母恒为 0（终态 UNKNOWN），分组核对尚无有效分母",
+    "252.7": "记录已带源码 SHA / 模型 / 策略指纹，历史 E2 与 v0.2 在结论表里分段；但尚无同一身份下的可比批次，分池规则未被真正行使",
+    "252.8": "24 槽矩阵未完成（额度耗尽）；现有 4 个真实例槽不足以写支持范围",
     "253.2": "保留材料与答案清单未提供，无摘要可留存",
     "253.5": "需与 #247 的持有者协调后端/技能/环境来源",
     "253.7": "无保留场景结果，无法与参考版本比较",
