@@ -53,6 +53,12 @@ place_server:
     move_to_pose_action: /move_to_pose
     gripper_action: /gripper_controller/gripper_cmd
     gripper_open_position: 0.02
+    # The jaws cannot reach the commanded 0.02 m: free-space open is 0.0104 m
+    # (docs/MISSION_UPDATE_20261112_R5.md 19.2), which is what made a real
+    # release read as "gripper did not open". This is the measured reachable
+    # opening, so release is judged against the measurement instead of the
+    # command; the tolerance itself is unchanged.
+    gripper_open_reference_m: 0.0104
     release_hover_m: 0.10
     release_clearance_m: 0.012
     carry_offset_m: 0.16
