@@ -29,9 +29,16 @@ def record(slot_id, status, qualification="REAL"):
 
 # ------------------------------------------------------------- the parser
 def test_the_manifest_parses_into_the_24_slots():
+    """Twenty-four slots, each carrying a word from the vocabulary.
+
+    This used to assert that every slot was NOT_RUN, which described an
+    unstarted experiment. Once the first real dispatch happened that assertion
+    was checking the past, so it now checks what still matters: the slots are
+    all present and none of them invents a status.
+    """
     statuses = RC.parse_manifest(MANIFEST)
     assert len(statuses) == 24
-    assert set(statuses.values()) == {"NOT_RUN"}
+    assert set(statuses.values()) <= set(RC.KNOWN_STATUSES), set(statuses.values())
 
 
 def test_every_manifest_status_is_in_the_vocabulary():
@@ -125,12 +132,22 @@ def test_a_manifest_status_outside_the_vocabulary_is_refused(tmp_path):
 
 
 # ------------------------------------------------------- against the real files
-def test_the_checked_in_manifest_has_no_records_yet_and_that_is_consistent():
-    statuses = RC.parse_manifest(MANIFEST)
-    report = RC.assert_reconciled(statuses, [])
-    assert report["manifest_slots"] == 24
-    assert report["records"] == 0
+def test_the_checked_in_manifest_reconciles_with_the_real_records():
+    """The records on disk map onto manifest slots and agree with their states.
 
+    Before the first dispatch this test asserted the opposite - no records, and
+    that being consistent - because an empty experiment reconciles trivially.
+    The invariant worth holding now is that every real record lands on a
+    pre-registered slot and that the checker says so.
+    """
+    statuses = RC.parse_manifest(MANIFEST)
+    records = RC.load_records(HERE / "evidence" / "real_instances_matrix.json")
+    assert len(records) == 24
+    report = RC.assert_reconciled(statuses, records)
+    assert report["manifest_slots"] == 24
+    assert report["records"] == 24
+    for record in records:
+        assert record["slot_id"] in statuses, record["slot_id"]
 
 def test_the_dry_run_matrix_records_are_all_excluded():
     """The evidence the matrix actually produced must not move a single slot."""
@@ -142,5 +159,9 @@ def test_the_dry_run_matrix_records_are_all_excluded():
     statuses = RC.parse_manifest(MANIFEST)
     report = RC.reconcile(statuses, records)
     assert len(report["excluded_not_real"]) == 24
-    assert report["consistent"] is True
-    assert set(statuses.values()) == {"NOT_RUN"}
+    # "Moves not a single slot" is a comparison, not an absolute. The manifest is
+    # now backed by the real-instance matrix, so reconciling it against stand-in
+    # records alone reports the same drift as reconciling it against nothing -
+    # and that equality is the property this test exists to hold.
+    baseline = RC.reconcile(statuses, [])
+    assert report["drift"] == baseline["drift"]

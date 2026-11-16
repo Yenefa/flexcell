@@ -28,7 +28,11 @@ TERMINAL = ("SUCCESS_VERIFIED", "FAIL", "BUDGET_EXHAUSTED", "UNKNOWN", "INVALID"
 KNOWN_STATUSES = (NOT_RUN, "RUNNING") + TERMINAL
 
 # A record whose qualification contains any of these is not a real run.
-NOT_REAL = ("DRY_RUN", "SCRIPTED")
+# SYNTHETIC belongs here: a run against the scratch fixtures exercises the
+# machinery, and its slot ids collide with the manifest while measuring a
+# different experiment. Counting it as real would let a stand-in batch
+# reconcile against the pre-registered slots.
+NOT_REAL = ("DRY_RUN", "SCRIPTED", "SYNTHETIC")
 
 SLOT_RE = re.compile(r"^\|\s*\d+\s*\|\s*`([^`]+)`\s*\|")
 
