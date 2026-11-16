@@ -21,7 +21,7 @@
 |---|---|
 | `benchmark/repair_eval/visibility.py` | 策略加载、目录边界、工具门面、反馈包、demo/审计 CLI；纯标准库 |
 | `benchmark/repair_eval/visibility_policy.json` | 版本化策略（`schema_version` + 条件表 + 受保护写入清单 + 诊断投影） |
-| `benchmark/repair_eval/test_visibility.py` | 离线负例/正例回归（pytest，49 项） |
+| `benchmark/repair_eval/test_visibility.py` | 离线负例/正例回归（pytest，52 项） |
 | `docs/repair_eval/VISIBILITY.md` | 本文：条件表、理由码、负例清单、已知限制、集成注意点 |
 
 本 issue 的写入范围只有 `benchmark/repair_eval/` 和 `docs/repair_eval/`。
@@ -99,7 +99,7 @@ cd /home/ros/wt/visibility
 python3 -m pytest benchmark/repair_eval/test_visibility.py -q
 ```
 
-当前结果：`49 passed`。负例与正例（测试名可检索）：
+当前结果：`52 passed`。负例与正例（测试名可检索）：
 
 - **A 读不到裁决**：`test_a_read_verdict_json_is_refused`（`reserved_name`）；
   `test_a_telemetry_and_diagnosis_tools_are_refused`（三个反馈工具 + 经 `read_file` 读
@@ -109,6 +109,15 @@ python3 -m pytest benchmark/repair_eval/test_visibility.py -q
 - **A 走别名拿不到裁决**：`test_a_read_through_a_symlink_alias_is_refused`、
   `test_a_symlink_to_hidden_material_is_refused`（`symlink_alias`）；
   `test_a_cross_root_hard_link_is_refused`（`hardlink_alias`）。
+- **别名不是一次校验就作数**：`test_a_read_through_a_repointed_symlink_is_still_refused`
+  ——先让同名软链 `swap.txt` 指向候选内允许文件并成功读一次，再把软链换成
+  `../verdict/verdict.json`（以及 `../hidden/answers.txt`）重读，仍是
+  `symlink_alias`，且拒绝记录落在 `swap.txt` 上。这条断言的是"每次读都按
+  当前真实路径判定"，而不是"校验那一刻解析过一次"。
+- **策略加载即失败**：`test_policy_loading_fails_closed_instead_of_silently_allowing`
+  （把 A 的 `verification` 改成 true → 加载直接 `PolicyError`，没有构造出 Policy
+  对象）；而同样的放宽施加在**已加载**对象上时，门面会照策略执行
+  （`test_verification_access_is_policy_driven`）——所以兜底的是加载器，不是读取时的运气。
 - **A 的反馈是 None**：`test_no_feedback_is_none_not_an_empty_string`。
 - **B 反馈带真实来源与摘要**：`test_b_feedback_packet_carries_its_own_source_and_digest`
   （`source_run_id=run-b`、`source_root=candidate`、`sha256 == sha256(log)`、`mismatched=False`）。
@@ -140,6 +149,31 @@ python3 -m pytest benchmark/repair_eval/test_visibility.py -q
   在裁决与隐藏答案里，搜索返回 `(no matches)`）。
 - **行为记录**：`test_attempts_record_every_decision_with_a_reason_code`（allow/deny 都记，
   理由码在 `REASON_CODES` 内）。
+
+### 对抗性复核记录（2026-11-16，另一名审阅者）
+
+方法：不改代码，按攻击者思路绕过门面，七类绕法共 22 类攻击；判据是"能否读到
+sealed 材料"。结果：**无一类读到**，全部落在上表的理由码上。
+
+| 攻击 | 结果 |
+|---|---|
+| 直接读 `verdict.json`（对照） | `reserved_name` |
+| `./verdict.json`、`skill//../verdict.json` | `reserved_name` / `parent_traversal` |
+| 大小写折叠 `VERDICT.JSON`、尾点、尾空格 | `missing_material`（精确名字匹配，解析后不同名即取不到；见第 9 节平台说明） |
+| 嵌套 `..`、`../verdicts/verdict.json`、绝对路径 | `parent_traversal` / `absolute_path` |
+| 候选内部建符号链接指向 sealed 文件 | `symlink_alias` |
+| 候选内部建目录软链指向 sealed 目录 | `symlink_alias` |
+| 先读一次再重定向软链（TOCTOU 式） | `symlink_alias`（重定向后仍拒绝） |
+| A 调 `read_feedback` / `diagnose` / `read_verification` | `policy_denied` |
+| `list_entries` 是否泄漏 sealed 名字 | 不泄漏 |
+| 写 `task.md`、写 `verdict.json` | `protected_write` |
+| 把策略改成 A 可见 `verification` 再加载 | `PolicyError`（加载期自校验） |
+
+这些探针刻意没有全部改名成正式用例：多数与第 6 节已有断言重复，重复计数会稀释
+"覆盖率"的含义。只有两条原先没有单独断言的性质被补成显式用例——上表的
+"软链重定向"（`test_a_read_through_a_repointed_symlink_is_still_refused`）和
+"策略加载期自校验"（`test_policy_loading_fails_closed_instead_of_silently_allowing`），
+两条都做过反向验证：去掉对应的机制，用例会失败。
 
 ## 7. 可执行检查与允许/拒绝例子
 
@@ -221,6 +255,10 @@ python3 -m benchmark.repair_eval.visibility \
   名字（不显示目标内容）。目录符号链接在 `search_code` 中不递归。
 - **`..` 一律拒绝**，包括 `skill/../skill/recovery.py` 这类本可规范化的写法；调用方应传
   规范化相对路径。
+- **名字匹配区分大小写**：保留名与受保护写入按精确名字比较。在大小写不敏感的文件系统
+  （macOS/Windows 默认）上，`VERDICT.JSON` / `GATE/sim.py` 这类写法可能落到真实
+  文件上，届时需要额外做大小写折叠比较。本仓库目标平台是 Ubuntu（区分大小写），本次未实现
+  该折叠；跨平台移植前必须补上。
 - **`assert_fresh_run` 只看名字**：候选目录里叫 `verdict.json`/`result.json`/… 的文件与
   `telemetry/`、`experience/` 目录会被判为残留，即使内容无害；反之改了名的残留不会被发现。
 - **诊断投影不是语义脱敏**：它按策略键名单截断，若执行日志本身包含敏感文本，投影仍会带上。
