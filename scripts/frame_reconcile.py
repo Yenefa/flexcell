@@ -142,9 +142,17 @@ def reconcile_run(out, bag_dir, *, deserialize, write_png, joints,
         except Exception as exc:
             errors.append('backfill_image_failed %d: %s' % (stamp, exc))
             continue
+        # A backfilled frame still needs a wall clock, or no visual-vs-truth
+        # pairing can place it in time. It is derived, not measured: the sim<->
+        # wall relation is linear at fixed RTF, so the offset comes from the real
+        # anchors and is labelled as derived rather than passed off as a capture
+        # time. A reader can then tell the two apart.
+        wall = _interp([(row['sim_ns'], row['captured_wall_ns']) for row in rows
+                        if isinstance(row.get('captured_wall_ns'), int)], stamp)
         row = dict(frame_index=next_index, sim_ns=stamp, monotonic_ns=_interp(anchors, stamp),
                    monotonic_ns_source='interpolated', image=rel, valid=False, reasons=[],
-                   backfilled_from_bag=True)
+                   backfilled_from_bag=True,
+                   captured_wall_ns=wall, captured_wall_ns_source='derived_from_anchors')
         next_index += 1
         state = _causal(states, stamp, state_age_ns)
         reference = _causal(references, stamp, state_age_ns)

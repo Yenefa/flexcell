@@ -60,12 +60,79 @@ def write_png(path, msg):
         stream.write(content)
 
 
+def truth_sidecar(out, clock_offset_ns):
+    """Write this run's own ground truth next to the frames.
+
+    WHY THE RUN WRITES ITS OWN TRUTH: a visual check is only checkable when every
+    frame has an independent record of where the objects actually were at that
+    instant. The physics trace already carries every object pose per step with a
+    monotonic stamp, so the run can hand that to a pairing gate instead of
+    requiring an external capture tool to have been running alongside it.
+
+    The clock is converted, not assumed: the trace stamp is monotonic and the
+    pairing contract is wall time, so the measured offset is added and published
+    in the file and in collection.json. A reader can therefore tell how the two
+    clocks were related for this run.
+    """
+    physics = out / 'physics.jsonl'
+    summary = dict(schema_version=1, source='GZ_GROUND_TRUTH', clock='wall',
+                   clock_offset_ns=clock_offset_ns, sample_count=0, skipped_rows=0,
+                   objects=[], note='wall_ns = trace monotonic_ns + clock_offset_ns')
+    if not physics.is_file():
+        summary['status'] = 'NO_PHYSICS_TRACE'
+        summary['samples'] = []
+        return summary
+    samples, skipped, objects = [], 0, set()
+    for line in physics.read_text().splitlines():
+        if not line.strip():
+            continue
+        try:
+            row = json.loads(line)
+        except ValueError:
+            skipped += 1
+            continue
+        measured = {}
+        for name, entry in (row.get('objects') or {}).items():
+            pose = (entry or {}).get('pose')
+            if not isinstance(pose, list) or len(pose) < 3:
+                skipped += 1
+                continue
+            xyz = pose[:3]
+            if any(isinstance(v, bool) or not isinstance(v, (int, float))
+                   or not np.isfinite(v) for v in xyz):
+                skipped += 1
+                continue
+            measured[name] = [float(v) for v in xyz]
+            objects.add(name)
+        stamp = row.get('monotonic_ns')
+        if not measured or isinstance(stamp, bool) or not isinstance(stamp, int):
+            skipped += 1
+            continue
+        samples.append(dict(wall_ns=stamp + clock_offset_ns,
+                            source='GZ_GROUND_TRUTH', objects=measured))
+    # "samples" is the list, not its length: that is the shape the pairing
+    # contract and scripts/visual_gate.py both read. The count is sample_count.
+    (out / 'truth_samples.json').write_text(json.dumps(dict(
+        **dict(summary, sample_count=len(samples), skipped_rows=skipped,
+               objects=sorted(objects)),
+        samples=[dict(wall_ns=sample['wall_ns'], source=sample['source'],
+                      objects=sample['objects']) for sample in samples])))
+    (out / 'objects.json').write_text(json.dumps(
+        dict(schema_version=1, objects=sorted(objects))) + '\n')
+    return dict(sample_count=len(samples), skipped_rows=skipped,
+                objects=sorted(objects))
+
+
 class Recorder(Node):
     def __init__(self, out):
         super().__init__('flexcell_data_recorder', parameter_overrides=[
             rclpy.parameter.Parameter('use_sim_time', value=True)])
         self.out, self.states, self.references, self.gripper = out, deque(maxlen=500), deque(maxlen=500), deque(maxlen=100)
         self.physics = LineWriter(out, 'physics.jsonl', max_pending=200000)
+        # The physics trace carries the simulator's monotonic stamp; the visual
+        # pairing contract is in wall time. Measure the offset once instead of
+        # pretending the two clocks are the same, and publish it with the data.
+        self.clock_offset_ns = time.time_ns() - time.monotonic_ns()
         self.index, self.last, self.errors = 0, -1, []
         (out / 'images').mkdir()
         self.writer = FrameWriter(out, write_png)
@@ -104,7 +171,10 @@ class Recorder(Node):
 
     def frame(self, msg):
         stamp = stamp_ns(msg.header)
+        # captured_wall_ns is what a visual-vs-truth pairing needs: a frame the
+        # truth cannot be placed next to in time cannot be checked at all.
         row = dict(frame_index=self.index, sim_ns=stamp, monotonic_ns=time.monotonic_ns(),
+                   captured_wall_ns=time.time_ns(),
                    image='images/%06d.png' % self.index, valid=False, reasons=[])
         self.index += 1
         try:
@@ -184,11 +254,13 @@ def main():
                 reconcile = dict(status='ERROR', error=str(exc))
                 node.errors.append('camera_reconcile_failed: ' + str(exc))
         log.close()
+        truth = truth_sidecar(args.out, node.clock_offset_ns)
         frames_total = reconcile.get('frames_total', node.index) if reconcile else node.index
         valid_total = reconcile.get('valid_total', writer['valid_frames']) if reconcile else writer['valid_frames']
         (args.out / 'collection.json').write_text(json.dumps(dict(
             schema_version=1, frames=frames_total, valid_frames=valid_total, errors=node.errors,
             image_writer=writer, physics_writer=physics, reconcile=reconcile,
+            truth=truth, clock_offset_ns=node.clock_offset_ns,
             rosbag_exit=bag.returncode, joints=JOINTS,
             action_semantics='arm controller reference positions + held accepted gripper position target',
             synchronization='causal source stamps; state/reference age <=50ms; backfilled rows from bag',
