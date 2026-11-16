@@ -81,6 +81,22 @@ def refresh_feedback(candidate):
     return ran
 
 
+def replace_editable_fields(contract, fields):
+    """A contract with a different editable surface.
+
+    TaskContract is frozen, so this rebuilds it from its mapping rather than
+    mutating it - the contract is the ruler and a runner must not loosen it in
+    place.
+    """
+    mapping = contract.to_mapping() if hasattr(contract, "to_mapping") else None
+    if mapping is None:
+        raw = dict(contract.__dict__)
+        raw["editable_fields"] = list(fields)
+        return task_contract.TaskContract.from_mapping(raw)
+    mapping["editable_fields"] = list(fields)
+    return task_contract.TaskContract.from_mapping(mapping)
+
+
 def run_slot(family, condition, rep, workdir, policy, donor, model, max_interactions,
              seed=None, donor_run_id=None, source_sha=None, donor_log_path=None,
              source="synthetic"):
@@ -122,6 +138,18 @@ def run_slot(family, condition, rep, workdir, policy, donor, model, max_interact
     transport = GatedTransport(model=model, timeout=300)
     ledger = B.Ledger(transport, max_interactions=max_interactions)
     contract = task_contract.TaskContract.from_mapping(contract_for(family))
+    if instance:
+        # The editable surface belongs to the instance, not to the synthetic
+        # contract. Four real-instance slots were spent learning this: the agent
+        # was told it could edit "skill/", wrote only there, and never touched
+        # config/week1.yaml or src/task_fsm_server.py. All four came back FAIL
+        # and the model was not at fault.
+        #
+        # This has to patch the assignment that survives: an earlier attempt put
+        # the same code before the transport line, where the next statement
+        # rebuilt the contract from scratch and silently undid it.
+        surface = str(Path(IN.editable_rel(instance)).parent) + "/"
+        contract = replace_editable_fields(contract, [surface])
     agent = RepairAgent(ledger, boundary, task_text, contract.editable_fields)
 
     # Drive the loop here rather than calling agent.run(), so that the feedback
