@@ -133,21 +133,33 @@ def _problems_position(value, where):
     return []
 
 
+def _normalise(path):
+    """The single definition of "the same path" used by every comparison.
+
+    Trailing slashes are stripped so a directory may be written `skill/` or
+    `skill`. This function must be the ONLY place that decides, because the
+    alternative - normalising in one comparison and not in another - is exactly
+    how a directory-form authorisation silently matched nothing.
+    """
+    return str(path).strip().rstrip("/")
+
+
 def split_path(path):
     """Split `file:member` into (file, member). member is None for plain paths.
 
     A repair is often authorised on one parameter of a file (`controller.yaml:kp`)
     rather than on the whole file, so the member has to survive normalisation.
+
+    The file part is normalised through the same function the comparison uses.
+    It used to keep its trailing slash, so `skill/` became the root `skill//`
+    and startswith() matched nothing: the contract validated, the run was
+    rejected, and nothing pointed at the contract.
     """
     text = str(path).strip()
     if ":" in text:
         head, _, tail = text.partition(":")
-        return head.strip(), (tail.strip() or None)
-    return text, None
-
-
-def _normalise(path):
-    return str(path).strip().rstrip("/")
+        return _normalise(head), (tail.strip() or None)
+    return _normalise(text), None
 
 
 def _under(path, root):
@@ -291,10 +303,21 @@ def _problems_editable(section, protected, where="editable_fields"):
         if not _is_text(entry):
             problems.append(at + ": must be a non-empty string")
             continue
-        field_file, _member = split_path(entry)
+        field_file, field_member = split_path(entry)
+        if not field_file:
+            problems.append(at + ": %r has no path before the member separator"
+                            % (entry,))
         if _normalise(entry) in seen:
             problems.append(at + ": duplicate editable field %r" % (entry,))
         seen.add(_normalise(entry))
+        # Self-consistency: the field must authorise the very path it names. A
+        # field that fails this can never authorise anything, and the author
+        # would not find out until every run came back UNAUTHORIZED_EDIT.
+        probe = entry if field_member else field_file
+        if field_file and not _field_permits(entry, probe):
+            problems.append(
+                "%s: %r authorises no path (it cannot even match itself)"
+                % (at, entry))
         # A contract that says "you may edit X" and "X must stay identical" has
         # no consistent reading, so it is refused rather than resolved by
         # precedence at grading time.

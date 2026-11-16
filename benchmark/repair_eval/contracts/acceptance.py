@@ -147,14 +147,29 @@ def _position(value):
     return tuple(float(v) for v in value)
 
 
+# Containers whose KEYS are data, not schema fields: "objects" is keyed by
+# object name, "protected_hashes" by file path. Their keys must never be read as
+# a field declaration, or a task with an object called "target" - about the most
+# natural name there is - would be rejected on every run as TAMPERED_IMMUTABLE:
+# the evaluator accusing the repair of cheating when the bug is its own.
+DATA_KEYED_CONTAINERS = frozenset({"objects", "protected_hashes"})
+
+
 def _forbidden_key_hits(node, prefix="$"):
-    """Every path in the candidate that names an immutable field."""
+    """Every path in the candidate that names an immutable SCHEMA field.
+
+    Recursion stops at the containers whose keys are data. The key that opens
+    such a container is still checked - a top-level "zones" is still a restated
+    schema field - but what lives inside it is a value, not a declaration.
+    """
     hits = []
     if isinstance(node, dict):
         for key in sorted(node, key=str):
             path = prefix + "." + str(key)
             if str(key) in FORBIDDEN_CANDIDATE_KEYS:
                 hits.append(path)
+            if str(key) in DATA_KEYED_CONTAINERS:
+                continue
             hits.extend(_forbidden_key_hits(node[key], path))
     elif isinstance(node, list):
         for index, item in enumerate(node):

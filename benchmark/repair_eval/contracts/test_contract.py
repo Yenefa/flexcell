@@ -554,6 +554,116 @@ def test_editing_the_goal_changes_the_frozen_digest():
     assert widened.sha256() != baseline
 
 
+# ------------------------------------------------- object names are data, not schema
+# These two defects were found by running the whole 24-slot matrix, not by the
+# corpus: both produce a false REJECT, which turns no test red and instead drives
+# the reported success rate to zero while looking like the repairs all failed.
+COLLIDING_OBJECT_NAMES = ("target", "goal", "version", "zones", "tolerance",
+                          "editable_fields", "protected_paths")
+
+
+def _contract_with_object_named(name):
+    mapping = load_case()["contract"]
+    for obj in mapping["immutable"]["objects"]:
+        if obj["name"] == "block_a":
+            obj["name"] = name
+    return task_contract.TaskContract.from_mapping(mapping)
+
+
+@pytest.mark.parametrize("name", COLLIDING_OBJECT_NAMES)
+def test_an_object_named_like_a_schema_field_is_not_tampering(name):
+    # "target" is the most natural object name there is. Scanning object keys as
+    # schema fields made every run of such a task REJECT with TAMPERED_IMMUTABLE:
+    # the evaluator accusing the repair of cheating when the bug was its own.
+    contract = _contract_with_object_named(name)
+    candidate = candidate_of()
+    candidate["objects"] = {name: [0.12, -0.15, 0.0175],
+                            "block_b": [0.25, 0.05, 0.0175]}
+    verdict = acceptance.evaluate(contract, candidate)
+    assert verdict.status == acceptance.ACCEPT, verdict.reasons
+    assert verdict.reasons == []
+
+
+def test_a_schema_field_key_is_still_tampering_at_the_top_level():
+    # The fix narrows the scan; it must not blunt it. A top-level "zones" is a
+    # restated schema field no matter what lives inside "objects".
+    candidate = candidate_of()
+    candidate["zones"] = [{"name": "z", "position": [0.0, 0.0, 0.0], "radius": 9.0}]
+    candidate["objects"]["target"] = [0.12, -0.15, 0.0175]
+    verdict = verdict_for(candidate)
+    assert verdict.status == acceptance.REJECT
+    assert verdict.codes == ["TAMPERED_IMMUTABLE"]
+    hits = check_named(verdict, "immutable_not_restated")["evidence"]["tampered_paths"]
+    assert hits == ["$.zones"], hits
+
+
+def test_the_container_key_is_still_checked_but_its_contents_are_not():
+    # The distinction the fix draws: a top-level "thresholds" is a restated
+    # schema field; a "tolerance" inside "objects" is an object's name. Both
+    # halves matter - skipping the whole scan would hide real tampering.
+    candidate = candidate_of()
+    candidate["objects"]["tolerance"] = [0.12, -0.15, 0.0175]   # object name
+    verdict = verdict_for(candidate)
+    assert verdict.codes == [], verdict.reasons
+
+    candidate = candidate_of()
+    candidate["thresholds"] = {"max_position_error_m": 0.5}     # schema field
+    verdict = verdict_for(candidate)
+    assert verdict.codes == ["TAMPERED_IMMUTABLE"]
+    hits = check_named(verdict, "immutable_not_restated")["evidence"]["tampered_paths"]
+    assert hits == ["$.thresholds"], hits
+
+
+# ------------------------------------------------------- directory authorisations
+@pytest.mark.parametrize("field", ["skill/", "skill", "skill/registry.py"])
+def test_directory_and_file_authorisations_agree(field):
+    # "skill/" used to authorise nothing: split_path kept the trailing slash while
+    # _normalise stripped it, so the root became "skill//" and startswith() never
+    # matched. The contract validated, so the author could not see the mistake
+    # until the whole matrix came back UNAUTHORIZED_EDIT.
+    mapping = load_case()["contract"]
+    mapping["editable_fields"] = [field]
+    contract = task_contract.TaskContract.from_mapping(mapping)
+    assert contract.classify_path("skill/registry.py") == (
+        True, task_contract.EDITABLE_FIELD)
+
+
+def test_a_directory_authorisation_covers_the_directory_but_a_file_does_not():
+    mapping = load_case()["contract"]
+    mapping["editable_fields"] = ["skill"]
+    directory = task_contract.TaskContract.from_mapping(mapping)
+    assert directory.is_editable("skill/nested/deep.py") is True
+    assert directory.is_editable("skill_other/x.py") is False
+
+    mapping = load_case()["contract"]
+    mapping["editable_fields"] = ["skill/registry.py"]
+    single = task_contract.TaskContract.from_mapping(mapping)
+    assert single.is_editable("skill/registry.py") is True
+    assert single.is_editable("skill/other.py") is False
+
+
+def test_split_path_normalises_the_file_part():
+    assert task_contract.split_path("skill/") == ("skill", None)
+    assert task_contract.split_path("skill/registry.py") == ("skill/registry.py", None)
+    assert task_contract.split_path("config/controller.yaml:kp") == (
+        "config/controller.yaml", "kp")
+    assert task_contract.split_path(" skill/ ") == ("skill", None)
+
+
+def test_an_editable_field_that_cannot_match_itself_is_refused():
+    # Self-consistency is checkable at contract-build time. Discovering it after
+    # the run is how a configuration mistake becomes "every repair failed".
+    for bad in (":kp", "/"):
+        mapping = load_case()["contract"]
+        mapping["editable_fields"] = [bad]
+        assert task_contract.validate(mapping), bad
+    for good in ("skill/", "skill", "skill/registry.py",
+                 "config/controller.yaml:kp"):
+        mapping = load_case()["contract"]
+        mapping["editable_fields"] = [good]
+        assert task_contract.validate(mapping) == [], good
+
+
 # --------------------------------------------------- candidate report format
 def test_every_case_declares_the_candidate_schema():
     # A case that lost its format tag would be judged UNKNOWN and would stop
