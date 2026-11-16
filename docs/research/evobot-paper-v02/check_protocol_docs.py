@@ -149,20 +149,37 @@ def slot_status(line):
     return cells[-1]
 
 
+VOCAB = {"NOT_RUN", "RUNNING", "SUCCESS_VERIFIED", "FAIL",
+         "BUDGET_EXHAUSTED", "UNKNOWN", "INVALID"}
+
+
 def check_status(rows):
-    not_run = 0
-    terminal = []
+    """Every slot carries a status from the vocabulary, and the counts add up.
+
+    This used to require all twenty-four slots to be NOT_RUN, which was true
+    while the manifest described an unstarted experiment and became false the
+    moment the first real dispatch happened. An invariant that encodes "nothing
+    has run yet" has to be replaced, not waived: what still matters is that no
+    slot is left blank, none invents a word outside the vocabulary, and the
+    section 6 tally matches the rows.
+    """
+    counts = {}
+    bad = []
     for _order, slot, line in rows:
-        status = slot_status(line)
-        if status == TICK + "NOT_RUN" + TICK:
-            not_run += 1
-        else:
-            terminal.append("%s=%s" % (slot, status))
-    ok = (not terminal and not_run == 24)
-    if terminal:
-        fail("slot status", "non-NOT_RUN slots: " + ", ".join(terminal))
-    print("[ %s ] slot status: %d NOT_RUN, %d terminal" % ("OK" if ok else "FAIL", not_run, len(terminal)))
-    return ok
+        status = slot_status(line).strip(TICK)
+        if status not in VOCAB:
+            bad.append("%s=%s" % (slot, status))
+            continue
+        counts[status] = counts.get(status, 0) + 1
+    if bad:
+        fail("slot status", "status outside the vocabulary: " + ", ".join(bad))
+        return False
+    if len(counts) and sum(counts.values()) != 24:
+        fail("slot status", "only %d slots carry a status" % sum(counts.values()))
+        return False
+    print("[ OK ] slot status: " + ", ".join("%s=%d" % (k, counts[k])
+                                             for k in sorted(counts)))
+    return True
 
 
 def check_order(rows):
@@ -174,12 +191,26 @@ def check_order(rows):
 
 
 def check_status_counts(manifest_text, rows):
-    pattern = r"\|\s*" + TICK + r"NOT_RUN" + TICK + r"\s*\|\s*\*\*(\d+)\*\*\s*\|"
-    m = re.search(pattern, manifest_text)
-    if not m:
-        fail("status counts", "cannot find the NOT_RUN count row in section 6")
+    """The section 6 tally must equal what the rows say, for every status."""
+    actual = {}
+    for _order, _slot, line in rows:
+        status = slot_status(line).strip(TICK)
+        actual[status] = actual.get(status, 0) + 1
+    declared = {}
+    for status in VOCAB:
+        pattern = (r"\|\s*" + TICK + status + TICK +
+                   r"\s*\|\s*\*\*(\d+)\*\*\s*\|")
+        m = re.search(pattern, manifest_text)
+        if m:
+            declared[status] = int(m.group(1))
+    wrong = [(s, declared.get(s, 0), actual.get(s, 0))
+             for s in VOCAB if declared.get(s, 0) != actual.get(s, 0)]
+    if wrong:
+        fail("status counts", "section 6 disagrees with the rows: " +
+             ", ".join("%s table=%d rows=%d" % w for w in wrong))
         return False
-    declared = int(m.group(1))
+    print("[ OK ] status counts: section 6 equals the rows")
+    return True
     ok = declared == len(rows) == 24
     if not ok:
         fail("status counts", "declared NOT_RUN=%d vs rows=%d" % (declared, len(rows)))
