@@ -19,8 +19,43 @@ from pathlib import Path
 import pytest
 
 ROOT = Path(__file__).resolve().parents[4]
-SCRIPT = (ROOT.parent / 'ci-public-window' / 'scripts' /
-          'evobot_visual_vs_truth.py')
+
+# The tool under test is an acceptance script, not a package, so it is loaded by
+# path. Two layouts are searched because the card that owns it has lived in two
+# places. WHY THE ORDER: the card was moved INTO this repository, which is what
+# makes this file runnable in a plain checkout and in CI at all; the sibling
+# `ci-public-window` checkout is the maintainer's older layout and is kept only
+# as a fallback, so an existing working copy does not turn red on the day of the
+# move.
+SCRIPT_CANDIDATES = (
+    ROOT / 'setup' / 'acceptance' / 'evobot_visual_capture_20261111' /
+    'scripts' / 'evobot_visual_vs_truth.py',
+    ROOT.parent / 'ci-public-window' / 'scripts' / 'evobot_visual_vs_truth.py',
+)
+
+
+def resolve_script():
+    """The pairing tool this checkout carries, or None when it carries neither.
+
+    WHY THE LOAD IS NOT DONE HERE
+        A module-level load turns a sparse checkout (no `setup/acceptance`) into
+        a FileNotFoundError during collection. That reads as "this test file is
+        broken" instead of "this checkout does not carry the fixture", and it
+        takes the whole collection down with it. Returning None lets the caller
+        skip with the paths it looked at.
+    """
+    for candidate in SCRIPT_CANDIDATES:
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+SCRIPT = resolve_script()
+
+pytestmark = pytest.mark.skipif(
+    SCRIPT is None,
+    reason='evobot_visual_vs_truth.py is not in this checkout; looked for '
+           + ' and '.join(str(candidate) for candidate in SCRIPT_CANDIDATES))
 
 
 def module():
@@ -31,7 +66,16 @@ def module():
     return loaded
 
 
-m = module()
+@pytest.fixture(scope='module')
+def m():
+    """The pairing tool, imported on first use.
+
+    A fixture rather than a module-level `m`: pytest resolves it only for the
+    tests that ask for it, so the skip in `pytestmark` is decided before any
+    attempt to read a file that may not exist.
+    """
+    return module()
+
 
 FRAME = dict(path='/tmp/a.png', label='task_start', sha256='a' * 64,
              png_bytes=1234, width=640, height=480, stamp_ns=10 ** 9,
@@ -45,7 +89,7 @@ def sample(wall_ns, objects=None):
 
 
 # --------------------------------------------------------------- the pairing
-def test_the_closest_truth_sample_wins_and_its_gap_is_recorded():
+def test_the_closest_truth_sample_wins_and_its_gap_is_recorded(m):
     samples = [sample(900_000_000), sample(1_050_000_000),
                sample(1_400_000_000)]
     pairing, reason = m.pair_one(FRAME, samples, max_gap_s=1.0)
@@ -54,31 +98,31 @@ def test_the_closest_truth_sample_wins_and_its_gap_is_recorded():
     assert pairing['pairing_gap_s'] == pytest.approx(0.05)
 
 
-def test_truth_from_too_far_away_is_refused_not_annotated():
+def test_truth_from_too_far_away_is_refused_not_annotated(m):
     """A pose from another moment does not describe this frame."""
     pairing, reason = m.pair_one(FRAME, [sample(5_000_000_000)], max_gap_s=1.0)
     assert pairing is None
     assert '4.000s away' in reason and 'does not describe this frame' in reason
 
 
-def test_no_truth_at_all_is_refused():
+def test_no_truth_at_all_is_refused(m):
     pairing, reason = m.pair_one(FRAME, [], max_gap_s=1.0)
     assert pairing is None and reason == 'no truth samples were taken'
 
 
-def test_a_sample_with_no_objects_is_refused():
+def test_a_sample_with_no_objects_is_refused(m):
     pairing, reason = m.pair_one(FRAME, [sample(1_000_000_000, objects={})])
     assert pairing is None and 'no objects' in reason
 
 
-def test_a_frame_without_a_capture_time_cannot_be_paired():
+def test_a_frame_without_a_capture_time_cannot_be_paired(m):
     broken = dict(FRAME)
     broken.pop('captured_wall_ns')
     pairing, reason = m.pair_one(broken, [sample(1_000_000_000)])
     assert pairing is None and 'captured_wall_ns' in reason
 
 
-def test_objects_that_were_not_measured_stay_absent():
+def test_objects_that_were_not_measured_stay_absent(m):
     """Never defaulted, never carried over from another sample."""
     samples = [sample(1_000_000_000, {'target_box_a': [0.22, 0.0, 0.0175]})]
     pairing, _ = m.pair_one(FRAME, samples)
@@ -86,7 +130,7 @@ def test_objects_that_were_not_measured_stay_absent():
     assert 'target_box_b' not in pairing['objects']
 
 
-def test_the_pairing_carries_the_frame_identity_so_it_can_be_rechecked():
+def test_the_pairing_carries_the_frame_identity_so_it_can_be_rechecked(m):
     pairing, _ = m.pair_one(FRAME, [sample(1_000_000_000)])
     assert pairing['png_sha256'] == 'a' * 64
     assert pairing['sim_stamp_ns'] == 10 ** 9
@@ -94,7 +138,7 @@ def test_the_pairing_carries_the_frame_identity_so_it_can_be_rechecked():
 
 
 # ---------------------------------------------------------------- the report
-def test_the_report_states_its_own_scope_so_it_cannot_be_over_read():
+def test_the_report_states_its_own_scope_so_it_cannot_be_over_read(m):
     report = m.build_report([], [], 0, 1.0)
     assert report['record_kind'] == 'EVOBOT_VISUAL_TRUTH_PAIRING'
     scope = report['scope']
@@ -102,7 +146,7 @@ def test_the_report_states_its_own_scope_so_it_cannot_be_over_read():
     assert 'recognised' in scope and 'can see' in scope
 
 
-def test_the_report_is_valid_json_without_nan(tmp_path):
+def test_the_report_is_valid_json_without_nan(m, tmp_path):
     report = m.build_report([], [], 0, 1.0)
     text = json.dumps(report, allow_nan=False)
     assert 'NaN' not in text
@@ -124,7 +168,7 @@ def _write_frames(tmp_path, count=1, with_sidecar=True, sidecar_ok=True):
     return directory
 
 
-def test_no_frames_is_a_non_zero_exit(tmp_path, capsys):
+def test_no_frames_is_a_non_zero_exit(m, tmp_path, capsys):
     empty = tmp_path / 'empty'
     empty.mkdir()
     code = m.main(['--frames', str(empty), '--out', str(tmp_path / 'p.json'),
@@ -133,7 +177,7 @@ def test_no_frames_is_a_non_zero_exit(tmp_path, capsys):
     assert 'NO_FRAMES' in capsys.readouterr().err
 
 
-def test_frames_without_sidecars_exit_non_zero(tmp_path, capsys):
+def test_frames_without_sidecars_exit_non_zero(m, tmp_path, capsys):
     frames = _write_frames(tmp_path, count=2, with_sidecar=False)
     truth = tmp_path / 't.json'
     truth.write_text(json.dumps([sample(1_000_000_000)]), encoding='utf-8')
@@ -145,7 +189,7 @@ def test_frames_without_sidecars_exit_non_zero(tmp_path, capsys):
     assert all('sidecar missing' in u['reason'] for u in report['unpaired'])
 
 
-def test_a_failed_capture_sidecar_is_not_treated_as_a_frame(tmp_path):
+def test_a_failed_capture_sidecar_is_not_treated_as_a_frame(m, tmp_path):
     frames = _write_frames(tmp_path, count=1, sidecar_ok=False)
     truth = tmp_path / 't.json'
     truth.write_text(json.dumps([sample(1_000_000_000)]), encoding='utf-8')
@@ -154,7 +198,7 @@ def test_a_failed_capture_sidecar_is_not_treated_as_a_frame(tmp_path):
     assert code == m.EXIT_UNPAIRED
 
 
-def test_a_successful_pairing_exits_zero(tmp_path):
+def test_a_successful_pairing_exits_zero(m, tmp_path):
     frames = _write_frames(tmp_path, count=1)
     truth = tmp_path / 't.json'
     truth.write_text(json.dumps([sample(1_000_000_000)]), encoding='utf-8')
@@ -165,7 +209,7 @@ def test_a_successful_pairing_exits_zero(tmp_path):
     assert report['frames_paired'] == 1 and report['frames_unpaired'] == 0
 
 
-def test_existing_pairing_is_never_overwritten_without_force(tmp_path):
+def test_existing_pairing_is_never_overwritten_without_force(m, tmp_path):
     frames = _write_frames(tmp_path, count=1)
     truth = tmp_path / 't.json'
     truth.write_text(json.dumps([sample(1_000_000_000)]), encoding='utf-8')
@@ -177,7 +221,7 @@ def test_existing_pairing_is_never_overwritten_without_force(tmp_path):
     assert json.loads(out.read_text()) == {'keep': True}
 
 
-def test_truth_carried_in_the_sidecar_is_preferred(tmp_path):
+def test_truth_carried_in_the_sidecar_is_preferred(m, tmp_path):
     """The snapshot tool samples truth right after the frame; that gap is the
     real one, so it must win over an external sample taken later."""
     frames = _write_frames(tmp_path, count=1)
@@ -200,7 +244,7 @@ def test_truth_carried_in_the_sidecar_is_preferred(tmp_path):
     assert pair['pairing_gap_s'] < 0.001
 
 
-def test_sidecar_truth_without_available_flag_is_not_used(tmp_path):
+def test_sidecar_truth_without_available_flag_is_not_used(m, tmp_path):
     frames = _write_frames(tmp_path, count=1)
     sidecar = next(frames.glob('*.png.json'))
     record = json.loads(sidecar.read_text())
@@ -211,7 +255,7 @@ def test_sidecar_truth_without_available_flag_is_not_used(tmp_path):
     assert code == m.EXIT_USAGE
 
 
-def test_live_truth_is_refused_when_no_objects_are_named(tmp_path, capsys):
+def test_live_truth_is_refused_when_no_objects_are_named(m, tmp_path, capsys):
     """The tool will not pair with truth it never measured."""
     frames = _write_frames(tmp_path, count=1)
     code = m.main(['--frames', str(frames), '--out', str(tmp_path / 'p.json')])
