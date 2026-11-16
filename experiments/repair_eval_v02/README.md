@@ -430,3 +430,39 @@ ok = 'editable' in tasks.lower() or '允许修改' in tasks
 ### 为什么这比多几条 MET 重要
 
 一份「25 项全绿」的审计，读者会以为 25 件事都被验证过。实际是 17 件行为验证 + 8 件「文档里提到过」。把后者标成 `MET` 是在借前者的信用。
+## 交叉一致性检查（`crosscheck_docs.py`）
+
+同一套词汇出现在四处：可见性策略与文档（#249）、契约与文档（#250）、协议包（#251）、方法章节（#254）。**每处都有自己的测试，每个测试只检查自己那份文件**——这正是协议能给 B 条件一个策略已经封住的裁决、而接口表列了 6 个拒绝码（实际 15 个）的原因。
+
+并排读文档没发现这两处；机械比对发现了。所以比对成了脚本。
+
+### 检查什么
+
+| 项 | 来源 A | 来源 B |
+| --- | --- | --- |
+| 预算上限 | `budget.py` 默认值 | PROTOCOL **与** DATA_DICTIONARY（逐份） |
+| 状态词表 | `reconcile.KNOWN_STATUSES` | RUN_MANIFEST §4 |
+| 信息供给枚举 | `run_record.FEEDBACK_SOURCES` | DATA_DICTIONARY §3.3 |
+| 拒绝码（15 个） | `visibility.py` 的常量 | VISIBILITY.md **与** ASSUMPTIONS 接口表 |
+| 理由码（16 个） | `acceptance.REASONS` | TASK_CONTRACT.md |
+
+```
+denial codes in the module: 15
+reason codes in the evaluator: 16
+documents and code agree
+```
+
+### 变异验证，以及它抓到的第二个自己的 bug
+
+第一轮四个变异全部 SURVIVED——但那是**变异脚本**的问题：文档里同一个词出现两次，我只替换了第一处。改成全量替换后 3 个立刻 KILLED，第 4 个仍然存活。
+
+第 4 个是真问题：预算检查写的是 `str(20000) not in (proto + dic)`——**把两份文档拼起来找数字**，只要任一份有就算通过。改成逐份检查后：
+
+```
+all denial mentions removed from VISIBILITY.md   KILLED
+all status mentions renamed in RUN_MANIFEST     KILLED
+all reason mentions removed from TASK_CONTRACT  KILLED
+all budget numbers changed in DATA_DICTIONARY   KILLED   ← 之前 SURVIVED
+```
+
+这条已经写进代码注释：**合并两份文档再检查，等于让一份的正确掩盖另一份的错误。**
