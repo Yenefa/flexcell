@@ -30,8 +30,9 @@
 | --- | --- | --- |
 | 缺陷实例 ID | `DEF-F1-REG` | DRAFT-FIXED |
 | 注入位置 | 工作区配置中感知服务的对象注册参数（`tracked_objects` 一类键） | DRAFT-FIXED |
-| 注入实现 | `experiments/repair_eval_v02/defects/DEF-F1-REG/override.yaml`（由 #252 落成；覆盖文件 sha256 `91fa50b3fd471670…`，原始配置 sha256 `7107bd766aaa1206…`） | DRAFT-FIXED |
+| 注入实现 | `experiments/repair_eval_v02/defects/DEF-F1-REG/override.yaml`（sha256 `6c4da05fe04e0ee8…`） | DRAFT-FIXED |
 | 机制 | 注册表缺失 → 感知层不发布 B → 任务层取不到 B | DRAFT-FIXED |
+| 机制（实测修正） | 原文写「注册表缺失」。2026-11-16 实测：`tracked_objects: []` 经 params 文件与 `--ros-args -p` 两种写法都触发 `ParameterUninitializedException`，节点启动即死——那是**另一种机制**。落成的注入改为注册一个世界里不存在的名字（`ghost_object`）：节点存活、感知层观察不到任何演示物体，任务层同样取不到 B。差异对修复者可见，登记在此而非默认化 | DRAFT-FIXED |
 
 ### 2.2 不可变目标
 
