@@ -73,14 +73,43 @@ def contract_for(family):
     }
 
 
-def build_candidate(root, family):
+def scene_for(seed):
+    """The objects this repetition is about.
+
+    A seed that controls nothing is decoration: three "repeats" of one input are
+    one run performed three times. In the first batch F2-A reported the identical
+    token count three times over, which is what that looks like from outside.
+    """
+    return ["obj%d" % i for i in range(2 + seed % 3)]
+
+
+def frame_for(seed):
+    return [1 + seed % 5, 2 + seed % 7, 0]
+
+
+def seeded_source(family, seed):
+    """The failing test for this seed, written out concretely."""
+    if family.startswith("F1"):
+        scene = scene_for(seed)
+        return ("from skill.registry import registered_objects" + chr(10) + chr(10) +
+                chr(10) + "def test_registry():" + chr(10) +
+                "    assert registered_objects(%r) == %r" % (scene, sorted(scene)) + chr(10))
+    frame = frame_for(seed)
+    expected = [frame[0], frame[1], 0]
+    return ("from skill.mapping import to_world" + chr(10) + chr(10) + chr(10) +
+            "def test_mapping():" + chr(10) +
+            "    assert to_world([0, 0, 0], %r) == %r" % (frame, expected) + chr(10))
+
+
+def build_candidate(root, family, seed=None):
     (root / "skill").mkdir(parents=True, exist_ok=True)
     (root / "task.md").write_text("")
     (root / "gate").mkdir(exist_ok=True)
-    (root / "gate" / "acceptance.py").write_text("print('gate')\n")
+    (root / "gate" / "acceptance.py").write_text("print('gate')" + chr(10))
     name = "registry.py" if family.startswith("F1") else "mapping.py"
     (root / "skill" / name).write_text(DEFECTS[family]["broken"])
-    (root / "skill" / "test_fix.py").write_text(DEFECTS[family]["test"])
+    body = DEFECTS[family]["test"] if seed is None else seeded_source(family, seed)
+    (root / "skill" / "test_fix.py").write_text(body)
     return root
 
 

@@ -79,8 +79,9 @@ def refresh_feedback(candidate):
     return ran
 
 
-def run_slot(family, condition, rep, workdir, policy, donor, model, max_interactions):
-    candidate = build_candidate(workdir / "candidate", family)
+def run_slot(family, condition, rep, workdir, policy, donor, model, max_interactions,
+             seed=None, donor_run_id=None, source_sha=None):
+    candidate = build_candidate(workdir / "candidate", family, seed=seed)
     verdict_dir = workdir / "verdict"; verdict_dir.mkdir()
     hidden = workdir / "hidden"; hidden.mkdir()
     boundary = vis.RunBoundary(policy, workdir, candidate, verdict_dir, hidden,
@@ -147,7 +148,7 @@ def run_slot(family, condition, rep, workdir, policy, donor, model, max_interact
         feedback_text=(TASKS[family] if condition != "A_STATIC" else None),
         guidance_text=(policy.conditions[condition].guidance
                        if condition == "D_GUIDED" else None),
-        donor_run_id=("DONOR-F1-B-r1" if condition == "C_MISMATCHED_FEEDBACK" else None),
+        donor_run_id=donor_run_id,
         gate_target=("PASS" if verdict["status"] == "ACCEPT" else "FAIL"),
         gate_contract=("PASS" if verdict["status"] == "ACCEPT" else "FAIL"),
         gate_contract_codes=[r["code"] for r in verdict["reasons"]],
@@ -156,6 +157,8 @@ def run_slot(family, condition, rep, workdir, policy, donor, model, max_interact
         evidence_path="experiments/repair_eval_v02/evidence",
     )
     record["qualification"] = "REAL_MODEL_RUN"
+    record["seed"] = seed
+    record["source_sha"] = source_sha
     record["model"] = transport.metadata()["requested_model"]
     record["key_fingerprint"] = transport.metadata()["key_fingerprint"]
     record["contract_verdict"] = verdict["status"]
@@ -170,9 +173,15 @@ def main(argv=None):
     ap.add_argument("--model", default="deepseek-flash")
     ap.add_argument("--out", default=str(HERE / "evidence" / "real_matrix.json"))
     ap.add_argument("--limit", type=int, default=0, help="stop after N slots (smoke)")
+    ap.add_argument("--families", default="", help="comma separated subset")
+    ap.add_argument("--conditions", default="", help="comma separated subset")
+    ap.add_argument("--reps", default="", help="comma separated subset")
     args = ap.parse_args(argv)
 
     policy = vis.load_policy(ROOT / "benchmark" / "repair_eval" / "visibility_policy.json")
+    fam_sel = [x for x in args.families.split(",") if x] or list(FAMILIES)
+    con_sel = [x for x in args.conditions.split(",") if x] or list(CONDITIONS)
+    rep_sel = [int(x) for x in args.reps.split(",") if x] or list(REPEATS)
     rows = []
     spent = 0
     stopped = None
@@ -181,9 +190,13 @@ def main(argv=None):
         donor = tmp / "donor"; (donor / "telemetry").mkdir(parents=True)
         (donor / "telemetry" / "execution.log").write_text("DONOR FAILURE" + chr(10))
         (donor / "verdict.json").write_text('{"passed": false}')
-        for family in FAMILIES:
-            for condition in CONDITIONS:
-                for rep in REPEATS:
+        source_sha = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(ROOT),
+                                    capture_output=True, text=True).stdout.strip() or None
+        base = {"F1_OBJECT_REGISTRATION": 5100, "F2_GOAL_MAPPING": 5200}
+        produced = {}          # (family, rep) -> run_id of the B slot
+        for family in fam_sel:
+            for condition in con_sel:
+                for rep in rep_sel:
                     if args.limit and len(rows) >= args.limit:
                         stopped = "limit %d reached" % args.limit
                         break
@@ -193,9 +206,31 @@ def main(argv=None):
                     workdir = tmp / ("%s-%s-r%d" % (family, condition, rep))
                     workdir.mkdir(parents=True)
                     slot_id = "%s-%s-r%d" % (family.split("_")[0], condition[0], rep)
+                    seed = base.get(family, 5000) + rep
+                    # MANIFEST 2: the donor of a C slot must be a B run of the same
+                    # family at a different seed, bound before any C run. With no
+                    # such run the C slot stays NOT_RUN - it is not filled in with
+                    # somebody else's feedback.
+                    borrowed = None
+                    if condition == "C_MISMATCHED_FEEDBACK":
+                        for other_rep in rep_sel:
+                            if other_rep != rep and (family, other_rep) in produced:
+                                borrowed = produced[(family, other_rep)]
+                                break
+                        if not borrowed:
+                            rows.append({"slot_id": slot_id, "condition": condition,
+                                         "terminal_status": "NOT_RUN",
+                                         "qualification": "REAL_MODEL_RUN",
+                                         "seed": seed, "source_sha": source_sha,
+                                         "notes": "no B run of this family at another "
+                                                  "seed exists to borrow from",
+                                         "tokens_total": 0, "interactions_used": 0,
+                                         "edited_paths": []})
+                            continue
                     try:
                         row = run_slot(family, condition, rep, workdir, policy, donor,
-                                       args.model, args.max_interactions)
+                                       args.model, args.max_interactions, seed=seed,
+                                       donor_run_id=borrowed, source_sha=source_sha)
                     except Exception as exc:                       # noqa: BLE001
                         # One dead call must not take the batch with it. The
                         # failure is a record of its own: the environment broke,
@@ -209,6 +244,8 @@ def main(argv=None):
                                "tokens_total": 0, "interactions_used": 0,
                                "edited_paths": []}
                     rows.append(row)
+                    if condition == "B_REAL_FEEDBACK":
+                        produced[(family, rep)] = row.get("run_id") or row["slot_id"]
                     spent += row.get("tokens_total", 0)
                     # persist every slot: a crash after the loop must not lose
                     # work that has already been paid for
@@ -226,7 +263,7 @@ def main(argv=None):
 
     summary = {
         "slots_attempted": len(rows),
-        "slots_planned": len(FAMILIES) * len(CONDITIONS) * len(REPEATS),
+        "slots_planned": len(fam_sel) * len(con_sel) * len(rep_sel),
         "tokens_spent": spent,
         "batch_budget": args.budget,
         "model": args.model,
