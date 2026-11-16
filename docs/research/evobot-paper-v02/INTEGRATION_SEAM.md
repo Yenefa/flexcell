@@ -64,4 +64,13 @@ python3 -m pytest benchmark/repair_eval/contracts -q                     # #250 
 `
 
 接缝探针脚本没有进仓库：它依赖两个尚未合并的分支，放进任一分支都会指向另一条分支上不存在的代码。
-等 #257 与 #258 合并后，这个探针应当变成 `benchmark/repair_eval/test_seam.py`，并且由 #252 扩展成真实适配器。
+
+> **2026-11-16 已落地。** #262（`codex/evobot-paper-v02-control-runs`）把 #249、#250、#251 三条分支合到一起，
+> 探针随之变成用例 **`experiments/repair_eval_v02/test_seam.py`**（7 条，3 个变异全部 KILLED）。
+> 文件没有放在本文件原先建议的 `benchmark/repair_eval/test_seam.py`，原因是那属于 #249 的分支；
+> 接缝测试要同时依赖两层，放在已经合并三层的那条分支上才成立。
+>
+> 另补了两条探针当时没覆盖的身份断言：一条记录必须能同时写下 `policy_id` 与 `contract.sha256()`；
+> **策略内容一改，`fingerprint` 必须随之改变**——否则「记录了指纹」证明不了任何事，
+> 规则可以在名字不动的情况下被换掉。这一条是这次复核时才想明白的。
+
