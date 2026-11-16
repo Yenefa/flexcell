@@ -26,6 +26,15 @@ slot, own output directory, sequential. 360 s per slot, 1440 s per window.
 | branch | `feat/physical-pick-place-reliability-20261116` @ `2ca40eb` |
 | build | `colcon build --merge-install`, 11 packages |
 
+## Offline tests
+
+```bash
+python3 -m unittest discover -s experiments/physical_capabilities/pick_place_reliability/tests -v
+```
+
+17 tests: one-result parsing, unknown-terminal detection, window stop behaviour,
+and the artifact aggregator. No simulator, no ROS.
+
 ## Results (6 windows, 24 slot attempts)
 
 | window | NORMAL_1 | DUAL_1 | NORMAL_2 | DUAL_2 |
