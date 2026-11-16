@@ -133,7 +133,7 @@ verdict  = contracts.check(candidate_dir: str, contract: TaskContract,
 | 项 | 本协议期望 | 实际交付 | 差异 | 处理 | 状态 |
 | --- | --- | --- | --- | --- | --- |
 | visibility 策略版本字段 | `policy_id` | `policy_id = flexcell.repair_eval.visibility/2026-11-16-issue249-r2`、`schema_version = repair-eval-visibility/1`，运行期另有 `Policy.fingerprint`（sha256，r2 实测 `a48651c0…f71ea951a`） | 比期望多一个 `fingerprint`；r2 增加了 `sealed_prefixes` | run record 同时记 `policy_id` 与 `fingerprint` | **已回填** |
-| visibility 拒绝码命名 | 见 §2.3 | `reserved_name` / `parent_traversal` / `absolute_path` / `symlink_alias` / `hardlink_alias` / `policy_denied` / `protected_write` / `sealed_material`（r2 新增）；残留产物抛 `StaleArtifact` | 命名一致；`stale` 以异常类型表达，不是拒绝码 | 映射不改义；数据字典登记为 `stale_artifact` 时写明来源类型 | **已回填** |
+| visibility 拒绝码命名 | 见 §2.3 | `reserved_name` / `parent_traversal` / `absolute_path` / `symlink_alias` / `hardlink_alias` / `policy_denied` / `protected_write` / `sealed_material`（r2 新增）/ `verdict_material` / `root_overlap` / `missing_material`（v0.1.3 补齐）；残留产物抛 `StaleArtifact` | 命名一致；`stale` 以异常类型表达，不是拒绝码 | 映射不改义；数据字典登记为 `stale_artifact` 时写明来源类型 | **已回填** |
 | 评估器源码（`gate/`）的可见性 | 协议 §2 拒绝"A 读评估器源码" | r1 把 `gate/` 归入 `static_input`，A 条件**可读**；r2 改为 `sealed_prefixes`，四条件一律 `sealed_material` | r1 与协议矛盾，r2 一致 | 采纳 r2（改实现不改协议）；`tests/` 保持四条件可读（回归契约，不含验收阈值） | **已回填（r2）** |
 | 裁决原件是否下发 | 协议 §2 B 行原写「评估器 verdict」 | #249 策略四个条件一律 `verification: false`，实现从不下发裁决 | 协议文本与实现矛盾（存在 11 轮） | 采纳实现：修复者知道哪里失败、不知道是否 PASS；理由是激励而非保密，看得见裁决就会照着判据调而不是修好任务 | **已回填（v0.1.3）** |
 | contracts 契约版本字段 | `contract_version` | `TaskContract.schema = flexcell.repair_eval.task_contract/1`，实例另有 `version`、`canonical_json()`、`sha256()` | 版本分散在 `schema` 与 `version` 两处 | 记录时三件一起写：`schema` + `version` + `sha256` | **已回填** |
