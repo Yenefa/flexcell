@@ -93,8 +93,12 @@ class Ledger:
         self.max_candidate_executions = max_candidate_executions
         self._clock = clock
         self.interactions_used = 0
-        self.tokens_in = 0
-        self.tokens_out = 0
+        # None means "the provider did not report it", which is not the same as 0.
+        # DATA_DICTIONARY 3.4: a provider that gives only a total must have the
+        # split recorded as unknown, and the split must not be inferred.
+        self.tokens_in = None
+        self.tokens_out = None
+        self.tokens_reported = 0
         self.candidate_executions = 0
         self.final_scenes = 0
         self._closed = None
@@ -104,7 +108,7 @@ class Ledger:
     # ---------------------------------------------------------------- checks
     @property
     def tokens_total(self):
-        return self.tokens_in + self.tokens_out
+        return self.tokens_reported
 
     @property
     def closed(self):
@@ -134,8 +138,15 @@ class Ledger:
         response = self.transport.chat(messages, **kwargs)
         usage = (response or {}).get("usage") or {}
         self.interactions_used += 1
-        self.tokens_in += int(usage.get("prompt_tokens") or 0)
-        self.tokens_out += int(usage.get("completion_tokens") or 0)
+        has_split = ("prompt_tokens" in usage) or ("completion_tokens" in usage)
+        if has_split:
+            self.tokens_in = (self.tokens_in or 0) + int(usage.get("prompt_tokens") or 0)
+            self.tokens_out = (self.tokens_out or 0) + int(usage.get("completion_tokens") or 0)
+            self.tokens_reported += (int(usage.get("prompt_tokens") or 0)
+                                     + int(usage.get("completion_tokens") or 0))
+        else:
+            # total only: keep the split unknown rather than halving the total
+            self.tokens_reported += int(usage.get("total_tokens") or 0)
         # A response that pushed the total past the cap ends the record, but its
         # cost stays counted: it was really spent.
         if self.tokens_total > self.max_tokens:
@@ -184,6 +195,8 @@ class Ledger:
             "tokens_in": self.tokens_in,
             "tokens_out": self.tokens_out,
             "tokens_total": self.tokens_total,
+            "tokens_source": ("provider_split" if self.tokens_in is not None
+                              else "provider_total_only"),
             "tokens_cap": self.max_tokens,
             "candidate_executions": self.candidate_executions,
             "final_scenes": self.final_scenes,

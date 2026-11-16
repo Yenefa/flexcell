@@ -132,6 +132,17 @@ class RepairAgent:
         if not self.done and self.ledger.closed:
             exhausted = True
         self.ledger.finish()
+        return self.result(exhausted=exhausted)
+
+    def result(self, exhausted=None):
+        """The run's outcome, also usable by a caller that drives step() itself.
+
+        A caller that refreshes execution feedback between steps cannot use run(),
+        because run() owns the loop. It should not have to re-derive the record
+        either, or the two drivers will drift apart.
+        """
+        if exhausted is None:
+            exhausted = bool(not self.done and self.ledger.closed)
         return dict(
             terminal_state=self.ledger.terminal_state(
                 exhausted=exhausted, claimed_success=self.claimed_success),
