@@ -20,7 +20,7 @@
       "experiment": "p1.5-w5-20261109",
       "label": "W5-E1 (first pilot; 2 arms x 1 run)",
       "layout": "arm_dirs",
-      "mapping": "aggregate.rows[arm]",
+      "mapping": "<arm>/result.json",
       "declared_n": 2,
       "aggregate": {
         "n": null,
@@ -49,27 +49,25 @@
           "record": "w5a",
           "usable": true,
           "success": true,
-          "first_pass": null,
+          "first_pass": false,
           "iterations": 4,
           "tokens": 3521,
-          "claim_success": null,
-          "false_success": null,
+          "claim_success": false,
+          "false_success": false,
           "model": "deepseek-chat",
-          "task": "W5-E1-synthetic",
-          "source": "aggregate.rows (no per-run result.json in this layout)"
+          "task": "T-W5"
         },
         {
           "record": "w5b",
           "usable": true,
           "success": false,
-          "first_pass": null,
+          "first_pass": false,
           "iterations": 5,
           "tokens": 5226,
-          "claim_success": null,
-          "false_success": null,
+          "claim_success": false,
+          "false_success": false,
           "model": "deepseek-chat",
-          "task": "W5-E1-synthetic",
-          "source": "aggregate.rows (no per-run result.json in this layout)"
+          "task": "T-W5"
         }
       ]
     },

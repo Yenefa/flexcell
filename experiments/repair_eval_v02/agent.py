@@ -13,6 +13,7 @@ WHAT THIS ADDS OVER THE SCRIPTED DRY RUN
 """
 import json
 import health
+from benchmark.repair_eval.visibility import ToolFacade
 
 from budget import BUDGET_EXHAUSTED, BudgetExhausted, DONE, INVALID, Ledger  # noqa: F401
 
@@ -23,10 +24,12 @@ class RepairAgent:
     def __init__(self, ledger, boundary, task_text, editable_fields, guidance=None):
         self.ledger = ledger
         self.boundary = boundary
+        self.tools = ToolFacade(boundary)
         self.task_text = task_text
         self.editable_fields = tuple(editable_fields)
         self.guidance = guidance
         self.transcript = []
+        self.message_attempts = []
         self.claimed_success = False
         self.done = False
         self.writes = []
@@ -94,7 +97,9 @@ class RepairAgent:
     # -------------------------------------------------------------- steps
     def step(self):
         """One interaction. Returns True when the agent says it is done."""
-        response = self.ledger.chat(self.messages())
+        messages = self.messages()
+        self.message_attempts.append(messages)
+        response = self.ledger.chat(messages)
         text = (response or {}).get("text") or ""
         if not text.strip():
             raise health.UnconfirmedAction(health.NO_RESPONSE, "model returned no response content")
@@ -115,7 +120,7 @@ class RepairAgent:
                 if not isinstance(target, (list, tuple)) or len(target) != 2:
                     continue
                 path, content = target
-                self.boundary.write_text(path, str(content))
+                self.tools.write_file(path, str(content))
                 self.writes.append(path)
                 continue
             if "search" in action:
@@ -124,7 +129,7 @@ class RepairAgent:
                     continue
                 path, pattern = str(target[0]), str(target[1])
                 try:
-                    body = self.boundary.read_text(path, "candidate_source")
+                    body = self.tools.read_file(path)
                 except Exception as exc:                        # noqa: BLE001
                     self.transcript.append({"role": "user", "content":
                                             "search: cannot read %s (%s)" % (path, exc)})
@@ -150,7 +155,7 @@ class RepairAgent:
                 count = int(target[2]) if len(target) > 2 else 120
                 count = max(1, min(int(count), 400))
                 try:
-                    body = self.boundary.read_text(path, "candidate_source")
+                    body = self.tools.read_file(path)
                 except Exception as exc:                        # noqa: BLE001
                     self.transcript.append({"role": "user", "content":
                                             "read_file: cannot read %s (%s)" % (path, exc)})
@@ -175,7 +180,7 @@ class RepairAgent:
                 # whole-file rewrite, and a 1578-line node cannot be repaired
                 # that way: measured, the model replaced it with an 18-line stub.
                 try:
-                    current = self.boundary.read_text(path, "candidate_source")
+                    current = self.tools.read_file(path)
                 except Exception as exc:                        # noqa: BLE001
                     self.transcript.append({"role": "user", "content":
                                             "edit_file: cannot read %s (%s)" % (path, exc)})
@@ -186,7 +191,7 @@ class RepairAgent:
                                             "edit_file: the old_text was not found in %s"
                                             " - read the file and copy it exactly" % path})
                     continue
-                self.boundary.write_text(path, current.replace(old_text, new_text, 1))
+                self.tools.write_file(path, current.replace(old_text, new_text, 1))
                 self.writes.append(path)
 
         if payload.get("claim_success"):

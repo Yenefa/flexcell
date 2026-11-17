@@ -32,6 +32,7 @@ import acceptance                                       # noqa: E402
 import health                                           # noqa: E402
 import evidence_archive as ARCH                          # noqa: E402
 import environment_receipt                               # noqa: E402
+import dispatch_plan                                     # noqa: E402
 import instances as IN                                   # noqa: E402
 import budget as B                                      # noqa: E402
 import run_record as REC                                # noqa: E402
@@ -199,6 +200,8 @@ def run_slot(family, condition, rep, workdir, policy, donor, model, max_interact
         ledger.finish()
         ARCH.write_json(workdir / "account.json", ledger.account())
         ARCH.write_json(workdir / "transcript.json", agent.transcript)
+        ARCH.write_json(workdir / "message_attempts.json", agent.message_attempts)
+        ARCH.write_json(workdir / "tool_calls.json", agent.tools.calls)
     result = agent.result()
 
     # Instance workspaces have no skill/ test package. Running pytest there
@@ -254,7 +257,9 @@ def run_slot(family, condition, rep, workdir, policy, donor, model, max_interact
         condition=condition, condition_access=policy.conditions[condition],
         policy=policy, account=result["account"], terminal_status=terminal,
         claim_success=result["claimed_success"],
-        feedback_text=(TASKS[family] if condition != "A_STATIC" else None),
+        feedback_text=next((m["content"].removeprefix("EXECUTION FEEDBACK\n")
+                            for m in (agent.message_attempts[0] if agent.message_attempts else [])
+                            if m["content"].startswith("EXECUTION FEEDBACK\n")), None),
         guidance_text=(policy.conditions[condition].guidance
                        if condition == "D_GUIDED" else None),
         donor_run_id=donor_run_id,
@@ -300,6 +305,8 @@ def main(argv=None):
     ap.add_argument("--families", default="", help="comma separated subset")
     ap.add_argument("--conditions", default="", help="comma separated subset")
     ap.add_argument("--reps", default="", help="comma separated subset")
+    ap.add_argument("--plan", default=str(dispatch_plan.DEFAULT),
+                    help="registered Markdown/JSON plan; its order, seeds and donors are authoritative")
     args = ap.parse_args(argv)
 
     policy = vis.load_policy(ROOT / "benchmark" / "repair_eval" / "visibility_policy.json")
@@ -348,17 +355,19 @@ def execute_batch(args, policy, families, conditions, reps, source_sha, source_f
     Working directories live beside their archives. If archiving fails, the
     originals survive; TemporaryDirectory must never erase the only evidence.
     """
+    plan = dispatch_plan.load(getattr(args, "plan", dispatch_plan.DEFAULT))
+    slots = dispatch_plan.select(plan, families, conditions, reps)
     out = Path(args.out).resolve()
     if out.exists():
         raise FileExistsError("batch output already exists; use a new run path: %s" % out)
     batch_dir = out.parent / (out.stem + "-" + uuid.uuid4().hex[:12])
     working = batch_dir / "working"
     working.mkdir(parents=True)
+    ARCH.write_json(batch_dir / "dispatch_plan.json", plan)
     donor = working / "donor"
     (donor / "telemetry").mkdir(parents=True)
     (donor / "telemetry" / "execution.log").write_text("DONOR FAILURE\n")
     (donor / "verdict.json").write_text('{"passed": false}')
-    slots = [(f, c, r) for f in families for c in conditions for r in reps]
     rows, produced = [], {}
     environment = environment_receipt.capture()
     spent, consecutive_exhausted, attempted = 0, 0, 0
@@ -373,6 +382,7 @@ def execute_batch(args, policy, families, conditions, reps, source_sha, source_f
                        qualification="REAL_MODEL_RUN", source_sha=source_sha,
                        environment=environment,
                        source_files=source_files, archive_root=str(batch_dir),
+                       plan_id=plan["plan_id"], plan_sha256=plan["sha256"],
                        terminal_states={}, by_condition={})
         for row in rows:
             status = row["terminal_status"]
@@ -381,10 +391,12 @@ def execute_batch(args, policy, families, conditions, reps, source_sha, source_f
         ARCH.write_json(out, {"summary": summary, "rows": rows})
 
     persist(True)
-    for family, condition, rep in slots:
-        slot_id = "%s-%s-r%d" % (family.split("_")[0], condition[0], rep)
+    for slot in slots:
+        family, condition, rep = slot["family"], slot["condition"], slot["rep"]
+        slot_id = slot["slot_id"]
         row = {"slot_id": slot_id, "condition": condition, "family": family,
-               "seed": {"F1_OBJECT_REGISTRATION": 5100, "F2_GOAL_MAPPING": 5200}[family] + rep,
+               "seed": slot["seed"], "donor_run_id": slot.get("donor_run_id"),
+               "plan_sha256": plan["sha256"],
                "source_sha": source_sha, "terminal_status": "NOT_RUN",
                "qualification": "REAL_MODEL_RUN", "tokens_total": 0,
                "interactions_used": 0, "edited_paths": []}
@@ -397,8 +409,7 @@ def execute_batch(args, policy, families, conditions, reps, source_sha, source_f
             rows.append(row)
             persist(True)
             continue
-        borrowed = next((v for (f, r), v in produced.items()
-                         if f == family and r != rep), None)
+        borrowed = produced.get(slot.get("donor_run_id"))
         if condition == "C_MISMATCHED_FEEDBACK" and (not borrowed
                 or not borrowed.get("donor_log") or not Path(borrowed["donor_log"]).is_file()):
             row["notes"] = "no B run of this family at another seed exists to borrow from"
@@ -472,7 +483,7 @@ def execute_batch(args, policy, families, conditions, reps, source_sha, source_f
             persist(True)
             if row.get("archive"):
                 if condition == "B_REAL_FEEDBACK" and row.get("donor_log"):
-                    produced[(family, rep)] = {"run_id": row.get("run_id", slot_id),
+                    produced[slot_id] = {"run_id": slot_id,
                                               "donor_log": str(Path(row["archive"]["path"]) / "donor_output" /
                                                                Path(row["donor_log"]).name)}
                 try:

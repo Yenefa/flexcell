@@ -153,7 +153,13 @@ def test_no_test_or_interrupted_process_is_unconfirmed(code):
 def test_three_exhausted_slots_stop_according_to_protocol(tmp_path, monkeypatch):
     calls = []
     monkeypatch.setattr(R, "run_slot", fake_slot(calls, terminal="BUDGET_EXHAUSTED"))
-    report = R.execute_batch(args(tmp_path), None, [R.FAMILIES[0]], ["A_STATIC"],
+    config = args(tmp_path)
+    plan = tmp_path / "test-plan.json"
+    ARCH.write_json(plan, {"schema": "evobot.dispatch_plan/1", "plan_id": "TEST_FOUR_SLOTS",
+                          "slots": [{"slot_id": "F1-A-r%d" % r, "seed": 5100 + r}
+                                    for r in range(1, 5)]})
+    config.plan = str(plan)
+    report = R.execute_batch(config, None, [R.FAMILIES[0]], ["A_STATIC"],
                              [1, 2, 3, 4], sha(), {})
     assert calls == [1, 2, 3]
     assert report["rows"][3]["terminal_status"] == "NOT_RUN"

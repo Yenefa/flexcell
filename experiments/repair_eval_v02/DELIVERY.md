@@ -1,5 +1,8 @@
 # 交付说明（#249–#254，截至 2026-11-17）
 
+> 审查修补与最新验证入口见 [#249–#254 修补记录](REVIEW_FIXES_249_254_20261117.md)。
+> 当前对账明确区分状态一致与历史顺序偏差；新增真实Agent隔离、别名和回归身份负例。
+
 > 2026-11-17 补齐：见 [#252/#253 补齐记录](FOLLOWUP_252_253_20261117.md)。
 > 健康停止、候选归档、七例回归及显式参考比较已实现；历史模型工作区未保留，
 > 普通任务回归与真实初态执行仍 `NOT_RUN`。下文旧计数不能作为 issue 全部关闭的依据。
@@ -27,7 +30,7 @@ done
 
 # 2) 全量测试
 python3 -m pytest benchmark/repair_eval experiments/repair_eval_v02 -q
-# 期望：342 passed
+# 期望：全部通过；实际数量以当前执行输出为准
 
 # 3) 三份自检
 python3 experiments/repair_eval_v02/crosscheck_docs.py      # documents and code agree
@@ -45,8 +48,9 @@ python3 experiments/repair_eval_v02/dry_run_holdout.py   # exit 0, ok=true
 # 6) 对账
 python3 experiments/repair_eval_v02/reconcile.py \
   --manifest docs/research/evobot-paper-v02/RUN_MANIFEST.md \
-  --records experiments/repair_eval_v02/evidence/real_instances_matrix.json
-# 期望：verdict CONSISTENT（24 槽 / 24 记录 / 0 排除）
+  --records experiments/repair_eval_v02/evidence/v2_matrix_n6.json \
+  --registered-only --allow-order-deviation
+# 期望：状态一致；顺序 DEVIATION；额外24槽显式列出。不是准入通过。
 ```
 
 ## 3. 已经跑出来的结果
@@ -82,15 +86,14 @@ F2  D_GUIDED                 3      3    0/0     4.33
 
 | 未完成 | 阻塞原因 |
 | --- | --- |
-| 四条件主对比（可解读版） | 需切到 `--task-variant v2`（作废现有 24 槽）+ 约 48 万 tokens 额度 |
-| 保留场景的真实运行 | 需真实例的 layout/state 变化（设计工作）+ 额度 |
+| 四条件主对比（可解读版） | 条件输入、静态答案和实例变化需重新登记并做诊断，旧 v2 不足以形成效应结论 |
+| 保留场景的真实运行 | 真实冻结模型候选、layout/state 执行与 #247 对接尚未完成 |
 | 独立裁决门（G3） | 需在保留场景上运行；未运行前所有终态只能记 `UNKNOWN` |
 | 论文的作者/单位/授权声明 | 需人填，非技术项 |
 
 ## 6. 一句话总结
 
-**机制全部落地并验证过；效应量没有测出来，因为第一版题面把答案写在了题目里，且样本量不足。**
-补齐这两点需要一次约 48 万 tokens 的重跑，代码已就绪（`--task-variant v2`）。
+**基础机制已有实现，但条件实施与任务可识别性尚需修订，不能用扩大样本量代替这些修正。**
 
 ## 7. 主批次与最终状态（2026-11-17 更新）
 

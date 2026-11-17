@@ -488,6 +488,7 @@ def evaluate(contract, candidate_state):
               "no regression records declared",
               required=contract.thresholds["min_regressions"])
     else:
+        seen_regressions = set()
         for index, record in enumerate(records):
             if not isinstance(record, dict):
                 check("regression:#%d" % index, False, "REGRESSION_MISSING",
@@ -495,7 +496,15 @@ def evaluate(contract, candidate_state):
                 continue
             label = record.get("name")
             if not isinstance(label, str) or not label.strip():
-                label = "#%d" % index
+                check("regression:#%d" % index, False, "REGRESSION_MISSING",
+                      "regression must have a non-empty identity")
+                continue
+            label = label.strip()
+            if label in seen_regressions:
+                check("regression:" + label, False, "REGRESSION_MISSING",
+                      "duplicate regression identity: %s" % label)
+                continue
+            seen_regressions.add(label)
             status = record.get("status")
             if status not in ("PASS", "FAIL"):
                 check("regression:" + label, False, "REGRESSION_MISSING",
