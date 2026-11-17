@@ -167,14 +167,33 @@ def audit(asset, acceptance=None, source_task=None, ledger_path=None,
             out = skill_asset.call(asset, doc)
         except Exception:  # noqa: BLE001 - a refusal is data, not a crash
             per_family[family]["refused"] += 1
+            if record and ledger_path and entry_id:
+                # A refusal is neither a win nor an inert application: the skill declined to
+                # run. Recorded as UNKNOWN so it is visible but is not scored as an outcome -
+                # counting a refusal as "unchanged" would credit it with a result it did not
+                # produce.
+                _record_task_use(ledger_mod, ledger_path, entry_id, task_id, family,
+                                 before, None, changed=False, outcome="UNKNOWN")
             continue
         after_stages = out["stages"] if isinstance(out, dict) else out
         after = _min_sep(after_stages)
         if _pts(after_stages) == _pts(stages):
             per_family[family]["untouched"] += 1
+            # AN INERT APPLICATION IS A RESULT AND MUST BE RECORDED. The ledger's own
+            # docstring warns about the opposite error - "one lesson was retrieved for every
+            # task and changed no plan" - and recording only the winners produces its mirror
+            # image: every application looks like it changed the outcome. Measured: 7 changed
+            # and 102 did not, so a wins-only ledger reports a 100% hit rate on a skill that
+            # fired on 6% of the plans it was offered to.
+            if record and ledger_path and entry_id:
+                _record_task_use(ledger_mod, ledger_path, entry_id, task_id, family,
+                                 before, after, changed=False, outcome="UNCHANGED")
             continue
         if after is not None and before is not None and after < before - 1e-9:
             per_family[family]["worse"] += 1
+            if record and ledger_path and entry_id:
+                _record_task_use(ledger_mod, ledger_path, entry_id, task_id, family,
+                                 before, after, changed=True, outcome="WORSE")
             continue
         if after is not None and after >= SPREAD_CONTRACT_M - 1e-9:
             if key not in seen:

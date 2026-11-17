@@ -540,15 +540,21 @@ def main():
         lg_rows = [json.loads(line) for line in
                    (tmp / "usage_ledger.jsonl").read_text(encoding="utf-8").splitlines()
                    if line.strip()]
-        task_ids = {r.get("run_id") for r in lg_rows
-                    if str(r.get("run_id") or "").startswith("HO-")}
+        # A task id is either a sealed instance ("HO-...") or a dev-split run
+        # ("T01-train-seed1000"). Testing only for "HO-" silently excluded every dev-split
+        # task from the count, which is how a "which task" check can pass while half the
+        # archive is invisible to it.
+        def _is_task_id(value):
+            value = str(value or "")
+            return value.startswith("HO-") or "-seed" in value
+        task_ids = {r.get("run_id") for r in lg_rows if _is_task_id(r.get("run_id"))}
         checks["the_ledger_names_the_tasks_a_skill_was_used_on"] = len(task_ids) >= 5
         # ... and each of those tasks carries its own RETRIEVED/APPLIED/OUTCOME triple,
         # because "offered but inert" and "applied and helped" must not look alike.
         per_task = {}
         for row in lg_rows:
             rid = row.get("run_id")
-            if str(rid or "").startswith("HO-"):
+            if _is_task_id(rid):
                 per_task.setdefault(rid, set()).add(row.get("event"))
         checks["each_recorded_task_has_retrieved_applied_and_outcome"] = bool(per_task) and all(
             {"RETRIEVED", "APPLIED", "OUTCOME"} <= events
@@ -557,6 +563,18 @@ def main():
         audit_totals = [r["total_instances_fixed"] for r in audit]
         checks["the_recorded_applications_match_the_audit"] = (
             len(per_task) >= max(audit_totals or [0]))
+        # A WINS-ONLY LEDGER IS THE MIRROR OF THE ERROR THE LEDGER WARNS ABOUT. Its docstring
+        # records "one lesson was retrieved for every task and changed no plan"; recording
+        # only the winners makes every application look like it changed the outcome.
+        outcome_kinds = {r.get("outcome") for r in lg_rows if r["event"] == "OUTCOME"}
+        checks["the_ledger_records_inert_applications_too"] = "UNCHANGED" in outcome_kinds
+        applied_rows = [r for r in lg_rows if r["event"] == "APPLIED"]
+        changed_rows = [r for r in applied_rows if r.get("changed")]
+        # the hit rate must be able to be SMALL: a ledger that only ever says 100% is not
+        # measuring, it is collecting
+        checks["the_recorded_hit_rate_is_not_flattered"] = (
+            len(applied_rows) >= 10
+            and len(changed_rows) < len(applied_rows))
 
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",

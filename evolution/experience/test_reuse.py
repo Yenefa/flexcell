@@ -116,7 +116,11 @@ def test_the_audit_can_record_each_task_it_used_the_skill_on(tmp_path):
                          record=True)
     summary = ledger_mod.summary(path)
     rec = summary[entry_id]
-    assert rec["applied"] == report["total_instances_fixed"] > 0
+    # APPLIED counts every plan the skill was offered to, not only the ones it changed:
+    # the wins are a SUBSET. Asserting equality here was the wins-only bias written into a
+    # test, where it would have locked the defect in.
+    assert rec["applied"] > report["total_instances_fixed"] > 0
+    assert rec["helpful"] == report["total_instances_fixed"]
     assert rec["harmful"] == 0
 
 
@@ -133,8 +137,58 @@ def test_every_recorded_task_gets_its_own_three_rows(tmp_path):
         by_run.setdefault(row["run_id"], set()).add(row["event"])
     assert by_run
     for run, events in by_run.items():
-        assert run.startswith("HO-"), run
+        # A task id is either a sealed instance ("HO-...") or a dev-split run
+        # ("T01-train-seed1000"). Asserting only "HO-" excluded every dev-split task.
+        assert run.startswith("HO-") or "-seed" in run, run
         assert {"RETRIEVED", "APPLIED", "OUTCOME"} <= events, run
+
+
+def test_an_inert_application_is_recorded_too(tmp_path):
+    """THE MIRROR OF THE ERROR THE LEDGER WARNS ABOUT.
+
+    Its docstring records "one lesson was retrieved for every task and changed no plan".
+    Recording only the winners inverts the bias: every application looks like it changed
+    the outcome. Measured on this archive, that is a 100% hit rate reported for a 2.4%
+    effect.
+    """
+    import ledger as ledger_mod
+    path = str(tmp_path / "l.jsonl")
+    assets = skill_asset.read(ASSETS)
+    report = reuse.audit(assets[0], acceptance=os.path.join(WT, "setup", "acceptance"),
+                         source_task=SOURCE, ledger_path=path, entry_id="e" * 64,
+                         record=True)
+    rows = [json.loads(line) for line in open(path, encoding="utf-8") if line.strip()]
+    outcomes = [r for r in rows if r["event"] == "OUTCOME"]
+    kinds = {r.get("outcome") for r in outcomes}
+    assert "IMPROVED" in kinds
+    assert "UNCHANGED" in kinds, "the inert applications were dropped from the ledger"
+    # the denominator must be the whole archive, not just the wins
+    assert len(outcomes) > 10 * report["total_instances_fixed"]
+
+
+def test_the_recorded_hit_rate_is_not_flattered(tmp_path):
+    path = str(tmp_path / "l.jsonl")
+    assets = skill_asset.read(ASSETS)
+    reuse.audit(assets[0], acceptance=os.path.join(WT, "setup", "acceptance"),
+                source_task=SOURCE, ledger_path=path, entry_id="e" * 64, record=True)
+    rows = [json.loads(line) for line in open(path, encoding="utf-8") if line.strip()]
+    applied = [r for r in rows if r["event"] == "APPLIED"]
+    changed = [r for r in applied if r.get("changed")]
+    assert len(applied) > 100
+    assert len(changed) < len(applied) / 2, "a ledger that only says 100% is not measuring"
+
+
+def test_every_outcome_row_has_a_matching_applied_row(tmp_path):
+    """An outcome without an application would be a result with no cause."""
+    path = str(tmp_path / "l.jsonl")
+    assets = skill_asset.read(ASSETS)
+    reuse.audit(assets[0], acceptance=os.path.join(WT, "setup", "acceptance"),
+                source_task=SOURCE, ledger_path=path, entry_id="e" * 64, record=True)
+    rows = [json.loads(line) for line in open(path, encoding="utf-8") if line.strip()]
+    applied = {(r["run_id"], r["event"]) for r in rows if r["event"] == "APPLIED"}
+    for row in rows:
+        if row["event"] == "OUTCOME":
+            assert (row["run_id"], "APPLIED") in applied, row["run_id"]
 
 
 def test_recording_off_writes_nothing(tmp_path):

@@ -208,7 +208,27 @@ capability is what makes that visible instead of leaving it to an audit.
     naming a real task). `record=False` writes nothing, and turning it on does not change a
     single number in the audit.
 
-`verify.py` asserts **96 checks**, including that both gates really ran, that the asset
+24. **recording only the wins is the ledger's own documented error, inverted.** Its
+    docstring records *"one lesson was retrieved for every task and changed no plan."* Last
+    round fixed *which task*; this round found that only the **7 changed** applications were
+    recorded, so the ledger reported a **100% hit rate for a 2.4% effect**.
+
+    | | recorded | apparent hit rate |
+    | --- | --- | --- |
+    | wins only | 7 (all `IMPROVED`) | **100%** |
+    | everything | **294** (7 `IMPROVED` + 287 `UNCHANGED`) | **2.4%** |
+
+    Every application is now recorded in one of four kinds: `IMPROVED`, `UNCHANGED`
+    (**offered, executed, correctly did nothing**), `WORSE`, and `UNKNOWN` for a skill that
+    **refused to run** — a refusal is not scored as an outcome, because counting it as
+    "unchanged" would credit it with a result it did not produce.
+
+    Two things had locked the bias in: a test asserted `applied == fixed`, which *is* the
+    defect written as an expectation, and the task-id check tested only for `HO-` — which
+    **excluded the entire development split** (`T01-train-seed1000`), so a "which task"
+    check could pass while half the archive was invisible to it.
+
+`verify.py` asserts **98 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -224,7 +244,8 @@ task family is actually offered to it while an unmeasured family is still withhe
 order while staying inert when the instruction fixes none**, and that **a record narrower
 than its measurement is revised while the lesson text stays untouched**, and that
 **an over-claiming record is caught in the other direction too**, and that **the ledger names
-the real tasks a skill was used on, each with its own three events**.
+the real tasks a skill was used on, each with its own three events**, and that **inert
+applications are recorded so the hit rate is not 100% by construction**.
 
 ---
 

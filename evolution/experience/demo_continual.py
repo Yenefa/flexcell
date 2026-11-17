@@ -587,9 +587,19 @@ def run(dest=OUT):
                                       source_task="HO-90899d657e68",
                                       ledger_path=ledger_path, record=True)
     _write(os.path.join(dest, "09b_reuse_audit.json"), reuse_report)
+    # The DENOMINATOR, not only the wins. A skill offered to 294 plans and changing 7 of
+    # them is a very different object from one that changed every plan it saw, and a ledger
+    # that recorded only the 7 would report a 100% hit rate for a 2.4% effect.
     steps.append({"step": "reuse_audit",
                   "total_instances_fixed": [r["total_instances_fixed"]
                                             for r in reuse_report],
+                  "plans_offered": [sum(v["untouched_plans"] + v["newly_fixed_instances"]
+                                        + v["made_worse"] + v["refused"]
+                                        for v in r["families"].values())
+                                    for r in reuse_report],
+                  "plans_correctly_untouched": [
+                      sum(v["untouched_plans"] for v in r["families"].values())
+                      for r in reuse_report],
                   "families_fixed_beyond_source": [r["families_fixed_beyond_the_source"]
                                                    for r in reuse_report],
                   "made_worse": [r["total_made_worse"] for r in reuse_report]})
