@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "description": [
+    "Evidence-format profile for the native ContactPush record layout (issue #246).",
+    "This is only a list of file names the three existing tools know how to read.",
+    "It contains NO task threshold, acceptance rule or motion parameter."
+  ],
+  "requires": {
+    "retention": [],
+    "progress": [
+      "push_attempts.jsonl",
+      "attempts.jsonl",
+      "contact_push.jsonl",
+      "skills/push.jsonl",
+      "skills/push_object.jsonl"
+    ],
+    "timeline": [
+      ["observations.jsonl", "world_state.jsonl", "poses.jsonl", "data/observations.jsonl"],
+      ["phases.jsonl", "stages.jsonl", "action_phases.jsonl", "data/phases.jsonl"]
+    ]
+  }
+}

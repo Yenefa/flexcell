@@ -135,6 +135,86 @@ def rel(run_dir: Path, path: Path) -> str:
     return path.relative_to(run_dir).as_posix()
 
 
+# --------------------------------------------- layout and RESULT dialect support
+# Two recorders have written the same evidence in two layouts:
+#   flat     task.out / decisions.jsonl / sim/episodes/*.json      (the older one,
+#            and the only one this config used to name)
+#   layered  task.stdout / skills/*.jsonl / episodes/*.json        (sim_window)
+# Both are accepted: the config names the flat path, alt_paths lists the layered
+# equivalent, so another layout is a config edit rather than a code edit.
+def candidate_paths(item) -> list:
+    """The configured path first, then every alternate, de-duplicated."""
+    names = []
+    primary = item.get("path")
+    if isinstance(primary, str) and primary:
+        names.append(primary)
+    for alt in item.get("alt_paths") or []:
+        if isinstance(alt, str) and alt and alt not in names:
+            names.append(alt)
+    return names
+
+
+# RESULT dialect 1 (numeric): {"outcome": 0, "error_code": 0}
+# RESULT dialect 2 (enum):    {"outcome": "OUTCOME_SUCCEEDED", "outcome_val": 0,
+#                              "error_code": "ERR_NONE"}
+# A field we cannot interpret must stay None: an unknown outcome is never success.
+_OUTCOME_SUCCESS = ("OUTCOME_SUCCEEDED", "SUCCEEDED", "SUCCESS", "OK")
+_OUTCOME_FAILURE = ("OUTCOME_FAILED", "OUTCOME_REJECTED", "OUTCOME_ABORTED",
+                    "FAILED", "FAILURE", "ERROR")
+
+
+def _outcome_int(value):
+    if isinstance(value, bool):
+        return 0 if value else 1
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str):
+        token = value.strip().upper()
+        if token in _OUTCOME_SUCCESS:
+            return 0
+        if token in _OUTCOME_FAILURE:
+            return 1
+    return None
+
+
+def _error_code_int(value):
+    if isinstance(value, bool):
+        return 0 if value else 1
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str):
+        token = value.strip().upper()
+        if token in ("", "ERR_NONE", "NONE", "OK", "NO_ERROR"):
+            return 0
+        if token.startswith("ERR_"):
+            return 1
+    return None
+
+
+def result_outcome(result):
+    """(outcome:int|None, error_code:int|None) from either RESULT dialect."""
+    if not isinstance(result, dict):
+        return None, None
+    outcome = _outcome_int(result.get("outcome"))
+    if outcome is None:
+        outcome = _outcome_int(result.get("outcome_val"))
+    return outcome, _error_code_int(result.get("error_code"))
+
+
+def task_outcome_label(result) -> str:
+    """SUCCEEDED / FAILED / UNKNOWN for one RESULT object.
+
+    UNKNOWN is not a failure and not a success: it means the record cannot be
+    read, which is a different statement from "the robot task failed".
+    """
+    outcome, error_code = result_outcome(result)
+    if outcome is None:
+        return "UNKNOWN"
+    if error_code not in (None, 0):
+        return "FAILED"
+    return "SUCCEEDED" if outcome == 0 else "FAILED"
+
+
 # ---------------------------------------------------------------------- config
 def load_config(path: Path) -> dict:
     try:
@@ -235,11 +315,12 @@ def classify(run_dir: Path, cfg: dict, result) -> str:
     the run being waved through.
     """
     if result is not None:
-        try:
-            outcome = int(result.get("outcome", -1))
-            error_code = int(result.get("error_code") or 0)
-        except (TypeError, ValueError):
+        outcome, error_code = result_outcome(result)
+        if outcome is None:
+            # an unreadable outcome is not a pass (see the docstring above)
             return "failure"
+        if error_code is None:
+            error_code = 0
         return "success" if outcome == 0 and error_code == 0 else "failure"
     for pattern in cfg["started_evidence"]:
         if any(run_dir.glob(pattern)):
@@ -248,23 +329,46 @@ def classify(run_dir: Path, cfg: dict, result) -> str:
 
 
 def discover_runs(target: Path, cfg: dict) -> list:
-    """The run directory itself, or every run directory directly below it."""
+    """The run directory itself, or the run directories below it.
+
+    A window-level directory (one that holds window.json / declaration.json) is
+    a container, never a run: treating it as a run audits the wrong thing and
+    reports the whole batch as failed. Containers are searched one level down,
+    then two, which covers <window>/trial-01/run-XXXX as well.
+    """
+    container_markers = list(cfg.get("container_markers") or [])
+    run_patterns = list(cfg["run_markers"]) + list(
+        cfg.get("nested_run_markers") or [])
+
+    def is_container(candidate: Path) -> bool:
+        return any((candidate / name).is_file() for name in container_markers)
+
     def is_run(candidate: Path) -> bool:
         # any(generator) is truthy even when empty, so materialise the match:
         # a bare generator expression here silently made EVERY directory a run.
-        return candidate.is_dir() and any(
+        if not candidate.is_dir() or is_container(candidate):
+            return False
+        return any(
             next(iter(candidate.glob(pattern)), None) is not None
-            for pattern in cfg["run_markers"])
+            for pattern in run_patterns)
 
     if is_run(target):
         return [target]
     runs = sorted(child for child in target.iterdir() if is_run(child))
-    if not runs:
-        raise UsageError(
-            "%s is not a run directory and contains none (a run must have at "
-            "least one of: %s)"
-            % (target, ", ".join(cfg["run_markers"])))
-    return runs
+    if runs:
+        return runs
+    # one more level: <window>/trial-01/run-XXXX
+    deeper = []
+    for child in sorted(target.iterdir()):
+        if not child.is_dir() or is_run(child):
+            continue
+        deeper.extend(grand for grand in child.iterdir() if is_run(grand))
+    if deeper:
+        return sorted(deeper)
+    raise UsageError(
+        "%s is not a run directory and contains none (a run must have at "
+        "least one of: %s)"
+        % (target, ", ".join(run_patterns)))
 
 
 # --------------------------------------------------------------- item checkers
@@ -276,59 +380,103 @@ def _miss(item, path, reason=None, detail=None):
 
 
 def _check_result_json(item, ctx):
-    path = ctx["run_dir"] / item["path"]
-    if not path.is_file():
-        return [_miss(item, item["path"], detail="file is absent")]
-    if extract_result(read_text(path)) is None:
-        return [_miss(item, item["path"], detail="no parseable RESULT object")]
-    return []
+    names = candidate_paths(item)
+    tried = []
+    for name in names:
+        path = ctx["run_dir"] / name
+        if not path.is_file():
+            tried.append("%s absent" % name)
+            continue
+        if extract_result(read_text(path)) is None:
+            tried.append("%s has no parseable RESULT object" % name)
+            continue
+        return []
+    return [_miss(item, names[0], detail="; ".join(tried))]
 
 
 def _check_text(item, ctx):
-    path = ctx["run_dir"] / item["path"]
-    if not path.is_file():
-        return [_miss(item, item["path"], detail="file is absent")]
-    if not read_text(path).strip():
-        return [_miss(item, item["path"], detail="file is empty")]
-    return []
+    names = candidate_paths(item)
+    tried = []
+    for name in names:
+        path = ctx["run_dir"] / name
+        if not path.is_file():
+            tried.append("%s absent" % name)
+            continue
+        if not read_text(path).strip():
+            tried.append("%s is empty" % name)
+            continue
+        return []
+    return [_miss(item, names[0], detail="; ".join(tried))]
 
 
 def _check_json(item, ctx):
-    path = ctx["run_dir"] / item["path"]
-    if not path.is_file():
-        return [_miss(item, item["path"], detail="file is absent")]
-    if read_json_object(path) is None:
-        return [_miss(item, item["path"], detail="not a JSON object")]
-    return []
+    names = candidate_paths(item)
+    tried = []
+    for name in names:
+        path = ctx["run_dir"] / name
+        if not path.is_file():
+            tried.append("%s absent" % name)
+            continue
+        if read_json_object(path) is None:
+            tried.append("%s is not a JSON object" % name)
+            continue
+        return []
+    return [_miss(item, names[0], detail="; ".join(tried))]
 
 
 def _check_jsonl(item, ctx):
-    path = ctx["run_dir"] / item["path"]
+    names = candidate_paths(item)
     minimum = int(item.get("min_records", 1))
-    if not path.is_file():
-        return [_miss(item, item["path"], detail="file is absent")]
-    records, tolerated, bad = read_jsonl(path)
-    if bad and not tolerated:
-        return [_miss(item, item["path"],
-                      detail="%d unparseable line(s)" % bad)]
-    if len(records) < minimum:
-        return [_miss(item, item["path"],
-                      detail="%d record(s), need %d" % (len(records), minimum))]
-    return []
+    tried = []
+    for name in names:
+        path = ctx["run_dir"] / name
+        if not path.is_file():
+            tried.append("%s absent" % name)
+            continue
+        records, tolerated, bad = read_jsonl(path)
+        if bad and not tolerated:
+            tried.append("%s: %d unparseable line(s)" % (name, bad))
+            continue
+        if len(records) < minimum:
+            tried.append("%s: %d record(s), need %d"
+                         % (name, len(records), minimum))
+            continue
+        return []
+    return [_miss(item, names[0], detail="; ".join(tried))]
+
+
+def _search_prefixes(cfg) -> list:
+    prefixes = [""] + [p for p in (cfg.get("search_prefixes") or [])
+                       if isinstance(p, str)]
+    seen = []
+    for prefix in prefixes:
+        if prefix not in seen:
+            seen.append(prefix)
+    return seen
+
+
+def _find_under(run_dir: Path, name: str, prefixes) -> Path | None:
+    """run_dir/name, then run_dir/<prefix>/name for each configured prefix."""
+    for prefix in prefixes:
+        path = run_dir / prefix / name if prefix else run_dir / name
+        if path.is_file():
+            return path
+    return None
 
 
 def _check_jsonl_any(item, ctx):
     minimum = int(item.get("min_present", 1))
+    prefixes = _search_prefixes(ctx["cfg"])
     present = []
     details = []
     for name in item["paths"]:
-        path = ctx["run_dir"] / name
-        if not path.is_file():
+        path = _find_under(ctx["run_dir"], name, prefixes)
+        if path is None:
             details.append("%s absent" % name)
             continue
         records, _tolerated, _bad = read_jsonl(path)
         if records:
-            present.append(name)
+            present.append(rel(ctx["run_dir"], path))
         else:
             details.append("%s empty" % name)
     if len(present) < minimum:
@@ -339,11 +487,17 @@ def _check_jsonl_any(item, ctx):
 
 def _check_glob_json(item, ctx):
     run_dir = ctx["run_dir"]
-    matches = sorted(p for p in run_dir.glob(item["path"]) if p.is_file())
+    names = candidate_paths(item)
+    matches = []
+    for name in names:
+        matches = sorted(p for p in run_dir.glob(name) if p.is_file())
+        if matches:
+            break
     minimum = int(item.get("min_matches", 1))
     if len(matches) < minimum:
-        return [_miss(item, item["path"],
-                      detail="%d match(es), need %d" % (len(matches), minimum))]
+        return [_miss(item, names[0],
+                      detail="%d match(es) over [%s], need %d"
+                             % (len(matches), ", ".join(names), minimum))]
     missing = []
     if item.get("validate") == "episode":
         for path in matches:
@@ -370,9 +524,10 @@ def stage_ids(ctx) -> dict:
             ids.add(value)
     if isinstance(result.get("detail"), str):
         ids.update(STAGE_TOKEN.findall(result["detail"]))
+    prefixes = _search_prefixes(ctx["cfg"])
     for name in ("task_fsm.jsonl", "demo_runs.jsonl"):
-        path = run_dir / name
-        if not path.is_file():
+        path = _find_under(run_dir, name, prefixes)
+        if path is None:
             continue
         records, _tolerated, _bad = read_jsonl(path)
         for record in records:
@@ -392,9 +547,10 @@ def stage_ids(ctx) -> dict:
 
 def _check_skill_logs(item, ctx):
     run_dir = ctx["run_dir"]
+    prefixes = _search_prefixes(ctx["cfg"])
     missing = []
     for log, idents in sorted(stage_ids(ctx).items()):
-        if (run_dir / log).is_file():
+        if _find_under(run_dir, log, prefixes) is not None:
             continue
         missing.append(_miss(item, log, reason="%s (stage %s)" % (
             item["reason"], ", ".join(sorted(idents)))))
@@ -448,9 +604,20 @@ def pointers(run_dir: Path) -> list:
     return out
 
 
+RESULT_SOURCES = ("task.out", "task.stdout")
+
+
 def audit_run(run_dir: Path, cfg: dict) -> dict:
-    task_out = run_dir / "task.out"
-    result = extract_result(read_text(task_out)) if task_out.is_file() else None
+    result = None
+    result_source = None
+    for name in RESULT_SOURCES:
+        path = run_dir / name
+        if not path.is_file():
+            continue
+        found = extract_result(read_text(path))
+        if found is not None:
+            result, result_source = found, name
+            break
     phase = classify(run_dir, cfg, result)
     ctx = {"run_dir": run_dir, "cfg": cfg, "result": result, "phase": phase}
     missing = []
@@ -461,10 +628,15 @@ def audit_run(run_dir: Path, cfg: dict) -> dict:
         required.append(item["id"])
         missing.extend(CHECKERS[item["kind"]](item, ctx))
     needed = stage_ids(ctx)
+    # task_outcome and audit_status answer two different questions and are kept
+    # apart on purpose: "the robot task failed" is not what a missing log means.
     return {
         "run_id": run_dir.name,
         "run_dir": str(run_dir),
         "phase": phase,
+        "task_outcome": task_outcome_label(result),
+        "result_source": result_source,
+        "audit_status": "complete" if not missing else "incomplete",
         "passed": not missing,
         "required_ids": required,
         "missing": missing,
@@ -508,6 +680,16 @@ def build_report(cfg, cfg_path: Path, runs, out_dir: Path) -> dict:
         "runs": runs,
         "totals": {
             "runs": len(runs),
+            "audit_complete": sum(1 for run in runs
+                                  if run["audit_status"] == "complete"),
+            "audit_incomplete": sum(1 for run in runs
+                                    if run["audit_status"] != "complete"),
+            "task_succeeded": sum(1 for run in runs
+                                  if run["task_outcome"] == "SUCCEEDED"),
+            "task_failed": sum(1 for run in runs
+                               if run["task_outcome"] == "FAILED"),
+            "task_unknown": sum(1 for run in runs
+                                if run["task_outcome"] == "UNKNOWN"),
             "passed": sum(1 for run in runs if run["passed"]),
             "failed": sum(1 for run in runs if not run["passed"]),
             "missing_items": total_missing,
@@ -519,16 +701,27 @@ def build_report(cfg, cfg_path: Path, runs, out_dir: Path) -> dict:
 
 def print_report(report: dict) -> None:
     for run in report["runs"]:
-        print("run %s phase=%s required=%d missing=%d"
-              % (run["run_id"], run["phase"], len(run["required_ids"]),
+        print("run %s phase=%s task=%s audit=%s required=%d missing=%d"
+              % (run["run_id"], run["phase"], run["task_outcome"],
+                 run["audit_status"], len(run["required_ids"]),
                  len(run["missing"])))
         for item in run["missing"]:
             print("MISSING: %s/%s (%s)" % (run["run_id"], item["path"],
                                           item["reason"]))
     totals = report["totals"]
-    print("audit summary: %d run(s), %d passed, %d failed, %d missing item(s)"
-          % (totals["runs"], totals["passed"], totals["failed"],
-             totals["missing_items"]))
+    # "passed" is kept as the audit-completeness word it always was (it is the
+    # word the acceptance tests and docs quote); the run's own robot-task result
+    # is reported on the next line so the two are never read as one.
+    print("audit summary: %d run(s), %d passed (audit-complete), "
+          "%d audit-incomplete, %d missing item(s)"
+          % (totals["runs"], totals["audit_complete"],
+             totals["audit_incomplete"], totals["missing_items"]))
+    print("task outcomes: %d succeeded, %d failed, %d unknown"
+          % (totals["task_succeeded"], totals["task_failed"],
+             totals["task_unknown"]))
+    print("note: task= comes from the run's own RESULT; audit= is log "
+          "completeness only. An audit-incomplete run is NOT a failed "
+          "robot task.")
     print("pointers: %d file(s) recorded with sha256, 0 bytes copied"
           % totals["files_pointed_at"])
     print("out: %s" % report["out_dir"])
