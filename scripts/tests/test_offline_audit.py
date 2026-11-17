@@ -7,6 +7,7 @@ tests check ONLY the new aggregation contract: status, reason codes, issue
 propagation, output safety and exit codes. One case at the end invokes the real
 run_log_audit.py end to end.
 """
+import hashlib
 import json
 import subprocess
 import sys
@@ -218,6 +219,63 @@ sys.exit(cli.main(%r))
         self.assertEqual(retention["exit_code"], 0)
         self.assertEqual(retention["sub_report"], "retention/audit.json")
         self.assertTrue((self.out / "retention" / "audit.json").is_file())
+
+    def test_out_of_order_and_duplicate_stamps_are_disclosed_not_dropped(self):
+        run = self.run
+        # Retention inputs so the run is readable; the point of this case is the
+        # timeline: out-of-order stamps plus a duplicate copy and a conflicting one.
+        write(run / "task.out", "RESULT %s\n" % json.dumps(
+            {"outcome": 0, "error_code": 0, "detail": "ok",
+             "completed_stage_ids": ["OBSERVE_A", "PUSH_A", "VERIFY_A"]}))
+        write_json(run / "sim" / "episodes" / "e.json",
+                   {"EpisodeSchemaVersion": 1, "steps": [{"seq": 1}],
+                    "final_state": {"outcome": 0}})
+        for name, rows in (("decisions.jsonl", [{"seq": 1}]),
+                           ("task_fsm.jsonl", [{"outcome": 0}]),
+                           ("observe.jsonl", [{"event": "request"}]),
+                           ("move_to_pose.jsonl", [{"event": "request"}]),
+                           ("push.jsonl", [{"event": "request"}]),
+                           ("verify.jsonl", [{"event": "request"}])):
+            write(run / name, "".join(json.dumps(r) + "\n" for r in rows))
+        observations = [
+            {"source_stamp_ns": 3000, "pose": {"x": 0.3, "y": 0.0, "z": 0.1}},
+            {"source_stamp_ns": 1000, "pose": {"x": 0.1, "y": 0.0, "z": 0.1}},
+            {"source_stamp_ns": 2000, "pose": {"x": 0.2, "y": 0.0, "z": 0.1}},
+            # Same stamp AND same pose: the recorder delivered the snapshot twice.
+            {"source_stamp_ns": 2000, "pose": {"x": 0.2, "y": 0.0, "z": 0.1}},
+            # Same stamp, different pose: a conflicting measurement, not a copy.
+            {"source_stamp_ns": 2000, "pose": {"x": 0.25, "y": 0.0, "z": 0.1}},
+        ]
+        phases = [{"phase": "OBSERVE_A", "source_stamp_ns": 500},
+                  {"phase": "PUSH_A", "source_stamp_ns": 1500},
+                  {"phase": "VERIFY_A", "source_stamp_ns": 2500}]
+        obs_path = write(run / "observations.jsonl",
+                         "".join(json.dumps(r) + "\n" for r in observations))
+        write(run / "phases.jsonl",
+              "".join(json.dumps(r) + "\n" for r in phases))
+        before = hashlib.sha256(obs_path.read_bytes()).hexdigest()
+
+        proc = self.invoke(self.use_stubs(real=("retention", "timeline")))
+        # Timeline rows are unalignable but the tool exits 0 -> aggregate must
+        # report UNKNOWN and exit 1, never claim the diagnostics are complete.
+        self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+        report = self.report()
+        timeline = report["checks"][2]
+        self.assertEqual(timeline["status"], "UNKNOWN")
+        self.assertEqual(timeline["exit_code"], 0)
+        self.assertTrue(any(issue["code"] == "NOT_FULLY_DETERMINED"
+                            and issue.get("check") == "timeline"
+                            for issue in report["issues"]))
+        summary = json.loads(
+            (self.out / "timeline" / "summary.json").read_text(encoding="utf-8"))
+        # Nothing is dropped or re-sorted away: every row is still accounted for.
+        self.assertEqual(summary["rows_total"], 5)
+        self.assertLess(summary["rows_counted"], summary["rows_total"])
+        self.assertEqual(summary["reasons"], {"OUT_OF_ORDER": 2,
+                                              "DUPLICATE_COPY": 1,
+                                              "DUPLICATE_SOURCE_STAMP": 1})
+        self.assertEqual(hashlib.sha256(obs_path.read_bytes()).hexdigest(), before)
+        self.assertEqual(report["robot_task_outcome"], "NOT_EVALUATED")
 
 
 class Long1AdapterCase(unittest.TestCase):

@@ -126,8 +126,10 @@ python3 -m scripts.offline_audit \
 ## 验证记录
 
 `python3 -m unittest discover -s scripts/tests -p 'test_offline_audit.py' -v`
-共 10 例，覆盖：完整报告契约、UNKNOWN 退出 0 不得冒充完整、缺输入显式失败、
-子工具异常传播、已有/输入内的输出目录拒绝、真实 `run_log_audit.py` 的端到端调用；
+共 11 例，覆盖：完整报告契约、UNKNOWN 退出 0 不得冒充完整、缺输入显式失败、
+子工具异常传播、已有/输入内的输出目录拒绝、真实 `run_log_audit.py` 的端到端调用、
+乱序与重复时间戳的披露（`OUT_OF_ORDER` / `DUPLICATE_COPY` / `DUPLICATE_SOURCE_STAMP`
+照样计数，不丢行、不重排）；
 以及 ZIP SHA 校验与路径穿越拒绝、原生 ID 关联与 `seq` 排序、来源分歧并列、
 缺字段写 UNKNOWN、归档 CLI 端到端且输入前后哈希不变。
 
