@@ -299,12 +299,23 @@ def _review(entry, out_dir, probe, reviewer="chain-demo-reviewer"):
     Not self-certification: the verdict is derived from the probe's expectations, and
     the artifact is a separate file with its own reference. A real round still needs an
     outside reviewer; that limit is written into SUMMARY.json rather than papered over.
+
+    WHY review_ref IS RELATIVE AND NAMES THE ARTIFACT THAT IS ACTUALLY WRITTEN:
+        It used to be os.path.dirname(out_dir)/REVIEW.md - an ABSOLUTE path, outside the
+        run directory, pointing at a file this function never created. Two consequences,
+        both real:
+          * the path was embedded in the entry body, so the entry_id changed with wherever
+            the demo happened to run. A committed artifact set could therefore NEVER match a
+            fresh run, and nothing could check the evidence was current.
+          * the reference dangled. A reader following it found no file.
+        It now names the per-entry artifact written beside it, relative to the run
+        directory, so the id is stable and the reference resolves.
     """
     verdict = "ACCEPT" if probe.get("expectations_met") else "REJECT"
-    ref = os.path.join(os.path.dirname(out_dir), "REVIEW.md")
-    _write(os.path.join(out_dir, "review_artifact_%s.json" % entry["version"]["label"]),
+    name = "review_artifact_%s.json" % entry["version"]["label"]
+    _write(os.path.join(out_dir, name),
            {"reviewer": reviewer, "verdict": verdict, "probe": probe})
-    return {"review_verdict": verdict, "review_ref": ref, "reviewed_by": reviewer}
+    return {"review_verdict": verdict, "review_ref": name, "reviewed_by": reviewer}
 
 
 # Files this script OWNS and may therefore replace. Everything else in the directory is

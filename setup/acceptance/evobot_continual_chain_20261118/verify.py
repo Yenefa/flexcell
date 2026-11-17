@@ -651,6 +651,20 @@ def main():
         checks["the_coverage_claim_says_an_unbacked_rule_is_worse"] = (
             "worse than an empty routing" in (cov.get("claim") or ""))
 
+        # 28 -- THE COMMITTED EVIDENCE MUST STILL DESCRIBE THE CODE. verify.py regenerates
+        # into a temp directory and asserts properties of THAT run, so it checks the code is
+        # self-consistent, not that the committed artifacts are current. They had already
+        # diverged: 18 of 32 files recorded a chain the current code no longer produces,
+        # because the entry body embedded an ABSOLUTE output path and the entry_id is a
+        # digest of that body.
+        freshness = _load("evidence_freshness").compare(fresh_dir=str(tmp))
+        checks["the_committed_evidence_numbers_match_a_fresh_run"] = not freshness[
+            "number_drift"]
+        # ... and the ids must match too. They only did once review_ref stopped carrying
+        # the run directory, and that is what made an evidence check possible at all.
+        checks["the_committed_evidence_ids_match_a_fresh_run"] = not freshness["id_churn"]
+        checks["every_committed_artifact_is_still_produced"] = not freshness["missing"]
+
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
             "batch": HERE.name,

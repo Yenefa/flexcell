@@ -294,7 +294,35 @@ capability is what makes that visible instead of leaving it to an audit.
     is **worse than an empty routing, not better**: an empty routing does nothing, while an
     unbacked live rule changes behaviour and **cannot be retired.**
 
-`verify.py` asserts **110 checks**, including that both gates really ran, that the asset
+28. **committed evidence must still describe the code.** verify.py regenerates the chain
+    into a **temp** directory and asserts properties of THAT run — a check that the code is
+    self-consistent, **not** that the committed artifacts are current. They had **already
+    diverged**: after a schema field was added, **18 of 32 files** recorded a chain the
+    current code no longer produces, and nothing said so.
+
+    Root cause: `review_ref` was an **absolute path built from the output directory**, and
+    it is part of the entry body — so `entry_id` (a digest of that body) **depended on
+    where the demo ran**. The same chain written to two places got two identities, which is
+    exactly why a committed artifact set could never match a fresh run, and why no freshness
+    check could exist until that was fixed. The reference was also dangling: it pointed
+    **outside the run directory at a file nothing wrote.**
+
+    `evidence_freshness.py` now compares the committed evidence against a fresh run:
+
+    | class | treatment |
+    | --- | --- |
+    | **number drift** | **FAIL** — numbers are what a reader quotes |
+    | **id churn** | reported as the evidence's AGE, not a failure |
+    | missing artifact | FAIL |
+
+    It compares numbers and not bytes: entry ids are digests of the body, so a byte
+    comparison would fail on every harmless schema addition and be **switched off within a
+    week** — which is how gates stop existing.
+
+    After the fix: committed vs fresh = number drift **0**, id churn **0**, missing **0**,
+    with **27 files byte-identical** (baseline count).
+
+`verify.py` asserts **113 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -313,8 +341,9 @@ than its measurement is revised while the lesson text stays untouched**, and tha
 the real tasks a skill was used on, each with its own three events**, and that **inert
 applications are recorded so the hit rate is not 100% by construction**, and that **the reported rate is computed in
 one unit rather than across two**, and that **the objective's four routings are reported
-one by one with a declared-but-empty destination not counted as covered**, and that **no
-rule is live in a code path without an entry admitted for it**.
+one by one with a declared-but-empty destination not counted as covered**, that **no rule is
+live in a code path without an entry admitted for it**, and that **the committed evidence
+ids, numbers and file set match a fresh run to the byte**.
 
 ---
 
