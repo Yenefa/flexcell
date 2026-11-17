@@ -37,6 +37,20 @@ profile 里的 `requires` 只说明该 check 需要哪类日志。没有匹配�
 记 `status: NOT_APPLICABLE` 和 issue `INPUT_ABSENT`，**不填零、不猜值**。
 子工具即使退出 0，只要报告里是 UNKNOWN，聚合结果仍记 issue 并以码 1 退出。
 
+## 对已有工具做过的改动（独立提交 27b174e4 / 5db4c5ca）
+
+交接文档要求改旧工具先独立说明原因，这两处修复在本分支里是**入口代码之前的独立提交**，
+每个提交只动 `scripts/run_log_audit.py` 与它自己的测试，没有和新增模块混在一起。原因都是
+真实运行时才暴露、测试替身遮住的缺陷：
+
+1. run 根识别按扁平布局写死，而实际产物是分层布局，`skills/` 被当成 run，PASS 被读成 failure；
+2. 结果字段是枚举字符串（`OUTCOME_SUCCEEDED`）时 `int()` 解析失败直接判失败；
+3. 审计不完整被渲染成 `1 failed`，容易被读成机器人任务失败。
+
+修复后汇总行仍保留原契约 `N passed (audit-complete)`，另起 `task outcomes` 行区分结论；
+旧测试 13 例全过，历史样本复核 trial-01/02 判 success、trial-05 仍判 failure（没有修过头）。
+如需把这部分拆成单独 PR，可从 27b174e4 切出，本分支其余提交不依赖它以外的文件。
+
 ## 输出契约
 
 `<out>/report.json` 含：
