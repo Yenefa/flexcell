@@ -142,6 +142,21 @@ jobs:
           python3 -m pytest experiments/pilot-001/tests -q
           python3 experiments/pilot-001/run_pilot.py --out /tmp/pilot001
 
+      # The continual chain's tests and its acceptance verifier were NOT in CI when
+      # they landed: offline-tests only ran experiments/pilot-001/tests, so a change
+      # could break the chain and still show a green check. A gate nobody runs is the
+      # same defect the experience store's own docstring records about "validated"
+      # meaning "the seeder ran". These steps make the chain re-checkable on every push.
+      - name: continual chain - unit tests
+        shell: bash
+        run: |
+          python3 -m pytest evolution/experience -q
+
+      - name: continual chain - acceptance verifier
+        shell: bash
+        run: |
+          python3 setup/acceptance/evobot_continual_chain_20261118/verify.py
+
       - name: colcon test (all suites, 0 failures required)
         shell: bash
         run: |
