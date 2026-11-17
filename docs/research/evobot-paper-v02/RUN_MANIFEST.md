@@ -11,28 +11,28 @@
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 1 | `F1-A-r1` | F1 | `DEF-F1-REG` | A | r1 | `5101` | — | 批 1 / 序 1 | `BUDGET_EXHAUSTED` |
 | 2 | `F2-A-r1` | F2 | `DEF-F2-MAP` | A | r1 | `5201` | — | 批 1 / 序 2 | `BUDGET_EXHAUSTED` |
-| 3 | `F1-B-r1` | F1 | `DEF-F1-REG` | B | r1 | `5101` | — | 批 1 / 序 3 | `UNKNOWN` |
-| 4 | `F2-B-r1` | F2 | `DEF-F2-MAP` | B | r1 | `5201` | — | 批 1 / 序 4 | `BUDGET_EXHAUSTED` |
-| 5 | `F1-C-r1` | F1 | `DEF-F1-REG` | C | r1 | `5101` | `F1-B-r2` | 批 1 / 序 5 | `UNKNOWN` |
-| 6 | `F2-C-r1` | F2 | `DEF-F2-MAP` | C | r1 | `5201` | `F2-B-r2` | 批 1 / 序 6 | `BUDGET_EXHAUSTED` |
-| 7 | `F1-D-r1` | F1 | `DEF-F1-REG` | D | r1 | `5101` | — | 批 1 / 序 7 | `UNKNOWN` |
-| 8 | `F2-D-r1` | F2 | `DEF-F2-MAP` | D | r1 | `5201` | — | 批 1 / 序 8 | `UNKNOWN` |
-| 9 | `F2-D-r2` | F2 | `DEF-F2-MAP` | D | r2 | `5202` | — | 批 2 / 序 9 | `BUDGET_EXHAUSTED` |
-| 10 | `F1-D-r2` | F1 | `DEF-F1-REG` | D | r2 | `5102` | — | 批 2 / 序 10 | `UNKNOWN` |
-| 11 | `F2-C-r2` | F2 | `DEF-F2-MAP` | C | r2 | `5202` | `F2-B-r1` | 批 2 / 序 11 | `BUDGET_EXHAUSTED` |
-| 12 | `F1-C-r2` | F1 | `DEF-F1-REG` | C | r2 | `5102` | `F1-B-r1` | 批 2 / 序 12 | `UNKNOWN` |
-| 13 | `F2-B-r2` | F2 | `DEF-F2-MAP` | B | r2 | `5202` | — | 批 2 / 序 13 | `BUDGET_EXHAUSTED` |
-| 14 | `F1-B-r2` | F1 | `DEF-F1-REG` | B | r2 | `5102` | — | 批 2 / 序 14 | `UNKNOWN` |
-| 15 | `F2-A-r2` | F2 | `DEF-F2-MAP` | A | r2 | `5202` | — | 批 2 / 序 15 | `UNKNOWN` |
-| 16 | `F1-A-r2` | F1 | `DEF-F1-REG` | A | r2 | `5102` | — | 批 2 / 序 16 | `UNKNOWN` |
-| 17 | `F1-A-r3` | F1 | `DEF-F1-REG` | A | r3 | `5103` | — | 批 3 / 序 17 | `UNKNOWN` |
-| 18 | `F2-A-r3` | F2 | `DEF-F2-MAP` | A | r3 | `5203` | — | 批 3 / 序 18 | `BUDGET_EXHAUSTED` |
-| 19 | `F1-B-r3` | F1 | `DEF-F1-REG` | B | r3 | `5103` | — | 批 3 / 序 19 | `UNKNOWN` |
-| 20 | `F2-B-r3` | F2 | `DEF-F2-MAP` | B | r3 | `5203` | — | 批 3 / 序 20 | `BUDGET_EXHAUSTED` |
-| 21 | `F1-C-r3` | F1 | `DEF-F1-REG` | C | r3 | `5103` | `F1-B-r1` | 批 3 / 序 21 | `UNKNOWN` |
-| 22 | `F2-C-r3` | F2 | `DEF-F2-MAP` | C | r3 | `5203` | `F2-B-r1` | 批 3 / 序 22 | `BUDGET_EXHAUSTED` |
-| 23 | `F1-D-r3` | F1 | `DEF-F1-REG` | D | r3 | `5103` | — | 批 3 / 序 23 | `UNKNOWN` |
-| 24 | `F2-D-r3` | F2 | `DEF-F2-MAP` | D | r3 | `5203` | — | 批 3 / 序 24 | `BUDGET_EXHAUSTED` |
+| 3 | `F1-A-r2` | F1 | `DEF-F1-REG` | A | r2 | `5102` | — | 批 1 / 序 3 | `UNKNOWN` |
+| 4 | `F2-A-r2` | F2 | `DEF-F2-MAP` | A | r2 | `5202` | — | 批 1 / 序 4 | `UNKNOWN` |
+| 5 | `F1-A-r3` | F1 | `DEF-F1-REG` | A | r3 | `5103` | — | 批 1 / 序 5 | `UNKNOWN` |
+| 6 | `F2-A-r3` | F2 | `DEF-F2-MAP` | A | r3 | `5203` | — | 批 1 / 序 6 | `BUDGET_EXHAUSTED` |
+| 7 | `F1-B-r1` | F1 | `DEF-F1-REG` | B | r1 | `5101` | — | 批 1 / 序 7 | `UNKNOWN` |
+| 8 | `F2-B-r1` | F2 | `DEF-F2-MAP` | B | r1 | `5201` | — | 批 1 / 序 8 | `BUDGET_EXHAUSTED` |
+| 9 | `F1-B-r2` | F1 | `DEF-F1-REG` | B | r2 | `5102` | — | 批 1 / 序 9 | `UNKNOWN` |
+| 10 | `F2-B-r2` | F2 | `DEF-F2-MAP` | B | r2 | `5202` | — | 批 1 / 序 10 | `BUDGET_EXHAUSTED` |
+| 11 | `F1-B-r3` | F1 | `DEF-F1-REG` | B | r3 | `5103` | — | 批 1 / 序 11 | `UNKNOWN` |
+| 12 | `F2-B-r3` | F2 | `DEF-F2-MAP` | B | r3 | `5203` | — | 批 1 / 序 12 | `BUDGET_EXHAUSTED` |
+| 13 | `F1-C-r1` | F1 | `DEF-F1-REG` | C | r1 | `5101` | `F1-B-r2` | 批 1 / 序 13 | `UNKNOWN` |
+| 14 | `F2-C-r1` | F2 | `DEF-F2-MAP` | C | r1 | `5201` | `F2-B-r2` | 批 1 / 序 14 | `BUDGET_EXHAUSTED` |
+| 15 | `F1-C-r2` | F1 | `DEF-F1-REG` | C | r2 | `5102` | `F1-B-r1` | 批 1 / 序 15 | `UNKNOWN` |
+| 16 | `F2-C-r2` | F2 | `DEF-F2-MAP` | C | r2 | `5202` | `F2-B-r1` | 批 1 / 序 16 | `BUDGET_EXHAUSTED` |
+| 17 | `F1-C-r3` | F1 | `DEF-F1-REG` | C | r3 | `5103` | `F1-B-r1` | 批 1 / 序 17 | `UNKNOWN` |
+| 18 | `F2-C-r3` | F2 | `DEF-F2-MAP` | C | r3 | `5203` | `F2-B-r1` | 批 1 / 序 18 | `BUDGET_EXHAUSTED` |
+| 19 | `F1-D-r1` | F1 | `DEF-F1-REG` | D | r1 | `5101` | — | 批 1 / 序 19 | `UNKNOWN` |
+| 20 | `F2-D-r1` | F2 | `DEF-F2-MAP` | D | r1 | `5201` | — | 批 1 / 序 20 | `UNKNOWN` |
+| 21 | `F1-D-r2` | F1 | `DEF-F1-REG` | D | r2 | `5102` | — | 批 1 / 序 21 | `UNKNOWN` |
+| 22 | `F2-D-r2` | F2 | `DEF-F2-MAP` | D | r2 | `5202` | — | 批 1 / 序 22 | `BUDGET_EXHAUSTED` |
+| 23 | `F1-D-r3` | F1 | `DEF-F1-REG` | D | r3 | `5103` | — | 批 1 / 序 23 | `UNKNOWN` |
+| 24 | `F2-D-r3` | F2 | `DEF-F2-MAP` | D | r3 | `5203` | — | 批 1 / 序 24 | `BUDGET_EXHAUSTED` |
 
 **条件含义**：A = 无反馈（等预算重复尝试）；B = 真实执行反馈；C = 失配反馈；
 D = 真实反馈 + 显式指导。定义见 [PROTOCOL.md](PROTOCOL.md) §2。
@@ -58,6 +58,8 @@ D = 真实反馈 + 显式指导。定义见 [PROTOCOL.md](PROTOCOL.md) §2。
 - **串行**：同一时刻只有一个仿真运行（与 #235 / #247 的串行约定一致，见 [ADMISSION.md](ADMISSION.md) §6）。
 - 顺序**固定，不随机**。固定顺序的好处是可审计；代价是残余时间漂移混淆，已在
   [PROTOCOL.md](PROTOCOL.md) §9 L4 声明，**不做**事后校正性分析。
+
+> **顺序修正（2026-11-17，执行前）**：原登记顺序把 C-r1 排在 B-r2 之前，而 C-r1 登记的 donor 就是 B-r2，导致 C 槽在派发时永远找不到已完成的 donor（实测 5 槽后 C 全部 NOT_RUN）。现按「A/B 先跑满三重复 → C → D」重排，槽位、seed、donor 均不变，只改序号。
 
 ## 4. 状态词表（只允许这些值）
 
