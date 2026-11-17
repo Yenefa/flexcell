@@ -444,5 +444,63 @@ class ReapInterruptTest(unittest.TestCase):
             self.assertFalse(payload['all_slots_completed'])
 
 
+class LateSignalTest(unittest.TestCase):
+    """A signal after a slot exits must not erase that slot."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = pathlib.Path(self.tmp.name)
+        self.prereg = dict(
+            slots=[dict(label='A', case='normal'), dict(label='B', case='normal')],
+            slot_timeout_s=5, window_budget_s=1000,
+            backend='velocity_servo', skill_backend='legacy',
+            experiment='unit-test')
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def test_sigterm_after_slot_exit_keeps_the_slot(self):
+        def fake_slot(*_args, **_kwargs):
+            return 0
+
+        def runner(label, case, slot_out, index):
+            write_result(slot_out, 'normal')
+            if label == 'A':
+                os.kill(os.getpid(), signal.SIGTERM)
+            return 0
+
+        payload = rw.run_window(self.prereg, self.root / 'out', runner=runner)
+
+        first, second = payload['results']
+        self.assertEqual(first['status'], 'INTERRUPTED')
+        self.assertIn('SIGTERM', first['reason'])
+        self.assertIsNotNone(first.get('result_path'))
+        self.assertEqual(second['status'], 'NOT_RUN')
+        self.assertTrue(payload['interrupted'])
+
+    def test_signal_during_finalization_still_writes_the_manifest(self):
+        original = rw.source_hashes
+        calls = {'n': 0}
+
+        def hashes():
+            calls['n'] += 1
+            if calls['n'] == 2:
+                os.kill(os.getpid(), signal.SIGINT)
+            return original()
+
+        def runner(label, case, slot_out, index):
+            write_result(slot_out, 'normal')
+            return 0
+
+        with mock.patch.object(rw, 'source_hashes', hashes):
+            payload = rw.run_window(self.prereg, self.root / 'out', runner=runner)
+
+        out = self.root / 'out'
+        self.assertTrue((out / 'results.json').is_file())
+        self.assertTrue((out / 'SHA256_MANIFEST.json').is_file())
+        self.assertTrue(payload['interrupted'])
+        self.assertIn('finalization', payload['stop_reason'])
+
+
 if __name__ == '__main__':
     unittest.main()

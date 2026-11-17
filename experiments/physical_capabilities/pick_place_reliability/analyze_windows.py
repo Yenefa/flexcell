@@ -27,6 +27,7 @@ import statistics
 import run_window
 
 NORMAL_LABELS = ('NORMAL_1', 'NORMAL_2')
+ALL_LABELS = ('NORMAL_1', 'DUAL_1', 'NORMAL_2', 'DUAL_2')
 
 
 def read_json(path):
@@ -151,7 +152,7 @@ def slot_status(runs, result, driver=None, metadata_error=None):
     if result.get('status') != 'PASS':
         return 'TASK_FAILED', 'harness status %r' % result.get('status')
     outcome = (result.get('task') or {}).get('outcome')
-    if outcome not in (None, 'OUTCOME_SUCCEEDED'):
+    if outcome != 'OUTCOME_SUCCEEDED':
         return 'TASK_FAILED', 'task outcome %r' % outcome
     return 'OK', None
 
@@ -228,13 +229,16 @@ def slot_row(window_dir, label, drivers=None, metadata_error=None, meta=None):
         targets.append(tuple(round(v, 6) for v in values))
 
     measured = task.get('final_position_error_m')
+    measured_mm = None
+    if finite_number(measured):
+        candidate = float(measured) * 1000.0
+        measured_mm = candidate if math.isfinite(candidate) else None
     row.update(
         harness_status=result.get('status'),
         outcome=task.get('outcome'),
         error_code=task.get('error_code'),
         wall_seconds=task.get('wall_seconds'),
-        final_error_mm=(float(measured) * 1000.0
-                        if finite_number(measured) else None),
+        final_error_mm=measured_mm,
         place_drop_mm=(parse_mm(place[-1].get('detail'), 'drop error')
                        if place and not place_errors else None),
         verify_error_mm=(parse_mm(verify[-1].get('detail'), 'err=')
@@ -246,9 +250,10 @@ def slot_row(window_dir, label, drivers=None, metadata_error=None, meta=None):
     return row
 
 
-def summarize(rows):
+def summarize(rows, stats_labels=NORMAL_LABELS):
     valid = [r for r in rows
-             if r.get('status') == 'OK' and r.get('final_error_mm') is not None]
+             if r.get('label') in stats_labels
+             and r.get('status') == 'OK' and r.get('final_error_mm') is not None]
     valid_ids = {id(r) for r in valid}
     errors = [r['final_error_mm'] for r in valid]
     deltas = [abs(r['place_drop_mm'] - r['verify_error_mm']) for r in valid
@@ -276,9 +281,11 @@ def summarize(rows):
             window=row.get('window'),
             source_unchanged=row.get('window_source_unchanged'),
             source_changed=row.get('window_source_changed') or [],
-            slots_completed=0, slots_not_comparable=0))
+            slots_ok=0, slots_completed=0, slots_not_comparable=0))
         if row.get('status') == 'OK':
-            entry['slots_completed'] += 1
+            entry['slots_ok'] += 1
+            if row.get('final_error_mm') is not None:
+                entry['slots_completed'] += 1
         elif row.get('status') == 'NOT_COMPARABLE':
             entry['slots_not_comparable'] += 1
     windows = [windows[key] for key in sorted(windows)]
@@ -340,16 +347,22 @@ def main(argv=None):
                                  if isinstance(meta, dict) else None),
             interrupted=(meta.get('interrupted') if isinstance(meta, dict) else None),
         ))
-        for label in NORMAL_LABELS:
+        for label in ALL_LABELS:
             rows.append(slot_row(window, label, drivers, metadata_error, meta))
 
     summary = summarize(rows)
+    complete_windows = all(
+        w.get('all_slots_completed') is True and not w.get('stop_reason')
+        for w in windows)
     payload = dict(windows=windows, rows=rows, summary=summary)
-    text = json.dumps(payload, indent=2, ensure_ascii=False)
+    text = json.dumps(payload, indent=2, ensure_ascii=False, allow_nan=False)
     if args.out:
         args.out.write_text(text + '\n')
     print(text)
-    return 0 if summary['slots_completed'] and not summary['windows_not_frozen'] else 1
+    ok = (summary['slots_completed']
+          and not summary['windows_not_frozen']
+          and complete_windows)
+    return 0 if ok else 1
 
 
 if __name__ == '__main__':

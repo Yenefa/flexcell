@@ -47,17 +47,31 @@ def _raise_window_signal(signum, _frame):
     raise WindowSignal(signum)
 
 
-def _install_signal_handlers(signals=(signal.SIGTERM, signal.SIGHUP)):
-    """Turn termination signals into an exception the cleanup path can see."""
+def _install_signal_handlers(signals=(signal.SIGTERM, signal.SIGHUP), sink=None):
+    """Install handlers; with `sink`, record names instead of raising.
+
+    `run_slot` uses the raising form so a signal inside a slot starts the bounded
+    cleanup. `run_window` uses the sink form between slots, so a late signal is
+    answered after the slot's row is written instead of unwinding the window.
+    """
     previous = {}
     for signum in signals:
         try:
             previous[signum] = signal.getsignal(signum)
-            signal.signal(signum, _raise_window_signal)
+            if sink is None:
+                signal.signal(signum, _raise_window_signal)
+            else:
+                signal.signal(signum, _record_window_signal(sink))
         except (OSError, ValueError):
             # Not the main thread: the slot still has its own timeout.
             previous.pop(signum, None)
     return previous
+
+
+def _record_window_signal(sink):
+    def handler(signum, _frame):
+        sink.append(signal.Signals(signum).name)
+    return handler
 
 
 def _restore_signal_handlers(previous):
@@ -349,7 +363,8 @@ def run_slot(argv, env, log, timeout_s, grace_s=30.0):
     marker = env.get(SLOT_MARKER)
     proc = None
     cleanup = dict(graceful=False, survivors=0, killed=0, left=0)
-    previous = _install_signal_handlers()
+    previous = _install_signal_handlers(
+        (signal.SIGINT, signal.SIGTERM, signal.SIGHUP))
     try:
         try:
             proc = subprocess.Popen(argv, env=env, stdout=log, stderr=subprocess.STDOUT,
@@ -393,10 +408,15 @@ def run_window(prereg, out, runner=None):
     started = time.monotonic()
     stopped = None
     interrupted = None
-    previous_handlers = _install_signal_handlers()
+    window_pending = []
+    previous_handlers = _install_signal_handlers(
+        (signal.SIGINT, signal.SIGTERM, signal.SIGHUP), sink=window_pending)
     try:
         for index, slot in enumerate(slots):
             label, case = slot['label'], slot['case']
+            if window_pending and not interrupted:
+                interrupted = window_pending[0]
+                stopped = 'interrupted by %s between slots' % interrupted
             if stopped:
                 rows.append(dict(label=label, case=case, status='NOT_RUN', reason=stopped))
                 continue
@@ -448,6 +468,12 @@ def run_window(prereg, out, runner=None):
                         signal_name, label)
                     row['status'] = 'INTERRUPTED'
                     row['reason'] = stopped
+            if window_pending and not interrupted_now:
+                interrupted_now = True
+                interrupted = window_pending[0]
+                stopped = 'interrupted by %s after %s' % (interrupted, label)
+                row['status'] = 'INTERRUPTED'
+                row['reason'] = stopped
             with _defer_signals() as pending:
                 try:
                     result, result_path = one_result(slot_out, case)
@@ -495,36 +521,53 @@ def run_window(prereg, out, runner=None):
         (out / 'results.partial.json').write_text(
             json.dumps(rows, indent=2, ensure_ascii=False))
     finally:
-        _restore_signal_handlers(previous_handlers)
+        pass  # handlers stay installed until the manifest is written
 
-    after = source_hashes()
-    changed = sorted(k for k in set(before) | set(after) if before.get(k) != after.get(k))
-    (out / 'source_before.json').write_text(
-        json.dumps(before, indent=2, sort_keys=True))
-    (out / 'source_after.json').write_text(
-        json.dumps(after, indent=2, sort_keys=True))
-    payload = dict(
-        experiment=prereg.get('experiment'),
-        scope='FUNCTIONAL_SMOKE_ONLY',
-        preregistration=prereg,
-        results=rows,
-        source_unchanged=(before == after),
-        source_changed=changed,
-        source_files=len(before),
-        source_scope=list(SOURCE_PATTERNS),
-        stop_reason=stopped,
-        interrupted=interrupted is not None,
-        interrupt_signal=interrupted,
-        all_slots_completed=(len(rows) == len(slots)
-                             and stopped is None
-                             and all(r.get('status') == 'OK' for r in rows)),
-        baseline_promoted=False,
-    )
-    (out / 'results.json').write_text(json.dumps(payload, indent=2, ensure_ascii=False))
-    manifest = {str(p.relative_to(out)): hashlib.sha256(p.read_bytes()).hexdigest()
-                for p in out.rglob('*') if p.is_file() and p.name != 'SHA256_MANIFEST.json'}
-    (out / 'SHA256_MANIFEST.json').write_text(json.dumps(manifest, indent=2, sort_keys=True))
-    return payload
+    try:
+        with _defer_signals() as finishing:
+            after = source_hashes()
+            if finishing.names and interrupted is None:
+                interrupted = finishing.names[0]
+                stopped = 'interrupted by %s during finalization' % interrupted
+            changed = sorted(k for k in set(before) | set(after) if before.get(k) != after.get(k))
+            (out / 'source_before.json').write_text(
+                json.dumps(before, indent=2, sort_keys=True))
+            (out / 'source_after.json').write_text(
+                json.dumps(after, indent=2, sort_keys=True))
+            payload = dict(
+                experiment=prereg.get('experiment'),
+                scope='FUNCTIONAL_SMOKE_ONLY',
+                preregistration=prereg,
+                results=rows,
+                source_unchanged=(before == after),
+                source_changed=changed,
+                source_files=len(before),
+                source_scope=list(SOURCE_PATTERNS),
+                stop_reason=stopped,
+                interrupted=interrupted is not None,
+                interrupt_signal=interrupted,
+                all_slots_completed=(len(rows) == len(slots)
+                                     and stopped is None
+                                     and all(r.get('status') == 'OK' for r in rows)),
+                baseline_promoted=False,
+            )
+            (out / 'results.json').write_text(
+                json.dumps(payload, indent=2, ensure_ascii=False))
+            manifest = {str(p.relative_to(out)): hashlib.sha256(p.read_bytes()).hexdigest()
+                        for p in out.rglob('*')
+                        if p.is_file() and p.name != 'SHA256_MANIFEST.json'}
+            (out / 'SHA256_MANIFEST.json').write_text(
+                json.dumps(manifest, indent=2, sort_keys=True))
+        if finishing.names and payload.get('interrupt_signal') != finishing.names[0]:
+            payload['interrupted'] = True
+            payload['interrupt_signal'] = finishing.names[0]
+            payload['stop_reason'] = payload.get('stop_reason') or (
+                'interrupted by %s during finalization' % finishing.names[0])
+            (out / 'results.json').write_text(
+                json.dumps(payload, indent=2, ensure_ascii=False))
+        return payload
+    finally:
+        _restore_signal_handlers(previous_handlers)
 
 
 def main(argv=None):

@@ -422,5 +422,79 @@ class WindowFreezeTest(unittest.TestCase):
         self.assertEqual(code, 1)
 
 
+class AdmissionTest(unittest.TestCase):
+    """Invalid evidence must not become a completed sample or a green exit."""
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = pathlib.Path(self.tmp.name)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _meta(self, rows, **extra):
+        payload = dict(results=rows, source_unchanged=True)
+        payload.update(extra)
+        (self.root / 'results.json').write_text(json.dumps(payload))
+
+    def test_overflowing_error_stays_unmeasured(self):
+        make_slot(self.root, 'NORMAL_1', 1e308, 'drop error 0.008m', 'err=0.008',
+                  [(0.12, -0.15, 0.1895)])
+        self._meta([dict(label='NORMAL_1', case='normal', driver_exit=0, status='OK')])
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'OK')
+        self.assertIsNone(row['final_error_mm'])
+
+        summary = aw.summarize([row])
+        self.assertEqual(summary['slots_completed'], 0)
+        self.assertEqual(summary['slots_unmeasured'], 1)
+        json.dumps(summary, allow_nan=False)  # must not raise on Infinity
+
+    def test_missing_outcome_is_not_ok(self):
+        run = self.root / 'NORMAL_1' / 'run-x'
+        run.mkdir(parents=True)
+        (run / 'result.json').write_text(json.dumps(dict(
+            case='normal', status='PASS',
+            task=dict(final_position_error_m=0.008))))
+        self._meta([dict(label='NORMAL_1', case='normal', driver_exit=0, status='OK')])
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        self.assertEqual(row['status'], 'TASK_FAILED')
+        self.assertIn('outcome', row['reason'])
+
+    def test_dual_failure_is_visible_and_exits_nonzero(self):
+        make_slot(self.root, 'NORMAL_1', 0.008, 'drop error 0.008m', 'err=0.008',
+                  [(0.12, -0.15, 0.1895)])
+        make_slot(self.root, 'NORMAL_2', 0.009, 'drop error 0.009m', 'err=0.009',
+                  [(0.12, -0.15, 0.1895)])
+        self._meta([
+            dict(label='NORMAL_1', case='normal', driver_exit=0, status='OK'),
+            dict(label='DUAL_1', case='dual_object', driver_exit=124, status='UNKNOWN'),
+            dict(label='NORMAL_2', case='normal', driver_exit=0, status='OK'),
+            dict(label='DUAL_2', case='dual_object', driver_exit=None, status='NOT_RUN'),
+        ], all_slots_completed=False, stop_reason='outer timeout')
+
+        import contextlib
+        import io
+        with contextlib.redirect_stdout(io.StringIO()):
+            code = aw.main([str(self.root)])
+
+        self.assertEqual(code, 1)
+        row = aw.slot_row(self.root, 'DUAL_1')
+        self.assertEqual(row['status'], 'UNKNOWN')
+
+    def test_window_entry_separates_ok_from_measured(self):
+        make_slot(self.root, 'NORMAL_1', None, 'drop error 0.008m', 'err=0.008',
+                  [(0.12, -0.15, 0.1895)])
+        self._meta([dict(label='NORMAL_1', case='normal', driver_exit=0, status='OK')])
+
+        row = aw.slot_row(self.root, 'NORMAL_1')
+        summary = aw.summarize([row])
+        window = summary['windows'][0]
+        self.assertEqual(window['slots_ok'], 1)
+        self.assertEqual(window['slots_completed'], 0)
+
+
 if __name__ == '__main__':
     unittest.main()
