@@ -427,11 +427,19 @@ class PlaceServer(Node):
                     and open_state["aperture_error"] is not None
                     and open_state["aperture_error"] > self._release_aperture_tolerance_m
                     and not open_state["reached_goal"]):
-                return finish(
-                    R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
-                    'gripper did not open (position=%r requested=%r stalled=%r)'
-                    % (open_state["position"], self._gripper_open,
-                       open_state["stalled"]))
+                detail = ('gripper did not open (position=%r requested=%r stalled=%r)'
+                          % (open_state["position"], self._gripper_open,
+                             open_state["stalled"]))
+                if self._carry_backend == 'detachable_joint':
+                    # The physical joint is already released; the jaws can stall
+                    # against the box that just settled between them. The
+                    # independent verify below decides whether the box actually
+                    # stayed at the target, so a stalled aperture is a warning
+                    # here, not a success claim.
+                    rec['gripper_open_warning'] = (
+                        detail + '; physical release confirmed, verify decides')
+                else:
+                    return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED, detail)
             res.released = True
 
             # ---------- VERIFYING (internal, ground truth) ----------
