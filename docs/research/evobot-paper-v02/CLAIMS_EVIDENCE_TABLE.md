@@ -10,7 +10,7 @@
 | R1 | F1 族、B 条件（真实执行反馈）：2 次重复均被契约门判 `ACCEPT` | 反馈类型是否影响是否修好 | B | D1 | 分子 2 / 分母 0（终态 `UNKNOWN`，不入 D1） | `5458f1d` | `deepseek-flash`；`a48651c0…`；`flexcell.repair_eval.task_contract/1` v1 `6628e64f…` | `experiments/repair_eval_v02/evidence/confirmatory_f1bc.json`（F1-B-r1/r2） | `UNKNOWN` |
 | R2 | F1 族、C 条件（失配反馈）：2 次重复均被判 `ACCEPT`，donor 为同族另一 seed 的 B 记录 | 不匹配的反馈是否足以支持修复 | C | D1 | 分子 2 / 分母 0（同上） | `5458f1d` | 同上；donor `F1-B-r2`（seed 5102）、`F1-B-r1`（seed 5101） | `confirmatory_f1bc.json`（F1-C-r1/r2）+ `evidence/donor/*.log` | `UNKNOWN` |
 | R3 | 预注册实例上 24 槽首次真实派发：22 槽使封印门判 `PASS` | 流水线在真实例上是否可跑通 | 全部 | D1 | 分子 22 / 分母 0（终态 `UNKNOWN`，不入 D1） | `6d5fd5d` | `deepseek-flash`；`a48651c0…`；`flexcell.repair_eval.task_contract/1` v1 | `experiments/repair_eval_v02/evidence/real_instances_matrix.json`（24 行） | `UNKNOWN` |
-| R4 | v2 题面 n=6 主批次：四条件成功率不可区分 | 反馈可得性是否改变修复成功率 | 全部 | D1 | 0 / 0（终态全 `UNKNOWN`）；门判 31/48，F2 为 A2/6 B2/6 C3/6 D4/6，Fisher p=0.57 | `11c056c5` | `deepseek-flash`；`a48651c0…` | `experiments/repair_eval_v02/evidence/v2_matrix_n6.json`（48 行） | `UNKNOWN` |
+| R4 | v2 题面 n=6 主批次：描述性统计，不主张条件差异 | 反馈可得性是否改变修复成功率 | 全部 | D1 | 0 / 0（终态 `UNKNOWN` 28、`BUDGET_EXHAUSTED` 20；门判 PASS 35/48） | `31541278…` | `deepseek-flash`；`a48651c0…` | `experiments/repair_eval_v02/evidence/v2_matrix_n6.json`（48 行） | `UNKNOWN` |
 
 **为什么这两行不是 `SUPPORTED`**：契约门判了 `ACCEPT`，但**独立裁决门从未运行**（`gate_independent = NOT_RUN`），所以终态一律 `UNKNOWN`，按 §3 的分母规则不进 D1。把它们写成 `SUPPORTED` 就等于把「契约说对了」当成「独立复核说对了」，这正是本表要防的事。独立门需要 #253 的 6 个保留场景跑起来。
 
@@ -24,7 +24,11 @@
 
 **R3 的两次重跑必须一起读**：同一批 F2-B 三格重跑从 1/3 变成 3/3（`f2b_reproduce.json`），单格差异在 n=3 下不可解读；另一批 24 槽（`*_writeonly_INVALIDATED.json`）全败，因为当时只有整文件重写接口——那是接口结论，不是模型结论。
 
-**R4 是零结果，并且这是它的价值**：48 槽、535,151 tokens 之后，四个条件在成功率上分不开。写成「未发现差异」而不是「有趋势」，因为后者需要 p 值支持，而这里是 p=0.57。
+**R4 不主张条件差异**：48 槽里门判 PASS 35 条（F1 24/24；F2 为 A 2/6、B 2/6、C 3/6、D 4/6），终态 28 `UNKNOWN` + 20 `BUDGET_EXHAUSTED`。先前写入的「31/48、终态全 UNKNOWN、来源 11c056c5」三处错误已更正为 35/48、28+20、`31541278…`。
+
+**「四条件成功率不可区分」的推断撤回**：协议未预注册该检验，事后 Fisher 检验不构成结论；且 D 组的指导文本来自执行域（要求耗尽重试预算），与本任务的修复行为不匹配，条件间比较本身受污染。
+
+
 
 填写规则：
 
