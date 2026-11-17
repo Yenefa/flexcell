@@ -1,0 +1,37 @@
+[
+  {
+    "tool": "read_file",
+    "argument": "config/week1.yaml",
+    "outcome": "allow"
+  },
+  {
+    "tool": "read_file",
+    "argument": "task.md",
+    "outcome": "allow"
+  },
+  {
+    "tool": "read_file",
+    "argument": "tests",
+    "outcome": "missing"
+  },
+  {
+    "tool": "read_file",
+    "argument": "tests",
+    "outcome": "missing"
+  },
+  {
+    "tool": "read_file",
+    "argument": "config",
+    "outcome": "allow:directory"
+  },
+  {
+    "tool": "read_file",
+    "argument": "config/week1.yaml",
+    "outcome": "allow"
+  },
+  {
+    "tool": "write_file",
+    "argument": "config/week1.yaml",
+    "outcome": "allow"
+  }
+]

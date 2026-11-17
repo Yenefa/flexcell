@@ -17,6 +17,9 @@ WHAT IT WILL NOT DO
     gate, and an adapter that shortcuts it would undo it.
 """
 import importlib.util
+from urllib.error import URLError
+import ssl
+import time
 import sys
 from pathlib import Path
 
@@ -90,7 +93,32 @@ class GatedTransport:
 
     # ---------------------------------------------------------------- call
     def chat(self, messages, **kwargs):
-        reply = self.client.chat(messages)
+        # A TLS handshake that dies before the request is written cannot have
+        # produced an answer, so retrying it risks nothing and prevents one
+        # network blip from ending a whole batch: two full runs stopped at slots
+        # 5 and 7 on URLError("UNEXPECTED_EOF_WHILE_READING"). Timeouts are not
+        # retried - the request may have been processed - and they still surface
+        # as the unconfirmed terminal the protocol wants.
+        attempt, retries = 0, 0
+        while True:
+            attempt += 1
+            try:
+                reply = self.client.chat(messages)
+                break
+            except (ssl.SSLError, ConnectionResetError) as exc:
+                if attempt >= 3:
+                    raise
+                retries += 1
+                time.sleep(1.5 * attempt)
+                last = exc
+            except URLError as exc:
+                reason = getattr(exc, "reason", None)
+                retryable = isinstance(reason, (ssl.SSLError, ConnectionResetError,
+                                                ConnectionRefusedError))
+                if not retryable or attempt >= 3:
+                    raise
+                retries += 1
+                time.sleep(1.5 * attempt)
         self.calls += 1
         tokens = int(reply.get("tokens") or 0)
         self.total_tokens += tokens
@@ -101,4 +129,5 @@ class GatedTransport:
             "usage": {"total_tokens": tokens, "split_available": False},
             "model_returned": reply.get("model"),
             "seconds": reply.get("seconds"),
+            "connection_retries": retries,
         }

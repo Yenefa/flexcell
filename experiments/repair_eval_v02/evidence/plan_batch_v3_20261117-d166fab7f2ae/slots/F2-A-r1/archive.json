@@ -1,0 +1,139 @@
+{
+  "schema": "evobot.slot_archive/1",
+  "files": {
+    "account.json": "ba909863b24f54311052e263ea2686724d464eb3ec5b7b2a15e7aa90f8649cf2",
+    "candidate/gate/check.py": "fed4f8cd1df4c6cbca7589bfde5b01f38cee0bca248473e51a35ef815009d990",
+    "candidate/gate/observe_server.py": "7ccd47ac286cc4d8115e416e54c9eb94d51aa7030d042565e3bd5ba25b13237b",
+    "candidate/src/task_fsm_server.py": "144c849a90e43777e88eeefc70185873ee710e6e1f37d3ebdad8c04613de1260",
+    "candidate/task.md": "aa2f5b5fe55c255fa751f5ea2856a9750052523809ebd3475e016d14d44bc1f5",
+    "candidate/telemetry/execution.log": "29ae60517a632f03e430a30442086881039c5ab97f82cbc5b37818e12badb57b",
+    "dispatch_after.json": "2fd91bf7537c470d3e5c9367725572d52d62dfdce009994c10d97cd383500ceb",
+    "dispatch_before.json": "d8ef7f91d04b6e9b862f7ac4872a85257e089f51f7b9fc1fe8bc4fc3f4652889",
+    "dispatch_final.json": "544f7c1d8504205f8e095bb808d87ea0ede3a89dab9babb6ad7d9aa6ac533645",
+    "health_after.json": "d24db4b0d2a28070a618271f40ab53f9b9fd4734a5d98282e5099326e549e854",
+    "health_before.json": "a053744d24cff5caa5f7d85d0f6738c76f55b8c3746002100ee04f7c60b81e90",
+    "initial_candidate/gate/check.py": "fed4f8cd1df4c6cbca7589bfde5b01f38cee0bca248473e51a35ef815009d990",
+    "initial_candidate/gate/observe_server.py": "7ccd47ac286cc4d8115e416e54c9eb94d51aa7030d042565e3bd5ba25b13237b",
+    "initial_candidate/src/task_fsm_server.py": "144c849a90e43777e88eeefc70185873ee710e6e1f37d3ebdad8c04613de1260",
+    "initial_candidate/task.md": "aa2f5b5fe55c255fa751f5ea2856a9750052523809ebd3475e016d14d44bc1f5",
+    "message_attempts.json": "371bb21d2b6894b3694067496d59c9c62e0421fb80dd514343c40a4037bcec31",
+    "source_identity.json": "9cfc9fa7478bbf5b7ad029a20411a3dc91210eb6fe1f8e9550fdace7751dec33",
+    "tool_calls.json": "4fd20fdab0b53adeb3d0aecbe583a4ed2ede45672b021f460389fe4df910fdf2",
+    "transcript.json": "69d9f7415b3da4606556839ded81ef5a0564c31c3e0819470f3003a57e079910",
+    "verdict/final.json": "d1564fd20e47dd5f33083a8fa35b3842d85b15fd1dcd218aec614e686b7e9936"
+  },
+  "candidate_sha": "63ea189040391fcb33d51b1a1eec43a8dc1c330db8cfb8edb0ac0cd9ca362682",
+  "record": {
+    "slot_id": "F2-A-r1",
+    "condition": "A_STATIC",
+    "family": "F2_GOAL_MAPPING",
+    "seed": 5201,
+    "donor_run_id": null,
+    "plan_sha256": "b8cd0e5df2416192c5700b8b4c839f5dab89d5f93f5dbc56ea3951bfe455b7f8",
+    "source_sha": "c0a788c3a29de30ff47e499a7304a01e70e9fefe",
+    "terminal_status": "BUDGET_EXHAUSTED",
+    "qualification": "REAL_MODEL_RUN|INSTANCE",
+    "tokens_total": 22084,
+    "interactions_used": 4,
+    "edited_paths": [],
+    "feedback_source": "none",
+    "task_variant": "v2",
+    "feedback_payload_sha256": null,
+    "guidance_sha256": null,
+    "visibility_policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+    "visibility_policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+    "interactions_cap": 6,
+    "tokens_in": null,
+    "tokens_out": null,
+    "tokens_source": "provider_total_only",
+    "tokens_cap": 20000,
+    "candidate_executions": 0,
+    "final_scenes": 0,
+    "wall_clock_s": 4.935,
+    "budget_exhausted_at": "token:22084",
+    "claim_success": false,
+    "gate_target": "FAIL",
+    "gate_regression": {},
+    "gate_contract": "FAIL",
+    "gate_contract_codes": [
+      "WRONG_ZONE_ASSIGNMENT"
+    ],
+    "gate_independent": "NOT_RUN",
+    "false_accept": false,
+    "false_reject": false,
+    "first_edit_after_execution": true,
+    "deviation_codes": [],
+    "evidence_path": "experiments/repair_eval_v02/evidence",
+    "notes": "",
+    "contract_sha256": "e50ac16acd59c70d4473a01ca4b5358f367d8c3068460d3e6995cc2d588efbd6",
+    "donor_log": null,
+    "model": "deepseek-flash",
+    "key_fingerprint": "0f17904e",
+    "contract_verdict": "REJECT",
+    "regression_exit": null,
+    "instance": "DEF-F2-MAP",
+    "action_terminal": "TYPED_FAILURE",
+    "health_before": {
+      "at": 1794891459.6422276,
+      "backend": "source_gate",
+      "healthy": true,
+      "checks": {
+        "source_sha": {
+          "status": "PASS",
+          "expected": "c0a788c3a29de30ff47e499a7304a01e70e9fefe",
+          "observed": "c0a788c3a29de30ff47e499a7304a01e70e9fefe"
+        },
+        "source_files": {
+          "status": "PASS",
+          "changed": []
+        },
+        "dependencies": {
+          "status": "PASS",
+          "missing": []
+        },
+        "workspace": {
+          "status": "PASS",
+          "missing": [],
+          "changed": []
+        },
+        "ros_gazebo": {
+          "status": "NOT_APPLICABLE",
+          "reason": "source/config execution; no ROS/Gazebo action dispatched"
+        }
+      },
+      "failures": []
+    },
+    "health_after": {
+      "at": 1794891464.6390424,
+      "backend": "source_gate",
+      "healthy": true,
+      "checks": {
+        "source_sha": {
+          "status": "PASS",
+          "expected": "c0a788c3a29de30ff47e499a7304a01e70e9fefe",
+          "observed": "c0a788c3a29de30ff47e499a7304a01e70e9fefe"
+        },
+        "source_files": {
+          "status": "PASS",
+          "changed": []
+        },
+        "dependencies": {
+          "status": "PASS",
+          "missing": []
+        },
+        "workspace": {
+          "status": "PASS",
+          "missing": [],
+          "changed": []
+        },
+        "ros_gazebo": {
+          "status": "NOT_APPLICABLE",
+          "reason": "source/config execution; no ROS/Gazebo action dispatched"
+        }
+      },
+      "failures": []
+    },
+    "candidate_sha": "63ea189040391fcb33d51b1a1eec43a8dc1c330db8cfb8edb0ac0cd9ca362682",
+    "regression_scope": "source_gate_only"
+  }
+}
