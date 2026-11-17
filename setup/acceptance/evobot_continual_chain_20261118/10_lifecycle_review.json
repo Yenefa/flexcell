@@ -7,6 +7,15 @@
     "harmful": 0,
     "helpful": 1,
     "label": "auto-harness_dds_exhaustion",
+    "scope": {
+      "added": [],
+      "measured": [],
+      "recorded": [
+        "T05_relay"
+      ],
+      "stale": false,
+      "why": "no callable binding, so the reuse instrument cannot see this entry"
+    },
     "why": "no harm recorded"
   },
   {
@@ -17,6 +26,21 @@
     "harmful": 0,
     "helpful": 1,
     "label": "E2",
+    "scope": {
+      "added": [],
+      "measured": [
+        "T03_ordered",
+        "T12_triple_revisit",
+        "T13_geometric_conditional"
+      ],
+      "recorded": [
+        "T03_ordered",
+        "T12_triple_revisit",
+        "T13_geometric_conditional"
+      ],
+      "stale": false,
+      "why": "the record already covers the measured scope"
+    },
     "why": "no harm recorded"
   }
 ]

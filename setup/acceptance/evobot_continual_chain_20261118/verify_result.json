@@ -86,10 +86,18 @@
     "the_planner_accepts_the_required_order": true,
     "the_order_check_is_inert_when_the_instruction_fixes_none": true,
     "the_planner_has_a_model_free_measured_effect": true,
-    "that_probe_refuses_none_of_the_compliant_plans": true
+    "that_probe_refuses_none_of_the_compliant_plans": true,
+    "a_record_narrower_than_its_measurement_is_revised": true,
+    "the_revision_widens_the_scope_to_the_measured_one": true,
+    "a_revision_changes_only_the_measured_scope": true,
+    "a_revision_keeps_the_previous_version_on_disk": true,
+    "a_revision_links_its_parent_and_stays_ACTIVE": true,
+    "the_revision_is_idempotent": true,
+    "the_store_chain_verifies_after_a_revision": true,
+    "a_revision_is_not_recorded_as_a_usage_outcome": true
   },
-  "checks_total": 82,
-  "checks_passed": 82,
+  "checks_total": 90,
+  "checks_passed": 90,
   "chain_message": "chain intact (6 records)",
   "measured": {
     "deliveries": {

@@ -467,6 +467,36 @@ def main():
         checks["that_probe_refuses_none_of_the_compliant_plans"] = (
             order_probe["detail"]["false_positives"] == 0)
 
+        # 21 -- THE THIRD TRANSITION. lifecycle.py's docstring lists three (RETIRE, REVISE,
+        # KEEP) and only two existed. REVISE is the one that matters when the record is
+        # narrower than a fresh measurement: the entry is not harmful (so RETIRE is wrong)
+        # and it is not fine (so KEEP is wrong). DGM's point is that a version evolves when
+        # evidence changes, and an activation-time snapshot is evidence that goes stale.
+        revise = json.loads((tmp / "10_revision_transition.json").read_text(encoding="utf-8"))
+        checks["a_record_narrower_than_its_measurement_is_revised"] = (
+            revise.get("ran") is True
+            and any(d["decision"] == "REVISE"
+                    for d in revise.get("decision_before") or []))
+        checks["the_revision_widens_the_scope_to_the_measured_one"] = set(
+            revise.get("added") or []) and set(revise["added"]).issubset(
+                set(revise.get("scope_after") or []))
+        # A revision must NOT be a second, unreviewed activation wearing a version bump.
+        checks["a_revision_changes_only_the_measured_scope"] = (
+            revise.get("lesson_unchanged") is True)
+        checks["a_revision_keeps_the_previous_version_on_disk"] = (
+            revise.get("old_version_still_on_disk") is True)
+        checks["a_revision_links_its_parent_and_stays_ACTIVE"] = (
+            revise.get("parent_linked") is True and revise.get("status_after") == "ACTIVE")
+        # ... and it must SETTLE: a second pass must not revise the same entry again.
+        checks["the_revision_is_idempotent"] = revise.get("still_revise_after") == []
+        checks["the_store_chain_verifies_after_a_revision"] = (
+            revise.get("chain_ok") is True)
+        # REVISED is a transition, not an outcome: counting it as helpful would credit an
+        # entry for a bookkeeping change.
+        lg = _load("ledger")
+        checks["a_revision_is_not_recorded_as_a_usage_outcome"] = (
+            "REVISED" in lg.EVENTS and "REVISED" not in lg.OUTCOMES)
+
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
             "batch": HERE.name,

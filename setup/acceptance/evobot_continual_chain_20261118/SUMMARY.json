@@ -331,6 +331,7 @@
             "harmful": 1,
             "helpful": 1,
             "label": "auto-harness_dds_exhaustion",
+            "scope": null,
             "why": "applied 2 time(s) and at least one outcome was WORSE"
           }
         ],
@@ -341,6 +342,37 @@
         "retired_entry_id": "fa8feb8d09d8c7ba86c72fac8b9f98e6586090e77259122d70b5a8d403c9ff87",
         "retired_reason": "applied 2 time(s) and at least one outcome was WORSE",
         "status_after": "RETIRED"
+      },
+      "revise_transition_demo": {
+        "added": [
+          "T03_ordered",
+          "T12_triple_revisit"
+        ],
+        "chain_ok": true,
+        "decision_before": [
+          {
+            "decision": "KEEP",
+            "label": "auto-harness_dds_exhaustion",
+            "why": "no harm recorded"
+          },
+          {
+            "decision": "REVISE",
+            "label": "E2",
+            "why": "the record lists ['T13_geometric_conditional'] but a fresh measurement reaches ['T03_ordered', 'T12_triple_revisit', 'T13_geometric_conditional']"
+          }
+        ],
+        "label": "E2",
+        "lesson_unchanged": true,
+        "old_version_still_on_disk": true,
+        "parent_linked": true,
+        "ran": true,
+        "scope_after": [
+          "T03_ordered",
+          "T12_triple_revisit"
+        ],
+        "scope_before": [],
+        "status_after": "ACTIVE",
+        "still_revise_after": []
       },
       "step": "lifecycle"
     },

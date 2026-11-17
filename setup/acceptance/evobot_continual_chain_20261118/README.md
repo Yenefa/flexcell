@@ -163,7 +163,26 @@ capability is what makes that visible instead of leaving it to an audit.
     instruction. A probe scanning same-run pairs alone reports **0 violations** and the check
     looks untested. `plan_order` therefore reports both numbers.
 
-`verify.py` asserts **82 checks**, including that both gates really ran, that the asset
+21. **the third transition exists now.** `lifecycle.py`'s docstring lists three —
+    RETIRE, REVISE, KEEP — and only two were implemented. REVISE is the one that covers the
+    case that actually occurs: the entry is **not harmful** (so RETIRE is wrong) and **not
+    fine** (so KEEP is wrong) because the record is **narrower than what has since been
+    measured**. `measured_families` is a snapshot taken at activation; a later measurement
+    can outgrow it, leaving the live entry narrower than its own evidence — retrieval then
+    withholds the lesson from a family it demonstrably fixes. The measurement is right and
+    the record is out of date.
+    `revise()` changes **only** `measured_families`: the lesson, its conditions and its
+    suggested action are untouched, because a revision that could rewrite the lesson would
+    be a second, unreviewed activation wearing a version bump. The previous version stays on
+    disk, the chain still verifies, the parent is linked, and it **settles** — a second
+    review pass does not revise again.
+    Three deliberate calls: **harm outranks staleness** (a wider scope makes harm worse, so
+    a harmful entry is retired whatever its scope says); **a consumer the instrument cannot
+    see is not "stale"** (that is a blind spot, not an out-of-date record); **REVISED is a
+    transition, not an outcome** (counting it as helpful use would credit an entry for a
+    bookkeeping change).
+
+`verify.py` asserts **90 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -176,7 +195,8 @@ actionable text is reported DROPPED rather than accepted, and that **an order-cl
 failure is told apart from a truncated run**, and that **the gate covers every verifier
 while not running the one that contains it**, and that **an entry measured to help another
 task family is actually offered to it while an unmeasured family is still withheld**, and that **the planner refuses a reversed
-order while staying inert when the instruction fixes none**.
+order while staying inert when the instruction fixes none**, and that **a record narrower
+than its measurement is revised while the lesson text stays untouched**.
 
 ---
 

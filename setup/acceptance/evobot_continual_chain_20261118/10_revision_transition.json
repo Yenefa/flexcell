@@ -1,0 +1,31 @@
+{
+  "added": [
+    "T03_ordered",
+    "T12_triple_revisit"
+  ],
+  "chain_ok": true,
+  "decision_before": [
+    {
+      "decision": "KEEP",
+      "label": "auto-harness_dds_exhaustion",
+      "why": "no harm recorded"
+    },
+    {
+      "decision": "REVISE",
+      "label": "E2",
+      "why": "the record lists ['T13_geometric_conditional'] but a fresh measurement reaches ['T03_ordered', 'T12_triple_revisit', 'T13_geometric_conditional']"
+    }
+  ],
+  "label": "E2",
+  "lesson_unchanged": true,
+  "old_version_still_on_disk": true,
+  "parent_linked": true,
+  "ran": true,
+  "scope_after": [
+    "T03_ordered",
+    "T12_triple_revisit"
+  ],
+  "scope_before": [],
+  "status_after": "ACTIVE",
+  "still_revise_after": []
+}

@@ -158,6 +158,82 @@ def entry_executor_side():
         **_COMMON)
 
 
+def _demonstrate_revision(store_path, ledger_path, dest):
+    """Prove the REVISE transition on a copy whose measured scope was narrowed first.
+
+    WHY ON A COPY: the real records were activated after their scope was measured, so they
+    are already current and there is nothing on them to revise. Narrowing a copy to the
+    state an activation produces when the measurement has since grown is the honest way to
+    exercise the transition - the alternative is to fabricate a measurement, which is the
+    dishonesty this package is built to refuse.
+
+    It also proves the properties that make a revision safe: the lesson text is unchanged,
+    the previous version stays on disk, the chain verifies, and the successor is ACTIVE with
+    a parent link (DGM's version lineage).
+    """
+    import shutil
+    import tempfile
+    tmp = tempfile.mkdtemp(prefix="revise_")
+    try:
+        cstore = os.path.join(tmp, "records_v2.jsonl")
+        cledger = os.path.join(tmp, "usage_ledger.jsonl")
+        # Rebuild rather than copy: a copied store already has the measured scope recorded,
+        # and dropping it in place would break the hash chain the store exists to protect.
+        for row in store.read(store_path):
+            body = {k: v for k, v in row.items()
+                    if k not in ("prev_sha256", "chain_sha256", "record_sha256")}
+            narrowed = (row.get("version") or {}).get("label") == "E2" \
+                and (row.get("version") or {}).get("status") == "ACTIVE"
+            if narrowed:
+                body["measured_families"] = []
+            body["entry_id"] = schema.digest(schema._body(body))
+            body["record_sha256"] = schema.digest(
+                {k: v for k, v in body.items() if k != "record_sha256"})
+            store.append(cstore, body)
+        shutil.copyfile(ledger_path, cledger)
+        before = lifecycle.review(cstore, cledger, measure=True,
+                                  acceptance=os.path.join(WT, "setup", "acceptance"),
+                                  source_task="HO-90899d657e68")
+        stale = [d for d in before if d["decision"] == "REVISE"]
+        if not stale:
+            return {"ran": False, "why": "no stale scope to revise on the copy"}
+        target = stale[0]
+        old = [r for r in store.read(cstore) if r["entry_id"] == target["entry_id"]][0]
+        successor = lifecycle.revise(target["entry_id"], store_path=cstore,
+                                     ledger_path=cledger,
+                                     acceptance=os.path.join(WT, "setup", "acceptance"),
+                                     source_task="HO-90899d657e68")
+        after = lifecycle.review(cstore, cledger, measure=True,
+                                 acceptance=os.path.join(WT, "setup", "acceptance"),
+                                 source_task="HO-90899d657e68")
+        result = {
+            "ran": True,
+            "label": target["label"],
+            "decision_before": [{"label": d["label"], "decision": d["decision"],
+                                 "why": d["why"]} for d in before],
+            "scope_before": old.get("measured_families"),
+            "scope_after": successor.get("measured_families"),
+            "added": successor["version"].get("revised_added"),
+            # A revision must not silently become a second activation: the reviewed text
+            # is untouched and only the measured scope moved.
+            "lesson_unchanged": (successor.get("suggested_action")
+                                 == old.get("suggested_action")
+                                 and successor.get("applicable_when")
+                                 == old.get("applicable_when")),
+            "status_after": successor["version"]["status"],
+            "parent_linked": successor["version"].get("parent_entry_id")
+                             == target["entry_id"],
+            "old_version_still_on_disk": any(r["entry_id"] == target["entry_id"]
+                                             for r in store.read(cstore)),
+            "still_revise_after": [d["label"] for d in after if d["decision"] == "REVISE"],
+            "chain_ok": store.verify_chain(cstore)[0],
+        }
+        _write(os.path.join(dest, "10_revision_transition.json"), result)
+        return result
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+
+
 def _demonstrate_retirement(store_path, ledger_path, dest):
     """Prove the RETIRE transition on a copy, with a synthetic WORSE outcome.
 
@@ -516,17 +592,28 @@ def run(dest=OUT):
     # The master goal's fifth step is "revise or retire based on the actual result". The
     # first version of this chain computed that verdict and then did nothing with it, so
     # a harmful entry would have stayed ACTIVE and kept being retrievable.
-    lifecycle_decisions = lifecycle.review(store_path, ledger_path)
+    # measure=True so the review also asks the SECOND question: is the record still as wide
+    # as what has been measured? The scope is written at activation and a later measurement
+    # can outgrow it, which would leave the live entry narrower than the evidence for it.
+    lifecycle_decisions = lifecycle.review(store_path, ledger_path, measure=True,
+                                          acceptance=os.path.join(WT, "setup",
+                                                                  "acceptance"),
+                                          source_task="HO-90899d657e68")
     _write(os.path.join(dest, "10_lifecycle_review.json"), lifecycle_decisions)
     # Demonstrate the retire transition on a THROWAWAY copy of the store, with a
     # synthetic WORSE outcome. Retiring the real entry here would be dishonest: no run
     # in this batch made anything worse, so there is no harm to act on. The transition
     # is proven on a copy and the real store is left exactly as the ledger describes it.
     harm_demo = _demonstrate_retirement(store_path, ledger_path, dest)
+    # ... and the REVISE transition, which this module promised in its docstring and never
+    # had. Shown on a throwaway copy whose measured scope was deliberately narrowed first:
+    # the real records are already current, so there is nothing on them to revise.
+    revise_demo = _demonstrate_revision(store_path, ledger_path, dest)
     steps.append({"step": "lifecycle",
                   "decisions": [{"label": d["label"], "effect": d["effect"],
                                  "decision": d["decision"]} for d in lifecycle_decisions],
-                  "retire_transition_demo": harm_demo})
+                  "retire_transition_demo": harm_demo,
+                  "revise_transition_demo": revise_demo})
 
     # 11 -- the store's own curation report, computed from the records on disk
     report = curate.curate(store.read(store_path))

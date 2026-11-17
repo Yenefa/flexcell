@@ -27,7 +27,11 @@ import json
 import os
 from pathlib import Path
 
-EVENTS = ("RETRIEVED", "APPLIED", "OUTCOME", "RETIRED", "REJECTED")
+# REVISED is a TRANSITION, not an outcome: the entry stayed live and its measured scope
+# was corrected. Keeping it out of the outcome vocabulary matters - counting a revision as
+# a "helpful use" would credit an entry for a bookkeeping change, and counting it as harmful
+# would retire an entry that was doing exactly what the new measurement says it does.
+EVENTS = ("RETRIEVED", "APPLIED", "OUTCOME", "RETIRED", "REJECTED", "REVISED")
 OUTCOMES = ("IMPROVED", "UNCHANGED", "WORSE", "UNKNOWN")
 
 
