@@ -72,7 +72,9 @@ def test_the_second_interaction_is_told_the_gates_answer():
             work.mkdir()
             row = R.run_slot("F1_OBJECT_REGISTRATION", "B_REAL_FEEDBACK", 1, work,
                              policy, donor, "scripted", 4, seed=5101,
-                             source_sha="scripted", source="instances")
+                             source_sha=R.health.checked_run(
+                                 ["git", "rev-parse", "HEAD"], cwd=R.ROOT).stdout.strip(),
+                             source="instances")
     finally:
         R.GatedTransport = original
 
@@ -83,3 +85,7 @@ def test_the_second_interaction_is_told_the_gates_answer():
     assert "no tests ran" not in second and "ERROR: file or directory not found" not in second, \
         "the second interaction got the synthetic test runner's output"
     assert row["qualification"].endswith("|INSTANCE")
+    first_request = json.loads(transport.seen[0])
+    delivered = next(m["content"].removeprefix("EXECUTION FEEDBACK\n")
+                     for m in first_request if m["content"].startswith("EXECUTION FEEDBACK\n"))
+    assert row["feedback_payload_sha256"] == R.REC.sha256_text(delivered)

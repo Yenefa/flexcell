@@ -750,9 +750,21 @@ class RunBoundary:
         resolved = self._resolve(operation, rel_text, category, root)
         self._refuse_sealed_prefix(operation, rel_text, category)
         self._refuse_reserved_name(operation, rel_text, category)
+        canonical = resolved.relative_to(root).as_posix()
+        self._refuse_sealed_prefix(operation, canonical, category)
+        self._refuse_reserved_name(operation, canonical, category)
+        if operation == "write":
+            protected = self._protected_write(canonical)
+            if protected is not None:
+                raise self._deny(operation, rel_text, category, PROTECTED_WRITE,
+                                 "resolved target is protected: %s" % protected)
+        if root == self.candidate and category in AGENT_FILE_CATEGORIES:
+            actual_category = self.category_for(canonical)
+            if actual_category == "execution_feedback" and category != actual_category:
+                raise self._deny(operation, rel_text, category, POLICY_DENIED,
+                                 "execution feedback requires its condition-routed channel")
         self._refuse_sealed_root(operation, rel_text, category, resolved)
         self._refuse_hardlink_alias(operation, rel_text, category, resolved)
-        self._refuse_resolved_material(operation, rel_text, category, resolved)
         if record_allow:
             self._record(operation, rel_text, category, "allow", root=self._root_name(category),
                          resolved=resolved)
@@ -817,47 +829,6 @@ class RunBoundary:
             raise self._deny(operation, rel, category, VERDICT_MATERIAL,
                              "resolved into the independent verdict root")
 
-    def _refuse_resolved_material(self, operation, rel, category, resolved):
-        """Classify the target, not the name used to reach it.
-
-        An internal symlink named code_alias pointing at gate passes every check
-        on the requested path, then reads or writes the sealed real file. An alias
-        to telemetry lets a no-feedback condition read execution feedback. Every
-        check here runs on the resolved target.
-        """
-        for name, root in (("hidden", self.hidden), ("verdict", self.verdict),
-                           ("mismatch", self.mismatch), ("candidate", self.candidate)):
-            if root is None or not _within(root, resolved):
-                continue
-            under = resolved.relative_to(root).as_posix()
-            if name == "hidden" and category != "hidden_answer":
-                raise self._deny(operation, rel, category, HIDDEN_MATERIAL,
-                                 "resolved into the hidden material root")
-            if name == "verdict" and category != "verification":
-                raise self._deny(operation, rel, category, VERDICT_MATERIAL,
-                                 "resolved into the independent verdict root")
-            if name == "mismatch" and category not in ("execution_feedback", "diagnosis"):
-                raise self._deny(operation, rel, category, POLICY_DENIED,
-                                 "resolved into the mismatch-run material root")
-            if name != "candidate":
-                continue
-            for prefix in self.policy.sealed_prefixes:
-                bare = prefix.rstrip("/")
-                if under == bare or under.startswith(bare + "/"):
-                    raise self._deny(operation, rel, category, SEALED_MATERIAL,
-                                     "resolved into sealed path %s" % bare)
-            if (under.startswith(self.policy.paths["telemetry_prefix"])
-                    and not self.access().allows("execution_feedback")):
-                raise self._deny(operation, rel, category, POLICY_DENIED,
-                                 "resolved into execution feedback this condition cannot read")
-            if operation in ("write", "write_file"):
-                protected = self._protected_write(under)
-                if protected is not None:
-                    raise self._deny(operation, rel, category, PROTECTED_WRITE,
-                                     "resolved target is protected as %r" % protected)
-        return
-
-
     def _refuse_hardlink_alias(self, operation, rel, category, resolved):
         try:
             stat = resolved.stat()
@@ -865,7 +836,7 @@ class RunBoundary:
             return  # nothing on disk yet: nothing to link to
         if stat.st_nlink <= 1:
             return
-        aliases = [str(path) for path in self._inode_matches(resolved, stat)]
+        aliases = [str(path) for path in self._inode_matches(resolved, stat, operation)]
         if aliases:
             raise self._deny(
                 operation, rel, category, HARDLINK_ALIAS,
@@ -873,7 +844,7 @@ class RunBoundary:
         self._record(operation, rel, category, "note", reason=HARDLINK_UNVERIFIED,
                      root=self._root_name(category), resolved=resolved)
 
-    def _inode_matches(self, resolved, stat) -> Iterator[Path]:
+    def _inode_matches(self, resolved, stat, operation="read") -> Iterator[Path]:
         """Best effort: find another root's file sharing this inode.
 
         A cross-root hard link has no path-level signature, so this scans the
@@ -881,21 +852,28 @@ class RunBoundary:
         the same inode differently are out of reach; see VISIBILITY.md.
         """
         seen = 0
-        for root in (self.verdict, self.hidden, self.mismatch):
-            if root is None or not root.is_dir():
+        roots = [self.verdict, self.hidden, self.mismatch]
+        roots += [self.candidate / p for p in self.policy.sealed_prefixes]
+        roots += [self.candidate / self.policy.paths["telemetry_prefix"]]
+        if operation == "write":
+            roots += [self.candidate / p for p in self.policy.protected_writes]
+        for root in roots:
+            if root is None or not root.exists():
                 continue
-            for entry in _walk_entries(root, max_depth=4):
+            entries = [root] if root.is_file() else (
+                Path(entry.path) for entry in _walk_entries(root, max_depth=4))
+            for entry in entries:
                 seen += 1
                 if seen > HARDLINK_SCAN_LIMIT:
                     return
                 try:
-                    if not entry.is_file(follow_symlinks=False):
+                    if entry.is_symlink() or not entry.is_file() or entry == resolved:
                         continue
                     other = entry.stat(follow_symlinks=False)
                 except OSError:
                     continue
                 if (other.st_dev, other.st_ino) == (stat.st_dev, stat.st_ino):
-                    yield Path(entry.path)
+                    yield entry
 
     # -- material access -----------------------------------------------------
     def category_for(self, rel) -> str:
@@ -904,7 +882,8 @@ class RunBoundary:
         for prefix in self.policy.static_prefixes:
             if rel_text == prefix.rstrip("/") or rel_text.startswith(prefix):
                 return "static_input"
-        if rel_text.startswith(self.policy.paths["telemetry_prefix"]):
+        telemetry = self.policy.paths["telemetry_prefix"].rstrip("/")
+        if rel_text == telemetry or rel_text.startswith(telemetry + "/"):
             return "execution_feedback"
         return "candidate_source"
 
@@ -1266,7 +1245,7 @@ class ToolFacade:
         for file in files:
             if file.suffix not in TEXT_SUFFIXES:
                 continue
-            rel = file.relative_to(self.boundary.candidate).as_posix()
+            rel = file.relative_to(self.boundary._root_for(category)).as_posix()
             try:
                 text = self.boundary.read_text(
                     rel, self.boundary.category_for(rel), record_allow=False)

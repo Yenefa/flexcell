@@ -117,6 +117,11 @@ def reconcile(manifest_statuses, records):
                 % (slot_id, declared))
 
     report["consistent"] = not report["drift"]
+    observed_order = list(seen)
+    expected_order = [slot for slot in manifest_statuses if slot in seen]
+    report["order_matches"] = observed_order == expected_order
+    report["expected_order"] = expected_order
+    report["observed_order"] = observed_order
     return report
 
 
@@ -148,20 +153,20 @@ def main(argv=None):
     parser.add_argument("--records", default=None,
                         help="records JSON (a list, or {rows: [...]})")
     parser.add_argument("--json", action="store_true", help="machine-readable output")
-    parser.add_argument("--only-registered", action="store_true",
-                        help="ignore records for slots the manifest does not list (extra repetitions)")
+    parser.add_argument("--registered-only", action="store_true",
+                        help="report and exclude extra repetitions explicitly")
+    parser.add_argument("--allow-order-deviation", action="store_true",
+                        help="acknowledge an already recorded historical order deviation")
     args = parser.parse_args(argv)
 
     statuses = parse_manifest(args.manifest)
     records = load_records(args.records) if args.records else []
-    if args.only_registered:
-        # A batch may carry more repetitions than the manifest registers. Those
-        # are extra samples, not registered slots: reconcile refuses them by
-        # design, and this flag says so out loud instead of loosening the check.
-        kept = [r for r in records if r.get("slot_id") in statuses]
-        skipped = len(records) - len(kept)
-        records = kept
+    extras = [r for r in records if r.get("slot_id") not in statuses]
+    if args.registered_only:
+        records = [r for r in records if r.get("slot_id") in statuses]
     report = reconcile(statuses, records)
+    report["extra_slots"] = [r.get("slot_id") for r in extras]
+    report["order_deviation_acknowledged"] = bool(args.allow_order_deviation and not report["order_matches"])
     report["manifest"] = os.path.relpath(args.manifest) if hasattr(os, "relpath") else args.manifest
     if args.json:
         print(json.dumps(report, indent=2, ensure_ascii=False))
@@ -169,14 +174,14 @@ def main(argv=None):
         print("manifest slots   : %d" % report["manifest_slots"])
         print("records read     : %d" % report["records"])
         print("excluded non-real: %d" % len(report["excluded_not_real"]))
-        if args.only_registered:
-            print("unregistered     : %d (kept out on request)" % skipped)
         if report["drift"]:
             print("DRIFT:")
             for line in report["drift"]:
                 print("  - " + line)
-        print("verdict          : %s" % ("CONSISTENT" if report["consistent"] else "DRIFT"))
-    return 0 if report["consistent"] else 1
+        print("status verdict   : %s" % ("CONSISTENT" if report["consistent"] else "DRIFT"))
+        print("order verdict    : %s" % ("MATCH" if report["order_matches"] else "DEVIATION"))
+        print("extra slots      : %d" % len(extras))
+    return 0 if report["consistent"] and (report["order_matches"] or args.allow_order_deviation) else 1
 
 
 if __name__ == "__main__":

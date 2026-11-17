@@ -75,19 +75,9 @@ def collect(exp_dir, layout):
         return records, "<rep>/result.json"
 
     if layout == "arm_dirs":
-        # One directory per arm; the summary carries the per-arm rows instead.
-        aggregate = _load(exp_dir / "aggregate.json") or {}
-        rows = aggregate.get("rows") or []
-        for row in rows:
-            records.append(dict(
-                record=str(row.get("arm")), usable=True,
-                success=row.get("success") is True,
-                first_pass=None, iterations=row.get("iters"),
-                tokens=row.get("tokens"), claim_success=None,
-                false_success=None, model=aggregate.get("model"),
-                task=aggregate.get("task"),
-                source="aggregate.rows (no per-run result.json in this layout)"))
-        return records, "aggregate.rows[arm]"
+        for arm in ("w5a", "w5b"):
+            records.append(_record(arm, _load(exp_dir / arm / "result.json")))
+        return records, "<arm>/result.json"
 
     if layout == "flat_first_then_dirs":
         # The first pilot's files sit at the top level; the rest are subdirs.
@@ -105,7 +95,9 @@ def collect(exp_dir, layout):
 
 def recompute(exp_dir, layout, declared_n, label):
     records, note = collect(exp_dir, layout)
-    aggregate = _load(exp_dir / "aggregate.json") or {}
+    aggregate = _load(exp_dir / "aggregate.json")
+    aggregate_missing = not isinstance(aggregate, dict) or not aggregate
+    aggregate = aggregate if isinstance(aggregate, dict) else {}
     usable = [row for row in records if row["usable"]]
     computed = dict(
         n=len(usable),
@@ -114,12 +106,28 @@ def recompute(exp_dir, layout, declared_n, label):
         tokens=[row["tokens"] for row in usable],
     )
     disagreements = []
+    if aggregate_missing:
+        disagreements.append("aggregate.json missing, malformed or empty; summary not verified")
     if declared_n is not None and computed["n"] != declared_n:
         disagreements.append("n: material says %d, records give %d" % (declared_n, computed["n"]))
     for key in ("n", "success"):
         if aggregate.get(key) is not None and aggregate[key] != computed[key]:
             disagreements.append("%s: aggregate says %r, records give %r"
                                  % (key, aggregate[key], computed[key]))
+    for key in ("iters", "tokens"):
+        if key in aggregate and aggregate[key] != computed[key]:
+            disagreements.append("%s profile differs from per-run records" % key)
+    indexed = {str(row.get("record")): row for row in usable}
+    for row in aggregate.get("rows", aggregate.get("pilots", [])):
+        name = str(row.get("arm", row.get("rep", "pilot" + str(row.get("pilot")))))
+        record = indexed.get(name)
+        if record is None:
+            disagreements.append("aggregate record missing from raw records: %s" % name)
+            continue
+        for key, actual in (("iters", record["iterations"]), ("tokens", record["tokens"]),
+                            ("success", record["success"]), ("model", record["model"])):
+            if key in row and row[key] != actual:
+                disagreements.append("%s.%s: aggregate=%r record=%r" % (name, key, row[key], actual))
     return dict(
         experiment=exp_dir.name, label=label, layout=layout, mapping=note,
         declared_n=declared_n, aggregate=dict(n=aggregate.get("n"), success=aggregate.get("success")),

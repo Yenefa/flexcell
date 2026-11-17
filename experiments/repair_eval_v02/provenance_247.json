@@ -1,0 +1,50 @@
+{
+  "schema": "evobot.regression_provenance/1",
+  "coordination_status": "ASSIGNED_AWAITING_OWNER_RESPONSE",
+  "issue": "https://github.com/Yenefa/flexcell/issues/247",
+  "listed_assignee": "zyx-dc",
+  "assignee_is_confirmation": false,
+  "source_checked_date": "2026-11-17",
+  "physical_regression": {
+    "execution_status": "NOT_RUN_BY_REPAIR_EVAL",
+    "source_pr": "https://github.com/Yenefa/flexcell/pull/260",
+    "source_commit": "8a2f6427d8f63761c02fc29bb2b8570fddf3d35d",
+    "preregistration_path": "experiments/physical_capabilities/pick_place_reliability/preregistration.json",
+    "backend": "velocity_servo",
+    "skill_backend": "legacy",
+    "skill_version_source": "source_commit; no independent skill release tag confirmed",
+    "confirmed_run_window": "NOT_CONFIRMED",
+    "slot_timeout_s": 360,
+    "window_budget_s": 1440,
+    "slots": [
+      "NORMAL_1",
+      "DUAL_1",
+      "NORMAL_2",
+      "DUAL_2"
+    ],
+    "environment_source": "PENDING_HOST_BUILD_RECEIPT_OR_OPTIONAL_IMAGE_DIGEST"
+  },
+  "current_evaluation": {
+    "backend": "sealed_source_gate",
+    "skill_backend": "NOT_APPLICABLE",
+    "regression_suite": "issue250 N1-N6 and P1 evaluator-contract fixtures",
+    "environment_source": "automatic host receipt: OS, Python, dependencies and installed ROS/Gazebo metadata",
+    "physical_initial_states_executed": false,
+    "image_required": false
+  },
+  "excluded_capabilities": [
+    "push",
+    "stack",
+    "contact_grasp_verification",
+    "hardware",
+    "cross_embodiment"
+  ],
+  "confirmation_needed": [
+    "#247 owner accepts the shared ordinary-task regression entrypoint and artifact handoff",
+    "exact skill/build revision and host build receipt; image digest is optional if an image is used",
+    "joint run window and resource ownership",
+    "candidate and reference ordinary-task results bound to the same frozen artifacts"
+  ],
+  "delegated_task": "https://github.com/Yenefa/flexcell/issues/265",
+  "delegated_assignee": "zyx-dc"
+}
