@@ -1,0 +1,58 @@
+name: physical-compact-stroke
+on:
+  push:
+    branches: [develop/physical-push-budget-20261117]
+    paths:
+      - '.github/workflows/physical-compact-stroke.yml'
+      - 'experiments/physical_capabilities/t08_compact_stroke_20261117/*.py'
+      - 'experiments/physical_capabilities/t08_compact_stroke_20261117/*.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: physical-capabilities
+  cancel-in-progress: false
+jobs:
+  candidate-window:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/Dockerfile.sim
+          load: true
+          tags: flexcell-sim:compact-stroke
+          build-args: SOURCE_REV=${{ github.sha }}
+          cache-from: type=gha,scope=flexcell-sim
+      - name: Image provenance
+        run: |
+          mkdir -p artifacts
+          docker image inspect flexcell-sim:compact-stroke > artifacts/image.json
+          lscpu > artifacts/host.txt
+      - name: Contact contracts and registered motion budget
+        run: |
+          docker run --init --rm -e OPENBLAS_NUM_THREADS=1 -e OMP_NUM_THREADS=1 flexcell-sim:compact-stroke \
+            python3 -m pytest -p no:cacheprovider -o addopts="" -q \
+            /opt/flexcell/repo/src/flexcell/flexcell_capabilities/test \
+            /opt/flexcell/repo/src/flexcell/flexcell_skills/test/test_contact_control.py \
+            /opt/flexcell/repo/src/flexcell/flexcell_skills/test/test_public_contact_runtime.py \
+            /opt/flexcell/repo/src/flexcell/flexcell_skills/test/test_push_results.py \
+            /opt/flexcell/repo/src/flexcell/flexcell_skills/test/test_push_composite.py \
+            /opt/flexcell/repo/src/flexcell/flexcell_skills/test/test_composite_server.py \
+            /opt/flexcell/repo/src/flexcell/flexcell_skills/test/test_composite.py \
+            /opt/flexcell/repo/src/flexcell/flexcell_skills/test/test_budget_lifecycle.py
+      - name: Fixed 30-goal control, candidate and ordinary regression window
+        run: |
+          docker run --init --rm --cpus=2 --shm-size=512m \
+            -v "$PWD:/candidate:ro" -v "$PWD/artifacts:/artifacts" \
+            -e OPENBLAS_NUM_THREADS=1 -e OMP_NUM_THREADS=1 flexcell-sim:compact-stroke \
+            python3 /candidate/experiments/physical_capabilities/t08_compact_stroke_20261117/run_budget_window.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: physical-compact-stroke-${{ github.run_id }}
+          path: artifacts/
+          retention-days: 30

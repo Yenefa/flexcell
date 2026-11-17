@@ -1,0 +1,22 @@
+{
+  "experiment": "T08_COMPACT_CHECKPOINT_BUDGET",
+  "implementation_commit": "b8ce146ef068405a08b0fab567df1a8313633479",
+  "slots": [
+    {"id": "CONTROL", "task": "budget30.json", "goal_limit": 13, "domain": 221, "expected": "BUDGET_REFUSAL"},
+    {"id": "COMPACT_1", "task": "budget30.json", "goal_limit": 10, "domain": 222, "expected": "PUSH_PASS"},
+    {"id": "COMPACT_2", "task": "budget30.json", "goal_limit": 10, "domain": 223, "expected": "PUSH_PASS"},
+    {"id": "ANCHOR", "task": "original", "goal_limit": 13, "domain": 224, "expected": "PUSH_PASS"},
+    {"id": "REG_NORMAL", "case": "normal", "domain": 225, "expected": "FUNCTIONAL_SMOKE_PASS"},
+    {"id": "REG_DUAL", "case": "dual_object", "domain": 226, "expected": "FUNCTIONAL_SMOKE_PASS"}
+  ],
+  "push_timeout_s": 850,
+  "ordinary_timeout_s": 360,
+  "window_budget_s": 2800,
+  "replacement_trials": false,
+  "stop_on_unknown_terminal": true,
+  "formal_held_out": false,
+  "baseline_promoted": false,
+  "hypothesis": "After two unchanged 4 mm contact-acquisition checkpoints, wider checkpoints on the checked trajectory allow three 30 mm stages within 30 actuator goals.",
+  "control": "Same budget30 declaration and materialized world, standard 13-goal cadence. Must refuse at planning before motion.",
+  "refutation": "A candidate failure, unavailable return, more than 30 goals, any original gate failure or ordinary smoke regression rejects the window. Known failures remain in place."
+}
