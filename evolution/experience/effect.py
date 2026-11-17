@@ -67,6 +67,14 @@ FIXTURES = {
     # held-out instance, because the T12/T13 families exist only there. This one does not:
     # evobot_t05_* runs T05 train seeds (s1000-s1005 are benchmark/tasks/train), which is
     # why the DDS lesson can be learned from development evidence and still be real.
+    # The only fixture that is a TASK SPEC rather than an archived run: a planner entry's
+    # delivery is rendered against an observation, and the observation comes from a public
+    # task file. This one is held-out, which is fine for a delivery check - it proves the
+    # text reaches the prompt renderer, not that the plan improves.
+    "t14_ordered_pair": {
+        "task": "benchmark/held_out/unseen_public/HO-90899d657e68.json",
+        "what": "a public task spec, used to build the observation a planner entry renders into",
+    },
     "t05_dds_harness": {
         "before_batch": "setup/acceptance/evobot_t05_n6_20261111",
         "after_batch": "setup/acceptance/evobot_t05_n6_clean_20261111",
@@ -79,7 +87,7 @@ FIXTURES = {
 }
 
 OPERATORS = ("spread_step", "respread_apply", "recovery_action",
-             "harness_capacity", "none")
+             "harness_capacity", "delivery", "none")
 
 
 def _digest(obj):
@@ -273,7 +281,11 @@ def probe(entry):
     if consumer not in consumers.CONSUMERS:
         out.update(verdict="UNMEASURED", why="unknown consumer %r" % (consumer,))
         return out
-    if not consumers.CONSUMERS[consumer]["measurable_offline"]:
+    # The measurable_offline flag says the consumer's EFFECT cannot be measured without a
+    # model. It does not say DELIVERY is unmeasurable, and treating the two as one meant a
+    # planner entry could never be checked at all - even for the one thing that IS
+    # deterministic about it, namely whether its text reaches the prompt renderer.
+    if not consumers.CONSUMERS[consumer]["measurable_offline"] and operator != "delivery":
         out.update(verdict="UNMEASURED",
                    why="%r delivers at the %s layer; a model call is required and this "
                        "prober does not make one" % (consumer,
@@ -287,6 +299,38 @@ def probe(entry):
         return out
 
     params = spec.get("params") or {}
+    # DELIVERY, for the prompt-level consumer. This measures whether the entry's text
+    # reaches the consumer's input - deterministically, no model call - and deliberately
+    # does NOT claim the plan changed. "Delivered" and "effective" are different, and
+    # conflating them is how a delivered-but-inert lesson gets recorded as evidence about
+    # the lesson rather than about the envelope.
+    if operator == "delivery":
+        import delivery as _delivery
+        import public_observation as _po
+        sys.path.insert(0, os.path.join(WT, "runtime", "planner"))
+        task = _load(FIXTURES[fixture]["task"])
+        observation = _po.build_observation(task)
+        result = _delivery.deliver(entry, observation)
+        out["detail"] = result
+        out["delivered"] = result.get("delivered", result.get("verdict") == "DELIVERED")
+        out["delivery_verdict"] = result.get("verdict")
+        out["text_source"] = result.get("text_source")
+        # A delivered prompt is still UNMEASURED as an EFFECT: no model was asked, so
+        # nothing here says the plan improved.
+        out["verdict"] = "UNMEASURED"
+        out["why"] = ("delivery %s (%s); the plan-level effect needs a model call and is "
+                      "not measured" % (result.get("verdict"), result.get("why")))
+        expect = spec.get("expect") or {}
+        got = {}
+        for key, want in expect.items():
+            if key == "delivered":
+                got[key] = bool(out["delivered"]) == bool(want)
+            else:
+                got[key] = False
+        out["expectations"] = got
+        out["expectations_met"] = all(got.values()) if got else None
+        return out
+
     # A harness entry's fixture has NO plan: its evidence is an archived batch PAIR and a
     # config file. Loading FIXTURES[fixture]["plan"] first would KeyError on exactly the
     # fixture that proves harness delivery is measurable at all.

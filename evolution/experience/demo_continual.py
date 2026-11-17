@@ -42,10 +42,13 @@ import lifecycle  # noqa: E402
 import postmortem  # noqa: E402
 import retrieve  # noqa: E402
 import reuse  # noqa: E402
+import delivery  # noqa: E402
 import candidate_search  # noqa: E402
 import schema  # noqa: E402
 import skill_asset  # noqa: E402
 import store  # noqa: E402
+sys.path.insert(0, os.path.join(WT, "runtime", "planner"))
+import public_observation as po  # noqa: E402
 
 OUT = os.path.join(WT, "setup", "acceptance", "evobot_continual_chain_20261118")
 FAILURE = "setup/acceptance/evobot_recover_n6_20261111/runs/HO-90899d657e68"
@@ -451,6 +454,24 @@ def run(dest=OUT):
         }
     _write(os.path.join(dest, "10_skill_assets.json"), assets)
     steps.append({"step": "skill_assets", "by_label": assets})
+
+    # 9a -- DELIVERY: did each ACTIVE entry actually REACH its consumer? Routing answers
+    # "which module can act on this"; it does not answer "did it arrive". The gap is silent:
+    # the planner's prompt renderer reads item["lesson"] while a v2 entry carries
+    # suggested_action, so the lesson vanishes and the ledger records NO_CHANGE - which
+    # reads exactly like "the lesson had no effect".
+    task = json.load(open(os.path.join(WT, "benchmark", "held_out", "unseen_public",
+                                      "HO-90899d657e68.json"), encoding="utf-8"))
+    observation = po.build_observation(task)
+    deliveries = {}
+    for row in [r for r in store.read(store_path)
+                if (r.get("version") or {}).get("status") == "ACTIVE"]:
+        deliveries[row["version"]["label"]] = delivery.deliver(row, observation)
+    _write(os.path.join(dest, "09a_delivery.json"), deliveries)
+    steps.append({"step": "delivery_check",
+                  "by_label": {k: {"consumer": v.get("consumer"),
+                                   "verdict": v.get("verdict")}
+                               for k, v in deliveries.items()}})
 
     # 9b -- REUSE: run the stored skill over EVERY archived task, including the ones it
     # never saw. "It works on the input it was derived from" is the weakest possible claim

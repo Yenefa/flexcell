@@ -1,0 +1,32 @@
+{
+  "E2": {
+    "callable": {
+      "function": "apply_respread",
+      "kwargs": {
+        "cluster_m": 0.12,
+        "spread_step": 0.09
+      },
+      "module": "runtime.recovery.recover"
+    },
+    "consumer": "executor_recovery",
+    "entry_id": "7403416136ed803c9ba6d36e1443584dc80f9a089711f80ecdd0f35e9a05fdf3",
+    "text": "separate same-bin landing points by at least the clearance contract plus the measured landing drift, and pick the spread axis that keeps every point clear of other objects",
+    "text_source": "suggested_action",
+    "verdict": "DELIVERED",
+    "why": "bound to runtime.recovery.recover.apply_respread with {'spread_step': 0.09, 'cluster_m': 0.12}"
+  },
+  "auto-harness_dds_exhaustion": {
+    "config": {
+      "declared_value": 120,
+      "live_value": 120,
+      "present": true,
+      "symbol": "MaxAutoParticipantIndex"
+    },
+    "consumer": "harness",
+    "entry_id": "a696e42ddd7fcdf34b1f1164a96ca7dd907b3572a137048ba3c3a728cd3096ee",
+    "text": "raise the DDS participant pool above the number of nodes the launch starts; a failed launch looks like a motion bug",
+    "text_source": "suggested_action",
+    "verdict": "DELIVERED",
+    "why": "MaxAutoParticipantIndex is set to 120 (entry declares 120)"
+  }
+}

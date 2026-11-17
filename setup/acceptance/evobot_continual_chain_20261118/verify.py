@@ -321,6 +321,44 @@ def main():
         checks["the_reuse_report_states_the_claim_it_does_not_support"] = all(
             "NOT cross-split" in (r.get("claim") or "") for r in audit)
 
+        # 16 -- DID IT ARRIVE? Routing says which module CAN act; delivery says the entry
+        # REACHED it. The gap is silent: the planner's renderer reads item["lesson"] while a
+        # v2 entry carries suggested_action, so the lesson vanishes and the ledger records
+        # NO_CHANGE - indistinguishable from "the lesson had no effect".
+        deliv = json.loads((tmp / "09a_delivery.json").read_text(encoding="utf-8"))
+        checks["every_active_entry_was_delivery_checked"] = bool(deliv)
+        checks["every_active_entry_reached_its_consumer"] = bool(deliv) and all(
+            v.get("verdict") == "DELIVERED" for v in deliv.values())
+        # a parameter consumer's delivery means a REAL callable with REAL kwargs
+        param = [v for v in deliv.values()
+                 if v.get("consumer") in ("spread_policy", "executor_recovery")]
+        checks["parameter_deliveries_bind_a_callable"] = bool(param) and all(
+            v.get("callable", {}).get("function") for v in param)
+        # ... and a planner delivery must be measurable WITHOUT claiming an effect
+        import delivery as _delivery
+        import public_observation as _po
+        task = json.loads((WT / "benchmark" / "held_out" / "unseen_public" /
+                           "HO-90899d657e68.json").read_text(encoding="utf-8"))
+        probe_entry = {"entry_id": "delivery-probe", "consumer": "planner",
+                       "failure_class": "planning",
+                       "suggested_action": "emit the moves in the order the instruction "
+                                           "states"}
+        delivered = _delivery.deliver(probe_entry, _po.build_observation(task))
+        checks["a_planner_entry_can_be_checked_for_delivery"] = (
+            delivered.get("verdict") == "DELIVERED")
+        # A planner entry with NO actionable text must be reported DROPPED, not accepted.
+        # (Picking an arbitrary stored record instead read the harness entry, which
+        # legitimately delivers a config value - the check has to name the case it means.)
+        silent = {"entry_id": "no-text", "consumer": "planner",
+                  "failure_class": "planning"}
+        checks["an_entry_with_no_actionable_text_is_reported_dropped"] = (
+            _delivery.deliver(silent, None).get("verdict") == "DROPPED")
+        # and a consumer with no delivery path must be UNSUPPORTED, never a silent pass
+        orphan = {"entry_id": "x", "consumer": "development",
+                  "suggested_action": "record the practice"}
+        checks["a_consumer_with_no_delivery_path_is_unsupported"] = (
+            _delivery.deliver(orphan, None).get("verdict") == "UNSUPPORTED")
+
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
             "batch": HERE.name,

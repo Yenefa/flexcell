@@ -2,9 +2,16 @@
   "generator": {
     "built": 1,
     "refused": {
+      "graded_push": "UNROUTED: no consumer in this stack declares a change for 'graded_push', so the knowledge would be stored and unable to act",
+      "graded_relative": "UNROUTED: no consumer in this stack declares a change for 'graded_relative', so the knowledge would be stored and unable to act",
+      "graded_unmoved": "UNROUTED: no consumer in this stack declares a change for 'graded_unmoved', so the knowledge would be stored and unable to act",
+      "graded_visit": "UNROUTED: no consumer in this stack declares a change for 'graded_visit', so the knowledge would be stored and unable to act",
+      "graded_visit_sequence": "UNROUTED: no consumer in this stack declares a change for 'graded_visit_sequence', so the knowledge would be stored and unable to act",
+      "order_clause_violated": "only 1 occurrence(s) of order_clause_violated; need 2 - a single run is a mis-attribution risk, not a lesson",
+      "placement_clause_failed": "UNROUTED: no consumer in this stack declares a change for 'placement_clause_failed', so the knowledge would be stored and unable to act",
       "unconfirmed_native": "UNROUTED: no consumer in this stack declares a change for 'unconfirmed_native', so the knowledge would be stored and unable to act"
     },
-    "scanned": 36
+    "scanned": 98
   },
   "honest_limits": [
     "the review artifact is written by a separate step of the same run, not by an outside reviewer; a real round needs the latter",
@@ -28,7 +35,14 @@
       "dev_split_produced": 1,
       "generated_from_archive": 1,
       "generator_refused": [
-        "unconfirmed_native"
+        "unconfirmed_native",
+        "graded_push",
+        "placement_clause_failed",
+        "graded_visit",
+        "graded_visit_sequence",
+        "graded_unmoved",
+        "graded_relative",
+        "order_clause_violated"
       ],
       "generator_split": "dev",
       "labels": [
@@ -263,6 +277,19 @@
         }
       },
       "step": "skill_assets"
+    },
+    {
+      "by_label": {
+        "E2": {
+          "consumer": "executor_recovery",
+          "verdict": "DELIVERED"
+        },
+        "auto-harness_dds_exhaustion": {
+          "consumer": "harness",
+          "verdict": "DELIVERED"
+        }
+      },
+      "step": "delivery_check"
     },
     {
       "families_fixed_beyond_source": [

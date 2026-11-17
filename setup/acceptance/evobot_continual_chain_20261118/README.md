@@ -98,7 +98,18 @@ capability is what makes that visible instead of leaving it to an audit.
     instance in this archive is held-out, so this is cross-**family** reuse, **not**
     cross-split transfer.
 
-`verify.py` asserts **58 checks**, including that both gates really ran, that the asset
+16. **delivery is measured, and it is not the same as effect.** `consumers.py` says which
+    module CAN act on an entry; it does not say the entry REACHED it. The gap was silent:
+    the planner's prompt renderer reads `item["lesson"]` while a v2 entry carries
+    `suggested_action`, so the lesson rendered as an empty bullet, the plan did not
+    change, and the ledger recorded `NO_CHANGE` — indistinguishable from *"the lesson had
+    no effect"*. `delivery.py` renders each entry into the shape its consumer actually
+    reads and reports DELIVERED / DROPPED / UNSUPPORTED — all three deterministic. The
+    planner's **effect** still reports `UNMEASURED` (a plan-level change needs a model
+    call); what changed is that it can now say *"delivered, effect not measured"* instead of
+    *"consumer not measurable"*.
+
+`verify.py` asserts **64 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -106,7 +117,8 @@ from**, that **two distinct consumers act**, that the ACTIVE set spans **both sp
 that **an already-conforming plan is a declared invalid condition whose probe reports
 INERT**, and that **several candidates were compared with the losers kept and explained**, and that
 **the skill fixes at least one task family other than its source while making nothing
-worse**.
+worse**, and that **every active entry reached its consumer** while an entry with no
+actionable text is reported DROPPED rather than accepted.
 
 ---
 
@@ -156,8 +168,9 @@ It touches no evaluator, tolerance, threshold or held-out answer. 11/11
    ACCEPT, but a machine step is still not a person.
 2. Every outcome is the effect_spec's expectation met on an **archived** input. No
    Gazebo window and no real robot run were made this round.
-3. The **planner consumer is not measurable offline**: a prompt-level delivery needs a
-   model call. It is reported `UNMEASURED`, never scored as no-effect.
+3. The **planner consumer's EFFECT is not measurable offline**: a prompt-level delivery
+   needs a model call, so it is reported `UNMEASURED`, never scored as no-effect. Its
+   **delivery** IS measured deterministically (the text reaches the prompt renderer).
 4. The spacing entries are about **one** task family (T13); the harness entry is about the
    T05 relay stack. Nothing in this batch shows transfer to a different task type, and
    **nothing learns on the development split and is measured on held-out** — the two

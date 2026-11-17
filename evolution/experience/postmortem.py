@@ -72,6 +72,23 @@ SIGNATURES = {
         "suggested_action": ("separate same-bin landing points by clearance plus the "
                              "measured landing drift"),
     },
+    "order_clause_violated": {
+        "action_kind": "move_order",
+        "consumer": "planner",
+        "failure_class": "planning",
+        "effect_spec": {"fixture": "t14_ordered_pair", "operator": "delivery",
+                        "params": {},
+                        "expect": {"delivered": True}},
+        "applicable_when": [
+            "the instruction fixes which object must be moved first",
+            "the grading report lists an 'order' clause as failed",
+        ],
+        "known_invalid_when": [],
+        "invalid_probes": [],
+        "suggested_action": ("emit the moves in the order the instruction states; a plan "
+                             "that puts the right blocks in the right bin in the wrong "
+                             "order fails the order clause"),
+    },
     "harness_dds_exhaustion": {
         "action_kind": "harness_config",
         "consumer": "harness",
@@ -177,6 +194,48 @@ def cites_sealed(path, sealed):
     if not sealed:
         return False
     return bool(set(SEALED_ID.findall(path)) & sealed)
+
+
+def _clause_failures(root, excluded_names, sealed):
+    """Failures recorded by the EVALUATOR, read from verdict*.json.
+
+    WHY A THIRD CHANNEL: task.out carries what the RUNNER reported, summary.txt carries
+    what the BATCH reported, and verdict.json carries what the GRADER found. An order
+    clause can fail while the runner reports success - in this archive three T14 runs
+    passed their first attempt and then failed the order clause on the retry. None of
+    those appear in task.out, so a scanner reading only the runner's channel cannot see
+    the one failure class that is purely about planning.
+
+    Graded failures are also the only ones that cannot be self-reported, which is why they
+    are worth a separate channel rather than folded into the runner's.
+    """
+    out, excluded = [], {}
+    for path in glob.glob(os.path.join(root, "evobot*", "**", "verdict*.json"),
+                          recursive=True):
+        try:
+            doc = json.load(open(path, encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if not isinstance(doc, dict) or doc.get("passed") is not False:
+            continue
+        clauses = [str(c) for c in (doc.get("failed_clauses") or [])]
+        if not clauses:
+            continue
+        rel = os.path.relpath(path, root)
+        batch = rel.split(os.sep)[0]
+        if batch in excluded_names:
+            excluded["%s:labelled_generalization_batch" % batch] = excluded.get(
+                "%s:labelled_generalization_batch" % batch, 0) + 1
+            continue
+        if cites_sealed(rel, sealed):
+            excluded["%s:sealed_instance" % batch] = excluded.get(
+                "%s:sealed_instance" % batch, 0) + 1
+            continue
+        out.append({"path": rel, "batch": batch, "error_code": None,
+                    "layer": "GRADED", "detail": "failed clause(s): " + ", ".join(clauses),
+                    "clauses": clauses,
+                    "completed_stage_ids": [], "outcome": None})
+    return out, excluded
 
 
 def _console_failures(root, excluded_names, sealed):
@@ -295,6 +354,11 @@ def scan_with_report(acceptance=None, include_held_out=False):
     out.extend(console_rows)
     for k, v in console_excluded.items():
         excluded[k] = excluded.get(k, 0) + v
+    # ... nor do the GRADER's own findings, which live in verdict.json.
+    clause_rows, clause_excluded = _clause_failures(root, excluded_names, sealed)
+    out.extend(clause_rows)
+    for k, v in clause_excluded.items():
+        excluded[k] = excluded.get(k, 0) + v
     return out, excluded
 
 
@@ -309,6 +373,15 @@ def signature_of(failure):
     # A HARNESS-layer failure is its own kind regardless of wording: the run never
     # dispatched, so no motion or planning diagnosis applies to it. Grouping it with the
     # motion rows would let a launch bug be counted as evidence about the executor.
+    if failure.get("layer") == "GRADED":
+        # A graded failure is classified by the CLAUSE that failed, not by the detail
+        # prose: the clause name is the machine-readable part and the prose is a summary.
+        clauses = [str(c) for c in (failure.get("clauses") or [])]
+        if "order" in clauses:
+            return "order_clause_violated"
+        if any(c.startswith("placement:") for c in clauses):
+            return "placement_clause_failed"
+        return "graded_%s" % (clauses[0].split(":")[0] if clauses else "unknown")
     if failure.get("layer") == "HARNESS":
         if "participant" in detail or "domain" in detail or "socket" in detail:
             return "harness_dds_exhaustion"
@@ -317,6 +390,8 @@ def signature_of(failure):
         return "occupied_destination"
     if "unconfirmed" in detail or "native terminal" in detail:
         return "unconfirmed_native"
+    if "order clause" in detail or "wrong order" in detail:
+        return "order_clause_violated"
     if "state drift" in detail:
         return "state_drift"
     return "error_%s" % failure.get("error_code")

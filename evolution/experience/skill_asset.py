@@ -60,12 +60,50 @@ def asset_id(entry):
     return "skill.%s.%s" % (entry.get("consumer"), entry.get("entry_id", "")[:12])
 
 
-def compile_asset(entry):
-    """Compile one ACTIVE entry into a callable asset record. Refuses when not compilable."""
-    if (entry.get("version") or {}).get("status") != "ACTIVE":
+def binding_for(entry):
+    """The callable an entry WOULD bind to, without the asset-quality gates.
+
+    WHY THIS IS SEPARATE FROM compile_asset: delivery.py asks a narrower question than
+    compilation - "does this entry have a callable with concrete kwargs at all" - and it
+    must be answerable for a candidate that has not been reviewed or given a guard yet.
+    Conflating the two made an unreviewed entry report DROPPED, which is the wrong reason:
+    the envelope is fine and the ASSET is simply not ready. Those lead to different fixes.
+    """
+    consumer = entry.get("consumer")
+    binding = BINDINGS.get(consumer)
+    if binding is None:
+        raise AssetError("consumer %r has no callable binding: this stack has no function "
+                         "that could execute its change" % (consumer,))
+    params = (entry.get("effect_spec") or {}).get("params") or {}
+    param_map = binding["param_map"]
+    kwargs, unbound = {}, []
+    for key, target in param_map.items():
+        if key in params:
+            kwargs[target] = params[key]
+        else:
+            unbound.append(key)
+    if unbound:
+        raise AssetError("unbound parameter(s) %s: an entry that omits a parameter cannot be "
+                         "called, and silently defaulting it would apply a value nobody "
+                         "chose" % (unbound,))
+    return {"module": binding["module"], "function": binding["function"],
+            "kwargs": kwargs}
+
+
+def compile_asset(entry, require_active=True):
+    """Compile one ACTIVE entry into a callable asset record. Refuses when not compilable.
+
+    require_active=False exists ONLY for delivery.py's pre-flight check: it asks "would this
+    entry bind to a callable at all", which must be answerable for a candidate. The status
+    gate itself is unchanged and every other caller keeps the default.
+    """
+    if require_active and (entry.get("version") or {}).get("status") != "ACTIVE":
         raise AssetError("only an ACTIVE entry may be compiled; status is %r"
                          % ((entry.get("version") or {}).get("status"),))
-    if (entry.get("validation") or {}).get("review_verdict") != "ACCEPT":
+    # The ACCEPT gate applies to the same pre-flight case as the status gate: delivery.py
+    # asks "would this entry bind to a callable at all", which must be answerable before
+    # review. Every other caller keeps the default and still faces both gates.
+    if require_active and (entry.get("validation") or {}).get("review_verdict") != "ACCEPT":
         raise AssetError("only an independently ACCEPTed entry may be compiled")
     consumer = entry.get("consumer")
     binding = BINDINGS.get(consumer)
