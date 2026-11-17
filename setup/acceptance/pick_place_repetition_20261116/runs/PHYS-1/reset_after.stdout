@@ -1,0 +1,77 @@
+[37;1m2026-11-16 13:25:47.274 [31;1m[[37;1mRTPS_TRANSPORT_SHM[31;1m Error] [37mFailed init_port fastrtps_port7005: open_and_lock_file failed[34;1m -> Function [36mopen_port_internal[m
+{
+  "ok": true,
+  "report": {
+    "task_idle": true,
+    "task_state_seen": "IDLE",
+    "task_state_publishers": 1,
+    "carry_stop_sent": true,
+    "carry_state_known": true,
+    "carry_engaged": false,
+    "scene_had_objects": true,
+    "scene_apply_ok": false,
+    "scene_cleared": true,
+    "arm_home": true,
+    "arm_home_detail": "\u001b[37;1m2026-11-16 13:25:51.441 \u001b[31;1m[\u001b[37;1mRTPS_TRANSPORT_SHM\u001b[31;1m Error] \u001b[37mFailed init_port fastrtps_port7005: open_and_lock_file failed\u001b[34;1m -> Function \u001b[36mopen_port_internal\u001b[m waiting ",
+    "respawn target_box_a": true,
+    "respawn_details target_box_a": {
+      "attempts": [
+        {
+          "attempt": 1,
+          "worker_rc": 0,
+          "stderr": "",
+          "transport_ok": true,
+          "response_data": true,
+          "elapsed_s": 0.20130809996044263
+        }
+      ]
+    },
+    "respawn target_box_b": true,
+    "respawn_details target_box_b": {
+      "attempts": [
+        {
+          "attempt": 1,
+          "worker_rc": 0,
+          "stderr": "",
+          "transport_ok": true,
+          "response_data": true,
+          "elapsed_s": 0.2028048069914803
+        }
+      ]
+    },
+    "reobserved": true,
+    "canonical_rpc target_box_a": [
+      {
+        "ok": true,
+        "attempts": [
+          {
+            "attempt": 1,
+            "worker_rc": 0,
+            "stderr": "",
+            "transport_ok": true,
+            "response_data": true,
+            "elapsed_s": 0.20213896495988593
+          }
+        ]
+      }
+    ],
+    "canonical target_box_a": "OK ['0.2200', '0.0000', '0.0175']",
+    "canonical_rpc target_box_b": [
+      {
+        "ok": true,
+        "attempts": [
+          {
+            "attempt": 1,
+            "worker_rc": 0,
+            "stderr": "",
+            "transport_ok": true,
+            "response_data": true,
+            "elapsed_s": 0.20135261601535603
+          }
+        ]
+      }
+    ],
+    "canonical target_box_b": "OK ['0.2000', '-0.1800', '0.0175']",
+    "carry_disengaged": true
+  }
+}

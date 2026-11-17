@@ -1,0 +1,22 @@
+[WARN] [ros2bag]: Positional "topics" argument deprecated. Please use optional "--topics" argument instead.
+stdin is not a terminal device. Keyboard handling disabled.[INFO] [1794806710.583250989] [rosbag2_recorder]: Press SPACE for pausing/resuming
+[INFO] [1794806710.583269237] [rosbag2_recorder]: Event publisher thread: Started
+[INFO] [1794806710.590964712] [rosbag2_recorder]: Starting recording to '/tmp/237_phys_run/run-17158fd906a8/data/raw'
+[INFO] [1794806710.596215165] [rosbag2_storage]: Opened database '/tmp/237_phys_run/run-17158fd906a8/data/raw/raw_0.db3' for READ_WRITE.
+[INFO] [1794806710.597127027] [rosbag2_recorder]: Listening for topics...
+[INFO] [1794806710.597146269] [rosbag2_recorder]: Recording...
+[INFO] [1794806710.597203393] [rosbag2_recorder]: Topics discovery started.
+[INFO] [1794806711.152240271] [rosbag2_recorder]: Subscribed to topic '/tf'
+[INFO] [1794806711.153276212] [rosbag2_recorder]: Subscribed to topic '/tf_static'
+[INFO] [1794806711.221485775] [rosbag2_recorder]: Subscribed to topic '/clock'
+[INFO] [1794806711.223628182] [rosbag2_recorder]: Subscribed to topic '/flexcell/physics_trace'
+[INFO] [1794806711.231258681] [rosbag2_recorder]: Subscribed to topic '/joint_states'
+[INFO] [1794806711.246701951] [rosbag2_recorder]: Subscribed to topic '/arm_controller/controller_state'
+[INFO] [1794806711.541971391] [rosbag2_recorder]: Subscribed to topic '/flexcell/task_state'
+[INFO] [1794806712.150583048] [rosbag2_recorder]: Subscribed to topic '/flexcell/carry_state'
+[INFO] [1794806772.196811032] [rosbag2_recorder]: Topics discovery stopped.
+[INFO] [1794806772.196983281] [rosbag2_recorder]: Pausing recording.
+[INFO] [1794806772.197036528] [rosbag2_cpp]: Writing remaining messages from cache to the bag. It may take a while
+[INFO] [1794806772.200514454] [rosbag2_recorder]: Recording stopped
+[WARN] [1794806772.200540046] [rosbag2_recorder]: Number of messages lost on the transport layer: 1
+[INFO] [1794806772.212073757] [rosbag2_recorder]: Event publisher thread: Exited

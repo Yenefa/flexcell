@@ -38,9 +38,19 @@ Each run is one bounded task, one attempt, no replacement, no model calls.
 | --- | --- | --- | --- | --- |
 | PHYS-1 | `velocity_servo` | `f78a469d…` | **PASS** `PICK_A:OK / PLACE_A:OK / VERIFY_A:OK` | **4.07 mm** |
 | PHYS-2 | `velocity_servo` | `f78a469d…` | **PASS** (same trace) | **12.26 mm** |
+| PHYS-3 | `velocity_servo` | same | **PASS** (same trace) | **2.19 mm** |
+| PHYS-4 | `velocity_servo` | same | **PASS** (same trace) | **6.86 mm** |
+| PHYS-5 | `velocity_servo` | same | **PASS** (same trace) | **9.87 mm** |
 | CONTROL-2 | `teleport` | `422f5a6a…` | PASS - reference only, not physical evidence | 9.20 mm |
 | PHYS-DJ2 | `detachable_joint` + `--contact-trace --physics-step-s 0.002` | `82e74a45…` | `PICK_A:OK`, **`PLACE_A:FAIL`** | - |
 | PHYS-DJ3 | same as DJ2 (reproduction) | `82e74a45…` | identical: `PICK_A:OK`, `PLACE_A:FAIL` | - |
+
+All five `velocity_servo` run directories are archived under
+`setup/acceptance/pick_place_repetition_20261116/`, with per-file sha256 in its
+`results.json`. Before that archive existed only the first two numbers appeared
+anywhere, so `n = 5` was not checkable; it is now. Each run archived there also
+records that `contact_force_observed` was false in every physics row, which is
+the reason a PASS here says nothing about grip force.
 
 ### Engine-level evidence (not agent reports)
 
@@ -77,8 +87,9 @@ collected, so this page does not claim a cause.
 ## What this establishes
 
 1. A **physical-backend** task (default `velocity_servo`, declared world) completes
-   end to end and passes the independent verifier: 2/2, errors 4.07 mm and
-   12.26 mm against a 60 mm tolerance.
+   end to end and passes the independent verifier on five repeated runs: 5/5,
+   errors 2.19-12.26 mm against a 60 mm tolerance. The five run directories are
+   archived, so this is checkable rather than quoted.
 2. The `detachable_joint` backend really attaches and lifts (engine-side joint
    rows plus ECM contact gaps), then `PLACE_A` fails deterministically on the
    **already-known gripper-aperture defect** documented in R5 §19.2. This run is
@@ -92,7 +103,8 @@ collected, so this page does not claim a cause.
 
 - No contact-force or friction claim: `contact_force_observed` was never true in
   the carry runs.
-- No capability or statistics claim: n = 2 per backend, single host,
+- No capability or statistics claim: n = 5 `velocity_servo` repetitions
+  (archived under `setup/acceptance/pick_place_repetition_20261116/`), single host,
   `qualification: FUNCTIONAL_SMOKE_ONLY`, and `detachable_joint` is explicitly
   not admitted as the default backend.
 - Nothing about #237's scheduling stall; that is covered separately in

@@ -1,0 +1,113 @@
+{
+  "experiment": "PICK_PLACE_REPETITION_VELOCITY_SERVO",
+  "backend": "velocity_servo",
+  "skill_backend": "legacy",
+  "note": "five bounded runs of the same task; no replacements, no model calls",
+  "runs": [
+    {
+      "label": "PHYS-1",
+      "archived_from": "/tmp/237_phys_run/run-17158fd906a8",
+      "status": "PASS",
+      "error": null,
+      "physical_tasks_dispatched": 1,
+      "fsm_trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK"
+      ],
+      "final_position_error_m": 0.00406544396674961,
+      "physics_rows": 2735,
+      "physics_steps_with_contact_force": 0,
+      "physics_steps_with_joint": 0,
+      "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+      "params_sha256": "32fa805b17dc486480895bae4333a98346769aa48f17c58e008a2ce41a8ab356",
+      "result_sha256": "aefbb1db2c8e5b266a539675f101b52dfa8f2bf18a89b92a0985625e954aa514",
+      "physics_sha256": "e58e12ce833df00de64ed241921a3ad9bc051cccb4298c1c0d1b5904370a8e30",
+      "rosbag_excluded": true
+    },
+    {
+      "label": "PHYS-2",
+      "archived_from": "/tmp/237_PHYS-2/run-a11e00076831",
+      "status": "PASS",
+      "error": null,
+      "physical_tasks_dispatched": 1,
+      "fsm_trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK"
+      ],
+      "final_position_error_m": 0.012257761153170992,
+      "physics_rows": 2781,
+      "physics_steps_with_contact_force": 0,
+      "physics_steps_with_joint": 0,
+      "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+      "params_sha256": "34d73abf0b20c6749e152e114aa7c3cdc8b03e379011917ef082cc4b1bf28480",
+      "result_sha256": "e715e6d2e8e292a907a2afd0735f12ecf5671af3f3c08db7eb5dad334dc39941",
+      "physics_sha256": "0bcd990e26a7532d54239e131124f85ad32cf85db7d9f75dab582c94ef0c58ce",
+      "rosbag_excluded": true
+    },
+    {
+      "label": "PHYS-3",
+      "archived_from": "/tmp/237_phys3/run-6e282eddae5a",
+      "status": "PASS",
+      "error": null,
+      "physical_tasks_dispatched": 1,
+      "fsm_trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK"
+      ],
+      "final_position_error_m": 0.0021948704757049093,
+      "physics_rows": 2665,
+      "physics_steps_with_contact_force": 0,
+      "physics_steps_with_joint": 0,
+      "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+      "params_sha256": "f808fc2a9cdedba68344107beb8a4d63782a2aa32b52cfa5d6d017418a201aa2",
+      "result_sha256": "8ed77251be8351f878239ad672fb7d199d4c0165848878cb3940e728347f33cb",
+      "physics_sha256": "25c89a4ef3b1c2ef792f23f742e6810a0df118b7941614f51ebd85d2731f8dd1",
+      "rosbag_excluded": true
+    },
+    {
+      "label": "PHYS-4",
+      "archived_from": "/tmp/237_phys4/run-487a77514b60",
+      "status": "PASS",
+      "error": null,
+      "physical_tasks_dispatched": 1,
+      "fsm_trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK"
+      ],
+      "final_position_error_m": 0.0068632130016543,
+      "physics_rows": 2683,
+      "physics_steps_with_contact_force": 0,
+      "physics_steps_with_joint": 0,
+      "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+      "params_sha256": "9eb0daed963ad9c35a250b513555fb99164e2716fdb2139d72c1e06f1614447d",
+      "result_sha256": "932091234bbbf03b71e663a3f6e41c998bd9495befd70f61e8dc222956c9a001",
+      "physics_sha256": "d342f6fb9a46384c58add028c1086b8300e1633714f7cca25492c02711416dc9",
+      "rosbag_excluded": true
+    },
+    {
+      "label": "PHYS-5",
+      "archived_from": "/tmp/237_phys5/run-a96930cccf7d",
+      "status": "PASS",
+      "error": null,
+      "physical_tasks_dispatched": 1,
+      "fsm_trace": [
+        "PICK_A(attempt=1):OK",
+        "PLACE_A:OK",
+        "VERIFY_A(attempt=1):OK"
+      ],
+      "final_position_error_m": 0.009872664896675435,
+      "physics_rows": 2551,
+      "physics_steps_with_contact_force": 0,
+      "physics_steps_with_joint": 0,
+      "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+      "params_sha256": "12cf5e080cacd443d1819528d9a27b87597d69be4847063c431de0ccc71e3227",
+      "result_sha256": "e305f6da2c75017086589e60206af7aa034245707b4e9f68f922741e23e098a7",
+      "physics_sha256": "b10aed5f979287bf053a831fea3d6cc4ea487e8f232a3a6f1482975f6b739d24",
+      "rosbag_excluded": true
+    }
+  ]
+}

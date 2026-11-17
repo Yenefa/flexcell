@@ -1,0 +1,76 @@
+[37;1m2026-11-16 14:20:07.098 [31;1m[[37;1mXMLPARSER[31;1m Error] [37mrealpath failed No such file or directory[34;1m -> Function [36mloadDefaultXMLFile[m
+{
+  "ok": true,
+  "report": {
+    "task_idle": true,
+    "task_state_seen": "IDLE",
+    "task_state_publishers": 1,
+    "carry_stop_sent": true,
+    "carry_state_known": true,
+    "carry_engaged": false,
+    "scene_had_objects": false,
+    "scene_cleared": true,
+    "arm_home": true,
+    "arm_home_detail": "\u001b[37;1m2026-11-16 14:20:10.245 \u001b[31;1m[\u001b[37;1mXMLPARSER\u001b[31;1m Error] \u001b[37mrealpath failed No such file or directory\u001b[34;1m -> Function \u001b[36mloadDefaultXMLFile\u001b[m waiting for /move_action and /execute",
+    "respawn target_box_a": true,
+    "respawn_details target_box_a": {
+      "attempts": [
+        {
+          "attempt": 1,
+          "worker_rc": 0,
+          "stderr": "",
+          "transport_ok": true,
+          "response_data": true,
+          "elapsed_s": 0.2012284779921174
+        }
+      ]
+    },
+    "respawn target_box_b": true,
+    "respawn_details target_box_b": {
+      "attempts": [
+        {
+          "attempt": 1,
+          "worker_rc": 0,
+          "stderr": "",
+          "transport_ok": true,
+          "response_data": true,
+          "elapsed_s": 0.20128295000176877
+        }
+      ]
+    },
+    "reobserved": true,
+    "canonical_rpc target_box_a": [
+      {
+        "ok": true,
+        "attempts": [
+          {
+            "attempt": 1,
+            "worker_rc": 0,
+            "stderr": "",
+            "transport_ok": true,
+            "response_data": true,
+            "elapsed_s": 0.20171916199615225
+          }
+        ]
+      }
+    ],
+    "canonical target_box_a": "OK ['0.2200', '0.0000', '0.0175']",
+    "canonical_rpc target_box_b": [
+      {
+        "ok": true,
+        "attempts": [
+          {
+            "attempt": 1,
+            "worker_rc": 0,
+            "stderr": "",
+            "transport_ok": true,
+            "response_data": true,
+            "elapsed_s": 0.20135821303119883
+          }
+        ]
+      }
+    ],
+    "canonical target_box_b": "OK ['0.2000', '-0.1800', '0.0175']",
+    "carry_disengaged": true
+  }
+}
