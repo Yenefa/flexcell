@@ -57,6 +57,23 @@ skill = get_skill(catalog, "contact_push.finger_tcp.v1")  # 独立副本，找�
 - 证据只指向已归档的仿真记录；默认后端仍是 legacy，正式基线 **NOT_PROMOTED**。
 - 查询时不执行验收器、不加载原始日志、不导入 ROS；无 ROS 环境可导入、查询和测试。
 
+## 与源码的核对（2026-11-17）
+
+示例记录的每个值都能在仓库里找到出处，不靠推测：
+
+| 目录里的声明 | 出处 |
+| --- | --- |
+| `interface: flexcell_interfaces/action/ContactPush` | `src/flexcell/flexcell_interfaces/action/ContactPush.action` 的请求段（`direction`、`distance_m`、`motion_profile_id`、`deadline_ms`、`max_motion_goals` 等） |
+| `direction.const = [-1, 0, 0]` | `contact_push_server.py` 的 `validate_request`：方向不等 `[-1,0,0]` 直接拒 |
+| `distance_m.const = 0.03` | 同上：`abs(distance_m - .03) > 1e-12` 直接拒 |
+| `motion_profile_id.const = demo_veryslow` | 同上：其余档位一律拒 |
+| `preconditions` 第三条「Motion budget and request fields…」 | 同上的 `deadline_ms <= 300000`、`max_motion_goals ∈ {0} ∪ [13,40]`、`preserve_objects` 不得重复 |
+| `validation.level = SCOPED_SIMULATION`、`evidence_ref` | `setup/acceptance/physical_reachable_contact_20261113/` 的 `archive.json` 与 README；默认后端 legacy、正式基线 NOT_PROMOTED |
+
+`parameter_constraints` 只登记已经实现并演练过的几何原语（世界 −x、单次 30 mm、`demo_veryslow`），
+其余准入条件写在 `preconditions` 里。目录**不做**参数合法性判断，也不替动作服务器做准入——
+按交接文档，参数声明检查属于首个 PR 通过之后的范围。
+
 ## 验证记录
 
 `python3 -m unittest discover -s runtime/skill_catalog/tests -v` 共 10 例，覆盖：
