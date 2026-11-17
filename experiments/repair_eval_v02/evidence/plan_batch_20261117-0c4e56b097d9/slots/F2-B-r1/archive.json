@@ -1,0 +1,140 @@
+{
+  "schema": "evobot.slot_archive/1",
+  "files": {
+    "account.json": "da678d3e0fe027c7c0569ebe304052d98f3c420676c8bd78a2bf25dd64eb95f2",
+    "candidate/gate/check.py": "fed4f8cd1df4c6cbca7589bfde5b01f38cee0bca248473e51a35ef815009d990",
+    "candidate/gate/observe_server.py": "7ccd47ac286cc4d8115e416e54c9eb94d51aa7030d042565e3bd5ba25b13237b",
+    "candidate/src/task_fsm_server.py": "d1d0e74d139cf779b7e44ce8eea60213e8d8e45fe62f2b71755c118c6e2df228",
+    "candidate/task.md": "aa2f5b5fe55c255fa751f5ea2856a9750052523809ebd3475e016d14d44bc1f5",
+    "candidate/telemetry/execution.log": "2574f1d7ed0817c3134801854dba0a94cc90c5ded1bfddf17280c2a279cfda69",
+    "dispatch_after.json": "9f633e950fe5fac062c1db2682c678e51d7184c0f3960a9ae951e970e6723c96",
+    "dispatch_before.json": "955d4aec4663eb9f90a7925a3dd98933309068cf5e09b1b6d188739bfcc1f29f",
+    "dispatch_final.json": "7819e81e2c595208fb01edb9cb4885bda55a434f27bf86837748c26d81e7aeea",
+    "donor_output/F2-B-r1.log": "29ae60517a632f03e430a30442086881039c5ab97f82cbc5b37818e12badb57b",
+    "health_after.json": "272e62aaa7000ed29a8564c651fbc163b03c2fc07e4d59dc138aa86cfa9901c8",
+    "health_before.json": "70e194bdcc3ac582ec6353c4365552813de41539ce457c0aac3dad2ec59ddd40",
+    "initial_candidate/gate/check.py": "fed4f8cd1df4c6cbca7589bfde5b01f38cee0bca248473e51a35ef815009d990",
+    "initial_candidate/gate/observe_server.py": "7ccd47ac286cc4d8115e416e54c9eb94d51aa7030d042565e3bd5ba25b13237b",
+    "initial_candidate/src/task_fsm_server.py": "144c849a90e43777e88eeefc70185873ee710e6e1f37d3ebdad8c04613de1260",
+    "initial_candidate/task.md": "aa2f5b5fe55c255fa751f5ea2856a9750052523809ebd3475e016d14d44bc1f5",
+    "message_attempts.json": "8646c070006c7fb60f7c661c81cbdc6a40d562552396f276d9fd02f95a36f882",
+    "source_identity.json": "3da2c77ce2f0c5052defcc77cdc56008ef9ddcbcd806f4b737089e8a67dc1e94",
+    "tool_calls.json": "e84eb6006c25b28f2957eebfe917d79efe816c8dc60889f3221265352ac91e7b",
+    "transcript.json": "b80d242ca9cd1719c40b238a0cea9edb930623c5aac8b779703b559903f781a5",
+    "verdict/final.json": "963eb516b57ec13c9a1ad66108b31061139bb6913140c0389f0aecb42c06fec3"
+  },
+  "candidate_sha": "9f6d730d44c8acdbcddcd15258f3bb5450cde2b216fbf0a51bf71ab2072db957",
+  "record": {
+    "slot_id": "F2-B-r1",
+    "condition": "B_REAL_FEEDBACK",
+    "family": "F2_GOAL_MAPPING",
+    "seed": 5201,
+    "donor_run_id": null,
+    "plan_sha256": "091dc8fbd7e725c6c73f64e403dc88d9701adb619e37c7fd772fb0aad546ccc3",
+    "source_sha": "d1a53416b1c38a062c0de59d55ff3aea82bbf103",
+    "terminal_status": "BUDGET_EXHAUSTED",
+    "qualification": "REAL_MODEL_RUN|INSTANCE",
+    "tokens_total": 13827,
+    "interactions_used": 6,
+    "edited_paths": [
+      "src/task_fsm_server.py"
+    ],
+    "feedback_source": "own_run",
+    "task_variant": "v2",
+    "feedback_payload_sha256": "29ae60517a632f03e430a30442086881039c5ab97f82cbc5b37818e12badb57b",
+    "guidance_sha256": null,
+    "visibility_policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+    "visibility_policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+    "interactions_cap": 6,
+    "tokens_in": null,
+    "tokens_out": null,
+    "tokens_source": "provider_total_only",
+    "tokens_cap": 20000,
+    "candidate_executions": 0,
+    "final_scenes": 0,
+    "wall_clock_s": 10.053,
+    "budget_exhausted_at": "interaction:6",
+    "claim_success": false,
+    "gate_target": "PASS",
+    "gate_regression": {},
+    "gate_contract": "PASS",
+    "gate_contract_codes": [],
+    "gate_independent": "NOT_RUN",
+    "false_accept": false,
+    "false_reject": false,
+    "first_edit_after_execution": true,
+    "deviation_codes": [],
+    "evidence_path": "experiments/repair_eval_v02/evidence",
+    "notes": "",
+    "contract_sha256": "e50ac16acd59c70d4473a01ca4b5358f367d8c3068460d3e6995cc2d588efbd6",
+    "donor_log": "/home/ros/wt/run252/experiments/repair_eval_v02/evidence/plan_batch_20261117-0c4e56b097d9/slots/F2-B-r1/donor_output/F2-B-r1.log",
+    "model": "deepseek-flash",
+    "key_fingerprint": "0f17904e",
+    "contract_verdict": "ACCEPT",
+    "regression_exit": null,
+    "instance": "DEF-F2-MAP",
+    "action_terminal": "SUCCESS",
+    "health_before": {
+      "at": 1794890803.051897,
+      "backend": "source_gate",
+      "healthy": true,
+      "checks": {
+        "source_sha": {
+          "status": "PASS",
+          "expected": "d1a53416b1c38a062c0de59d55ff3aea82bbf103",
+          "observed": "d1a53416b1c38a062c0de59d55ff3aea82bbf103"
+        },
+        "source_files": {
+          "status": "PASS",
+          "changed": []
+        },
+        "dependencies": {
+          "status": "PASS",
+          "missing": []
+        },
+        "workspace": {
+          "status": "PASS",
+          "missing": [],
+          "changed": []
+        },
+        "ros_gazebo": {
+          "status": "NOT_APPLICABLE",
+          "reason": "source/config execution; no ROS/Gazebo action dispatched"
+        }
+      },
+      "failures": []
+    },
+    "health_after": {
+      "at": 1794890813.1779017,
+      "backend": "source_gate",
+      "healthy": true,
+      "checks": {
+        "source_sha": {
+          "status": "PASS",
+          "expected": "d1a53416b1c38a062c0de59d55ff3aea82bbf103",
+          "observed": "d1a53416b1c38a062c0de59d55ff3aea82bbf103"
+        },
+        "source_files": {
+          "status": "PASS",
+          "changed": []
+        },
+        "dependencies": {
+          "status": "PASS",
+          "missing": []
+        },
+        "workspace": {
+          "status": "PASS",
+          "missing": [],
+          "changed": []
+        },
+        "ros_gazebo": {
+          "status": "NOT_APPLICABLE",
+          "reason": "source/config execution; no ROS/Gazebo action dispatched"
+        }
+      },
+      "failures": []
+    },
+    "candidate_sha": "9f6d730d44c8acdbcddcd15258f3bb5450cde2b216fbf0a51bf71ab2072db957",
+    "regression_scope": "source_gate_only"
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "schema": "evobot.slot_archive/1",
+  "files": {
+    "account.json": "def258c3ea38e31ad16eab1d4ccf26adfb84a3ce3c8f0b0c4c63d3e46aa33ff6",
+    "candidate/config/week1.yaml": "0a1204ac404fc832ab1aed9530937eb85ee7e70db468a964b914a3944ee34d06",
+    "candidate/gate/check.py": "fed4f8cd1df4c6cbca7589bfde5b01f38cee0bca248473e51a35ef815009d990",
+    "candidate/gate/observe_server.py": "7ccd47ac286cc4d8115e416e54c9eb94d51aa7030d042565e3bd5ba25b13237b",
+    "candidate/task.md": "7000f54ef51fd7161b1dfd4cbbf808d3e12abdba38e3cc92f4109faf341dce41",
+    "candidate/telemetry/execution.log": "c7b3db0ca6658b7083ccabe998621db1b1dd43a183e7a5083d60cbdeb971eb9e",
+    "dispatch_after.json": "dade1b8049d1e6c5a445bc48932a024e11150412cb067ae05999829c46702dbf",
+    "dispatch_before.json": "d3c6e65b48a7931329f74167de2234234576cacb2854be6aa93f8237c1715c63",
+    "dispatch_final.json": "3ba11729528e01f1ba4d5b47a9a7378538f75d2ee767e36298d02d7705ba1587",
+    "donor_output/F1-B-r1.log": "68d04b304eb69efdf8ec91826c0aa220eb1f6aaaf5a537867bd8816241616884",
+    "health_after.json": "75a6d988be119cf108cab476b036cad767953d4fc4cb1bac1d3fe9c7a2b8ec99",
+    "health_before.json": "feaa74f86f8d6af9e482ae403a86ad173f17b420e433c45f27e9ec3664728f3d",
+    "initial_candidate/config/week1.yaml": "6c4da05fe04e0ee8eb0016046af998b7b1dddf7c6c0775cdfda695665588e16e",
+    "initial_candidate/gate/check.py": "fed4f8cd1df4c6cbca7589bfde5b01f38cee0bca248473e51a35ef815009d990",
+    "initial_candidate/gate/observe_server.py": "7ccd47ac286cc4d8115e416e54c9eb94d51aa7030d042565e3bd5ba25b13237b",
+    "initial_candidate/task.md": "7000f54ef51fd7161b1dfd4cbbf808d3e12abdba38e3cc92f4109faf341dce41",
+    "message_attempts.json": "c936b5e4aa8042139d036ba3e72587a4ff40d53f4b4e06bd94ecbc7c140773fb",
+    "source_identity.json": "3da2c77ce2f0c5052defcc77cdc56008ef9ddcbcd806f4b737089e8a67dc1e94",
+    "tool_calls.json": "9b2afea188a519c862c54b2b2767c56250a105306c9a03e22a83d87c197d3687",
+    "transcript.json": "6256a52783a0ca25c92bc03024178bf6f96e35632a7adb861f0c32db0e8b8dd6",
+    "verdict/final.json": "963eb516b57ec13c9a1ad66108b31061139bb6913140c0389f0aecb42c06fec3"
+  },
+  "candidate_sha": "4ab5a0a86ccc7a18cbd52a072d4f59ea9c65432729454f1062879f37f78780c3",
+  "record": {
+    "slot_id": "F1-B-r1",
+    "condition": "B_REAL_FEEDBACK",
+    "family": "F1_OBJECT_REGISTRATION",
+    "seed": 5101,
+    "donor_run_id": null,
+    "plan_sha256": "091dc8fbd7e725c6c73f64e403dc88d9701adb619e37c7fd772fb0aad546ccc3",
+    "source_sha": "d1a53416b1c38a062c0de59d55ff3aea82bbf103",
+    "terminal_status": "UNKNOWN",
+    "qualification": "REAL_MODEL_RUN|INSTANCE",
+    "tokens_total": 5806,
+    "interactions_used": 4,
+    "edited_paths": [
+      "config/week1.yaml"
+    ],
+    "feedback_source": "own_run",
+    "task_variant": "v2",
+    "feedback_payload_sha256": "68d04b304eb69efdf8ec91826c0aa220eb1f6aaaf5a537867bd8816241616884",
+    "guidance_sha256": null,
+    "visibility_policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+    "visibility_policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+    "interactions_cap": 6,
+    "tokens_in": null,
+    "tokens_out": null,
+    "tokens_source": "provider_total_only",
+    "tokens_cap": 20000,
+    "candidate_executions": 0,
+    "final_scenes": 0,
+    "wall_clock_s": 4.613,
+    "budget_exhausted_at": null,
+    "claim_success": true,
+    "gate_target": "PASS",
+    "gate_regression": {},
+    "gate_contract": "PASS",
+    "gate_contract_codes": [],
+    "gate_independent": "NOT_RUN",
+    "false_accept": true,
+    "false_reject": false,
+    "first_edit_after_execution": true,
+    "deviation_codes": [],
+    "evidence_path": "experiments/repair_eval_v02/evidence",
+    "notes": "",
+    "contract_sha256": "6628e64fb08a19351aa37e5c03ab02bce4a80995ffc2c15f6df8149002a23610",
+    "donor_log": "/home/ros/wt/run252/experiments/repair_eval_v02/evidence/plan_batch_20261117-0c4e56b097d9/slots/F1-B-r1/donor_output/F1-B-r1.log",
+    "model": "deepseek-flash",
+    "key_fingerprint": "0f17904e",
+    "contract_verdict": "ACCEPT",
+    "regression_exit": null,
+    "instance": "DEF-F1-REG",
+    "action_terminal": "SUCCESS",
+    "health_before": {
+      "at": 1794890798.3286128,
+      "backend": "source_gate",
+      "healthy": true,
+      "checks": {
+        "source_sha": {
+          "status": "PASS",
+          "expected": "d1a53416b1c38a062c0de59d55ff3aea82bbf103",
+          "observed": "d1a53416b1c38a062c0de59d55ff3aea82bbf103"
+        },
+        "source_files": {
+          "status": "PASS",
+          "changed": []
+        },
+        "dependencies": {
+          "status": "PASS",
+          "missing": []
+        },
+        "workspace": {
+          "status": "PASS",
+          "missing": [],
+          "changed": []
+        },
+        "ros_gazebo": {
+          "status": "NOT_APPLICABLE",
+          "reason": "source/config execution; no ROS/Gazebo action dispatched"
+        }
+      },
+      "failures": []
+    },
+    "health_after": {
+      "at": 1794890803.0263672,
+      "backend": "source_gate",
+      "healthy": true,
+      "checks": {
+        "source_sha": {
+          "status": "PASS",
+          "expected": "d1a53416b1c38a062c0de59d55ff3aea82bbf103",
+          "observed": "d1a53416b1c38a062c0de59d55ff3aea82bbf103"
+        },
+        "source_files": {
+          "status": "PASS",
+          "changed": []
+        },
+        "dependencies": {
+          "status": "PASS",
+          "missing": []
+        },
+        "workspace": {
+          "status": "PASS",
+          "missing": [],
+          "changed": []
+        },
+        "ros_gazebo": {
+          "status": "NOT_APPLICABLE",
+          "reason": "source/config execution; no ROS/Gazebo action dispatched"
+        }
+      },
+      "failures": []
+    },
+    "candidate_sha": "4ab5a0a86ccc7a18cbd52a072d4f59ea9c65432729454f1062879f37f78780c3",
+    "regression_scope": "source_gate_only"
+  }
+}

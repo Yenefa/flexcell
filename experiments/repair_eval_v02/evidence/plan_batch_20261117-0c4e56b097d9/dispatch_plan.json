@@ -1,0 +1,200 @@
+{
+  "schema": "evobot.dispatch_plan/1",
+  "plan_id": "registered-markdown:RUN_MANIFEST.md",
+  "source_path": "/home/ros/wt/run252/docs/research/evobot-paper-v02/RUN_MANIFEST.md",
+  "sha256": "091dc8fbd7e725c6c73f64e403dc88d9701adb619e37c7fd772fb0aad546ccc3",
+  "slots": [
+    {
+      "slot_id": "F1-A-r1",
+      "seed": 5101,
+      "donor_run_id": null,
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "A_STATIC",
+      "rep": 1
+    },
+    {
+      "slot_id": "F2-A-r1",
+      "seed": 5201,
+      "donor_run_id": null,
+      "family": "F2_GOAL_MAPPING",
+      "condition": "A_STATIC",
+      "rep": 1
+    },
+    {
+      "slot_id": "F1-B-r1",
+      "seed": 5101,
+      "donor_run_id": null,
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "B_REAL_FEEDBACK",
+      "rep": 1
+    },
+    {
+      "slot_id": "F2-B-r1",
+      "seed": 5201,
+      "donor_run_id": null,
+      "family": "F2_GOAL_MAPPING",
+      "condition": "B_REAL_FEEDBACK",
+      "rep": 1
+    },
+    {
+      "slot_id": "F1-C-r1",
+      "seed": 5101,
+      "donor_run_id": "F1-B-r2",
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "C_MISMATCHED_FEEDBACK",
+      "rep": 1
+    },
+    {
+      "slot_id": "F2-C-r1",
+      "seed": 5201,
+      "donor_run_id": "F2-B-r2",
+      "family": "F2_GOAL_MAPPING",
+      "condition": "C_MISMATCHED_FEEDBACK",
+      "rep": 1
+    },
+    {
+      "slot_id": "F1-D-r1",
+      "seed": 5101,
+      "donor_run_id": null,
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "D_GUIDED",
+      "rep": 1
+    },
+    {
+      "slot_id": "F2-D-r1",
+      "seed": 5201,
+      "donor_run_id": null,
+      "family": "F2_GOAL_MAPPING",
+      "condition": "D_GUIDED",
+      "rep": 1
+    },
+    {
+      "slot_id": "F2-D-r2",
+      "seed": 5202,
+      "donor_run_id": null,
+      "family": "F2_GOAL_MAPPING",
+      "condition": "D_GUIDED",
+      "rep": 2
+    },
+    {
+      "slot_id": "F1-D-r2",
+      "seed": 5102,
+      "donor_run_id": null,
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "D_GUIDED",
+      "rep": 2
+    },
+    {
+      "slot_id": "F2-C-r2",
+      "seed": 5202,
+      "donor_run_id": "F2-B-r1",
+      "family": "F2_GOAL_MAPPING",
+      "condition": "C_MISMATCHED_FEEDBACK",
+      "rep": 2
+    },
+    {
+      "slot_id": "F1-C-r2",
+      "seed": 5102,
+      "donor_run_id": "F1-B-r1",
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "C_MISMATCHED_FEEDBACK",
+      "rep": 2
+    },
+    {
+      "slot_id": "F2-B-r2",
+      "seed": 5202,
+      "donor_run_id": null,
+      "family": "F2_GOAL_MAPPING",
+      "condition": "B_REAL_FEEDBACK",
+      "rep": 2
+    },
+    {
+      "slot_id": "F1-B-r2",
+      "seed": 5102,
+      "donor_run_id": null,
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "B_REAL_FEEDBACK",
+      "rep": 2
+    },
+    {
+      "slot_id": "F2-A-r2",
+      "seed": 5202,
+      "donor_run_id": null,
+      "family": "F2_GOAL_MAPPING",
+      "condition": "A_STATIC",
+      "rep": 2
+    },
+    {
+      "slot_id": "F1-A-r2",
+      "seed": 5102,
+      "donor_run_id": null,
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "A_STATIC",
+      "rep": 2
+    },
+    {
+      "slot_id": "F1-A-r3",
+      "seed": 5103,
+      "donor_run_id": null,
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "A_STATIC",
+      "rep": 3
+    },
+    {
+      "slot_id": "F2-A-r3",
+      "seed": 5203,
+      "donor_run_id": null,
+      "family": "F2_GOAL_MAPPING",
+      "condition": "A_STATIC",
+      "rep": 3
+    },
+    {
+      "slot_id": "F1-B-r3",
+      "seed": 5103,
+      "donor_run_id": null,
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "B_REAL_FEEDBACK",
+      "rep": 3
+    },
+    {
+      "slot_id": "F2-B-r3",
+      "seed": 5203,
+      "donor_run_id": null,
+      "family": "F2_GOAL_MAPPING",
+      "condition": "B_REAL_FEEDBACK",
+      "rep": 3
+    },
+    {
+      "slot_id": "F1-C-r3",
+      "seed": 5103,
+      "donor_run_id": "F1-B-r1",
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "C_MISMATCHED_FEEDBACK",
+      "rep": 3
+    },
+    {
+      "slot_id": "F2-C-r3",
+      "seed": 5203,
+      "donor_run_id": "F2-B-r1",
+      "family": "F2_GOAL_MAPPING",
+      "condition": "C_MISMATCHED_FEEDBACK",
+      "rep": 3
+    },
+    {
+      "slot_id": "F1-D-r3",
+      "seed": 5103,
+      "donor_run_id": null,
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "D_GUIDED",
+      "rep": 3
+    },
+    {
+      "slot_id": "F2-D-r3",
+      "seed": 5203,
+      "donor_run_id": null,
+      "family": "F2_GOAL_MAPPING",
+      "condition": "D_GUIDED",
+      "rep": 3
+    }
+  ]
+}

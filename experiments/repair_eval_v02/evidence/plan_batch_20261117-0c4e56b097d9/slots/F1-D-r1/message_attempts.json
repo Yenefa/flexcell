@@ -1,0 +1,16 @@
+[
+  [
+    {
+      "role": "system",
+      "content": "You are repairing a robot skill so the task succeeds.\n\nTASK\nThe robot cannot see the boxes it is asked to move. The perception service starts, but it reports nothing the task layer can use, so every task fails before the first pick.\n\nThe repair surface is the workcell configuration: config/week1.yaml. Nothing in this task tells you which objects the workcell has.\n\nYou may only change these paths:\n  - config/\n\nTwo actions are available. Prefer the second for large files:\n  {\"write_file\": [path, content]} replaces the whole file.\n  {\"edit_file\": [path, old_text, new_text]} replaces the first\n   occurrence of old_text. old_text must match the file exactly.\n  {\"search\": [path, pattern]} returns the matching lines and their\n   numbers. Use it to find the place; a whole large file will not\n   fit in the budget.\n  {\"read_file\": [path, start, lines]} returns that window of the file.\nReading the file you are repairing is allowed in every condition;\nso is reading this workspace's tests and task.md. Nothing else is.\nReply with a single JSON object: {\"actions\": [...], \"claim_success\": bool, \"done\": bool}. No prose outside the JSON."
+    },
+    {
+      "role": "user",
+      "content": "EXECUTION FEEDBACK\n{\"ok\": false, \"code\": \"OBJECT_NOT_REGISTERED\", \"tracked\": [\"ghost_object\"], \"expected_objects\": [\"target_box_a\", \"target_box_b\"]}\n"
+    },
+    {
+      "role": "user",
+      "content": "GUIDANCE\nConsume the remaining retry budget before giving up: after a recoverable failure the decision must attempt recovery while budget remains, and abort only when the budget is exhausted."
+    }
+  ]
+]
