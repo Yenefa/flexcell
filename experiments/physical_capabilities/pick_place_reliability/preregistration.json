@@ -1,0 +1,21 @@
+{
+  "experiment": "pick-place-reliability-20261116",
+  "declared_before_run": true,
+  "backend": "velocity_servo",
+  "skill_backend": "legacy",
+  "slot_timeout_s": 360,
+  "window_budget_s": 1440,
+  "slots": [
+    {"label": "NORMAL_1", "case": "normal"},
+    {"label": "DUAL_1", "case": "dual_object"},
+    {"label": "NORMAL_2", "case": "normal"},
+    {"label": "DUAL_2", "case": "dual_object"}
+  ],
+  "boundaries": {
+    "changes_objects": false,
+    "changes_targets": false,
+    "changes_tolerance": false,
+    "changes_task_budget": false,
+    "allows_rerun_to_cover_failure": false
+  }
+}
