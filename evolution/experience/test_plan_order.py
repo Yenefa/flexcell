@@ -71,11 +71,40 @@ def test_a_plan_that_ignores_the_object_entirely_is_a_different_fault():
         ORDER_OBS, [{"object": "target_box_a", "zone": "zone_1"}]) is None
 
 
-def test_validate_plan_carries_the_order_problem():
-    _, problems = agent_planner.validate_plan({"moves": RED_THEN_GREEN}, ORDER_OBS)
-    assert any("FIRST" in p for p in problems)
-    _, clean = agent_planner.validate_plan({"moves": GREEN_THEN_RED}, ORDER_OBS)
+def test_validate_plan_carries_the_order_problem_ONLY_when_an_entry_is_admitted():
+    """The rule must not be live on its own.
+
+    Wiring it straight into validate_plan made the planner refuse plans it used to accept -
+    a live behaviour change with no entry behind it, so nothing could review it, probe it
+    for misuse, record an outcome for it, or retire it. Step 4 of the objective is explicit
+    that a change is validated and versioned BEFORE it is enabled.
+    """
+    _, without = agent_planner.validate_plan({"moves": RED_THEN_GREEN}, ORDER_OBS)
+    assert not any("FIRST" in p for p in without), \
+        "the rule fired with no admitted entry - an unreviewed live behaviour change"
+
+    admitted = dict(ORDER_OBS)
+    admitted["experience"] = [{"failure_class": "planning",
+                               "lesson": "emit moves in the stated order",
+                               "_entry_id": "e" * 64}]
+    _, with_entry = agent_planner.validate_plan({"moves": RED_THEN_GREEN}, admitted)
+    assert any("FIRST" in p for p in with_entry)
+    _, clean = agent_planner.validate_plan({"moves": GREEN_THEN_RED}, admitted)
     assert clean == []
+
+
+def test_the_order_rule_is_still_measurable_without_being_live():
+    """Measuring the rule is not the same as enabling it."""
+    assert agent_planner.check_plan_order(ORDER_OBS, RED_THEN_GREEN)
+    assert agent_planner.order_rule_admitted(ORDER_OBS) is False
+
+
+def test_an_entry_marker_without_an_id_does_not_admit_the_rule():
+    """Delivery stamps _entry_id. A bare lesson string must not be enough, or any text
+    reaching the observation would enable a rule nobody reviewed."""
+    obs = dict(ORDER_OBS)
+    obs["experience"] = [{"failure_class": "planning", "lesson": "do the thing"}]
+    assert agent_planner.order_rule_admitted(obs) is False
 
 
 def test_the_check_is_still_not_a_correctness_judgement():

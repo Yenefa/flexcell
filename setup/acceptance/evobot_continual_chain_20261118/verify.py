@@ -613,6 +613,44 @@ def main():
         checks["acting_from_an_unnamed_consumer_is_reported_separately"] = (
             "harness" in cov["carried_by_an_unnamed_consumer"])
 
+        # 27 -- NO LIVE BEHAVIOUR CHANGE WITHOUT AN ENTRY BEHIND IT. The order rule was
+        # wired straight into validate_plan, so the planner refused plans it used to accept
+        # - with no entry to review, probe for misuse, record an outcome for, or retire.
+        # Step 4 of the objective is explicit that a change is validated and versioned
+        # BEFORE it is enabled. The rule is now gated on an admitted entry, which arrives
+        # through the same "experience" channel describe() reads.
+        plain_obs = {
+            "instruction": ("Put both blocks in the left bin. The blue block must be put "
+                            "there FIRST, then the red block."),
+            "objects": [{"name": "a", "color": "red"}, {"name": "b", "color": "blue"}],
+            "zones": [{"name": "z", "position": [0.12, -0.15, 0.0]}]}
+        reversed_plan = {"moves": [{"object": "a", "zone": "z"},
+                                   {"object": "b", "zone": "z"}]}
+        _, ungated = _ap.validate_plan(reversed_plan, plain_obs)
+        checks["the_order_rule_is_not_live_without_an_admitted_entry"] = not any(
+            "FIRST" in p for p in ungated)
+        admitted_obs = dict(plain_obs)
+        admitted_obs["experience"] = [{"failure_class": "planning",
+                                       "lesson": "emit moves in the stated order",
+                                       "_entry_id": "e" * 64}]
+        _, gated = _ap.validate_plan(reversed_plan, admitted_obs)
+        checks["the_order_rule_acts_once_an_entry_is_admitted"] = any(
+            "FIRST" in p for p in gated)
+        # the delivery path stamps the marker the gate looks for, so delivered entries work
+        delivered_obs = _load("delivery").deliver_planner(
+            {"entry_id": "x" * 64, "consumer": "planner", "failure_class": "planning",
+             "suggested_action": "emit the moves in the order the instruction states"},
+            plain_obs)
+        checks["a_delivered_entry_admits_the_rule"] = (
+            _ap.order_rule_admitted(delivered_obs) is True)
+        # ... and the coverage report must CHECK for unbacked live rules rather than only
+        # counting entries: a rule wired into the code path acts without any entry and is
+        # worse than an empty routing, not better.
+        checks["the_coverage_report_checks_for_unbacked_live_rules"] = (
+            cov.get("live_rules_with_no_entry") == [])
+        checks["the_coverage_claim_says_an_unbacked_rule_is_worse"] = (
+            "worse than an empty routing" in (cov.get("claim") or ""))
+
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
             "batch": HERE.name,

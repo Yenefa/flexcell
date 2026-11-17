@@ -103,15 +103,41 @@ def coverage(store_path, delivery=None):
         if verdict == delivery_mod.DELIVERED:
             served_elsewhere.setdefault(consumer, []).append(
                 row.get("version", {}).get("label"))
+    # A CONSUMER CAN ALSO ACT WITHOUT AN ENTRY - a rule wired straight into the code path.
+    # That is NOT coverage and it is worse than an empty routing: an empty routing does
+    # nothing, while an unbacked live rule changes behaviour and cannot be reviewed, probed
+    # for misuse, recorded, revised or retired, because there is no entry to hang any of
+    # that on. Detected for the planner specifically, because that is where it happened.
+    unbacked = []
+    try:
+        sys.path.insert(0, os.path.join(WT, "runtime", "planner"))
+        import agent_planner
+        # A reversed plan and an observation with no delivered entry: if the planner refuses
+        # it anyway, a rule is live that nothing backs.
+        probe_obs = {"instruction": ("the blue block must be put there FIRST"),
+                     "objects": [{"name": "a", "color": "red"},
+                                 {"name": "b", "color": "blue"}],
+                     "zones": [{"name": "z", "position": [0.0, 0.0, 0.0]}]}
+        _p, problems = agent_planner.validate_plan(
+            {"moves": [{"object": "a", "zone": "z"},
+                       {"object": "b", "zone": "z"}]}, probe_obs)
+        if any("FIRST" in str(x) for x in problems):
+            unbacked.append("planner:order_rule")
+    except Exception:  # noqa: BLE001 - a missing planner is not an unbacked rule
+        pass
     return {"routings": out,
             "carried": sum(1 for r in out if r["state"] == CARRIED),
             "named": len(out),
+            "live_rules_with_no_entry": unbacked,
             # consumers the objective did NOT name but that do carry a delivered entry
             "carried_by_an_unnamed_consumer": served_elsewhere,
             "claim": ("a routing is CARRIED only when an ACTIVE entry reaches its consumer; "
                       "a declared consumer with no arriving entry is NAMED_BUT_EMPTY. A "
                       "lesson can also act from a consumer the objective did not name, and "
-                      "that is reported separately rather than counted as coverage")}
+                      "that is reported separately rather than counted as coverage. A rule "
+                      "live in the code path with no entry behind it is reported as "
+                      "live_rules_with_no_entry - it is worse than an empty routing, not "
+                      "better, because it cannot be reviewed or retired")}
 
 
 if __name__ == "__main__":

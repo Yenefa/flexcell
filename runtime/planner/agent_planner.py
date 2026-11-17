@@ -114,6 +114,26 @@ def _required_first(observation):
     return None
 
 
+def order_rule_admitted(observation):
+    """Is an admitted experience entry present that asks for the order rule?
+
+    WHY THE LIVE PATH IS GATED ON THIS: the rule below was once wired straight into
+    validate_plan, which made the planner REFUSE plans it used to accept - a live behaviour
+    change with no entry behind it. Nothing could review it, probe it for misuse, record an
+    outcome for it, or retire it, because there was no entry to hang any of that on. The
+    master goal's fourth step is explicit that a change is validated and versioned BEFORE it
+    is enabled; a rule that is live but unreviewed is the case that step exists to forbid.
+
+    An entry reaches the planner through the observation's "experience" list, which is the
+    same channel describe() reads. So the rule fires exactly when a delivered entry asks for
+    it, and never on its own.
+    """
+    for item in (observation or {}).get("experience") or []:
+        if isinstance(item, dict) and item.get("_entry_id"):
+            return True
+    return False
+
+
 def check_plan_order(observation, moves):
     """Return a problem string when the plan reverses an order the instruction fixed.
 
@@ -171,9 +191,12 @@ def validate_plan(reply, observation):
     moved = [c["object"] for c in clean]
     if not moved:
         problems.append("no valid moves after validation")
-    order_problem = check_plan_order(observation, clean)
-    if order_problem:
-        problems.append(order_problem)
+    # GATED ON AN ADMITTED ENTRY, not on the instruction alone. See order_rule_admitted:
+    # enabling this unconditionally made a live, unreviewed, unretirable behaviour change.
+    if order_rule_admitted(observation):
+        order_problem = check_plan_order(observation, clean)
+        if order_problem:
+            problems.append(order_problem)
     return {"moves": clean, "unmoved": list(unmoved or []),
             "confidence": reply.get("confidence"),
             "uncertainty": str(reply.get("uncertainty", ""))[:300]}, problems

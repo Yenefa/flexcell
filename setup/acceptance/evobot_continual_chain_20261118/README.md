@@ -272,7 +272,29 @@ capability is what makes that visible instead of leaving it to an audit.
     objective did **not** name — **separately, never counted as coverage of the fourth
     routing.** Counting it would be the rounding-up this module exists to prevent.
 
-`verify.py` asserts **105 checks**, including that both gates really ran, that the asset
+27. **no live behaviour change without an entry behind it.** The order rule had been wired
+    **straight into `validate_plan`**, so the planner began **refusing plans it used to
+    accept** — a real behaviour change with **no entry** behind it. Nothing could review it,
+    probe it for misuse, record an outcome for it, or **retire** it, because there was no
+    entry to hang any of that on. Step 4 of the objective is explicit that a change is
+    validated and versioned **before** it is enabled.
+
+    `order_rule_admitted()` now gates the rule on a **delivered** entry (the `_entry_id`
+    marker `delivery.deliver_planner()` stamps), so "arrived" and "acts" are the same
+    channel:
+
+    | observation | planner behaviour |
+    | --- | --- |
+    | no admitted entry | **exactly as before — refuses nothing new** |
+    | a delivered entry | refuses a reversed plan |
+
+    The rule stays **directly measurable** (`check_plan_order`), because *measuring a rule
+    is not the same as enabling it.* `routing_coverage` now also reports
+    `live_rules_with_no_entry` — a rule live in the code path with nothing backing it. That
+    is **worse than an empty routing, not better**: an empty routing does nothing, while an
+    unbacked live rule changes behaviour and **cannot be retired.**
+
+`verify.py` asserts **110 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -291,7 +313,8 @@ than its measurement is revised while the lesson text stays untouched**, and tha
 the real tasks a skill was used on, each with its own three events**, and that **inert
 applications are recorded so the hit rate is not 100% by construction**, and that **the reported rate is computed in
 one unit rather than across two**, and that **the objective's four routings are reported
-one by one with a declared-but-empty destination not counted as covered**.
+one by one with a declared-but-empty destination not counted as covered**, and that **no
+rule is live in a code path without an entry admitted for it**.
 
 ---
 

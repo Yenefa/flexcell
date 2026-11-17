@@ -110,6 +110,21 @@ def test_every_routing_row_states_a_reason():
         assert row["why"].strip(), row
 
 
+def test_an_unbacked_live_rule_is_reported():
+    """A rule wired straight into the code path acts with no entry behind it. That is
+    WORSE than an empty routing, not better: it cannot be reviewed, probed for misuse,
+    recorded, revised or retired, because there is no entry to hang any of that on."""
+    report = routing_coverage.coverage(RECORDS)
+    assert "live_rules_with_no_entry" in report
+    # the planner's order rule is gated on an admitted entry, so this must be empty
+    assert report["live_rules_with_no_entry"] == []
+
+
+def test_the_claim_says_an_unbacked_rule_is_worse_than_an_empty_routing():
+    report = routing_coverage.coverage(RECORDS)
+    assert "worse than an empty routing" in report["claim"]
+
+
 def test_the_claim_says_what_is_not_counted():
     report = routing_coverage.coverage(RECORDS)
     assert "separately" in report["claim"]
