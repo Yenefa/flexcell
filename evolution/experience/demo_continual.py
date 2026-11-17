@@ -41,6 +41,7 @@ import ledger  # noqa: E402
 import lifecycle  # noqa: E402
 import postmortem  # noqa: E402
 import retrieve  # noqa: E402
+import candidate_search  # noqa: E402
 import schema  # noqa: E402
 import skill_asset  # noqa: E402
 import store  # noqa: E402
@@ -293,6 +294,23 @@ def run(dest=OUT):
                   "dev_split_produced": len(dev_entries),
                   "generator_refused": [s for s, v in pm_report["signatures"].items()
                                         if not v["built"]]})
+
+    # 2b -- THE SKILL PARAMETER IS SELECTED, NOT TYPED. Every parameter in this package
+    # used to be a hand-picked constant. A parameter nobody compared against an alternative
+    # is a guess wearing a number, and the comparison is free when the feedback is already
+    # archived. Feasibility is a hard filter and cost is the objective among the feasible -
+    # not a weighted sum, because a weight would let a cheap candidate buy its way past a
+    # violated clearance contract.
+    selection, board = candidate_search.search()
+    _write(os.path.join(dest, "02b_candidate_board.json"),
+           {"selected": selection, "board": board})
+    steps.append({"step": "candidate_search",
+                  "selected": selection["candidate"] if selection else None,
+                  "board": [{"candidate": r["candidate"], "admissible": r["admissible"],
+                             "fixed": r["fixed"], "plans": r["plans"],
+                             "clearance_violations": r["clearance_violations"],
+                             "mean_displacement_m": r["mean_displacement_m"],
+                             "why": r["why"]} for r in board]})
 
     # 3 -- effect, executed not asserted, for BOTH delivery addresses
     probes = {}

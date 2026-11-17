@@ -275,6 +275,33 @@ def main():
             not _cites_sealed(r) for r in generated_rows
             if (r.get("evidence") or {}).get("evidence_split") == "dev")
 
+        # 14 -- THE SKILL PARAMETER WAS SELECTED, NOT TYPED. A parameter nobody compared
+        # against an alternative is a guess wearing a number; the comparison is free when
+        # the feedback is already archived.
+        board = json.loads((tmp / "02b_candidate_board.json").read_text(encoding="utf-8"))
+        rows = board["board"]
+        checks["several_candidates_were_compared"] = len(rows) >= 4
+        checks["a_candidate_was_selected"] = board.get("selected") is not None
+        # the board must KEEP the losers, or it cannot show that anything was compared
+        checks["the_board_keeps_the_rejected_candidates"] = any(
+            not r["admissible"] for r in rows)
+        # feasibility is a hard filter, so the winner must fix every plan it was scored on
+        sel_row = board.get("selected") or {}
+        checks["the_winner_fixes_every_plan_it_was_scored_on"] = (
+            sel_row.get("fixed") == sel_row.get("plans"))
+        checks["the_winner_breaks_no_clearance_contract"] = (
+            sel_row.get("clearance_violations") == 0)
+        # cost is the OBJECTIVE among the feasible, never a term that can outvote a
+        # violated contract
+        admissible = [r for r in rows if r["admissible"]]
+        checks["the_winner_is_the_cheapest_admissible_candidate"] = bool(admissible) and (
+            sel_row.get("mean_displacement_m") == min(
+                r["mean_displacement_m"] for r in admissible))
+        # and a cheaper-but-unsafe candidate existed and lost with a stated reason
+        rejected = [r for r in rows if not r["admissible"]]
+        checks["a_rejected_candidate_states_why_it_lost"] = bool(rejected) and all(
+            r.get("why") for r in rejected)
+
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
             "batch": HERE.name,
@@ -284,6 +311,11 @@ def main():
             "chain_message": msg,
             "measured": {"deliveries": {label: p["verdict"]
                                         for label, p in probes.items()},
+                         "selected_skill_parameter": board.get("selected", {}).get(
+                             "candidate"),
+                         "candidates_compared": len(rows),
+                         "candidates_rejected": sum(1 for r in rows
+                                                    if not r["admissible"]),
                          "acting_label": acting_label,
                          "acting_consumer": routes.get(acting_label),
                          "spread_separation_m": e2.get("applied_min_separation_m"),

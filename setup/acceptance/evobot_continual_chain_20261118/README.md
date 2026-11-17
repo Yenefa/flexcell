@@ -77,13 +77,22 @@ capability is what makes that visible instead of leaving it to an audit.
     case. Fixed by skipping a group whose current separation already meets `spread_step`;
     the condition and its probe (`spacing.already_satisfied`) now guard the regression.
 
-`verify.py` asserts **46 checks**, including that both gates really ran, that the asset
+14. **the skill parameter is selected, not typed.** `candidate_search.py` compares 6
+    candidates over the archive under a hard feasibility filter (fix every plan, break no
+    clearance contract, never reduce separation) with cost as the objective among the
+    feasible. The cheapest-by-design candidate — `minimal_move`, 17 mm of displacement
+    instead of 53 mm on the two-stage case it was written for — is **rejected**: it puts a
+    landing 46.1 mm from box_b, which is the 2026-11-18 defect. Judging it by its cost on
+    the case it was designed for would have shipped it. Rejected candidates stay on the
+    board with their numbers and the reason.
+
+`verify.py` asserts **53 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
 from**, that **two distinct consumers act**, that the ACTIVE set spans **both splits**, and
 that **an already-conforming plan is a declared invalid condition whose probe reports
-INERT**.
+INERT**, and that **several candidates were compared with the losers kept and explained**.
 
 ---
 

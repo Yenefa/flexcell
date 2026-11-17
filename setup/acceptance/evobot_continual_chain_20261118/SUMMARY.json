@@ -56,6 +56,66 @@
       "step": "entries_built"
     },
     {
+      "board": [
+        {
+          "admissible": true,
+          "candidate": "respread/step=0.090",
+          "clearance_violations": 0,
+          "fixed": 33,
+          "mean_displacement_m": 0.0475,
+          "plans": 33,
+          "why": "admissible"
+        },
+        {
+          "admissible": true,
+          "candidate": "respread/step=0.090/cm=0.060",
+          "clearance_violations": 0,
+          "fixed": 33,
+          "mean_displacement_m": 0.0475,
+          "plans": 33,
+          "why": "admissible"
+        },
+        {
+          "admissible": true,
+          "candidate": "respread/step=0.095",
+          "clearance_violations": 0,
+          "fixed": 33,
+          "mean_displacement_m": 0.0497,
+          "plans": 33,
+          "why": "admissible"
+        },
+        {
+          "admissible": true,
+          "candidate": "respread/step=0.100",
+          "clearance_violations": 0,
+          "fixed": 33,
+          "mean_displacement_m": 0.052,
+          "plans": 33,
+          "why": "admissible"
+        },
+        {
+          "admissible": true,
+          "candidate": "respread/step=0.110",
+          "clearance_violations": 0,
+          "fixed": 33,
+          "mean_displacement_m": 0.0565,
+          "plans": 33,
+          "why": "admissible"
+        },
+        {
+          "admissible": false,
+          "candidate": "minimal_move/step=0.090",
+          "clearance_violations": 28,
+          "fixed": 33,
+          "mean_displacement_m": 0.0816,
+          "plans": 33,
+          "why": "28 plan(s) end up inside the clearance contract"
+        }
+      ],
+      "selected": "respread/step=0.090",
+      "step": "candidate_search"
+    },
+    {
       "changed": {
         "E1": false,
         "E2": true,
