@@ -85,18 +85,67 @@ def test_gate_reverts_on_a_new_failure():
     assert result["new_failures"] == ["evobot_spacing_fix_20261111"]
 
 
-def test_a_baselined_failure_is_not_a_reason_to_revert(tmp_path):
+def test_the_gate_scope_is_every_verifier_not_a_pinned_pair():
+    """A pin naming 2 of 70 made "nothing that used to work stopped working" cover 2."""
+    names = regression.all_verifiers()
+    pinned = {n for v in regression.CONSUMER_VERIFIERS.values() for n in v}
+    assert len(names) > len(pinned)
+    assert pinned.issubset(set(names))
+
+
+def test_the_verifier_that_contains_the_gate_is_excluded_and_named():
+    """Otherwise the gate re-runs itself and reports a REVERT caused by recursion."""
+    assert "evobot_continual_chain_20261118" in regression.SELF_VERIFIERS
+    assert "evobot_continual_chain_20261118" not in regression.all_verifiers()
+
+
+def test_the_widened_scope_catches_a_regression_the_old_pin_would_miss(tmp_path):
+    """The pin named 2 verifiers. A break in any of the other 68 was invisible to it."""
+    import subprocess as sp
+    names = ("evobot_fake_a_20261111", "evobot_fake_b_20261111")
+    for n in names:
+        d = tmp_path / n
+        d.mkdir()
+        (d / "verify.py").write_text("import sys; sys.exit(0)", encoding="utf-8")
     known = tmp_path / "known.json"
-    # every verifier in this consumer's pinned subset must be baselined, or the unlisted
-    # one counts as a NEW failure - which is the gate working, not a false alarm
-    known.write_text(json.dumps({"failures": [
-        {"verifier": v} for v in regression.CONSUMER_VERIFIERS["spread_policy"]]}),
-        encoding="utf-8")
+    known.write_text(json.dumps({"failures": []}), encoding="utf-8")
+    assert regression.check({"consumer": "executor_recovery"}, acceptance=str(tmp_path),
+                            known_path=str(known))["verdict"] == "KEEP"
+    # break the one the pin never named
+    (tmp_path / names[1] / "verify.py").write_text("import sys; sys.exit(1)",
+                                                   encoding="utf-8")
+    result = regression.check({"consumer": "executor_recovery"},
+                              acceptance=str(tmp_path), known_path=str(known))
+    assert result["verdict"] == "REVERT"
+    assert result["new_failures"] == [names[1]]
+
+
+def test_a_baselined_verifier_that_recovers_is_reported(tmp_path):
+    """A stale baseline entry must be visible, or it becomes a permanent excuse."""
+    known = tmp_path / "known.json"
+    known.write_text(json.dumps({"failures": [{"verifier": "evobot_ok_20261111"}]}),
+                     encoding="utf-8")
+    result = regression.check({"consumer": "spread_policy"}, known_path=str(known),
+                              runner=lambda name, acc: (True, "ok"))
+    assert result["verdict"] == "KEEP"
+    assert "now pass" in result["why"]
+
+
+def test_a_baselined_failure_is_not_a_reason_to_revert(tmp_path):
+    """EVERY verifier in scope must be baselined, not just the consumer's pin.
+
+    The scope is the whole checkout now, so a baseline covering only CONSUMER_VERIFIERS
+    would leave the rest as new failures - which is the gate working, not a false alarm.
+    """
+    known = tmp_path / "known.json"
+    everything = regression.all_verifiers()
+    assert len(everything) > 2, "scope should be every verifier, not a pinned pair"
+    known.write_text(json.dumps({"failures": [{"verifier": v} for v in everything]}),
+                     encoding="utf-8")
     result = regression.check({"consumer": "spread_policy"}, known_path=str(known),
                               runner=lambda name, acc: (False, "pre-existing"))
     assert result["verdict"] == "KEEP"
-    assert sorted(result["baselined"]) == sorted(
-        regression.CONSUMER_VERIFIERS["spread_policy"])
+    assert sorted(result["baselined"]) == sorted(everything)
 
 
 def test_a_missing_baseline_is_unknown_not_a_pass(tmp_path):

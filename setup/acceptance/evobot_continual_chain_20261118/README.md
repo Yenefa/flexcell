@@ -120,7 +120,22 @@ capability is what makes that visible instead of leaving it to an audit.
     the correction exactly one genuine reordering remains, and `MIN_OCCURRENCES` correctly
     refuses it.
 
-`verify.py` asserts **68 checks**, including that both gates really ran, that the asset
+18. **the regression gate's scope is the whole checkout, not a pinned pair.** It pinned
+    **2 verifiers out of 70**, so *"nothing that used to work stopped working"* was a claim
+    about 2 checks — an entry breaking any of the other 68 would have been reported
+    **KEEP**. Widening it immediately exposed a second defect: the gate ran **every**
+    verifier including the chain verifier that contains it, so it re-ran itself and the
+    only "new failure" reported was **the verifier containing the gate** — a REVERT caused
+    by **recursion**, not by a regression. Both are fixed: `all_verifiers()` is the scope,
+    and `SELF_VERIFIERS` is an explicit named exclusion (a glob would quietly grow into
+    "skip whatever is inconvenient"). The 18 verifiers that fail are **measured** to fail
+    identically on PR base `39016694`; each baseline entry carries `measured_on`, a
+    `classification`, why it cannot be attributed to any entry, and what would fix it.
+    Result: **52 pass, 18 baselined, 0 new failures, 69 ran**. The gate requires **no new
+    failures**, not a green repository — a gate that requires the impossible gets switched
+    off, which had already happened here once.
+
+`verify.py` asserts **73 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -130,7 +145,8 @@ INERT**, and that **several candidates were compared with the losers kept and ex
 **the skill fixes at least one task family other than its source while making nothing
 worse**, and that **every active entry reached its consumer** while an entry with no
 actionable text is reported DROPPED rather than accepted, and that **an order-clause
-failure is told apart from a truncated run**.
+failure is told apart from a truncated run**, and that **the gate covers every verifier
+while not running the one that contains it**.
 
 ---
 

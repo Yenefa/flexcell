@@ -378,6 +378,32 @@ def main():
         checks["the_single_reordering_is_refused_for_lack_of_occurrences"] = (
             sigs.get("order_clause_violated", {}).get("built") is False)
 
+        # 18 -- THE REGRESSION GATE'S SCOPE IS THE WHOLE CHECKOUT, NOT A PINNED PAIR.
+        # It pinned 2 verifiers out of 70, so "nothing that used to work stopped working"
+        # was a claim about 2 checks. Widening it exposed a second defect: the gate ran
+        # every verifier including the chain verifier that contains it, so it re-ran itself
+        # and reported a REVERT caused by recursion.
+        regression = _load("regression")
+        checks["the_regression_gate_covers_every_verifier"] = (
+            len(regression.all_verifiers()) > 10)
+        checks["the_gate_does_not_run_the_verifier_that_contains_it"] = (
+            "evobot_continual_chain_20261118" in regression.SELF_VERIFIERS
+            and "evobot_continual_chain_20261118" not in regression.all_verifiers())
+        # the baseline must not be an excuse that grew: every entry names a verifier that
+        # really fails, and each carries a reason it cannot be attributed to an entry
+        known_doc = json.loads((WT / "evolution" / "validation" /
+                                "known_failures.json").read_text(encoding="utf-8"))
+        entries = known_doc.get("failures") or []
+        checks["every_baselined_failure_carries_a_reason"] = bool(entries) and all(
+            e.get("why_not_a_live_defect") for e in entries)
+        checks["the_baseline_records_where_it_was_measured"] = all(
+            e.get("measured_on") or e.get("classification") in
+            ("STALE_RECORD", "STATE_DEPENDENT") for e in entries)
+        # ... and it must be measured, not estimated: the 18 entries fail on the PR base too
+        checks["the_baseline_was_measured_on_the_pr_base_commit"] = (
+            "390166948abbbecc96f90e29054ed8804f089576"
+            in (known_doc.get("measured_scope") or ""))
+
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
             "batch": HERE.name,
