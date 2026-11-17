@@ -25,7 +25,16 @@
     "demo_runs.jsonl",
     "sim/episodes"
   ],
-  "started_evidence": ["task.out", "sim/episodes/*.json", "*.jsonl"],
+  "nested_run_markers": ["task.stdout", "result.json", "episodes"],
+  "container_markers": ["window.json", "declaration.json"],
+  "search_prefixes": ["", "skills"],
+  "started_evidence": [
+    "task.out",
+    "task.stdout",
+    "sim/episodes/*.json",
+    "episodes/*.json",
+    "*.jsonl"
+  ],
   "crash_markers": [
     "Traceback (most recent call last)",
     "unhandled exception",
@@ -45,6 +54,7 @@
       "id": "task_result",
       "kind": "result_json",
       "path": "task.out",
+      "alt_paths": ["task.stdout"],
       "marker": "RESULT ",
       "phases": ["success", "failure"],
       "reason": "no parseable RESULT line in task.out: the task's own outcome is unrecorded and runtime/recovery reads task.out"
@@ -64,6 +74,7 @@
         "crash_detail.txt",
         "failure_evidence.json:detail",
         "task.out:detail",
+        "task.stdout:detail",
         "launch.out:markers"
       ],
       "reason": "no crash/failure detail retained anywhere (checked crash_detail.txt, failure_evidence.json:detail, task.out RESULT detail and launch.out crash markers)"
@@ -72,6 +83,7 @@
       "id": "episode_records",
       "kind": "glob_json",
       "path": "sim/episodes/*.json",
+      "alt_paths": ["episodes/*.json"],
       "min_matches": 1,
       "validate": "episode",
       "phases": ["success", "failure"],
@@ -81,6 +93,7 @@
       "id": "decision_log",
       "kind": "jsonl",
       "path": "decisions.jsonl",
+      "alt_paths": ["skills/decisions.jsonl"],
       "min_records": 1,
       "phases": ["success", "failure"],
       "reason": "no decision record: which decision was dispatched, on which policy input, is unrecorded"
