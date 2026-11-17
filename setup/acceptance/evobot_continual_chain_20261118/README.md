@@ -228,7 +228,23 @@ capability is what makes that visible instead of leaving it to an audit.
     **excluded the entire development split** (`T01-train-seed1000`), so a "which task"
     check could pass while half the archive was invisible to it.
 
-`verify.py` asserts **98 checks**, including that both gates really ran, that the asset
+25. **a rate must be computed in one unit.** The hit rate reported last round was **2.4%**
+    — and wrong, in a specific way: `fixed` was counted **per task instance** while
+    `untouched` was counted **per plan file**, and **the same task appears in several
+    batches**, so the plan-file denominator is about **2.7×** the instance denominator.
+
+    | basis | denominator | rate |
+    | --- | --- | --- |
+    | mixed (as reported) | 7 / (7+287) | **2.4%** ✗ |
+    | per **instance** | 7 / 109 | **6.4%** ✓ |
+    | per **plan file** | 7 / 294 | 2.4% (a *file* rate, not an instance rate) |
+
+    Both counts are useful and they are **not interchangeable** — so the audit now carries
+    **both denominators** and the hit rate uses the one that matches its numerator
+    (`instance_hit_rate`). Fixing the wins-only bias last round was not enough:
+    **the surviving number was itself two units welded together.**
+
+`verify.py` asserts **101 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -245,7 +261,8 @@ order while staying inert when the instruction fixes none**, and that **a record
 than its measurement is revised while the lesson text stays untouched**, and that
 **an over-claiming record is caught in the other direction too**, and that **the ledger names
 the real tasks a skill was used on, each with its own three events**, and that **inert
-applications are recorded so the hit rate is not 100% by construction**.
+applications are recorded so the hit rate is not 100% by construction**, and that **the reported rate is computed in
+one unit rather than across two**.
 
 ---
 

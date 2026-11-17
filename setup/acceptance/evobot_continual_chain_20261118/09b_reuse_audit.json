@@ -6,8 +6,11 @@
       "T01_multi_object_sorting": {
         "instances": [],
         "made_worse": 0,
+        "made_worse_instances": 0,
         "newly_fixed_instances": 0,
         "refused": 0,
+        "refused_instances": 0,
+        "untouched_instances": 3,
         "untouched_plans": 11
       },
       "T03_ordered": {
@@ -15,29 +18,41 @@
           "HO-13c5efca228e"
         ],
         "made_worse": 0,
+        "made_worse_instances": 0,
         "newly_fixed_instances": 1,
         "refused": 0,
+        "refused_instances": 0,
+        "untouched_instances": 1,
         "untouched_plans": 1
       },
       "T04_duplicates": {
         "instances": [],
         "made_worse": 0,
+        "made_worse_instances": 0,
         "newly_fixed_instances": 0,
         "refused": 0,
+        "refused_instances": 0,
+        "untouched_instances": 2,
         "untouched_plans": 6
       },
       "T05_relay": {
         "instances": [],
         "made_worse": 0,
+        "made_worse_instances": 0,
         "newly_fixed_instances": 0,
         "refused": 0,
+        "refused_instances": 0,
+        "untouched_instances": 6,
         "untouched_plans": 24
       },
       "T06_revisit": {
         "instances": [],
         "made_worse": 0,
+        "made_worse_instances": 0,
         "newly_fixed_instances": 0,
         "refused": 0,
+        "refused_instances": 0,
+        "untouched_instances": 1,
         "untouched_plans": 4
       },
       "T12_triple_revisit": {
@@ -47,8 +62,11 @@
           "HO-fd5737f932db"
         ],
         "made_worse": 0,
+        "made_worse_instances": 0,
         "newly_fixed_instances": 3,
         "refused": 0,
+        "refused_instances": 0,
+        "untouched_instances": 32,
         "untouched_plans": 96
       },
       "T13_geometric_conditional": {
@@ -58,22 +76,31 @@
           "HO-b81a5ae02d6d"
         ],
         "made_worse": 0,
+        "made_worse_instances": 0,
         "newly_fixed_instances": 3,
         "refused": 0,
+        "refused_instances": 0,
+        "untouched_instances": 32,
         "untouched_plans": 101
       },
       "T14_ordered_pair": {
         "instances": [],
         "made_worse": 0,
+        "made_worse_instances": 0,
         "newly_fixed_instances": 0,
         "refused": 0,
+        "refused_instances": 0,
+        "untouched_instances": 16,
         "untouched_plans": 35
       },
       "UNKNOWN": {
         "instances": [],
         "made_worse": 0,
+        "made_worse_instances": 0,
         "newly_fixed_instances": 0,
         "refused": 0,
+        "refused_instances": 0,
+        "untouched_instances": 9,
         "untouched_plans": 9
       }
     },
@@ -86,6 +113,9 @@
       "T12_triple_revisit",
       "T13_geometric_conditional"
     ],
+    "instance_hit_rate": 0.0642,
+    "instances_offered": 109,
+    "plans_offered": 294,
     "source_family": "T13_geometric_conditional",
     "source_task": "HO-90899d657e68",
     "total_instances_fixed": 7,

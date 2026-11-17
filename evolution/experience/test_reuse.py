@@ -191,6 +191,55 @@ def test_every_outcome_row_has_a_matching_applied_row(tmp_path):
             assert (row["run_id"], "APPLIED") in applied, row["run_id"]
 
 
+def test_the_report_never_divides_across_units():
+    """fixed is per task instance; untouched was once per plan file.
+
+    The same task appears in several batches, so the plan-file denominator is about 3x the
+    instance denominator. A rate built from one of each understated the effect by that
+    factor - a real headline said 2.4% where the honest figure was 6.4%.
+    """
+    assets = skill_asset.read(ASSETS)
+    report = reuse.audit(assets[0], acceptance=os.path.join(WT, "setup", "acceptance"),
+                         source_task=SOURCE)
+    assert report["instances_offered"] > 0
+    assert report["plans_offered"] > report["instances_offered"], \
+        "if these were equal the batch duplication would be untested"
+    fixed = report["total_instances_fixed"]
+    assert abs(report["instance_hit_rate"] - fixed / float(report["instances_offered"])) < 1e-3
+
+
+def test_the_instance_hit_rate_differs_from_the_plan_rate():
+    """Guard against the two being silently interchangeable."""
+    assets = skill_asset.read(ASSETS)
+    report = reuse.audit(assets[0], acceptance=os.path.join(WT, "setup", "acceptance"),
+                         source_task=SOURCE)
+    offered_plans = report["plans_offered"]
+    fixed = report["total_instances_fixed"]
+    plan_rate = fixed / float(offered_plans)
+    assert abs(plan_rate - report["instance_hit_rate"]) > 0.01, \
+        "a same-unit denominator would make this test vacuous"
+
+
+def test_untouched_is_counted_per_instance_and_per_plan():
+    assets = skill_asset.read(ASSETS)
+    report = reuse.audit(assets[0], acceptance=os.path.join(WT, "setup", "acceptance"),
+                         source_task=SOURCE)
+    plans = sum(r["untouched_plans"] for r in report["families"].values())
+    instances = sum(r["untouched_instances"] for r in report["families"].values())
+    assert plans > instances > 0
+
+
+def test_the_instance_and_plan_offered_counts_agree_on_totals():
+    """Each offered plan is exactly one of fixed/untouched/worse/refused, and each offered
+    instance likewise - so both totals must be internally consistent."""
+    assets = skill_asset.read(ASSETS)
+    report = reuse.audit(assets[0], acceptance=os.path.join(WT, "setup", "acceptance"),
+                         source_task=SOURCE)
+    per_plans = sum(r["newly_fixed_instances"] + r["untouched_plans"] + r["made_worse"]
+                    + r["refused"] for r in report["families"].values())
+    assert report["plans_offered"] == per_plans
+
+
 def test_recording_off_writes_nothing(tmp_path):
     """The measurement must stay usable as a pure report."""
     path = tmp_path / "l.jsonl"

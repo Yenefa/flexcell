@@ -575,6 +575,22 @@ def main():
         checks["the_recorded_hit_rate_is_not_flattered"] = (
             len(applied_rows) >= 10
             and len(changed_rows) < len(applied_rows))
+        # 25 -- A RATE MUST BE COMPUTED IN ONE UNIT. fixed is counted per task instance and
+        # untouched was counted per PLAN FILE, and dividing one by the other reported a 2.4%
+        # effect for a 6.4% one: the same task appears in several batches, so the plan-file
+        # denominator is about 3x too big. The audit now carries both counts and both rates.
+        per_asset = audit[0] if audit else {}
+        checks["the_reuse_report_carries_a_rate_it_can_defend"] = (
+            per_asset.get("instances_offered", 0) > 0
+            and per_asset.get("plans_offered", 0) > per_asset.get("instances_offered", 0))
+        # the two denominators must actually differ, or the distinction is untested
+        checks["the_plan_and_instance_denominators_are_not_the_same_number"] = (
+            per_asset.get("plans_offered") != per_asset.get("instances_offered"))
+        # and the reported rate must be the instance one, not a cross-unit fraction
+        fixed = per_asset.get("total_instances_fixed") or 0
+        offered = per_asset.get("instances_offered") or 1
+        checks["the_reported_hit_rate_uses_matching_units"] = (
+            abs((per_asset.get("instance_hit_rate") or 0) - fixed / float(offered)) < 1e-3)
 
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",

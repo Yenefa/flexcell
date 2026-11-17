@@ -143,9 +143,21 @@ def audit(asset, acceptance=None, source_task=None, ledger_path=None,
     """
     import ledger as ledger_mod
     root = acceptance or os.path.join(WT, "setup", "acceptance")
+    # TWO COUNTERS PER OUTCOME: one per PLAN FILE, one per TASK INSTANCE.
+    #
+    # WHY BOTH: fixed was always counted per instance (the comment below says why) while
+    # untouched was counted per plan file. Dividing one by the other produced a headline of
+    # "2.4% of plans changed" from 7 instances over 287 plan files - two different units in
+    # one fraction. The same task appears in several batches, so the plan-file denominator is
+    # about 3x the instance denominator and the ratio was wrong by the same factor.
+    # A per-plan number and a per-instance number are both useful and they are NOT
+    # interchangeable, so the report carries both and never divides across them.
     per_family = collections.defaultdict(lambda: {"fixed": 0, "untouched": 0,
                                                   "worse": 0, "refused": 0,
-                                                  "instances": set()})
+                                                  "instances": set(),
+                                                  "untouched_instances": set(),
+                                                  "worse_instances": set(),
+                                                  "refused_instances": set()})
     seen = set()
     for path in glob.glob(os.path.join(root, "**", "plan*.json"), recursive=True):
         try:
@@ -167,6 +179,7 @@ def audit(asset, acceptance=None, source_task=None, ledger_path=None,
             out = skill_asset.call(asset, doc)
         except Exception:  # noqa: BLE001 - a refusal is data, not a crash
             per_family[family]["refused"] += 1
+            per_family[family]["refused_instances"].add(task_id)
             if record and ledger_path and entry_id:
                 # A refusal is neither a win nor an inert application: the skill declined to
                 # run. Recorded as UNKNOWN so it is visible but is not scored as an outcome -
@@ -179,6 +192,7 @@ def audit(asset, acceptance=None, source_task=None, ledger_path=None,
         after = _min_sep(after_stages)
         if _pts(after_stages) == _pts(stages):
             per_family[family]["untouched"] += 1
+            per_family[family]["untouched_instances"].add(task_id)
             # AN INERT APPLICATION IS A RESULT AND MUST BE RECORDED. The ledger's own
             # docstring warns about the opposite error - "one lesson was retrieved for every
             # task and changed no plan" - and recording only the winners produces its mirror
@@ -191,6 +205,7 @@ def audit(asset, acceptance=None, source_task=None, ledger_path=None,
             continue
         if after is not None and before is not None and after < before - 1e-9:
             per_family[family]["worse"] += 1
+            per_family[family]["worse_instances"].add(task_id)
             if record and ledger_path and entry_id:
                 _record_task_use(ledger_mod, ledger_path, entry_id, task_id, family,
                                  before, after, changed=True, outcome="WORSE")
@@ -213,8 +228,11 @@ def audit(asset, acceptance=None, source_task=None, ledger_path=None,
     for family, row in per_family.items():
         families[family] = {"newly_fixed_instances": row["fixed"],
                             "untouched_plans": row["untouched"],
+                            "untouched_instances": len(row["untouched_instances"]),
                             "made_worse": row["worse"],
+                            "made_worse_instances": len(row["worse_instances"]),
                             "refused": row["refused"],
+                            "refused_instances": len(row["refused_instances"]),
                             "instances": sorted(row["instances"])}
     source_family = template_of(source_task, acceptance) if source_task else None
     transferred = sorted(f for f, r in families.items()
@@ -230,6 +248,22 @@ def audit(asset, acceptance=None, source_task=None, ledger_path=None,
         "total_instances_fixed": sum(r["newly_fixed_instances"]
                                      for r in families.values()),
         "total_made_worse": sum(r["made_worse"] for r in families.values()),
+        # THE RATE MUST BE COMPUTED IN ONE UNIT. fixed is per instance, so its denominator
+        # is per instance; using the plan-file count would mix units and misstate the rate
+        # by about the batch-duplication factor.
+        "plans_offered": sum(r["newly_fixed_instances"] + r["untouched_plans"]
+                             + r["made_worse"] + r["refused"]
+                             for r in families.values()),
+        "instances_offered": sum(r["newly_fixed_instances"] + r["untouched_instances"]
+                                 + r["made_worse_instances"] + r["refused_instances"]
+                                 for r in families.values()),
+        "instance_hit_rate": (
+            round(sum(r["newly_fixed_instances"] for r in families.values())
+                  / float(max(1, sum(r["newly_fixed_instances"]
+                                     + r["untouched_instances"]
+                                     + r["made_worse_instances"]
+                                     + r["refused_instances"]
+                                     for r in families.values()))), 4)),
         "claim": ("cross-FAMILY reuse only; every instance in this archive is held-out, "
                   "so this is NOT cross-split transfer"),
     }

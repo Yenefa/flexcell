@@ -590,13 +590,16 @@ def run(dest=OUT):
     # The DENOMINATOR, not only the wins. A skill offered to 294 plans and changing 7 of
     # them is a very different object from one that changed every plan it saw, and a ledger
     # that recorded only the 7 would report a 100% hit rate for a 2.4% effect.
+    # THE RATE IS REPORTED IN ONE UNIT. Both denominators are carried and neither is
+    # divided by the other: fixed is per task instance while untouched was once per plan
+    # file, and the same task appears in several batches, so a fraction built from the two
+    # understated the effect by roughly the duplication factor.
     steps.append({"step": "reuse_audit",
                   "total_instances_fixed": [r["total_instances_fixed"]
                                             for r in reuse_report],
-                  "plans_offered": [sum(v["untouched_plans"] + v["newly_fixed_instances"]
-                                        + v["made_worse"] + v["refused"]
-                                        for v in r["families"].values())
-                                    for r in reuse_report],
+                  "plans_offered": [r["plans_offered"] for r in reuse_report],
+                  "instances_offered": [r["instances_offered"] for r in reuse_report],
+                  "instance_hit_rate": [r["instance_hit_rate"] for r in reuse_report],
                   "plans_correctly_untouched": [
                       sum(v["untouched_plans"] for v in r["families"].values())
                       for r in reuse_report],
