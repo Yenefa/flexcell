@@ -70,7 +70,7 @@
 ## 6. 开放问题（如实留痕，未擅自改）
 
 - LONG_1 原生归档不含三个旧工具认识的日志名，三项检查记 `NOT_APPLICABLE` + `INPUT_ABSENT`，不是工具异常。
-- 仓库基线 CI 两道红灯：`offline-tests` 死在**第 15 步 `pilot-001 P1.0 measurement self-test`**，`sim-smoke` 死在**第 5 步 `All first-party packages, including native Gazebo code`**。纯文档 PR #256、#258 在**同一步骤**同样失败，说明与本次改动无关，属基线分支既有问题。
+- 仓库两道 CI 红灯定位到步骤：`offline-tests` 死在**第 15 步 `pilot-001 P1.0 measurement self-test`**，`sim-smoke` 死在**第 5 步 `All first-party packages, including native Gazebo code`**。纯文档 PR #256、#258（同为 `chore/team-handoff-20261116` 的基线）在**同一步骤**同样失败；而以 `main` 为基线的 PR #268 上这两项检查均为 success。故红灯来自交接分支的内容演进（`experiments/pilot-001` 的 pilot 代码更新后未同步其自检），不是本次改动，也不在 `main` 上。
 - `scripts/run_log_audit.py`、`scripts/test_run_log_audit.py`、`config/run_log_required.json` 不在 B 槽位的「独占范围」内。B 文档允许修改旧工具但要求「先提独立修复 PR」；这两处修复是入口代码**之前**的独立提交（`27b174e4`、`5db4c5ca`），原因与兼容证据写在 `docs/OFFLINE_AUDIT.md`（提交 `63fa10ac`），未拆成第二个 PR 以避免对已开 PR 做 force-push。
 
 ## 7. 过程材料（本地，未另存副本到云端）
