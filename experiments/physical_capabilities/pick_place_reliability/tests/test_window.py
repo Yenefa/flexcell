@@ -94,6 +94,9 @@ class SourceScopeTest(unittest.TestCase):
         self.assertIn('scripts/sim_smoke.py', rw.source_hashes())
 
     def test_configuration_is_hashed(self):
+        config = pathlib.Path(rw.ROOT) / 'config'
+        if not config.is_dir():
+            self.skipTest('this checkout has no config/ directory')
         hashes = rw.source_hashes()
         self.assertTrue(any(key.startswith('config/') for key in hashes))
 
@@ -576,6 +579,68 @@ class ClassifyTest(unittest.TestCase):
         result = dict(case='normal', status='PASS',
                       task=dict(outcome='OUTCOME_SUCCEEDED'))
         self.assertEqual(rw.classify(result, 0), 'OK')
+
+
+class ProbeTest(unittest.TestCase):
+    """The carry-offset probe is opt-in and read-only: it cannot fail a slot."""
+
+    STUB = (
+        "import json, pathlib, sys\n"
+        "out = pathlib.Path(sys.argv[sys.argv.index('--out') + 1])\n"
+        "run = out / 'run-x'\n"
+        "run.mkdir(parents=True, exist_ok=True)\n"
+        "(run / 'result.json').write_text(json.dumps(dict(\n"
+        "    case='normal', status='PASS',\n"
+        "    task=dict(outcome='OUTCOME_SUCCEEDED', final_position_error_m=0.008))))\n"
+    )
+
+    def setUp(self):
+        self.tmp = tempfile.TemporaryDirectory()
+        self.root = pathlib.Path(self.tmp.name)
+        self.entry = self.root / 'stub_sim.py'
+        self.entry.write_text(self.STUB)
+        self.prereg = dict(
+            slots=[dict(label='A', case='normal'), dict(label='B', case='normal')],
+            slot_timeout_s=10, window_budget_s=1000,
+            backend='velocity_servo', skill_backend='legacy',
+            experiment='unit-test', carry_probe_settle_s=0.2)
+
+    def tearDown(self):
+        self.tmp.cleanup()
+
+    def _run(self, prereg):
+        def command(label, case, slot_out, backend, skill_backend):
+            return [sys.executable, str(self.entry),
+                    '--out', str(slot_out), '--case', case]
+        with mock.patch.object(rw, 'slot_command', command):
+            return rw.run_window(prereg, self.root / 'out')
+
+    def test_disabled_by_default(self):
+        self.assertIsNone(rw.probe_command(dict(), self.root))
+        payload = self._run(dict(self.prereg))
+        self.assertNotIn('carry_probe', payload['results'][0])
+
+    def test_probe_runs_alongside_and_stops(self):
+        prereg = dict(self.prereg,
+                      carry_probe_command=[sys.executable, '-c',
+                                           'import time; time.sleep(30)'])
+        payload = self._run(prereg)
+
+        first = payload['results'][0]
+        self.assertEqual(first['status'], 'OK')
+        self.assertTrue(first['carry_probe']['started'])
+        self.assertIsNotNone(first['carry_probe']['exit'])
+
+    def test_probe_failure_does_not_fail_the_slot(self):
+        prereg = dict(self.prereg,
+                      carry_probe_command=[sys.executable, '-c',
+                                           'raise SystemExit(3)'])
+        payload = self._run(prereg)
+
+        first = payload['results'][0]
+        self.assertEqual(first['status'], 'OK')
+        self.assertEqual(first['carry_probe']['exit'], 3)
+        self.assertEqual([r['status'] for r in payload['results']], ['OK', 'OK'])
 
 
 if __name__ == '__main__':

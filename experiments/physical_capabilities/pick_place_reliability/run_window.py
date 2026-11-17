@@ -327,6 +327,65 @@ def reap(marker, grace_s=10.0):
     return len(strays), len(stubborn)
 
 
+def probe_command(prereg, slot_out):
+    """Optional read-only carry-offset probe (#261); disabled unless asked for."""
+    override = prereg.get('carry_probe_command')
+    if override:
+        return [str(part) for part in override]
+    if not prereg.get('carry_probe'):
+        return None
+    script = HERE.parent / 'carry_offset_probe' / 'probe.py'
+    if not script.is_file():
+        return None
+    return [sys.executable, str(script),
+            '--out', str(slot_out),
+            '--object', str(prereg.get('carry_object', 'target_box_a')),
+            '--rate-hz', str(prereg.get('carry_probe_rate_hz', 20)),
+            '--settle-s', str(prereg.get('carry_probe_settle_sample_s', 1.0))]
+
+
+def start_probe(prereg, slot_out, env, out, label):
+    """Start the probe next to one slot; a probe failure never fails the slot."""
+    command = probe_command(prereg, slot_out)
+    if not command:
+        return None, None, None
+    log = (Path(out) / (label + '_probe.log')).open('a')
+    try:
+        proc = subprocess.Popen(command, env=env, stdout=log,
+                                stderr=subprocess.STDOUT, start_new_session=True)
+    except OSError as exc:
+        log.write('probe start failed: %s\n' % exc)
+        log.flush()
+        return None, log, str(exc)
+    time.sleep(float(prereg.get('carry_probe_settle_s', 3.0)))
+    return proc, log, None
+
+
+def stop_probe(proc, log, grace_s=5.0):
+    info = dict(started=proc is not None, exit=None)
+    if proc is None:
+        if log is not None:
+            log.close()
+        return info
+    if proc.poll() is None:
+        try:
+            proc.send_signal(signal.SIGINT)
+        except OSError:
+            pass
+        try:
+            proc.wait(timeout=grace_s)
+        except subprocess.TimeoutExpired:
+            proc.kill()
+            try:
+                proc.wait(timeout=5)
+            except subprocess.TimeoutExpired:
+                pass
+    info['exit'] = proc.returncode
+    if log is not None:
+        log.close()
+    return info
+
+
 def stop_slot(proc, marker, cleanup, grace_s=30.0):
     """Ask one slot to exit, then stop anything that escaped its session."""
     if proc.poll() is None:
@@ -430,13 +489,21 @@ def run_window(prereg, out, runner=None):
             slot_out = out / label
             slot_id = None
             cleanup = None
+            probe_info = None
             interrupted_now = False
             if runner is None:
                 slot_id = '%s-%d-%s' % (label, index, uuid.uuid4().hex[:8])
+                env = slot_env(label, index, slot_id)
                 argv = slot_command(label, case, slot_out, backend, skill_backend)
+                probe, probe_log, probe_error = start_probe(
+                    prereg, slot_out, env, out, label)
                 with (out / (label + '_driver.log')).open('x') as log:
-                    exit_code, cleanup = run_slot(argv, slot_env(label, index, slot_id),
-                                                  log, slot_timeout, cleanup_grace)
+                    exit_code, cleanup = run_slot(argv, env, log, slot_timeout,
+                                                  cleanup_grace)
+                if probe is not None or probe_error:
+                    probe_info = stop_probe(probe, probe_log)
+                    if probe_error:
+                        probe_info['error'] = probe_error
                 if exit_code in INTERRUPT_EXITS:
                     interrupted_now = True
                     interrupted = INTERRUPT_EXITS[exit_code]
@@ -462,6 +529,8 @@ def run_window(prereg, out, runner=None):
             if cleanup is not None:
                 row['slot_id'] = slot_id
                 row['timeout_cleanup'] = cleanup
+            if probe_info is not None:
+                row['carry_probe'] = probe_info
             if runner is None:
                 signal_name = reap_after_slot(slot_id, row, label)
                 if signal_name:
