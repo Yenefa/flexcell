@@ -81,6 +81,41 @@ python3 -m scripts.offline_audit \
 `NOT_APPLICABLE` + `INPUT_ABSENT`，而不是伪装成工具异常；诊断退出码为 1
 （数据不适用），仍不是机器人任务结论。
 
+## 决策记录（自行判定，2026-11-17）
+
+交接时留下两个开放问题。按仓库内代码自行判定，不再回问；依据均可复查。
+
+### D1：四个来源结论不一致时如何取舍
+
+**决定：不取舍。四个值并列保留，工具不合成任何任务结论。**
+
+- 判定"任务通过"需要的信息不止这四项。`experiments/physical_capabilities/t08_*/run_window.py`
+  里 `passed` 的条件是：驱动退出码为 0、`runtime.agent_claimed_success` 为真、
+  `verdict.passed` 为真，并且 `verdict.evidence.gates` 恰好 9 道且全部 ok。
+- 也就是说"通过"是**验收层的合成结果**，依赖 gate 明细。审计工具拿不到 gate 明细，
+  挑任何一个来源当结论都等于伪造这个合成。
+- 因此 `source_claims.json` 只记 `kind: source_reference` 与 `conflicts`，
+  `robot_task_outcome` 恒为 `NOT_EVALUATED`；四条并列即为最终形态，不是待办。
+- 若将来需要单一权威结论，应由验收负责人指定来源，再在 `source_claims.json`
+  增加 `authoritative: <source>` 字段；不由审计工具推断。
+
+### D2：verdict.json 由哪一层生成
+
+**决定：由独立验收层生成并写入 trial 目录根；不是 run 层，也不是窗口层根。**
+
+- `setup/acceptance/evobot_t08_evidence_loop_20261112/scripts/build_trial_evidence.py`
+  中，`from benchmark.evaluators import evaluate as evaluator` 之后调用
+  `evaluator.evaluate(spec, evaluator_input)`，并把返回值写入
+  `(trial_dir / "verdict.json")`；`trial_dir` 是该脚本的第一个位置参数。
+- 历史归档印证：`setup/acceptance/evobot_t01_baseline_b_20261111/verdict.json`、
+  `evobot_t05_b_20261111/verdict.json` 均直接位于 trial 目录根。
+- `scripts/sim_window.py`（执行层）全文不含 `verdict` 字样，只调用 `sim_smoke.py`
+  跑 episode 并汇总窗口结果，不生成独立验收结论。
+- 因此审计一个 run 时在 run 层找不到 `verdict.json`，是**真实缺失**（该次执行没有走
+  独立验收），不是路径写错。工具行为维持不变，报错文案已写明
+  "a passing run must retain the independent verdict that says it passed"。
+- 若要让窗口层自动产出该文件，需要在窗口流程中显式调用验收步骤，而不是由审计工具补写。
+
 ## 边界
 
 - 不输出任何由本工具计算的任务通过结论；原验收结论如需展示必须标明是来源引用。
