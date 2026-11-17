@@ -41,7 +41,7 @@ python3 experiments/repair_eval_v02/dry_run_holdout.py   # exit 0, ok=true
 # 6) 对账
 python3 experiments/repair_eval_v02/reconcile.py \
   --manifest docs/research/evobot-paper-v02/RUN_MANIFEST.md \
-  --records experiments/repair_eval_v02/evidence/real_instances_matrix.json
+  --records experiments/repair_eval_v02/evidence/v2_matrix_n6.json --only-registered
 # 期望：verdict CONSISTENT（24 槽 / 24 记录 / 0 排除）
 ```
 
@@ -92,28 +92,18 @@ F2  D_GUIDED                 3      3    0/0     4.33
 
 ### 已经跑出来的主结果
 
-`evidence/v2_matrix_n6.json`：**48 槽，535,151 tokens**，题面切到 `task_variant=v2`（不写答案），每格 6 次重复。
+`evidence/v2_matrix_n6.json`：**48 槽，535,151 tokens**，源码 SHA `31541278…`。
 
-| 族 | A 无反馈 | B 真实反馈 | C 失配反馈 | D 真实+指导 |
+| 族 | A | B | C | D |
 | --- | --- | --- | --- | --- |
 | F1 | 6/6 | 6/6 | 6/6 | 6/6 |
 | F2 | 2/6 | 2/6 | 3/6 | 4/6 |
 
-**这是一个零结果**：F1 全过（配置键名 `object_target_box_a_size` 本身就给出物体名，静态输入对所有条件可见）；
-F2 的四条件成功率最大对比（A 对 D，2/6 对 4/6）Fisher 精确检验 **p = 0.57**，不能拒绝「四条件相同」。
-成本有差异但不单调（F2 平均 tokens：A 22,739 / B 15,542 / C 17,316 / D 13,484）。
+门判 PASS 合计 **35/48**；终态 **28 `UNKNOWN` + 20 `BUDGET_EXHAUSTED`**。
 
-### 本轮修掉的三个真缺陷
+**不主张条件差异**：协议未预注册显著性检验，事后 Fisher 检验不构成结论；D 组指导文本来自执行域，条件间比较受污染。
 
-1. **删除即通过**：配置不写 `tracked_objects` 时门回落到节点默认值（恰好是健康值），于是删掉那行就能过。新增 `TRACKED_OBJECTS_ABSENT`。
-2. **v2 试点的参数错误**：`--families` 收族名而非实例名，错传导致跑了错实例、烧掉 63,460 tokens。现在立即失败并提示合法值。
-3. **记录字段与文档不一致**：`task_variant` 原先事后塞进记录，文档声明了但记录没有。改为 `build_record` 的正式参数。
-
-### #253 现在有真实差异
-
-两个 layout（区位坐标不同）× 三个 state。定向修复在 L1/L2 都通过；**写死坐标的修复在 L2 被抓**（`LAYOUT_VALUES_CHANGED`）。
-参考修复也据此改为只替换出错那一行——整文件重写会悄悄回退另一个 layout。
-
+**派发顺序偏差**：见 MANIFEST 的偏差登记；执行器现支持 `--plan`。
 ### 明确没做的
 
 | 项 | 状态 |

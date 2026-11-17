@@ -15,6 +15,7 @@ BUDGET
 import argparse
 import hashlib
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -243,6 +244,34 @@ def run_slot(family, condition, rep, workdir, policy, donor, model, max_interact
     return record
 
 
+def plan_order(path, fam_sel, con_sel, rep_sel):
+    """The registered slot order, or the natural order when no plan is given.
+
+    The manifest fixes the dispatch order; nested loops by family then condition
+    do not reproduce it. #251 and #252 both require the registered order, so the
+    executor reads it from the manifest instead of inventing one.
+    """
+    natural = [(f, c, r) for f in fam_sel for c in con_sel for r in rep_sel]
+    if not path:
+        return natural
+    codes = {"F1": "F1_OBJECT_REGISTRATION", "F2": "F2_GOAL_MAPPING"}
+    letters = {"A": "A_STATIC", "B": "B_REAL_FEEDBACK",
+               "C": "C_MISMATCHED_FEEDBACK", "D": "D_GUIDED"}
+    tick = chr(96)
+    pattern = r"^\| \d+ \| " + tick + r"([A-Z]\d)-([A-Z])-r(\d+)" + tick
+    ordered = []
+    for line in Path(path).read_text(encoding="utf-8").splitlines():
+        m = re.match(pattern, line)
+        if not m:
+            continue
+        family = codes.get(m.group(1))
+        condition = letters.get(m.group(2))
+        rep = int(m.group(3))
+        if family in fam_sel and condition in con_sel and rep in rep_sel:
+            ordered.append((family, condition, rep))
+    return ordered or natural
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--budget", type=int, default=500000)
@@ -256,6 +285,7 @@ def main(argv=None):
     ap.add_argument("--families", default="", help="comma separated subset")
     ap.add_argument("--conditions", default="", help="comma separated subset")
     ap.add_argument("--reps", default="", help="comma separated subset")
+    ap.add_argument("--plan", default="", help="RUN_MANIFEST.md: dispatch in the registered slot order")
     args = ap.parse_args(argv)
 
     policy = vis.load_policy(ROOT / "benchmark" / "repair_eval" / "visibility_policy.json")
@@ -285,9 +315,10 @@ def main(argv=None):
                                     capture_output=True, text=True).stdout.strip() or None
         base = {"F1_OBJECT_REGISTRATION": 5100, "F2_GOAL_MAPPING": 5200}
         produced = {}          # (family, rep) -> run_id of the B slot
-        for family in fam_sel:
-            for condition in con_sel:
-                for rep in rep_sel:
+        dispatch = plan_order(args.plan, fam_sel, con_sel, rep_sel)
+        for family, condition, rep in dispatch:
+            if True:   # keeps the body indentation unchanged
+                if True:
                     if args.limit and len(rows) >= args.limit:
                         stopped = "limit %d reached" % args.limit
                         break

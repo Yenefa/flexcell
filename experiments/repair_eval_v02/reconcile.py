@@ -148,10 +148,19 @@ def main(argv=None):
     parser.add_argument("--records", default=None,
                         help="records JSON (a list, or {rows: [...]})")
     parser.add_argument("--json", action="store_true", help="machine-readable output")
+    parser.add_argument("--only-registered", action="store_true",
+                        help="ignore records for slots the manifest does not list (extra repetitions)")
     args = parser.parse_args(argv)
 
     statuses = parse_manifest(args.manifest)
     records = load_records(args.records) if args.records else []
+    if args.only_registered:
+        # A batch may carry more repetitions than the manifest registers. Those
+        # are extra samples, not registered slots: reconcile refuses them by
+        # design, and this flag says so out loud instead of loosening the check.
+        kept = [r for r in records if r.get("slot_id") in statuses]
+        skipped = len(records) - len(kept)
+        records = kept
     report = reconcile(statuses, records)
     report["manifest"] = os.path.relpath(args.manifest) if hasattr(os, "relpath") else args.manifest
     if args.json:
@@ -160,6 +169,8 @@ def main(argv=None):
         print("manifest slots   : %d" % report["manifest_slots"])
         print("records read     : %d" % report["records"])
         print("excluded non-real: %d" % len(report["excluded_not_real"]))
+        if args.only_registered:
+            print("unregistered     : %d (kept out on request)" % skipped)
         if report["drift"]:
             print("DRIFT:")
             for line in report["drift"]:

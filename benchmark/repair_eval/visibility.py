@@ -752,6 +752,7 @@ class RunBoundary:
         self._refuse_reserved_name(operation, rel_text, category)
         self._refuse_sealed_root(operation, rel_text, category, resolved)
         self._refuse_hardlink_alias(operation, rel_text, category, resolved)
+        self._refuse_resolved_material(operation, rel_text, category, resolved)
         if record_allow:
             self._record(operation, rel_text, category, "allow", root=self._root_name(category),
                          resolved=resolved)
@@ -815,6 +816,47 @@ class RunBoundary:
         if category != "verification" and _within(self.verdict, resolved):
             raise self._deny(operation, rel, category, VERDICT_MATERIAL,
                              "resolved into the independent verdict root")
+
+    def _refuse_resolved_material(self, operation, rel, category, resolved):
+        """Classify the target, not the name used to reach it.
+
+        An internal symlink named code_alias pointing at gate passes every check
+        on the requested path, then reads or writes the sealed real file. An alias
+        to telemetry lets a no-feedback condition read execution feedback. Every
+        check here runs on the resolved target.
+        """
+        for name, root in (("hidden", self.hidden), ("verdict", self.verdict),
+                           ("mismatch", self.mismatch), ("candidate", self.candidate)):
+            if root is None or not _within(root, resolved):
+                continue
+            under = resolved.relative_to(root).as_posix()
+            if name == "hidden" and category != "hidden_answer":
+                raise self._deny(operation, rel, category, HIDDEN_MATERIAL,
+                                 "resolved into the hidden material root")
+            if name == "verdict" and category != "verification":
+                raise self._deny(operation, rel, category, VERDICT_MATERIAL,
+                                 "resolved into the independent verdict root")
+            if name == "mismatch" and category not in ("execution_feedback", "diagnosis"):
+                raise self._deny(operation, rel, category, POLICY_DENIED,
+                                 "resolved into the mismatch-run material root")
+            if name != "candidate":
+                continue
+            for prefix in self.policy.sealed_prefixes:
+                bare = prefix.rstrip("/")
+                if under == bare or under.startswith(bare + "/"):
+                    raise self._deny(operation, rel, category, SEALED_MATERIAL,
+                                     "resolved into sealed path %s" % bare)
+            if (under.startswith(self.policy.paths["telemetry_prefix"])
+                    and not self.access().allows("execution_feedback")):
+                raise self._deny(operation, rel, category, POLICY_DENIED,
+                                 "resolved into execution feedback this condition cannot read")
+            if operation in ("write", "write_file"):
+                protected = self._protected_write(under)
+                if protected is not None:
+                    raise self._deny(operation, rel, category, PROTECTED_WRITE,
+                                     "resolved target is protected as %r" % protected)
+        return
+
 
     def _refuse_hardlink_alias(self, operation, rel, category, resolved):
         try:

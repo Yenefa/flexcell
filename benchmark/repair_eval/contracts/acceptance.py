@@ -90,6 +90,8 @@ REASONS = {
     # unmeasurable gates: a gap in this run decides nothing
     "GOAL_UNMEASURED": (UNKNOWN, "no measured final position for a contract object"),
     "REGRESSION_MISSING": (UNKNOWN, "fewer usable regression records than the contract requires"),
+    "REGRESSION_DUPLICATE": (UNKNOWN, "two regression records share one identity"),
+    "REGRESSION_UNNAMED": (UNKNOWN, "a regression record carries no name"),
     "PROTECTED_UNVERIFIABLE": (UNKNOWN, "no digest supplied for a protected file"),
     "EVIDENCE_MISSING": (UNKNOWN, "a required evidence artifact is absent or malformed"),
     "RUN_ID_MISMATCH": (UNKNOWN, "the run id does not match the contract's pattern"),
@@ -483,6 +485,7 @@ def evaluate(contract, candidate_state):
     # ------------------------------------------------------------- regressions
     records = state.get("regressions")
     usable = 0
+    seen_regressions = set()
     if not isinstance(records, list):
         check("regressions_present", False, "REGRESSION_MISSING",
               "no regression records declared",
@@ -495,7 +498,20 @@ def evaluate(contract, candidate_state):
                 continue
             label = record.get("name")
             if not isinstance(label, str) or not label.strip():
-                label = "#%d" % index
+                # A record without a name cannot be matched to a declared
+                # regression, and #250 measured that an unnamed PASS satisfied
+                # the minimum: two anonymous records were counted as two.
+                check("regression:#%d" % index, False, "REGRESSION_UNNAMED",
+                      "regression record %d carries no usable name" % (index,))
+                continue
+            if label in seen_regressions:
+                # The same identity twice is one regression testifying twice.
+                check("regression:" + label, False, "REGRESSION_DUPLICATE",
+                      "regression %r appears more than once; a duplicated record "
+                      "cannot satisfy a second requirement" % (label,),
+                      regression=label)
+                continue
+            seen_regressions.add(label)
             status = record.get("status")
             if status not in ("PASS", "FAIL"):
                 check("regression:" + label, False, "REGRESSION_MISSING",

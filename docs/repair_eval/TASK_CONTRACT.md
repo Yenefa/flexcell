@@ -175,6 +175,8 @@
 | `TASK_MISMATCH` | REJECT | 候选报告的是另一个任务，或回显的契约版本/摘要与本契约不符 |
 | `GOAL_UNMEASURED` | UNKNOWN | 契约物体没有测到的最终位置 |
 | `REGRESSION_MISSING` | UNKNOWN | 可用的回归记录少于契约要求 |
+| `REGRESSION_DUPLICATE` | UNKNOWN | 两条回归记录共用同一身份，只能作证一次，不能计作两条 |
+| `REGRESSION_UNNAMED` | UNKNOWN | 回归记录没有名字，无法与声明的回归对应 |
 | `PROTECTED_UNVERIFIABLE` | UNKNOWN | 保护文件没有给出摘要 |
 | `EVIDENCE_MISSING` | UNKNOWN | 必需证据缺失或格式不可用 |
 | `RUN_ID_MISMATCH` | UNKNOWN | run id 不匹配契约的 `run_id_pattern` |

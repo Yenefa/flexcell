@@ -719,3 +719,54 @@ def test_writing_the_sealed_gate_is_still_refused(policy, tmp_path):
     assert caught.value.reason == vis.PROTECTED_WRITE
     assert (tree["candidate"] / "gate" / "acceptance.py").read_text(encoding="utf-8") == (
         'PASS_IF = {"max_error": 0.02}\n')
+
+
+# ---------------------------------------------------- internal symlink aliases
+def _alias_candidate(tmp_path, name, target):
+    candidate = tmp_path / "candidate"
+    (candidate / "config").mkdir(parents=True, exist_ok=True)
+    (candidate / "config" / "week1.yaml").write_text("x: 1\n", encoding="utf-8")
+    (candidate / target).mkdir(parents=True, exist_ok=True)
+    (candidate / target / "marker.txt").write_text("SEALED", encoding="utf-8")
+    (candidate / name).symlink_to(target)
+    return candidate
+
+
+def _boundary(tmp_path, candidate, condition="A_STATIC"):
+    policy = vis.load_policy(Path(__file__).resolve().parents[2]
+                             / "benchmark" / "repair_eval" / "visibility_policy.json")
+    verdict = tmp_path / "verdict"; verdict.mkdir(exist_ok=True)
+    hidden = tmp_path / "hidden"; hidden.mkdir(exist_ok=True)
+    return vis.RunBoundary(policy, tmp_path, candidate, verdict, hidden,
+                           condition=condition, mismatch_dir=None)
+
+
+def test_an_internal_alias_to_a_sealed_directory_cannot_be_read(tmp_path):
+    candidate = _alias_candidate(tmp_path, "code_alias", "gate")
+    boundary = _boundary(tmp_path, candidate)
+    with pytest.raises(vis.AccessDenied) as caught:
+        boundary.read_text("code_alias/marker.txt", "candidate_source")
+    assert caught.value.reason in (vis.SEALED_MATERIAL, vis.PROTECTED_WRITE), caught.value.reason
+
+
+def test_an_internal_alias_to_a_sealed_directory_cannot_be_written(tmp_path):
+    candidate = _alias_candidate(tmp_path, "code_alias", "gate")
+    boundary = _boundary(tmp_path, candidate)
+    with pytest.raises(vis.AccessDenied) as caught:
+        boundary.write_text("code_alias/marker.txt", "tampered", "candidate_source")
+    assert caught.value.reason in (vis.SEALED_MATERIAL, vis.PROTECTED_WRITE), caught.value.reason
+    assert (candidate / "gate" / "marker.txt").read_text() == "SEALED"
+
+
+def test_an_internal_alias_to_telemetry_cannot_be_read_without_feedback(tmp_path):
+    candidate = _alias_candidate(tmp_path, "tel_alias", "telemetry")
+    boundary = _boundary(tmp_path, candidate, "A_STATIC")
+    with pytest.raises(vis.AccessDenied) as caught:
+        boundary.read_text("tel_alias/marker.txt", "candidate_source")
+    assert caught.value.reason == vis.POLICY_DENIED, caught.value.reason
+
+
+def test_an_internal_alias_to_telemetry_stays_readable_with_feedback(tmp_path):
+    candidate = _alias_candidate(tmp_path, "tel_alias", "telemetry")
+    boundary = _boundary(tmp_path, candidate, "B_REAL_FEEDBACK")
+    assert boundary.read_text("tel_alias/marker.txt", "candidate_source") == "SEALED"

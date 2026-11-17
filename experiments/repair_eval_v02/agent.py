@@ -112,7 +112,8 @@ class RepairAgent:
                 if not isinstance(target, (list, tuple)) or len(target) != 2:
                     continue
                 path, content = target
-                self.boundary.write_text(path, str(content))
+                self.boundary.write_text(path, str(content),
+                                         self.boundary.category_for(path))
                 self.writes.append(path)
                 continue
             if "search" in action:
@@ -121,7 +122,7 @@ class RepairAgent:
                     continue
                 path, pattern = str(target[0]), str(target[1])
                 try:
-                    body = self.boundary.read_text(path, "candidate_source")
+                    body = self.boundary.read_text(path, self.boundary.category_for(path))
                 except Exception as exc:                        # noqa: BLE001
                     self.transcript.append({"role": "user", "content":
                                             "search: cannot read %s (%s)" % (path, exc)})
@@ -147,7 +148,7 @@ class RepairAgent:
                 count = int(target[2]) if len(target) > 2 else 120
                 count = max(1, min(int(count), 400))
                 try:
-                    body = self.boundary.read_text(path, "candidate_source")
+                    body = self.boundary.read_text(path, self.boundary.category_for(path))
                 except Exception as exc:                        # noqa: BLE001
                     self.transcript.append({"role": "user", "content":
                                             "read_file: cannot read %s (%s)" % (path, exc)})
@@ -172,7 +173,7 @@ class RepairAgent:
                 # whole-file rewrite, and a 1578-line node cannot be repaired
                 # that way: measured, the model replaced it with an 18-line stub.
                 try:
-                    current = self.boundary.read_text(path, "candidate_source")
+                    current = self.boundary.read_text(path, self.boundary.category_for(path))
                 except Exception as exc:                        # noqa: BLE001
                     self.transcript.append({"role": "user", "content":
                                             "edit_file: cannot read %s (%s)" % (path, exc)})
