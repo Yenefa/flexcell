@@ -180,6 +180,12 @@ jobs:
           colcon test-result --verbose
           colcon test-result || exit 1
 
+      # PRE-EXISTING FAILURE, unrelated to this branch: 3 findings in
+      # src/flexcell/flexcell_skills, reproduced on the untouched base commit 39016694 by
+      # running the same script there. Not fixed here (it is a different subsystem), and
+      # deliberately NOT marked continue-on-error either: masking a known defect for a
+      # green check is the thing this repository keeps punishing. What IS fixed is the
+      # cascade - this failure used to skip the replay probe below.
       - name: static ghost-attribute scan
         shell: bash
         run: |
@@ -187,7 +193,9 @@ jobs:
 
       # Needs the built package on PYTHONPATH (replay_episode + FSMPolicy), so it
       # runs after the build rather than with the other archive checkers.
+      # if: always() so a pre-existing failure ABOVE cannot hide this check as well.
       - name: replay drift probe (semantic vs textual)
+        if: always()
         shell: bash
         run: |
           source /opt/ros/jazzy/setup.bash
