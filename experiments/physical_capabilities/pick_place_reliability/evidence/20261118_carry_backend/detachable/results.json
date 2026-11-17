@@ -1,0 +1,155 @@
+{
+  "experiment": "carry-detachable-window",
+  "scope": "FUNCTIONAL_SMOKE_ONLY",
+  "preregistration": {
+    "experiment": "carry-detachable-window",
+    "slots": [
+      {
+        "label": "NORMAL_1",
+        "case": "normal"
+      },
+      {
+        "label": "DUAL_1",
+        "case": "dual_object"
+      },
+      {
+        "label": "NORMAL_2",
+        "case": "normal"
+      },
+      {
+        "label": "DUAL_2",
+        "case": "dual_object"
+      }
+    ],
+    "slot_timeout_s": 360,
+    "window_budget_s": 1440,
+    "backend": "detachable_joint",
+    "skill_backend": "legacy",
+    "carry_probe": true,
+    "carry_probe_settle_s": 3,
+    "carry_probe_settle_sample_s": 1.0,
+    "carry_object": "target_box_a"
+  },
+  "results": [
+    {
+      "label": "NORMAL_1",
+      "case": "normal",
+      "driver_exit": 0,
+      "status": "OK",
+      "task_completed": true,
+      "slot_id": "NORMAL_1-0-60a1a690",
+      "timeout_cleanup": {
+        "graceful": false,
+        "survivors": 0,
+        "killed": 0,
+        "left": 0
+      },
+      "carry_probe": {
+        "started": true,
+        "exit": 0
+      },
+      "result_path": "/tmp/carry-detach/out/NORMAL_1/run-a8017ecf3b17/result.json",
+      "harness_status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error_code": "ERR_NONE",
+      "wall_seconds": 15.914,
+      "err_m": 0.00268049543524826,
+      "task_reported_pass": true
+    },
+    {
+      "label": "DUAL_1",
+      "case": "dual_object",
+      "driver_exit": 1,
+      "status": "TASK_FAILED",
+      "task_completed": false,
+      "slot_id": "DUAL_1-1-3f9a225c",
+      "timeout_cleanup": {
+        "graceful": false,
+        "survivors": 0,
+        "killed": 0,
+        "left": 0
+      },
+      "carry_probe": {
+        "started": true,
+        "exit": 0
+      },
+      "result_path": "/tmp/carry-detach/out/DUAL_1/run-7fccd71561b3/result.json",
+      "harness_status": "ROBOT_FAILURE",
+      "outcome": "OUTCOME_FAILED",
+      "error_code": "ERR_SKILL_FAILED",
+      "wall_seconds": 29.344,
+      "err_m": null,
+      "task_reported_pass": false
+    },
+    {
+      "label": "NORMAL_2",
+      "case": "normal",
+      "driver_exit": 0,
+      "status": "OK",
+      "task_completed": true,
+      "slot_id": "NORMAL_2-2-18858cee",
+      "timeout_cleanup": {
+        "graceful": false,
+        "survivors": 0,
+        "killed": 0,
+        "left": 0
+      },
+      "carry_probe": {
+        "started": true,
+        "exit": 0
+      },
+      "result_path": "/tmp/carry-detach/out/NORMAL_2/run-47be83ac137a/result.json",
+      "harness_status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error_code": "ERR_NONE",
+      "wall_seconds": 15.71,
+      "err_m": 0.0018083795161280487,
+      "task_reported_pass": true
+    },
+    {
+      "label": "DUAL_2",
+      "case": "dual_object",
+      "driver_exit": 1,
+      "status": "TASK_FAILED",
+      "task_completed": false,
+      "slot_id": "DUAL_2-3-d816cfba",
+      "timeout_cleanup": {
+        "graceful": false,
+        "survivors": 0,
+        "killed": 0,
+        "left": 0
+      },
+      "carry_probe": {
+        "started": true,
+        "exit": 0
+      },
+      "result_path": "/tmp/carry-detach/out/DUAL_2/run-241751b5d0b3/result.json",
+      "harness_status": "ROBOT_FAILURE",
+      "outcome": "OUTCOME_FAILED",
+      "error_code": "ERR_SKILL_FAILED",
+      "wall_seconds": 14.06,
+      "err_m": null,
+      "task_reported_pass": false
+    }
+  ],
+  "source_unchanged": true,
+  "source_changed": [],
+  "source_files": 386,
+  "source_scope": [
+    "src/flexcell/**/*",
+    "infra/**/*",
+    "scripts/**/*",
+    "worlds/**/*",
+    "config/**/*",
+    "setup/flexcell_admin.py",
+    "plan_execute.py",
+    "experiments/physical_capabilities/pick_place_reliability/*.py",
+    "experiments/physical_capabilities/pick_place_reliability/*.json",
+    "experiments/physical_capabilities/pick_place_reliability/tests/*.py"
+  ],
+  "stop_reason": null,
+  "interrupted": false,
+  "interrupt_signal": null,
+  "all_slots_completed": false,
+  "baseline_promoted": false
+}
