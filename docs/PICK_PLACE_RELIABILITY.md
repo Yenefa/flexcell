@@ -32,11 +32,11 @@ slot, own output directory, sequential. 360 s per slot, 1440 s per window.
 python3 -m unittest discover -s experiments/physical_capabilities/pick_place_reliability/tests -v
 ```
 
-56 tests: one-result parsing, the single-run rule, the source-change scope,
+69 tests: one-result parsing, the single-run rule, the source-change scope,
 unknown-terminal detection, window stop behaviour, the completion flag, timeout
-and signal cleanup, the driver-verdict gate, source-freeze admission (including
-missing/malformed metadata), non-finite values, corrupt-log isolation, and the
-artifact aggregator. No simulator, no ROS.
+and signal cleanup, finalization and late-signal handling, the driver-verdict
+gate, source-freeze admission (including missing/malformed metadata), non-finite
+values, corrupt-log isolation, and the artifact aggregator. No simulator, no ROS.
 
 ## Results (6 windows, 24 slot attempts)
 

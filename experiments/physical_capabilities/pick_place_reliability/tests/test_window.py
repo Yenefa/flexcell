@@ -6,6 +6,7 @@ unknown-terminal detection, window stop behaviour, the completion flag, and the
 timeout cleanup that stops processes which escaped into their own session.
 """
 import json
+import hashlib
 import os
 import pathlib
 import signal
@@ -460,9 +461,6 @@ class LateSignalTest(unittest.TestCase):
         self.tmp.cleanup()
 
     def test_sigterm_after_slot_exit_keeps_the_slot(self):
-        def fake_slot(*_args, **_kwargs):
-            return 0
-
         def runner(label, case, slot_out, index):
             write_result(slot_out, 'normal')
             if label == 'A':
@@ -500,6 +498,84 @@ class LateSignalTest(unittest.TestCase):
         self.assertTrue((out / 'SHA256_MANIFEST.json').is_file())
         self.assertTrue(payload['interrupted'])
         self.assertIn('finalization', payload['stop_reason'])
+
+    def test_sigterm_after_the_last_partial_result_is_not_swallowed(self):
+        prereg = dict(
+            slots=[dict(label='A', case='normal')],
+            slot_timeout_s=5, window_budget_s=1000,
+            backend='velocity_servo', skill_backend='legacy',
+            experiment='unit-test')
+
+        real_write = pathlib.Path.write_text
+        fired = {'done': False}
+
+        def write_then_signal(self, data, *args, **kwargs):
+            result = real_write(self, data, *args, **kwargs)
+            if self.name == 'results.partial.json' and not fired['done']:
+                fired['done'] = True
+                os.kill(os.getpid(), signal.SIGTERM)
+            return result
+
+        def runner(label, case, slot_out, index):
+            write_result(slot_out, 'normal')
+            return 0
+
+        with mock.patch.object(pathlib.Path, 'write_text', write_then_signal):
+            payload = rw.run_window(prereg, self.root / 'out', runner=runner)
+
+        self.assertEqual(payload['results'][0]['status'], 'OK')
+        self.assertTrue(payload['interrupted'])
+        self.assertEqual(payload['interrupt_signal'], 'SIGTERM')
+        self.assertFalse(payload['all_slots_completed'])
+        self.assertIn('before finalization', payload['stop_reason'])
+
+    def test_signal_after_results_write_keeps_manifest_consistent(self):
+        real_write = pathlib.Path.write_text
+        fired = {'done': False}
+
+        def write_then_signal(self, data, *args, **kwargs):
+            result = real_write(self, data, *args, **kwargs)
+            if self.name == 'results.json' and not fired['done']:
+                fired['done'] = True
+                os.kill(os.getpid(), signal.SIGINT)
+            return result
+
+        def runner(label, case, slot_out, index):
+            write_result(slot_out, 'normal')
+            return 0
+
+        with mock.patch.object(pathlib.Path, 'write_text', write_then_signal):
+            payload = rw.run_window(self.prereg, self.root / 'out', runner=runner)
+
+        out = self.root / 'out'
+        manifest = json.loads((out / 'SHA256_MANIFEST.json').read_text())
+        actual = hashlib.sha256((out / 'results.json').read_bytes()).hexdigest()
+        self.assertTrue(payload['interrupted'])
+        self.assertEqual(manifest['results.json'], actual)
+
+    def test_unexpected_exception_restores_signal_handlers(self):
+        before = signal.getsignal(signal.SIGTERM)
+        self.addCleanup(signal.signal, signal.SIGTERM, before)
+
+        def runner(*_args, **_kwargs):
+            raise RuntimeError('boom')
+
+        with self.assertRaises(RuntimeError):
+            rw.run_window(self.prereg, self.root / 'out', runner=runner)
+
+        self.assertIs(signal.getsignal(signal.SIGTERM), before)
+
+
+class ClassifyTest(unittest.TestCase):
+    def test_failed_task_outcome_is_not_ok(self):
+        result = dict(case='normal', status='PASS',
+                      task=dict(outcome='OUTCOME_FAILED'))
+        self.assertEqual(rw.classify(result, 0), 'TASK_FAILED')
+
+    def test_succeeded_task_outcome_is_ok(self):
+        result = dict(case='normal', status='PASS',
+                      task=dict(outcome='OUTCOME_SUCCEEDED'))
+        self.assertEqual(rw.classify(result, 0), 'OK')
 
 
 if __name__ == '__main__':

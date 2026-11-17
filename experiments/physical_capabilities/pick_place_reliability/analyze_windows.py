@@ -270,7 +270,9 @@ def summarize(rows, stats_labels=NORMAL_LABELS):
         if id(row) in valid_ids:
             continue
         reason = row.get('reason')
-        if reason is None and row.get('status') == 'OK':
+        if row.get('label') not in stats_labels:
+            reason = reason or 'outside normal placement statistics'
+        elif reason is None and row.get('status') == 'OK':
             reason = 'no final_position_error_m'
         excluded.append(dict(label=row.get('label'), window=row.get('window'),
                              status=row.get('status'), reason=reason))
@@ -284,7 +286,8 @@ def summarize(rows, stats_labels=NORMAL_LABELS):
             slots_ok=0, slots_completed=0, slots_not_comparable=0))
         if row.get('status') == 'OK':
             entry['slots_ok'] += 1
-            if row.get('final_error_mm') is not None:
+            if (row.get('label') in stats_labels
+                    and row.get('final_error_mm') is not None):
                 entry['slots_completed'] += 1
         elif row.get('status') == 'NOT_COMPARABLE':
             entry['slots_not_comparable'] += 1
@@ -361,7 +364,8 @@ def main(argv=None):
     print(text)
     ok = (summary['slots_completed']
           and not summary['windows_not_frozen']
-          and complete_windows)
+          and complete_windows
+          and all(r.get('status') == 'OK' for r in rows))
     return 0 if ok else 1
 
 

@@ -261,9 +261,12 @@ def classify(result, exit_code):
         return 'UNKNOWN'
     if unknown(result):
         return 'UNKNOWN'
-    if exit_code == 0 and result.get('status') == 'PASS':
-        return 'OK'
-    return 'TASK_FAILED'
+    if exit_code != 0 or result.get('status') != 'PASS':
+        return 'TASK_FAILED'
+    task = result.get('task') or {}
+    if task.get('outcome') != 'OUTCOME_SUCCEEDED':
+        return 'TASK_FAILED'
+    return 'OK'
 
 
 def owned_pids(marker):
@@ -521,10 +524,20 @@ def run_window(prereg, out, runner=None):
         (out / 'results.partial.json').write_text(
             json.dumps(rows, indent=2, ensure_ascii=False))
     finally:
-        pass  # handlers stay installed until the manifest is written
+        # Keep the handlers installed for finalization on the normal path, but
+        # do not leak them when the loop fails for an unexpected reason.
+        if sys.exc_info()[0] is not None:
+            _restore_signal_handlers(previous_handlers)
 
     try:
         with _defer_signals() as finishing:
+            # A signal after the last slot's partial result is recorded in
+            # `window_pending`, not in `finishing.names`. Merge it before the
+            # final result is built, otherwise the window would report a clean
+            # completion after a SIGTERM that arrived just before finalization.
+            if window_pending and interrupted is None:
+                interrupted = window_pending[0]
+                stopped = 'interrupted by %s before finalization' % interrupted
             after = source_hashes()
             if finishing.names and interrupted is None:
                 interrupted = finishing.names[0]
@@ -553,18 +566,22 @@ def run_window(prereg, out, runner=None):
             )
             (out / 'results.json').write_text(
                 json.dumps(payload, indent=2, ensure_ascii=False))
-            manifest = {str(p.relative_to(out)): hashlib.sha256(p.read_bytes()).hexdigest()
-                        for p in out.rglob('*')
-                        if p.is_file() and p.name != 'SHA256_MANIFEST.json'}
-            (out / 'SHA256_MANIFEST.json').write_text(
-                json.dumps(manifest, indent=2, sort_keys=True))
-        if finishing.names and payload.get('interrupt_signal') != finishing.names[0]:
+        # A signal can arrive after the payload was built but before the block
+        # exits. Rewrite `results.json` before the manifest is computed; never
+        # after, or the manifest no longer matches the file it hashes.
+        late_signals = list(dict.fromkeys(window_pending + finishing.names))
+        if late_signals and payload.get('interrupt_signal') != late_signals[0]:
             payload['interrupted'] = True
-            payload['interrupt_signal'] = finishing.names[0]
+            payload['interrupt_signal'] = late_signals[0]
             payload['stop_reason'] = payload.get('stop_reason') or (
-                'interrupted by %s during finalization' % finishing.names[0])
+                'interrupted by %s during finalization' % late_signals[0])
             (out / 'results.json').write_text(
                 json.dumps(payload, indent=2, ensure_ascii=False))
+        manifest = {str(p.relative_to(out)): hashlib.sha256(p.read_bytes()).hexdigest()
+                    for p in out.rglob('*')
+                    if p.is_file() and p.name != 'SHA256_MANIFEST.json'}
+        (out / 'SHA256_MANIFEST.json').write_text(
+            json.dumps(manifest, indent=2, sort_keys=True))
         return payload
     finally:
         _restore_signal_handlers(previous_handlers)

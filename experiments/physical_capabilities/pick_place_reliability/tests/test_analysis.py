@@ -25,11 +25,11 @@ def write_driver_row(root, label, status='OK', exit_code=None):
 
 def make_slot(root, label, error_m, place_detail, verify_detail, targets,
               run_name='run-test', status='PASS', outcome='OUTCOME_SUCCEEDED',
-              driver_status='OK'):
+              driver_status='OK', case='normal'):
     run = pathlib.Path(root) / label / run_name
     (run / 'skills').mkdir(parents=True, exist_ok=True)
     (run / 'result.json').write_text(json.dumps({
-        'case': 'normal', 'status': status,
+        'case': case, 'status': status,
         'task': dict(outcome=outcome, error_code='ERR_NONE',
                      wall_seconds=14.0, final_position_error_m=error_m),
     }))
@@ -494,6 +494,54 @@ class AdmissionTest(unittest.TestCase):
         window = summary['windows'][0]
         self.assertEqual(window['slots_ok'], 1)
         self.assertEqual(window['slots_completed'], 0)
+
+    def _complete_window(self, failed_label=None):
+        for label, case in (('NORMAL_1', 'normal'), ('NORMAL_2', 'normal'),
+                            ('DUAL_1', 'dual_object'), ('DUAL_2', 'dual_object')):
+            make_slot(self.root, label, 0.008, 'drop error 0.008m', 'err=0.008',
+                      [(0.12, -0.15, 0.1895)], case=case,
+                      outcome=('OUTCOME_FAILED' if label == failed_label
+                               else 'OUTCOME_SUCCEEDED'))
+        self._meta([
+            dict(label='NORMAL_1', case='normal', driver_exit=0, status='OK'),
+            dict(label='DUAL_1', case='dual_object', driver_exit=0, status='OK'),
+            dict(label='NORMAL_2', case='normal', driver_exit=0, status='OK'),
+            dict(label='DUAL_2', case='dual_object', driver_exit=0, status='OK'),
+        ], all_slots_completed=True)
+
+    def test_dual_success_is_not_excluded_from_normal_stats(self):
+        self._complete_window()
+
+        import contextlib
+        import io
+        with contextlib.redirect_stdout(io.StringIO()):
+            code = aw.main([str(self.root)])
+
+        rows = [aw.slot_row(self.root, label) for label in aw.ALL_LABELS]
+        summary = aw.summarize(rows)
+        self.assertEqual(code, 0)
+        self.assertEqual(summary['slots_attempted'], 4)
+        self.assertEqual(summary['slots_completed'], 2)
+        window = summary['windows'][0]
+        self.assertEqual(window['slots_ok'], 4)
+        self.assertEqual(window['slots_completed'], 2)
+        excluded = {entry['label']: entry for entry in summary['excluded']}
+        self.assertEqual(set(excluded), {'DUAL_1', 'DUAL_2'})
+        for entry in excluded.values():
+            self.assertEqual(entry['reason'], 'outside normal placement statistics')
+
+    def test_driver_ok_but_failed_outcome_exits_nonzero(self):
+        self._complete_window(failed_label='DUAL_1')
+
+        import contextlib
+        import io
+        with contextlib.redirect_stdout(io.StringIO()):
+            code = aw.main([str(self.root)])
+
+        rows = [aw.slot_row(self.root, label) for label in aw.ALL_LABELS]
+        summary = aw.summarize(rows)
+        self.assertEqual(code, 1)
+        self.assertEqual(summary['slots_task_failed'], 1)
 
 
 if __name__ == '__main__':
