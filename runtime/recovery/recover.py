@@ -114,6 +114,21 @@ def apply_respread(plan, spread_step=0.090, bin_radius=0.06, cluster_m=0.12,
         idxs = g["idx"]
         if len(idxs) < 2:
             continue
+        # INERT WHEN THE GROUP ALREADY MEETS THE CONTRACT (2026-11-18). Before this the
+        # function widened EVERY cluster within cluster_m, including clusters that were
+        # already spread. On the archive that touched 127 plans and 94 of them needed no
+        # change at all - and because the axis is chosen by margin, those 94 were not
+        # merely rewritten, they were ROTATED: T03-train-seed1000 sits at exactly the
+        # 90 mm contract along x, and respread moved both landings to y, displacing them
+        # 64 mm for no benefit. A recovery action that moves landings the planner chose
+        # deliberately is not a recovery.
+        current = min(math.hypot(float(stages[a]["place_pose"][0])
+                                - float(stages[b]["place_pose"][0]),
+                                float(stages[a]["place_pose"][1])
+                                - float(stages[b]["place_pose"][1]))
+                      for i, a in enumerate(idxs) for b in idxs[i + 1:])
+        if current >= spread_step - 1e-9:
+            continue
         cx = sum(float(stages[i]["place_pose"][0]) for i in idxs) / len(idxs)
         cy = sum(float(stages[i]["place_pose"][1]) for i in idxs) / len(idxs)
         offsets = [(rank - (len(idxs) - 1) / 2.0) * spread_step

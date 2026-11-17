@@ -212,7 +212,42 @@ def probe_capacity_removed(params):
         return "REFUSED", str(exc)
 
 
+def probe_spacing_already_satisfied(params):
+    """The plan ALREADY meets the spacing contract: the respread must leave it alone.
+
+    This is the probe that found a real defect rather than confirming a design. Before
+    2026-11-18 apply_respread widened every cluster within cluster_m, so a plan sitting at
+    exactly the 90 mm contract was ROTATED onto the other axis - 94 of 127 touched plans
+    on the archive needed no change at all and were displaced anyway. A lesson that fires
+    where it is not needed is the misuse this module is named after.
+    """
+    rc = _recover_module()
+    at_contract = 0.090
+    plan = {"stages": [
+        {"stage_id": "a-0", "object_name": "a",
+         "place_pose": [0.075, -0.15, 0.0175]},
+        {"stage_id": "b-1", "object_name": "b",
+         "place_pose": [0.075 + at_contract, -0.15, 0.0175]},
+    ]}
+    before = [list(s["place_pose"]) for s in plan["stages"]]
+    try:
+        out = rc.apply_respread(plan, spread_step=params.get("step_m", 0.090),
+                                cluster_m=params.get("cluster_m", 0.12),
+                                avoid=[[0.22, 0.0], [0.20, -0.18]])
+    except ValueError:
+        return "REFUSED", "consumer refused before applying"
+    after = [list(s["place_pose"]) for s in out["stages"]]
+    if after == before:
+        return "INERT", ("plan already at the %.3f m contract; consumer left it alone"
+                         % at_contract)
+    moved = max(sum((a - b) ** 2 for a, b in zip(x, y)) ** 0.5
+                for x, y in zip(after, before))
+    return "APPLIED", ("consumer displaced an already-conforming plan by %.3f m"
+                       % moved)
+
+
 PROBES = {
+    "spacing.already_satisfied": probe_spacing_already_satisfied,
     "harness.capacity_already_sufficient": probe_capacity_already_sufficient,
     "harness.capacity_removed": probe_capacity_removed,
     "spread.single_stage": probe_single_stage,

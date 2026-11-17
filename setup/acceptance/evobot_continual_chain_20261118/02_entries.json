@@ -93,7 +93,7 @@
           "step_m": 0.09
         }
       },
-      "entry_id": "9f0cdfc6e48a7f3f1f15c618558451fe1b1f83f958a596b44d7f86a90092d89c",
+      "entry_id": "8d5651ec12b296c235092fb1c1e8d52c04616f7d2e53df4211a7b2033741990a",
       "evidence": {
         "clearance_m": 0.05,
         "evidence_split": "held_out",
@@ -118,17 +118,22 @@
         {
           "condition": "another object sits inside the corridor the spread would use",
           "probe": "spread.three_in_one_bin"
+        },
+        {
+          "condition": "the landings ALREADY meet the spacing contract",
+          "probe": "spacing.already_satisfied"
         }
       ],
       "known_invalid_when": [
         "a single stage lands in the bin (nothing to separate)",
         "the separation would push a landing outside the bin radius",
-        "another object sits inside the corridor the spread would use"
+        "another object sits inside the corridor the spread would use",
+        "the landings ALREADY meet the spacing contract"
       ],
       "notes": "planner-side consumer: groups by exact pose, so this is expected inert; evidence is HELD-OUT, so this demonstrates a mechanism, not a generalization result",
       "origin": "AGENT_GENERATED",
       "provenance_verified": true,
-      "record_sha256": "5c37c296ac062653a0dc8874e299bc60506b91d840727228777027803d6b1485",
+      "record_sha256": "1a4cc66077656e338f121e47a540f98fa13ea6bdb80820146f26780d5d67f7a2",
       "schema_version": "experience-entry/2",
       "source_run": "setup/acceptance/evobot_recover_n6_20261111/runs/HO-90899d657e68",
       "stats": {
@@ -170,7 +175,7 @@
           "step_m": 0.09
         }
       },
-      "entry_id": "90584f210021cc67eb05f8ba08a366aa014cf072781a4e3ee660e06f34eaa8b0",
+      "entry_id": "b5559af93d0a6fac5d618191b7022b5a35ae0fc746d1a6d769e1544d4be150cb",
       "evidence": {
         "clearance_m": 0.05,
         "evidence_split": "held_out",
@@ -195,17 +200,22 @@
         {
           "condition": "another object sits inside the corridor the spread would use",
           "probe": "respread.corridor_blocked"
+        },
+        {
+          "condition": "the landings ALREADY meet the spacing contract",
+          "probe": "spacing.already_satisfied"
         }
       ],
       "known_invalid_when": [
         "a single stage lands in the bin (nothing to separate)",
         "the separation would push a landing outside the bin radius",
-        "another object sits inside the corridor the spread would use"
+        "another object sits inside the corridor the spread would use",
+        "the landings ALREADY meet the spacing contract"
       ],
       "notes": "executor-side consumer: clusters by distance, so the same lesson acts; evidence is HELD-OUT, so this demonstrates a mechanism, not a generalization result",
       "origin": "AGENT_GENERATED",
       "provenance_verified": true,
-      "record_sha256": "e62cbf3d4f10bf3476904dab5221fd6f6ee3fc344ec6b32486596c8abb16eafb",
+      "record_sha256": "8c423f2b8997e539b5c12d17f96775b158e2cd607ec3795bdc32d63697980ad9",
       "schema_version": "experience-entry/2",
       "source_run": "setup/acceptance/evobot_recover_n6_20261111/runs/HO-90899d657e68",
       "stats": {

@@ -70,11 +70,20 @@ capability is what makes that visible instead of leaving it to an audit.
    archived before/after batch pair (harness failures 2/7 → 0/7) and against the live
    contract (participant pool 120 ≥ 6 launch nodes).
 
-`verify.py` asserts **44 checks**, including that both gates really ran, that the asset
+13. **the misuse check found a real defect this round.** `apply_respread` widened every
+    cluster within `cluster_m`, including clusters already at the contract — and because
+    the axis is chosen by margin it ROTATED them rather than rewriting them. On the
+    archive that touched 127 plans and **94 needed no change**, displaced 64 mm in the T03
+    case. Fixed by skipping a group whose current separation already meets `spread_step`;
+    the condition and its probe (`spacing.already_satisfied`) now guard the regression.
+
+`verify.py` asserts **46 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
-from**, that **two distinct consumers act**, and that the ACTIVE set spans **both splits**.
+from**, that **two distinct consumers act**, that the ACTIVE set spans **both splits**, and
+that **an already-conforming plan is a declared invalid condition whose probe reports
+INERT**.
 
 ---
 
@@ -140,7 +149,7 @@ It touches no evaluator, tolerance, threshold or held-out answer. 11/11
 8. **RETIRE has never fired on real evidence.** No run in this batch made anything worse,
    so the transition is shown on a copy with a synthetic WORSE outcome. A retirement
    driven by a real regression is still missing.
-9. The misuse probes cover the spacing, respread and harness consumers (7 probes). The
+9. The misuse probes cover the spacing, respread and harness consumers (8 probes). The
    `development` has none, so its entries would report UNPROBED.
 10. **Entry generation is automatic but narrow.** The generator reads archived failures
     and emits candidates, but the signature→consumer mapping table is hand-maintained,

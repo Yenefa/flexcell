@@ -158,6 +158,21 @@ def main():
         declared = len(active[0].get("known_invalid_when") or []) if active else 0
         probed = (active[0].get("misuse_check") or {}).get("probed", 0) if active else 0
         checks["every_invalid_condition_was_probed"] = declared > 0 and probed == declared
+        # THE MISUSE CHECK IS SUPPOSED TO BE ABLE TO FIND SOMETHING, not only to confirm a
+        # design. This round it did: apply_respread widened every cluster within cluster_m,
+        # so a plan already sitting at the 90 mm contract was ROTATED onto the other axis -
+        # 94 of 127 touched plans on the archive needed no change and were displaced anyway.
+        # The condition and its probe are what caught it, so their presence is asserted.
+        # Across ALL active entries, not active[0]: which entry is first depends on which
+        # consumer happens to act, and the condition belongs to the spacing entries.
+        conditions = {c for r in active for c in (r.get("known_invalid_when") or [])}
+        checks["a_already_conforming_plan_is_a_declared_invalid_condition"] = any(
+            "ALREADY meet" in c for c in conditions)
+        import misuse as _misuse
+        outcome, detail = _misuse.PROBES["spacing.already_satisfied"](
+            {"step_m": 0.090, "cluster_m": 0.12})
+        checks["the_already_conforming_probe_reports_inert"] = (
+            outcome == "INERT"), detail
 
         # 10 -- the LIFECYCLE half exists: the ledger produces a decision, and the RETIRE
         # transition really changes what retrieval serves

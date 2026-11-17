@@ -83,6 +83,56 @@ def test_a_probe_that_fires_where_it_must_not_reports_misusable(monkeypatch):
     assert len(result["misused"]) == 1
 
 
+# ------------------------------------------------- the misuse that was a real defect
+#
+# This probe did not confirm a design, it found a bug. apply_respread widened every
+# cluster within cluster_m, so a plan sitting at exactly the 90 mm contract was rotated
+# onto the other axis: 94 of 127 touched plans on the archive needed no change and were
+# displaced anyway, 64 mm in the T03 case.
+
+def _recover():
+    """Import the recovery module the same way the runtime does."""
+    sys.path.insert(0, os.path.join(WT, "runtime", "recovery"))
+    import recover
+    return recover
+
+
+def test_a_plan_already_at_the_contract_is_left_alone():
+    recover = _recover()
+    step = 0.090
+    plan = {"stages": [
+        {"stage_id": "a-0", "object_name": "a", "place_pose": [0.075, -0.15, 0.0175]},
+        {"stage_id": "b-1", "object_name": "b",
+         "place_pose": [0.075 + step, -0.15, 0.0175]},
+    ]}
+    before = json.dumps(plan, sort_keys=True)
+    out = recover.apply_respread(plan, spread_step=step, cluster_m=0.12,
+                                 avoid=[[0.22, 0.0], [0.20, -0.18]])
+    assert out["stages"] == plan["stages"], (
+        "respread displaced a plan that already met the contract")
+    assert json.dumps(plan, sort_keys=True) == before
+
+
+def test_a_plan_below_the_contract_still_gets_widened():
+    """The inert rule must not disable the real case it exists for."""
+    recover = _recover()
+    plan = {"stages": [
+        {"stage_id": "a-0", "object_name": "a", "place_pose": [0.092, -0.15, 0.0175]},
+        {"stage_id": "b-1", "object_name": "b", "place_pose": [0.148, -0.15, 0.0175]},
+    ]}
+    out = recover.apply_respread(plan, spread_step=0.090, cluster_m=0.12,
+                                 avoid=[[0.22, 0.0], [0.20, -0.18]])
+    assert out["recovered"] is True
+    assert out["stages"] != plan["stages"]
+
+
+def test_the_already_satisfied_probe_reports_inert():
+    """If this ever reports APPLIED, the needless-displacement regression is back."""
+    outcome, detail = misuse.PROBES["spacing.already_satisfied"](
+        {"step_m": 0.090, "cluster_m": 0.12})
+    assert outcome == "INERT", detail
+
+
 def test_schema_refuses_a_partial_probe_list():
     """Declaring three conditions and probing one would make all three look checked."""
     e = make()

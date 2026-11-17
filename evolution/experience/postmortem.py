@@ -56,6 +56,8 @@ SIGNATURES = {
              "probe": "spread.narrow_bin"},
             {"condition": "more than two stages share one bin",
              "probe": "spread.three_in_one_bin"},
+            {"condition": "the landings ALREADY meet the spacing contract",
+             "probe": "spacing.already_satisfied"},
         ],
         "applicable_when": [
             "two or more stages declare the same or a near-identical landing point",
@@ -65,6 +67,7 @@ SIGNATURES = {
             "a single stage lands in the bin (nothing to separate)",
             "the separation would push a landing outside the bin radius",
             "more than two stages share one bin",
+            "the landings ALREADY meet the spacing contract",
         ],
         "suggested_action": ("separate same-bin landing points by clearance plus the "
                              "measured landing drift"),

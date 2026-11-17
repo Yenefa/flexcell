@@ -78,7 +78,8 @@ _COMMON = dict(
                      "the bin radius is 60 mm and the clearance contract is 50 mm"],
     known_invalid_when=["a single stage lands in the bin (nothing to separate)",
                         "the separation would push a landing outside the bin radius",
-                        "another object sits inside the corridor the spread would use"],
+                        "another object sits inside the corridor the spread would use",
+                        "the landings ALREADY meet the spacing contract"],
     suggested_action=("separate same-bin landing points by at least the clearance "
                       "contract plus the measured landing drift, and pick the spread "
                       "axis that keeps every point clear of other objects"),
@@ -95,6 +96,8 @@ _PLANNER_PROBES = [
      "probe": "spread.narrow_bin"},
     {"condition": "another object sits inside the corridor the spread would use",
      "probe": "spread.three_in_one_bin"},
+    {"condition": "the landings ALREADY meet the spacing contract",
+     "probe": "spacing.already_satisfied"},
 ]
 
 _EXECUTOR_PROBES = [
@@ -104,6 +107,8 @@ _EXECUTOR_PROBES = [
      "probe": "respread.narrow_bin"},
     {"condition": "another object sits inside the corridor the spread would use",
      "probe": "respread.corridor_blocked"},
+    {"condition": "the landings ALREADY meet the spacing contract",
+     "probe": "spacing.already_satisfied"},
 ]
 
 
