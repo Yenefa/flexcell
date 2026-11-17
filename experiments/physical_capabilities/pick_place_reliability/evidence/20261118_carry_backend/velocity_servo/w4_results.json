@@ -1,0 +1,155 @@
+{
+  "experiment": "carry-offset-window-main",
+  "scope": "FUNCTIONAL_SMOKE_ONLY",
+  "preregistration": {
+    "experiment": "carry-offset-window-main",
+    "slots": [
+      {
+        "label": "NORMAL_1",
+        "case": "normal"
+      },
+      {
+        "label": "DUAL_1",
+        "case": "dual_object"
+      },
+      {
+        "label": "NORMAL_2",
+        "case": "normal"
+      },
+      {
+        "label": "DUAL_2",
+        "case": "dual_object"
+      }
+    ],
+    "slot_timeout_s": 360,
+    "window_budget_s": 1440,
+    "backend": "velocity_servo",
+    "skill_backend": "legacy",
+    "carry_probe": true,
+    "carry_probe_settle_s": 3,
+    "carry_probe_settle_sample_s": 1.0,
+    "carry_object": "target_box_a"
+  },
+  "results": [
+    {
+      "label": "NORMAL_1",
+      "case": "normal",
+      "driver_exit": 0,
+      "status": "OK",
+      "task_completed": true,
+      "slot_id": "NORMAL_1-0-e53db608",
+      "timeout_cleanup": {
+        "graceful": false,
+        "survivors": 0,
+        "killed": 0,
+        "left": 0
+      },
+      "carry_probe": {
+        "started": true,
+        "exit": 0
+      },
+      "result_path": "/tmp/carry-window4/out/NORMAL_1/run-2f569d55c0c0/result.json",
+      "harness_status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error_code": "ERR_NONE",
+      "wall_seconds": 14.479,
+      "err_m": 0.00610159246694961,
+      "task_reported_pass": true
+    },
+    {
+      "label": "DUAL_1",
+      "case": "dual_object",
+      "driver_exit": 0,
+      "status": "OK",
+      "task_completed": true,
+      "slot_id": "DUAL_1-1-6b322841",
+      "timeout_cleanup": {
+        "graceful": false,
+        "survivors": 0,
+        "killed": 0,
+        "left": 0
+      },
+      "carry_probe": {
+        "started": true,
+        "exit": 0
+      },
+      "result_path": "/tmp/carry-window4/out/DUAL_1/run-1e1f4755d95d/result.json",
+      "harness_status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error_code": "ERR_NONE",
+      "wall_seconds": 28.883,
+      "err_m": null,
+      "task_reported_pass": true
+    },
+    {
+      "label": "NORMAL_2",
+      "case": "normal",
+      "driver_exit": 0,
+      "status": "OK",
+      "task_completed": true,
+      "slot_id": "NORMAL_2-2-298cb176",
+      "timeout_cleanup": {
+        "graceful": false,
+        "survivors": 0,
+        "killed": 0,
+        "left": 0
+      },
+      "carry_probe": {
+        "started": true,
+        "exit": 0
+      },
+      "result_path": "/tmp/carry-window4/out/NORMAL_2/run-3be913541f18/result.json",
+      "harness_status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error_code": "ERR_NONE",
+      "wall_seconds": 14.463,
+      "err_m": 0.004703933147050607,
+      "task_reported_pass": true
+    },
+    {
+      "label": "DUAL_2",
+      "case": "dual_object",
+      "driver_exit": 0,
+      "status": "OK",
+      "task_completed": true,
+      "slot_id": "DUAL_2-3-d594962b",
+      "timeout_cleanup": {
+        "graceful": false,
+        "survivors": 0,
+        "killed": 0,
+        "left": 0
+      },
+      "carry_probe": {
+        "started": true,
+        "exit": 0
+      },
+      "result_path": "/tmp/carry-window4/out/DUAL_2/run-eb88a0cd4368/result.json",
+      "harness_status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error_code": "ERR_NONE",
+      "wall_seconds": 29.008,
+      "err_m": null,
+      "task_reported_pass": true
+    }
+  ],
+  "source_unchanged": true,
+  "source_changed": [],
+  "source_files": 386,
+  "source_scope": [
+    "src/flexcell/**/*",
+    "infra/**/*",
+    "scripts/**/*",
+    "worlds/**/*",
+    "config/**/*",
+    "setup/flexcell_admin.py",
+    "plan_execute.py",
+    "experiments/physical_capabilities/pick_place_reliability/*.py",
+    "experiments/physical_capabilities/pick_place_reliability/*.json",
+    "experiments/physical_capabilities/pick_place_reliability/tests/*.py"
+  ],
+  "stop_reason": null,
+  "interrupted": false,
+  "interrupt_signal": null,
+  "all_slots_completed": true,
+  "baseline_promoted": false
+}

@@ -1,0 +1,53 @@
+{
+  "date": "2026-11-18",
+  "window_commit": "dfdeb615",
+  "probe": "PR #271 (carry_offset.jsonl)",
+  "velocity_servo": {
+    "windows": [
+      "carry-window2",
+      "carry-window3",
+      "carry-window4"
+    ],
+    "sessions": 18,
+    "normal_landing_mm": [
+      11.09,
+      5.359,
+      10.784,
+      8.911,
+      6.102,
+      4.704
+    ],
+    "normal_landing_mean_mm": 7.825,
+    "normal_landing_min_mm": 4.704,
+    "normal_landing_max_mm": 11.09,
+    "offset_drift_mm": [
+      7.28,
+      38.29
+    ],
+    "object_orientation": "identity (constant); TCP rotates ~50 deg during carry"
+  },
+  "detachable_joint": {
+    "windows": [
+      "carry-detach"
+    ],
+    "normal_landing_mm": [
+      2.68,
+      1.808
+    ],
+    "offset_mean_mm": [
+      18.512,
+      -0.875,
+      -160.206
+    ],
+    "offset_spread_mm": 7.884,
+    "rel_angle_mean_deg": 6.81,
+    "rel_angle_stdev_deg": 1.21,
+    "dual": "PLACE_B / PLACE_A fail with ERR_PLACE_FAILED, legacy_error_code=25"
+  },
+  "limits": [
+    "simulation only; no hardware claim",
+    "detachable normal landing n=2, direction only",
+    "legacy landing n=6 over three windows",
+    "detachable does not support two consecutive pick/place (see issue)"
+  ]
+}

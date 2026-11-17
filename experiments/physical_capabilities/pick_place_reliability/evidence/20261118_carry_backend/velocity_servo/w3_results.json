@@ -1,0 +1,155 @@
+{
+  "experiment": "carry-offset-window-main",
+  "scope": "FUNCTIONAL_SMOKE_ONLY",
+  "preregistration": {
+    "experiment": "carry-offset-window-main",
+    "slots": [
+      {
+        "label": "NORMAL_1",
+        "case": "normal"
+      },
+      {
+        "label": "DUAL_1",
+        "case": "dual_object"
+      },
+      {
+        "label": "NORMAL_2",
+        "case": "normal"
+      },
+      {
+        "label": "DUAL_2",
+        "case": "dual_object"
+      }
+    ],
+    "slot_timeout_s": 360,
+    "window_budget_s": 1440,
+    "backend": "velocity_servo",
+    "skill_backend": "legacy",
+    "carry_probe": true,
+    "carry_probe_settle_s": 3,
+    "carry_probe_settle_sample_s": 1.0,
+    "carry_object": "target_box_a"
+  },
+  "results": [
+    {
+      "label": "NORMAL_1",
+      "case": "normal",
+      "driver_exit": 0,
+      "status": "OK",
+      "task_completed": true,
+      "slot_id": "NORMAL_1-0-c88bac4c",
+      "timeout_cleanup": {
+        "graceful": false,
+        "survivors": 0,
+        "killed": 0,
+        "left": 0
+      },
+      "carry_probe": {
+        "started": true,
+        "exit": 0
+      },
+      "result_path": "/tmp/carry-window3/out/NORMAL_1/run-7c231a57a747/result.json",
+      "harness_status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error_code": "ERR_NONE",
+      "wall_seconds": 14.68,
+      "err_m": 0.010784101197504312,
+      "task_reported_pass": true
+    },
+    {
+      "label": "DUAL_1",
+      "case": "dual_object",
+      "driver_exit": 0,
+      "status": "OK",
+      "task_completed": true,
+      "slot_id": "DUAL_1-1-3c395baa",
+      "timeout_cleanup": {
+        "graceful": false,
+        "survivors": 0,
+        "killed": 0,
+        "left": 0
+      },
+      "carry_probe": {
+        "started": true,
+        "exit": 0
+      },
+      "result_path": "/tmp/carry-window3/out/DUAL_1/run-088381fb78ac/result.json",
+      "harness_status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error_code": "ERR_NONE",
+      "wall_seconds": 29.272,
+      "err_m": null,
+      "task_reported_pass": true
+    },
+    {
+      "label": "NORMAL_2",
+      "case": "normal",
+      "driver_exit": 0,
+      "status": "OK",
+      "task_completed": true,
+      "slot_id": "NORMAL_2-2-38b7f055",
+      "timeout_cleanup": {
+        "graceful": false,
+        "survivors": 0,
+        "killed": 0,
+        "left": 0
+      },
+      "carry_probe": {
+        "started": true,
+        "exit": 0
+      },
+      "result_path": "/tmp/carry-window3/out/NORMAL_2/run-862639dfc0a0/result.json",
+      "harness_status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error_code": "ERR_NONE",
+      "wall_seconds": 14.627,
+      "err_m": 0.00891123506856696,
+      "task_reported_pass": true
+    },
+    {
+      "label": "DUAL_2",
+      "case": "dual_object",
+      "driver_exit": 0,
+      "status": "OK",
+      "task_completed": true,
+      "slot_id": "DUAL_2-3-f12cf6cc",
+      "timeout_cleanup": {
+        "graceful": false,
+        "survivors": 0,
+        "killed": 0,
+        "left": 0
+      },
+      "carry_probe": {
+        "started": true,
+        "exit": 0
+      },
+      "result_path": "/tmp/carry-window3/out/DUAL_2/run-744b6c79ba55/result.json",
+      "harness_status": "PASS",
+      "outcome": "OUTCOME_SUCCEEDED",
+      "error_code": "ERR_NONE",
+      "wall_seconds": 28.876,
+      "err_m": null,
+      "task_reported_pass": true
+    }
+  ],
+  "source_unchanged": true,
+  "source_changed": [],
+  "source_files": 386,
+  "source_scope": [
+    "src/flexcell/**/*",
+    "infra/**/*",
+    "scripts/**/*",
+    "worlds/**/*",
+    "config/**/*",
+    "setup/flexcell_admin.py",
+    "plan_execute.py",
+    "experiments/physical_capabilities/pick_place_reliability/*.py",
+    "experiments/physical_capabilities/pick_place_reliability/*.json",
+    "experiments/physical_capabilities/pick_place_reliability/tests/*.py"
+  ],
+  "stop_reason": null,
+  "interrupted": false,
+  "interrupt_signal": null,
+  "all_slots_completed": true,
+  "baseline_promoted": false
+}

@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "status": "ROBOT_FAILURE",
+  "backend": "detachable_joint",
+  "skill_backend": "legacy",
+  "physical_tasks_dispatched": 1,
+  "qualification": "FUNCTIONAL_SMOKE_ONLY",
+  "case": "dual_object",
+  "object": "target_box_a",
+  "out": "/tmp/carry-detach/out/DUAL_2/run-241751b5d0b3",
+  "decision_policy": "fsm",
+  "hybrid_threshold": null,
+  "resume_completed": false,
+  "model_env": {
+    "FLEXCELL_LLM_ENDPOINT": null,
+    "FLEXCELL_LLM_MODEL": null,
+    "FLEXCELL_LLM_BACKEND": null,
+    "FLEXCELL_JEV_ENDPOINT": null,
+    "FLEXCELL_JEV_MODEL": null,
+    "FLEXCELL_JEV_BACKEND": null
+  },
+  "world_sha256": "1e345b3a4c985045d14e5c38124b4fc73a749c52efcf09d5a53b19148fe696ca",
+  "semantic_config_sha256": "96ff7ff577404a1b1a42b76d646ba89948d2b19f427a57b86f31af21b90cbbb1",
+  "runtime_fingerprint": "9b99b722c662b4fa55322b0730f475701c68b1a696fda9c957e88887bb80ff2a",
+  "task_start_monotonic_ns": 3776667542128,
+  "goal_pose": [
+    0.12,
+    -0.15,
+    0.0175
+  ],
+  "zone_2_pose": null,
+  "config_override": null,
+  "task_end_monotonic_ns": 3791368758449,
+  "task": {
+    "action": "demo",
+    "goal_uuid": "bf40721901e34ad18f976c0be1a32fb5",
+    "outcome": "OUTCOME_FAILED",
+    "outcome_val": 1,
+    "error_code": "ERR_SKILL_FAILED",
+    "detail": "policy abort (NON_RECOVERABLE): place failed (ERR_PLACE_FAILED, carried box is not retried) (trace=PICK_A(attempt=1):OK,PLACE_A:FAIL); previous_skill=PLACE cause=ERR_PLACE_FAILED legacy_error_code=25",
+    "evidence_id": "week1_demo_v1-f9322bf2",
+    "wall_seconds": 14.06,
+    "fsm_trace": [
+      "PICK_A(attempt=1):OK",
+      "PLACE_A:FAIL"
+    ],
+    "object_a_at_zone": false,
+    "object_b_at_zone": false,
+    "zone_a_error_m": null,
+    "zone_b_error_m": null,
+    "run_id": "week1_demo_v1-6803ba52",
+    "scenario_id": "week1_demo_v1"
+  },
+  "actual_routing": {
+    "decisions": 4,
+    "sources": {
+      "fsm": 4
+    },
+    "leaves": {
+      "fsm": 4
+    },
+    "fallbacks": 0,
+    "models": [],
+    "backends": [],
+    "fast_calls": 0,
+    "slow_calls": 0,
+    "model_calls": 0,
+    "calls_without_identity": 0
+  },
+  "model_calls": 0,
+  "fast_calls": 0,
+  "slow_calls": 0,
+  "error": "typed task failure retained; no replacement task",
+  "recorder_exit": 0,
+  "owned_launch_exit": 0,
+  "unavailable_numeric_fields": {
+    "task.zone_a_error_m": "nan",
+    "task.zone_b_error_m": "nan"
+  }
+}
