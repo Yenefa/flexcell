@@ -1,0 +1,79 @@
+{
+  "schema": "evobot.comparative_freeze/1",
+  "freeze": {
+    "candidate_sha": "4ab5a0a86ccc7a18cbd52a072d4f59ea9c65432729454f1062879f37f78780c3",
+    "source_run_id": "F1-A-r2",
+    "selection_basis": "registered slot F1-A-r2; archived real model run",
+    "frozen_at": 1794892661.9505894,
+    "repair_runs": 7,
+    "reference_sha": "42ec0b95a59ac884328572d1ed38800a1d7a5a62339ef28111ccf165d3e3b61a",
+    "reference_basis": "handoff baseline 2ca40ebe"
+  },
+  "freeze_sha": "a834b85fa3dc15680c7b875e9638982f8508536af12c4877ae6445efae09d336",
+  "instance": "DEF-F1-REG",
+  "task_variant": "v2",
+  "candidate_archive": "/home/ros/wt/run252/experiments/repair_eval_v02/evidence/plan_batch_v4_20261117-aa05e9788f0c/slots/F1-A-r2",
+  "reference_archive": "/home/ros/wt/run252/experiments/repair_eval_v02/evidence/holdout_reference_f1",
+  "candidate_archive_sha": "836b2a4e54cccb690bfe45917981c8dee0ad1239743cb84628d61606f19a6491",
+  "reference_archive_sha": "cb64eed6bcd8d31e9433ce840793bd9017ce9597c746633c1cd16bc649985016",
+  "candidate_source_sha": "cfa10f73cb261e35b6460b03ed827c343396f054",
+  "reference_source_sha": "2ca40ebe6c5e33dcc5d7ecb229d26aa36807ca35",
+  "candidate_qualification": "REAL_MODEL_RUN|INSTANCE",
+  "artifact_hash_algorithm": "sha256-file-inventory",
+  "environment": {
+    "source_kind": "host_receipt",
+    "python": "3.12.3",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "image_digest": null,
+    "image_required": false,
+    "dependencies": {
+      "pytest": "7.4.4",
+      "PyYAML": "6.0.1"
+    },
+    "installed_files": {
+      "/opt/ros/jazzy/setup.bash": "12556a2725a823c3841f8fbab50892c8b8c69df9654d2a74761407226ecca4df",
+      "/opt/ros/jazzy/share/ros_environment/package.xml": "06c96a0e374501c902c4782da64fa889d0b1e0263c37a1b8deb0479fa3c7c279",
+      "/opt/ros/jazzy/share/ros_gz_sim/package.xml": "2d97e18448dacfe734e61c48a8367d1863342210284c4347002c2c87903694c5",
+      "/opt/ros/jazzy/share/gz_sim_vendor/package.xml": "7bff7b336ffd8c36214800e9389d8cf6126992f5eb5334e1b935f76ecd26e228",
+      "/opt/ros/jazzy/share/rclpy/package.xml": "6367e8f5f30e81867b246a8750ee900d7276f1f52253ba5140c188e360e6cb0f",
+      "/opt/ros/jazzy/share/moveit_configs_utils/package.xml": "a7f0e2428dbe2b612907e52ff355540182838f8a1b41c682e41839188ed2922b"
+    },
+    "os_release_sha256": "87458b3b1f1ca0e5c693ade771de7007c3783bdc692fa6b39eb6414bf2af2763",
+    "os_release": {
+      "PRETTY_NAME": "Ubuntu 24.04.5 LTS",
+      "VERSION_ID": "24.04"
+    },
+    "ros_gazebo_packages": [
+      "ros-jazzy-gz-sim-vendor\t0.0.13-1noble.20260905.073557",
+      "ros-jazzy-ros-base\t0.11.0-1noble.20260903.093452",
+      "ros-jazzy-ros-gz-sim\t1.0.24-1noble.20260905.085151"
+    ],
+    "overlay_relation_to_candidate": "NOT_VERIFIED; installed metadata only, no build performed",
+    "receipt_sha256": "29c4ec060372330cba86da42be1332360ad0824d69a566949326c41ba67f0e7e"
+  },
+  "evaluator_files": {
+    "experiments/repair_eval_v02/evaluate_holdout.py": "894ba2bbb0cb2308cf2e2f6969ffb0063cb2fd8a86c5f9d2d56720a8ddc596bb",
+    "experiments/repair_eval_v02/holdout.py": "a548303e52affb20e4c42111693c4bceafdcc7e274b57b2d052ac1b040adb4e1",
+    "experiments/repair_eval_v02/health.py": "f227d7a07c224c2dc03626165ad571232c62f806b94b40998e1b7b24036700ab",
+    "experiments/repair_eval_v02/instances.py": "1b9d2eba427aceeb215720cf80d653524175394cb1033b17c21fbcb6906040e9",
+    "experiments/repair_eval_v02/layouts.py": "1f8151e58f3c14cba0a9868e6863a238416aee9dcbf0ceb675040ca4bcd7c1f0",
+    "experiments/repair_eval_v02/frozen_regressions.py": "d94f21b3119eef439af359365086a69f01d8a2eadb4153e80d655238f22d0851",
+    "experiments/repair_eval_v02/evidence_archive.py": "ebdd7247586e185b0118a48f88bc838749017e36b8cae6ac1b43327e14ae56d7",
+    "experiments/repair_eval_v02/environment_receipt.py": "a767a25791e8b547d743a86939c89400285d935f8d5bd80482a8d50365cd9e63",
+    "benchmark/repair_eval/contracts/conftest.py": "56a345a3b1a629ab316bed7dfc9e73ea51eb67502e2d29e68d21501c95321154",
+    "benchmark/repair_eval/contracts/acceptance.py": "e83e5bf832a26de72a5b15d2f92d7437a4ffed62b01f6533778dc43cfe6dec7f",
+    "benchmark/repair_eval/contracts/__init__.py": "5738d826e592d0f7fdaae467925982d6be7a765274d8455bbbf3b70245e92ce8",
+    "benchmark/repair_eval/contracts/test_contract.py": "5bc99f1aad0f0729b270cf48c5c24e555960994fc1637b5e27b6ff2d81c57521",
+    "benchmark/repair_eval/contracts/casefile.py": "0d7e4469fae18a993820f1fa74051c3965c1efc1a4f496237d38be5225126c2d",
+    "benchmark/repair_eval/contracts/task_contract.py": "cba0fa20623fc71fc3f262e05127c218022d18f1d365068adb3aab6292641040",
+    "benchmark/repair_eval/contracts/cases/n1_claim_success_goal_not_met.json": "7d05f3a5f3a2be49bf405291646451112d1ba9014954bdeca4361879bd53f1d6",
+    "benchmark/repair_eval/contracts/cases/n2_tampered_goal_or_threshold.json": "39b1a9fcef27810ed0443c95612c5cdf4703bf2e56abdf3d427099d92079832f",
+    "benchmark/repair_eval/contracts/cases/n3_goal_met_regression_failed.json": "425960ddf5e1bf79778e0f15acabcc0cfff150892bc5fe36b402ee7f442839e3",
+    "benchmark/repair_eval/contracts/cases/n4_protected_file_modified.json": "ad2edb03c6e101e8f0ba07bcb358628a4c86349176dbfc0ff67bc0003b020e8f",
+    "benchmark/repair_eval/contracts/cases/n5_evidence_missing_run_id_mismatch.json": "36979df5dffb98b82324a231791bbe61962b60f2a69d69bd259fa7b64ad75e54",
+    "benchmark/repair_eval/contracts/cases/n6_pass_text_nonzero_exit.json": "9a6b34a42a0592d22b2b975b6da1e064012399dd091907941f5377abd099044a",
+    "benchmark/repair_eval/contracts/cases/p1_valid_repair.json": "2b58d0a5a8c10c4d4f749d8cb9db374143344fcb0f6db9844ac4b3e17759ca2f",
+    "experiments/repair_eval_v02/provenance_247.json": "1e4fb0af3721ccd502f18fab7e1ff8b8b40393958119960ef44dbd34cdd76cc7"
+  },
+  "mechanical_only": false
+}
