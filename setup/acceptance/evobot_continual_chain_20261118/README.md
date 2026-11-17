@@ -86,13 +86,27 @@ capability is what makes that visible instead of leaving it to an audit.
     the case it was designed for would have shipped it. Rejected candidates stay on the
     board with their numbers and the reason.
 
-`verify.py` asserts **53 checks**, including that both gates really ran, that the asset
+15. **reuse is measured on tasks the skill was NOT built from.** `reuse.py` runs the
+    compiled asset over the whole archive and reports per task family: newly fixed,
+    untouched, made worse, refused. The spacing lesson was learned from a **T13** failure
+    and also fixes **T12** (3 instances) and **T03** (1) — 7 distinct instances across 3
+    families, **0 made worse, and no conforming plan touched**. Instances are counted once,
+    not once per plan file: the same instance appears in several batches and file counting
+    would inflate the result fourfold. "Untouched" is a pass condition, not a miss — an
+    asset that disturbs a conforming plan is a defect, which is how the 2026-11-18
+    rotation bug was found. The report states the claim it does **not** support: every
+    instance in this archive is held-out, so this is cross-**family** reuse, **not**
+    cross-split transfer.
+
+`verify.py` asserts **58 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
 from**, that **two distinct consumers act**, that the ACTIVE set spans **both splits**, and
 that **an already-conforming plan is a declared invalid condition whose probe reports
-INERT**, and that **several candidates were compared with the losers kept and explained**.
+INERT**, and that **several candidates were compared with the losers kept and explained**, and that
+**the skill fixes at least one task family other than its source while making nothing
+worse**.
 
 ---
 

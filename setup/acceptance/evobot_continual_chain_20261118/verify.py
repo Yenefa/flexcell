@@ -302,6 +302,25 @@ def main():
         checks["a_rejected_candidate_states_why_it_lost"] = bool(rejected) and all(
             r.get("why") for r in rejected)
 
+        # 15 -- REUSE ACROSS TASKS THE LESSON WAS NOT BUILT FROM. "It works on the input
+        # it was derived from" is the weakest possible claim; the objective's claim is that
+        # a lesson accumulated on one task is reused on later ones.
+        audit = json.loads((tmp / "09b_reuse_audit.json").read_text(encoding="utf-8"))
+        checks["a_skill_was_audited_over_the_whole_archive"] = bool(audit) and all(
+            r.get("asset_id") for r in audit)
+        checks["the_skill_fixes_tasks_beyond_its_source_instance"] = any(
+            r["total_instances_fixed"] > 0 for r in audit)
+        # the strongest form: families OTHER than the one the lesson came from
+        checks["the_skill_fixes_at_least_one_OTHER_task_family"] = any(
+            r["families_fixed_beyond_the_source"] for r in audit)
+        # and it must not achieve that by thrashing conforming plans
+        checks["the_skill_made_no_task_worse"] = all(
+            r["total_made_worse"] == 0 for r in audit)
+        # the report must state which claim it supports, so it cannot be read as a
+        # cross-split transfer result when it is only cross-family
+        checks["the_reuse_report_states_the_claim_it_does_not_support"] = all(
+            "NOT cross-split" in (r.get("claim") or "") for r in audit)
+
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
             "batch": HERE.name,
@@ -316,6 +335,10 @@ def main():
                          "candidates_compared": len(rows),
                          "candidates_rejected": sum(1 for r in rows
                                                     if not r["admissible"]),
+                         "reuse_instances_fixed": [r["total_instances_fixed"]
+                                                   for r in audit],
+                         "reuse_families_beyond_source": [
+                             r["families_fixed_beyond_the_source"] for r in audit],
                          "acting_label": acting_label,
                          "acting_consumer": routes.get(acting_label),
                          "spread_separation_m": e2.get("applied_min_separation_m"),

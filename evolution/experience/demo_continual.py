@@ -41,6 +41,7 @@ import ledger  # noqa: E402
 import lifecycle  # noqa: E402
 import postmortem  # noqa: E402
 import retrieve  # noqa: E402
+import reuse  # noqa: E402
 import candidate_search  # noqa: E402
 import schema  # noqa: E402
 import skill_asset  # noqa: E402
@@ -450,6 +451,21 @@ def run(dest=OUT):
         }
     _write(os.path.join(dest, "10_skill_assets.json"), assets)
     steps.append({"step": "skill_assets", "by_label": assets})
+
+    # 9b -- REUSE: run the stored skill over EVERY archived task, including the ones it
+    # never saw. "It works on the input it was derived from" is the weakest possible claim
+    # and it is the one a demo naturally produces; the objective's claim is that a lesson
+    # accumulated on one task is reused on LATER ones, which is a statement about tasks it
+    # was not built from.
+    reuse_report = reuse.reuse_assets(os.path.join(dest, "skill_assets.jsonl"),
+                                      source_task="HO-90899d657e68")
+    _write(os.path.join(dest, "09b_reuse_audit.json"), reuse_report)
+    steps.append({"step": "reuse_audit",
+                  "total_instances_fixed": [r["total_instances_fixed"]
+                                            for r in reuse_report],
+                  "families_fixed_beyond_source": [r["families_fixed_beyond_the_source"]
+                                                   for r in reuse_report],
+                  "made_worse": [r["total_made_worse"] for r in reuse_report]})
 
     # 10 -- LIFECYCLE: what the ledger says should happen to each ACTIVE entry.
     # The master goal's fifth step is "revise or retire based on the actual result". The

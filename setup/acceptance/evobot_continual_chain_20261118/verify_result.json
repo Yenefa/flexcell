@@ -57,10 +57,15 @@
     "the_winner_fixes_every_plan_it_was_scored_on": true,
     "the_winner_breaks_no_clearance_contract": true,
     "the_winner_is_the_cheapest_admissible_candidate": true,
-    "a_rejected_candidate_states_why_it_lost": true
+    "a_rejected_candidate_states_why_it_lost": true,
+    "a_skill_was_audited_over_the_whole_archive": true,
+    "the_skill_fixes_tasks_beyond_its_source_instance": true,
+    "the_skill_fixes_at_least_one_OTHER_task_family": true,
+    "the_skill_made_no_task_worse": true,
+    "the_reuse_report_states_the_claim_it_does_not_support": true
   },
-  "checks_total": 53,
-  "checks_passed": 53,
+  "checks_total": 58,
+  "checks_passed": 58,
   "chain_message": "chain intact (6 records)",
   "measured": {
     "deliveries": {
@@ -71,6 +76,15 @@
     "selected_skill_parameter": "respread/step=0.090",
     "candidates_compared": 6,
     "candidates_rejected": 1,
+    "reuse_instances_fixed": [
+      7
+    ],
+    "reuse_families_beyond_source": [
+      [
+        "T03_ordered",
+        "T12_triple_revisit"
+      ]
+    ],
     "acting_label": "E2",
     "acting_consumer": "executor_recovery",
     "spread_separation_m": 0.09000000000000001,

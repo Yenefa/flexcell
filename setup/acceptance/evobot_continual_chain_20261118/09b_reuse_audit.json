@@ -1,0 +1,94 @@
+[
+  {
+    "asset_id": "skill.executor_recovery.7403416136ed",
+    "claim": "cross-FAMILY reuse only; every instance in this archive is held-out, so this is NOT cross-split transfer",
+    "families": {
+      "T01_multi_object_sorting": {
+        "instances": [],
+        "made_worse": 0,
+        "newly_fixed_instances": 0,
+        "refused": 0,
+        "untouched_plans": 11
+      },
+      "T03_ordered": {
+        "instances": [
+          "HO-13c5efca228e"
+        ],
+        "made_worse": 0,
+        "newly_fixed_instances": 1,
+        "refused": 0,
+        "untouched_plans": 1
+      },
+      "T04_duplicates": {
+        "instances": [],
+        "made_worse": 0,
+        "newly_fixed_instances": 0,
+        "refused": 0,
+        "untouched_plans": 6
+      },
+      "T05_relay": {
+        "instances": [],
+        "made_worse": 0,
+        "newly_fixed_instances": 0,
+        "refused": 0,
+        "untouched_plans": 24
+      },
+      "T06_revisit": {
+        "instances": [],
+        "made_worse": 0,
+        "newly_fixed_instances": 0,
+        "refused": 0,
+        "untouched_plans": 4
+      },
+      "T12_triple_revisit": {
+        "instances": [
+          "HO-42109d30fa00",
+          "HO-b91d34102cdc",
+          "HO-fd5737f932db"
+        ],
+        "made_worse": 0,
+        "newly_fixed_instances": 3,
+        "refused": 0,
+        "untouched_plans": 96
+      },
+      "T13_geometric_conditional": {
+        "instances": [
+          "HO-90899d657e68",
+          "HO-96e57334764a",
+          "HO-b81a5ae02d6d"
+        ],
+        "made_worse": 0,
+        "newly_fixed_instances": 3,
+        "refused": 0,
+        "untouched_plans": 101
+      },
+      "T14_ordered_pair": {
+        "instances": [],
+        "made_worse": 0,
+        "newly_fixed_instances": 0,
+        "refused": 0,
+        "untouched_plans": 35
+      },
+      "UNKNOWN": {
+        "instances": [],
+        "made_worse": 0,
+        "newly_fixed_instances": 0,
+        "refused": 0,
+        "untouched_plans": 9
+      }
+    },
+    "families_fixed_beyond_the_source": [
+      "T03_ordered",
+      "T12_triple_revisit"
+    ],
+    "families_with_fixes": [
+      "T03_ordered",
+      "T12_triple_revisit",
+      "T13_geometric_conditional"
+    ],
+    "source_family": "T13_geometric_conditional",
+    "source_task": "HO-90899d657e68",
+    "total_instances_fixed": 7,
+    "total_made_worse": 0
+  }
+]
