@@ -117,9 +117,39 @@ def test_a_prompt_only_entry_is_never_silently_treated_as_delivered():
 
 
 def test_a_consumer_with_no_delivery_path_is_unsupported():
-    out = delivery.deliver({"entry_id": "x", "consumer": "development",
+    """Re-pointed, not deleted. This used to pin "development"; the path now exists, so an
+    undeclared consumer stands in for it. Deleting the check would have turned "the gap
+    closed" into "the guard went away"."""
+    out = delivery.deliver({"entry_id": "x", "consumer": "not-a-consumer",
                             "suggested_action": "record the practice"}, None)
     assert out["verdict"] == "UNSUPPORTED"
+
+
+def test_the_consumer_that_was_unreachable_is_now_reachable():
+    out = delivery.deliver({"entry_id": "x", "consumer": "development",
+                            "suggested_action": "record the practice",
+                            "applicable_when": ["a"]}, None)
+    assert out["verdict"] == "DELIVERED"
+
+
+def test_the_development_candidate_does_not_claim_PROPOSED():
+    """PROPOSED means written, unit-tested and mutation-tested. An experience entry has none
+    of those, so claiming it would put a verification into the registry that never happened."""
+    out = delivery.deliver({"entry_id": "x", "consumer": "development",
+                            "suggested_action": "check the DDS pool before launching",
+                            "applicable_when": ["launching N nodes"]}, None)
+    assert out["candidate"]["status"] != "PROPOSED"
+    assert out["candidate"]["revisit_metrics"]["effect"] == "NOT_MEASURED"
+    assert set(out["missing_registry_fields"]) == {"entrypoints", "tests", "mutation"}
+
+
+def test_a_development_candidate_without_a_trigger_is_refused():
+    """A skill with no stated trigger is never loaded at the right moment - the failure mode
+    behind the measured zero adoption."""
+    out = delivery.deliver({"entry_id": "x", "consumer": "development",
+                            "suggested_action": "do the thing"}, None)
+    assert out["verdict"] == "DROPPED"
+    assert "trigger" in out["why"]
 
 
 def test_the_three_verdicts_are_distinct():

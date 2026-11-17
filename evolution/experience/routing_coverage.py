@@ -50,6 +50,12 @@ OBJECTIVE_ROUTINGS = (
 CARRIED = "CARRIED"
 NAMED_BUT_EMPTY = "NAMED_BUT_EMPTY"
 UNDECLARED = "UNDECLARED"
+# TWO DIFFERENT GAPS that used to report as one:
+#   NO_ENTRY     the delivery path works; nothing has been routed here yet
+#   NO_DELIVERY  an entry exists for this consumer but cannot reach it
+# They need different work, so blending them lets one hide behind the other.
+NO_ENTRY = "NO_ENTRY"
+NO_DELIVERY = "NO_DELIVERY"
 
 
 def coverage(store_path, delivery=None):
@@ -80,11 +86,25 @@ def coverage(store_path, delivery=None):
         elif deliverable:
             state, why = CARRIED, "delivered by %s" % (deliverable,)
         elif mine:
-            state = NAMED_BUT_EMPTY
+            verdict = delivery_mod.deliver(mine[0], None)
+            # a consumer with no renderer at all is a CODE gap; one whose renderer works but
+            # produced nothing is a DIFFERENT gap
+            state = NO_DELIVERY if verdict.get("verdict") == delivery_mod.UNSUPPORTED \
+                else NAMED_BUT_EMPTY
             why = ("%d ACTIVE entr(ies) name it but delivery refuses: %s"
-                   % (len(mine), delivery_mod.deliver(mine[0], None).get("why")))
+                   % (len(mine), verdict.get("why")))
         else:
-            state, why = NAMED_BUT_EMPTY, "no ACTIVE entry names this consumer"
+            # Does a path exist at all? Asking delivery with a probe would be wrong for the
+            # planner: it needs an observation, so a bare probe returns UNSUPPORTED and the
+            # consumer would be reported as having no delivery path when it has one. The
+            # registered renderer is the direct evidence, and the non-text consumers are
+            # declared in deliver_non_text.
+            reachable = (consumer in getattr(delivery_mod, "RENDERERS", {})
+                         or consumer in ("spread_policy", "executor_recovery", "harness",
+                                         "development"))
+            state = NO_ENTRY if reachable else NO_DELIVERY
+            why = ("no ACTIVE entry names this consumer (a delivery path %s)"
+                   % ("exists" if reachable else "does NOT exist"))
         out.append({"routing": label, "consumer": consumer, "state": state, "why": why,
                     "active_entries": [r.get("version", {}).get("label") for r in mine]})
     # A NAMED ROUTING CAN BE SERVED FROM A DIFFERENT ADDRESS. The objective says a ROS
@@ -131,8 +151,9 @@ def coverage(store_path, delivery=None):
             "live_rules_with_no_entry": unbacked,
             # consumers the objective did NOT name but that do carry a delivered entry
             "carried_by_an_unnamed_consumer": served_elsewhere,
-            "claim": ("a routing is CARRIED only when an ACTIVE entry reaches its consumer; "
-                      "a declared consumer with no arriving entry is NAMED_BUT_EMPTY. A "
+            "claim": ("a routing is CARRIED only when an ACTIVE entry reaches its consumer. "
+                      "NO_ENTRY (path works, nothing routed) and NO_DELIVERY (entry exists, "
+                      "cannot arrive) are reported apart because they need different work. A "
                       "lesson can also act from a consumer the objective did not name, and "
                       "that is reported separately rather than counted as coverage. A rule "
                       "live in the code path with no entry behind it is reported as "

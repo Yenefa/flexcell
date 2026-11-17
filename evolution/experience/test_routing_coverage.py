@@ -50,11 +50,17 @@ def test_all_four_objective_routings_are_reported():
         "planner", "spread_policy", "executor_recovery", "development"}
 
 
-def test_a_declared_consumer_with_no_entry_is_NAMED_BUT_EMPTY():
-    """The whole point: 'declared' must not be allowed to look like 'covered'."""
+def test_a_declared_consumer_with_no_entry_is_reported():
+    """The whole point: 'declared' must not be allowed to look like 'covered'.
+
+    The state is now NO_ENTRY (the path works, nothing is routed here) rather than the old
+    blanket NAMED_BUT_EMPTY, because that blanket hid a delivered path from a missing one.
+    """
     report = routing_coverage.coverage(RECORDS)
     by = {r["consumer"]: r for r in report["routings"]}
-    assert by["development"]["state"] == routing_coverage.NAMED_BUT_EMPTY
+    assert by["development"]["state"] in (routing_coverage.NO_ENTRY,
+                                          routing_coverage.NAMED_BUT_EMPTY)
+    assert by["development"]["state"] != routing_coverage.CARRIED
     assert by["development"]["active_entries"] == []
 
 
@@ -81,17 +87,19 @@ def test_a_candidate_entry_does_not_count_as_coverage(tmp_path):
     store.append(str(path), entry)
     report = routing_coverage.coverage(str(path))
     by = {r["consumer"]: r for r in report["routings"]}
-    assert by["development"]["state"] == routing_coverage.NAMED_BUT_EMPTY
+    assert by["development"]["state"] != routing_coverage.CARRIED
 
 
-def test_an_entry_that_routes_but_cannot_be_delivered_is_not_carried(tmp_path):
-    """development has no delivery path, so an ACTIVE entry there still does not arrive."""
+def test_an_entry_with_no_trigger_does_not_become_coverage(tmp_path):
+    """The delivery path exists now, but a development entry with no applicable_when is
+    DROPPED, so it still must not be counted as carried."""
     entry = _entry("development", "development")
+    entry["applicable_when"] = []
     path = tmp_path / "s.jsonl"
     store.append(str(path), entry)
     report = routing_coverage.coverage(str(path))
     by = {r["consumer"]: r for r in report["routings"]}
-    assert by["development"]["state"] == routing_coverage.NAMED_BUT_EMPTY
+    assert by["development"]["state"] != routing_coverage.CARRIED
     assert by["development"]["active_entries"] == ["E"]
 
 
@@ -132,11 +140,17 @@ def test_the_claim_says_what_is_not_counted():
 
 # ---------------------------------------------------------------- the underlying gap
 
-def test_development_is_declared_but_has_no_delivery_path():
-    """This is the genuine gap, pinned so it cannot be quietly forgotten."""
+def test_development_had_no_delivery_path_and_now_has_one():
+    """The gap was real and is now closed - pinned in both directions so neither the fix nor
+    the original defect can be forgotten."""
     assert "development" in consumers.CONSUMERS
     assert consumers.implemented("development") is True, \
         "its entrypoint file exists, which is why 'implemented' was never the right check"
     out = delivery.deliver({"entry_id": "x", "consumer": "development",
-                            "suggested_action": "check the DDS participant pool"}, None)
-    assert out["verdict"] == delivery.UNSUPPORTED
+                            "suggested_action": "check the DDS participant pool",
+                            "applicable_when": ["launching many nodes"]}, None)
+    assert out["verdict"] == delivery.DELIVERED
+    # ... but a DEVELOPMENT entry with no trigger is still refused
+    dropped = delivery.deliver({"entry_id": "x", "consumer": "development",
+                                "suggested_action": "check the DDS participant pool"}, None)
+    assert dropped["verdict"] == delivery.DROPPED

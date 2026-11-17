@@ -322,7 +322,48 @@ capability is what makes that visible instead of leaving it to an audit.
     After the fix: committed vs fresh = number drift **0**, id churn **0**, missing **0**,
     with **27 files byte-identical** (baseline count).
 
-`verify.py` asserts **113 checks**, including that both gates really ran, that the asset
+29. **the fourth routing now has a delivery path — and it refuses to lie.** The objective
+    says ROS-launch lessons belong in development experience. That routing was
+    **UNSUPPORTED**: even if an entry had existed, **nothing could arrive**.
+
+    The obvious fix would have been wrong. `development_skills/registry.json` defines
+    **PROPOSED** as *"written, unit-tested, mutation-tested"*, and its own `promotion_rule`
+    says passing tests is necessary but not sufficient. **An experience entry has no test
+    file and no mutation run**, so writing it as PROPOSED would put a **verification into
+    the registry that never happened.**
+
+    So delivery renders a **candidate** instead:
+
+    | field | value |
+    | --- | --- |
+    | status | `CANDIDATE_NOT_IN_REGISTRY` — **not PROPOSED** |
+    | effect | **NOT_MEASURED**, as that registry's own legend requires |
+    | `missing_for_proposed` | **entrypoints / tests / mutation** — what the entry cannot supply |
+
+    **A candidate that names its own missing tests is more useful than a PROPOSED entry that
+    quietly has none.**
+
+    Two inputs are genuinely refused: an entry with **no `applicable_when`** is **DROPPED**
+    — *a skill with no stated trigger is never loaded at the right moment*, which is the
+    failure mode behind the measured **zero adoption** — and an entry with no actionable text.
+
+    The report also stops blending two different gaps that used to share one label:
+
+    | state | meaning |
+    | --- | --- |
+    | `CARRIED` | an ACTIVE entry actually arrived |
+    | `NO_ENTRY` | **path works, nothing routed here** |
+    | `NO_DELIVERY` | **entry exists, cannot arrive** |
+
+    They need different work, so one must not hide behind the other. Now **no named routing
+    is NO_DELIVERY**: one CARRIED, three NO_ENTRY.
+
+    One existing assertion pinned "development has no delivery path". It had to fail. **It
+    was re-pointed rather than deleted** — at an undeclared consumer, which must still be
+    UNSUPPORTED — and a second check asserts the previously unreachable consumer is now
+    reachable. Deleting it would have turned *"the gap closed"* into *"the guard went away"*.
+
+`verify.py` asserts **119 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -342,8 +383,9 @@ the real tasks a skill was used on, each with its own three events**, and that *
 applications are recorded so the hit rate is not 100% by construction**, and that **the reported rate is computed in
 one unit rather than across two**, and that **the objective's four routings are reported
 one by one with a declared-but-empty destination not counted as covered**, that **no rule is
-live in a code path without an entry admitted for it**, and that **the committed evidence
-ids, numbers and file set match a fresh run to the byte**.
+live in a code path without an entry admitted for it**, that **the committed evidence
+ids, numbers and file set match a fresh run to the byte**, and that **the development
+routing renders a candidate that does not claim PROPOSED and names its own missing tests**.
 
 ---
 

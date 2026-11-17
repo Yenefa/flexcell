@@ -358,11 +358,21 @@ def main():
                   "failure_class": "planning"}
         checks["an_entry_with_no_actionable_text_is_reported_dropped"] = (
             _delivery.deliver(silent, None).get("verdict") == "DROPPED")
-        # and a consumer with no delivery path must be UNSUPPORTED, never a silent pass
-        orphan = {"entry_id": "x", "consumer": "development",
+        # A CONSUMER WITH NO DELIVERY PATH MUST BE UNSUPPORTED, NEVER A SILENT PASS.
+        # This used to pin "development" as that consumer. The path now exists, so the check
+        # is re-pointed rather than deleted: an undeclared consumer must still be refused,
+        # or "the gap closed" would quietly become "the guard went away".
+        orphan = {"entry_id": "x", "consumer": "not-a-consumer",
                   "suggested_action": "record the practice"}
         checks["a_consumer_with_no_delivery_path_is_unsupported"] = (
             _delivery.deliver(orphan, None).get("verdict") == "UNSUPPORTED")
+        # ... and the consumer that USED to be that example must now be reachable, or the
+        # re-pointing above hid a regression instead of reporting a fix
+        checks["the_consumer_that_was_unreachable_is_now_reachable"] = (
+            _delivery.deliver({"entry_id": "x", "consumer": "development",
+                               "suggested_action": "record the practice",
+                               "applicable_when": ["a"]}, None).get("verdict")
+            == "DELIVERED")
 
         # 17 -- AN ORDER CLAUSE FAILURE IS TWO DIFFERENT THINGS. Three archived rows name
         # "order" as failed; only one is a reordering. The other two are runs where the
@@ -605,9 +615,15 @@ def main():
         checks["at_least_one_named_routing_actually_carries_an_entry"] = (
             cov["carried"] >= 1)
         # ... and the gap must be REPORTED, not silently rounded up to 4/4
-        checks["a_declared_destination_with_no_entry_is_reported_empty"] = (
+        # ... and the gap must be reported by KIND, not blended: an empty routing (path works,
+        # nothing routed here) is different work from an unreachable one (entry exists, cannot
+        # arrive). Blending them lets one hide behind the other.
+        checks["no_named_routing_is_unreachable"] = (
+            "NO_DELIVERY" not in by_consumer.values())
+        checks["the_gap_is_reported_by_kind"] = (
             cov["carried"] < cov["named"]
-            and "NAMED_BUT_EMPTY" in by_consumer.values())
+            and all(state in ("CARRIED", "NO_ENTRY", "NO_DELIVERY", "NAMED_BUT_EMPTY")
+                    for state in by_consumer.values()))
         # the ROS-launch lesson does act - from a consumer the objective did not name, which
         # is reported separately rather than counted as coverage of the fourth routing
         checks["acting_from_an_unnamed_consumer_is_reported_separately"] = (
@@ -650,6 +666,27 @@ def main():
             cov.get("live_rules_with_no_entry") == [])
         checks["the_coverage_claim_says_an_unbacked_rule_is_worse"] = (
             "worse than an empty routing" in (cov.get("claim") or ""))
+        # 29 -- A PATH FOR THE FOURTH ROUTING EXISTS. It used to be UNSUPPORTED, which meant
+        # "ROS 启动经验归入开发经验" could not have been honoured even if an entry had existed.
+        dev = _load("delivery").deliver(
+            {"entry_id": "x" * 64, "consumer": "development",
+             "suggested_action": "check the DDS participant pool before launching many nodes",
+             "applicable_when": ["launching N ROS 2 processes in one domain"]}, None)
+        checks["the_development_routing_now_has_a_delivery_path"] = (
+            dev.get("verdict") == _load("delivery").DELIVERED)
+        # ... and it must NOT masquerade as a PROPOSED registry skill: PROPOSED means
+        # written, unit-tested and mutation-tested, and this entry has none of those.
+        checks["a_rendered_candidate_does_not_claim_PROPOSED"] = (
+            dev["candidate"]["status"] != "PROPOSED"
+            and dev["candidate"]["revisit_metrics"]["effect"] == "NOT_MEASURED")
+        checks["a_rendered_candidate_names_what_it_cannot_supply"] = (
+            set(dev["missing_registry_fields"]) == {"entrypoints", "tests", "mutation"})
+        # a development practice with no trigger is never loaded - that is the failure mode
+        # behind the zero-adoption measurement, so it must be refused rather than rendered
+        checks["a_development_candidate_without_a_trigger_is_refused"] = (
+            _load("delivery").deliver(
+                {"entry_id": "x", "consumer": "development",
+                 "suggested_action": "do something"}, None)["verdict"] == "DROPPED")
 
         # 28 -- THE COMMITTED EVIDENCE MUST STILL DESCRIBE THE CODE. verify.py regenerates
         # into a temp directory and asserts properties of THAT run, so it checks the code is

@@ -42,6 +42,13 @@ DROPPED = "DROPPED"
 UNSUPPORTED = "UNSUPPORTED"
 
 
+def _slug(text, limit=48):
+    """A registry-safe name for a rendered candidate."""
+    import re
+    words = re.findall(r"[a-z0-9]+", str(text).lower())
+    return "-".join(words)[:limit].strip("-") or "unnamed-candidate"
+
+
 def actionable_text(entry):
     """The one sentence a consumer should act on, and where it came from.
 
@@ -145,8 +152,84 @@ def deliver_non_text(entry):
                        % (detail["symbol"], detail["live_value"],
                           detail["declared_value"]),
                 "config": detail}
+    if consumer == "development":
+        detail = deliver_development(entry)
+        if detail.get("verdict") == DELIVERED:
+            return detail
+        return detail
     return {"verdict": UNSUPPORTED,
             "why": "no delivery path for consumer %r" % (consumer,)}
+
+
+# ---------------------------------------------------------------- development experience
+# THE OBVIOUS DELIVERY IS A LIE, AND THE HONEST ONE IS STILL USEFUL.
+#
+# development_skills/registry.json declares four states. PROPOSED means "written,
+# unit-tested, mutation-tested" and its own promotion_rule says tests are necessary but not
+# sufficient. An experience entry has NO test file and NO mutation run, so writing it into
+# the registry as PROPOSED would be a false status - the registry would then be claiming a
+# verification that never happened. That is why this consumer had no delivery path, and why
+# adding one carelessly would have been worse than the gap.
+#
+# What an entry CAN honestly reach is the registry's candidate side: the shape a future
+# agent reads when deciding what to test next. So delivery renders that shape and REPORTS
+# WHICH REGISTRY FIELDS THE ENTRY CANNOT SUPPLY, rather than filling them with prose. A
+# candidate that names its own missing tests is more useful than a PROPOSED entry that
+# quietly has none.
+REGISTRY_REQUIRED = ("name", "status", "status_reason", "trigger", "evidence", "incidents",
+                     "entrypoints", "tests", "mutation", "revisit_metrics")
+# fields an experience entry structurally cannot supply: they describe work done on a TOOL,
+# which an experience entry does not contain
+REGISTRY_NEEDS_A_TOOL = ("entrypoints", "tests", "mutation")
+
+
+def deliver_development(entry):
+    """Render an entry into the development-skills candidate shape.
+
+    DELIVERED means the rendered candidate carries everything a future agent needs to
+    evaluate and test the practice: a trigger, the actionable text, the measured provenance,
+    and an honest statement of what is missing. It is NOT a claim that the practice works -
+    effect stays NOT_MEASURED, exactly as the registry's own legend requires.
+    """
+    text, source = actionable_text(entry)
+    if not text:
+        return {"verdict": DROPPED, "why": "the entry carries no actionable text"}
+    trigger = " ".join(entry.get("applicable_when") or []) or None
+    if not trigger:
+        # A skill with no stated trigger cannot be loaded at the right moment, which is the
+        # failure mode that made adoption zero in the first place.
+        return {"verdict": DROPPED,
+                "why": "no applicable_when: a skill with no trigger is never loaded"}
+    name = _slug(text)
+    candidate = {
+        "name": name,
+        "status": "CANDIDATE_NOT_IN_REGISTRY",
+        "status_reason": ("rendered from experience entry %s; it has no entrypoint, no test "
+                          "file and no mutation run, so it may not be recorded as PROPOSED"
+                          % (entry.get("entry_id") or "?")),
+        "trigger": trigger,
+        "action": text,
+        "action_source": source,
+        "evidence": ["setup/acceptance/evobot_continual_chain_20261118/records_v2.jsonl"],
+        "measured_on": {"task_family": entry.get("task_family"),
+                        "failure_class": entry.get("failure_class"),
+                        "split": (entry.get("evidence") or {}).get("split")},
+        "revisit_metrics": {"effect": "NOT_MEASURED",
+                            "why": "an experience entry carries no with/without comparison "
+                                   "of a development practice"},
+        # the honest part: the registry requires these and the entry cannot supply them
+        "missing_for_proposed": list(REGISTRY_NEEDS_A_TOOL),
+    }
+    missing = [k for k in REGISTRY_REQUIRED if k not in candidate]
+    return {"verdict": DELIVERED,
+            "why": ("rendered a candidate for the development-skills registry; %d/%d registry "
+                    "fields are structurally unavailable to an experience entry"
+                    % (len(REGISTRY_NEEDS_A_TOOL), len(REGISTRY_REQUIRED))),
+            "candidate": candidate,
+            "missing_registry_fields": REGISTRY_NEEDS_A_TOOL,
+            "note": ("delivered to the CANDIDATE side on purpose: PROPOSED requires a test "
+                     "file and a mutation run this entry does not have, and claiming it "
+                     "would be the overstatement the registry's promotion_rule warns about")}
 
 
 def deliver(entry, observation=None):
