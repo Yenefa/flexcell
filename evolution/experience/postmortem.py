@@ -231,9 +231,33 @@ def _clause_failures(root, excluded_names, sealed):
             excluded["%s:sealed_instance" % batch] = excluded.get(
                 "%s:sealed_instance" % batch, 0) + 1
             continue
+        # An "order" clause can fail for two very different reasons and the clause name
+        # alone does not say which. If only SOME of the required moves happened, the order
+        # clause fails as a side effect of an incomplete run - the second move never
+        # happened, so it was not out of order. Teaching a planning rule from those would
+        # be teaching it from a placement failure. Only a plan whose moves happened but in
+        # the WRONG SEQUENCE is an order lesson.
+        order_kind = None
+        for clause in (doc.get("clauses") or []):
+            if not isinstance(clause, dict) or clause.get("clause") != "order":
+                continue
+            ev = clause.get("evidence") or {}
+            required = [str(x) for x in (ev.get("required") or [])]
+            observed = [str(x) for x in (ev.get("observed") or [])]
+            if not required:
+                order_kind = "unknown"
+            elif observed[:len(required)] == required:
+                order_kind = "satisfied"
+            elif observed and required[:len(observed)] == observed:
+                # every observed move is in the right place, but some never happened
+                order_kind = "incomplete"
+            elif sorted(observed) == sorted(required):
+                order_kind = "reordered"
+            else:
+                order_kind = "mismatched"
         out.append({"path": rel, "batch": batch, "error_code": None,
                     "layer": "GRADED", "detail": "failed clause(s): " + ", ".join(clauses),
-                    "clauses": clauses,
+                    "clauses": clauses, "order_kind": order_kind,
                     "completed_stage_ids": [], "outcome": None})
     return out, excluded
 
@@ -378,7 +402,15 @@ def signature_of(failure):
         # prose: the clause name is the machine-readable part and the prose is a summary.
         clauses = [str(c) for c in (failure.get("clauses") or [])]
         if "order" in clauses:
-            return "order_clause_violated"
+            # Only a genuine reordering is a planning lesson. An incomplete run fails the
+            # order clause too, but its cause is elsewhere and filing it here would teach
+            # the planner to fix something that was never wrong.
+            kind = failure.get("order_kind")
+            if kind == "reordered":
+                return "order_clause_violated"
+            if kind == "incomplete":
+                return "incomplete_execution"
+            return "order_unclassified"
         if any(c.startswith("placement:") for c in clauses):
             return "placement_clause_failed"
         return "graded_%s" % (clauses[0].split(":")[0] if clauses else "unknown")

@@ -359,6 +359,25 @@ def main():
         checks["a_consumer_with_no_delivery_path_is_unsupported"] = (
             _delivery.deliver(orphan, None).get("verdict") == "UNSUPPORTED")
 
+        # 17 -- AN ORDER CLAUSE FAILURE IS TWO DIFFERENT THINGS. Three archived rows name
+        # "order" as failed; only one is a reordering. The other two are runs where the
+        # second move never happened, so it was never out of order. The clause name is the
+        # same in all three and only the evidence separates them.
+        postmortem = _load("postmortem")
+        graded = postmortem.scan_with_report(include_held_out=True)[0]
+        reordered = [r for r in graded if r.get("order_kind") == "reordered"]
+        incomplete = [r for r in graded if r.get("order_kind") == "incomplete"]
+        checks["an_order_clause_failure_is_told_apart_from_a_truncated_run"] = (
+            bool(reordered) and bool(incomplete))
+        checks["a_truncated_run_is_not_filed_as_an_order_lesson"] = all(
+            postmortem.signature_of(r) == "incomplete_execution" for r in incomplete)
+        checks["a_genuine_reordering_IS_filed_as_an_order_lesson"] = all(
+            postmortem.signature_of(r) == "order_clause_violated" for r in reordered)
+        # one genuine reordering is a mis-attribution risk, so the lesson must stay refused
+        sigs = postmortem.generate()[1]["signatures"]
+        checks["the_single_reordering_is_refused_for_lack_of_occurrences"] = (
+            sigs.get("order_clause_violated", {}).get("built") is False)
+
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
             "batch": HERE.name,

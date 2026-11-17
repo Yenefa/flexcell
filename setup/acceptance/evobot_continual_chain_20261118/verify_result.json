@@ -68,10 +68,14 @@
     "parameter_deliveries_bind_a_callable": true,
     "a_planner_entry_can_be_checked_for_delivery": true,
     "an_entry_with_no_actionable_text_is_reported_dropped": true,
-    "a_consumer_with_no_delivery_path_is_unsupported": true
+    "a_consumer_with_no_delivery_path_is_unsupported": true,
+    "an_order_clause_failure_is_told_apart_from_a_truncated_run": true,
+    "a_truncated_run_is_not_filed_as_an_order_lesson": true,
+    "a_genuine_reordering_IS_filed_as_an_order_lesson": true,
+    "the_single_reordering_is_refused_for_lack_of_occurrences": true
   },
-  "checks_total": 64,
-  "checks_passed": 64,
+  "checks_total": 68,
+  "checks_passed": 68,
   "chain_message": "chain intact (6 records)",
   "measured": {
     "deliveries": {

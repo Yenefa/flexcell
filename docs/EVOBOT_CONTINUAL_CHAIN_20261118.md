@@ -57,6 +57,31 @@
 于是重试第三次被拒为"declared destination occupied"。修改为**按余量选轴**，并且两轴都不满足契约时**拒绝**而不是发出一个必然被拒的计划；
 不传 avoid 时行为与旧实现**逐字节相同**，11/11 `benchmark/tests/test_recovery_driver.py` 仍通过。
 
+## 4.24 「order 子句失败」是**两件不同的事**
+
+归档里有 3 行名字叫 `order` 的失败。**只有 1 行是真正的顺序错误。**
+
+| 运行 | required | observed | 实际是什么 |
+| --- | --- | --- | --- |
+| `run_foreign_plan` | [b, a] | [a, b] | **REORDERED**——每一步都发生了，顺序错了 |
+| `HO-2efba46248da` | [a, b] | [a] | **INCOMPLETE**——第二步**根本没发生** |
+| `HO-d3ab212142de` | [b, a] | [b] | **INCOMPLETE**——同上 |
+
+**子句名字一样，只有证据能分开它们。** 一个按 "order" 关键词分类的扫描器无法区分，
+于是 3 行都会被记成"规划顺序经验"——**而其中 2 行的真因在别处**（第二步没执行），
+那样教给规划器的是**修一个从来没坏过的东西**。
+
+现在分类器读 `clauses[].evidence` 的 `required` / `observed`：
+
+| observed 与 required 的关系 | 判定 |
+| --- | --- |
+| observed 是 required 的**前缀**（且更短） | `incomplete_execution`——**不是顺序经验** |
+| observed 是 required 的**排列**（同集合不同序） | `order_clause_violated`——**是** |
+| 其他 | `order_unclassified`——**不硬凑成经验** |
+
+分类修正后，真正重排只剩 **1 次**，`MIN_OCCURRENCES` 正确地**拒绝**把它变成经验——
+单次观测在本仓库被判为误归因风险，不是教训。
+
 ## 4.25 路由之外还有一件事：**它到底送到了没有？**
 
 `consumers.py` 回答的是"哪个模块**有能力**执行这条经验"。它没回答"这条经验**到达**那个模块了吗"。
@@ -363,7 +388,7 @@ python3 evolution/experience/demo_continual.py
 python3 -m pytest evolution/experience/test_continual_chain.py -q
 ```
 
-verifier 会**重新执行**整条链并断言 **64 项检查**，不读取 SUMMARY 里的自述。其中关键几项：
+verifier 会**重新执行**整条链并断言 **68 项检查**，不读取 SUMMARY 里的自述。其中关键几项：
 
 - 规划侧不生效（NO_CHANGE）、执行侧生效（CHANGED）；
 - 启用前后检索分别为 0 与 1；
@@ -378,6 +403,7 @@ verifier 会**重新执行**整条链并断言 **64 项检查**，不读取 SUMM
 - **至少一条条目来自归档自动生成**，生成器拒绝了一个 UNROUTED 签名，且**没有任何生成记录在无具名审阅者时被 ACCEPT**；
 - **每条条目都声明了自己的证据 split**；开发集确实产出了条目（不是零）；没有任何被标为 `dev` 的条目引用封存实例；
 - **两个不同消费者都能生效**（executor_recovery 与 harness），且 ACTIVE 条目**覆盖两种 split**；
+- **"order 子句失败"被拆成两件事**：真正的重排 vs 执行被截断，且后者不被记成顺序经验；
 - **每条 ACTIVE 条目都真的送到了它的消费者**（DELIVERED），参数类条目绑定到**真实存在**的可调用函数；
 - 一个没有可执行文本的条目被报 **DROPPED**，一个没有投递路径的消费者被报 **UNSUPPORTED**——
   两者都不许静默算通过；

@@ -109,7 +109,18 @@ capability is what makes that visible instead of leaving it to an audit.
     call); what changed is that it can now say *"delivered, effect not measured"* instead of
     *"consumer not measurable"*.
 
-`verify.py` asserts **64 checks**, including that both gates really ran, that the asset
+17. **"order clause failed" is two different things.** Three archived rows name `order` as
+    the failed clause; **only one is a reordering.** The other two are runs where the
+    second move never happened — observed is a strict **prefix** of required — so it was
+    never out of order. A scanner keyed on the clause name cannot tell them apart and would
+    have filed all three as planning lessons, teaching the planner to fix something that
+    was never wrong. The classifier now reads `clauses[].evidence` (`required` vs
+    `observed`): prefix → `incomplete_execution`, permutation → `order_clause_violated`,
+    anything else → `order_unclassified` rather than being dressed up as a lesson. After
+    the correction exactly one genuine reordering remains, and `MIN_OCCURRENCES` correctly
+    refuses it.
+
+`verify.py` asserts **68 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -118,7 +129,8 @@ that **an already-conforming plan is a declared invalid condition whose probe re
 INERT**, and that **several candidates were compared with the losers kept and explained**, and that
 **the skill fixes at least one task family other than its source while making nothing
 worse**, and that **every active entry reached its consumer** while an entry with no
-actionable text is reported DROPPED rather than accepted.
+actionable text is reported DROPPED rather than accepted, and that **an order-clause
+failure is told apart from a truncated run**.
 
 ---
 
