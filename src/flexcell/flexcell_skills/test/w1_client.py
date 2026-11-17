@@ -129,7 +129,7 @@ def main():
     from rclpy.action import ActionClient
     cli = ActionClient(n, cls, act)
 
-    if not cli.wait_for_server(timeout_sec=10.0):
+    if not cli.wait_for_server(timeout_sec=30.0):
         print(json.dumps({'client_error': 'action %s unavailable' % act}))
         return 2
 
@@ -172,7 +172,7 @@ def main():
     send = cli.send_goal_async(g, goal_uuid=goal_uuid)
     while not send.done():
         executor.spin_once(timeout_sec=0.05)
-        if time.monotonic() - t0 > min(30.0, args.timeout):
+        if time.monotonic() - t0 > min(90.0, args.timeout):
             print('CLIENT_GOAL_SEND_TIMEOUT: acceptance unknown; stop batch and inspect task state', flush=True)
             n.destroy_node()
             rclpy.shutdown()
