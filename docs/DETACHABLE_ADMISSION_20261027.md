@@ -1,5 +1,7 @@
 # D3 attachment admission: NO_GO for default qualification
 
+> Current status entry (当前状态入口): [D3_STATUS_CURRENT.md](D3_STATUS_CURRENT.md) carries the per-criterion state, window IDs, observed values and remaining gaps; [STATUS_INDEX_CURRENT.md](STATUS_INDEX_CURRENT.md) is the project-wide navigation page. The decision and the tables below are unchanged.
+
 Decision recorded on 2026-10-27: **NO_GO_FOR_DEFAULT_ADMISSION**. Keep
 DetachableJoint as an explicitly selected experimental oracle; continue the existing
 velocity_servo control. This is a qualification decision, not a finding that the

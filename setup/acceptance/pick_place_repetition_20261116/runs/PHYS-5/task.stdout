@@ -1,0 +1,21 @@
+[37;1m2026-11-16 14:20:24.248 [31;1m[[37;1mXMLPARSER[31;1m Error] [37mrealpath failed No such file or directory[34;1m -> Function [36mloadDefaultXMLFile[m
+SENDING action=task object=target_box_a pose=[0.12, -0.15, 0.0175]
+GOAL_UUID b4dfdcbf7bc4471382a2691a01b60c4f
+RESULT {
+  "action": "task",
+  "goal_uuid": "b4dfdcbf7bc4471382a2691a01b60c4f",
+  "outcome": "OUTCOME_SUCCEEDED",
+  "outcome_val": 0,
+  "error_code": "ERR_NONE",
+  "detail": "task done: all assignments verified",
+  "evidence_id": "pick_place_v1-23dd56ad",
+  "wall_seconds": 15.109,
+  "fsm_trace": [
+    "PICK_A(attempt=1):OK",
+    "PLACE_A:OK",
+    "VERIFY_A(attempt=1):OK"
+  ],
+  "object_at_place": true,
+  "final_position_error_m": 0.009872664896675435,
+  "skip_verify": false
+}

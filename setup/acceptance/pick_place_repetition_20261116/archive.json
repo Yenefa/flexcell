@@ -1,0 +1,9 @@
+{
+  "kind": "LOCAL_RUN_ARCHIVE",
+  "source_revision": null,
+  "host": "WSL2 Ubuntu 24.04 / ROS 2 Jazzy",
+  "run_count": 5,
+  "size_bytes": 17009215,
+  "rosbag_excluded": true,
+  "rosbag_exclusion_reason": "data/raw holds the rosbag transport copy. The engine-level evidence is data/physics.jsonl (per-step, written by the physics trace plugin), which is retained. Excluded to keep the archive proportionate; stated here so a reader knows the bag cannot be replayed."
+}

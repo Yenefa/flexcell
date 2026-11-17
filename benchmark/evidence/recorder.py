@@ -98,8 +98,17 @@ def contact_intervals(contact_records, model, pusher_links):
     """
     intervals = []
     open_interval = None
+    open_steps = 0
     present = False
     partners = set()
+
+    def _close(interval, steps):
+        # steps == 1 means the contact existed for exactly one physics step: the
+        # bounds are equal and that is the truth, not a missing measurement.
+        # v1 rejected this shape outright (see schema.SCHEMA_VERSION_V2).
+        interval['steps'] = steps
+        interval['single_frame'] = steps == 1
+        intervals.append(interval)
     for record in contact_records:
         target = (record.get('targets') or {}).get(model)
         if not isinstance(target, dict):
@@ -124,13 +133,16 @@ def contact_intervals(contact_records, model, pusher_links):
             if open_interval is None:
                 open_interval = {'start_sim_ns': sim_ns, 'end_sim_ns': sim_ns,
                                  'other': hit[0]}
+                open_steps = 1
             else:
                 open_interval['end_sim_ns'] = sim_ns
+                open_steps += 1
         elif open_interval is not None:
-            intervals.append(open_interval)
+            _close(open_interval, open_steps)
             open_interval = None
+            open_steps = 0
     if open_interval is not None:
-        intervals.append(open_interval)
+        _close(open_interval, open_steps)
     return intervals, present, sorted(partners)
 
 
@@ -190,7 +202,9 @@ def build(args):
 
     task_sha = schema.sha256_file(args.task)
     bundle = {
-        'schema_version': schema.SCHEMA_VERSION,
+        # v2 is written from now on: it is the only version that can represent a
+        # one-step contact honestly. Bundles already on disk keep their v1 verdict.
+        'schema_version': schema.SCHEMA_VERSION_V2,
         'task': {
             'task_id': args.task_id,
             'task_sha256': task_sha,

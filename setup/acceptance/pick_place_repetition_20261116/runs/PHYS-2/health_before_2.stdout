@@ -1,0 +1,27 @@
+[37;1m2026-11-16 13:26:54.530 [31;1m[[37;1mRTPS_TRANSPORT_SHM[31;1m Error] [37mFailed init_port fastrtps_port7005: open_and_lock_file failed[34;1m -> Function [36mopen_port_internal[m
+{
+  "ok": true,
+  "checks": {
+    "action /move_to_pose": "OK",
+    "action /observe": "OK",
+    "action /pick_object": "OK",
+    "action /place_object": "OK",
+    "action /verify_object": "OK",
+    "action /run_demo": "OK",
+    "action /run_pick_place": "OK",
+    "service /controller_manager/list_controllers": "OK",
+    "controller arm_controller": "OK",
+    "controller gripper_controller": "OK",
+    "controller joint_state_broadcaster": "OK",
+    "service /get_planning_scene": "OK",
+    "gz world models": "OK",
+    "object target_box_a pose": "OK ['0.220', '0.000', '0.017']",
+    "object target_box_b pose": "OK ['0.200', '-0.180', '0.017']",
+    "service /flexcell/carry_snapshot": "OK",
+    "carry_state publishers": "OK (1)",
+    "task_state": "IDLE",
+    "carry_engaged": false
+  },
+  "hard_fail": [],
+  "busy": false
+}

@@ -2,6 +2,7 @@
 
 ## 当前执行入口（2026-11-07）
 
+- **当前 D3 状态入口**：[docs/D3_STATUS_CURRENT.md](D3_STATUS_CURRENT.md) —— 按 #57 六条判据列实现状态、证据链接、证据边界与仍缺什么；本页只做导航，不下 GO/NO_GO 裁决。
 - 2026-11-07（本会话）：仓库按用户授权转为 **public**，GitHub Actions 计费门禁解除，
   push / PR / workflow_dispatch 均正常分配 runner（此前私有时 0-step 的拒绝已消失）。
 - PR [#128](https://github.com/Yenefa/flexcell/pull/128) 合并为 `d17c284`：录制器新增

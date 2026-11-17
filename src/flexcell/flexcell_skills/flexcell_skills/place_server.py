@@ -26,6 +26,9 @@ from flexcell_interfaces.srv import QueryCarry
 
 from flexcell_skills.contracts.skill_result import derive_status
 from flexcell_skills.release_attitude import attitude_gate, tilt_deg
+from flexcell_skills.release_aperture import (
+    DEFAULT_CLOSED_POSITION_M, DEFAULT_OPEN_REFERENCE_M, DEFAULT_TOLERANCE_M,
+    release_aperture_verdict)
 from flexcell_skills.joint_follow import SnapshotWatch, follow_failure_detail, check_backend_parameter
 from flexcell_skills.common import (
     GripperClient, JsonlLog, MoveToPoseClient, PlanningSceneOps,
@@ -58,6 +61,12 @@ class PlaceServer(Node):
     # opt-out value, matching the "declare nothing -> no gate" contract.
     _max_release_tilt = DISABLED_RELEASE_TILT_DEG
 
+    # Same contract for the release-aperture check: a fixture that bypasses
+    # __init__ gets the uncalibrated defaults instead of AttributeError.
+    _gripper_open_reference_m = DEFAULT_OPEN_REFERENCE_M
+    _gripper_closed_position_m = DEFAULT_CLOSED_POSITION_M
+    _release_aperture_tolerance_m = DEFAULT_TOLERANCE_M
+
     def __init__(self):
         super().__init__('place_server')
 
@@ -66,7 +75,9 @@ class PlaceServer(Node):
         self.declare_parameter('record_execution_commands', False)
         self.declare_parameter('gripper_action', '/gripper_controller/gripper_cmd')
         self.declare_parameter('gripper_open_position', 0.02)
-        self.declare_parameter('release_aperture_tolerance_m', 0.005)
+        self.declare_parameter('gripper_open_reference_m', DEFAULT_OPEN_REFERENCE_M)
+        self.declare_parameter('gripper_closed_position_m', DEFAULT_CLOSED_POSITION_M)
+        self.declare_parameter('release_aperture_tolerance_m', DEFAULT_TOLERANCE_M)
         self.declare_parameter('release_hover_m', 0.10)
         self.declare_parameter('release_clearance_m', 0.012)
         self.declare_parameter('carry_offset_m', 0.16)
@@ -103,6 +114,13 @@ class PlaceServer(Node):
                                       telemetry=gp('record_execution_commands').value)
         self._scene = PlanningSceneOps(self)
         self._gripper_open = float(gp('gripper_open_position').value)
+        # Measured reachable open aperture; 0.0 keeps the commanded comparison
+        # (docs/MISSION_UPDATE_20261112_R5.md 19.2: this gripper reaches 0.0104 m
+        # of a commanded 0.02 m, which the old check read as a failed release).
+        self._gripper_open_reference_m = float(
+            gp('gripper_open_reference_m').value)
+        self._gripper_closed_position_m = float(
+            gp('gripper_closed_position_m').value)
         self._release_aperture_tolerance_m = float(
             gp('release_aperture_tolerance_m').value)
         self._hover = float(gp('release_hover_m').value)
@@ -423,15 +441,20 @@ class PlaceServer(Node):
             # the drop check below still decides the physical outcome.
             open_state = gripper_outcome(gres, requested=self._gripper_open)
             rec['gripper_open'] = open_state
-            if (open_state["position"] is not None
-                    and open_state["aperture_error"] is not None
-                    and open_state["aperture_error"] > self._release_aperture_tolerance_m
-                    and not open_state["reached_goal"]):
-                return finish(
-                    R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
-                    'gripper did not open (position=%r requested=%r stalled=%r)'
-                    % (open_state["position"], self._gripper_open,
-                       open_state["stalled"]))
+            # The aperture is a calibrated measurement, not a tolerance decision
+            # (docs/MISSION_UPDATE_20261112_R5.md 19.2): comparing against the
+            # commanded 0.02 m made every full open (0.0104 m) look failed, and
+            # only reached_goal kept it alive. The verdict still fails a release
+            # that did not move or stopped short of the reachable reference.
+            verdict = release_aperture_verdict(
+                open_state, self._gripper_open,
+                reference_m=self._gripper_open_reference_m,
+                closed_m=self._gripper_closed_position_m,
+                tolerance_m=self._release_aperture_tolerance_m)
+            rec['release_aperture'] = verdict
+            if not verdict["ok"]:
+                return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
+                              verdict["detail"])
             res.released = True
 
             # ---------- VERIFYING (internal, ground truth) ----------

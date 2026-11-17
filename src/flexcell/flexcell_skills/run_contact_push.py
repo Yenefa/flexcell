@@ -85,7 +85,11 @@ def main():
                     q,g,metadata=selected;joint_selection[0]=metadata
                     return q,g
             pump(.02)
-        raise MotionFailed('fresh complete measured joints unavailable')
+        # Report WHY, not just that it timed out. A latched native error (for
+        # example a refused backlog) is the actionable fact; "unavailable" alone
+        # hides it behind a 3 s wait and reads like a slow publisher.
+        raise MotionFailed('fresh complete measured joints unavailable'
+                           + ('' if native.error is None else ': ' + native.error))
     def quiet():
         end=time.monotonic()+10.;since=None;stamp=None
         while time.monotonic()<end:

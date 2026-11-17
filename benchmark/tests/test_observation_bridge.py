@@ -6,17 +6,20 @@ hand-written stub, because the whole point of the bridge is to read the shape th
 runtime actually writes.
 """
 import json
+import os
 import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+# The archive may be relocated outside the repository: docs/EVIDENCE_ARCHIVE.md
+EVIDENCE_ROOT = Path(os.environ.get('FLEXCELL_EVIDENCE_ROOT', str(ROOT)))
 sys.path.insert(0, str(ROOT / "benchmark" / "evaluators"))
 
 import evaluate as ev
 import observe_from_run as bridge
 import generate as gen
 
-REAL_RUN = (ROOT / "setup/acceptance/c13c_admission_20261110"
+REAL_RUN = (EVIDENCE_ROOT / "setup/acceptance/c13c_admission_20261110"
             / "legacy-constrained/run-2f1d13a5a98c")
 
 

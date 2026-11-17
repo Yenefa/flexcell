@@ -1,0 +1,133 @@
+{
+  "schema_version": 1,
+  "description": [
+    "Required run artefacts for ONE archived run directory (for example",
+    "setup/acceptance/<batch>/runs/<RUN-ID>/). scripts/run_log_audit.py reads this",
+    "file and reports every missing item as 'MISSING: <path> (reason)', exiting 1.",
+    "Inventory only: nothing here changes motion, task definitions, evaluators or",
+    "thresholds. Adding a newly required log is a config edit, not a code edit."
+  ],
+  "default_out_root": "artifacts/run_log_audit",
+  "phases": {
+    "success": "the run reached the task layer and its own RESULT reports success",
+    "failure": "the run reached the task layer and did not report success, or it had started but kept no RESULT",
+    "startup_failure": "the run never reached the task layer (no episode, no decision, no skill jsonl)"
+  },
+  "run_markers": [
+    "task.out",
+    "task_retry.out",
+    "launch.out",
+    "crash_detail.txt",
+    "failure_evidence.json",
+    "verdict.json",
+    "decisions.jsonl",
+    "task_fsm.jsonl",
+    "demo_runs.jsonl",
+    "sim/episodes"
+  ],
+  "started_evidence": ["task.out", "sim/episodes/*.json", "*.jsonl"],
+  "crash_markers": [
+    "Traceback (most recent call last)",
+    "unhandled exception",
+    "terminate called after throwing"
+  ],
+  "stage_skill_logs": {
+    "OBSERVE": "observe.jsonl",
+    "MOVE": "move_to_pose.jsonl",
+    "PUSH": "push.jsonl",
+    "PICK": "pick.jsonl",
+    "PLACE": "place.jsonl",
+    "CARRY": "carry.jsonl",
+    "VERIFY": "verify.jsonl"
+  },
+  "items": [
+    {
+      "id": "task_result",
+      "kind": "result_json",
+      "path": "task.out",
+      "marker": "RESULT ",
+      "phases": ["success", "failure"],
+      "reason": "no parseable RESULT line in task.out: the task's own outcome is unrecorded and runtime/recovery reads task.out"
+    },
+    {
+      "id": "launch_record",
+      "kind": "text",
+      "path": "launch.out",
+      "phases": ["startup_failure"],
+      "reason": "launch capture missing: a run that never reached the task layer must still record why it did not start"
+    },
+    {
+      "id": "crash_detail",
+      "kind": "crash_evidence",
+      "phases": ["failure", "startup_failure"],
+      "sources": [
+        "crash_detail.txt",
+        "failure_evidence.json:detail",
+        "task.out:detail",
+        "launch.out:markers"
+      ],
+      "reason": "no crash/failure detail retained anywhere (checked crash_detail.txt, failure_evidence.json:detail, task.out RESULT detail and launch.out crash markers)"
+    },
+    {
+      "id": "episode_records",
+      "kind": "glob_json",
+      "path": "sim/episodes/*.json",
+      "min_matches": 1,
+      "validate": "episode",
+      "phases": ["success", "failure"],
+      "reason": "no episode record under sim/episodes/: the policy input/output sequence cannot be replayed offline (contracts/episode.py)"
+    },
+    {
+      "id": "decision_log",
+      "kind": "jsonl",
+      "path": "decisions.jsonl",
+      "min_records": 1,
+      "phases": ["success", "failure"],
+      "reason": "no decision record: which decision was dispatched, on which policy input, is unrecorded"
+    },
+    {
+      "id": "fsm_log",
+      "kind": "jsonl_any",
+      "paths": ["task_fsm.jsonl", "demo_runs.jsonl"],
+      "min_present": 1,
+      "phases": ["success", "failure"],
+      "reason": "neither task_fsm.jsonl nor demo_runs.jsonl exists: the task FSM's stage history is unrecorded"
+    },
+    {
+      "id": "skill_logs",
+      "kind": "skill_logs",
+      "phases": ["success", "failure"],
+      "reason": "the run's stage evidence names this skill but its jsonl was not retained"
+    },
+    {
+      "id": "skill_log_any",
+      "kind": "jsonl_any",
+      "paths": [
+        "observe.jsonl",
+        "move_to_pose.jsonl",
+        "push.jsonl",
+        "pick.jsonl",
+        "place.jsonl",
+        "carry.jsonl",
+        "verify.jsonl"
+      ],
+      "min_present": 1,
+      "phases": ["success", "failure"],
+      "reason": "no skill jsonl at all: a run that reached the task layer kept none of its per-skill records"
+    },
+    {
+      "id": "failure_evidence",
+      "kind": "json",
+      "path": "failure_evidence.json",
+      "phases": ["failure"],
+      "reason": "failed run without failure_evidence.json: runtime/recovery's failure record was not retained"
+    },
+    {
+      "id": "verdict",
+      "kind": "json",
+      "path": "verdict.json",
+      "phases": ["success"],
+      "reason": "a passing run must retain the independent verdict that says it passed"
+    }
+  ]
+}

@@ -87,6 +87,27 @@ jobs:
           python3 setup/acceptance/grasp_phase3_window_20261026/verify_phase3_window_v2.py
           python3 setup/acceptance/grasp_phase3_window_20261026/selftest_verify_phase3_window_v2.py
 
+      - name: package discovery contract (exactly five first-party packages)
+        shell: bash
+        # The tree holds 12 package.xml files: 5 first-party packages, plus 7
+        # frozen copies of flexcell_skills under experiments/pilot-001/runs/.
+        # Discovery must resolve to the five first-party packages, never to a
+        # duplicate name. This replaces trusting a hand-written COLCON_IGNORE.
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          diff -u \
+            <(printf '%s\n' flexcell_capabilities flexcell_gazebo flexcell_interfaces flexcell_mtc flexcell_skills | sort) \
+            <(colcon list --names-only | sort)
+
+      - name: evidence manifest (inert until the archive is externalised)
+        shell: bash
+        run: |
+          if [ -f config/evidence_manifest.json ]; then
+            python3 scripts/evidence_manifest.py verify
+          else
+            echo "no manifest yet - the archive is still in-tree"
+          fi
+
       - name: build (first-party packages)
         shell: bash
         run: |

@@ -29,6 +29,18 @@ import math
 
 SCHEMA_VERSION = "t08-evidence/1.0"
 
+# v2 exists because of a measured defect, not a preference. The recorder derives
+# contact intervals from consecutive physics steps, so a contact that lasts
+# exactly one step yields start_sim_ns == end_sim_ns. Under v1 that is "empty or
+# inverted" and the whole bundle is rejected - two of fifteen intervals in run
+# 43274720654 - which turns a real contact into an unevaluable bundle.
+#
+# v2 keeps the bounds truthful (no invented duration) and requires the
+# single-frame case to declare itself, so a downstream reader can tell "one step
+# of contact" from "a duration that was never measured".
+SCHEMA_VERSION_V2 = "t08-evidence/2.0"
+SUPPORTED_SCHEMA_VERSIONS = (SCHEMA_VERSION, SCHEMA_VERSION_V2)
+
 # A trajectory that covers only the target cannot detect "the arm swept the
 # blue block aside on the way", which T08 forbids. Absence of evidence about
 # the protected object is not evidence that it was safe.
@@ -188,7 +200,15 @@ def _problems_objects(section, task):
     return out
 
 
-def _problems_contacts(section):
+def _problems_contacts(section, version=SCHEMA_VERSION):
+    """Interval rules are versioned.
+
+    A v1 bundle keeps the rule it was written under, including the rule that
+    rejected single-frame intervals: re-reading history must not silently change
+    a verdict it already reached. Only a v2 bundle may carry a zero-length
+    interval, and only with single_frame set, so the reader can never mistake it
+    for a measured duration.
+    """
     if not isinstance(section, dict):
         return ["contacts: missing or not an object"]
     out = []
@@ -216,8 +236,19 @@ def _problems_contacts(section):
                 continue
             if not _is_int(item.get("start_sim_ns")) or not _is_int(item.get("end_sim_ns")):
                 out.append(where + ": missing integer bounds")
-            elif item["end_sim_ns"] <= item["start_sim_ns"]:
-                out.append(where + ": empty or inverted interval")
+            elif item["end_sim_ns"] < item["start_sim_ns"]:
+                out.append(where + ": inverted interval")
+            elif item["end_sim_ns"] == item["start_sim_ns"]:
+                if version == SCHEMA_VERSION:
+                    out.append(where + ": empty or inverted interval")
+                elif item.get("single_frame") is not True:
+                    out.append(where + ": zero-length interval must declare "
+                                      "single_frame: true (v2)")
+                elif item.get("steps") is not None and item.get("steps") != 1:
+                    out.append(where + ": single_frame interval must declare steps: 1")
+            elif item.get("single_frame") is True:
+                out.append(where + ": single_frame is only valid when the interval "
+                                  "has no duration")
             if not isinstance(item.get("other"), str) or not item["other"]:
                 out.append(where + ": missing contact partner name")
     return out
@@ -291,9 +322,10 @@ def validate(bundle, files=None):
     if not isinstance(bundle, dict):
         return ["bundle: not an object"]
     problems = []
-    if bundle.get("schema_version") != SCHEMA_VERSION:
-        problems.append("schema_version: expected %r got %r"
-                        % (SCHEMA_VERSION, bundle.get("schema_version")))
+    version = bundle.get("schema_version")
+    if version not in SUPPORTED_SCHEMA_VERSIONS:
+        problems.append("schema_version: expected one of %r got %r"
+                        % (SUPPORTED_SCHEMA_VERSIONS, version))
     for key in ("task", "run", "source", "objects", "contacts", "gripper",
                 "attachment", "teleport", "manifest"):
         if key not in bundle:
@@ -302,7 +334,7 @@ def validate(bundle, files=None):
     problems += _problems_run(bundle.get("run"))
     problems += _problems_source(bundle.get("source"))
     problems += _problems_objects(bundle.get("objects"), bundle.get("task"))
-    problems += _problems_contacts(bundle.get("contacts"))
+    problems += _problems_contacts(bundle.get("contacts"), version)
     problems += _problems_gripper(bundle.get("gripper"))
     problems += _problems_attachment(bundle.get("attachment"))
     problems += _problems_teleport(bundle.get("teleport"))

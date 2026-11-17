@@ -1,0 +1,636 @@
+[INFO] [launch]: All log files can be found below /home/ros/.ros/log/2026-11-16-13-24-49-046311-localhost-909667
+[INFO] [launch]: Default logging verbosity is set to INFO
+WARNING:root:[33;21mCannot infer URDF from `/home/ros/agentic_workcell_ws/install/share/open_manipulator_moveit_config`. -- using config/open_manipulator_x.urdf[0m
+WARNING:root:[33;21mCannot infer SRDF from `/home/ros/agentic_workcell_ws/install/share/open_manipulator_moveit_config`. -- using config/open_manipulator_x.srdf[0m
+WARNING:root:[33;21m"File /home/ros/agentic_workcell_ws/install/share/open_manipulator_moveit_config/config/open_manipulator_x.urdf doesn't exist"[0m
+WARNING:root:[33;21mThe robot description will be loaded from /robot_description topic [0m
+[INFO] [gz-1]: process started with pid [909670]
+[INFO] [robot_state_publisher-2]: process started with pid [909671]
+[INFO] [parameter_bridge-3]: process started with pid [909672]
+[INFO] [create-4]: process started with pid [909673]
+[INFO] [move_group-5]: process started with pid [909674]
+[INFO] [move_to_pose_server-6]: process started with pid [909675]
+[INFO] [observe_server-7]: process started with pid [909676]
+[INFO] [pick_server-8]: process started with pid [909677]
+[INFO] [place_server-9]: process started with pid [909678]
+[INFO] [verify_server-10]: process started with pid [909726]
+[INFO] [task_fsm_server-11]: process started with pid [909727]
+[INFO] [carry_server-12]: process started with pid [909728]
+[INFO] [push_server-13]: process started with pid [909729]
+[create-4] [INFO] [1794806689.257261696] [ros_gz_sim]: Requesting list of world names.
+[robot_state_publisher-2] [INFO] [1794806689.272123155] [robot_state_publisher]: Robot initialized
+[parameter_bridge-3] [INFO] [1794806689.291961061] [ros_gz_bridge]: Creating GZ->ROS Bridge: [/clock (gz.msgs.Clock) -> /clock (rosgraph_msgs/msg/Clock)] (Lazy 0)
+[parameter_bridge-3] [INFO] [1794806689.292660136] [ros_gz_bridge]: Creating GZ->ROS Bridge: [/flexcell/physics_trace (gz.msgs.StringMsg) -> /flexcell/physics_trace (std_msgs/msg/String)] (Lazy 0)
+[gz-1] [1;33m[Wrn] [Conversions.cc:735] [0m[1;33m<gui><camera> can't be converted yet[0m[1;33m[0m
+[gz-1] [1;33m[Wrn] [Conversions.cc:735] [0m[1;33m<gui><camera> can't be converted yet[0m[1;33m[0m
+[move_group-5] [INFO] [1794806689.783159718] [move_group.moveit.moveit.ros.rdf_loader]: Loaded robot model in 0 seconds
+[move_group-5] [INFO] [1794806689.783342780] [move_group.moveit.moveit.core.robot_model]: Loading robot model 'open_manipulator_x'...
+[move_group-5] [INFO] [1794806689.783365434] [move_group.moveit.moveit.core.robot_model]: No root/virtual joint specified in SRDF. Assuming fixed joint
+[create-4] [INFO] [1794806689.806369072] [ros_gz_sim]: Entity creation successful.
+[move_group-5] [WARN] [1794806689.871031740] [move_group.moveit.moveit.core.robot_model]: Link end_effector_link has visual geometry but no collision geometry. Collision geometry will be left empty. Fix your URDF file by explicitly specifying collision geometry.
+[move_group-5] [WARN] [1794806689.875709946] [move_group.moveit.moveit.core.robot_model]: Could not identify parent group for end-effector 'end_effector'
+[move_group-5] [INFO] [1794806689.880034250] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Joint weights for group 'arm': 1 1 1 1
+[verify_server-10] [INFO] [1794806689.901672423] [verify_server]: Verify server up | default_tolerance=0.050m
+[INFO] [create-4]: process has finished cleanly [pid 909673]
+[INFO] [spawner-14]: process started with pid [909851]
+[task_fsm_server-11] [INFO] [1794806690.053335509] [task_fsm_server]: Task FSM v3 up | demo: target_box_a->zone_1, target_box_b->zone_2 | recovery budget=1 | policy=fsm v1.0
+[observe_server-7] [INFO] [1794806690.068448769] [observe_server]: Observe server v2 up | tracked=['target_box_a', 'target_box_b'] zones=['zone_1', 'zone_2'] eps=0.0020m source=SIMULATION_GROUND_TRUTH
+[place_server-9] [INFO] [1794806690.126977581] [place_server]: Place server up | hover=0.10m carry_offset=0.16m tol=0.060m
+[carry_server-12] [INFO] [1794806690.141829896] [carry_server]: Carry servo up | backend=velocity_servo service=/world/empty/flexcell/carry/pin period=0.10s state=/flexcell/carry_state
+[pick_server-8] [INFO] [1794806690.143626743] [pick_server]: Pick server up | hover=0.22m grasp_dz=0.16m raise=0.10m attach_r=0.20m
+[push_server-13] [INFO] [1794806690.175971137] [push_server]: Push server up | contact_height=UNSET (request must declare it) increments=5 contact_floor=0.0050m
+[move_to_pose_server-6] [INFO] [1794806690.207192098] [move_to_pose_server]: MoveToPose server up | group=arm ee=end_effector_link base=world | pos_tol=0.020m ori_enforced=False
+[move_to_pose_server-6] [WARN] [1794806690.207912143] [move_to_pose_server]: orientation NOT enforced: the active kinematics solver is position-only. This is reported explicitly in every result (orientation_enforced=false).
+[move_to_pose_server-6] [INFO] [1794806690.208537973] [move_to_pose_server]: structured log: /tmp/237_phys_run/run-17158fd906a8/skills/move_to_pose.jsonl
+[move_group-5] [INFO] [1794806690.225264451] [move_group.moveit.moveit.ros.planning_scene_monitor]: Publishing maintained planning scene on 'monitored_planning_scene'
+[move_group-5] [INFO] [1794806690.225446613] [move_group.moveit.moveit.ros.moveit_cpp]: Listening to 'joint_states' for joint states
+[move_group-5] [INFO] [1794806690.227111411] [move_group.moveit.moveit.ros.current_state_monitor]: Listening to joint states on topic 'joint_states'
+[move_group-5] [INFO] [1794806690.228175910] [move_group.moveit.moveit.ros.planning_scene_monitor]: Listening to '/attached_collision_object' for attached collision objects
+[move_group-5] [INFO] [1794806690.228215614] [move_group.moveit.moveit.ros.planning_scene_monitor]: Stopping existing planning scene publisher.
+[move_group-5] [INFO] [1794806690.228355313] [move_group.moveit.moveit.ros.planning_scene_monitor]: Stopped publishing maintained planning scene.
+[move_group-5] [INFO] [1794806690.229572154] [move_group.moveit.moveit.ros.planning_scene_monitor]: Publishing maintained planning scene on 'monitored_planning_scene'
+[move_group-5] [INFO] [1794806690.229680800] [move_group.moveit.moveit.ros.planning_scene_monitor]: Starting planning scene monitor
+[move_group-5] [INFO] [1794806690.231763933] [move_group.moveit.moveit.ros.planning_scene_monitor]: Listening to '/planning_scene'
+[move_group-5] [INFO] [1794806690.231798610] [move_group.moveit.moveit.ros.planning_scene_monitor]: Starting world geometry update monitor for collision objects, attached objects, octomap updates.
+[move_group-5] [INFO] [1794806690.233163263] [move_group.moveit.moveit.ros.planning_scene_monitor]: Listening to 'collision_object'
+[move_group-5] [INFO] [1794806690.234635053] [move_group.moveit.moveit.ros.planning_scene_monitor]: Listening to 'planning_scene_world' for planning scene world geometry
+[move_group-5] [WARN] [1794806690.234777700] [move_group.moveit.moveit.ros.occupancy_map_monitor]: Resolution not specified for Octomap. Assuming resolution = 0.1 instead
+[move_group-5] [ERROR] [1794806690.234791049] [move_group.moveit.moveit.ros.occupancy_map_monitor]: No 3D sensor plugin(s) defined for octomap updates
+[spawner-14] [INFO] [1794806690.330977572] [spawner_joint_state_broadcaster]: waiting for service /controller_manager/list_controllers to become available...
+[move_group-5] [INFO] [1794806690.373182427] [move_group.moveit.moveit.ros.planning_pipeline]: Successfully loaded planner 'OMPL'
+[move_group-5] [INFO] [1794806690.374024709] [move_group]: Try loading adapter 'default_planning_request_adapters/ResolveConstraintFrames'
+[move_group-5] [INFO] [1794806690.374614641] [move_group]: Loaded adapter 'default_planning_request_adapters/ResolveConstraintFrames'
+[move_group-5] [INFO] [1794806690.374645427] [move_group]: Try loading adapter 'default_planning_request_adapters/ValidateWorkspaceBounds'
+[move_group-5] [INFO] [1794806690.375033761] [move_group]: Loaded adapter 'default_planning_request_adapters/ValidateWorkspaceBounds'
+[move_group-5] [INFO] [1794806690.375054645] [move_group]: Try loading adapter 'default_planning_request_adapters/CheckStartStateBounds'
+[move_group-5] [INFO] [1794806690.375084939] [move_group]: Loaded adapter 'default_planning_request_adapters/CheckStartStateBounds'
+[move_group-5] [INFO] [1794806690.375094453] [move_group]: Try loading adapter 'default_planning_request_adapters/CheckStartStateCollision'
+[move_group-5] [INFO] [1794806690.375117325] [move_group]: Loaded adapter 'default_planning_request_adapters/CheckStartStateCollision'
+[move_group-5] [INFO] [1794806690.376294822] [move_group]: Try loading adapter 'default_planning_response_adapters/AddTimeOptimalParameterization'
+[move_group-5] [INFO] [1794806690.378592758] [move_group]: Loaded adapter 'default_planning_response_adapters/AddTimeOptimalParameterization'
+[move_group-5] [INFO] [1794806690.378609136] [move_group]: Try loading adapter 'default_planning_response_adapters/ValidateSolution'
+[move_group-5] [INFO] [1794806690.380747753] [move_group]: Loaded adapter 'default_planning_response_adapters/ValidateSolution'
+[move_group-5] [INFO] [1794806690.380762739] [move_group]: Try loading adapter 'default_planning_response_adapters/DisplayMotionPath'
+[move_group-5] [INFO] [1794806690.385532350] [move_group]: Loaded adapter 'default_planning_response_adapters/DisplayMotionPath'
+[move_group-5] [INFO] [1794806690.405543024] [move_group.moveit.moveit.ros.planning_pipeline]: Successfully loaded planner 'CHOMP'
+[move_group-5] [INFO] [1794806690.406309939] [move_group]: Try loading adapter 'default_planning_request_adapters/ResolveConstraintFrames'
+[move_group-5] [INFO] [1794806690.406392141] [move_group]: Loaded adapter 'default_planning_request_adapters/ResolveConstraintFrames'
+[move_group-5] [INFO] [1794806690.406399033] [move_group]: Try loading adapter 'default_planning_request_adapters/ValidateWorkspaceBounds'
+[move_group-5] [INFO] [1794806690.406850331] [move_group]: Loaded adapter 'default_planning_request_adapters/ValidateWorkspaceBounds'
+[move_group-5] [INFO] [1794806690.406883995] [move_group]: Try loading adapter 'default_planning_request_adapters/CheckStartStateBounds'
+[move_group-5] [INFO] [1794806690.406912945] [move_group]: Loaded adapter 'default_planning_request_adapters/CheckStartStateBounds'
+[move_group-5] [INFO] [1794806690.406918114] [move_group]: Try loading adapter 'default_planning_request_adapters/CheckStartStateCollision'
+[move_group-5] [INFO] [1794806690.406926151] [move_group]: Loaded adapter 'default_planning_request_adapters/CheckStartStateCollision'
+[move_group-5] [INFO] [1794806690.407702449] [move_group]: Try loading adapter 'default_planning_response_adapters/AddTimeOptimalParameterization'
+[move_group-5] [INFO] [1794806690.408867315] [move_group]: Loaded adapter 'default_planning_response_adapters/AddTimeOptimalParameterization'
+[move_group-5] [INFO] [1794806690.408901330] [move_group]: Try loading adapter 'default_planning_response_adapters/ValidateSolution'
+[move_group-5] [INFO] [1794806690.410116108] [move_group]: Loaded adapter 'default_planning_response_adapters/ValidateSolution'
+[move_group-5] [INFO] [1794806690.410151059] [move_group]: Try loading adapter 'default_planning_response_adapters/DisplayMotionPath'
+[move_group-5] [INFO] [1794806690.411458953] [move_group]: Loaded adapter 'default_planning_response_adapters/DisplayMotionPath'
+[move_group-5] [INFO] [1794806690.415215907] [move_group.moveit.moveit.planners.pilz.joint_limits_aggregator]: Reading limits from namespace robot_description_planning
+[move_group-5] [INFO] [1794806690.429732555] [move_group.moveit.moveit.planners.pilz.command_planner]: Available plugins: pilz_industrial_motion_planner/PlanningContextLoaderCIRC pilz_industrial_motion_planner/PlanningContextLoaderLIN pilz_industrial_motion_planner/PlanningContextLoaderPTP 
+[move_group-5] [INFO] [1794806690.429774986] [move_group.moveit.moveit.planners.pilz.command_planner]: About to load: pilz_industrial_motion_planner/PlanningContextLoaderCIRC
+[move_group-5] [INFO] [1794806690.430765899] [move_group.moveit.moveit.planners.pilz.command_planner]: Registered Algorithm [CIRC]
+[move_group-5] [INFO] [1794806690.430801116] [move_group.moveit.moveit.planners.pilz.command_planner]: About to load: pilz_industrial_motion_planner/PlanningContextLoaderLIN
+[move_group-5] [INFO] [1794806690.431392477] [move_group.moveit.moveit.planners.pilz.command_planner]: Registered Algorithm [LIN]
+[move_group-5] [INFO] [1794806690.431427552] [move_group.moveit.moveit.planners.pilz.command_planner]: About to load: pilz_industrial_motion_planner/PlanningContextLoaderPTP
+[move_group-5] [INFO] [1794806690.432055825] [move_group.moveit.moveit.planners.pilz.command_planner]: Registered Algorithm [PTP]
+[move_group-5] [INFO] [1794806690.432092765] [move_group.moveit.moveit.ros.planning_pipeline]: Successfully loaded planner 'Pilz Industrial Motion Planner'
+[move_group-5] [INFO] [1794806690.432945782] [move_group]: Try loading adapter 'default_planning_request_adapters/ResolveConstraintFrames'
+[move_group-5] [INFO] [1794806690.433036580] [move_group]: Loaded adapter 'default_planning_request_adapters/ResolveConstraintFrames'
+[move_group-5] [INFO] [1794806690.433044087] [move_group]: Try loading adapter 'default_planning_request_adapters/ValidateWorkspaceBounds'
+[move_group-5] [INFO] [1794806690.433485378] [move_group]: Loaded adapter 'default_planning_request_adapters/ValidateWorkspaceBounds'
+[move_group-5] [INFO] [1794806690.433520548] [move_group]: Try loading adapter 'default_planning_request_adapters/CheckStartStateBounds'
+[move_group-5] [INFO] [1794806690.433551022] [move_group]: Loaded adapter 'default_planning_request_adapters/CheckStartStateBounds'
+[move_group-5] [INFO] [1794806690.433559836] [move_group]: Try loading adapter 'default_planning_request_adapters/CheckStartStateCollision'
+[move_group-5] [INFO] [1794806690.433575674] [move_group]: Loaded adapter 'default_planning_request_adapters/CheckStartStateCollision'
+[move_group-5] [INFO] [1794806690.434439493] [move_group]: Try loading adapter 'default_planning_response_adapters/ValidateSolution'
+[move_group-5] [INFO] [1794806690.437142103] [move_group]: Loaded adapter 'default_planning_response_adapters/ValidateSolution'
+[move_group-5] [INFO] [1794806690.437176799] [move_group]: Try loading adapter 'default_planning_response_adapters/DisplayMotionPath'
+[move_group-5] [INFO] [1794806690.438449059] [move_group]: Loaded adapter 'default_planning_response_adapters/DisplayMotionPath'
+[move_group-5] [INFO] [1794806690.443292656] [move_group.moveit.moveit.ros.planning_pipeline]: Successfully loaded planner 'STOMP'
+[move_group-5] [INFO] [1794806690.444165981] [move_group]: Try loading adapter 'default_planning_request_adapters/ResolveConstraintFrames'
+[move_group-5] [INFO] [1794806690.444251751] [move_group]: Loaded adapter 'default_planning_request_adapters/ResolveConstraintFrames'
+[move_group-5] [INFO] [1794806690.444258785] [move_group]: Try loading adapter 'default_planning_request_adapters/ValidateWorkspaceBounds'
+[move_group-5] [INFO] [1794806690.444734621] [move_group]: Loaded adapter 'default_planning_request_adapters/ValidateWorkspaceBounds'
+[move_group-5] [INFO] [1794806690.444770397] [move_group]: Try loading adapter 'default_planning_request_adapters/CheckStartStateBounds'
+[move_group-5] [INFO] [1794806690.444802130] [move_group]: Loaded adapter 'default_planning_request_adapters/CheckStartStateBounds'
+[move_group-5] [INFO] [1794806690.444816529] [move_group]: Try loading adapter 'default_planning_request_adapters/CheckStartStateCollision'
+[move_group-5] [INFO] [1794806690.444836145] [move_group]: Loaded adapter 'default_planning_request_adapters/CheckStartStateCollision'
+[move_group-5] [INFO] [1794806690.446472140] [move_group]: Try loading adapter 'default_planning_response_adapters/AddTimeOptimalParameterization'
+[move_group-5] [INFO] [1794806690.448050306] [move_group]: Loaded adapter 'default_planning_response_adapters/AddTimeOptimalParameterization'
+[move_group-5] [INFO] [1794806690.448084860] [move_group]: Try loading adapter 'default_planning_response_adapters/ValidateSolution'
+[move_group-5] [INFO] [1794806690.449444311] [move_group]: Loaded adapter 'default_planning_response_adapters/ValidateSolution'
+[move_group-5] [INFO] [1794806690.449482368] [move_group]: Try loading adapter 'default_planning_response_adapters/DisplayMotionPath'
+[move_group-5] [INFO] [1794806690.450659505] [move_group]: Loaded adapter 'default_planning_response_adapters/DisplayMotionPath'
+[move_group-5] [INFO] [1794806690.584360666] [move_group.moveit.moveit.plugins.simple_controller_manager]: Added FollowJointTrajectory controller for arm_controller
+[move_group-5] [INFO] [1794806690.584442318] [move_group.moveit.moveit.plugins.simple_controller_manager]: gripper_controller will command a max effort of: 0
+[move_group-5] [INFO] [1794806690.591905652] [move_group.moveit.moveit.plugins.simple_controller_manager]: Added GripperCommand controller for gripper_controller
+[move_group-5] [INFO] [1794806690.592073454] [move_group.moveit.moveit.plugins.simple_controller_manager]: Returned 2 controllers in list
+[move_group-5] [INFO] [1794806690.592098068] [move_group.moveit.moveit.plugins.simple_controller_manager]: Returned 2 controllers in list
+[move_group-5] [INFO] [1794806690.593284094] [move_group.moveit.moveit.ros.trajectory_execution_manager]: Trajectory execution is managing controllers
+[move_group-5] [INFO] [1794806690.593319321] [move_group]: MoveGroup debug mode is ON
+[move_group-5] [INFO] [1794806690.675366390] [move_group.moveit.moveit.planners.pilz.move_group_sequence_action]: initialize move group sequence action
+[move_group-5] [INFO] [1794806690.683191197] [move_group.moveit.moveit.planners.pilz.joint_limits_aggregator]: Reading limits from namespace robot_description_planning
+[move_group-5] [INFO] [1794806690.683344021] [move_group.moveit.moveit.planners.pilz.joint_limits_aggregator]: Reading limits from namespace robot_description_planning
+[move_group-5] [INFO] [1794806690.685152111] [move_group.moveit.moveit.ros.move_group.executable]: 
+[move_group-5] 
+[move_group-5] ********************************************************
+[move_group-5] * MoveGroup using: 
+[move_group-5] *     - apply_planning_scene_service
+[move_group-5] *     - clear_octomap_service
+[move_group-5] *     - get_group_urdf
+[move_group-5] *     - load_geometry_from_file
+[move_group-5] *     - CartesianPathService
+[move_group-5] *     - execute_trajectory_action
+[move_group-5] *     - get_planning_scene_service
+[move_group-5] *     - kinematics_service
+[move_group-5] *     - move_action
+[move_group-5] *     - motion_plan_service
+[move_group-5] *     - query_planners_service
+[move_group-5] *     - state_validation_service
+[move_group-5] *     - save_geometry_to_file
+[move_group-5] *     - SequenceAction
+[move_group-5] *     - SequenceService
+[move_group-5] ********************************************************
+[move_group-5] 
+[move_group-5] [INFO] [1794806690.685223028] [move_group.moveit.moveit.ros.move_group.context]: MoveGroup context using pipeline ompl
+[move_group-5] [INFO] [1794806690.685232608] [move_group.moveit.moveit.ros.move_group.context]: MoveGroup context initialization complete
+[move_group-5] [96mLoading 'move_group/ApplyPlanningSceneService'...[0m
+[move_group-5] [96mLoading 'move_group/ClearOctomapService'...[0m
+[move_group-5] [96mLoading 'move_group/GetUrdfService'...[0m
+[move_group-5] [96mLoading 'move_group/LoadGeometryFromFileService'...[0m
+[move_group-5] [96mLoading 'move_group/MoveGroupCartesianPathService'...[0m
+[move_group-5] [96mLoading 'move_group/MoveGroupExecuteTrajectoryAction'...[0m
+[move_group-5] [96mLoading 'move_group/MoveGroupGetPlanningSceneService'...[0m
+[move_group-5] [96mLoading 'move_group/MoveGroupKinematicsService'...[0m
+[move_group-5] [96mLoading 'move_group/MoveGroupMoveAction'...[0m
+[move_group-5] [96mLoading 'move_group/MoveGroupPlanService'...[0m
+[move_group-5] [96mLoading 'move_group/MoveGroupQueryPlannersService'...[0m
+[move_group-5] [96mLoading 'move_group/MoveGroupStateValidationService'...[0m
+[move_group-5] [96mLoading 'move_group/SaveGeometryToFileService'...[0m
+[move_group-5] [96mLoading 'pilz_industrial_motion_planner/MoveGroupSequenceAction'...[0m
+[move_group-5] [96mLoading 'pilz_industrial_motion_planner/MoveGroupSequenceService'...[0m
+[move_group-5] 
+[move_group-5] [92mYou can start planning now![0m
+[move_group-5] 
+[gz-1] [INFO] [1794806692.750846960] [gz_ros_control]: [gz_ros2_control] Fixed joint ['world_fixed'] (Entity='47') is skipped.
+[gz-1] [INFO] [1794806692.752139518] [gz_ros_control]: Loading controller_manager
+[gz-1] [INFO] [1794806692.788422411] [controller_manager]: Using ROS clock for triggering controller manager cycles.
+[gz-1] [WARN] [1794806692.788486227] [controller_manager]: The resource manager is not yet initialized, will wait for the robot description to initialize it..
+[gz-1] [INFO] [1794806692.800156712] [controller_manager]: Subscribing to '/robot_description' topic for robot description.
+[gz-1] [WARN] [1794806692.800244763] [gz_ros_control]: Waiting RM to load and initialize hardware...
+[gz-1] [INFO] [1794806692.810606113] [controller_manager]: Received robot description from topic.
+[gz-1] [INFO] [1794806692.810668860] [controller_manager]: Enforcing command limits is disabled. Command limits from URDF will be ignored.
+[gz-1] [INFO] [1794806692.813965898] [gz_ros_control]: The position_proportional_gain has been set to: 0.1
+[gz-1] [INFO] [1794806692.814026704] [gz_ros_control]: Loading joint: joint1
+[gz-1] [INFO] [1794806692.814034827] [gz_ros_control]: 	State:
+[gz-1] [INFO] [1794806692.814039986] [gz_ros_control]: 		 position
+[gz-1] [INFO] [1794806692.814044047] [gz_ros_control]: 		 velocity
+[gz-1] [INFO] [1794806692.814052265] [gz_ros_control]: 		 effort
+[gz-1] [INFO] [1794806692.814055938] [gz_ros_control]: 	Command:
+[gz-1] [INFO] [1794806692.814059128] [gz_ros_control]: 		 position
+[gz-1] [INFO] [1794806692.814069674] [gz_ros_control]: Loading joint: joint2
+[gz-1] [INFO] [1794806692.814073461] [gz_ros_control]: 	State:
+[gz-1] [INFO] [1794806692.814076481] [gz_ros_control]: 		 position
+[gz-1] [INFO] [1794806692.814079548] [gz_ros_control]: 		 velocity
+[gz-1] [INFO] [1794806692.814082985] [gz_ros_control]: 		 effort
+[gz-1] [INFO] [1794806692.814086090] [gz_ros_control]: 	Command:
+[gz-1] [INFO] [1794806692.814089119] [gz_ros_control]: 		 position
+[gz-1] [INFO] [1794806692.814096958] [gz_ros_control]: Loading joint: joint3
+[gz-1] [INFO] [1794806692.814100148] [gz_ros_control]: 	State:
+[gz-1] [INFO] [1794806692.814103026] [gz_ros_control]: 		 position
+[gz-1] [INFO] [1794806692.814106027] [gz_ros_control]: 		 velocity
+[gz-1] [INFO] [1794806692.814109028] [gz_ros_control]: 		 effort
+[gz-1] [INFO] [1794806692.814112560] [gz_ros_control]: 	Command:
+[gz-1] [INFO] [1794806692.814115551] [gz_ros_control]: 		 position
+[gz-1] [INFO] [1794806692.814123181] [gz_ros_control]: Loading joint: joint4
+[gz-1] [INFO] [1794806692.814126353] [gz_ros_control]: 	State:
+[gz-1] [INFO] [1794806692.814129392] [gz_ros_control]: 		 position
+[gz-1] [INFO] [1794806692.814132440] [gz_ros_control]: 		 velocity
+[gz-1] [INFO] [1794806692.814135394] [gz_ros_control]: 		 effort
+[gz-1] [INFO] [1794806692.814138452] [gz_ros_control]: 	Command:
+[gz-1] [INFO] [1794806692.814141330] [gz_ros_control]: 		 position
+[gz-1] [INFO] [1794806692.814148884] [gz_ros_control]: Loading joint: gripper_left_joint
+[gz-1] [INFO] [1794806692.814152463] [gz_ros_control]: 	State:
+[gz-1] [INFO] [1794806692.814155464] [gz_ros_control]: 		 position
+[gz-1] [INFO] [1794806692.814158522] [gz_ros_control]: 		 velocity
+[gz-1] [INFO] [1794806692.814161769] [gz_ros_control]: 		 effort
+[gz-1] [INFO] [1794806692.814164864] [gz_ros_control]: 	Command:
+[gz-1] [INFO] [1794806692.814167790] [gz_ros_control]: 		 position
+[gz-1] [INFO] [1794806692.814178402] [gz_ros_control]: Loading joint: gripper_right_joint
+[gz-1] [INFO] [1794806692.814183533] [gz_ros_control]: Joint 'gripper_right_joint'is mimicking joint 'gripper_left_joint' with multiplier: 1 and offset: 0
+[gz-1] [INFO] [1794806692.814187689] [gz_ros_control]: 	State:
+[gz-1] [INFO] [1794806692.814190700] [gz_ros_control]: 		 position
+[gz-1] [INFO] [1794806692.814193701] [gz_ros_control]: 		 velocity
+[gz-1] [INFO] [1794806692.814197610] [gz_ros_control]: 		 effort
+[gz-1] [INFO] [1794806692.814200744] [gz_ros_control]: 	Command:
+[gz-1] [INFO] [1794806692.814285530] [controller_manager]: Initialize hardware 'OpenManipulatorXSystem' 
+[gz-1] [WARN] [1794806692.814299134] [controller_manager.hardware_component.system.OpenManipulatorXSystem]: Executor is not available during hardware component initialization for 'OpenManipulatorXSystem'. Skipping node creation!
+[gz-1] [INFO] [1794806692.814373998] [controller_manager]: Successful initialization of hardware 'OpenManipulatorXSystem'
+[gz-1] [INFO] [1794806692.814476052] [controller_manager]: Activating component 'OpenManipulatorXSystem'.
+[gz-1] [INFO] [1794806692.814506639] [resource_manager]: 'configure' hardware 'OpenManipulatorXSystem' 
+[gz-1] [INFO] [1794806692.814511988] [gz_ros_control]: System Successfully configured!
+[gz-1] [INFO] [1794806692.814516807] [resource_manager]: Successful 'configure' of hardware 'OpenManipulatorXSystem'
+[gz-1] [INFO] [1794806692.814523945] [resource_manager]: 'activate' hardware 'OpenManipulatorXSystem' 
+[gz-1] [INFO] [1794806692.814535163] [resource_manager]: Successful 'activate' of hardware 'OpenManipulatorXSystem'
+[gz-1] [WARN] [1794806692.814583691] [controller_manager]: Component 'OpenManipulatorXSystem' does not have read or write statistics initialized, skipping registration.
+[gz-1] [INFO] [1794806692.814590071] [controller_manager]: Resource Manager has been successfully initialized. Starting Controller Manager services...
+[gz-1] [INFO] [1794806692.947579604] [controller_manager]: Received robot description from topic.
+[gz-1] [WARN] [1794806692.947635156] [controller_manager]: ResourceManager has already loaded a urdf and is initialized. Ignoring attempt to reload a robot description.
+[gz-1] [INFO] [1794806692.955807732] [controller_manager]: Received robot description from topic.
+[gz-1] [WARN] [1794806692.955859772] [controller_manager]: ResourceManager has already loaded a urdf and is initialized. Ignoring attempt to reload a robot description.
+[gz-1] [INFO] [1794806693.337055313] [controller_manager]: Received robot description from topic.
+[gz-1] [WARN] [1794806693.337117814] [controller_manager]: ResourceManager has already loaded a urdf and is initialized. Ignoring attempt to reload a robot description.
+[gz-1] [INFO] [1794806693.384249888] [controller_manager]: Loading controller : 'joint_state_broadcaster' of type 'joint_state_broadcaster/JointStateBroadcaster'
+[gz-1] [INFO] [1794806693.384317189] [controller_manager]: Loading controller 'joint_state_broadcaster'
+[gz-1] [INFO] [1794806693.390120955] [controller_manager]: Controller 'joint_state_broadcaster' node arguments: --ros-args --params-file /home/ros/agentic_workcell_ws/install/share/open_manipulator_bringup/config/open_manipulator_x/hardware_controller_manager.yaml -p use_sim_time:=true --param use_sim_time:=true 
+[spawner-14] [INFO] [1794806693.426128978] [spawner_joint_state_broadcaster]: Loaded joint_state_broadcaster
+[gz-1] [INFO] [1794806693.428908156] [controller_manager]: Configuring controller: 'joint_state_broadcaster'
+[gz-1] [INFO] [1794806693.429168326] [joint_state_broadcaster]: 'joints' or 'interfaces' parameter is empty. All available state interfaces will be published
+[gz-1] [INFO] [1794806693.443371929] [controller_manager]: Activating controllers: [ joint_state_broadcaster ]
+[gz-1] [1;31m[Err] [Physics.cc:1906] [0m[1;31mAttempting to create a mimic constraint for joint [[0m[1;31mgripper_right_joint[0m[1;31m] but the chosen physics engine does not support [0m[1;31mmimic constraints, so no constraint will be [0m[1;31mcreated.[0m[1;31m[0m
+[gz-1] [WARN] [1794806694.904954332] [gz_ros_control]:  Desired controller update period (0.01 s) is slower than the gazebo simulation period (0.005 s).
+[gz-1] [INFO] [1794806694.906655290] [controller_manager]: Successfully switched controllers!
+[spawner-14] [INFO] [1794806694.916133900] [spawner_joint_state_broadcaster]: Configured and activated joint_state_broadcaster
+[INFO] [spawner-14]: process has finished cleanly [pid 909851]
+[INFO] [spawner-15]: process started with pid [909991]
+[INFO] [spawner-16]: process started with pid [909992]
+[move_group-5] [WARN] [1794806695.289635502] [tf2_buffer]: Detected jump back in time. Clearing TF buffer.
+[spawner-16] [INFO] [1794806695.454611578] [spawner_gripper_controller]: waiting for service /controller_manager/list_controllers to become available...
+[move_group-5] [WARN] [1794806695.491986589] [tf2_buffer]: Detected jump back in time. Clearing TF buffer.
+[move_group-5] [WARN] [1794806696.549709725] [tf2_buffer]: Detected jump back in time. Clearing TF buffer.
+[gz-1] [INFO] [1794806697.772112537] [controller_manager]: Loading controller : 'gripper_controller' of type 'position_controllers/GripperActionController'
+[gz-1] [INFO] [1794806697.772151111] [controller_manager]: Loading controller 'gripper_controller'
+[gz-1] [INFO] [1794806697.775991341] [controller_manager]: Controller 'gripper_controller' node arguments: --ros-args --params-file /home/ros/agentic_workcell_ws/install/share/open_manipulator_bringup/config/open_manipulator_x/hardware_controller_manager.yaml -p use_sim_time:=true --param use_sim_time:=true 
+[gz-1] [WARN] [1794806697.823795806] [gripper_controller]: [Deprecated]: the `position_controllers/GripperActionController` and `effort_controllers::GripperActionController` controllers are replaced by 'parallel_gripper_controllers/GripperActionController' controller
+[spawner-16] [INFO] [1794806697.834720843] [spawner_gripper_controller]: Loaded gripper_controller
+[gz-1] [INFO] [1794806697.838414323] [controller_manager]: Configuring controller: 'gripper_controller'
+[gz-1] [INFO] [1794806697.838504301] [gripper_controller]: Action status changes will be monitored at 20.000000 Hz.
+[gz-1] [INFO] [1794806697.850583936] [controller_manager]: Activating controllers: [ gripper_controller ]
+[gz-1] [INFO] [1794806697.872898348] [controller_manager]: Successfully switched controllers!
+[spawner-16] [INFO] [1794806697.881877567] [spawner_gripper_controller]: Configured and activated gripper_controller
+[spawner-15] [INFO] [1794806698.007891256] [spawner_arm_controller]: waiting for service /controller_manager/list_controllers to become available...
+[move_group-5] [WARN] [1794806698.050238160] [tf2_buffer]: Detected jump back in time. Clearing TF buffer.
+[INFO] [spawner-16]: process has finished cleanly [pid 909992]
+[gz-1] [INFO] [1794806699.015255902] [controller_manager]: Loading controller : 'arm_controller' of type 'joint_trajectory_controller/JointTrajectoryController'
+[gz-1] [INFO] [1794806699.015314186] [controller_manager]: Loading controller 'arm_controller'
+[gz-1] [INFO] [1794806699.018803861] [controller_manager]: Controller 'arm_controller' node arguments: --ros-args --params-file /home/ros/agentic_workcell_ws/install/share/open_manipulator_bringup/config/open_manipulator_x/hardware_controller_manager.yaml -p use_sim_time:=true --param use_sim_time:=true 
+[spawner-15] [INFO] [1794806699.081667124] [spawner_arm_controller]: Loaded arm_controller
+[gz-1] [INFO] [1794806699.085207723] [controller_manager]: Configuring controller: 'arm_controller'
+[gz-1] [INFO] [1794806699.085420610] [arm_controller]: No specific joint names are used for command interfaces. Using 'joints' parameter.
+[gz-1] [INFO] [1794806699.085481194] [arm_controller]: Command interfaces are [position] and state interfaces are [position velocity].
+[gz-1] [INFO] [1794806699.085520417] [arm_controller]: Using 'splines' interpolation method.
+[gz-1] [INFO] [1794806699.092079804] [arm_controller]: Goals with partial set of joints are allowed
+[gz-1] [INFO] [1794806699.092121128] [arm_controller]: Action status changes will be monitored at 20.00 Hz.
+[gz-1] [INFO] [1794806699.111025258] [arm_controller]: Setting initial scaling factor to 1.000000
+[gz-1] [INFO] [1794806699.111076970] [arm_controller]: No scaling interface set. This controller will not read speed scaling from the hardware.
+[gz-1] [INFO] [1794806699.122059363] [controller_manager]: Activating controllers: [ arm_controller ]
+[gz-1] [INFO] [1794806699.130274227] [controller_manager]: Successfully switched controllers!
+[spawner-15] [INFO] [1794806699.142571057] [spawner_arm_controller]: Configured and activated arm_controller
+[INFO] [spawner-15]: process has finished cleanly [pid 909991]
+[move_group-5] [WARN] [1794806702.149089656] [tf2_buffer]: Detected jump back in time. Clearing TF buffer.
+[move_group-5] [WARN] [1794806702.690054291] [tf2_buffer]: Detected jump back in time. Clearing TF buffer.
+[move_group-5] [WARN] [1794806703.998638851] [tf2_buffer]: Detected jump back in time. Clearing TF buffer.
+[move_group-5] [WARN] [1794806706.916297405] [tf2_buffer]: Detected jump back in time. Clearing TF buffer.
+[carry_server-12] [INFO] [1794806714.811766336] [carry_server]: carry RELEASED
+[carry_server-12] [INFO] [1794806715.262477046] [carry_server]: carry RELEASED
+[carry_server-12] [INFO] [1794806715.481938411] [carry_server]: carry RELEASED
+[move_group-5] [INFO] [1794806722.276096393] [move_group.moveit.moveit.ros.move_group.move_action]: MoveGroupMoveAction: Received request
+[move_group-5] [INFO] [1794806722.276498637] [move_group.moveit.moveit.ros.move_group.move_action]: executing..
+[move_group-5] [INFO] [1794806722.279683449] [move_group.moveit.moveit.ros.move_group.move_action]: Planning request received for MoveGroup action. Forwarding to planning pipeline.
+[move_group-5] [INFO] [1794806722.279914036] [move_group]: Calling PlanningRequestAdapter 'ResolveConstraintFrames'
+[move_group-5] [INFO] [1794806722.279984403] [move_group]: Calling PlanningRequestAdapter 'ValidateWorkspaceBounds'
+[move_group-5] [WARN] [1794806722.279995539] [move_group.moveit.moveit.ros.validate_workspace_bounds]: It looks like the planning volume was not specified. Using default values.
+[move_group-5] [INFO] [1794806722.280010137] [move_group]: Calling PlanningRequestAdapter 'CheckStartStateBounds'
+[move_group-5] [ERROR] [1794806722.280028622] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806722.280068151] [move_group]: Calling PlanningRequestAdapter 'CheckStartStateCollision'
+[move_group-5] [ERROR] [1794806722.280080928] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [ERROR] [1794806722.293802544] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806722.295871275] [move_group.moveit.moveit.planners.ompl.model_based_planning_context]: Planner configuration 'arm' will use planner 'geometric::RRTConnect'. Additional configuration parameters will be set when the planner is constructed.
+[move_group-5] [INFO] [1794806722.298414280] [move_group]: Calling Planner 'OMPL'
+[move_group-5] [INFO] [1794806722.315642615] [move_group]: Calling PlanningResponseAdapter 'AddTimeOptimalParameterization'
+[move_group-5] [INFO] [1794806722.315879505] [move_group]: Calling PlanningResponseAdapter 'ValidateSolution'
+[move_group-5] [INFO] [1794806722.315947464] [move_group]: Calling PlanningResponseAdapter 'DisplayMotionPath'
+[move_group-5] [WARN] [1794806722.316001214] [move_group.moveit.moveit.ros.planning_pipeline]: The planner plugin did not fill out the 'planner_id' field of the MotionPlanResponse. Setting it to the planner ID name of the MotionPlanRequest assuming that the planner plugin does warn you if it does not use the requested planner.
+[move_group-5] [INFO] [1794806722.316049480] [move_group.moveit.moveit.ros.move_group.move_action]: Motion plan was computed successfully.
+[move_group-5] [INFO] [1794806722.317697917] [move_group.moveit.moveit.ros.move_group.clear_octomap_service]: Execution request received
+[move_group-5] [INFO] [1794806722.317770151] [move_group.moveit.moveit.plugins.simple_controller_manager]: Returned 2 controllers in list
+[move_group-5] [INFO] [1794806722.317798914] [move_group.moveit.moveit.plugins.simple_controller_manager]: Returned 2 controllers in list
+[move_group-5] [INFO] [1794806722.317959945] [move_group.moveit.moveit.ros.trajectory_execution_manager]: Validating trajectory with allowed_start_tolerance 0.01
+[move_group-5] [INFO] [1794806722.319807735] [move_group.moveit.moveit.ros.trajectory_execution_manager]: Starting trajectory execution ...
+[move_group-5] [INFO] [1794806722.319930904] [move_group.moveit.moveit.plugins.simple_controller_manager]: Returned 2 controllers in list
+[move_group-5] [INFO] [1794806722.319962869] [move_group.moveit.moveit.plugins.simple_controller_manager]: Returned 2 controllers in list
+[move_group-5] [INFO] [1794806722.320149914] [moveit.simple_controller_manager.follow_joint_trajectory_controller_handle]: sending trajectory to arm_controller
+[gz-1] [INFO] [1794806722.320566607] [arm_controller]: Received new action goal
+[gz-1] [INFO] [1794806722.320655919] [arm_controller]: Accepted new action goal
+[move_group-5] [INFO] [1794806722.320954093] [moveit.simple_controller_manager.follow_joint_trajectory_controller_handle]: arm_controller started execution
+[move_group-5] [INFO] [1794806722.320972289] [moveit.simple_controller_manager.follow_joint_trajectory_controller_handle]: Goal request accepted!
+[gz-1] [INFO] [1794806722.389435086] [arm_controller]: Goal reached, success!
+[move_group-5] [INFO] [1794806722.421433116] [moveit.simple_controller_manager.follow_joint_trajectory_controller_handle]: Controller 'arm_controller' successfully finished
+[move_group-5] [INFO] [1794806722.429751480] [move_group.moveit.moveit.ros.trajectory_execution_manager]: Completed trajectory execution with status SUCCEEDED ...
+[move_group-5] [INFO] [1794806722.429878479] [move_group.moveit.moveit.ros.move_group.clear_octomap_service]: Execution completed: SUCCEEDED
+[gz-1] [INFO] [1794806731.286977277] [gripper_controller]: Received & accepted new action goal
+[move_group-5] [ERROR] [1794806731.414854508] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806731.414963099] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806731.438526179] [move_group.moveit.moveit.ros.move_group.plan_service]: Received new planning service request...
+[move_group-5] [INFO] [1794806731.438679075] [move_group]: Calling PlanningRequestAdapter 'ResolveConstraintFrames'
+[move_group-5] [INFO] [1794806731.438712209] [move_group]: Calling PlanningRequestAdapter 'ValidateWorkspaceBounds'
+[move_group-5] [INFO] [1794806731.438726739] [move_group]: Calling PlanningRequestAdapter 'CheckStartStateBounds'
+[move_group-5] [ERROR] [1794806731.438746148] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806731.438788666] [move_group]: Calling PlanningRequestAdapter 'CheckStartStateCollision'
+[move_group-5] [ERROR] [1794806731.438812183] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [ERROR] [1794806731.438973446] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806731.439202336] [move_group.moveit.moveit.planners.ompl.model_based_planning_context]: Planner configuration 'arm' will use planner 'geometric::RRTConnect'. Additional configuration parameters will be set when the planner is constructed.
+[move_group-5] [INFO] [1794806731.439280043] [move_group]: Calling Planner 'OMPL'
+[move_group-5] [INFO] [1794806731.449313006] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806731.449492584] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806731.449552790] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806731.449609154] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806731.449698216] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806731.449830455] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806731.449940481] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806731.453903461] [move_group]: Calling PlanningResponseAdapter 'AddTimeOptimalParameterization'
+[move_group-5] [INFO] [1794806731.454399502] [move_group]: Calling PlanningResponseAdapter 'ValidateSolution'
+[move_group-5] [INFO] [1794806731.454546836] [move_group]: Calling PlanningResponseAdapter 'DisplayMotionPath'
+[move_group-5] [WARN] [1794806731.454596906] [move_group.moveit.moveit.ros.planning_pipeline]: The planner plugin did not fill out the 'planner_id' field of the MotionPlanResponse. Setting it to the planner ID name of the MotionPlanRequest assuming that the planner plugin does warn you if it does not use the requested planner.
+[gz-1] [INFO] [1794806731.462446495] [arm_controller]: Received new action goal
+[gz-1] [INFO] [1794806731.462503470] [arm_controller]: Accepted new action goal
+[gz-1] [INFO] [1794806732.868274659] [arm_controller]: Goal reached, success!
+[move_group-5] [ERROR] [1794806733.009470548] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806733.009542369] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806733.029233425] [move_group.moveit.moveit.ros.move_group.plan_service]: Received new planning service request...
+[move_group-5] [INFO] [1794806733.029320239] [move_group]: Calling PlanningRequestAdapter 'ResolveConstraintFrames'
+[move_group-5] [INFO] [1794806733.029339249] [move_group]: Calling PlanningRequestAdapter 'ValidateWorkspaceBounds'
+[move_group-5] [INFO] [1794806733.029346579] [move_group]: Calling PlanningRequestAdapter 'CheckStartStateBounds'
+[move_group-5] [ERROR] [1794806733.029355261] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806733.029411005] [move_group]: Calling PlanningRequestAdapter 'CheckStartStateCollision'
+[move_group-5] [ERROR] [1794806733.029423545] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [ERROR] [1794806733.029514339] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806733.029683052] [move_group.moveit.moveit.planners.ompl.model_based_planning_context]: Planner configuration 'arm' will use planner 'geometric::RRTConnect'. Additional configuration parameters will be set when the planner is constructed.
+[move_group-5] [INFO] [1794806733.029742535] [move_group]: Calling Planner 'OMPL'
+[move_group-5] [INFO] [1794806733.039784286] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806733.040029326] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806733.040169533] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806733.040357618] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806733.044826014] [move_group]: Calling PlanningResponseAdapter 'AddTimeOptimalParameterization'
+[move_group-5] [INFO] [1794806733.045058319] [move_group]: Calling PlanningResponseAdapter 'ValidateSolution'
+[move_group-5] [INFO] [1794806733.045126789] [move_group]: Calling PlanningResponseAdapter 'DisplayMotionPath'
+[move_group-5] [WARN] [1794806733.045176925] [move_group.moveit.moveit.ros.planning_pipeline]: The planner plugin did not fill out the 'planner_id' field of the MotionPlanResponse. Setting it to the planner ID name of the MotionPlanRequest assuming that the planner plugin does warn you if it does not use the requested planner.
+[gz-1] [INFO] [1794806733.085298150] [arm_controller]: Received new action goal
+[gz-1] [INFO] [1794806733.085353765] [arm_controller]: Accepted new action goal
+[gz-1] [INFO] [1794806733.868549216] [arm_controller]: Goal reached, success!
+[gz-1] [INFO] [1794806733.957722036] [gripper_controller]: Received & accepted new action goal
+[carry_server-12] [INFO] [1794806734.225205278] [carry_server]: carry RELEASED
+[carry_server-12] [INFO] [1794806734.234899281] [carry_server]: carry ENGAGED object=target_box_a offset=[-0.005 0.000 -0.161]
+[move_group-5] [ERROR] [1794806735.358982354] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806735.359063975] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806735.386890381] [move_group.moveit.moveit.ros.move_group.plan_service]: Received new planning service request...
+[move_group-5] [INFO] [1794806735.386993650] [move_group]: Calling PlanningRequestAdapter 'ResolveConstraintFrames'
+[move_group-5] [INFO] [1794806735.387021018] [move_group]: Calling PlanningRequestAdapter 'ValidateWorkspaceBounds'
+[move_group-5] [INFO] [1794806735.387035262] [move_group]: Calling PlanningRequestAdapter 'CheckStartStateBounds'
+[move_group-5] [ERROR] [1794806735.387056419] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806735.387102713] [move_group]: Calling PlanningRequestAdapter 'CheckStartStateCollision'
+[move_group-5] [ERROR] [1794806735.387120576] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [ERROR] [1794806735.387275989] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806735.387428348] [move_group.moveit.moveit.planners.ompl.model_based_planning_context]: Planner configuration 'arm' will use planner 'geometric::RRTConnect'. Additional configuration parameters will be set when the planner is constructed.
+[move_group-5] [INFO] [1794806735.387582115] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806735.387657560] [move_group]: Calling Planner 'OMPL'
+[move_group-5] [INFO] [1794806735.388345748] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806735.388508870] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806735.388627254] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806735.388743314] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806735.388856718] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806735.388970825] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806735.389087506] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806735.389201307] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806735.389330343] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806735.400835755] [move_group]: Calling PlanningResponseAdapter 'AddTimeOptimalParameterization'
+[move_group-5] [INFO] [1794806735.401255654] [move_group]: Calling PlanningResponseAdapter 'ValidateSolution'
+[move_group-5] [INFO] [1794806735.401370668] [move_group]: Calling PlanningResponseAdapter 'DisplayMotionPath'
+[move_group-5] [WARN] [1794806735.401402950] [move_group.moveit.moveit.ros.planning_pipeline]: The planner plugin did not fill out the 'planner_id' field of the MotionPlanResponse. Setting it to the planner ID name of the MotionPlanRequest assuming that the planner plugin does warn you if it does not use the requested planner.
+[gz-1] [INFO] [1794806735.424826798] [arm_controller]: Received new action goal
+[gz-1] [INFO] [1794806735.424871186] [arm_controller]: Accepted new action goal
+[gz-1] [INFO] [1794806736.578545147] [arm_controller]: Goal reached, success!
+[move_group-5] [ERROR] [1794806738.940083119] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806738.940167896] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806738.971671482] [move_group.moveit.moveit.ros.move_group.plan_service]: Received new planning service request...
+[move_group-5] [INFO] [1794806738.971775696] [move_group]: Calling PlanningRequestAdapter 'ResolveConstraintFrames'
+[move_group-5] [INFO] [1794806738.971792762] [move_group]: Calling PlanningRequestAdapter 'ValidateWorkspaceBounds'
+[move_group-5] [INFO] [1794806738.971800139] [move_group]: Calling PlanningRequestAdapter 'CheckStartStateBounds'
+[move_group-5] [ERROR] [1794806738.971818927] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806738.971854263] [move_group]: Calling PlanningRequestAdapter 'CheckStartStateCollision'
+[move_group-5] [ERROR] [1794806738.971868710] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [ERROR] [1794806738.971994230] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806738.972156047] [move_group.moveit.moveit.planners.ompl.model_based_planning_context]: Planner configuration 'arm' will use planner 'geometric::RRTConnect'. Additional configuration parameters will be set when the planner is constructed.
+[move_group-5] [INFO] [1794806738.972208608] [move_group]: Calling Planner 'OMPL'
+[move_group-5] [INFO] [1794806738.982328849] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806738.982571345] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806738.982815394] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806738.982972002] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806738.985870958] [move_group]: Calling PlanningResponseAdapter 'AddTimeOptimalParameterization'
+[move_group-5] [INFO] [1794806738.986459747] [move_group]: Calling PlanningResponseAdapter 'ValidateSolution'
+[move_group-5] [INFO] [1794806738.986595752] [move_group]: Calling PlanningResponseAdapter 'DisplayMotionPath'
+[move_group-5] [WARN] [1794806738.986627738] [move_group.moveit.moveit.ros.planning_pipeline]: The planner plugin did not fill out the 'planner_id' field of the MotionPlanResponse. Setting it to the planner ID name of the MotionPlanRequest assuming that the planner plugin does warn you if it does not use the requested planner.
+[gz-1] [INFO] [1794806738.994058904] [arm_controller]: Received new action goal
+[gz-1] [INFO] [1794806738.994111761] [arm_controller]: Accepted new action goal
+[gz-1] [INFO] [1794806740.908329268] [arm_controller]: Goal reached, success!
+[move_group-5] [ERROR] [1794806741.065808145] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806741.065886023] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806741.086367755] [move_group.moveit.moveit.ros.move_group.plan_service]: Received new planning service request...
+[move_group-5] [INFO] [1794806741.086483775] [move_group]: Calling PlanningRequestAdapter 'ResolveConstraintFrames'
+[move_group-5] [INFO] [1794806741.086508841] [move_group]: Calling PlanningRequestAdapter 'ValidateWorkspaceBounds'
+[move_group-5] [INFO] [1794806741.086525847] [move_group]: Calling PlanningRequestAdapter 'CheckStartStateBounds'
+[move_group-5] [ERROR] [1794806741.086551238] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806741.086599568] [move_group]: Calling PlanningRequestAdapter 'CheckStartStateCollision'
+[move_group-5] [ERROR] [1794806741.086613030] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [ERROR] [1794806741.086774539] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806741.086970808] [move_group.moveit.moveit.planners.ompl.model_based_planning_context]: Planner configuration 'arm' will use planner 'geometric::RRTConnect'. Additional configuration parameters will be set when the planner is constructed.
+[move_group-5] [INFO] [1794806741.087050760] [move_group]: Calling Planner 'OMPL'
+[move_group-5] [INFO] [1794806741.097066916] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806741.097327691] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806741.105402825] [move_group]: Calling PlanningResponseAdapter 'AddTimeOptimalParameterization'
+[move_group-5] [INFO] [1794806741.106146261] [move_group]: Calling PlanningResponseAdapter 'ValidateSolution'
+[move_group-5] [INFO] [1794806741.106329266] [move_group]: Calling PlanningResponseAdapter 'DisplayMotionPath'
+[move_group-5] [WARN] [1794806741.106387523] [move_group.moveit.moveit.ros.planning_pipeline]: The planner plugin did not fill out the 'planner_id' field of the MotionPlanResponse. Setting it to the planner ID name of the MotionPlanRequest assuming that the planner plugin does warn you if it does not use the requested planner.
+[gz-1] [INFO] [1794806741.140069768] [arm_controller]: Received new action goal
+[gz-1] [INFO] [1794806741.140125483] [arm_controller]: Accepted new action goal
+[gz-1] [INFO] [1794806742.568146261] [arm_controller]: Goal reached, success!
+[carry_server-12] [INFO] [1794806742.884798026] [carry_server]: carry RELEASED
+[gz-1] [INFO] [1794806742.919209997] [gripper_controller]: Received & accepted new action goal
+[move_group-5] [ERROR] [1794806744.125592953] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806744.125677034] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806744.146360132] [move_group.moveit.moveit.ros.move_group.plan_service]: Received new planning service request...
+[move_group-5] [INFO] [1794806744.146460661] [move_group]: Calling PlanningRequestAdapter 'ResolveConstraintFrames'
+[move_group-5] [INFO] [1794806744.146482211] [move_group]: Calling PlanningRequestAdapter 'ValidateWorkspaceBounds'
+[move_group-5] [INFO] [1794806744.146494627] [move_group]: Calling PlanningRequestAdapter 'CheckStartStateBounds'
+[move_group-5] [ERROR] [1794806744.146509902] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806744.146541830] [move_group]: Calling PlanningRequestAdapter 'CheckStartStateCollision'
+[move_group-5] [ERROR] [1794806744.146553426] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [ERROR] [1794806744.146672186] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806744.146851665] [move_group.moveit.moveit.planners.ompl.model_based_planning_context]: Planner configuration 'arm' will use planner 'geometric::RRTConnect'. Additional configuration parameters will be set when the planner is constructed.
+[move_group-5] [INFO] [1794806744.146926361] [move_group]: Calling Planner 'OMPL'
+[move_group-5] [INFO] [1794806744.156931121] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806744.157138228] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806744.157247133] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806744.157393890] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806744.157558817] [move_group.moveit.moveit.kinematics.kdl_kinematics_plugin]: Using position only ik
+[move_group-5] [INFO] [1794806744.160763038] [move_group]: Calling PlanningResponseAdapter 'AddTimeOptimalParameterization'
+[move_group-5] [INFO] [1794806744.161435790] [move_group]: Calling PlanningResponseAdapter 'ValidateSolution'
+[move_group-5] [INFO] [1794806744.161583405] [move_group]: Calling PlanningResponseAdapter 'DisplayMotionPath'
+[move_group-5] [WARN] [1794806744.161625495] [move_group.moveit.moveit.ros.planning_pipeline]: The planner plugin did not fill out the 'planner_id' field of the MotionPlanResponse. Setting it to the planner ID name of the MotionPlanRequest assuming that the planner plugin does warn you if it does not use the requested planner.
+[gz-1] [INFO] [1794806744.189678340] [arm_controller]: Received new action goal
+[gz-1] [INFO] [1794806744.189726445] [arm_controller]: Accepted new action goal
+[gz-1] [INFO] [1794806745.528248730] [arm_controller]: Goal reached, success!
+[carry_server-12] [INFO] [1794806748.710066189] [carry_server]: carry RELEASED
+[carry_server-12] [INFO] [1794806748.924494956] [carry_server]: carry RELEASED
+[carry_server-12] [INFO] [1794806749.134579272] [carry_server]: carry RELEASED
+[move_group-5] [ERROR] [1794806750.791505831] [move_group.moveit.moveit.core.robot_state]: Attached body 'target_box_a' not found
+[move_group-5] [ERROR] [1794806750.791581762] [move_group.moveit.moveit.core.robot_state]: Attached body 'target_box_b' not found
+[move_group-5] [WARN] [1794806750.791634753] [move_group.moveit.moveit.core.planning_scene]: Tried to remove world object 'target_box_b', but it does not exist in this scene.
+[move_group-5] [INFO] [1794806757.680741214] [move_group.moveit.moveit.ros.move_group.move_action]: MoveGroupMoveAction: Received request
+[move_group-5] [INFO] [1794806757.681087652] [move_group.moveit.moveit.ros.move_group.move_action]: executing..
+[move_group-5] [INFO] [1794806757.681199884] [move_group.moveit.moveit.ros.move_group.move_action]: Planning request received for MoveGroup action. Forwarding to planning pipeline.
+[move_group-5] [INFO] [1794806757.681294145] [move_group]: Calling PlanningRequestAdapter 'ResolveConstraintFrames'
+[move_group-5] [INFO] [1794806757.681384999] [move_group]: Calling PlanningRequestAdapter 'ValidateWorkspaceBounds'
+[move_group-5] [WARN] [1794806757.682093197] [move_group.moveit.moveit.ros.validate_workspace_bounds]: It looks like the planning volume was not specified. Using default values.
+[move_group-5] [INFO] [1794806757.682119490] [move_group]: Calling PlanningRequestAdapter 'CheckStartStateBounds'
+[move_group-5] [ERROR] [1794806757.682133854] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806757.682159651] [move_group]: Calling PlanningRequestAdapter 'CheckStartStateCollision'
+[move_group-5] [ERROR] [1794806757.682167089] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [ERROR] [1794806757.682281332] [move_group.moveit.moveit.core.conversions]: Found empty JointState message
+[move_group-5] [INFO] [1794806757.682492001] [move_group.moveit.moveit.planners.ompl.model_based_planning_context]: Planner configuration 'arm' will use planner 'geometric::RRTConnect'. Additional configuration parameters will be set when the planner is constructed.
+[move_group-5] [INFO] [1794806757.682570664] [move_group]: Calling Planner 'OMPL'
+[move_group-5] [INFO] [1794806757.695403935] [move_group]: Calling PlanningResponseAdapter 'AddTimeOptimalParameterization'
+[move_group-5] [INFO] [1794806757.695993319] [move_group]: Calling PlanningResponseAdapter 'ValidateSolution'
+[move_group-5] [INFO] [1794806757.696127390] [move_group]: Calling PlanningResponseAdapter 'DisplayMotionPath'
+[move_group-5] [WARN] [1794806757.696168596] [move_group.moveit.moveit.ros.planning_pipeline]: The planner plugin did not fill out the 'planner_id' field of the MotionPlanResponse. Setting it to the planner ID name of the MotionPlanRequest assuming that the planner plugin does warn you if it does not use the requested planner.
+[move_group-5] [INFO] [1794806757.696205277] [move_group.moveit.moveit.ros.move_group.move_action]: Motion plan was computed successfully.
+[move_group-5] [INFO] [1794806757.697883467] [move_group.moveit.moveit.ros.move_group.clear_octomap_service]: Execution request received
+[move_group-5] [INFO] [1794806757.698205223] [move_group.moveit.moveit.plugins.simple_controller_manager]: Returned 2 controllers in list
+[move_group-5] [INFO] [1794806757.698293204] [move_group.moveit.moveit.plugins.simple_controller_manager]: Returned 2 controllers in list
+[move_group-5] [INFO] [1794806757.698438132] [move_group.moveit.moveit.ros.trajectory_execution_manager]: Validating trajectory with allowed_start_tolerance 0.01
+[move_group-5] [INFO] [1794806757.699377238] [move_group.moveit.moveit.ros.trajectory_execution_manager]: Starting trajectory execution ...
+[move_group-5] [INFO] [1794806757.699432358] [move_group.moveit.moveit.plugins.simple_controller_manager]: Returned 2 controllers in list
+[move_group-5] [INFO] [1794806757.699464250] [move_group.moveit.moveit.plugins.simple_controller_manager]: Returned 2 controllers in list
+[move_group-5] [INFO] [1794806757.699650222] [moveit.simple_controller_manager.follow_joint_trajectory_controller_handle]: sending trajectory to arm_controller
+[move_group-5] [INFO] [1794806757.700083751] [moveit.simple_controller_manager.follow_joint_trajectory_controller_handle]: arm_controller started execution
+[move_group-5] [INFO] [1794806757.700096898] [moveit.simple_controller_manager.follow_joint_trajectory_controller_handle]: Goal request accepted!
+[gz-1] [INFO] [1794806757.699838725] [arm_controller]: Received new action goal
+[gz-1] [INFO] [1794806757.699870320] [arm_controller]: Accepted new action goal
+[gz-1] [INFO] [1794806758.907315686] [arm_controller]: Goal reached, success!
+[move_group-5] [INFO] [1794806758.952287706] [moveit.simple_controller_manager.follow_joint_trajectory_controller_handle]: Controller 'arm_controller' successfully finished
+[move_group-5] [INFO] [1794806758.958258734] [move_group.moveit.moveit.ros.trajectory_execution_manager]: Completed trajectory execution with status SUCCEEDED ...
+[move_group-5] [INFO] [1794806758.958381019] [move_group.moveit.moveit.ros.move_group.clear_octomap_service]: Execution completed: SUCCEEDED
+[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)
+[INFO] [push_server-13]: sending signal 'SIGINT' to process[push_server-13]
+[INFO] [carry_server-12]: sending signal 'SIGINT' to process[carry_server-12]
+[INFO] [task_fsm_server-11]: sending signal 'SIGINT' to process[task_fsm_server-11]
+[INFO] [verify_server-10]: sending signal 'SIGINT' to process[verify_server-10]
+[INFO] [place_server-9]: sending signal 'SIGINT' to process[place_server-9]
+[INFO] [pick_server-8]: sending signal 'SIGINT' to process[pick_server-8]
+[INFO] [observe_server-7]: sending signal 'SIGINT' to process[observe_server-7]
+[INFO] [move_to_pose_server-6]: sending signal 'SIGINT' to process[move_to_pose_server-6]
+[INFO] [move_group-5]: sending signal 'SIGINT' to process[move_group-5]
+[INFO] [parameter_bridge-3]: sending signal 'SIGINT' to process[parameter_bridge-3]
+[INFO] [robot_state_publisher-2]: sending signal 'SIGINT' to process[robot_state_publisher-2]
+[INFO] [gz-1]: sending signal 'SIGINT' to process[gz-1]
+[move_group-5] [INFO] [1794806772.616074812] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[parameter_bridge-3] [INFO] [1794806772.616509700] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[robot_state_publisher-2] [INFO] [1794806772.620187385] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[push_server-13] Traceback (most recent call last):
+[push_server-13]   File "/home/ros/work/flexcell/install_merged/lib/flexcell_skills/push_server", line 33, in <module>
+[push_server-13]     sys.exit(load_entry_point('flexcell-skills', 'console_scripts', 'push_server')())
+[push_server-13]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[push_server-13]   File "/home/ros/work/flexcell/build_merged/flexcell_skills/flexcell_skills/push_server.py", line 419, in main
+[push_server-13]     node.destroy_node()
+[push_server-13]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/node.py", line 1960, in destroy_node
+[place_server-9] Traceback (most recent call last):
+[place_server-9]   File "/home/ros/work/flexcell/install_merged/lib/flexcell_skills/place_server", line 33, in <module>
+[place_server-9]     sys.exit(load_entry_point('flexcell-skills', 'console_scripts', 'place_server')())
+[place_server-9]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[place_server-9]   File "/home/ros/work/flexcell/build_merged/flexcell_skills/flexcell_skills/place_server.py", line 501, in main
+[place_server-9]     node.destroy_node()
+[place_server-9]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/node.py", line 1962, in destroy_node
+[pick_server-8] Traceback (most recent call last):
+[pick_server-8]   File "/home/ros/work/flexcell/install_merged/lib/flexcell_skills/pick_server", line 33, in <module>
+[pick_server-8]     sys.exit(load_entry_point('flexcell-skills', 'console_scripts', 'pick_server')())
+[pick_server-8]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[pick_server-8]   File "/home/ros/work/flexcell/build_merged/flexcell_skills/flexcell_skills/pick_server.py", line 722, in main
+[pick_server-8]     node.destroy_node()
+[pick_server-8]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/node.py", line 1962, in destroy_node
+[task_fsm_server-11] Traceback (most recent call last):
+[task_fsm_server-11]   File "/home/ros/work/flexcell/install_merged/lib/flexcell_skills/task_fsm_server", line 33, in <module>
+[task_fsm_server-11]     sys.exit(load_entry_point('flexcell-skills', 'console_scripts', 'task_fsm_server')())
+[task_fsm_server-11]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[task_fsm_server-11]   File "/home/ros/work/flexcell/build_merged/flexcell_skills/flexcell_skills/task_fsm_server.py", line 1572, in main
+[task_fsm_server-11]     node.destroy_node()
+[task_fsm_server-11]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/node.py", line 1962, in destroy_node
+[parameter_bridge-3] [INFO] [1794806772.638647551] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[robot_state_publisher-2] [INFO] [1794806772.640432853] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[place_server-9]     self.destroy_service(self._services[0])
+[place_server-9]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/node.py", line 1886, in destroy_service
+[pick_server-8]     self.destroy_service(self._services[0])
+[pick_server-8]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/node.py", line 1886, in destroy_service
+[place_server-9]     service.destroy()
+[place_server-9]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/service.py", line 123, in destroy
+[pick_server-8]     service.destroy()
+[pick_server-8]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/service.py", line 123, in destroy
+[task_fsm_server-11]     self.destroy_service(self._services[0])
+[task_fsm_server-11]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/node.py", line 1886, in destroy_service
+[place_server-9]     self.__service.destroy_when_not_in_use()
+[place_server-9] KeyboardInterrupt
+[task_fsm_server-11]     service.destroy()
+[task_fsm_server-11]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/service.py", line 123, in destroy
+[task_fsm_server-11]     self.__service.destroy_when_not_in_use()
+[task_fsm_server-11] KeyboardInterrupt
+[pick_server-8]     self.__service.destroy_when_not_in_use()
+[pick_server-8] KeyboardInterrupt
+[move_group-5] [INFO] [1794806772.646506450] [rclcpp]: signal_handler(SIGINT/SIGTERM)
+[push_server-13]     self.destroy_client(self._clients[0])
+[push_server-13]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/node.py", line 1870, in destroy_client
+[push_server-13]     client.destroy()
+[push_server-13]   File "/opt/ros/jazzy/lib/python3.12/site-packages/rclpy/client.py", line 232, in destroy
+[push_server-13]     self.__client.destroy_when_not_in_use()
+[push_server-13] KeyboardInterrupt
+[ERROR] [move_to_pose_server-6]: process has died [pid 909675, exit code -2, cmd '/home/ros/work/flexcell/install_merged/lib/flexcell_skills/move_to_pose_server --ros-args -r __node:=move_to_pose_server --params-file /tmp/237_phys_run/run-17158fd906a8/params.yaml --params-file /tmp/launch_params_o17v4acu'].
+[ERROR] [verify_server-10]: process has died [pid 909726, exit code -2, cmd '/home/ros/work/flexcell/install_merged/lib/flexcell_skills/verify_server --ros-args -r __node:=verify_server --params-file /tmp/237_phys_run/run-17158fd906a8/params.yaml'].
+[ERROR] [observe_server-7]: process has died [pid 909676, exit code -2, cmd '/home/ros/work/flexcell/install_merged/lib/flexcell_skills/observe_server --ros-args -r __node:=observe_server --params-file /tmp/237_phys_run/run-17158fd906a8/params.yaml'].
+[gz-1] [INFO] [1794806772.671761579] [controller_manager.pal_statistics]: Async messages lost 0
+[gz-1] [INFO] [1794806772.671852511] [controller_manager.pal_statistics]: publish_async_failures_ 0
+[gz-1] [INFO] [1794806772.675145642] [controller_manager.pal_statistics]: Async messages lost 0
+[gz-1] [INFO] [1794806772.675197853] [controller_manager.pal_statistics]: publish_async_failures_ 0
+[move_group-5] Stack trace (most recent call last):
+[move_group-5] #6    Object "", at 0xffffffffffffffff, in 
+[move_group-5] #5    Object "/opt/ros/jazzy/lib/moveit_ros_move_group/move_group", at 0x576fe8ae5a14, in _start
+[move_group-5] #4    Source "../csu/libc-start.c", line 360, in __libc_start_main_impl [0x757aace2a28a]
+[move_group-5] #3    Source "../sysdeps/nptl/libc_start_call_main.h", line 58, in __libc_start_call_main [0x757aace2a1c9]
+[move_group-5] #2    Object "/opt/ros/jazzy/lib/moveit_ros_move_group/move_group", at 0x576fe8ae44e7, in main
+[move_group-5] #1    Object "/opt/ros/jazzy/lib/librclcpp.so", at 0x757aad7162f7, in rclcpp::Executor::~Executor()
+[move_group-5] #0    Object "/opt/ros/jazzy/lib/librclcpp.so", at 0x757aad710dde, in 
+[move_group-5] Segmentation fault (Address not mapped to object [0x757a55e41170])
+[INFO] [parameter_bridge-3]: process has finished cleanly [pid 909672]
+[INFO] [robot_state_publisher-2]: process has finished cleanly [pid 909671]
+[ERROR] [place_server-9]: process has died [pid 909678, exit code -2, cmd '/home/ros/work/flexcell/install_merged/lib/flexcell_skills/place_server --ros-args -r __node:=place_server --params-file /tmp/237_phys_run/run-17158fd906a8/params.yaml'].
+[ERROR] [push_server-13]: process has died [pid 909729, exit code -2, cmd '/home/ros/work/flexcell/install_merged/lib/flexcell_skills/push_server --ros-args -r __node:=push_server --params-file /tmp/237_phys_run/run-17158fd906a8/params.yaml'].
+[ERROR] [pick_server-8]: process has died [pid 909677, exit code -2, cmd '/home/ros/work/flexcell/install_merged/lib/flexcell_skills/pick_server --ros-args -r __node:=pick_server --params-file /tmp/237_phys_run/run-17158fd906a8/params.yaml'].
+[ERROR] [task_fsm_server-11]: process has died [pid 909727, exit code -2, cmd '/home/ros/work/flexcell/install_merged/lib/flexcell_skills/task_fsm_server --ros-args -r __node:=task_fsm_server --params-file /tmp/237_phys_run/run-17158fd906a8/params.yaml'].
+[INFO] [gz-1]: process has finished cleanly [pid 909670]
+[carry_server-12] Traceback (most recent call last):
+[carry_server-12]   File "/home/ros/work/flexcell/install_merged/lib/flexcell_skills/carry_server", line 33, in <module>
+[carry_server-12]     sys.exit(load_entry_point('flexcell-skills', 'console_scripts', 'carry_server')())
+[carry_server-12]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[carry_server-12]   File "/home/ros/work/flexcell/build_merged/flexcell_skills/flexcell_skills/carry_server.py", line 603, in main
+[carry_server-12]     node._on_stop(None, cause='shutdown')
+[carry_server-12]   File "/home/ros/work/flexcell/build_merged/flexcell_skills/flexcell_skills/carry_server.py", line 381, in _on_stop
+[carry_server-12]     if not self._guard_release(''):
+[carry_server-12]            ^^^^^^^^^^^^^^^^^^^^^^^
+[carry_server-12]   File "/home/ros/work/flexcell/build_merged/flexcell_skills/flexcell_skills/carry_server.py", line 446, in _guard_release
+[carry_server-12]     return self._request_ok(self._gz_node.request(
+[carry_server-12]                             ^^^^^^^^^^^^^^^^^^^^^^
+[carry_server-12]   File "/opt/ros/jazzy/opt/gz_transport_vendor/lib/python/gz/transport13/__init__.py", line 147, in request
+[carry_server-12]     result, serialized_response = self.request_raw(
+[carry_server-12]                                   ^^^^^^^^^^^^^^^^^
+[carry_server-12] KeyboardInterrupt
+[ERROR] [carry_server-12]: process has died [pid 909728, exit code -2, cmd '/home/ros/work/flexcell/install_merged/lib/flexcell_skills/carry_server --ros-args -r __node:=carry_server --params-file /tmp/237_phys_run/run-17158fd906a8/params.yaml'].
+[ERROR] [move_group-5]: process has died [pid 909674, exit code -11, cmd '/opt/ros/jazzy/lib/moveit_ros_move_group/move_group --ros-args --params-file /tmp/launch_params_4v_xgg15 --params-file /tmp/launch_params_n0mtok5r --params-file /tmp/launch_params_fsak5730'].

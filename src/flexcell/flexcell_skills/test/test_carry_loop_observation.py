@@ -8,6 +8,7 @@ or a physical acceptance test.
 import ast
 from copy import deepcopy
 import hashlib
+import os
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -15,7 +16,9 @@ import pytest
 
 
 ROOT = Path(__file__).resolve().parents[4]
-REFERENCE = ROOT / 'setup/acceptance/carry_observation_20261025/loop_before.txt'
+# The archive may be relocated outside the repository: docs/EVIDENCE_ARCHIVE.md
+EVIDENCE_ROOT = Path(os.environ.get('FLEXCELL_EVIDENCE_ROOT', str(ROOT)))
+REFERENCE = EVIDENCE_ROOT / 'setup/acceptance/carry_observation_20261025/loop_before.txt'
 SERVER = ROOT / 'src/flexcell/flexcell_skills/flexcell_skills/carry_server.py'
 REFERENCE_SHA = 'c16814b9662cf417e9be8dbe1018b126d9ec8ea4eedf2df06fdd4f4c2b36e664'
 OBJECT, SESSION = 'target_box_a', 'a' * 32

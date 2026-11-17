@@ -550,6 +550,9 @@ class TestPickEngageFailure(unittest.TestCase):
         node._backend_consistent = lambda: (True, '')
         node._seq = 0
         node._admission = threading.Lock()
+        # __new__ fixtures bypass the node's declared bounded wait (default 5.0s);
+        # pin it to zero so a held lock fails fast instead of sleeping 5s.
+        node._admission_wait_s = 0.
         node.get_logger = lambda: _Logger()
         node._log = JsonlLog(_StubNode(), self.tmp, 'pick_it.jsonl')
         node._profiles = ['demo_slow']
@@ -621,7 +624,9 @@ class TestJointFollowStop(unittest.TestCase):
     def pick_node(self, watch, stop_confirmed, *, already_completed=False):
         node = PickServer.__new__(PickServer)
         node._backend_consistent = lambda: (True, '')
-        for name, value in dict(_seq=0, _admission=threading.Lock(),
+        # __new__ fixtures bypass the node's declared bounded wait (default 5.0s);
+        # pin it to zero so a held lock fails fast instead of sleeping 5s.
+        for name, value in dict(_seq=0, _admission=threading.Lock(), _admission_wait_s=0.,
             _profiles=['demo_slow'], _default_profile='demo_slow', _deadline=30000,
             _inject=InjectionLifecycle(), _base='world', _size=[.035] * 3,
             _hover=.22, _grasp_dz=.16, _raise=.1, _attach_radius=.20,
@@ -714,7 +719,9 @@ class TestJointFollowStop(unittest.TestCase):
         watch = self.Watch()
         node = PlaceServer.__new__(PlaceServer)
         node._backend_consistent = lambda: (True, '')
-        for name, value in dict(_seq=0, _admission=threading.Lock(),
+        # __new__ fixtures bypass the node's declared bounded wait (default 5.0s);
+        # pin it to zero so a held lock fails fast instead of sleeping 5s.
+        for name, value in dict(_seq=0, _admission=threading.Lock(), _admission_wait_s=0.,
             _profiles=['demo_slow'], _default_profile='demo_slow', _deadline=30000,
             _carry_backend='detachable_joint', _carry_query=object(),
             _hover=.10, _clearance=.012, _carry=.16, _retreat=.10).items():
@@ -784,7 +791,9 @@ class TestPickLiftCleanup(unittest.TestCase):
     def drive(self, scene_ok=True, gripper_ok=True, cancel=False, samples=None):
         node = PickServer.__new__(PickServer)
         node._backend_consistent = lambda: (True, '')
-        values = dict(_seq=0, _admission=threading.Lock(),
+        # __new__ fixtures bypass the node's declared bounded wait (default 5.0s);
+        # pin it to zero so a held lock fails fast instead of sleeping 5s.
+        values = dict(_seq=0, _admission=threading.Lock(), _admission_wait_s=0.,
                       _profiles=['demo_slow'], _default_profile='demo_slow',
                       _deadline=30000, _inject=InjectionLifecycle(), _base='world',
                       _size=[0.035] * 3, _hover=0.22, _grasp_dz=0.16, _raise=0.10,

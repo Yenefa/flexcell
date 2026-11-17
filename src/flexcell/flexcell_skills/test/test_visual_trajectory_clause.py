@@ -25,11 +25,48 @@ import pytest
 
 ROOT = Path(__file__).resolve().parents[4]
 EVALUATOR = ROOT / 'benchmark' / 'evaluators' / 'evaluate.py'
-SCRIPT = (ROOT.parent / 'ci-public-window' / 'scripts' /
-          'evobot_visual_vs_truth.py')
 
-pytestmark = pytest.mark.skipif(
-    not EVALUATOR.is_file(), reason='frozen evaluator not present')
+# The pairing tool is an acceptance script, not a package, so it is loaded by
+# path. Two layouts are searched because the card that owns it has lived in two
+# places. WHY THE ORDER: the card was moved INTO this repository, which is what
+# makes this file runnable in a plain checkout and in CI at all; the sibling
+# `ci-public-window` checkout is the maintainer's older layout and is kept only
+# as a fallback, so an existing working copy does not turn red on the day of the
+# move.
+SCRIPT_CANDIDATES = (
+    ROOT / 'setup' / 'acceptance' / 'evobot_visual_capture_20261111' /
+    'scripts' / 'evobot_visual_vs_truth.py',
+    ROOT.parent / 'ci-public-window' / 'scripts' / 'evobot_visual_vs_truth.py',
+)
+
+
+def resolve_script():
+    """The pairing tool this checkout carries, or None when it carries neither.
+
+    WHY THE LOAD IS NOT DONE HERE
+        A module-level load turns a sparse checkout (no `setup/acceptance`) into
+        a FileNotFoundError during collection. That reads as "this test file is
+        broken" instead of "this checkout does not carry the fixture", and it
+        takes the whole collection down with it.
+    """
+    for candidate in SCRIPT_CANDIDATES:
+        if candidate.is_file():
+            return candidate
+    return None
+
+
+SCRIPT = resolve_script()
+
+SCRIPT_MISSING = ('evobot_visual_vs_truth.py is not in this checkout; looked '
+                  'for ' + ' and '.join(str(candidate)
+                                        for candidate in SCRIPT_CANDIDATES))
+
+# Only the evaluator decides whether this file can run at all. The pairing tool
+# is needed by the five cases that call pairing_module(), and that call skips
+# with SCRIPT_MISSING on its own - so a checkout without setup/acceptance still
+# runs the three cases about the evaluator itself instead of skipping them too.
+pytestmark = pytest.mark.skipif(not EVALUATOR.is_file(),
+                                reason='frozen evaluator not present')
 
 
 def evaluator():
@@ -41,6 +78,14 @@ def evaluator():
 
 
 def pairing_module():
+    """Imported on first use, never at collection time.
+
+    A missing tool is a skip with the paths that were searched, not an error:
+    the absence of an acceptance artefact is not a failing assertion in this
+    file's subject (the evaluator's compatibility rules).
+    """
+    if SCRIPT is None:
+        pytest.skip(SCRIPT_MISSING)
     spec = importlib.util.spec_from_file_location('evobot_visual_vs_truth', SCRIPT)
     loaded = importlib.util.module_from_spec(spec)
     sys.modules['evobot_visual_vs_truth'] = loaded

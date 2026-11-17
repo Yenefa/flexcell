@@ -197,6 +197,63 @@ def test_native_contact_uses_physical_parent_plus_fixed_tcp_transform(tmp_path):
     assert native.max_patch_error<1e-12
 
 
+def write_rows(path, rows):
+    path.write_text(''.join(json.dumps(row) + '\n' for row in rows))
+
+
+def physics_row(ns, now):
+    return dict(monotonic_ns=now, sim_ns=ns)
+
+
+def contact_row(ns, now):
+    return dict(monotonic_ns=now, sim_ns=ns,
+                targets={'a': dict(component_present=True, pose=[0., 0., 0.], contacts={})})
+
+
+def test_a_monitor_attaching_to_a_running_stream_skips_history_without_latching_an_error(tmp_path):
+    """The startup race: the adapter joins a stream that is already deep.
+
+    WHY THIS IS THE REGRESSION: the monitor used to replay the whole backlog in
+    one poll and then refuse the rows whose physics frame had already left the
+    window - an error that latches, so fresh() stayed false for ever and the
+    adapter reported "fresh complete measured joints unavailable" with
+    actuator_goals 0. That was two of five real runs.
+
+    A monitor did not observe rows written before it attached, so it neither
+    replays them nor calls them expired: it attaches at the tail and counts the
+    bytes it stepped over, so the gap stays visible instead of becoming an error
+    or a silent skip.
+    """
+    from flexcell_capabilities.contact_trace import WINDOW_FRAMES
+    now = time.monotonic_ns()
+    old = [10_000_000_000 + i * 2_000_000 for i in range(WINDOW_FRAMES * 4)]
+    write_rows(tmp_path/'physics.jsonl', [physics_row(ns, now) for ns in old])
+    write_rows(tmp_path/'contacts.jsonl', [contact_row(ns, now) for ns in old])
+    native = NativeContact(tmp_path, 'a', {})
+    # Both tails step over their own history; the byte counts differ because a
+    # contact row is much larger than a physics row, so only that both are > 0.
+    assert native.physics.skipped_bytes > 0
+    assert native.contacts.skipped_bytes > 0
+    fresh = [10_000_000_000 + len(old) * 2_000_000]
+    write_rows(tmp_path/'physics.jsonl', [physics_row(ns, now) for ns in old + fresh])
+    write_rows(tmp_path/'contacts.jsonl', [contact_row(ns, now) for ns in old + fresh])
+    native.poll()
+    assert native.error is None, native.error
+    assert native.latest['sim_ns'] == fresh[-1] == native.matched_physics['sim_ns']
+    assert len(native.order) == 1
+
+
+def test_a_burst_larger_than_the_backlog_cap_is_refused_not_silently_dropped(tmp_path):
+    from flexcell_capabilities.contact_trace import MAX_BACKLOG_FRAMES
+    now = time.monotonic_ns()
+    native = NativeContact(tmp_path, 'a', {})
+    steps = [10_000_000_000 + i * 2_000_000 for i in range(MAX_BACKLOG_FRAMES + 1)]
+    write_rows(tmp_path/'physics.jsonl', [physics_row(ns, now) for ns in steps])
+    native.poll()
+    assert 'backlog' in native.error
+    assert not native.fresh()
+
+
 def test_native_bootstrap_prefix_is_counted_but_later_expired_steps_refuse(tmp_path):
     native=NativeContact(tmp_path,'a',{});now=time.monotonic_ns()
     def physics(ns):return dict(monotonic_ns=now,sim_ns=ns)
