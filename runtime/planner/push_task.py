@@ -59,7 +59,10 @@ def plan(public,world,capabilities):
     if type(steps) is not int or steps<1 or type(wall) not in (int,float) or not math.isfinite(wall) or wall<=0:
         raise PushTaskRejected('an explicit finite task budget is required')
     motion_budget=min(steps,int(capabilities['motion_budget']))
-    maximum=min(8,motion_budget//13)
+    stage_limit=capabilities.get('push_motion_goal_limit',13) if capabilities['push_backend']=='finger_tcp' else 13
+    if type(stage_limit) is not int or not 1<=stage_limit<=40:
+        raise PushTaskRejected('invalid registered push stage budget')
+    maximum=min(8,motion_budget//stage_limit)
     start=positions[goal['target']];zone=goal['zone'];count=None
     for n in range(1,maximum+1):
         predicted=[start[0]-.03*n,start[1],start[2]]

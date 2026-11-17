@@ -13,6 +13,7 @@ from sensor_msgs.msg import JointState
 from std_msgs.msg import String
 from flexcell_interfaces.action import Observe
 from flexcell_capabilities.contact_geometry import ARM,ContactGeometry,apply
+from flexcell_capabilities.contact_stroke import stroke_checkpoints
 from flexcell_skills.contact_motion import ConstrainedMotion,MotionCanceled,MotionFailed,MotionUnknown
 from flexcell_skills.contact_receipt import ContactReceipt,ReturnedState
 from flexcell_capabilities.contact_trace import NativeContact,fresh_joint_values
@@ -28,6 +29,7 @@ def angles(q):
 
 def execute_contact_push(node,model,native,out,request_id,target,distance_m,
                          preserve_objects,canceled,max_motion_goals):
+    checkpoints=stroke_checkpoints(distance_m,max_motion_goals)
     out.mkdir(exist_ok=False)
     native.end();native.target=target;native.protected={};native.protected_peak=0.
     declared={};protected=native.protected
@@ -168,8 +170,8 @@ def execute_contact_push(node,model,native,out,request_id,target,distance_m,
                 raise MotionFailed('approach displaced the object before the registered stroke')
             q,g=state();line_start=apply(model.frames(q,g)['end_effector_link'],np.asarray(tcp))
             native.begin(reg)
-            for index in range(1,10):
-                travel=min(index*.004,requested+.005)
+            event('STROKE_CHECKPOINTS',distances_m=checkpoints,max_motion_goals=max_motion_goals)
+            for index,travel in enumerate(checkpoints,1):
                 endpoint=line_start+[-travel,0.,0.]
                 move(tcp,endpoint,reg['pitch_rad'],'STROKE')
                 current=observe()

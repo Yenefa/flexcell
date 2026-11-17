@@ -17,6 +17,7 @@ from std_srvs.srv import Trigger
 from flexcell_interfaces.action import ContactPush
 from flexcell_skills.contact_executor import execute_contact_push
 from flexcell_capabilities.contact_geometry import ContactGeometry
+from flexcell_capabilities.contact_stroke import COMPACT_MOTION_GOALS,STANDARD_MOTION_GOALS
 from flexcell_capabilities.contact_trace import NativeContact
 from flexcell_skills.contracts import push
 
@@ -28,7 +29,7 @@ def validate_request(request):
             or not math.isfinite(request.distance_m) or abs(request.distance_m-.03)>1e-12
             or request.motion_profile_id!='demo_veryslow'
             or request.deadline_ms>300000
-            or request.max_motion_goals not in (0,*range(13,41))
+            or request.max_motion_goals not in (0,COMPACT_MOTION_GOALS,*range(STANDARD_MOTION_GOALS,41))
             or len(request.preserve_objects)!=len(set(request.preserve_objects))):
         return 'unsupported goal; validated capability is one30mm world-x stroke'
     return None
@@ -90,10 +91,11 @@ class ContactPushServer(Node):
                 handle,out,done,box,deadline=work
                 try:
                     request=handle.request
+                    limit=min(STANDARD_MOTION_GOALS,request.max_motion_goals or STANDARD_MOTION_GOALS)
                     box['execution']=execute_contact_push(node,model,native,out,request.request_id,
                         request.object_name,request.distance_m,list(request.preserve_objects),
                         lambda:handle.is_cancel_requested or time.monotonic()>=deadline,
-                        min(13,request.max_motion_goals or 13))
+                        limit)
                 except Exception as exc:
                     self._quarantined=True;box['exception']=str(exc)
                 finally:done.set()

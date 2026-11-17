@@ -29,6 +29,7 @@ def main():
     import rclpy
     from rclpy.action import ActionClient
     from rclpy.node import Node
+    from rcl_interfaces.msg import ParameterType
     from rcl_interfaces.srv import GetParameters
     from std_srvs.srv import Trigger
     from rosidl_runtime_py.convert import message_to_ordereddict
@@ -60,9 +61,14 @@ def main():
         params=node.create_client(GetParameters,'/task_fsm_server/get_parameters')
         if not params.wait_for_service(timeout_sec=15.) or not runtime.wait_for_server(timeout_sec=15.):
             raise RuntimeError('Runtime task executor unavailable')
-        request=GetParameters.Request();request.names=['push_backend','contact_task_motion_budget','contact_task_wall_s']
+        request=GetParameters.Request();request.names=['push_backend','contact_task_motion_budget','contact_task_wall_s',
+                                                       'contact_push_motion_goal_limit']
         values=wait(params.call_async(request),5.).values
         capabilities=dict(push_backend=values[0].string_value,motion_budget=values[1].integer_value,wall_s=values[2].double_value)
+        if values[3].type == ParameterType.PARAMETER_INTEGER:
+            capabilities['push_motion_goal_limit']=values[3].integer_value
+        elif values[3].type != ParameterType.PARAMETER_NOT_SET:
+            raise RuntimeError('contact push stage budget is not an integer')
         if capabilities['push_backend']!=args.backend:raise RuntimeError('registered executor backend differs from requested experiment')
         if args.backend=='finger_tcp':
             ready=node.create_client(Trigger,'/contact_push/ready')

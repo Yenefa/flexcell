@@ -39,6 +39,46 @@ def test_private_task_keys_are_rejected_before_planning():
     with pytest.raises(LeakError):plan(task,world,cap)
 
 
+def test_registered_compact_budget_admits_three_stages_at_thirty_goals():
+    task, world, cap = inputs()
+    world['objects'][0]['pose']['position'].update(x=.235,y=.025)
+    task['zones'][0].update(pose=[.105,.025,.0175],radius=.06)
+    task['execution_budget']['max_steps'] = 30
+    with pytest.raises(PushTaskRejected,match='budget'):
+        plan(task,world,cap)
+    cap['push_motion_goal_limit'] = 10
+    recipe, _, budget = plan(task,world,cap)
+    assert len(recipe['stages']) == 3 and budget['max_motion_goals'] == 30
+    task['execution_budget']['max_steps'] = 29
+    with pytest.raises(PushTaskRejected,match='budget'):
+        plan(task,world,cap)
+
+
+def test_compact_cap_is_requested_and_charged_by_the_existing_owner():
+    from flexcell_interfaces.action import ContactPush
+    from flexcell_skills.contact_push_server import validate_request
+    from flexcell_skills.task_fsm_server import TaskFsmServer
+    from flexcell_skills.contracts.composite import CompositeError
+
+    server=TaskFsmServer.__new__(TaskFsmServer);server._contact_type=ContactPush
+    server._contact_remaining=10;server._contact_goal_limit=10;server._contact_wall=600.
+    server._cli_contact=Mock()
+    def reply(client, request, *_args, **_kwargs):
+        assert validate_request(request) is None and request.max_motion_goals==10
+        return NS(motion_goals_used=9,motion_terminal_known=True),None
+    server._demo_call=Mock(side_effect=reply)
+    stage=dict(stage_id='one',object_name='red',direction=[-1.,0.,0.],distance_m=.03)
+    parent=dict(initial_objects={'red':[.235,.025,.0175]},motion_profile_id='demo_veryslow')
+    # Stub the existing result converter: this test covers the owner boundary.
+    from unittest.mock import patch
+    with patch('flexcell_skills.task_fsm_server.contact_push_result'):
+        server._native_contact_push(stage,'a'*32,NS(run_id='parent'),NS(),time.monotonic(),parent,[])
+    assert server._contact_remaining==1
+    with pytest.raises(CompositeError,match='budget exhausted'):
+        server._native_contact_push(stage,'a'*32,NS(run_id='parent'),NS(),time.monotonic(),parent,[])
+    assert server._demo_call.call_count==1
+
+
 def test_another_colour_identity_and_zone_are_not_hardcoded():
     task,world,cap=inputs()
     task['instruction']='Push the blue block into the marked zone. Do not move the red block.'

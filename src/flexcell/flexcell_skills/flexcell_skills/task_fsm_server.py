@@ -37,6 +37,7 @@ from rclpy.node import Node
 from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
 
 from geometry_msgs.msg import PoseStamped
+from rcl_interfaces.msg import ParameterDescriptor
 from std_msgs.msg import String as StringMsg
 from std_srvs.srv import Trigger
 
@@ -47,6 +48,7 @@ from flexcell_interfaces.action import (
 from flexcell_interfaces.msg import ZoneState
 
 from flexcell_skills.common import JsonlLog, crash_detail, new_evidence
+from flexcell_capabilities.contact_stroke import COMPACT_MOTION_GOALS, STANDARD_MOTION_GOALS
 from flexcell_skills.task_components.push_results import contact_push_result, legacy_push_result
 from flexcell_skills.skill_contract import (
     check_pick, check_place, check_verify)
@@ -147,6 +149,8 @@ class TaskFsmServer(Node):
         self.declare_parameter('push_backend','legacy')
         self.declare_parameter('contact_push_action','/contact_push')
         self.declare_parameter('contact_task_motion_budget',40)
+        self.declare_parameter('contact_push_motion_goal_limit', STANDARD_MOTION_GOALS,
+                               ParameterDescriptor(read_only=True))
         self.declare_parameter('contact_task_wall_s',600.)
         self.declare_parameter('default_place_tolerance_m', 0.05)
         self.declare_parameter('skill_wait_s', 90.0)
@@ -172,6 +176,9 @@ class TaskFsmServer(Node):
             self._cli_contact=ActionClient(self,ContactPush,gp('contact_push_action').value,
                                            callback_group=ReentrantCallbackGroup())
         self._contact_budget=int(gp('contact_task_motion_budget').value)
+        self._contact_goal_limit=gp('contact_push_motion_goal_limit').value
+        if self._contact_goal_limit not in (STANDARD_MOTION_GOALS, COMPACT_MOTION_GOALS):
+            raise ValueError('unsupported contact push motion goal limit')
         self._contact_wall=float(gp('contact_task_wall_s').value)
         if not 1<=self._contact_budget<=40 or not 0<self._contact_wall<=600.:
             raise ValueError('contact task budgets exceed the development capability')
@@ -867,10 +874,11 @@ class TaskFsmServer(Node):
         request.distance_m=float(stage['distance_m']);request.motion_profile_id=plan['motion_profile_id']
         request.preserve_objects=sorted(set(plan['initial_objects'])-{request.object_name})
         remaining_wall=self._contact_wall-(time.monotonic()-started)
-        if self._contact_remaining<13 or remaining_wall<=0:
+        limit=getattr(self,'_contact_goal_limit',STANDARD_MOTION_GOALS)
+        if self._contact_remaining<limit or remaining_wall<=0:
             raise CompositeError(62,'executor contact task budget exhausted before dispatch')
         wait=min(300.,remaining_wall);request.deadline_ms=max(1,int(wait*1000))
-        request.max_motion_goals=min(13,self._contact_remaining)
+        request.max_motion_goals=limit
         view=ComponentGoal(goal_handle,request,goal_uuid,stage['stage_id'],started,len(progress))
         try:
             reply,error=self._demo_call(self._cli_contact,request,'CONTACT_'+stage['stage_id'],view,
