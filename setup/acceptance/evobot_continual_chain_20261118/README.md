@@ -60,17 +60,21 @@ capability is what makes that visible instead of leaving it to an audit.
    it. Note: nothing in this batch made a run worse, so the transition is demonstrated on
    a **copy** with a synthetic WORSE event; the real store is untouched.
 
-11. **entry generation** — the first entry is not written in the demo script; it is
-   produced by `postmortem.py` from 51 archived failures. The generator emitted one entry
-   (`occupied_destination`, 5 occurrences) and **refused** the largest cluster
-   (`unconfirmed_native`, 46 occurrences) as UNROUTED: this stack has no callable function
-   that resumes from a measured state, so the knowledge has nowhere to act.
+11. **entry generation** — the harness entry is not written in the demo script; it is
+   produced by `postmortem.py` from the archived HARNESS-layer failures. The generator
+   emits `harness_dds_exhaustion` (5 occurrences, development split) and **refuses** the
+   largest cluster (`unconfirmed_native`, 31 occurrences) as UNROUTED: this stack has no
+   callable function that resumes from a measured state.
+12. **harness delivery is measurable.** It was marked `measurable_offline=False` with the
+   reason "a config change cannot be measured". A config change IS measurable: against the
+   archived before/after batch pair (harness failures 2/7 → 0/7) and against the live
+   contract (participant pool 120 ≥ 6 launch nodes).
 
-`verify.py` asserts **40 checks**, including that both gates really ran, that the asset
+`verify.py` asserts **44 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
-without a named reviewer**, and that **every entry declares which split its evidence came
-from** — with the dev split tried first and reported as producing nothing.
+without a named reviewer**, that **every entry declares which split its evidence came
+from**, that **two distinct consumers act**, and that the ACTIVE set spans **both splits**.
 
 ---
 
@@ -95,19 +99,26 @@ It touches no evaluator, tolerance, threshold or held-out answer. 11/11
 
 ## Honest limits (do not quote past these)
 
-0. **THE EVIDENCE IS HELD-OUT, SO THIS IS NOT A GENERALIZATION RESULT.** Every entry in
-   this batch — both hand-written ones and the generated one — reads
-   `HO-90899d657e68`, which lives in `benchmark/held_out/unseen_public`. The T12/T13 task
-   families exist **only** in the held-out set; `benchmark/tasks/train` and `.../val`
-   contain T01–T06 and no T13 at all. So there is no development-split T13 to learn from,
-   and the chain learned from the set it would be measured on. It demonstrates a
-   **mechanism**; it does not show that the agent generalizes. Every entry carries
-   `evidence.evidence_split == "held_out"` and the verifier asserts it.
+0. **TWO SPLITS, AND ONLY ONE OF THEM SUPPORTS A GENERALIZATION CLAIM.** Three entries
+   are in the store: two spacing entries read `HO-90899d657e68` from
+   `benchmark/held_out/unseen_public` (the T12/T13 families exist **only** in the
+   held-out set), and one harness/DDS entry reads `evobot_t05_*`, which runs **train**
+   seeds s1000–s1005. Every entry carries `evidence.evidence_split` and the verifier
+   asserts both splits are represented.
 
-   The generator now refuses held-out evidence by default (two independent rules: the
+   The harness entry is the first one learned from **development** evidence, and it was
+   only found once the scan stopped reading `task*.out` alone: a run whose stack never
+   started leaves no task.out, so five archived HARNESS-layer failures — the whole DDS
+   participant lesson — were invisible to it. Reading `summary.txt` and then each run's
+   `stack.log` (for the cause, not the label "stack unavailable") is what opened the
+   development split at all.
+
+   The generator refuses held-out evidence by default under two independent rules: the
    batch's `evidence_index` rung says "Generalization Tested", and the run cites an
-   instance in the current sealed set). Its honest dev-split output is **zero entries**,
-   and the report says so.
+   instance in the current sealed set.
+
+   **Still not shown: cross-split transfer.** Nothing here learns on development and is
+   measured on held-out.
 1. The review artifact is written by a **separate step of the same run**, not by an
    outside reviewer. The schema forbids an AGENT_GENERATED entry from carrying its own
    ACCEPT, but a machine step is still not a person.
@@ -115,8 +126,10 @@ It touches no evaluator, tolerance, threshold or held-out answer. 11/11
    Gazebo window and no real robot run were made this round.
 3. The **planner consumer is not measurable offline**: a prompt-level delivery needs a
    model call. It is reported `UNMEASURED`, never scored as no-effect.
-4. The entry that is ACTIVE here is about **one** task family (T13). Nothing in this
-   batch shows transfer to a different task type.
+4. The spacing entries are about **one** task family (T13); the harness entry is about the
+   T05 relay stack. Nothing in this batch shows transfer to a different task type, and
+   **nothing learns on the development split and is measured on held-out** — the two
+   active entries are independent, not a transfer result.
 5. `used_helpful` means: applied once, measured once, expectation met on the archive.
    It is not a success rate, and n=1.
 6. The regression gate runs a **pinned two-verifier subset** per consumer, not all 109.
@@ -127,8 +140,8 @@ It touches no evaluator, tolerance, threshold or held-out answer. 11/11
 8. **RETIRE has never fired on real evidence.** No run in this batch made anything worse,
    so the transition is shown on a copy with a synthetic WORSE outcome. A retirement
    driven by a real regression is still missing.
-9. The misuse probes cover the spacing and respread consumers only (6 probes). The
-   harness and development consumers have none, so their entries would report UNPROBED.
+9. The misuse probes cover the spacing, respread and harness consumers (7 probes). The
+   `development` has none, so its entries would report UNPROBED.
 10. **Entry generation is automatic but narrow.** The generator reads archived failures
     and emits candidates, but the signature→consumer mapping table is hand-maintained,
     and 46 of 51 archived failures fall outside it (UNROUTED, honestly reported rather

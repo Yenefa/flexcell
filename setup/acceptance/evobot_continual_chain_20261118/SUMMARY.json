@@ -4,7 +4,7 @@
     "refused": {
       "unconfirmed_native": "UNROUTED: no consumer in this stack declares a change for 'unconfirmed_native', so the knowledge would be stored and unable to act"
     },
-    "scanned": 51
+    "scanned": 36
   },
   "honest_limits": [
     "the review artifact is written by a separate step of the same run, not by an outside reviewer; a real round needs the latter",
@@ -12,8 +12,9 @@
     "the planner consumer is not measurable offline; a prompt-level delivery is reported UNMEASURED rather than scored as no-effect"
   ],
   "measured_result": {
+    "E1": "NO_CHANGE",
     "E2": "CHANGED",
-    "auto-occupied_destination": "NO_CHANGE"
+    "auto-harness_dds_exhaustion": "CHANGED"
   },
   "ran_at": "2026-11-18",
   "record_kind": "EVOBOT_CONTINUAL_CHAIN_DEMO",
@@ -24,20 +25,26 @@
       "step": "measured_failure"
     },
     {
-      "dev_split_produced": 0,
+      "dev_split_produced": 1,
       "generated_from_archive": 1,
       "generator_refused": [
         "unconfirmed_native"
       ],
-      "generator_split": "held_out",
+      "generator_split": "dev",
       "labels": [
-        "auto-occupied_destination",
+        "auto-harness_dds_exhaustion",
+        "E1",
         "E2"
       ],
       "routes": [
         {
+          "consumer": "harness",
+          "label": "auto-harness_dds_exhaustion",
+          "why": "routed by declared capability (harness_config -> harness)"
+        },
+        {
           "consumer": "spread_policy",
-          "label": "auto-occupied_destination",
+          "label": "E1",
           "why": "routed by declared capability (landing_spacing -> spread_policy)"
         },
         {
@@ -50,18 +57,21 @@
     },
     {
       "changed": {
+        "E1": false,
         "E2": true,
-        "auto-occupied_destination": false
+        "auto-harness_dds_exhaustion": true
       },
       "step": "effect_probe",
       "verdicts": {
+        "E1": "NO_CHANGE",
         "E2": "CHANGED",
-        "auto-occupied_destination": "NO_CHANGE"
+        "auto-harness_dds_exhaustion": "CHANGED"
       }
     },
     {
       "conflict": "CONFLICT",
       "decisions": [
+        "ADD",
         "ADD",
         "ADD"
       ],
@@ -69,68 +79,102 @@
       "step": "curation"
     },
     {
-      "consumer": "spread_policy",
+      "consumer": "harness",
       "kept": 0,
-      "refused": 2,
+      "refused": 3,
       "step": "retrieval_before_review"
     },
     {
       "activated": {
+        "E1": {
+          "active": "079cffb6c94ed568aa10126eeb3968c1be84c1561f73df843c589a331572a8c0",
+          "candidate": "9f0cdfc6e48a7f3f1f15c618558451fe1b1f83f958a596b44d7f86a90092d89c",
+          "status": "REJECTED",
+          "verdict": "REJECT"
+        },
         "E2": {
           "active": "1991c46dd4466cbe3677f9edc4624019c8eaf5266fe5c7a26a4de626a4899fbd",
           "candidate": "90584f210021cc67eb05f8ba08a366aa014cf072781a4e3ee660e06f34eaa8b0",
           "status": "ACTIVE",
           "verdict": "ACCEPT"
         },
-        "auto-occupied_destination": {
-          "active": "1c0588a065fc7d01b6c3f8985b8d97935f6cf306e0f302734b704a06c64bc4f6",
-          "candidate": "026e9b6f416d9e46ea1573595a1e1ed56f0a45a756b27f962a9478cd517b57ae",
-          "status": "REJECTED",
-          "verdict": "REJECT"
+        "auto-harness_dds_exhaustion": {
+          "active": "a696e42ddd7fcdf34b1f1164a96ca7dd907b3572a137048ba3c3a728cd3096ee",
+          "candidate": "ecac643b2454caeddc73076f30eae4aafbc8862ce22f22ce7479b11995048fcf",
+          "status": "ACTIVE",
+          "verdict": "ACCEPT"
         }
       },
       "step": "activated"
     },
     {
       "by_label": {
+        "E1": {
+          "consumer": "spread_policy",
+          "kept": [],
+          "refused_count": 6
+        },
         "E2": {
           "consumer": "executor_recovery",
           "kept": [
             "1991c46dd4466cbe3677f9edc4624019c8eaf5266fe5c7a26a4de626a4899fbd"
           ],
-          "refused_count": 3
+          "refused_count": 5
         },
-        "auto-occupied_destination": {
-          "consumer": "spread_policy",
-          "kept": [],
-          "refused_count": 4
+        "auto-harness_dds_exhaustion": {
+          "consumer": "harness",
+          "kept": [
+            "a696e42ddd7fcdf34b1f1164a96ca7dd907b3572a137048ba3c3a728cd3096ee"
+          ],
+          "refused_count": 5
         }
       },
       "step": "retrieval_after_review"
     },
     {
       "by_label": {
+        "E1": {
+          "delta": {
+            "applied_min_clearance_m": 0.06003332407921455,
+            "applied_min_separation_m": 0.055999999999999994,
+            "applied_sha": "0ae97180f0d2af48",
+            "baseline_min_clearance_m": 0.06003332407921455,
+            "baseline_min_separation_m": 0.055999999999999994,
+            "baseline_sha": "0ae97180f0d2af48",
+            "changed": false,
+            "operator": "spread_step",
+            "verdict": "NO_CHANGE"
+          },
+          "effect_state": "never_used",
+          "entry_id": "079cffb6c94ed568aa10126eeb3968c1be84c1561f73df843c589a331572a8c0"
+        },
         "E2": {
           "delta": {
             "applied_min_clearance_m": 0.08139410298049855,
             "applied_min_separation_m": 0.09000000000000001,
+            "applied_sha": "298aaa92866ca081",
             "baseline_min_clearance_m": 0.06003332407921455,
             "baseline_min_separation_m": 0.055999999999999994,
-            "changed": true
+            "baseline_sha": "0ae97180f0d2af48",
+            "changed": true,
+            "operator": "respread_apply",
+            "verdict": "CHANGED"
           },
           "effect_state": "used_helpful",
           "entry_id": "1991c46dd4466cbe3677f9edc4624019c8eaf5266fe5c7a26a4de626a4899fbd"
         },
-        "auto-occupied_destination": {
+        "auto-harness_dds_exhaustion": {
           "delta": {
-            "applied_min_clearance_m": 0.06003332407921455,
-            "applied_min_separation_m": 0.055999999999999994,
-            "baseline_min_clearance_m": 0.06003332407921455,
-            "baseline_min_separation_m": 0.055999999999999994,
-            "changed": false
+            "applied_harness_failures": 0,
+            "applied_sha": "20f580d0937f25e8",
+            "baseline_harness_failures": 2,
+            "baseline_sha": "5f2f4dd73ef44d3c",
+            "changed": true,
+            "operator": "harness_capacity",
+            "verdict": "CHANGED"
           },
-          "effect_state": "never_used",
-          "entry_id": "1c0588a065fc7d01b6c3f8985b8d97935f6cf306e0f302734b704a06c64bc4f6"
+          "effect_state": "used_helpful",
+          "entry_id": "a696e42ddd7fcdf34b1f1164a96ca7dd907b3572a137048ba3c3a728cd3096ee"
         }
       },
       "step": "applied_and_outcome"
@@ -152,12 +196,21 @@
           "code_generated": false,
           "compiled": true,
           "guard_count": 3
+        },
+        "auto-harness_dds_exhaustion": {
+          "compiled": false,
+          "why": "consumer 'harness' has no callable binding: this stack has no function that could execute its change"
         }
       },
       "step": "skill_assets"
     },
     {
       "decisions": [
+        {
+          "decision": "KEEP",
+          "effect": "used_helpful",
+          "label": "auto-harness_dds_exhaustion"
+        },
         {
           "decision": "KEEP",
           "effect": "used_helpful",
@@ -172,10 +225,10 @@
             "applied": 2,
             "decision": "RETIRE",
             "effect": "used_harmful",
-            "entry_id": "1991c46dd4466cbe3677f9edc4624019c8eaf5266fe5c7a26a4de626a4899fbd",
+            "entry_id": "a696e42ddd7fcdf34b1f1164a96ca7dd907b3572a137048ba3c3a728cd3096ee",
             "harmful": 1,
             "helpful": 1,
-            "label": "E2",
+            "label": "auto-harness_dds_exhaustion",
             "why": "applied 2 time(s) and at least one outcome was WORSE"
           }
         ],
@@ -183,17 +236,17 @@
         "parent_linked": true,
         "ran": true,
         "retired": true,
-        "retired_entry_id": "f6744d0e3093344423e2780bdd0aec33b2e7defe71fbfd6c1fde660f59981e30",
+        "retired_entry_id": "2430257bcdb46480e9150ba344b880a189a1fcb7b3c24569d306dcde90d9ffb3",
         "retired_reason": "applied 2 time(s) and at least one outcome was WORSE",
         "status_after": "RETIRED"
       },
       "step": "lifecycle"
     },
     {
-      "chains": 2,
+      "chains": 3,
       "conflicts": 0,
       "duplicates": 0,
-      "entries": 4,
+      "entries": 6,
       "step": "store_report"
     }
   ],

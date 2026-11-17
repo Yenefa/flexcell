@@ -269,7 +269,11 @@ def run(dest=OUT):
             "dev_split_built": len(dev_entries),
             "split": pm_report["split"],
             "entries": [e["entry_id"] for e in generated]})
-    entries = generated + [entry_executor_side()]
+    # Three deliveries: the generated one (harness, DEV split), plus the hand-written
+    # pair that shows the ADDRESS problem - the same lesson inert at the planner-side
+    # spread() and active at the executor-side respread(). Dropping the inert one would
+    # silently remove the batch's only negative control.
+    entries = generated + [entry_planner_side(), entry_executor_side()]
     routes = []
     for entry in entries:
         consumer, why = consumers.route(entry)
@@ -375,11 +379,14 @@ def run(dest=OUT):
         label = entry["version"]["label"]
         target_id = activated[label]["active"]
         probe = effect.probe(entry)
-        delta = {"baseline_min_separation_m": probe.get("baseline_min_separation_m"),
-                 "applied_min_separation_m": probe.get("applied_min_separation_m"),
-                 "baseline_min_clearance_m": probe.get("baseline_min_clearance_m"),
-                 "applied_min_clearance_m": probe.get("applied_min_clearance_m"),
-                 "changed": probe.get("changed")}
+        # Copy the operator's OWN numeric read-out rather than a fixed set of spacing
+        # fields. The hand-written list emitted four nulls for the harness entry, which
+        # reads as "the effect was measured and nothing moved" when the measurement was
+        # simply of a different kind.
+        delta = {k: v for k, v in probe.items()
+                 if (k.startswith("baseline_") or k.startswith("applied_")
+                     or k in ("changed", "verdict", "operator"))}
+        delta.setdefault("changed", probe.get("changed"))
         if activated[label]["status"] == "ACTIVE":
             ledger.append(ledger_path, target_id, "APPLIED", run_id="chain-demo",
                           consumer=routes[[r["label"] for r in routes].index(label)]["consumer"],

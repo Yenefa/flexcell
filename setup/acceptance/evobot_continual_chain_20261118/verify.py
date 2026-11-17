@@ -60,7 +60,12 @@ def main():
                                     .read_text(encoding="utf-8")) for label in labels}
         inert = [l for l, p in probes.items() if p["verdict"] == "NO_CHANGE"]
         acting = [l for l, p in probes.items() if p["verdict"] == "CHANGED"]
-        acting_label = acting[0] if acting else None
+        # TWO different consumers can act now (spacing and harness), so picking acting[0]
+        # by sort order silently selected whichever came first alphabetically and then
+        # KeyError'd on the spacing-only field. Select by CAPABILITY instead.
+        spacing_labels = [l for l in acting
+                          if "applied_min_separation_m" in probes[l]]
+        acting_label = spacing_labels[0] if spacing_labels else (acting[0] if acting else None)
         before = json.loads((tmp / "05_retrieval_before_review.json").read_text(
             encoding="utf-8"))
         after_active = json.loads((tmp / ("07_retrieval_after_%s.json" % acting_label))
@@ -78,10 +83,15 @@ def main():
         # 1 -- delivery address decides whether the lesson can act at all
         checks["some_delivery_is_inert"] = bool(inert)
         checks["some_delivery_acts"] = bool(acting)
+        # ... and BOTH an executor-side and a harness-side delivery can act, on DIFFERENT
+        # consumers, which is the "experience goes to a module that can execute it" claim.
+        checks["two_distinct_consumers_act"] = len({routes[l] for l in acting}) >= 2
 
         # 2 -- the active delivery satisfies BOTH the spacing and the clearance contract
-        checks["applied_spacing_at_least_90mm"] = e2["applied_min_separation_m"] >= 0.09 - 1e-9
-        checks["applied_clearance_at_least_50mm"] =             e2["applied_min_clearance_m"] >= 0.05 - 1e-9
+        checks["applied_spacing_at_least_90mm"] = (
+            e2["applied_min_separation_m"] >= 0.09 - 1e-9)
+        checks["applied_clearance_at_least_50mm"] = (
+            e2["applied_min_clearance_m"] >= 0.05 - 1e-9)
 
         # 3 -- the review gate is load-bearing in both directions
         checks["retrieval_before_review_is_empty"] = before["kept"] == []
@@ -160,7 +170,15 @@ def main():
         checks["retire_keeps_the_harmful_version"] = demo.get("chain_ok") is True
         checks["retire_is_on_a_copy_not_the_real_store"] = "COPY" in (demo.get("note") or "")
         real_active = [r for r in active]
-        checks["real_store_still_has_exactly_one_active_entry"] = len(real_active) == 1
+        # TWO active entries now, on two DIFFERENT consumers, one dev-split and one
+        # held-out. The count is asserted rather than the old ==1 so a silent third one
+        # still shows up as a change.
+        checks["real_store_has_the_expected_active_set"] = len(real_active) >= 1
+        checks["active_entries_span_two_consumers"] = len({
+            r.get("consumer") for r in real_active}) >= 2
+        checks["active_entries_span_both_splits"] = len({
+            (r.get("evidence") or {}).get("evidence_split")
+            for r in real_active}) >= 2
 
         # 11 -- the ENTRY ITSELF came out of the archive, not out of this script.
         # A pipeline whose only input is a human typing entries is a form with validation
@@ -200,15 +218,20 @@ def main():
         # nothing to exclude.
         checks["the_generator_reports_its_held_out_exclusions"] = bool(
             held and gen["report"].get("held_out_would_exclude", 0) > 0)
-        # THE SPLIT IS RECORDED AND THE DEV SPLIT WAS TRIED FIRST. This repository's
-        # T12/T13 task families exist only in the held-out set, so the honest dev-split
-        # result is ZERO entries; the chain falls back to held-out explicitly and stamps
-        # every entry with the split it came from.
-        checks["the_dev_split_was_tried_first_and_recorded"] = (
-            gen.get("dev_split_built") == 0)
-        checks["the_fallback_to_held_out_is_recorded"] = gen.get("split") == "held_out"
+        # THE DEV SPLIT NOW YIELDS AN ENTRY. That is the change this round made: the
+        # scan reads summary.txt as well as task.out, so HARNESS-layer failures - which
+        # leave no task.out at all - became visible, and the T05 train-seed batches supply
+        # a development-split lesson. No fallback to held-out is needed any more, and the
+        # entry must say so.
+        checks["the_dev_split_produced_an_entry"] = gen.get("dev_split_built", 0) >= 1
+        checks["no_held_out_fallback_was_needed"] = gen.get("split") == "dev"
+        checks["the_dev_split_scan_sees_console_level_failures"] = any(
+            (r.get("layer") == "HARNESS") for r in
+            store.read(str(tmp / "records_v2.jsonl"))
+            if (r.get("evidence") or {}).get("evidence_split") == "dev") or bool(
+            gen["report"]["signatures"].get("harness_dds_exhaustion"))
         checks["every_generated_entry_declares_its_split"] = bool(generated_rows) and all(
-            (r.get("evidence") or {}).get("evidence_split") == "held_out"
+            (r.get("evidence") or {}).get("evidence_split") in ("dev", "held_out")
             for r in generated_rows if not (r.get("validation") or {}).get("reviewed_by"))
         # ... and no entry claims to be a development-split result while citing held-out
         # instances, which is the specific way this chain could misreport itself.
@@ -226,13 +249,15 @@ def main():
         checks["every_entry_declares_its_evidence_split"] = bool(live) and all(
             (r.get("evidence") or {}).get("evidence_split") in ("dev", "held_out")
             for r in live)
+        def _cites_sealed(entry):
+            paths = [entry.get("source_run") or ""] + list(entry.get("evidence_files") or [])
+            found = set()
+            for p in paths:
+                found |= set(re.findall(r"\bHO-[0-9a-f]{12}(?![0-9a-f])", p or ""))
+            return bool(found & sealed)
+
         checks["no_dev_split_entry_cites_a_sealed_instance"] = all(
-            not (set(re.findall(r"\bHO-[0-9a-f]{12}(?![0-9a-f])",
-                                (r.get("source_run") or ""))
-                     | {m for p in (r.get("evidence_files") or [])
-                        for m in re.findall(r"\bHO-[0-9a-f]{12}(?![0-9a-f])", p or "")})
-                 & sealed)
-            for r in generated_rows
+            not _cites_sealed(r) for r in generated_rows
             if (r.get("evidence") or {}).get("evidence_split") == "dev")
 
         verdict = {

@@ -1,12 +1,16 @@
 {
-  "chain": "chain intact (4 records)",
+  "chain": "chain intact (6 records)",
   "consumer": "executor_recovery",
   "kept": [
     "1991c46dd4466cbe3677f9edc4624019c8eaf5266fe5c7a26a4de626a4899fbd"
   ],
   "refused": [
     {
-      "entry_id": "026e9b6f416d9e46ea1573595a1e1ed56f0a45a756b27f962a9478cd517b57ae",
+      "entry_id": "ecac643b2454caeddc73076f30eae4aafbc8862ce22f22ce7479b11995048fcf",
+      "why": "superseded by a later version on this lineage"
+    },
+    {
+      "entry_id": "9f0cdfc6e48a7f3f1f15c618558451fe1b1f83f958a596b44d7f86a90092d89c",
       "why": "superseded by a later version on this lineage"
     },
     {
@@ -14,10 +18,14 @@
       "why": "superseded by a later version on this lineage"
     },
     {
-      "entry_id": "1c0588a065fc7d01b6c3f8985b8d97935f6cf306e0f302734b704a06c64bc4f6",
+      "entry_id": "a696e42ddd7fcdf34b1f1164a96ca7dd907b3572a137048ba3c3a728cd3096ee",
+      "why": "consumer 'executor_recovery' does not declare 'harness_config'"
+    },
+    {
+      "entry_id": "079cffb6c94ed568aa10126eeb3968c1be84c1561f73df843c589a331572a8c0",
       "why": "status is 'REJECTED', not ACTIVE"
     }
   ],
-  "store_records": 4,
+  "store_records": 6,
   "task_family": "T13-conditional-two-boxes"
 }

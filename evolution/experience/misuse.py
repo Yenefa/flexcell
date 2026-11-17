@@ -175,7 +175,46 @@ def probe_narrow_bin_respread(params):
     return _classify(run)
 
 
+def probe_capacity_already_sufficient(params):
+    """The pool is already larger than the node count: raising it changes nothing."""
+    ef = __import__("effect")
+    want = params.get("participant_capacity")
+    nodes = ef._count_launch_nodes(ef.FIXTURES["t05_dds_harness"]["launch"])
+    live = params.get("live_capacity")
+    if live is None:
+        import re
+        with open(os.path.join(WT, ef.FIXTURES["t05_dds_harness"]["config"]),
+                  encoding="utf-8") as fh:
+            m = re.search(r"<MaxAutoParticipantIndex>(\d+)</MaxAutoParticipantIndex>",
+                          fh.read())
+            live = int(m.group(1)) if m else 0
+    if want is None or live >= nodes:
+        return "INERT", ("pool %r already covers %d node(s); the lesson has nothing to do"
+                         % (live, nodes))
+    return "APPLIED", "pool rose from %r to %r" % (live, want)
+
+
+def probe_capacity_removed(params):
+    """The config declares NO participant pool at all: the lesson must not pretend to fix it."""
+    ef = __import__("effect")
+
+    class _NoConfig(OSError):
+        pass
+
+    try:
+        live = params.get("live_capacity")
+        if live is None:
+            return "REFUSED", "no live capacity to compare against"
+        if live <= 0:
+            return "REFUSED", "config declares no MaxAutoParticipantIndex"
+        return "APPLIED", "a pool is declared (%r)" % (live,)
+    except _NoConfig as exc:  # pragma: no cover - defensive
+        return "REFUSED", str(exc)
+
+
 PROBES = {
+    "harness.capacity_already_sufficient": probe_capacity_already_sufficient,
+    "harness.capacity_removed": probe_capacity_removed,
     "spread.single_stage": probe_single_stage,
     "spread.three_in_one_bin": probe_three_in_one_bin,
     "spread.narrow_bin": probe_narrow_bin,

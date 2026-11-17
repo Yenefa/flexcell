@@ -56,7 +56,13 @@ CONSUMERS = {
         "entrypoint": "config/cyclonedds.xml",
         "symbol": "MaxAutoParticipantIndex",
         "delivery": "config",
-        "measurable_offline": False,
+        # MEASURABLE, and it took a change of method to see that. A config change cannot be
+        # measured by "run the robot and watch", which is what measurable_offline=False
+        # was really saying. It CAN be measured against the archived before/after batch
+        # pair that the lesson came from, plus a live check that the pool still exceeds
+        # the node count the launch starts. Reporting UNMEASURED here was the prober
+        # declaring its own limitation as the consumer's property.
+        "measurable_offline": True,
     },
     "development": {
         "action_kinds": ("development",),

@@ -63,9 +63,23 @@ FIXTURES = {
                 "move the world",
         "committed_stage_ids": [],
     },
+    # THE FIRST DEVELOPMENT-SPLIT FIXTURE in this package. Every other fixture reads a
+    # held-out instance, because the T12/T13 families exist only there. This one does not:
+    # evobot_t05_* runs T05 train seeds (s1000-s1005 are benchmark/tasks/train), which is
+    # why the DDS lesson can be learned from development evidence and still be real.
+    "t05_dds_harness": {
+        "before_batch": "setup/acceptance/evobot_t05_n6_20261111",
+        "after_batch": "setup/acceptance/evobot_t05_n6_clean_20261111",
+        "config": "config/cyclonedds.xml",
+        "launch": "src/flexcell/flexcell_skills/launch/trusted_sim.launch.py",
+        "what": "the T05 n=6 batch where 2 of 6 runs never dispatched because CyloneDDS "
+                "could not allocate a participant, and the next batch after the pool was "
+                "raised where 6 of 6 dispatched",
+    },
 }
 
-OPERATORS = ("spread_step", "respread_apply", "recovery_action", "none")
+OPERATORS = ("spread_step", "respread_apply", "recovery_action",
+             "harness_capacity", "none")
 
 
 def _digest(obj):
@@ -183,6 +197,70 @@ def _run_recovery(plan, params, evidence):
     return baseline, applied, {"failure_class": target_class, "action": new_action}
 
 
+def _count_harness_failures(batch_dir):
+    """Count rows whose layer is HARNESS in an archived batch's summary.txt.
+
+    HARNESS is a LAYER, not an error code: those runs never dispatched a task at all, so
+    they carry no task.out and no error_code. Counting them by error code would report
+    zero and make the DDS bug invisible - which is exactly how it stayed undiagnosed for
+    two rounds while it was being blamed on "Gazebo instability".
+    """
+    import glob as _glob
+    total, harness = 0, 0
+    for path in _glob.glob(os.path.join(WT, batch_dir, "summary.txt")):
+        for line in open(path, encoding="utf-8", errors="replace"):
+            parts = line.split()
+            if len(parts) < 3 or not parts[0].startswith("s"):
+                continue
+            total += 1
+            if parts[2] == "HARNESS":
+                harness += 1
+    return harness, total
+
+
+def _count_launch_nodes(rel):
+    """Nodes one launch file starts, by counting Node( constructions in the source."""
+    import re
+    with open(os.path.join(WT, rel), encoding="utf-8") as fh:
+        return len(re.findall(r"\bNode\(", fh.read()))
+
+
+def _run_harness(params):
+    """Measure a harness lesson as an ARCHIVED BEFORE/AFTER pair, plus the current contract.
+
+    Two measurements, because either alone can mislead:
+      1. the archived pair - the same seeds, same launch, one batch before the pool was
+         raised and one after. This is the evidence the lesson was learned from, and it is
+         DEVELOPMENT split (T05 train seeds), so it is not circular.
+      2. the live contract - does the config's pool still exceed the number of nodes the
+         launch starts? A past fix proves nothing about today's tree; a later edit could
+         lower the pool and silently reinstate the bug.
+    """
+    spec = FIXTURES["t05_dds_harness"]
+    before_h, before_n = _count_harness_failures(spec["before_batch"])
+    after_h, after_n = _count_harness_failures(spec["after_batch"])
+    nodes = _count_launch_nodes(spec["launch"])
+    capacity = params.get("participant_capacity")
+    with open(os.path.join(WT, spec["config"]), encoding="utf-8") as fh:
+        text = fh.read()
+    import re
+    m = re.search(r"<MaxAutoParticipantIndex>(\d+)</MaxAutoParticipantIndex>", text)
+    live_capacity = int(m.group(1)) if m else 0
+    baseline = {"harness_failures": before_h, "runs": before_n,
+                "capacity": params.get("baseline_capacity", 0),
+                "capacity_covers_nodes": False}
+    applied = {"harness_failures": after_h, "runs": after_n,
+               "capacity": capacity if capacity is not None else live_capacity,
+               "capacity_covers_nodes": (capacity if capacity is not None
+                                         else live_capacity) >= nodes}
+    return baseline, applied, {
+        "before_batch": spec["before_batch"], "after_batch": spec["after_batch"],
+        "before_harness_failures": before_h, "before_runs": before_n,
+        "after_harness_failures": after_h, "after_runs": after_n,
+        "launch_nodes": nodes, "live_capacity": live_capacity,
+    }
+
+
 def probe(entry):
     """Run one entry's effect_spec. Returns a verdict dict; never raises for a bad spec."""
     spec = entry.get("effect_spec") or {}
@@ -208,8 +286,32 @@ def probe(entry):
         out.update(verdict="UNMEASURED", why="no runnable operator in effect_spec")
         return out
 
-    plan = _load(FIXTURES[fixture]["plan"])
     params = spec.get("params") or {}
+    # A harness entry's fixture has NO plan: its evidence is an archived batch PAIR and a
+    # config file. Loading FIXTURES[fixture]["plan"] first would KeyError on exactly the
+    # fixture that proves harness delivery is measurable at all.
+    if operator == "harness_capacity":
+        try:
+            baseline, applied, detail = _run_harness(params)
+        except (ValueError, KeyError, OSError) as exc:
+            out.update(verdict="REFUSED", why="%s: %s" % (type(exc).__name__, exc))
+            return out
+        out["detail"] = detail
+        out["baseline_sha"] = _digest(baseline)[:16]
+        out["applied_sha"] = _digest(applied)[:16]
+        out["changed"] = out["baseline_sha"] != out["applied_sha"]
+        out["verdict"] = "CHANGED" if out["changed"] else "NO_CHANGE"
+        out["baseline_harness_failures"] = detail["before_harness_failures"]
+        out["applied_harness_failures"] = detail["after_harness_failures"]
+        out["launch_nodes"] = detail["launch_nodes"]
+        out["live_capacity"] = detail["live_capacity"]
+        expect = spec.get("expect") or {}
+        out["expectations"] = _check_expectations(expect, out)
+        out["expectations_met"] = (all(out["expectations"].values())
+                                   if out["expectations"] else None)
+        return out
+
+    plan = _load(FIXTURES[fixture]["plan"])
     try:
         if operator == "spread_step":
             baseline, applied, detail = _run_spread(plan, params)

@@ -69,6 +69,32 @@ SIGNATURES = {
         "suggested_action": ("separate same-bin landing points by clearance plus the "
                              "measured landing drift"),
     },
+    "harness_dds_exhaustion": {
+        "action_kind": "harness_config",
+        "consumer": "harness",
+        "failure_class": "tooling",
+        "effect_spec": {"fixture": "t05_dds_harness", "operator": "harness_capacity",
+                        "params": {"participant_capacity": 120, "baseline_capacity": 0},
+                        "expect": {"changed": True,
+                                   "applied_harness_failures_lte": 0}},
+        "applicable_when": [
+            "several ROS processes share one DDS domain on one host",
+            "a run reports it never dispatched, with no task.out at all",
+        ],
+        "known_invalid_when": [
+            "the participant pool already exceeds the number of nodes the launch starts",
+            "the config declares no participant pool at all",
+        ],
+        "invalid_probes": [
+            {"condition": "the participant pool already exceeds the number of nodes the "
+                          "launch starts",
+             "probe": "harness.capacity_already_sufficient"},
+            {"condition": "the config declares no participant pool at all",
+             "probe": "harness.capacity_removed"},
+        ],
+        "suggested_action": ("raise the DDS participant pool above the number of nodes the "
+                             "launch starts; a failed launch looks like a motion bug"),
+    },
     # unconfirmed_native is deliberately ABSENT.
     #
     # It is the largest cluster in the archive (46 of 51 failures), and the remedy this
@@ -150,6 +176,75 @@ def cites_sealed(path, sealed):
     return bool(set(SEALED_ID.findall(path)) & sealed)
 
 
+def _console_failures(root, excluded_names, sealed):
+    """Failures that never produced a task.out at all, read from summary.txt.
+
+    WHY THIS EXISTS: scan() reads task*.out, so a run whose STACK never started has no
+    task.out and is invisible to it. Five archived runs are like that, and they are the
+    DDS participant-exhaustion lesson - a real defect that cost two rounds of
+    misattribution ("Gazebo is unstable") precisely because the evidence channel that was
+    being scanned could not contain it. A generator that can only see dispatched runs will
+    keep rediscovering motion bugs and never rediscover launch bugs.
+
+    The row shape matches scan() so downstream clustering does not special-case it. The
+    distinguishing field is layer="HARNESS".
+    """
+    out, excluded = [], {}
+    for path in glob.glob(os.path.join(root, "evobot*", "summary.txt")):
+        rel = os.path.relpath(path, root)
+        batch = rel.split(os.sep)[0]
+        if batch in excluded_names:
+            continue
+        for line in open(path, encoding="utf-8", errors="replace"):
+            parts = line.split()
+            if len(parts) < 3 or not parts[0].startswith("s"):
+                continue
+            if parts[2] != "HARNESS":
+                continue
+            seed = parts[0]
+            # The summary row says only "stack unavailable". The CAUSE is in the run's
+            # stack.log, so read it: "the stack did not come up" is not a lesson, and a
+            # generator that stops at the summary would file the DDS bug under "unknown".
+            cause = _stack_log_cause(os.path.join(root, batch, "runs"), seed)
+            detail = "stack never dispatched (%s)" % (cause or "cause not recorded")
+            artifact = rel
+            if cites_sealed(rel, sealed):
+                excluded["%s:sealed_instance" % batch] = excluded.get(
+                    "%s:sealed_instance" % batch, 0) + 1
+                continue
+            out.append({"path": artifact, "batch": batch, "error_code": None,
+                        "layer": "HARNESS", "seed": seed, "detail": detail,
+                        "completed_stage_ids": [], "outcome": None})
+    return out, excluded
+
+
+def _stack_log_cause(runs_dir, seed):
+    """Read a HARNESS run's stack.log and name the cause, or None.
+
+    Refuses to guess. The words it recognises are the ones the runtime actually prints;
+    anything else returns None and is reported as "cause not recorded" rather than being
+    filed under a convenient label.
+    """
+    if not os.path.isdir(runs_dir):
+        return None
+    hits = []
+    for d in sorted(glob.glob(os.path.join(runs_dir, seed + "*"))):
+        log = os.path.join(d, "stack.log")
+        if not os.path.exists(log):
+            continue
+        try:
+            text = open(log, encoding="utf-8", errors="replace").read().lower()
+        except OSError:
+            continue
+        if "participant index" in text or "out of range" in text:
+            hits.append("dds_participant")
+        elif "error" in text:
+            hits.append("stack_error")
+    if not hits:
+        return None
+    return sorted(set(hits))[0]
+
+
 def scan_with_report(acceptance=None, include_held_out=False):
     """Scan, and report exactly which batches were excluded and why.
 
@@ -187,9 +282,16 @@ def scan_with_report(acceptance=None, include_held_out=False):
         out.append({"path": rel,
                     "batch": batch,
                     "error_code": res.get("error_code"),
+                    "layer": "EXECUTION",
                     "detail": str(res.get("detail") or ""),
                     "completed_stage_ids": res.get("completed_stage_ids") or [],
                     "outcome": res.get("outcome")})
+    # Runs whose stack never came up leave no task.out, so they must be collected from a
+    # different channel or they do not exist as far as this generator is concerned.
+    console_rows, console_excluded = _console_failures(root, excluded_names, sealed)
+    out.extend(console_rows)
+    for k, v in console_excluded.items():
+        excluded[k] = excluded.get(k, 0) + v
     return out, excluded
 
 
@@ -201,6 +303,13 @@ def scan(acceptance=None, include_held_out=False):
 def signature_of(failure):
     """An OBSERVABLE signature. Deliberately coarse: it groups what a reader can verify."""
     detail = failure["detail"].lower()
+    # A HARNESS-layer failure is its own kind regardless of wording: the run never
+    # dispatched, so no motion or planning diagnosis applies to it. Grouping it with the
+    # motion rows would let a launch bug be counted as evidence about the executor.
+    if failure.get("layer") == "HARNESS":
+        if "participant" in detail or "domain" in detail or "socket" in detail:
+            return "harness_dds_exhaustion"
+        return "harness_stack_absent"
     if "occupied destination" in detail or "destination occupied" in detail:
         return "occupied_destination"
     if "unconfirmed" in detail or "native terminal" in detail:

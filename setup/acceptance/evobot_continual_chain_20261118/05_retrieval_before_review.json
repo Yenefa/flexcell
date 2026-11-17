@@ -1,10 +1,14 @@
 {
-  "chain": "chain intact (2 records)",
-  "consumer": "spread_policy",
+  "chain": "chain intact (3 records)",
+  "consumer": "harness",
   "kept": [],
   "refused": [
     {
-      "entry_id": "026e9b6f416d9e46ea1573595a1e1ed56f0a45a756b27f962a9478cd517b57ae",
+      "entry_id": "ecac643b2454caeddc73076f30eae4aafbc8862ce22f22ce7479b11995048fcf",
+      "why": "status is 'CANDIDATE', not ACTIVE"
+    },
+    {
+      "entry_id": "9f0cdfc6e48a7f3f1f15c618558451fe1b1f83f958a596b44d7f86a90092d89c",
       "why": "status is 'CANDIDATE', not ACTIVE"
     },
     {
@@ -12,6 +16,6 @@
       "why": "status is 'CANDIDATE', not ACTIVE"
     }
   ],
-  "store_records": 2,
+  "store_records": 3,
   "task_family": "T13-conditional-two-boxes"
 }

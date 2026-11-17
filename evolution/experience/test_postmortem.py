@@ -61,17 +61,48 @@ def test_scan_skips_unparseable_output(tmp_path):
 
 # ---------------------------------------------------------------- generation
 
-def test_the_dev_split_honestly_produces_nothing():
-    """T12/T13 exist ONLY in the held-out set, so the dev split has no lesson to offer.
+def test_the_dev_split_produces_the_harness_lesson():
+    """A development-split lesson exists, but only once console-level failures are read.
 
-    This is the finding, not a regression: reporting zero here is correct, and the first
-    version of this generator only appeared to work because it was quietly reading the
-    held-out measurement batches.
+    The first version of this generator globbed task*.out, so a run whose stack never
+    started - which leaves no task.out - was invisible to it. That blindness is why the
+    dev split looked empty: T12/T13 exist only in held-out, and the only dev-split
+    failures are HARNESS-layer. Reading summary.txt is what opens the dev split.
     """
     entries, report = postmortem.generate()
     assert report["split"] == "dev"
-    assert entries == []
-    assert report["held_out_would_exclude"] > 0
+    labels = {e["version"]["label"] for e in entries}
+    assert "auto-harness_dds_exhaustion" in labels, report
+    for entry in entries:
+        assert entry["evidence"]["evidence_split"] == "dev"
+        assert entry["consumer"] == "harness"
+
+
+def test_console_level_failures_are_scanned_from_summary():
+    """HARNESS rows carry no task.out and no error code; only summary.txt has them."""
+    rows = postmortem.scan()
+    harness = [r for r in rows if r.get("layer") == "HARNESS"]
+    assert harness, "no HARNESS rows found - the summary.txt channel is not being read"
+    for r in harness:
+        assert r["error_code"] is None
+        assert r["detail"].startswith("stack never dispatched")
+
+
+def test_the_stack_log_supplies_the_cause_not_a_guessed_label():
+    """"stack unavailable" is not a lesson; the cause is in the run's stack.log."""
+    rows = postmortem.scan()
+    harness = [r for r in rows if r.get("layer") == "HARNESS"]
+    assert any("dds_participant" in r["detail"] for r in harness), harness
+
+
+def test_a_harness_failure_is_never_grouped_with_motion_failures():
+    """A launch bug counted as evidence about the executor would misdirect the lesson."""
+    assert postmortem.signature_of(
+        {"layer": "HARNESS", "detail": "stack never dispatched (dds_participant)"}
+    ) == "harness_dds_exhaustion"
+    assert postmortem.signature_of(
+        {"layer": "EXECUTION", "detail": "native terminal/verification unconfirmed"}
+    ) == "unconfirmed_native"
 
 
 def test_the_held_out_split_generates_the_entry_and_labels_it():
@@ -166,6 +197,53 @@ def test_a_signature_with_partial_probes_is_not_ready(monkeypatch):
     entry, why = postmortem.build("occupied_destination", [failure(), failure()])
     assert entry is None
     assert "NOT_READY" in why
+
+
+# ---------------------------------------------------------------- the harness consumer
+#
+# The harness consumer was marked measurable_offline=False, which said "a config change
+# cannot be measured". That was the prober declaring its own limitation as the consumer's
+# property. A config change IS measurable: against the archived before/after batch pair it
+# came from, plus a live check that the pool still exceeds the node count.
+
+def test_the_harness_effect_is_measured_not_reported_unmeasured():
+    import effect
+    out = effect.probe({
+        "entry_id": "x", "consumer": "harness",
+        "effect_spec": {"fixture": "t05_dds_harness", "operator": "harness_capacity",
+                        "params": {"participant_capacity": 120,
+                                   "baseline_capacity": 0},
+                        "expect": {"changed": True,
+                                   "applied_harness_failures_lte": 0}}})
+    assert out["verdict"] == "CHANGED", out
+    assert out["baseline_harness_failures"] > 0
+    assert out["applied_harness_failures"] == 0
+    assert out["expectations_met"] is True
+
+
+def test_the_harness_fixture_is_development_split():
+    """Every other fixture reads a held-out instance; this one must not."""
+    import effect
+    spec = effect.FIXTURES["t05_dds_harness"]
+    sealed = postmortem.sealed_instances()
+    for key in ("before_batch", "after_batch", "config", "launch"):
+        assert not postmortem.cites_sealed(spec[key], sealed), key
+
+
+def test_the_harness_entry_is_activated_with_a_misuse_verdict(tmp_path):
+    import curate
+    import store as store_mod
+    entries, _ = postmortem.generate()
+    entry = next(e for e in entries
+                 if e["version"]["label"] == "auto-harness_dds_exhaustion")
+    s, l = tmp_path / "s.jsonl", tmp_path / "l.jsonl"
+    store_mod.append(str(s), entry)
+    succ = curate.activate(entry["entry_id"],
+                           {"review_verdict": "ACCEPT", "reviewed_by": "r"},
+                           store_path=str(s), ledger_path=str(l))
+    assert succ["version"]["status"] == "ACTIVE"
+    assert succ["misuse_check"]["verdict"] == "BLOCKED"
+    assert succ["evidence"]["evidence_split"] == "dev"
 
 
 def test_generation_is_deterministic():

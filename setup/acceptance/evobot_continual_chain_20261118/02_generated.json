@@ -1,18 +1,27 @@
 {
-  "dev_split_built": 0,
+  "dev_split_built": 1,
   "entries": [
-    "026e9b6f416d9e46ea1573595a1e1ed56f0a45a756b27f962a9478cd517b57ae"
+    "ecac643b2454caeddc73076f30eae4aafbc8862ce22f22ce7479b11995048fcf"
   ],
   "report": {
     "entries": [
       {
-        "consumer": "spread_policy",
-        "entry_id": "026e9b6f416d9e46ea1573595a1e1ed56f0a45a756b27f962a9478cd517b57ae",
+        "consumer": "harness",
+        "entry_id": "ecac643b2454caeddc73076f30eae4aafbc8862ce22f22ce7479b11995048fcf",
         "occurrences": 5,
-        "signature": "occupied_destination"
+        "signature": "harness_dds_exhaustion"
       }
     ],
-    "excluded_held_out": {},
+    "excluded_held_out": {
+      "evobot_bc_pair_20261111": 1,
+      "evobot_crosstype_20261111": 5,
+      "evobot_generalization_20261111": 2,
+      "evobot_heldout_n6_20261111": 1,
+      "evobot_recover_n6_20261111:sealed_instance": 3,
+      "evobot_spacing_fix_20261111:sealed_instance": 3,
+      "evobot_unseen_bc_20261111": 2,
+      "evobot_unseen_n6_20261111": 3
+    },
     "held_out_batches": [
       "evobot_bc_pair_20261111",
       "evobot_crosstype_20261111",
@@ -22,21 +31,21 @@
       "evobot_unseen_n6_20261111"
     ],
     "held_out_would_exclude": 20,
-    "scanned": 51,
+    "scanned": 36,
     "sealed_instances": 42,
     "signatures": {
-      "occupied_destination": {
+      "harness_dds_exhaustion": {
         "built": true,
         "occurrences": 5,
-        "why": "5 occurrence(s), consumer 'spread_policy' declares 'landing_spacing'"
+        "why": "5 occurrence(s), consumer 'harness' declares 'harness_config'"
       },
       "unconfirmed_native": {
         "built": false,
-        "occurrences": 46,
+        "occurrences": 31,
         "why": "UNROUTED: no consumer in this stack declares a change for 'unconfirmed_native', so the knowledge would be stored and unable to act"
       }
     },
-    "split": "held_out"
+    "split": "dev"
   },
-  "split": "held_out"
+  "split": "dev"
 }
