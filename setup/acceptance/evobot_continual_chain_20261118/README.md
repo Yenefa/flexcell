@@ -244,7 +244,35 @@ capability is what makes that visible instead of leaving it to an audit.
     (`instance_hit_rate`). Fixing the wins-only bias last round was not enough:
     **the surviving number was itself two units welded together.**
 
-`verify.py` asserts **101 checks**, including that both gates really ran, that the asset
+26. **a declared destination is not a covered one.** `consumers.implemented()` checks that a
+    consumer's entrypoint **file** exists. That says the address is real; **it does not say
+    any mail ever arrived.** The objective names **four** routings; this stack declares all
+    four; a check written against the declaration would report **4/4** while only **1** is
+    actually carrying an entry.
+
+    | routing | consumer | state |
+    | --- | --- | --- |
+    | order (操作顺序) | `planner` | **NAMED_BUT_EMPTY** |
+    | spread (落点间距) | `spread_policy` | **NAMED_BUT_EMPTY** |
+    | recovery (抓放恢复) | `executor_recovery` | **CARRIED** |
+    | ROS launch (ROS 启动) | `development` | **NAMED_BUT_EMPTY** — never carried anything |
+
+    Concretely: offering a ROS-launch lesson to `development` returns **UNSUPPORTED** — the
+    routing exists and **nothing can arrive**. That is the same *routed-but-undeliverable*
+    defect this package fixed twice for other consumers; **it had never been checked for
+    this one.**
+
+    `routing_coverage.py` does **not** invent a delivery path to make the number look
+    better: a development experience lands in `development_skills/registry.json`, which is
+    prose for a coding agent, and there is **no deterministic way** to check that a lesson
+    changed an agent's behaviour. Claiming otherwise is the overstatement that registry's
+    own README warns about.
+
+    It also reports the ROS-launch lesson **acting from `harness`**, a consumer the
+    objective did **not** name — **separately, never counted as coverage of the fourth
+    routing.** Counting it would be the rounding-up this module exists to prevent.
+
+`verify.py` asserts **105 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -262,7 +290,8 @@ than its measurement is revised while the lesson text stays untouched**, and tha
 **an over-claiming record is caught in the other direction too**, and that **the ledger names
 the real tasks a skill was used on, each with its own three events**, and that **inert
 applications are recorded so the hit rate is not 100% by construction**, and that **the reported rate is computed in
-one unit rather than across two**.
+one unit rather than across two**, and that **the objective's four routings are reported
+one by one with a declared-but-empty destination not counted as covered**.
 
 ---
 

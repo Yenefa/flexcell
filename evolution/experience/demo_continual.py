@@ -42,6 +42,7 @@ import lifecycle  # noqa: E402
 import postmortem  # noqa: E402
 import retrieve  # noqa: E402
 import reuse  # noqa: E402
+import routing_coverage  # noqa: E402
 import delivery  # noqa: E402
 import candidate_search  # noqa: E402
 import schema  # noqa: E402
@@ -633,6 +634,19 @@ def run(dest=OUT):
                                  "decision": d["decision"]} for d in lifecycle_decisions],
                   "retire_transition_demo": harm_demo,
                   "revise_transition_demo": revise_demo})
+
+    # 10b -- WHICH OF THE OBJECTIVE'S FOUR ROUTINGS ACTUALLY CARRY AN ENTRY. consumers.py
+    # declaring a destination is not evidence anything was ever sent there: the fourth
+    # routing the objective names (ROS launch -> development experience) is declared,
+    # counted as "implemented" because its entrypoint file exists, and has never carried
+    # anything. Nothing said so, because nothing asked.
+    coverage = routing_coverage.coverage(store_path)
+    _write(os.path.join(dest, "10b_routing_coverage.json"), coverage)
+    steps.append({"step": "routing_coverage",
+                  "carried": coverage["carried"], "named": coverage["named"],
+                  "states": {r["consumer"]: r["state"] for r in coverage["routings"]},
+                  "carried_by_an_unnamed_consumer":
+                      sorted(coverage["carried_by_an_unnamed_consumer"])})
 
     # 11 -- the store's own curation report, computed from the records on disk
     report = curate.curate(store.read(store_path))

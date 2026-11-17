@@ -1,0 +1,42 @@
+{
+  "carried": 1,
+  "carried_by_an_unnamed_consumer": {
+    "harness": [
+      "auto-harness_dds_exhaustion"
+    ]
+  },
+  "claim": "a routing is CARRIED only when an ACTIVE entry reaches its consumer; a declared consumer with no arriving entry is NAMED_BUT_EMPTY. A lesson can also act from a consumer the objective did not name, and that is reported separately rather than counted as coverage",
+  "named": 4,
+  "routings": [
+    {
+      "active_entries": [],
+      "consumer": "planner",
+      "routing": "order (\u64cd\u4f5c\u987a\u5e8f)",
+      "state": "NAMED_BUT_EMPTY",
+      "why": "no ACTIVE entry names this consumer"
+    },
+    {
+      "active_entries": [],
+      "consumer": "spread_policy",
+      "routing": "spread (\u843d\u70b9\u95f4\u8ddd)",
+      "state": "NAMED_BUT_EMPTY",
+      "why": "no ACTIVE entry names this consumer"
+    },
+    {
+      "active_entries": [
+        "E2"
+      ],
+      "consumer": "executor_recovery",
+      "routing": "recovery (\u6293\u653e\u6062\u590d)",
+      "state": "CARRIED",
+      "why": "delivered by ['E2']"
+    },
+    {
+      "active_entries": [],
+      "consumer": "development",
+      "routing": "ROS launch (ROS \u542f\u52a8)",
+      "state": "NAMED_BUT_EMPTY",
+      "why": "no ACTIVE entry names this consumer"
+    }
+  ]
+}

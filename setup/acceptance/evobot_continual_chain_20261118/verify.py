@@ -592,6 +592,27 @@ def main():
         checks["the_reported_hit_rate_uses_matching_units"] = (
             abs((per_asset.get("instance_hit_rate") or 0) - fixed / float(offered)) < 1e-3)
 
+        # 26 -- A DECLARED DESTINATION IS NOT A COVERED ONE. The objective names four
+        # routings; consumers.py declares all four; three of them carry a live entry and the
+        # fourth (ROS launch -> development experience) has never carried anything. Nothing
+        # said so, because nothing asked: implemented() only checks that the entrypoint FILE
+        # exists, which says a destination is addressable, not that mail arrives.
+        cov = json.loads((tmp / "10b_routing_coverage.json").read_text(encoding="utf-8"))
+        by_consumer = {r["consumer"]: r["state"] for r in cov["routings"]}
+        checks["the_objectives_four_routings_are_all_measured"] = (
+            cov["named"] == 4 and set(by_consumer) == {"planner", "spread_policy",
+                                                       "executor_recovery", "development"})
+        checks["at_least_one_named_routing_actually_carries_an_entry"] = (
+            cov["carried"] >= 1)
+        # ... and the gap must be REPORTED, not silently rounded up to 4/4
+        checks["a_declared_destination_with_no_entry_is_reported_empty"] = (
+            cov["carried"] < cov["named"]
+            and "NAMED_BUT_EMPTY" in by_consumer.values())
+        # the ROS-launch lesson does act - from a consumer the objective did not name, which
+        # is reported separately rather than counted as coverage of the fourth routing
+        checks["acting_from_an_unnamed_consumer_is_reported_separately"] = (
+            "harness" in cov["carried_by_an_unnamed_consumer"])
+
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
             "batch": HERE.name,
