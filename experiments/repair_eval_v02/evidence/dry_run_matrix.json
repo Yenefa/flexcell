@@ -1,0 +1,551 @@
+{
+  "summary": {
+    "slots": 24,
+    "expected": 24,
+    "by_status": {
+      "DRY_RUN_COMPLETE": 24
+    },
+    "by_condition": {
+      "A_STATIC": [
+        "ACCEPT",
+        "ACCEPT",
+        "ACCEPT",
+        "ACCEPT",
+        "ACCEPT",
+        "ACCEPT"
+      ],
+      "B_REAL_FEEDBACK": [
+        "ACCEPT",
+        "ACCEPT",
+        "ACCEPT",
+        "ACCEPT",
+        "ACCEPT",
+        "ACCEPT"
+      ],
+      "C_MISMATCHED_FEEDBACK": [
+        "ACCEPT",
+        "ACCEPT",
+        "ACCEPT",
+        "ACCEPT",
+        "ACCEPT",
+        "ACCEPT"
+      ],
+      "D_GUIDED": [
+        "ACCEPT",
+        "ACCEPT",
+        "ACCEPT",
+        "ACCEPT",
+        "ACCEPT",
+        "ACCEPT"
+      ]
+    },
+    "visibility_consistent": true,
+    "qualification": "DRY_RUN_SCRIPTED_AGENT_NOT_A_MODEL_RESULT"
+  },
+  "rows": [
+    {
+      "slot_id": "F1-A-r1",
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "A_STATIC",
+      "repetition": 1,
+      "run_id": "RUN-0010",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "policy_denied",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "6628e64fb08a19351aa37e5c03ab02bce4a80995ffc2c15f6df8149002a23610"
+    },
+    {
+      "slot_id": "F1-A-r2",
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "A_STATIC",
+      "repetition": 2,
+      "run_id": "RUN-0020",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "policy_denied",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "6628e64fb08a19351aa37e5c03ab02bce4a80995ffc2c15f6df8149002a23610"
+    },
+    {
+      "slot_id": "F1-A-r3",
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "A_STATIC",
+      "repetition": 3,
+      "run_id": "RUN-0030",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "policy_denied",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "6628e64fb08a19351aa37e5c03ab02bce4a80995ffc2c15f6df8149002a23610"
+    },
+    {
+      "slot_id": "F1-B-r1",
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "B_REAL_FEEDBACK",
+      "repetition": 1,
+      "run_id": "RUN-0011",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "missing_material",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "6628e64fb08a19351aa37e5c03ab02bce4a80995ffc2c15f6df8149002a23610"
+    },
+    {
+      "slot_id": "F1-B-r2",
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "B_REAL_FEEDBACK",
+      "repetition": 2,
+      "run_id": "RUN-0021",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "missing_material",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "6628e64fb08a19351aa37e5c03ab02bce4a80995ffc2c15f6df8149002a23610"
+    },
+    {
+      "slot_id": "F1-B-r3",
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "B_REAL_FEEDBACK",
+      "repetition": 3,
+      "run_id": "RUN-0031",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "missing_material",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "6628e64fb08a19351aa37e5c03ab02bce4a80995ffc2c15f6df8149002a23610"
+    },
+    {
+      "slot_id": "F1-C-r1",
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "C_MISMATCHED_FEEDBACK",
+      "repetition": 1,
+      "run_id": "RUN-0012",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "present",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "6628e64fb08a19351aa37e5c03ab02bce4a80995ffc2c15f6df8149002a23610"
+    },
+    {
+      "slot_id": "F1-C-r2",
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "C_MISMATCHED_FEEDBACK",
+      "repetition": 2,
+      "run_id": "RUN-0022",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "present",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "6628e64fb08a19351aa37e5c03ab02bce4a80995ffc2c15f6df8149002a23610"
+    },
+    {
+      "slot_id": "F1-C-r3",
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "C_MISMATCHED_FEEDBACK",
+      "repetition": 3,
+      "run_id": "RUN-0032",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "present",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "6628e64fb08a19351aa37e5c03ab02bce4a80995ffc2c15f6df8149002a23610"
+    },
+    {
+      "slot_id": "F1-D-r1",
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "D_GUIDED",
+      "repetition": 1,
+      "run_id": "RUN-0013",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "missing_material",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "6628e64fb08a19351aa37e5c03ab02bce4a80995ffc2c15f6df8149002a23610"
+    },
+    {
+      "slot_id": "F1-D-r2",
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "D_GUIDED",
+      "repetition": 2,
+      "run_id": "RUN-0023",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "missing_material",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "6628e64fb08a19351aa37e5c03ab02bce4a80995ffc2c15f6df8149002a23610"
+    },
+    {
+      "slot_id": "F1-D-r3",
+      "family": "F1_OBJECT_REGISTRATION",
+      "condition": "D_GUIDED",
+      "repetition": 3,
+      "run_id": "RUN-0033",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "missing_material",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "6628e64fb08a19351aa37e5c03ab02bce4a80995ffc2c15f6df8149002a23610"
+    },
+    {
+      "slot_id": "F2-A-r1",
+      "family": "F2_GOAL_MAPPING",
+      "condition": "A_STATIC",
+      "repetition": 1,
+      "run_id": "RUN-0010",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "policy_denied",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "e50ac16acd59c70d4473a01ca4b5358f367d8c3068460d3e6995cc2d588efbd6"
+    },
+    {
+      "slot_id": "F2-A-r2",
+      "family": "F2_GOAL_MAPPING",
+      "condition": "A_STATIC",
+      "repetition": 2,
+      "run_id": "RUN-0020",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "policy_denied",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "e50ac16acd59c70d4473a01ca4b5358f367d8c3068460d3e6995cc2d588efbd6"
+    },
+    {
+      "slot_id": "F2-A-r3",
+      "family": "F2_GOAL_MAPPING",
+      "condition": "A_STATIC",
+      "repetition": 3,
+      "run_id": "RUN-0030",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "policy_denied",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "e50ac16acd59c70d4473a01ca4b5358f367d8c3068460d3e6995cc2d588efbd6"
+    },
+    {
+      "slot_id": "F2-B-r1",
+      "family": "F2_GOAL_MAPPING",
+      "condition": "B_REAL_FEEDBACK",
+      "repetition": 1,
+      "run_id": "RUN-0011",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "missing_material",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "e50ac16acd59c70d4473a01ca4b5358f367d8c3068460d3e6995cc2d588efbd6"
+    },
+    {
+      "slot_id": "F2-B-r2",
+      "family": "F2_GOAL_MAPPING",
+      "condition": "B_REAL_FEEDBACK",
+      "repetition": 2,
+      "run_id": "RUN-0021",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "missing_material",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "e50ac16acd59c70d4473a01ca4b5358f367d8c3068460d3e6995cc2d588efbd6"
+    },
+    {
+      "slot_id": "F2-B-r3",
+      "family": "F2_GOAL_MAPPING",
+      "condition": "B_REAL_FEEDBACK",
+      "repetition": 3,
+      "run_id": "RUN-0031",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "missing_material",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "e50ac16acd59c70d4473a01ca4b5358f367d8c3068460d3e6995cc2d588efbd6"
+    },
+    {
+      "slot_id": "F2-C-r1",
+      "family": "F2_GOAL_MAPPING",
+      "condition": "C_MISMATCHED_FEEDBACK",
+      "repetition": 1,
+      "run_id": "RUN-0012",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "present",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "e50ac16acd59c70d4473a01ca4b5358f367d8c3068460d3e6995cc2d588efbd6"
+    },
+    {
+      "slot_id": "F2-C-r2",
+      "family": "F2_GOAL_MAPPING",
+      "condition": "C_MISMATCHED_FEEDBACK",
+      "repetition": 2,
+      "run_id": "RUN-0022",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "present",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "e50ac16acd59c70d4473a01ca4b5358f367d8c3068460d3e6995cc2d588efbd6"
+    },
+    {
+      "slot_id": "F2-C-r3",
+      "family": "F2_GOAL_MAPPING",
+      "condition": "C_MISMATCHED_FEEDBACK",
+      "repetition": 3,
+      "run_id": "RUN-0032",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "present",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "e50ac16acd59c70d4473a01ca4b5358f367d8c3068460d3e6995cc2d588efbd6"
+    },
+    {
+      "slot_id": "F2-D-r1",
+      "family": "F2_GOAL_MAPPING",
+      "condition": "D_GUIDED",
+      "repetition": 1,
+      "run_id": "RUN-0013",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "missing_material",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "e50ac16acd59c70d4473a01ca4b5358f367d8c3068460d3e6995cc2d588efbd6"
+    },
+    {
+      "slot_id": "F2-D-r2",
+      "family": "F2_GOAL_MAPPING",
+      "condition": "D_GUIDED",
+      "repetition": 2,
+      "run_id": "RUN-0023",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "missing_material",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "e50ac16acd59c70d4473a01ca4b5358f367d8c3068460d3e6995cc2d588efbd6"
+    },
+    {
+      "slot_id": "F2-D-r3",
+      "family": "F2_GOAL_MAPPING",
+      "condition": "D_GUIDED",
+      "repetition": 3,
+      "run_id": "RUN-0033",
+      "status": "DRY_RUN_COMPLETE",
+      "qualification": "DRY_RUN",
+      "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+      "policy_fingerprint": "a48651c04e4e825dda2ad0324029960d9f39cc38673f2dabca3a115f71ea951a",
+      "visibility": {
+        "task": "visible",
+        "gate": "sealed_material",
+        "source": "visible"
+      },
+      "feedback": "missing_material",
+      "regression_exit": 0,
+      "verdict": "ACCEPT",
+      "codes": [],
+      "contract_sha256": "e50ac16acd59c70d4473a01ca4b5358f367d8c3068460d3e6995cc2d588efbd6"
+    }
+  ]
+}

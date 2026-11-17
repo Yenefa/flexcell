@@ -1,0 +1,30 @@
+{
+  "at": 1794890788.73422,
+  "backend": "source_gate",
+  "healthy": true,
+  "checks": {
+    "source_sha": {
+      "status": "PASS",
+      "expected": "d1a53416b1c38a062c0de59d55ff3aea82bbf103",
+      "observed": "d1a53416b1c38a062c0de59d55ff3aea82bbf103"
+    },
+    "source_files": {
+      "status": "PASS",
+      "changed": []
+    },
+    "dependencies": {
+      "status": "PASS",
+      "missing": []
+    },
+    "workspace": {
+      "status": "PASS",
+      "missing": [],
+      "changed": []
+    },
+    "ros_gazebo": {
+      "status": "NOT_APPLICABLE",
+      "reason": "source/config execution; no ROS/Gazebo action dispatched"
+    }
+  },
+  "failures": []
+}

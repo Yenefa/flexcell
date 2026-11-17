@@ -1,214 +1,154 @@
 # Agentic Flexible Robotic Workcell
 
-Skill architecture: [development skills, execution skills and physical capability development](docs/SKILL_ARCHITECTURE.md).
+**Official name:** Agentic Flexible Robotic Workcell · **repository handle:** `flexcell`
 
-Repository organization: [module/build/evidence boundaries](docs/REPOSITORY_MODULES.md)
-and [version/branch conventions](docs/VERSION_CONTROL.md). Executed-source and
-evidence checkpoints are indexed separately in [version_baselines.json](config/version_baselines.json).
-Active worktrees and isolated build/Python environments: [WORKTREES.md](docs/WORKTREES.md).
-Research CLI migrations: [ENTRYPOINTS.md](experiments/baselines/ENTRYPOINTS.md).
+A ROS 2 Jazzy workcell around a ROBOTIS **OpenMANIPULATOR-X**, simulated in Gazebo
+Harmonic and planned/executed through MoveIt 2 — built so that an **agent** can
+drive it, and so that what the agent did can be checked afterwards by someone who
+does not trust it.
 
-2026-10-27: [trusted simulation, MTC and data implementation](docs/TRUSTED_SIMULATION_20261027.md)
-and [portable CPU reproduction](REPRODUCE.md#portable-cpu-simulation-plane-2026-10-27).
-
-**Official project name: Agentic Flexible Robotic Workcell**  
-Repository handle: `flexcell`
-
-> **定位：Self-Evolving Agentic Robotics（自进化智能机器人系统）。**
-> 研究对象是"Agent 如何开发、控制、验证并持续进化机器人"；FlexCell 是验证该愿景的**执行平台**，
-> ROS 2 / Gazebo / MoveIt 2 等是实现手段。能力阶梯 **L1 开发 → L2 运行 → L3 进化**，
-> 原则是 **Agent 定 WHAT、执行器定 HOW、独立验证定 WHETHER**。
-> 目标拆解：[docs/SELF_EVOLVING_AGENTIC_ROBOTICS.md](docs/SELF_EVOLVING_AGENTIC_ROBOTICS.md)。
-
-Use an existing Codex/Claude/WorkBuddy agent with the robot through the upstream
-[ROS-MCP quick start](docs/ROS_MCP.md): install, bridge, check, then give the agent a task.
-
-A ROS 2 Jazzy workcell around a ROBOTIS **OpenMANIPULATOR-X**, simulated in
-Gazebo Harmonic and planned/executed through MoveIt 2 - built so that an **agent** can drive it.
-
-> **Origin & motivation:** see [docs/ORIGIN.md](docs/ORIGIN.md) - why this project exists,
-> and how it relates to NVIDIA's Agent Skills (Development Plane) vs FlexCell (Runtime Plane).
-
-## IYAIC 2026 competition
-
-Competition packaging lives in [competition/iyaic-2026/](competition/iyaic-2026/). It separates the
-shared runtime core from raw evidence and the judge-facing showcase, and tracks a three-state
-delivery index (**implemented / accepted / branch-pending**) in
-[DELIVERY_STATUS.md](competition/iyaic-2026/DELIVERY_STATUS.md). It adds no second runtime and does
-not change the decision / skill / execution / verification boundaries.
-
----
+> **Positioning: self-evolving agentic robotics.** The research object is how an
+> agent develops, operates, validates and keeps improving a robot. FlexCell is the
+> execution platform; ROS 2 / Gazebo / MoveIt 2 are means, not the subject.
+> Capability ladder **L1 develop → L2 operate → L3 evolve**; division of labour
+> **agent decides WHAT, executor decides HOW, independent verification decides
+> WHETHER**. See [docs/SELF_EVOLVING_AGENTIC_ROBOTICS.md](docs/SELF_EVOLVING_AGENTIC_ROBOTICS.md)
+> and [docs/ORIGIN.md](docs/ORIGIN.md).
 
 ## What "agentic" means here
 
-An agent (coding agent or runtime agent) invokes the workcell's capabilities as **skills**:
-discrete, callable robot actions such as "plan and execute to this joint state". The agent
-decides _what_ to do; the workcell guarantees _how_ it is executed safely.
+An agent invokes robot capabilities as **skills** — discrete, callable actions such
+as "plan and execute to this joint state". The agent decides *what*; the workcell
+guarantees *how* it is executed safely.
 
     agent  ->  skill layer  ->  MoveIt 2  ->  ros2_control  ->  Gazebo / real arm
 
-**This skill layer is ours, and it is not vendor-specific.** In particular it does not depend
-on NVIDIA's Isaac ROS Agent Skills - those live in the _development_ plane, a different layer:
+The skill layer is ours and not vendor-specific. It does not depend on NVIDIA's
+Isaac ROS Agent Skills, which live in the *development* plane rather than the
+runtime plane — see [docs/SKILL_ARCHITECTURE.md](docs/SKILL_ARCHITECTURE.md).
 
-|          | NVIDIA Isaac ROS Agent Skills                                         | flexcell skills                              |
-| -------- | --------------------------------------------------------------------- | -------------------------------------------- |
-| What     | instruction packs letting coding assistants operate Isaac ROS tooling | runtime robot capabilities the agent invokes |
-| Layer    | development plane (authoring / tooling)                               | runtime plane (control)                      |
-| Requires | Isaac ROS 5.0, CUDA 13.2+, driver 595+, ROS 2 Lyrical                 | ROS 2 Jazzy (this repo)                      |
-| Status   | not used yet; planned as a separate sandbox                           | Day 2 work                                   |
+## Three planes, and the boundaries between them
 
-See docs/ORIGIN.md for the full framing.
+| Plane | Question it answers | Lives in |
+| --- | --- | --- |
+| Development skills | how the agent writes and fixes robot code | `development_skills/`, agent tooling |
+| Execution skills | what the runtime can be asked to do | `src/flexcell/flexcell_skills` |
+| Physical capability | what the arm and gripper can actually achieve | `src/flexcell/flexcell_capabilities`, `experiments/physical_capabilities` |
 
----
+The boundaries are machine-checked, not documentary:
+`scripts/check_skill_boundaries.py` against `config/skill_boundaries.json`
+(execution must not depend on development code; runtime may use execution
+interfaces only; the physical core must not import execution internals). It fails
+the build on a violation rather than warning.
 
-## Roadmap
+First-party packages:
 
-- [x] **Day 1** - Gazebo Harmonic + MoveIt 2 Plan & Execute, verified on-machine
-- [x] **Day 2** - MoveToPose ROS 2 Action (typed request -> MoveIt -> Gazebo -> measured result) - see docs/DAY2_MOVETOPOSE.md
-- [x] **Week 1** - deterministic skills (observe / pick / place / verify) + FSM
-- [ ] **Week 1 (parallel)** - standalone NVIDIA Development Agent sandbox
-- [x] **Week 1.5** - Deterministic Demo Hardening (lifecycle CLI, strict health gate, dual-object scenario, bounded recovery + failure injection)
-- [ ] **Week 2 (M2)** - Runtime Decision Foundation - ratified design in docs/WEEK2_PREPARATION.md; tracked via issues #2-#12, RFCs #14/#16 - see docs/ROADMAP.md
-- [ ] **M3** - Confidence-Gated Hybrid Agent Benchmark - RFC #15
-- [ ] **Later** - Isaac ROS / Isaac Sim / VLA, only when a measured bottleneck justifies it; real robot backend; vision integration
+| Package | Role |
+| --- | --- |
+| `flexcell_interfaces` | messages, actions, shared types |
+| `flexcell_skills` | execution skills: observe / pick / place / verify, task FSM |
+| `flexcell_capabilities` | physical capability layer |
+| `flexcell_mtc` | MoveIt Task Constructor integration |
+| `flexcell_gazebo` | simulation bring-up |
 
-> **0 lines of Jev before the deterministic robot baseline works.**
+Architecture of record: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) ·
+module and evidence boundaries: [docs/REPOSITORY_MODULES.md](docs/REPOSITORY_MODULES.md) ·
+branch/version conventions: [docs/VERSION_CONTROL.md](docs/VERSION_CONTROL.md).
 
----
+## Current work (v0.2): does the agent's access to feedback change what it repairs?
 
-## Project management
+The active research line is a controlled experiment on repair behaviour, kept in
+`benchmark/repair_eval` (the judging side) and
+`experiments/repair_eval_v02` (the running side).
 
-The repository is the single source of truth — GitHub-native workflow (Issues, Milestones,
-Project board), no external PM tools. Every important idea must have a traceable path:
-discussion → Issue/ADR → milestone task → implementation → experiment evidence → docs update.
+- **Four conditions** — A no feedback, B real execution feedback, C another run's
+  feedback, D real feedback plus bounded guidance. What each condition may read is
+  a policy, not a convention: `benchmark/repair_eval/visibility.py` refuses any
+  access the policy does not grant, including through symlinks or a path the caller
+  mislabels.
+- **The task is fixed outside the candidate**: `contracts/` freezes the goal, the
+  object set, the tolerances and the allowed edit surface, then judges the repair
+  against them — a repair cannot pass by moving the goal.
+- **Evidence discipline**: per-file digests, sealed gates, frozen candidates,
+  registered seeds and donors, no pooling across source/model/protocol identity,
+  and `UNKNOWN` never collapses into pass. Excluded or invalidated batches stay on
+  disk and are labelled as such.
 
-- [docs/ROADMAP.md](docs/ROADMAP.md) — long-term phases & milestones (M1 done / M2 current / M3 future)
-- [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) — execution calendar + maintenance policy
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — system architecture (current vs target)
-- [docs/EXPERIMENTS.md](docs/EXPERIMENTS.md) — experiment log with evidence locations
-- [docs/ADR/](docs/ADR/) — architecture decision records (ADR-001: simulation manipulation backend)
-- [docs/WEEK2_PREPARATION.md](docs/WEEK2_PREPARATION.md) — ratified Week-2 design of record
-- Milestones: **M1** Deterministic Workcell Baseline (done) · **M2** Runtime Decision
-  Foundation (current; sub-milestones M2.1/M2.2/M2.3) · **M3** Hybrid Agent Benchmark (future)
+Current results, stated with their limits:
 
-**Maintenance rule:** before coding — which Issue? which ADR? which docs need updating?
-After coding — update the Issue, record evidence in EXPERIMENTS.md, link the commit.
+| Item | State |
+| --- | --- |
+| Registered batch (24 slots) | 7 dispatched, then **stopped by protocol** (unconfirmed action terminal); 17 `NOT_RUN` |
+| Held-out evaluation | 6 candidate + 6 reference slots executed, `checks_passed: true` |
+| Physical admission | `NOT_VERIFIED_PHYSICALLY` |
+| Independent judge (G3) | `NOT_RUN` |
 
----
+Read [experiments/repair_eval_v02/DELIVERY.md](experiments/repair_eval_v02/DELIVERY.md)
+before quoting any number: it carries the verification commands and the list of
+what the data cannot support.
+
+## Quick start
+
+Prerequisites: Ubuntu 24.04, ROS 2 Jazzy, Gazebo Harmonic, MoveIt 2. Scripts are
+numbered by stage:
+
+```bash
+scripts/01_provision.sh        # host packages
+scripts/02_ros_jazzy.sh        # ROS 2 Jazzy
+scripts/03_build_omx.sh        # OpenMANIPULATOR-X from source
+scripts/20_launch_gazebo.sh    # simulation
+scripts/22_launch_moveit.sh    # planning
+scripts/30_plan_execute.py     # one plan-and-execute round trip
+```
+
+Do not re-run `03_build_omx.sh` on a machine that already has a working overlay;
+it rebuilds the workspace it sits in.
+
+## Verifying a checkout
+
+```bash
+# repair-eval suites (417 tests as of 2026-11-17)
+python3 -m pytest benchmark/repair_eval experiments/repair_eval_v02 -q
+
+# plane boundaries
+python3 scripts/check_skill_boundaries.py
+
+# repository layout — needs a FULL checkout; a sparse one reports missing paths
+python3 scripts/check_repository_layout.py
+
+# experiment bookkeeping
+python3 experiments/repair_eval_v02/crosscheck_docs.py       # docs and code agree
+python3 docs/research/evobot-paper-v02/check_protocol_docs.py
+python3 experiments/repair_eval_v02/audit_acceptance.py      # 46/46 criteria covered
+python3 experiments/repair_eval_v02/reconcile.py \
+  --manifest docs/research/evobot-paper-v02/RUN_MANIFEST.md \
+  --records experiments/repair_eval_v02/evidence/v2_matrix_n6.json \
+  --registered-only --allow-order-deviation
+```
+
+Expected: `status verdict: CONSISTENT`, `order verdict: DEVIATION` for the batch that predates the reordered plan - the deviation is recorded, not hidden.
+
+## Repository map
+
+| Path | What lives there |
+| --- | --- |
+| `src/flexcell/` | the first-party ROS 2 packages |
+| `benchmark/` | evaluators, held-out material, `repair_eval` judging side |
+| `experiments/` | running sides: `repair_eval_v02`, `physical_capabilities`, `pilot-001` |
+| `docs/` | architecture, ADRs, protocol packages, results |
+| `config/` | skill boundaries, version baselines, workcell parameters |
+| `scripts/` | setup, launch, gates and audits |
+| `runtime/` | planner and model access |
+| `evolution/` | self-improvement loop |
 
 ## Status
 
-2026-10-26 GRASP-B-001 follow-up (#32): an opt-in per-trial evidence gate and
-read-only replay checker are prepared for the fixed A1 → A4 → B5 diagnostic
-window. The gate requires PR #50's teleport observations, stops dispatch after
-missing/inconsistent evidence, and keeps typed physical failures. No new live
-window has run; the physical root cause remains UNKNOWN. See
-[verification and simulation-host handoff](docs/GRASP_PHASE3_GATE_20261026.md).
+- Milestone of record: **M2 Runtime Decision Foundation** — source implemented,
+  qualification incomplete. See [docs/ROADMAP.md](docs/ROADMAP.md).
+- The physical arm has **not** been admitted on hardware for this line of work;
+  simulation results are not a hardware claim.
+- Handoff notes for the next agent: [docs/AGENT_HANDOFF.md](docs/AGENT_HANDOFF.md).
 
-2026-10-02 mainline hardening (E-016): lifecycle paths and typed controller
-readiness are fixed; Observe now reads confirmed carry authority instead of a
-stale topic cache. Cold FSM dual-object S1 passed, and a real stale-A injection
-confirmed that the stale cache was not used. Local Jev calibration and frozen
-model offline replay
-now have measured results; the fast route is ineligible and model replay failed.
-Hybrid online smoke still failed, including official API timeouts. The final
-fleet is FSM/IDLE, with reset and strict health passing; historical reset/flood
-roots remain open. Local commits only, no push. See
-[implementation, results and remaining blockers](docs/HARDENING_20261002.md).
-
-2026-10-01 carry implementation update (E-015): the mainline now uses a bounded
-Gazebo pose/velocity constraint, confirms engage before lifting, and checks
-PLACE's release dependency before admitting deployment. The final single-object
-closed loop passed with 2.86 mm error. Earlier S1 smoke batches were 4/5 and 1/2
-under different fingerprints; both failures and limitations remain recorded.
-This is a new magnetic carry implementation, not an accepted statistical baseline.
-See [implementation and online evidence](docs/CARRY_VELOCITY_20261001.md).
-
-2026-10-01 mechanism investigation: reproduced a Fast DDS discovery failure
-caused by incomplete fragmented localhost UDP delivery; a 1400-byte transport
-limit passed two repetitions. Isolated Gazebo controls support preserved
-velocity under pose-only servo as a cause of lift loss. The current fleet and
-physics baseline remain unchanged. See [causal evidence and limits](docs/MECHANISM_20261001.md).
-
-2026-10-01 mainline update: both task actions share the policy executor and
-episode recorder. The fleet now uses the official `deepseek-flash` endpoint,
-with a persistent RMB 5 request budget. One single-object task completed with
-8.95 mm measured placement error; a separate S1 smoke batch completed all five
-tasks with three successes and two failures. Placement waits for carry-release
-acknowledgment, and accepted action results can be read again without resending
-the physical goal. S3 recovered a B-only injected failure, and S4 recorded its
-expected PLACE failure through the single-object policy seam (one run each).
-Protocol v1 E-011 is archived; v2 batches stay separate and
-the large batch remains frozen. MTC is pending. See
-[current implementation, evidence and limits](docs/DEEPSEEK_20261001.md).
-
-Current: **Week-1.5 accepted; M2 Runtime Decision Foundation is the active milestone** —
-see [docs/ROADMAP.md](docs/ROADMAP.md). The table below is the Day-1 verification record.
-
-### Evidence quality (M2.3 audit, 2026-09-28)
-
-A full audit (code + evidence chain + external tech scan) found the
-architecture sound but the historical "all green" claims overstated: the
-real steady state was "retried to green" (first-attempt success ~30-50% on
-several batteries), some parity artifacts read FAIL on disk, and the
-batteries could not red-flag anything. The remediation commit (P0-1..3
-runtime fixes, hard gates in the batteries, independent referee, measured
-parity) addresses the causes; until episode recording lands (#7), treat
-every pre-audit acceptance claim in HANDOFF / acceptance/ as **unverified
-unless re-run under the gated batteries**. See docs/P2_DECISION_MEMO.md for
-the open route decisions.
-
-| Item                                     | State                       |
-| ---------------------------------------- | --------------------------- |
-| Ubuntu 24.04 + ROS 2 Jazzy               | OK                          |
-| Gazebo Harmonic 8.15.0                   | OK                          |
-| OpenMANIPULATOR-X (ROBOTIS jazzy source) | OK, 6 colcon packages       |
-| Gazebo model + 3 controllers active      | OK                          |
-| MoveIt 2 Plan                            | OK, error_code = 1          |
-| MoveIt 2 Execute                         | OK, error_code = 1          |
-| Real motion in Gazebo physics            | OK, verified via link poses |
-| /joint_states consistent with plan       | OK                          |
-
-See DAY1_REPORT.md for the full environment, every problem hit, and the fixes.
-
-## Layout
-
-    agentic_workcell_ws/
-    |- README.md
-    |- DAY1_REPORT.md          # Day 1 report
-    |- docs/ORIGIN.md          # origin & motivation (living document)
-    |- docs/DAY2_MOVETOPOSE.md  # Day 2 contract, verification, known blocker
-    |- plan_execute.py         # MoveIt Plan & Execute driver
-    |- agentic_workcell.repos  # upstream repos (vcstool)
-    |- scripts/                # provisioning + launch scripts
-    |- src/flexcell/           # OUR packages (tracked)
-    |- src/                    # upstream clones (ignored, via .repos)
-
-## Reproduce
-
-    mkdir -p ~/agentic_workcell_ws/src && cd ~/agentic_workcell_ws
-    vcs import src < agentic_workcell.repos
-    source /opt/ros/jazzy/setup.bash
-    rosdep install --from-paths src --ignore-src -r -y
-    colcon build --symlink-install \
-      --packages-up-to open_manipulator_bringup open_manipulator_moveit_config
-
-## Run
-
-    # Terminal 1 - Gazebo
-    ros2 launch open_manipulator_bringup open_manipulator_x_gazebo.launch.py
-
-    # Terminal 2 - MoveIt 2 + RViz
-    ros2 launch open_manipulator_moveit_config open_manipulator_x_moveit.launch.py use_sim:=true
-
-    # Terminal 3 - Plan & Execute (optional joint target)
-    python3 plan_execute.py 0.6 -0.9 0.9 0.5
-
-## Known limitations
-
-- WSL exposes no /dev/dri and the WSL dxg graphics path currently fails
-  (dxgkio_query_adapter_info: Ioctl failed: -22), so Gazebo/RViz render on CPU
-  (llvmpipe). Simulation is unaffected; only the GUI is slow.
-- CUDA toolkit is intentionally NOT installed - nothing in Day 1 needs it.
-- Isaac ROS 5.0 requires CUDA 13.2+ / driver 595+ / ROS 2 Lyrical, so it cannot share this
-  Jazzy environment. It belongs in a separate Docker-isolated sandbox, not in this workspace.
+**Maintenance rule:** before coding — which issue, which ADR, which document will
+change? After coding — update the issue, record evidence, link the commit. A claim
+without an evidence path is a draft, not a result.

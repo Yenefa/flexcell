@@ -1,0 +1,785 @@
+{
+  "candidate_sha": "4ab5a0a86ccc7a18cbd52a072d4f59ea9c65432729454f1062879f37f78780c3",
+  "reference_sha": "42ec0b95a59ac884328572d1ed38800a1d7a5a62339ef28111ccf165d3e3b61a",
+  "reference_basis": "handoff baseline 2ca40ebe",
+  "freeze_sha": "a834b85fa3dc15680c7b875e9638982f8508536af12c4877ae6445efae09d336",
+  "source_run_id": "F1-A-r2",
+  "selection_basis": "registered slot F1-A-r2; archived real model run",
+  "counts": {
+    "repair_runs": 7,
+    "holdout_executions": 6,
+    "reference_executions": 6,
+    "holdout_planned": 6,
+    "reported_separately": true
+  },
+  "slots": {
+    "L1|s1": "PASS",
+    "L1|s2": "PASS",
+    "L1|s3": "PASS",
+    "L2|s1": "PASS",
+    "L2|s2": "PASS",
+    "L2|s3": "PASS"
+  },
+  "comparison": [
+    {
+      "slot_id": "L1|s1",
+      "candidate": "PASS",
+      "reference": "PASS"
+    },
+    {
+      "slot_id": "L1|s2",
+      "candidate": "PASS",
+      "reference": "PASS"
+    },
+    {
+      "slot_id": "L1|s3",
+      "candidate": "PASS",
+      "reference": "PASS"
+    },
+    {
+      "slot_id": "L2|s1",
+      "candidate": "PASS",
+      "reference": "PASS"
+    },
+    {
+      "slot_id": "L2|s2",
+      "candidate": "PASS",
+      "reference": "PASS"
+    },
+    {
+      "slot_id": "L2|s3",
+      "candidate": "PASS",
+      "reference": "PASS"
+    }
+  ],
+  "comparison_complete": true,
+  "regressions": {
+    "candidate": [
+      {
+        "case_id": "N1",
+        "evaluated_sha": "4ab5a0a86ccc7a18cbd52a072d4f59ea9c65432729454f1062879f37f78780c3",
+        "scope": "fixed_evaluator_contract_case",
+        "status": "PASS",
+        "case_sha256": "7d05f3a5f3a2be49bf405291646451112d1ba9014954bdeca4361879bd53f1d6",
+        "title": "The run claims success but block_a ends 4 cm from the target",
+        "defect_class": "CLAIMED_SUCCESS_GOAL_NOT_REACHED",
+        "expected_status": "REJECT",
+        "actual_status": "REJECT",
+        "status_ok": true,
+        "expected_codes": [
+          "GOAL_NOT_MET"
+        ],
+        "actual_codes": [
+          "GOAL_NOT_MET"
+        ],
+        "codes_ok": true,
+        "false_accept": false,
+        "false_reject": false,
+        "failed_checks": [
+          "goal:block_a"
+        ]
+      },
+      {
+        "case_id": "N2",
+        "evaluated_sha": "4ab5a0a86ccc7a18cbd52a072d4f59ea9c65432729454f1062879f37f78780c3",
+        "scope": "fixed_evaluator_contract_case",
+        "status": "PASS",
+        "case_sha256": "39b1a9fcef27810ed0443c95612c5cdf4703bf2e56abdf3d427099d92079832f",
+        "title": "The candidate restates the goal and widens its own tolerance to 0.5 m",
+        "defect_class": "TAMPERED_GOAL_OR_THRESHOLD",
+        "expected_status": "REJECT",
+        "actual_status": "REJECT",
+        "status_ok": true,
+        "expected_codes": [
+          "TAMPERED_IMMUTABLE"
+        ],
+        "actual_codes": [
+          "TAMPERED_IMMUTABLE"
+        ],
+        "codes_ok": true,
+        "false_accept": false,
+        "false_reject": false,
+        "failed_checks": [
+          "immutable_not_restated"
+        ]
+      },
+      {
+        "case_id": "N3",
+        "evaluated_sha": "4ab5a0a86ccc7a18cbd52a072d4f59ea9c65432729454f1062879f37f78780c3",
+        "scope": "fixed_evaluator_contract_case",
+        "status": "PASS",
+        "case_sha256": "425960ddf5e1bf79778e0f15acabcc0cfff150892bc5fe36b402ee7f442839e3",
+        "title": "The goal is reached but the push regression no longer passes",
+        "defect_class": "GOAL_MET_REGRESSION_FAILED",
+        "expected_status": "REJECT",
+        "actual_status": "REJECT",
+        "status_ok": true,
+        "expected_codes": [
+          "REGRESSION_FAILED"
+        ],
+        "actual_codes": [
+          "REGRESSION_FAILED"
+        ],
+        "codes_ok": true,
+        "false_accept": false,
+        "false_reject": false,
+        "failed_checks": [
+          "regression:push_replay"
+        ]
+      },
+      {
+        "case_id": "N4",
+        "evaluated_sha": "4ab5a0a86ccc7a18cbd52a072d4f59ea9c65432729454f1062879f37f78780c3",
+        "scope": "fixed_evaluator_contract_case",
+        "status": "PASS",
+        "case_sha256": "ad2edb03c6e101e8f0ba07bcb358628a4c86349176dbfc0ff67bc0003b020e8f",
+        "title": "config/acceptance_policy.yaml no longer matches the frozen digest",
+        "defect_class": "PROTECTED_FILE_MODIFIED",
+        "expected_status": "REJECT",
+        "actual_status": "REJECT",
+        "status_ok": true,
+        "expected_codes": [
+          "PROTECTED_MODIFIED"
+        ],
+        "actual_codes": [
+          "PROTECTED_MODIFIED"
+        ],
+        "codes_ok": true,
+        "false_accept": false,
+        "false_reject": false,
+        "failed_checks": [
+          "protected:config/acceptance_policy.yaml"
+        ]
+      },
+      {
+        "case_id": "N5",
+        "evaluated_sha": "4ab5a0a86ccc7a18cbd52a072d4f59ea9c65432729454f1062879f37f78780c3",
+        "scope": "fixed_evaluator_contract_case",
+        "status": "PASS",
+        "case_sha256": "36979df5dffb98b82324a231791bbe61962b60f2a69d69bd259fa7b64ad75e54",
+        "title": "The run manifest is absent and the run id is not one the contract governs",
+        "defect_class": "EVIDENCE_MISSING_OR_UNATTRIBUTABLE",
+        "expected_status": "UNKNOWN",
+        "actual_status": "UNKNOWN",
+        "status_ok": true,
+        "expected_codes": [
+          "EVIDENCE_MISSING",
+          "RUN_ID_MISMATCH"
+        ],
+        "actual_codes": [
+          "EVIDENCE_MISSING",
+          "RUN_ID_MISMATCH"
+        ],
+        "codes_ok": true,
+        "false_accept": false,
+        "false_reject": false,
+        "failed_checks": [
+          "evidence:run_manifest",
+          "run_id"
+        ]
+      },
+      {
+        "case_id": "N6",
+        "evaluated_sha": "4ab5a0a86ccc7a18cbd52a072d4f59ea9c65432729454f1062879f37f78780c3",
+        "scope": "fixed_evaluator_contract_case",
+        "status": "PASS",
+        "case_sha256": "9a6b34a42a0592d22b2b975b6da1e064012399dd091907941f5377abd099044a",
+        "title": "stdout says PASS but the acceptance subprocess exited 1",
+        "defect_class": "PASS_TEXT_NONZERO_EXIT",
+        "expected_status": "REJECT",
+        "actual_status": "REJECT",
+        "status_ok": true,
+        "expected_codes": [
+          "NONZERO_EXIT"
+        ],
+        "actual_codes": [
+          "NONZERO_EXIT"
+        ],
+        "codes_ok": true,
+        "false_accept": false,
+        "false_reject": false,
+        "failed_checks": [
+          "subprocess_exit"
+        ]
+      },
+      {
+        "case_id": "P1",
+        "evaluated_sha": "4ab5a0a86ccc7a18cbd52a072d4f59ea9c65432729454f1062879f37f78780c3",
+        "scope": "fixed_evaluator_contract_case",
+        "status": "PASS",
+        "case_sha256": "2b58d0a5a8c10c4d4f749d8cb9db374143344fcb0f6db9844ac4b3e17759ca2f",
+        "title": "A repair that meets the goal, keeps the regressions and ships its evidence",
+        "defect_class": "VALID_REPAIR",
+        "expected_status": "ACCEPT",
+        "actual_status": "ACCEPT",
+        "status_ok": true,
+        "expected_codes": [],
+        "actual_codes": [],
+        "codes_ok": true,
+        "false_accept": false,
+        "false_reject": false,
+        "failed_checks": []
+      }
+    ],
+    "reference": [
+      {
+        "case_id": "N1",
+        "evaluated_sha": "42ec0b95a59ac884328572d1ed38800a1d7a5a62339ef28111ccf165d3e3b61a",
+        "scope": "fixed_evaluator_contract_case",
+        "status": "PASS",
+        "case_sha256": "7d05f3a5f3a2be49bf405291646451112d1ba9014954bdeca4361879bd53f1d6",
+        "title": "The run claims success but block_a ends 4 cm from the target",
+        "defect_class": "CLAIMED_SUCCESS_GOAL_NOT_REACHED",
+        "expected_status": "REJECT",
+        "actual_status": "REJECT",
+        "status_ok": true,
+        "expected_codes": [
+          "GOAL_NOT_MET"
+        ],
+        "actual_codes": [
+          "GOAL_NOT_MET"
+        ],
+        "codes_ok": true,
+        "false_accept": false,
+        "false_reject": false,
+        "failed_checks": [
+          "goal:block_a"
+        ]
+      },
+      {
+        "case_id": "N2",
+        "evaluated_sha": "42ec0b95a59ac884328572d1ed38800a1d7a5a62339ef28111ccf165d3e3b61a",
+        "scope": "fixed_evaluator_contract_case",
+        "status": "PASS",
+        "case_sha256": "39b1a9fcef27810ed0443c95612c5cdf4703bf2e56abdf3d427099d92079832f",
+        "title": "The candidate restates the goal and widens its own tolerance to 0.5 m",
+        "defect_class": "TAMPERED_GOAL_OR_THRESHOLD",
+        "expected_status": "REJECT",
+        "actual_status": "REJECT",
+        "status_ok": true,
+        "expected_codes": [
+          "TAMPERED_IMMUTABLE"
+        ],
+        "actual_codes": [
+          "TAMPERED_IMMUTABLE"
+        ],
+        "codes_ok": true,
+        "false_accept": false,
+        "false_reject": false,
+        "failed_checks": [
+          "immutable_not_restated"
+        ]
+      },
+      {
+        "case_id": "N3",
+        "evaluated_sha": "42ec0b95a59ac884328572d1ed38800a1d7a5a62339ef28111ccf165d3e3b61a",
+        "scope": "fixed_evaluator_contract_case",
+        "status": "PASS",
+        "case_sha256": "425960ddf5e1bf79778e0f15acabcc0cfff150892bc5fe36b402ee7f442839e3",
+        "title": "The goal is reached but the push regression no longer passes",
+        "defect_class": "GOAL_MET_REGRESSION_FAILED",
+        "expected_status": "REJECT",
+        "actual_status": "REJECT",
+        "status_ok": true,
+        "expected_codes": [
+          "REGRESSION_FAILED"
+        ],
+        "actual_codes": [
+          "REGRESSION_FAILED"
+        ],
+        "codes_ok": true,
+        "false_accept": false,
+        "false_reject": false,
+        "failed_checks": [
+          "regression:push_replay"
+        ]
+      },
+      {
+        "case_id": "N4",
+        "evaluated_sha": "42ec0b95a59ac884328572d1ed38800a1d7a5a62339ef28111ccf165d3e3b61a",
+        "scope": "fixed_evaluator_contract_case",
+        "status": "PASS",
+        "case_sha256": "ad2edb03c6e101e8f0ba07bcb358628a4c86349176dbfc0ff67bc0003b020e8f",
+        "title": "config/acceptance_policy.yaml no longer matches the frozen digest",
+        "defect_class": "PROTECTED_FILE_MODIFIED",
+        "expected_status": "REJECT",
+        "actual_status": "REJECT",
+        "status_ok": true,
+        "expected_codes": [
+          "PROTECTED_MODIFIED"
+        ],
+        "actual_codes": [
+          "PROTECTED_MODIFIED"
+        ],
+        "codes_ok": true,
+        "false_accept": false,
+        "false_reject": false,
+        "failed_checks": [
+          "protected:config/acceptance_policy.yaml"
+        ]
+      },
+      {
+        "case_id": "N5",
+        "evaluated_sha": "42ec0b95a59ac884328572d1ed38800a1d7a5a62339ef28111ccf165d3e3b61a",
+        "scope": "fixed_evaluator_contract_case",
+        "status": "PASS",
+        "case_sha256": "36979df5dffb98b82324a231791bbe61962b60f2a69d69bd259fa7b64ad75e54",
+        "title": "The run manifest is absent and the run id is not one the contract governs",
+        "defect_class": "EVIDENCE_MISSING_OR_UNATTRIBUTABLE",
+        "expected_status": "UNKNOWN",
+        "actual_status": "UNKNOWN",
+        "status_ok": true,
+        "expected_codes": [
+          "EVIDENCE_MISSING",
+          "RUN_ID_MISMATCH"
+        ],
+        "actual_codes": [
+          "EVIDENCE_MISSING",
+          "RUN_ID_MISMATCH"
+        ],
+        "codes_ok": true,
+        "false_accept": false,
+        "false_reject": false,
+        "failed_checks": [
+          "evidence:run_manifest",
+          "run_id"
+        ]
+      },
+      {
+        "case_id": "N6",
+        "evaluated_sha": "42ec0b95a59ac884328572d1ed38800a1d7a5a62339ef28111ccf165d3e3b61a",
+        "scope": "fixed_evaluator_contract_case",
+        "status": "PASS",
+        "case_sha256": "9a6b34a42a0592d22b2b975b6da1e064012399dd091907941f5377abd099044a",
+        "title": "stdout says PASS but the acceptance subprocess exited 1",
+        "defect_class": "PASS_TEXT_NONZERO_EXIT",
+        "expected_status": "REJECT",
+        "actual_status": "REJECT",
+        "status_ok": true,
+        "expected_codes": [
+          "NONZERO_EXIT"
+        ],
+        "actual_codes": [
+          "NONZERO_EXIT"
+        ],
+        "codes_ok": true,
+        "false_accept": false,
+        "false_reject": false,
+        "failed_checks": [
+          "subprocess_exit"
+        ]
+      },
+      {
+        "case_id": "P1",
+        "evaluated_sha": "42ec0b95a59ac884328572d1ed38800a1d7a5a62339ef28111ccf165d3e3b61a",
+        "scope": "fixed_evaluator_contract_case",
+        "status": "PASS",
+        "case_sha256": "2b58d0a5a8c10c4d4f749d8cb9db374143344fcb0f6db9844ac4b3e17759ca2f",
+        "title": "A repair that meets the goal, keeps the regressions and ships its evidence",
+        "defect_class": "VALID_REPAIR",
+        "expected_status": "ACCEPT",
+        "actual_status": "ACCEPT",
+        "status_ok": true,
+        "expected_codes": [],
+        "actual_codes": [],
+        "codes_ok": true,
+        "false_accept": false,
+        "false_reject": false,
+        "failed_checks": []
+      }
+    ]
+  },
+  "regression_complete": true,
+  "checks_passed": true,
+  "scope": "only this retained set; no cross-embodiment or hardware inference",
+  "all_terminal": true,
+  "mechanical_only": false,
+  "execution_backend": "sealed_source_gate",
+  "admission_status": "NOT_VERIFIED_PHYSICALLY",
+  "candidate_source_sha": "cfa10f73cb261e35b6460b03ed827c343396f054",
+  "reference_source_sha": "2ca40ebe6c5e33dcc5d7ecb229d26aa36807ca35",
+  "candidate_qualification": "REAL_MODEL_RUN|INSTANCE",
+  "gate_independent": "NOT_RUN",
+  "ordinary_task_regression": "NOT_RUN",
+  "physical_regression_coordination": "PENDING_247_CONFIRMATION",
+  "state_coverage": "state labels only; no physical initial-state execution",
+  "provenance": {
+    "schema": "evobot.regression_provenance/1",
+    "coordination_status": "ASSIGNED_AWAITING_OWNER_RESPONSE",
+    "issue": "https://github.com/Yenefa/flexcell/issues/247",
+    "listed_assignee": "zyx-dc",
+    "assignee_is_confirmation": false,
+    "source_checked_date": "2026-11-17",
+    "physical_regression": {
+      "execution_status": "NOT_RUN_BY_REPAIR_EVAL",
+      "source_pr": "https://github.com/Yenefa/flexcell/pull/260",
+      "source_commit": "8a2f6427d8f63761c02fc29bb2b8570fddf3d35d",
+      "preregistration_path": "experiments/physical_capabilities/pick_place_reliability/preregistration.json",
+      "backend": "velocity_servo",
+      "skill_backend": "legacy",
+      "skill_version_source": "source_commit; no independent skill release tag confirmed",
+      "confirmed_run_window": "NOT_CONFIRMED",
+      "slot_timeout_s": 360,
+      "window_budget_s": 1440,
+      "slots": [
+        "NORMAL_1",
+        "DUAL_1",
+        "NORMAL_2",
+        "DUAL_2"
+      ],
+      "environment_source": "PENDING_HOST_BUILD_RECEIPT_OR_OPTIONAL_IMAGE_DIGEST"
+    },
+    "current_evaluation": {
+      "backend": "sealed_source_gate",
+      "skill_backend": "NOT_APPLICABLE",
+      "regression_suite": "issue250 N1-N6 and P1 evaluator-contract fixtures",
+      "environment_source": "automatic host receipt: OS, Python, dependencies and installed ROS/Gazebo metadata",
+      "physical_initial_states_executed": false,
+      "image_required": false
+    },
+    "excluded_capabilities": [
+      "push",
+      "stack",
+      "contact_grasp_verification",
+      "hardware",
+      "cross_embodiment"
+    ],
+    "confirmation_needed": [
+      "#247 owner accepts the shared ordinary-task regression entrypoint and artifact handoff",
+      "exact skill/build revision and host build receipt; image digest is optional if an image is used",
+      "joint run window and resource ownership",
+      "candidate and reference ordinary-task results bound to the same frozen artifacts"
+    ],
+    "delegated_task": "https://github.com/Yenefa/flexcell/issues/265",
+    "delegated_assignee": "zyx-dc"
+  },
+  "environment": {
+    "source_kind": "host_receipt",
+    "python": "3.12.3",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "image_digest": null,
+    "image_required": false,
+    "dependencies": {
+      "pytest": "7.4.4",
+      "PyYAML": "6.0.1"
+    },
+    "installed_files": {
+      "/opt/ros/jazzy/setup.bash": "12556a2725a823c3841f8fbab50892c8b8c69df9654d2a74761407226ecca4df",
+      "/opt/ros/jazzy/share/ros_environment/package.xml": "06c96a0e374501c902c4782da64fa889d0b1e0263c37a1b8deb0479fa3c7c279",
+      "/opt/ros/jazzy/share/ros_gz_sim/package.xml": "2d97e18448dacfe734e61c48a8367d1863342210284c4347002c2c87903694c5",
+      "/opt/ros/jazzy/share/gz_sim_vendor/package.xml": "7bff7b336ffd8c36214800e9389d8cf6126992f5eb5334e1b935f76ecd26e228",
+      "/opt/ros/jazzy/share/rclpy/package.xml": "6367e8f5f30e81867b246a8750ee900d7276f1f52253ba5140c188e360e6cb0f",
+      "/opt/ros/jazzy/share/moveit_configs_utils/package.xml": "a7f0e2428dbe2b612907e52ff355540182838f8a1b41c682e41839188ed2922b"
+    },
+    "os_release_sha256": "87458b3b1f1ca0e5c693ade771de7007c3783bdc692fa6b39eb6414bf2af2763",
+    "os_release": {
+      "PRETTY_NAME": "Ubuntu 24.04.5 LTS",
+      "VERSION_ID": "24.04"
+    },
+    "ros_gazebo_packages": [
+      "ros-jazzy-gz-sim-vendor\t0.0.13-1noble.20260905.073557",
+      "ros-jazzy-ros-base\t0.11.0-1noble.20260903.093452",
+      "ros-jazzy-ros-gz-sim\t1.0.24-1noble.20260905.085151"
+    ],
+    "overlay_relation_to_candidate": "NOT_VERIFIED; installed metadata only, no build performed",
+    "receipt_sha256": "29c4ec060372330cba86da42be1332360ad0824d69a566949326c41ba67f0e7e"
+  },
+  "frozen_environment": {
+    "source_kind": "host_receipt",
+    "python": "3.12.3",
+    "platform": "Linux-6.18.33.2-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+    "image_digest": null,
+    "image_required": false,
+    "dependencies": {
+      "pytest": "7.4.4",
+      "PyYAML": "6.0.1"
+    },
+    "installed_files": {
+      "/opt/ros/jazzy/setup.bash": "12556a2725a823c3841f8fbab50892c8b8c69df9654d2a74761407226ecca4df",
+      "/opt/ros/jazzy/share/ros_environment/package.xml": "06c96a0e374501c902c4782da64fa889d0b1e0263c37a1b8deb0479fa3c7c279",
+      "/opt/ros/jazzy/share/ros_gz_sim/package.xml": "2d97e18448dacfe734e61c48a8367d1863342210284c4347002c2c87903694c5",
+      "/opt/ros/jazzy/share/gz_sim_vendor/package.xml": "7bff7b336ffd8c36214800e9389d8cf6126992f5eb5334e1b935f76ecd26e228",
+      "/opt/ros/jazzy/share/rclpy/package.xml": "6367e8f5f30e81867b246a8750ee900d7276f1f52253ba5140c188e360e6cb0f",
+      "/opt/ros/jazzy/share/moveit_configs_utils/package.xml": "a7f0e2428dbe2b612907e52ff355540182838f8a1b41c682e41839188ed2922b"
+    },
+    "os_release_sha256": "87458b3b1f1ca0e5c693ade771de7007c3783bdc692fa6b39eb6414bf2af2763",
+    "os_release": {
+      "PRETTY_NAME": "Ubuntu 24.04.5 LTS",
+      "VERSION_ID": "24.04"
+    },
+    "ros_gazebo_packages": [
+      "ros-jazzy-gz-sim-vendor\t0.0.13-1noble.20260905.073557",
+      "ros-jazzy-ros-base\t0.11.0-1noble.20260903.093452",
+      "ros-jazzy-ros-gz-sim\t1.0.24-1noble.20260905.085151"
+    ],
+    "overlay_relation_to_candidate": "NOT_VERIFIED; installed metadata only, no build performed",
+    "receipt_sha256": "29c4ec060372330cba86da42be1332360ad0824d69a566949326c41ba67f0e7e"
+  },
+  "details": {
+    "L1|s1": {
+      "candidate": {
+        "evaluated_sha": "4ab5a0a86ccc7a18cbd52a072d4f59ea9c65432729454f1062879f37f78780c3",
+        "layout": "L1",
+        "initial_state": "s1",
+        "evidence_path": "experiments/repair_eval_v02/evidence/holdout_eval_f1.json/slots/L1-s1/candidate",
+        "edit_sha256": "091004be823de84cc01e1396d905ec3331fe8430292b0b9bcfc75c88989580af",
+        "gate": {
+          "ok": true,
+          "code": "PASS",
+          "tracked": [
+            "target_box_a",
+            "target_box_b"
+          ]
+        },
+        "layout_integrity": {
+          "status": "PASS",
+          "changed_or_missing": []
+        },
+        "illegal_changes": [],
+        "status": "PASS"
+      },
+      "reference": {
+        "evaluated_sha": "42ec0b95a59ac884328572d1ed38800a1d7a5a62339ef28111ccf165d3e3b61a",
+        "layout": "L1",
+        "initial_state": "s1",
+        "evidence_path": "experiments/repair_eval_v02/evidence/holdout_eval_f1.json/slots/L1-s1/reference",
+        "edit_sha256": "a8ccb254aa6242618bcd091c0b50a082c1615fcc7efde04e8c06733931c594db",
+        "gate": {
+          "ok": true,
+          "code": "PASS",
+          "tracked": [
+            "target_box_a",
+            "target_box_b"
+          ]
+        },
+        "layout_integrity": {
+          "status": "PASS",
+          "changed_or_missing": []
+        },
+        "illegal_changes": [],
+        "status": "PASS"
+      }
+    },
+    "L1|s2": {
+      "candidate": {
+        "evaluated_sha": "4ab5a0a86ccc7a18cbd52a072d4f59ea9c65432729454f1062879f37f78780c3",
+        "layout": "L1",
+        "initial_state": "s2",
+        "evidence_path": "experiments/repair_eval_v02/evidence/holdout_eval_f1.json/slots/L1-s2/candidate",
+        "edit_sha256": "091004be823de84cc01e1396d905ec3331fe8430292b0b9bcfc75c88989580af",
+        "gate": {
+          "ok": true,
+          "code": "PASS",
+          "tracked": [
+            "target_box_a",
+            "target_box_b"
+          ]
+        },
+        "layout_integrity": {
+          "status": "PASS",
+          "changed_or_missing": []
+        },
+        "illegal_changes": [],
+        "status": "PASS"
+      },
+      "reference": {
+        "evaluated_sha": "42ec0b95a59ac884328572d1ed38800a1d7a5a62339ef28111ccf165d3e3b61a",
+        "layout": "L1",
+        "initial_state": "s2",
+        "evidence_path": "experiments/repair_eval_v02/evidence/holdout_eval_f1.json/slots/L1-s2/reference",
+        "edit_sha256": "a8ccb254aa6242618bcd091c0b50a082c1615fcc7efde04e8c06733931c594db",
+        "gate": {
+          "ok": true,
+          "code": "PASS",
+          "tracked": [
+            "target_box_a",
+            "target_box_b"
+          ]
+        },
+        "layout_integrity": {
+          "status": "PASS",
+          "changed_or_missing": []
+        },
+        "illegal_changes": [],
+        "status": "PASS"
+      }
+    },
+    "L1|s3": {
+      "candidate": {
+        "evaluated_sha": "4ab5a0a86ccc7a18cbd52a072d4f59ea9c65432729454f1062879f37f78780c3",
+        "layout": "L1",
+        "initial_state": "s3",
+        "evidence_path": "experiments/repair_eval_v02/evidence/holdout_eval_f1.json/slots/L1-s3/candidate",
+        "edit_sha256": "091004be823de84cc01e1396d905ec3331fe8430292b0b9bcfc75c88989580af",
+        "gate": {
+          "ok": true,
+          "code": "PASS",
+          "tracked": [
+            "target_box_a",
+            "target_box_b"
+          ]
+        },
+        "layout_integrity": {
+          "status": "PASS",
+          "changed_or_missing": []
+        },
+        "illegal_changes": [],
+        "status": "PASS"
+      },
+      "reference": {
+        "evaluated_sha": "42ec0b95a59ac884328572d1ed38800a1d7a5a62339ef28111ccf165d3e3b61a",
+        "layout": "L1",
+        "initial_state": "s3",
+        "evidence_path": "experiments/repair_eval_v02/evidence/holdout_eval_f1.json/slots/L1-s3/reference",
+        "edit_sha256": "a8ccb254aa6242618bcd091c0b50a082c1615fcc7efde04e8c06733931c594db",
+        "gate": {
+          "ok": true,
+          "code": "PASS",
+          "tracked": [
+            "target_box_a",
+            "target_box_b"
+          ]
+        },
+        "layout_integrity": {
+          "status": "PASS",
+          "changed_or_missing": []
+        },
+        "illegal_changes": [],
+        "status": "PASS"
+      }
+    },
+    "L2|s1": {
+      "candidate": {
+        "evaluated_sha": "4ab5a0a86ccc7a18cbd52a072d4f59ea9c65432729454f1062879f37f78780c3",
+        "layout": "L2",
+        "initial_state": "s1",
+        "evidence_path": "experiments/repair_eval_v02/evidence/holdout_eval_f1.json/slots/L2-s1/candidate",
+        "edit_sha256": "091004be823de84cc01e1396d905ec3331fe8430292b0b9bcfc75c88989580af",
+        "gate": {
+          "ok": true,
+          "code": "PASS",
+          "tracked": [
+            "target_box_a",
+            "target_box_b"
+          ]
+        },
+        "layout_integrity": {
+          "status": "PASS",
+          "changed_or_missing": []
+        },
+        "illegal_changes": [],
+        "status": "PASS"
+      },
+      "reference": {
+        "evaluated_sha": "42ec0b95a59ac884328572d1ed38800a1d7a5a62339ef28111ccf165d3e3b61a",
+        "layout": "L2",
+        "initial_state": "s1",
+        "evidence_path": "experiments/repair_eval_v02/evidence/holdout_eval_f1.json/slots/L2-s1/reference",
+        "edit_sha256": "a8ccb254aa6242618bcd091c0b50a082c1615fcc7efde04e8c06733931c594db",
+        "gate": {
+          "ok": true,
+          "code": "PASS",
+          "tracked": [
+            "target_box_a",
+            "target_box_b"
+          ]
+        },
+        "layout_integrity": {
+          "status": "PASS",
+          "changed_or_missing": []
+        },
+        "illegal_changes": [],
+        "status": "PASS"
+      }
+    },
+    "L2|s2": {
+      "candidate": {
+        "evaluated_sha": "4ab5a0a86ccc7a18cbd52a072d4f59ea9c65432729454f1062879f37f78780c3",
+        "layout": "L2",
+        "initial_state": "s2",
+        "evidence_path": "experiments/repair_eval_v02/evidence/holdout_eval_f1.json/slots/L2-s2/candidate",
+        "edit_sha256": "091004be823de84cc01e1396d905ec3331fe8430292b0b9bcfc75c88989580af",
+        "gate": {
+          "ok": true,
+          "code": "PASS",
+          "tracked": [
+            "target_box_a",
+            "target_box_b"
+          ]
+        },
+        "layout_integrity": {
+          "status": "PASS",
+          "changed_or_missing": []
+        },
+        "illegal_changes": [],
+        "status": "PASS"
+      },
+      "reference": {
+        "evaluated_sha": "42ec0b95a59ac884328572d1ed38800a1d7a5a62339ef28111ccf165d3e3b61a",
+        "layout": "L2",
+        "initial_state": "s2",
+        "evidence_path": "experiments/repair_eval_v02/evidence/holdout_eval_f1.json/slots/L2-s2/reference",
+        "edit_sha256": "a8ccb254aa6242618bcd091c0b50a082c1615fcc7efde04e8c06733931c594db",
+        "gate": {
+          "ok": true,
+          "code": "PASS",
+          "tracked": [
+            "target_box_a",
+            "target_box_b"
+          ]
+        },
+        "layout_integrity": {
+          "status": "PASS",
+          "changed_or_missing": []
+        },
+        "illegal_changes": [],
+        "status": "PASS"
+      }
+    },
+    "L2|s3": {
+      "candidate": {
+        "evaluated_sha": "4ab5a0a86ccc7a18cbd52a072d4f59ea9c65432729454f1062879f37f78780c3",
+        "layout": "L2",
+        "initial_state": "s3",
+        "evidence_path": "experiments/repair_eval_v02/evidence/holdout_eval_f1.json/slots/L2-s3/candidate",
+        "edit_sha256": "091004be823de84cc01e1396d905ec3331fe8430292b0b9bcfc75c88989580af",
+        "gate": {
+          "ok": true,
+          "code": "PASS",
+          "tracked": [
+            "target_box_a",
+            "target_box_b"
+          ]
+        },
+        "layout_integrity": {
+          "status": "PASS",
+          "changed_or_missing": []
+        },
+        "illegal_changes": [],
+        "status": "PASS"
+      },
+      "reference": {
+        "evaluated_sha": "42ec0b95a59ac884328572d1ed38800a1d7a5a62339ef28111ccf165d3e3b61a",
+        "layout": "L2",
+        "initial_state": "s3",
+        "evidence_path": "experiments/repair_eval_v02/evidence/holdout_eval_f1.json/slots/L2-s3/reference",
+        "edit_sha256": "a8ccb254aa6242618bcd091c0b50a082c1615fcc7efde04e8c06733931c594db",
+        "gate": {
+          "ok": true,
+          "code": "PASS",
+          "tracked": [
+            "target_box_a",
+            "target_box_b"
+          ]
+        },
+        "layout_integrity": {
+          "status": "PASS",
+          "changed_or_missing": []
+        },
+        "illegal_changes": [],
+        "status": "PASS"
+      }
+    }
+  },
+  "concluded_at": 1794892662.6580558
+}

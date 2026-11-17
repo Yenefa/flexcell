@@ -1,0 +1,451 @@
+{
+  "qualification": "ARCHIVE_RECOMPUTATION_NOT_A_NEW_EXPERIMENT",
+  "note": "Recomputed from the recorded runs. The aggregate files remain the quoted source; a disagreement means the summary is not reproducible, not that a run was misgraded.",
+  "summary": {
+    "experiments": 6,
+    "records": 19,
+    "successes": 13,
+    "disagreements": 0,
+    "claim_success_true": 0,
+    "false_success_true": 0,
+    "models": [
+      "deepseek-chat",
+      "deepseek-flash",
+      "deepseek-v4-pro"
+    ],
+    "problems": []
+  },
+  "experiments": [
+    {
+      "experiment": "p1.5-w5-20261109",
+      "label": "W5-E1 (first pilot; 2 arms x 1 run)",
+      "layout": "arm_dirs",
+      "mapping": "<arm>/result.json",
+      "declared_n": 2,
+      "aggregate": {
+        "n": null,
+        "success": null
+      },
+      "computed": {
+        "n": 2,
+        "success": 1,
+        "iters": [
+          4,
+          5
+        ],
+        "tokens": [
+          3521,
+          5226
+        ]
+      },
+      "disagreements": [],
+      "claim_success_true": 0,
+      "false_success_true": 0,
+      "models": [
+        "deepseek-chat"
+      ],
+      "records": [
+        {
+          "record": "w5a",
+          "usable": true,
+          "success": true,
+          "first_pass": false,
+          "iterations": 4,
+          "tokens": 3521,
+          "claim_success": false,
+          "false_success": false,
+          "model": "deepseek-chat",
+          "task": "T-W5"
+        },
+        {
+          "record": "w5b",
+          "usable": true,
+          "success": false,
+          "first_pass": false,
+          "iterations": 5,
+          "tokens": 5226,
+          "claim_success": false,
+          "false_success": false,
+          "model": "deepseek-chat",
+          "task": "T-W5"
+        }
+      ]
+    },
+    {
+      "experiment": "p1.5-w5e2-20261109",
+      "label": "W5-E2 (3-round budget, BLOCKED)",
+      "layout": "flat_first_then_dirs",
+      "mapping": "pilot1-result.json + <pilotN>/result.json",
+      "declared_n": 3,
+      "aggregate": {
+        "n": 3,
+        "success": null
+      },
+      "computed": {
+        "n": 3,
+        "success": 0,
+        "iters": [
+          4,
+          4,
+          4
+        ],
+        "tokens": [
+          8235,
+          8709,
+          7500
+        ]
+      },
+      "disagreements": [],
+      "claim_success_true": 0,
+      "false_success_true": 0,
+      "models": [
+        "deepseek-chat"
+      ],
+      "records": [
+        {
+          "record": "pilot1",
+          "usable": true,
+          "success": false,
+          "first_pass": false,
+          "iterations": 4,
+          "tokens": 8235,
+          "claim_success": false,
+          "false_success": false,
+          "model": "deepseek-chat",
+          "task": "T-W5E2"
+        },
+        {
+          "record": "pilot2",
+          "usable": true,
+          "success": false,
+          "first_pass": false,
+          "iterations": 4,
+          "tokens": 8709,
+          "claim_success": false,
+          "false_success": false,
+          "model": "deepseek-chat",
+          "task": "T-W5E2"
+        },
+        {
+          "record": "pilot3",
+          "usable": true,
+          "success": false,
+          "first_pass": false,
+          "iterations": 4,
+          "tokens": 7500,
+          "claim_success": false,
+          "false_success": false,
+          "model": "deepseek-chat",
+          "task": "T-W5E2"
+        }
+      ]
+    },
+    {
+      "experiment": "p1.5-w5e2b-20261109",
+      "label": "W5-E2b (6 rounds + read-only gate)",
+      "layout": "rep_dirs",
+      "mapping": "<rep>/result.json",
+      "declared_n": 3,
+      "aggregate": {
+        "n": 3,
+        "success": 3
+      },
+      "computed": {
+        "n": 3,
+        "success": 3,
+        "iters": [
+          5,
+          3,
+          3
+        ],
+        "tokens": [
+          5161,
+          2668,
+          2668
+        ]
+      },
+      "disagreements": [],
+      "claim_success_true": 0,
+      "false_success_true": 0,
+      "models": [
+        "deepseek-chat"
+      ],
+      "records": [
+        {
+          "record": "rep1",
+          "usable": true,
+          "success": true,
+          "first_pass": false,
+          "iterations": 5,
+          "tokens": 5161,
+          "claim_success": false,
+          "false_success": false,
+          "model": "deepseek-chat",
+          "task": "T-W5E2B"
+        },
+        {
+          "record": "rep2",
+          "usable": true,
+          "success": true,
+          "first_pass": false,
+          "iterations": 3,
+          "tokens": 2668,
+          "claim_success": false,
+          "false_success": false,
+          "model": "deepseek-chat",
+          "task": "T-W5E2B"
+        },
+        {
+          "record": "rep3",
+          "usable": true,
+          "success": true,
+          "first_pass": false,
+          "iterations": 3,
+          "tokens": 2668,
+          "claim_success": false,
+          "false_success": false,
+          "model": "deepseek-chat",
+          "task": "T-W5E2B"
+        }
+      ]
+    },
+    {
+      "experiment": "p1.5-w5e2c-20261109",
+      "label": "W5-E2c (multi-scenario regression gate)",
+      "layout": "rep_dirs",
+      "mapping": "<rep>/result.json",
+      "declared_n": 2,
+      "aggregate": {
+        "n": 2,
+        "success": 0
+      },
+      "computed": {
+        "n": 2,
+        "success": 0,
+        "iters": [
+          6,
+          6
+        ],
+        "tokens": [
+          7519,
+          7582
+        ]
+      },
+      "disagreements": [],
+      "claim_success_true": 0,
+      "false_success_true": 0,
+      "models": [
+        "deepseek-chat"
+      ],
+      "records": [
+        {
+          "record": "rep1",
+          "usable": true,
+          "success": false,
+          "first_pass": false,
+          "iterations": 6,
+          "tokens": 7519,
+          "claim_success": false,
+          "false_success": false,
+          "model": "deepseek-chat",
+          "task": "T-W5E2C"
+        },
+        {
+          "record": "rep2",
+          "usable": true,
+          "success": false,
+          "first_pass": false,
+          "iterations": 6,
+          "tokens": 7582,
+          "claim_success": false,
+          "false_success": false,
+          "model": "deepseek-chat",
+          "task": "T-W5E2C"
+        }
+      ]
+    },
+    {
+      "experiment": "p1.5-w5e2d-20261109",
+      "label": "W5-E2d (explicit action instruction)",
+      "layout": "rep_dirs",
+      "mapping": "<rep>/result.json",
+      "declared_n": 6,
+      "aggregate": {
+        "n": 6,
+        "success": 6
+      },
+      "computed": {
+        "n": 6,
+        "success": 6,
+        "iters": [
+          3,
+          2,
+          2,
+          3,
+          3,
+          3
+        ],
+        "tokens": [
+          3089,
+          1999,
+          1983,
+          3069,
+          3511,
+          3132
+        ]
+      },
+      "disagreements": [],
+      "claim_success_true": 0,
+      "false_success_true": 0,
+      "models": [
+        "deepseek-chat",
+        "deepseek-flash",
+        "deepseek-v4-pro"
+      ],
+      "records": [
+        {
+          "record": "rep1",
+          "usable": true,
+          "success": true,
+          "first_pass": false,
+          "iterations": 3,
+          "tokens": 3089,
+          "claim_success": false,
+          "false_success": false,
+          "model": "deepseek-chat",
+          "task": "T-W5E2D"
+        },
+        {
+          "record": "rep2",
+          "usable": true,
+          "success": true,
+          "first_pass": false,
+          "iterations": 2,
+          "tokens": 1999,
+          "claim_success": false,
+          "false_success": false,
+          "model": "deepseek-chat",
+          "task": "T-W5E2D"
+        },
+        {
+          "record": "rep3",
+          "usable": true,
+          "success": true,
+          "first_pass": false,
+          "iterations": 2,
+          "tokens": 1983,
+          "claim_success": false,
+          "false_success": false,
+          "model": "deepseek-chat",
+          "task": "T-W5E2D"
+        },
+        {
+          "record": "rep4",
+          "usable": true,
+          "success": true,
+          "first_pass": false,
+          "iterations": 3,
+          "tokens": 3069,
+          "claim_success": false,
+          "false_success": false,
+          "model": "deepseek-chat",
+          "task": "T-W5E2D"
+        },
+        {
+          "record": "rep5-v4pro",
+          "usable": true,
+          "success": true,
+          "first_pass": false,
+          "iterations": 3,
+          "tokens": 3511,
+          "claim_success": false,
+          "false_success": false,
+          "model": "deepseek-v4-pro",
+          "task": "T-W5E2D"
+        },
+        {
+          "record": "rep6-flash",
+          "usable": true,
+          "success": true,
+          "first_pass": false,
+          "iterations": 3,
+          "tokens": 3132,
+          "claim_success": false,
+          "false_success": false,
+          "model": "deepseek-flash",
+          "task": "T-W5E2D"
+        }
+      ]
+    },
+    {
+      "experiment": "p1.5-w5e2e-20261109",
+      "label": "W5-E2e (flash model)",
+      "layout": "rep_dirs",
+      "mapping": "<rep>/result.json",
+      "declared_n": 3,
+      "aggregate": {
+        "n": 3,
+        "success": 3
+      },
+      "computed": {
+        "n": 3,
+        "success": 3,
+        "iters": [
+          4,
+          4,
+          4
+        ],
+        "tokens": [
+          4063,
+          4060,
+          4321
+        ]
+      },
+      "disagreements": [],
+      "claim_success_true": 0,
+      "false_success_true": 0,
+      "models": [
+        "deepseek-chat",
+        "deepseek-flash"
+      ],
+      "records": [
+        {
+          "record": "rep1",
+          "usable": true,
+          "success": true,
+          "first_pass": false,
+          "iterations": 4,
+          "tokens": 4063,
+          "claim_success": false,
+          "false_success": false,
+          "model": "deepseek-chat",
+          "task": "T-W5E2E"
+        },
+        {
+          "record": "rep2",
+          "usable": true,
+          "success": true,
+          "first_pass": false,
+          "iterations": 4,
+          "tokens": 4060,
+          "claim_success": false,
+          "false_success": false,
+          "model": "deepseek-chat",
+          "task": "T-W5E2E"
+        },
+        {
+          "record": "rep3-flash",
+          "usable": true,
+          "success": true,
+          "first_pass": false,
+          "iterations": 4,
+          "tokens": 4321,
+          "claim_success": false,
+          "false_success": false,
+          "model": "deepseek-flash",
+          "task": "T-W5E2E"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1578 @@
+#!/usr/bin/env python3
+"""FlexCell deterministic pick-and-place task FSM (Week 1; policy seam since #4).
+
+Strict sequential task over the four skills:
+
+    OBSERVE -> PICK -> PLACE -> VERIFY
+
+The task decisions (sequencing, recoverability, retry budgeting) are ROUTED
+through the DecisionPolicy interface (issue #4, ADR-002): the executor asks
+`FSMPolicy.decide()` at every decision point and consumes the returned
+`Decision` objects. With the default `decision_policy=fsm` the policy encodes
+exactly the frozen Week-1.5 semantics, so behavior is trace-equivalent (B5).
+Every decision is logged to `decisions.jsonl` with evidence references
+(world revision + observe evidence id + decide latency).
+
+FSMPolicy remains the default reference arm. Jev, LLM and Hybrid policies
+use the same executor for both task actions. One task at a time (single-arm
+mutual exclusion). Cancellation is
+honoured between states; a canceled mid-task leaves the robot in the state the
+skills left it in and reports honestly.
+"""
+
+import json
+import math
+import os
+import threading
+import time
+import uuid
+
+from unique_identifier_msgs.msg import UUID
+
+import rclpy
+from rclpy.action import ActionClient, ActionServer, CancelResponse, GoalResponse
+from rclpy.callback_groups import ReentrantCallbackGroup
+from rclpy.executors import MultiThreadedExecutor
+from rclpy.node import Node
+from rclpy.qos import QoSDurabilityPolicy, QoSProfile, QoSReliabilityPolicy
+
+from geometry_msgs.msg import PoseStamped
+from std_msgs.msg import String as StringMsg
+from std_srvs.srv import Trigger
+
+from flexcell_interfaces.action import (
+    Observe, PickObject, PlaceObject, PushObject, RunComposite, RunDemo,
+    RunPickPlace,
+    VerifyObject)
+from flexcell_interfaces.msg import ZoneState
+
+from flexcell_skills.common import JsonlLog, crash_detail, new_evidence
+from flexcell_skills.task_components.push_results import contact_push_result, legacy_push_result
+from flexcell_skills.skill_contract import (
+    check_pick, check_place, check_verify)
+from flexcell_skills.canonical_state import serialize_envelope
+from flexcell_skills.contracts.error_codes import task_abort_error_code
+from flexcell_skills.contracts.action_result import AcceptedGoalResult
+from flexcell_skills.skill_lifecycle import MotionQuarantine, confirm_stop
+from flexcell_skills.contracts.composite import (
+    ACTION_PUSH, CompositeError, Journal, execute as execute_composite,
+    prepare_plan)
+from flexcell_skills.contracts.composite_checkpoint import (
+    claim_checkpoint, load_checkpoint)
+
+from flexcell_skills.contracts.episode import EpisodeRecorder, EpisodeStore
+from flexcell_skills.contracts.benchmark_protocol import load_protocol
+from flexcell_skills.contracts.decision_record import decision_record
+from flexcell_skills.contracts.safety_gate import (
+    destination_clear, metrics as safety_metrics,
+    rejection_canonical_code, sanitize as sanitize_decision, validate)
+from flexcell_skills.contracts.recovery import (
+    RECIPE_PICK, RECIPE_VERIFY, recovery_eligible)
+from flexcell_skills.contracts.skill_result import previous_skill_result
+from flexcell_skills.contracts.task_result import task_abort_detail
+from flexcell_skills.decision_policy import (
+    ACTION_ABORT, ACTION_OBSERVE, ACTION_PICK, ACTION_PLACE, ACTION_VERIFY,
+    Constraints, Decision, FSMPolicy, HistoryRecord, PolicyStateError,
+    TaskGoal, RC_BUDGET_EXHAUSTED, RC_OBSERVE_FAILED, RC_RECOVERABLE_RETRY,
+    RC_VERIFY_BUDGET_EXHAUSTED, RC_VERIFY_MISMATCH_RETRY)
+
+R = RunPickPlace.Result
+
+
+class SkillTransportError(RuntimeError):
+    """An unknown skill result must not become another policy dispatch."""
+
+
+class ComponentGoal:
+    """Internal native goal sharing the parent's cancellation and arm lease."""
+    def __init__(self, parent, request, goal_uuid, stage_id, started, completed=0):
+        self.parent, self.request = parent, request
+        self.goal_id = UUID(uuid=list(bytes.fromhex(goal_uuid)))
+        self.stage_id, self.started, self.completed = stage_id, started, completed
+        self.terminal_status = None
+
+    @property
+    def is_cancel_requested(self):
+        return self.parent.is_cancel_requested
+
+    def publish_feedback(self, feedback):
+        fb = RunComposite.Feedback()
+        fb.stage_id, fb.state = self.stage_id, feedback.state
+        fb.completed_stages = self.completed
+        fb.elapsed_ms = int((time.monotonic() - self.started) * 1000)
+        self.parent.publish_feedback(fb)
+
+    def succeed(self):
+        self.terminal_status = 'SUCCEEDED'
+
+    def canceled(self):
+        self.terminal_status = 'CANCELED'
+
+    def abort(self):
+        self.terminal_status = 'FAILED'
+
+
+def err_name(cls, prefix, value):
+    for k, v in vars(cls).items():
+        if k.startswith(prefix) and isinstance(v, int) and v == value:
+            return k
+    return str(value)
+
+
+def _parse_planted(spec):
+    """Test-hook parser (issue #6 AC): "ACTION[:target]" -> planted Decision.
+
+    Read PER RUN from the plant_out_of_contract parameter, so a runtime
+    `ros2 param set` arms the deterministic out-of-contract proposal for the
+    next demo.  Empty/None -> no planting.
+    """
+    spec = str(spec or '').strip()
+    if not spec:
+        return None
+    action, _, target = spec.partition(':')
+    return Decision(action.strip(), target.strip() or '',
+                    explanation='planted out-of-contract proposal (issue #6 AC)')
+
+
+class TaskFsmServer(Node):
+
+    def __init__(self):
+        super().__init__('task_fsm_server')
+
+        self.declare_parameter('observe_action', '/observe')
+        self.declare_parameter('pick_action', '/pick_object')
+        self.declare_parameter('place_action', '/place_object')
+        self.declare_parameter('verify_action', '/verify_object')
+        self.declare_parameter('push_action', '/push_object')
+        self.declare_parameter('push_backend','legacy')
+        self.declare_parameter('contact_push_action','/contact_push')
+        self.declare_parameter('contact_task_motion_budget',40)
+        self.declare_parameter('contact_task_wall_s',600.)
+        self.declare_parameter('default_place_tolerance_m', 0.05)
+        self.declare_parameter('skill_wait_s', 90.0)
+        self.declare_parameter('log_dir', '~/.ros/flexcell')
+        self.declare_parameter('log_file', 'task_fsm.jsonl')
+
+        gp = self.get_parameter
+        self._cli_observe = ActionClient(self, Observe, gp('observe_action').value,
+                                         callback_group=ReentrantCallbackGroup())
+        self._cli_pick = ActionClient(self, PickObject, gp('pick_action').value,
+                                      callback_group=ReentrantCallbackGroup())
+        self._cli_place = ActionClient(self, PlaceObject, gp('place_action').value,
+                                       callback_group=ReentrantCallbackGroup())
+        self._cli_verify = ActionClient(self, VerifyObject, gp('verify_action').value,
+                                        callback_group=ReentrantCallbackGroup())
+        self._cli_push = ActionClient(self, PushObject, gp('push_action').value,
+                                      callback_group=ReentrantCallbackGroup())
+        self._push_backend=gp('push_backend').value
+        if self._push_backend not in ('legacy','finger_tcp'):raise ValueError('unsupported push backend')
+        if self._push_backend=='finger_tcp':
+            from flexcell_interfaces.action import ContactPush
+            self._contact_type=ContactPush
+            self._cli_contact=ActionClient(self,ContactPush,gp('contact_push_action').value,
+                                           callback_group=ReentrantCallbackGroup())
+        self._contact_budget=int(gp('contact_task_motion_budget').value)
+        self._contact_wall=float(gp('contact_task_wall_s').value)
+        if not 1<=self._contact_budget<=40 or not 0<self._contact_wall<=600.:
+            raise ValueError('contact task budgets exceed the development capability')
+        self._tol = float(gp('default_place_tolerance_m').value)
+        self._skill_wait = float(gp('skill_wait_s').value)
+        self._log = JsonlLog(self, gp('log_dir').value, gp('log_file').value)
+
+        # one atomic admission gate for BOTH task actions - they drive the
+        # same arm (audit P1-3: the old per-action check-then-set flags were
+        # racy and mutually blind; RunDemo and RunPickPlace could run
+        # concurrently on one robot)
+        self.declare_parameter('max_world_age_s', 2.0)
+        self.declare_parameter('stop_cancel_timeout_s', 4.0)
+        self.declare_parameter('stop_result_timeout_s', 12.0)
+        self._admission = threading.Lock()
+        # P0-A: a cancel request is not a stop confirmation. Once a skill's stop
+        # cannot be proven the arm stays quarantined: no lease release, no IDLE,
+        # no new motion dispatch until a verified reset.
+        self._motion_quarantine = MotionQuarantine()
+        self._last_stop = None
+        self._seq = 0
+
+        self._server = ActionServer(
+            self, RunPickPlace, 'run_pick_place',
+            execute_callback=self._execute,
+            goal_callback=lambda req: GoalResponse.ACCEPT,
+            cancel_callback=lambda gh: CancelResponse.ACCEPT,
+            callback_group=ReentrantCallbackGroup())
+
+        # ---------------- Week-1.5 demo task (policy seam since #4) ----------------
+        self.declare_parameter('object_a', 'target_box_a')
+        self.declare_parameter('object_b', 'target_box_b')
+        self.declare_parameter('zone_1_x', 0.12)
+        self.declare_parameter('zone_1_y', -0.15)
+        self.declare_parameter('zone_1_z', 0.0175)
+        self.declare_parameter('zone_2_x', 0.25)
+        self.declare_parameter('zone_2_y', 0.05)
+        self.declare_parameter('zone_2_z', 0.0175)
+        self.declare_parameter('recovery_budget', 1)
+        self.declare_parameter('demo_verify_tolerance_m', 0.06)
+        self.declare_parameter('demo_log_file', 'demo_runs.jsonl')
+        self.declare_parameter('episode_dir', '~/.ros/flexcell/episodes')
+        self.declare_parameter('task_state_topic', '/flexcell/task_state')
+        self.declare_parameter('decision_policy', 'fsm')
+        self.declare_parameter('resume_completed_objects', False)
+        self.declare_parameter('jev_backend', 'local')
+        self.declare_parameter('hybrid_threshold', 0.7)
+        self.declare_parameter('decision_log_file', 'decisions.jsonl')
+        # test hook (issue #6 AC): "ACTION[:target]" - the FIRST decision the
+        # executor receives is replaced by this planted out-of-contract
+        # proposal, so the safety gate's rejection is demonstrable end-to-end
+        self.declare_parameter('plant_out_of_contract', '')
+
+        gp2 = self.get_parameter
+        self._obj_a = gp2('object_a').value
+        self._obj_b = gp2('object_b').value
+        self._zones = {
+            'zone_1': (float(gp2('zone_1_x').value), float(gp2('zone_1_y').value),
+                       float(gp2('zone_1_z').value)),
+            'zone_2': (float(gp2('zone_2_x').value), float(gp2('zone_2_y').value),
+                       float(gp2('zone_2_z').value)),
+        }
+        self._budget = int(gp2('recovery_budget').value)
+        self._demo_tol = float(gp2('demo_verify_tolerance_m').value)
+        self._demo_log = JsonlLog(self, gp2('log_dir').value,
+                                  gp2('demo_log_file').value)
+        self._episodes = EpisodeStore(gp2('episode_dir').value,
+                                      self.get_logger())
+        protocol, digest = load_protocol()
+        self._benchmark_protocol = {'id': protocol['protocol_id'],
+                                    'version': protocol['protocol_version'],
+                                    'sha256': digest}
+
+        self._max_world_age_s = float(
+            self.get_parameter('max_world_age_s').value)
+        self._stop_cancel_timeout_s = float(
+            self.get_parameter('stop_cancel_timeout_s').value)
+        self._stop_result_timeout_s = float(
+            self.get_parameter('stop_result_timeout_s').value)
+        policy_name = gp2('decision_policy').value
+        if policy_name == 'fsm':
+            self._policy = FSMPolicy()
+        elif policy_name in ('jev', 'llm', 'hybrid'):
+            # issue #10 (ratified ④): backend-agnostic fast policy with typed
+            # policy_failure -> FSM fallback (degradation, not deadlock)
+            from flexcell_skills.jev_backends import make_backend
+            from flexcell_skills.jev_policy import JevPolicy
+            from flexcell_skills.hybrid_policy import HybridRouter, LLMPolicy
+            backend = make_backend(str(gp2('jev_backend').value))
+            ok, detail = backend.health()
+            if not ok:
+                self.get_logger().warn(
+                    'jev backend %r unavailable (%s) - fast path will '
+                    'fall back or escalate according to the selected policy' % (
+                        gp2('jev_backend').value, detail))
+            fast = JevPolicy(backend, fallback=FSMPolicy())
+            slow = LLMPolicy(fallback=FSMPolicy())
+            self._policy = (fast if policy_name == 'jev' else
+                            slow if policy_name == 'llm' else
+                            HybridRouter(fast, slow,
+                                         threshold=gp2('hybrid_threshold').value))
+        else:
+            raise ValueError(
+                'unknown decision_policy %r (fsm|jev|llm|hybrid)' % policy_name)
+        if gp2('resume_completed_objects').value:
+            from flexcell_skills.resume_policy import ResumePolicy
+            self._policy = ResumePolicy(self._policy)
+        self._decision_log = JsonlLog(self, gp2('log_dir').value,
+                                      gp2('decision_log_file').value)
+
+        # latched task state so lifecycle reset / diagnostics can read it
+        qos = QoSProfile(depth=1)
+        qos.durability = QoSDurabilityPolicy.TRANSIENT_LOCAL
+        qos.reliability = QoSReliabilityPolicy.RELIABLE
+        self._state_pub = self.create_publisher(
+            StringMsg, gp2('task_state_topic').value, qos)
+        self._reset_srv = self.create_service(
+            Trigger, 'reset_motion_quarantine', self._reset_motion_quarantine)
+        self._publish_task_state('IDLE')
+
+        self._demo_server = ActionServer(
+            self, RunDemo, 'run_demo',
+            execute_callback=self._execute_demo,
+            goal_callback=lambda req: GoalResponse.ACCEPT,
+            cancel_callback=lambda gh: CancelResponse.ACCEPT,
+            callback_group=ReentrantCallbackGroup())
+
+        self._composite_dir = os.path.join(
+            os.path.expanduser(gp2('log_dir').value), 'composites')
+        self._composite_server = ActionServer(
+            self, RunComposite, 'run_composite',
+            execute_callback=self._execute_composite,
+            goal_callback=lambda req: GoalResponse.ACCEPT,
+            cancel_callback=lambda gh: CancelResponse.ACCEPT,
+            callback_group=ReentrantCallbackGroup())
+
+        self.get_logger().info(
+            'Task FSM v3 up | demo: %s->zone_1, %s->zone_2 | recovery budget=%d | '
+            'policy=%s v%s' % (self._obj_a, self._obj_b, self._budget,
+                               self._policy.name, self._policy.version))
+
+    # Lazily created so partially constructed nodes (tests that bypass __init__)
+    # still fail closed: a missing quarantine is an ACTIVE-free gate, not a crash.
+    @property
+    def _quarantine(self):
+        gate = self.__dict__.get("_motion_quarantine")
+        if gate is None:
+            gate = MotionQuarantine()
+            self.__dict__["_motion_quarantine"] = gate
+        return gate
+
+    @_quarantine.setter
+    def _quarantine(self, value):
+        self.__dict__["_motion_quarantine"] = value
+
+    @property
+    def _max_world_age_s(self):
+        # Measured on the real stack: OBSERVE -> PICK -> PLACE spans about 7 s
+        # (a fresh snapshot would be needed every leg otherwise), so a 2 s bound
+        # rejected legitimate place decisions. 10 s still refuses a world left
+        # over from an earlier leg while covering one in-flight leg.
+        return float(self.__dict__.get("_max_world_age_value", 10.0))
+
+    @_max_world_age_s.setter
+    def _max_world_age_s(self, value):
+        self.__dict__["_max_world_age_value"] = value
+
+    @property
+    def _stop_cancel_timeout_s(self):
+        return float(self.__dict__.get("_stop_cancel_s", 4.0))
+
+    @_stop_cancel_timeout_s.setter
+    def _stop_cancel_timeout_s(self, value):
+        self.__dict__["_stop_cancel_s"] = value
+
+    @property
+    def _stop_result_timeout_s(self):
+        return float(self.__dict__.get("_stop_result_s", 12.0))
+
+    @_stop_result_timeout_s.setter
+    def _stop_result_timeout_s(self, value):
+        self.__dict__["_stop_result_s"] = value
+
+    def _finish_arm_state(self, owns_arm):
+        """Release the arm only when no skill stop is unconfirmed."""
+        if not owns_arm:
+            return
+        if self._quarantine.active:
+            self._publish_task_state("QUARANTINED")
+            return
+        self._admission.release()
+        self._publish_task_state('IDLE')
+
+    def _reset_motion_quarantine(self, request, response):
+        """Verified recovery: only a goal that terminated may leave quarantine."""
+        ok, detail = self._quarantine.clear("reset_motion_quarantine")
+        if ok:
+            try:
+                self._admission.release()
+            except RuntimeError:
+                pass
+            self._publish_task_state('IDLE')
+        response.success = bool(ok)
+        response.message = detail
+        try:
+            self.get_logger().info('reset_motion_quarantine: %s' % detail)
+        except Exception:  # noqa: BLE001
+            pass
+        return response
+
+    def _publish_task_state(self, state):
+        pub = self.__dict__.get("_state_pub")
+        if pub is None:
+            return
+        pub.publish(StringMsg(data=state))
+
+
+    # ---------------------------------------------------------------- P0-A
+    def _quarantine_skill(self, label, record, extra=None):
+        """Enter quarantine and log it; the arm lease is deliberately kept."""
+        payload = dict(record)
+        payload["label"] = label
+        payload["terminated"] = bool(record.get("terminated"))
+        if extra:
+            payload.update(extra)
+        entered = self._quarantine.enter(**payload)
+        self._last_stop = entered
+        try:
+            self.get_logger().error(
+                "motion quarantine: %s (cancel=%s terminated=%s reason=%s)"
+                % (label, entered.get("cancel_accepted"),
+                   entered.get("terminated"), entered.get("reason")))
+        except Exception:  # noqa: BLE001
+            pass
+        self._publish_task_state("QUARANTINED")
+        return entered
+
+    def _stop_detail(self, label, record):
+        return ("%s canceled: stop unconfirmed (%s)" % (label, record.get("reason")))
+
+    def _call_skill(self, cli, goal, state, trace, rec, deadline_s, goal_handle=None, t0=None):
+        """Call one skill; returns (result, None) or (None, detail).
+
+        P0-A: a timeout or cancel is only a request; the call returns only after
+        the goal proved it stopped or the arm was quarantined.
+        """
+        trace.append(state)
+        if self._quarantine.active:
+            return None, ("%s not dispatched: motion quarantine is active"
+                          % state)
+        if goal_handle is not None:
+            fb = RunPickPlace.Feedback()
+            fb.state = state
+            fb.elapsed_ms = int((time.monotonic() - t0) * 1000) if t0 else 0
+            goal_handle.publish_feedback(fb)
+        if not cli.wait_for_server(timeout_sec=10.0):
+            return None, "%s skill server unavailable" % state
+        send = cli.send_goal_async(goal)
+        t_send = time.monotonic()
+        while not send.done():
+            if time.monotonic() - t_send > 15.0:
+                record = {"cancel_requested": False, "cancel_accepted": False,
+                          "cancel_detail": "goal send future never completed",
+                          "terminated": False, "reason": "acceptance is unknown",
+                          "result_outcome": None, "result_error_code": None,
+                          "result_detail": ""}
+                self._quarantine_skill(state, record,
+                                       {"goal_identity_unknown": True})
+                return None, "%s goal send timeout: acceptance unknown, quarantined" % state
+            time.sleep(0.02)
+        gh = send.result()
+        if gh is None or not gh.accepted:
+            return None, "%s goal rejected" % state
+        rf = AcceptedGoalResult(gh)
+        t_r = time.monotonic()
+        while not rf.done():
+            if goal_handle is not None and goal_handle.is_cancel_requested:
+                return self._stop_skill(state, gh, rf, rec=rec)
+            if time.monotonic() - t_r > deadline_s:
+                return self._stop_skill(state, gh, rf, rec=rec)
+            time.sleep(0.05)
+        result = rf.result().result
+        rec["%s_result" % state.lower()] = {
+            "outcome": int(result.outcome),
+            "error_code": int(getattr(result, "error_code", 0)),
+            "detail": getattr(result, "detail", ""),
+        }
+        if getattr(result, "outcome", 0) == 3 or getattr(result, "error_code", 0) == 33:
+            record = {"cancel_requested": False, "cancel_accepted": False,
+                      "cancel_detail": "no cancel needed", "terminated": True,
+                      "result_outcome": int(getattr(result, "outcome", -1)),
+                      "result_error_code": int(getattr(result, "error_code", -1)),
+                      "result_detail": str(getattr(result, "detail", ""))[:400],
+                      "reason": "skill reported STATE_UNKNOWN"}
+            self._quarantine_skill(state, record)
+            return None, self._stop_detail(state, record)
+        return result, None
+
+    def _execute(self, goal_handle):
+        """Single-object tasks use the same policy/skill seam as RunDemo."""
+        return self._execute_plan(goal_handle, single=True)
+
+    # =================================================================
+    # Week-1.5 demo task, policy-driven (issue #4 / ADR-002):
+    #   decisions come from FSMPolicy (frozen Week-1.5 semantics) at every
+    #   decision point; the executor gates, dispatches, records. Bounded
+    #   recovery: recoverable pick failures get REOBSERVE + one retry
+    #   (budget=1); place failures abort; verify mismatches get one
+    #   re-verification. Every decision lands in decisions.jsonl with
+    #   evidence references; every step lands in the demo evidence JSONL.
+    # =================================================================
+
+    def _demo_call(self, cli, goal, label, goal_handle, t0, deadline_s, goal_uuid=None):
+        """Run one skill for the demo; returns (result, None) or (None, err_detail).
+
+        P0-A: a timeout or a cancel only *requests* a stop. This helper returns a
+        failure only after the downstream goal either proved it stopped or was
+        quarantined; it never releases the arm on an unconfirmed stop.
+        """
+        if self._quarantine.active:
+            return None, ("%s not dispatched: motion quarantine is active"
+                          % label)
+        if goal_handle is not None:
+            fb_type = (RunPickPlace.Feedback if isinstance(
+                goal_handle.request, RunPickPlace.Goal) else RunDemo.Feedback)
+            fb = fb_type()
+            fb.state = label
+            fb.elapsed_ms = int((time.monotonic() - t0) * 1000)
+            goal_handle.publish_feedback(fb)
+        if not cli.wait_for_server(timeout_sec=10.0):
+            return None, "%s skill server unavailable" % label
+        send = cli.send_goal_async(goal) if goal_uuid is None else cli.send_goal_async(goal,goal_uuid=goal_uuid)
+        t_send = time.monotonic()
+        while not send.done():
+            if time.monotonic() - t_send > 15.0:
+                record = {"cancel_requested": False, "cancel_accepted": False,
+                          "cancel_detail": "goal send future never completed",
+                          "terminated": False, "result_outcome": None,
+                          "result_error_code": None, "result_detail": "",
+                          "reason": "skill goal acceptance is unknown"}
+                self._quarantine_skill(label, record,
+                                       {"goal_identity_unknown": True})
+                return None, ("%s goal send timeout: acceptance unknown, "
+                              "quarantined" % label)
+            if goal_handle is not None and goal_handle.is_cancel_requested:
+                record = {"cancel_requested": False, "cancel_accepted": False,
+                          "cancel_detail": "no goal handle to cancel",
+                          "terminated": False, "result_outcome": None,
+                          "result_error_code": None, "result_detail": "",
+                          "reason": "cancel requested while acceptance is unknown"}
+                self._quarantine_skill(label, record,
+                                       {"goal_identity_unknown": True})
+                return None, ("%s canceled before acceptance: identity unknown, "
+                              "quarantined" % label)
+            time.sleep(0.02)
+        gh = send.result()
+        if gh is None or not gh.accepted:
+            return None, "%s goal rejected" % label
+        rf = AcceptedGoalResult(gh)
+        t_r = time.monotonic()
+        while not rf.done():
+            if goal_handle is not None and goal_handle.is_cancel_requested:
+                return self._stop_skill(label, gh, rf)
+            if time.monotonic() - t_r > deadline_s:
+                return self._stop_skill(label, gh, rf)
+            time.sleep(0.05)
+        result = rf.result().result
+        if getattr(result, "outcome", 0) == 3 or getattr(result, "error_code", 0) == 33:
+            record = {"cancel_requested": False, "cancel_accepted": False,
+                      "cancel_detail": "no cancel needed", "terminated": True,
+                      "result_outcome": int(getattr(result, "outcome", -1)),
+                      "result_error_code": int(getattr(result, "error_code", -1)),
+                      "result_detail": str(getattr(result, "detail", ""))[:400],
+                      "reason": "skill reported STATE_UNKNOWN"}
+            self._quarantine_skill(label, record)
+            return None, self._stop_detail(label, record)
+        return result, None
+
+    def _stop_skill(self, label, gh, rf, rec=None):
+        """Request a stop and wait for the proof; quarantine when unproven."""
+        record = confirm_stop(
+            gh, rf,
+            cancel_timeout_s=self._stop_cancel_timeout_s,
+            result_timeout_s=self._stop_result_timeout_s)
+        self._last_stop = record
+        if record.get("stop_confirmed"):
+            try:
+                result = rf.result().result
+            except Exception as exc:  # noqa: BLE001
+                self._quarantine_skill(label, record)
+                return None, "%s canceled: result unreadable (%s)" % (label, exc)
+            if rec is not None:
+                rec["%s_result" % label.lower()] = {
+                    "outcome": int(result.outcome),
+                    "error_code": int(getattr(result, "error_code", 0)),
+                    "detail": getattr(result, "detail", ""),
+                }
+            return result, None
+        self._quarantine_skill(label, record)
+        return None, self._stop_detail(label, record)
+
+    def _has_pending_skill_goal(self):
+        """True while a skill goal's acceptance is unknown.
+
+        This build has no goal-quarantine machinery, so there is never an
+        unconfirmed send; the hook exists so the composite path and the demo
+        path share one admission rule.
+        """
+        return self._quarantine.active or bool(
+            getattr(self, "_pending_skill_sends", {}))
+
+    def _execute_demo(self, goal_handle):
+        return self._execute_plan(goal_handle, single=False)
+
+    def _execute_composite(self, goal_handle):
+        """Hold the common arm admission gate across the entire outer chain."""
+        started = time.monotonic()
+        res = RunComposite.Result()
+        res.outcome, res.error_code = res.OUTCOME_FAILED, res.ERR_INTERNAL
+        res.run_id = 'composite-' + uuid.uuid4().hex[:16]
+        journal, owns_arm = None, False
+        progress = []
+        try:
+            journal = Journal(self._composite_dir, res.run_id, dict(
+                goal_uuid=bytes(goal_handle.goal_id.uuid).hex(),
+                runtime_fingerprint=os.environ.get('FLEXCELL_RUNTIME_FINGERPRINT'),
+                policy=self._policy.name, policy_version=self._policy.version,
+                push_backend=getattr(self,'_push_backend','legacy'),
+                contract_version=2))
+            res.evidence_id = str(journal.path)
+            if not self._admission.acquire(blocking=False):
+                res.error_code, res.detail = (
+                    res.ERR_RESOURCE_BUSY, 'another task owns the arm')
+                journal.emit('TERMINAL', outcome=1, error_code=res.error_code,
+                             detail=res.detail)
+            else:
+                owns_arm = True
+                self._active_task_run_id = res.run_id
+                self._publish_task_state('BUSY')
+                if self._has_pending_skill_goal():
+                    res.error_code = res.ERR_RESOURCE_BUSY
+                    res.detail = 'skill acceptance or stop confirmation is unknown'
+                    journal.emit('TERMINAL', outcome=1,
+                                 error_code=res.error_code, detail=res.detail)
+                else:
+                    goal = goal_handle.request
+                    self._contact_remaining=getattr(self,'_contact_budget',40)
+
+                    def xyz(p):
+                        return [p.x, p.y, p.z]
+
+                    names = [p.object_name for p in goal.initial_objects]
+                    if len(names) != len(set(names)):
+                        raise ValueError('duplicate initial objects')
+                    stages = []
+                    for stage in goal.stages:
+                        # getattr: a caller built against the pre-T08
+                        # CompositeStage simply has no action field, and must
+                        # keep meaning "place".
+                        if int(getattr(stage, 'action', 0)) == ACTION_PUSH:
+                            # Validated by the contract, not here: this function
+                            # only maps the wire representation. Anything the
+                            # contract would refuse is left to be refused there,
+                            # so there is exactly one validator.
+                            entry = dict(
+                                stage_id=stage.stage_id,
+                                object_name=stage.object_name,
+                                action=ACTION_PUSH,
+                                direction=[float(stage.push_direction.x),
+                                           float(stage.push_direction.y),
+                                           float(stage.push_direction.z)],
+                                distance_m=float(stage.push_distance_m))
+                            # NaN on the wire means "use the server parameter".
+                            # It is forwarded as NaN, not as 0.0: 0.0 is a real
+                            # height and would silently push at the table plane.
+                            for wire, key in (('contact_height_m', 'contact_height_m'),
+                                              ('overdrive_m', 'overdrive_m')):
+                                value = float(getattr(stage, wire, float('nan')))
+                                if not math.isnan(value):
+                                    entry[key] = value
+                            if int(getattr(stage, 'max_increments', 0)):
+                                entry['max_increments'] = int(
+                                    getattr(stage, 'max_increments'))
+                            stages.append(entry)
+                            continue
+                        pose = stage.place_pose
+                        q = pose.pose.orientation
+                        if (pose.header.frame_id != 'world' or
+                                [q.x, q.y, q.z, q.w] != [0., 0., 0., 1.]):
+                            raise ValueError('stages require world frame and '
+                                             'identity orientation')
+                        stages.append(dict(
+                            stage_id=stage.stage_id,
+                            object_name=stage.object_name,
+                            destination=xyz(pose.pose.position)))
+                    plan = prepare_plan(dict(
+                        scenario_id=goal.scenario_id,
+                        initial_objects={p.object_name: xyz(p.position)
+                                         for p in goal.initial_objects},
+                        stages=stages,
+                        final_empty_positions=[xyz(p)
+                                               for p in goal.final_empty_positions],
+                        position_tolerance_m=goal.position_tolerance_m,
+                        clearance_m=goal.clearance_m,
+                        motion_profile_id=goal.motion_profile_id))
+                    checkpoint = None
+                    if goal.resume_run_id or goal.resume_receipt_sha256:
+                        if goal.pause_after_stages:
+                            raise CompositeError(
+                                65, 'resume must finish the remaining chain')
+                        try:
+                            checkpoint = load_checkpoint(
+                                self._composite_dir, goal.resume_run_id,
+                                goal.resume_receipt_sha256, plan,
+                                os.environ.get('FLEXCELL_RUNTIME_FINGERPRINT'),
+                                self._episodes._dir)
+                        except (ValueError, KeyError, TypeError, OSError) as exc:
+                            raise CompositeError(65, 'checkpoint rejected: ' + str(exc))
+                        if (checkpoint['policy'] != self._policy.name or
+                                checkpoint['policy_version'] != self._policy.version):
+                            raise CompositeError(
+                                65, 'checkpoint policy identity mismatch')
+                        checkpoint['claim'] = claim_checkpoint(
+                            self._composite_dir, checkpoint, res.run_id)
+                        res.resumed_from_run_id = goal.resume_run_id
+                        res.inherited_stages = len(checkpoint['completed_stage_ids'])
+                        progress.extend(checkpoint['completed_stage_ids'])
+
+                    def emit(event, **data):
+                        journal.emit(event, **data)
+                        if event == 'COMMITTED':
+                            progress.append(data['stage_id'])
+
+                    def observe(stage_id, boundary):
+                        view = ComponentGoal(
+                            goal_handle, RunPickPlace.Goal(), uuid.uuid4().hex,
+                            stage_id, started, len(progress))
+                        request = Observe.Goal()
+                        request.refresh = True
+                        if getattr(self,'_push_backend','legacy')=='finger_tcp':request.max_age_s=.5
+                        reply, error = self._demo_call(
+                            self._cli_observe, request,
+                            'OBSERVE_' + boundary.upper(), view, started,
+                            self._skill_wait)
+                        if reply is None:
+                            raise SkillTransportError(error)
+                        ws = reply.world_state
+                        if getattr(self,'_push_backend','legacy')=='finger_tcp' and any(
+                                not math.isfinite(o.pose_age_s) or not 0<=o.pose_age_s<=.5 for o in ws.objects):
+                            raise SkillTransportError('contact task observation has stale/unavailable source ages')
+                        return dict(
+                            outcome=int(reply.outcome),
+                            error_code=int(reply.error_code),
+                            evidence_id=reply.evidence_id,
+                            source=ws.source, revision=int(ws.revision),
+                            carry=dict(engaged=bool(ws.carry.engaged),
+                                       object_id=ws.carry.object_id),
+                            objects=[dict(name=o.name,
+                                          available=bool(o.available),
+                                          position=xyz(o.pose.position))
+                                     for o in ws.objects])
+
+                    def native(stage, goal_uuid):
+                        if stage.get('action') == ACTION_PUSH:
+                            return self._native_push(stage, goal_uuid, res,
+                                                     goal_handle, started,
+                                                     plan, progress)
+                        request = RunPickPlace.Goal()
+                        request.object_name = stage['object_name']
+                        request.motion_profile_id = plan['motion_profile_id']
+                        request.place_pose.header.frame_id = 'world'
+                        request.place_pose.pose.orientation.w = 1.
+                        p = request.place_pose.pose.position
+                        p.x, p.y, p.z = map(float, stage['destination'])
+                        request.skip_verify = False
+                        context = dict(parent_run_id=res.run_id,
+                                       stage_id=stage['stage_id'])
+                        view = ComponentGoal(goal_handle, request, goal_uuid,
+                                             stage['stage_id'], started,
+                                             len(progress))
+                        result = self._execute_plan(
+                            view, single=True, admission_held=True,
+                            component=context)
+                        self._active_task_run_id = res.run_id
+                        return dict(
+                            context, goal_uuid=goal_uuid,
+                            terminal_status=view.terminal_status,
+                            outcome=int(result.outcome),
+                            error_code=int(result.error_code),
+                            detail=result.detail,
+                            object_at_place=bool(result.object_at_place),
+                            final_position_error_m=result.final_position_error_m)
+
+                    result = execute_composite(
+                        plan, observe, native, emit,
+                        lambda: goal_handle.is_cancel_requested,
+                        pause_after_stages=int(goal.pause_after_stages),
+                        checkpoint=checkpoint)
+                    for field in ('outcome', 'error_code', 'detail',
+                                  'completed_stage_ids', 'component_run_ids',
+                                  'component_goal_uuids'):
+                        setattr(res, field, result[field])
+        except Exception as exc:
+            res.outcome = res.OUTCOME_FAILED
+            res.error_code = (exc.code if isinstance(exc, CompositeError) else
+                              res.ERR_INVALID_PLAN if isinstance(exc, ValueError) else
+                              res.ERR_INTERNAL)
+            res.detail = crash_detail(exc)
+            if journal is not None:
+                try:
+                    journal.emit('TERMINAL', outcome=int(res.outcome),
+                                 error_code=int(res.error_code),
+                                 detail=res.detail)
+                except Exception as log_exc:
+                    self.get_logger().error(
+                        'composite receipt failed: %s' % log_exc)
+        finally:
+            if owns_arm:
+                if self._quarantine.active:
+                    self._publish_task_state('QUARANTINED')
+                else:
+                    self._publish_task_state(
+                        'BUSY' if self._has_pending_skill_goal() else 'IDLE')
+                    self._admission.release()
+            if journal is not None:
+                try:
+                    journal.close()
+                except Exception as exc:
+                    res.outcome, res.error_code = (
+                        res.OUTCOME_FAILED, res.ERR_INTERNAL)
+                    res.detail = crash_detail(exc)
+        if res.outcome in (res.OUTCOME_SUCCEEDED, res.OUTCOME_PAUSED):
+            goal_handle.succeed()
+        elif res.outcome == res.OUTCOME_CANCELED:
+            goal_handle.canceled()
+        else:
+            goal_handle.abort()
+        return res
+
+    def _native_push(self, stage, goal_uuid, res, goal_handle, started, plan,
+                     progress):
+        """Dispatch one push stage as a native PushObject goal.
+
+        The component record is shaped exactly like a place component - same
+        keys the composite contract re-checks - plus the measured push fields.
+        That way push stages ride the existing chain machinery (journal,
+        ordering, independent postcondition) instead of a parallel path.
+        """
+        if getattr(self,'_push_backend','legacy')=='finger_tcp':
+            return self._native_contact_push(stage,goal_uuid,res,goal_handle,started,plan,progress)
+        request = PushObject.Goal()
+        request.request_id = 'push-' + uuid.uuid4().hex
+        request.object_name = stage['object_name']
+        direction = stage['direction']
+        request.direction.x = float(direction[0])
+        request.direction.y = float(direction[1])
+        request.direction.z = float(direction[2])
+        request.distance_m = float(stage['distance_m'])
+        request.contact_height_m = float(stage.get('contact_height_m', float('nan')))
+        request.overdrive_m = float(stage.get('overdrive_m', float('nan')))
+        request.max_increments = int(stage.get('max_increments', 0))
+        request.motion_profile_id = plan['motion_profile_id']
+        context = dict(parent_run_id=res.run_id, stage_id=stage['stage_id'])
+        view = ComponentGoal(goal_handle, request, goal_uuid, stage['stage_id'],
+                             started, len(progress))
+        context.update(goal_uuid=goal_uuid)
+        skill_result, error = self._demo_call(
+            self._cli_push, request, 'PUSH_' + stage['stage_id'], view,
+            started, self._skill_wait)
+        self._active_task_run_id = res.run_id
+        if skill_result is None:
+            view.abort()
+            return dict(
+                context, terminal_status='FAILED', outcome=1,
+                error_code=2, detail=error or 'push transport failure',
+                final_state=dict(goal_uuid=goal_uuid, error_code=2))
+        # The ComponentGoal shares the parent's cancellation; its terminal
+        # status is what the composite contract reads back, so it must be set
+        # from the CHILD's reported outcome, never assumed.
+        if int(skill_result.outcome) == 0:
+            view.succeed()
+        elif int(skill_result.outcome) == 2:
+            view.canceled()
+        else:
+            view.abort()
+        return legacy_push_result(skill_result, context, request.request_id,
+                                  view.terminal_status, goal_uuid)
+
+    def _native_contact_push(self,stage,goal_uuid,res,goal_handle,started,plan,progress):
+        request=self._contact_type.Goal()
+        request.request_id='contact-'+uuid.uuid4().hex;request.object_name=stage['object_name']
+        request.direction.x,request.direction.y,request.direction.z=map(float,stage['direction'])
+        request.distance_m=float(stage['distance_m']);request.motion_profile_id=plan['motion_profile_id']
+        request.preserve_objects=sorted(set(plan['initial_objects'])-{request.object_name})
+        remaining_wall=self._contact_wall-(time.monotonic()-started)
+        if self._contact_remaining<13 or remaining_wall<=0:
+            raise CompositeError(62,'executor contact task budget exhausted before dispatch')
+        wait=min(300.,remaining_wall);request.deadline_ms=max(1,int(wait*1000))
+        request.max_motion_goals=min(13,self._contact_remaining)
+        view=ComponentGoal(goal_handle,request,goal_uuid,stage['stage_id'],started,len(progress))
+        try:
+            reply,error=self._demo_call(self._cli_contact,request,'CONTACT_'+stage['stage_id'],view,
+                started,wait,goal_uuid=UUID(uuid=list(bytes.fromhex(goal_uuid))))
+        except Exception as exc:
+            self._quarantine_skill('CONTACT_PUSH',dict(reason='contact transport exception; ownership unknown',
+                terminated=False,result_outcome=3,result_error_code=33,result_detail=str(exc)))
+            reply,error=None,'contact transport failed with unknown acceptance or terminal: '+str(exc)
+        context=dict(parent_run_id=res.run_id,stage_id=stage['stage_id'],backend='finger_tcp',
+            goal_uuid=goal_uuid,request_id=request.request_id,run_id=request.request_id)
+        if reply is None:
+            return dict(context,terminal_status='FAILED',outcome=3 if self._quarantine.active else 1,
+                        error_code=33 if self._quarantine.active else 2,
+                        detail=error or 'contact reply unavailable',final_state=dict(goal_uuid=goal_uuid,error_code=2))
+        self._contact_remaining-=int(reply.motion_goals_used)
+        if not reply.motion_terminal_known:
+            self._quarantine_skill('CONTACT_PUSH',dict(reason='contact terminal unknown',terminated=False,
+                result_outcome=3,result_error_code=33,result_detail=reply.detail))
+        return contact_push_result(reply, context, plan['initial_objects'],
+                                   self._contact_remaining, goal_uuid, time.monotonic_ns)
+
+    def _execute_plan(self, goal_handle, single=False, admission_held=False,
+                      component=None):
+        t0 = time.monotonic()
+        goal = goal_handle.request
+        self._seq += 1
+        scenario = ('pick_place_v1' if single else
+                    goal.scenario_id or 'week1_demo_v1')
+        result_type = RunPickPlace.Result if single else RunDemo.Result
+        owns_arm = False
+        zones = dict(self._zones)
+        if single:
+            pp = goal.place_pose.pose.position
+            zones['task_place'] = (pp.x, pp.y, pp.z)
+        run_id = '%s-%s' % (scenario, uuid.uuid4().hex[:8])
+        _, evidence = new_evidence(scenario, self._seq)
+        trace = []
+        steps = []
+        res = result_type()
+        verify_results = {}
+        # episode recorder (issue #7 / §4.4): the exact policy input at every
+        # decide() call, persisted for offline policy-input replay
+        episode = EpisodeRecorder(scenario, run_id, self._policy.name,
+                                  self._policy.version)
+        # safety-gate accounting (issue #6): per-run, executor-owned counters
+        safety_evaluated = 0
+        safety_rejected = 0
+        planted = _parse_planted(
+            self.get_parameter('plant_out_of_contract').value)
+        if planted is not None:
+            self.get_logger().warn(
+                'SAFETY TEST HOOK armed: first decision will be planted '
+                '(%r -> %r)' % (planted.action, planted.target))
+        planted_used = False
+
+        finished = []
+
+        def finish(outcome, error, detail):
+            # P1-F: finish() is idempotent. A second call (an exception handler
+            # after a normal return, a cancel race) must NOT write a second
+            # episode, a second log line or a different result - it returns the
+            # first, already-decided result unchanged.
+            if finished:
+                return finished[0]
+            finished.append(res)
+            res.outcome, res.error_code = outcome, error
+            res.detail, res.fsm_trace, res.evidence_id = detail, trace, evidence
+            duration_s = time.monotonic() - t0
+            final = {
+                'outcome': str(outcome), 'error_code': int(error),
+                'detail': detail, 'fsm_trace': list(trace),
+                'duration_s': duration_s, 'evidence_id': evidence,
+                'safety': safety_metrics(safety_evaluated, safety_rejected),
+            }
+            ros_goal = getattr(goal_handle, 'goal_id', None)
+            if ros_goal is not None:
+                final['goal_uuid'] = bytes(ros_goal.uuid).hex()
+            if component is not None:
+                final.update(parent_run_id=component['parent_run_id'],
+                             stage_id=component['stage_id'],
+                             execution_kind='IN_PROCESS_COMPONENT',
+                             component_execution_id=final.get('goal_uuid'))
+            if single:
+                vr = verify_results.get('a')
+                res.object_at_place = bool(
+                    (vr is not None and int(vr.outcome) == 0) or
+                    (goal.skip_verify and outcome == result_type.OUTCOME_SUCCEEDED))
+                res.final_position_error_m = (
+                    float(vr.position_error_m)
+                    if vr is not None and vr.has_measured_pose else float('nan'))
+                final.update(object_at_place=res.object_at_place,
+                             final_position_error_m=res.final_position_error_m)
+            else:
+                res.scenario_id, res.run_id = scenario, run_id
+                res.duration_s = duration_s
+                for tag in ('a', 'b'):
+                    vr = verify_results.get(tag)
+                    v_ok = vr is not None and int(vr.outcome) == 0
+                    setattr(res, 'object_%s_at_zone' % tag, bool(v_ok))
+                    setattr(res, 'zone_%s_error_m' % tag,
+                            float(vr.position_error_m)
+                            if vr is not None and vr.has_measured_pose
+                            else float('nan'))
+                    final['object_%s_at_zone' % tag] = bool(v_ok)
+                    final['zone_%s_error_m' % tag] = getattr(
+                        res, 'zone_%s_error_m' % tag)
+            episode.drop_pending()
+            episode_path = self._episodes.write(episode.to_dict(
+                final_state=final, protocol=getattr(self, '_benchmark_protocol', None)))
+            if component is not None:
+                component.update(run_id=run_id, final_state=final,
+                                 episode_path=episode_path)
+            log_record = dict(final, scenario_id=scenario, run_id=run_id,
+                              steps=steps)
+            if single:
+                log_record.update(object_name=goal.object_name,
+                                  place=list(zones['task_place']))
+                self._log.write(log_record)
+            else:
+                self._demo_log.write(log_record)
+            if owns_arm:
+                self._publish_task_state(
+                    'BUSY' if self._has_pending_skill_goal() else 'IDLE')
+            if outcome == result_type.OUTCOME_SUCCEEDED:
+                goal_handle.succeed()
+            elif outcome == result_type.OUTCOME_CANCELED:
+                goal_handle.canceled()
+            else:
+                goal_handle.abort()
+            return res
+
+        if self._quarantine.active:
+            record = self._quarantine.record() or {}
+            return finish(result_type.OUTCOME_FAILED,
+                          result_type.ERR_SKILL_FAILED,
+                          ("motion quarantine active (%s): no new motion may be "
+                           "dispatched until a verified reset" % record.get("reason")))
+
+        if not admission_held and not self._admission.acquire(blocking=False):
+            return finish(result_type.OUTCOME_FAILED,
+                          result_type.ERR_RESOURCE_BUSY,
+                          'another demo task is active')
+        owns_arm = not admission_held
+        self._active_task_run_id = run_id
+        self._publish_task_state('BUSY')
+        try:
+            if self._has_pending_skill_goal():
+                return finish(
+                    result_type.OUTCOME_FAILED, result_type.ERR_RESOURCE_BUSY,
+                    'skill goal acceptance or stop confirmation is unknown')
+            if single and not goal.object_name:
+                return finish(result_type.OUTCOME_FAILED, result_type.ERR_OBJECT_UNKNOWN,
+                              'object_name is empty')
+            # ---- decision inputs (ADR-002: executor assembles, policy decides) ----
+            goal_obj = TaskGoal(
+                goal_id=run_id,
+                scenario_id=scenario,
+                assignments=(((goal.object_name, 'task_place'),) if single else
+                             ((self._obj_a, 'zone_2'), (self._obj_b, 'zone_1'))),
+            )
+            constraints = Constraints(
+                allowed_actions=frozenset((
+                    ACTION_OBSERVE, ACTION_PICK, ACTION_PLACE, ACTION_VERIFY,
+                    'WAIT', ACTION_ABORT)),
+                recovery_budget=self._budget,
+                verify_tolerance_m=(self._tol if single else self._demo_tol),
+                motion_profile_id=(goal.motion_profile_id or 'demo_slow'
+                                   if single else 'demo_slow'),
+                max_world_age_s=self._max_world_age_s,
+            )
+            zone_of = dict(goal_obj.assignments)
+            world = None
+            world_sampled_monotonic = None
+            history = []
+            last_skill_result = None
+
+            def record_skill_evidence(action, result, error):
+                # Policy history has frozen OBSERVE sentinel semantics. Keep
+                # diagnostics separate so a real failure is not called a timeout.
+                nonlocal last_skill_result
+                has_reply = error is None and result is not None
+                last_skill_result = previous_skill_result(
+                    action, result.outcome if has_reply else 255,
+                    result.error_code if has_reply else -1)
+
+            decision_seq = 0
+            tag = 'A'
+            attempt = 1
+            vattempt = 1
+            last_world_revision = 0
+            last_observe_evidence = ''
+            last_fail_label = ''
+
+            def tag_of(object_id):
+                return 'A' if single or object_id == self._obj_a else 'B'
+
+            while True:
+                # cancellation is honoured at decision boundaries (the original
+                # demo loop never checked it - safety delta, documented in #4)
+                if goal_handle.is_cancel_requested:
+                    return finish(result_type.OUTCOME_CANCELED,
+                                  result_type.ERR_CANCELED,
+                                  'canceled (trace=%s)' % ','.join(trace))
+                # completion is structural (all assignments verified), not a decision
+                verified_targets = {d.target for d in history
+                                    if d.action == ACTION_VERIFY and d.outcome == 0}
+                if single and goal.skip_verify:
+                    verified_targets = {d.target for d in history
+                                        if d.action == ACTION_PLACE and d.outcome == 0}
+                if {obj for obj, _ in goal_obj.assignments} <= verified_targets:
+                    if single and goal.skip_verify:
+                        trace.append('VERIFY(skipped)')
+                    return finish(result_type.OUTCOME_SUCCEEDED,
+                                  result_type.ERR_NONE,
+                                  'task done: all assignments verified')
+
+                if decision_seq >= 64:
+                    return finish(result_type.OUTCOME_FAILED, result_type.ERR_SKILL_FAILED,
+                                  'executor decision limit reached (64)')
+                # P1-A/P1-C: a single OBSERVE cannot cover a whole leg (PICK plus
+                # lift spans several seconds), so a world older than the bound is
+                # refreshed BEFORE the policy is asked. Refreshing keeps the
+                # freshness gate honest instead of widening it until it never fires.
+                if (world is not None and world_sampled_monotonic is not None
+                        and self._max_world_age_s > 0
+                        and time.monotonic() - world_sampled_monotonic
+                        > self._max_world_age_s):
+                    og = Observe.Goal()
+                    og.refresh = True
+                    stale_r, stale_err = self._demo_call(
+                        self._cli_observe, og, 'OBSERVE_refresh', goal_handle, t0, 30.0)
+                    if stale_err is None and stale_r is not None and (
+                            int(stale_r.outcome)
+                            == Observe.Result.OUTCOME_SUCCEEDED):
+                        world = stale_r.world_state
+                        world_sampled_monotonic = time.monotonic()
+                        last_world_revision = int(world.revision)
+                        last_observe_evidence = getattr(stale_r, 'evidence_id', '')
+                        # The refresh REPLACES the executor world only. It is not
+                        # appended to history: FSMPolicy replays the frozen
+                        # OBSERVE->PICK->PLACE->VERIFY order from history, so an
+                        # extra record would look like an out-of-order decision
+                        # and the policy would raise a state error.
+
+                # ---- ask the policy WHAT next ----
+                # issue #7: persist the EXACT policy input before decide()
+                world_canonical = (serialize_envelope(
+                    world, sampled_monotonic=world_sampled_monotonic)
+                    if world is not None else None)
+                episode.begin_step(world_canonical, goal_obj, constraints,
+                                   history)
+                t_dec = time.perf_counter_ns()
+                decision = self._policy.decide(world, goal_obj, constraints,
+                                               tuple(history))
+                d_ms = (time.perf_counter_ns() - t_dec) / 1_000_000.0
+                if planted is not None and not planted_used:
+                    # issue #6 AC test hook: the executor receives the planted
+                    # out-of-contract proposal instead of the policy's output
+                    decision = planted
+                    planted_used = True
+                episode.record_decision(decision, d_ms, clock='perf_counter_ns')
+
+                recovery_audit = None
+                if (history and decision.reason_code in (
+                        RC_RECOVERABLE_RETRY, RC_VERIFY_MISMATCH_RETRY,
+                        RC_BUDGET_EXHAUSTED)):
+                    last_rec = history[-1]
+                    recovery_audit = {
+                        'recipe': (RECIPE_PICK
+                                   if decision.reason_code == RC_RECOVERABLE_RETRY
+                                   else (RECIPE_VERIFY
+                                         if decision.reason_code == RC_VERIFY_MISMATCH_RETRY
+                                         else 'BUDGET_EXHAUSTED')),
+                        'eligible': recovery_eligible(
+                            last_rec.action, last_rec.error_code,
+                            last_rec.outcome),
+                        'error_code': int(last_rec.error_code),
+                        'canonical_error_code': (
+                            prev['canonical_error_code'] if prev else None),
+                        'attempt': (vattempt
+                                    if decision.reason_code == RC_VERIFY_MISMATCH_RETRY
+                                    else attempt),
+                        'budget_cap': constraints.recovery_budget,
+                    }
+
+                # ---- safety gate (issue #6): deterministic, BEFORE dispatch.
+                # Consumes the policy-facing view (canonical envelope), never
+                # the planning-scene belief; free text cannot pass (sanitize
+                # is what the dispatcher would see).
+                safety_evaluated += 1
+                decision_seq += 1
+                # prev / recovery_audit (the policy-facing view of the last
+                # skill result and the recovery context) are needed by BOTH
+                # the gate's rejection record and the regular decision log -
+                # compute them before the gate
+                prev = last_skill_result
+                recovery_audit = None
+                world_dict = (json.loads(world_canonical)
+                              if world_canonical is not None else None)
+                gate_ok, gate_reason = validate(decision, goal_obj, world_dict,
+                                                constraints, history)
+                if gate_ok and decision.action == ACTION_PICK:
+                    gate_ok, gate_reason = destination_clear(
+                        world_dict, decision.target, zones[zone_of[decision.target]])
+                if not gate_ok:
+                    safety_rejected += 1
+                    # P1-B: the rejection reason is typed, not flattened into
+                    # one code. The mapping is the existing
+                    # rejection_canonical_code() vocabulary, so a stale world,
+                    # an unknown target and a contract violation stay
+                    # distinguishable for the caller and for the decision log.
+                    rejection_code = rejection_canonical_code(gate_reason)
+                    rejection_kind = str(gate_reason or '').split(':', 1)[0]
+                    self._decision_log.write(decision_record(
+                        run_id=run_id, scenario=scenario, seq=decision_seq,
+                        previous_skill_result=prev, recovery=recovery_audit,
+                        decision=decision, policy_name=self._policy.name,
+                        policy_version=self._policy.version,
+                        world_revision=last_world_revision,
+                        observe_evidence_id=last_observe_evidence,
+                        decide_latency_ms=d_ms, dispatched=False,
+                        rejection_kind=gate_reason,
+                        rejection_error_code=rejection_code))
+                    episode.record_executor_result(
+                        detail='safety rejection: %s' % gate_reason,
+                        post_condition='SAFETY_REJECTED')
+                    # The ACTION contract keeps ERR_SAFETY_REJECTED (a client
+                    # switch on the action code must not change); the typed
+                    # canonical cause rides in the detail prefix and in the
+                    # decision log so a caller/auditor can still tell a stale
+                    # world from an unknown target.
+                    return finish(result_type.OUTCOME_FAILED,
+                                  result_type.ERR_SAFETY_REJECTED,
+                                  'safety gate rejected %s on %r: %s '
+                                  '[canonical_error_code=%d kind=%s]'
+                                  % (decision.action, decision.target,
+                                     gate_reason, int(rejection_code),
+                                     rejection_kind))
+                dispatch_view = sanitize_decision(decision)
+                # the dispatch sites read ONLY action/target - the sanitized
+                # assert proves free text (explanation) can never reach a
+                # skill goal (issue #6 §2.6)
+                assert dispatch_view == {'action': decision.action,
+                                         'target': decision.target}
+                # P1-F: recovery_audit is computed BEFORE the gate below, so a
+                self._decision_log.write(decision_record(
+                    run_id=run_id, scenario=scenario, seq=decision_seq,
+                    previous_skill_result=prev, recovery=recovery_audit,
+                    decision=decision, policy_name=self._policy.name,
+                    policy_version=self._policy.version,
+                    world_revision=last_world_revision,
+                    observe_evidence_id=last_observe_evidence,
+                    decide_latency_ms=d_ms, dispatched=True))
+
+                if decision.target and tag_of(decision.target) != tag:
+                    tag = tag_of(decision.target)   # leg transition
+                    attempt = 1
+                    vattempt = 1
+
+                # ---------------- OBSERVE (leg start / recovery) ----------------
+                if decision.action == ACTION_OBSERVE:
+                    if decision.reason_code == RC_RECOVERABLE_RETRY:
+                        trace.append('RECOVERY:REOBSERVE+RETRY(after %s)' % last_fail_label)
+                        label = 'REOBSERVE_%s' % tag
+                    elif decision.reason_code == RC_VERIFY_MISMATCH_RETRY:
+                        trace.append('RECOVERY:REOBSERVE+REVERIFY(after %s)' % last_fail_label)
+                        label = 'REOBSERVE_%s' % tag
+                    else:
+                        label = 'OBSERVE_%s' % tag
+                    og = Observe.Goal()
+                    og.refresh = True
+                    r, err = self._demo_call(self._cli_observe, og, label,
+                                             goal_handle, t0, 30.0)
+                    record_skill_evidence(ACTION_OBSERVE, r, err)
+                    o_outcome = int(r.outcome) if r is not None else 255
+                    o_evidence = getattr(r, 'evidence_id', '') if r else ''
+                    episode.record_executor_result(
+                        outcome=(int(r.outcome) if r is not None else None),
+                        error_code=(int(getattr(r, 'error_code', 0))
+                                    if r is not None else None),
+                        detail=(err or getattr(r, 'detail', '')),
+                        evidence_id=o_evidence)
+                    if decision.reason_code == RC_VERIFY_MISMATCH_RETRY:
+                        # frozen behavior: the verify-path reobserve result is
+                        # ignored - the re-verify decides
+                        history.append(HistoryRecord(
+                            action=ACTION_OBSERVE, target=decision.target,
+                            outcome=o_outcome, error_code=0, attempt=vattempt,
+                            world_revision=last_world_revision,
+                            evidence_id=o_evidence))
+                        continue
+                    o_ok = (err is None and r is not None and
+                            o_outcome == Observe.Result.OUTCOME_SUCCEEDED)
+                    steps.append({'state': label, 'skill': 'observe',
+                                  'ok': o_ok, 'error': err or '', 'attempt': attempt})
+                    if err or o_outcome != Observe.Result.OUTCOME_SUCCEEDED:
+                        if goal_handle.is_cancel_requested:
+                            return finish(result_type.OUTCOME_CANCELED,
+                                          result_type.ERR_CANCELED,
+                                          'canceled during %s (trace=%s)'
+                                          % (label, ','.join(trace)))
+                        history.append(HistoryRecord(
+                            action=ACTION_OBSERVE, target=decision.target,
+                            outcome=255, error_code=-1, attempt=attempt,
+                            world_revision=last_world_revision, evidence_id=''))
+                        continue
+                    world = r.world_state
+                    # P1-A: the instant this executor received the snapshot;
+                    # the world age is measured from here, not from sample time.
+                    world_sampled_monotonic = time.monotonic()
+                    if single:
+                        zone = ZoneState()
+                        zone.id = 'task_place'
+                        zone.center.x, zone.center.y, zone.center.z = zones['task_place']
+                        world.zones = [z for z in world.zones if z.id != 'task_place'] + [zone]
+                    last_world_revision = int(r.world_state.revision)
+                    # Observe.action carries no evidence_id field - defensive
+                    # getattr keeps the decision log honest if it is added later
+                    last_observe_evidence = getattr(r, 'evidence_id', '')
+                    history.append(HistoryRecord(
+                        action=ACTION_OBSERVE, target=decision.target,
+                        outcome=0, error_code=0, attempt=attempt,
+                        world_revision=last_world_revision,
+                        evidence_id=getattr(r, 'evidence_id', '')))
+                    continue
+
+                # ---------------- PICK (bounded recovery via policy) ----------------
+                if decision.action == ACTION_PICK:
+                    attempt = 1 + sum(h.action == ACTION_PICK and
+                                      h.target == decision.target for h in history)
+                    if attempt > 1 + constraints.recovery_budget:
+                        episode.record_executor_result(detail='executor pick budget exhausted')
+                        return finish(result_type.OUTCOME_FAILED,
+                                      result_type.ERR_RECOVERY_EXHAUSTED,
+                                      'executor pick budget exhausted')
+                    label = 'PICK_%s(attempt=%d)' % (tag, attempt)
+                    pg = PickObject.Goal()
+                    pg.object_name = decision.target
+                    pg.motion_profile_id = constraints.motion_profile_id
+                    r, err = self._demo_call(self._cli_pick, pg, label,
+                                             goal_handle, t0, 90.0)
+                    record_skill_evidence(ACTION_PICK, r, err)
+                    pick_ok = (err is None and r is not None and
+                               int(r.outcome) == PickObject.Result.OUTCOME_SUCCEEDED)
+                    code = int(r.error_code) if (err is None and r is not None) else -1
+                    episode.record_executor_result(
+                        outcome=(int(r.outcome) if r is not None else None),
+                        error_code=(code if r is not None else None),
+                        detail=(err or (r.detail if r else '')),
+                        evidence_id=getattr(r, 'evidence_id', '') if r else '')
+                    ename = err or err_name(PickObject.Result, 'ERR_', code)
+                    steps.append({'state': label, 'skill': 'pick', 'ok': pick_ok,
+                                  'error': err or (r.detail if r else ''),
+                                  'error_code': code, 'attempt': attempt,
+                                  'evidence_id': getattr(r, 'evidence_id', '') if r else ''})
+                    trace.append('%s:%s' % (label, 'OK' if pick_ok else 'FAIL:%s' % ename))
+                    if pick_ok:
+                        violation = check_pick(r)
+                        if violation is not None:
+                            steps.append({'state': label, 'skill': 'pick',
+                                          'ok': False, 'error': violation,
+                                          'error_code': result_type.ERR_SKILL_CONTRACT_VIOLATION,
+                                          'attempt': attempt,
+                                          'evidence_id': getattr(r, 'evidence_id', '')})
+                            trace.append('%s:FAIL:ERR_SKILL_CONTRACT_VIOLATION' % label)
+                            return finish(result_type.OUTCOME_FAILED,
+                                          result_type.ERR_SKILL_CONTRACT_VIOLATION,
+                                          'post-condition violation on %s: %s'
+                                          % (label, violation))
+                        history.append(HistoryRecord(
+                            action=ACTION_PICK, target=decision.target,
+                            outcome=0, error_code=0, attempt=attempt,
+                            world_revision=last_world_revision,
+                            evidence_id=r.evidence_id))
+                        # executor-owned world update (issue #6): the pick
+                        # attached the object, but the canonical world dates
+                        # from the last observe - the gate's PLACE carried
+                        # check needs the carry state the executor knows
+                        if world is not None:
+                            world.carry.engaged = True
+                            world.carry.object_id = decision.target
+                    else:
+                        last_fail_label = label
+                        if (err is None and r is not None and
+                                int(r.error_code) == PickObject.Result.ERR_INTERNAL):
+                            return finish(result_type.OUTCOME_FAILED, result_type.ERR_SKILL_FAILED,
+                                          '%s internal failure; execution stopped: %s'
+                                          % (label, r.detail))
+                        if goal_handle.is_cancel_requested:
+                            return finish(result_type.OUTCOME_CANCELED,
+                                          result_type.ERR_CANCELED,
+                                          'canceled during %s (trace=%s)'
+                                          % (label, ','.join(trace)))
+                        history.append(HistoryRecord(
+                            action=ACTION_PICK, target=decision.target,
+                            outcome=(int(r.outcome) if r is not None else 255),
+                            error_code=code, attempt=attempt,
+                            world_revision=last_world_revision,
+                            evidence_id=getattr(r, 'evidence_id', '') if r else ''))
+                    continue
+
+                # ---------------- PLACE (failure aborts: carried box) ----------------
+                if decision.action == ACTION_PLACE:
+                    label = 'PLACE_%s' % tag
+                    zx, zy, zz = zones[zone_of[decision.target]]
+                    zone_pose = PoseStamped()
+                    zone_pose.header.frame_id = 'world'
+                    zone_pose.pose.position.x = zx
+                    zone_pose.pose.position.y = zy
+                    zone_pose.pose.position.z = zz
+                    zone_pose.pose.orientation.w = 1.0
+                    pg = PlaceObject.Goal()
+                    pg.object_name = decision.target
+                    pg.place_pose = zone_pose
+                    pg.motion_profile_id = constraints.motion_profile_id
+                    r, err = self._demo_call(self._cli_place, pg, label,
+                                             goal_handle, t0, 90.0)
+                    record_skill_evidence(ACTION_PLACE, r, err)
+                    place_ok = (err is None and r is not None and
+                                int(r.outcome) == PlaceObject.Result.OUTCOME_SUCCEEDED)
+                    episode.record_executor_result(
+                        outcome=(int(r.outcome) if r is not None else None),
+                        error_code=(int(r.error_code) if r is not None else None),
+                        detail=(err or (r.detail if r else '')),
+                        evidence_id=getattr(r, 'evidence_id', '') if r else '')
+                    steps.append({'state': label, 'skill': 'place', 'ok': place_ok,
+                                  'error': err or (r.detail if r else ''),
+                                  'evidence_id': getattr(r, 'evidence_id', '') if r else ''})
+                    trace.append('%s:%s' % (label, 'OK' if place_ok else 'FAIL'))
+                    if place_ok:
+                        violation = check_place(
+                            r, place_position=[zx, zy, zz],
+                            tolerance_m=constraints.verify_tolerance_m)
+                        if violation is not None:
+                            steps.append({'state': label, 'skill': 'place',
+                                          'ok': False, 'error': violation,
+                                          'error_code': result_type.ERR_SKILL_CONTRACT_VIOLATION,
+                                          'evidence_id': getattr(r, 'evidence_id', '') if r else ''})
+                            trace.append('%s:FAIL:ERR_SKILL_CONTRACT_VIOLATION' % label)
+                            return finish(result_type.OUTCOME_FAILED,
+                                          result_type.ERR_SKILL_CONTRACT_VIOLATION,
+                                          'post-condition violation on %s: %s'
+                                          % (label, violation))
+                        history.append(HistoryRecord(
+                            action=ACTION_PLACE, target=decision.target,
+                            outcome=0, error_code=0, attempt=attempt,
+                            world_revision=last_world_revision,
+                            evidence_id=getattr(r, 'evidence_id', '') if r else ''))
+                        # executor-owned world update (issue #6): the object
+                        # was released into the zone
+                        if world is not None:
+                            world.carry.engaged = False
+                            world.carry.object_id = ''
+                            for obj in world.objects:
+                                if obj.name == decision.target:
+                                    obj.pose = r.object_pose_after
+                                    obj.pose_age_s = 0.0
+                    else:
+                        if (err is None and r is not None and
+                                int(r.error_code) == PlaceObject.Result.ERR_INTERNAL):
+                            return finish(result_type.OUTCOME_FAILED, result_type.ERR_SKILL_FAILED,
+                                          '%s internal failure; execution stopped: %s'
+                                          % (label, r.detail))
+                        if goal_handle.is_cancel_requested:
+                            return finish(result_type.OUTCOME_CANCELED,
+                                          result_type.ERR_CANCELED,
+                                          'canceled during PLACE_%s (box state '
+                                          'unchanged by the failed place; '
+                                          'trace=%s)' % (tag, ','.join(trace)))
+                        history.append(HistoryRecord(
+                            action=ACTION_PLACE, target=decision.target,
+                            outcome=(int(r.outcome) if r is not None else 255),
+                            error_code=(int(r.error_code) if r is not None else -1),
+                            attempt=attempt,
+                            world_revision=last_world_revision,
+                            evidence_id=getattr(r, 'evidence_id', '') if r else ''))
+                    continue
+
+                # ---------------- VERIFY (bounded re-verification via policy) ----------------
+                if decision.action == ACTION_VERIFY:
+                    vattempt = 1 + sum(h.action == ACTION_VERIFY and
+                                       h.target == decision.target for h in history)
+                    if vattempt > 1 + constraints.recovery_budget:
+                        episode.record_executor_result(detail='executor verify budget exhausted')
+                        return finish(result_type.OUTCOME_FAILED,
+                                      result_type.ERR_RECOVERY_EXHAUSTED,
+                                      'executor verify budget exhausted')
+                    label = 'VERIFY_%s(attempt=%d)' % (tag, vattempt)
+                    zx, zy, zz = zones[zone_of[decision.target]]
+                    zone_pose = PoseStamped()
+                    zone_pose.header.frame_id = 'world'
+                    zone_pose.pose.position.x = zx
+                    zone_pose.pose.position.y = zy
+                    zone_pose.pose.position.z = zz
+                    zone_pose.pose.orientation.w = 1.0
+                    vg = VerifyObject.Goal()
+                    vg.object_name = decision.target
+                    vg.expected_pose = zone_pose.pose
+                    vg.position_tolerance_m = constraints.verify_tolerance_m
+                    r, err = self._demo_call(self._cli_verify, vg, label,
+                                             goal_handle, t0, 30.0)
+                    record_skill_evidence(ACTION_VERIFY, r, err)
+                    v_ok = (err is None and r is not None and
+                            int(r.outcome) == VerifyObject.Result.OUTCOME_VERIFIED)
+                    episode.record_executor_result(
+                        outcome=(int(r.outcome) if r is not None else None),
+                        error_code=(int(getattr(r, 'error_code', 0))
+                                    if r is not None else None),
+                        detail=(err or getattr(r, 'detail', '')),
+                        evidence_id=getattr(r, 'evidence_id', '') if r else '')
+                    if v_ok:
+                        violation = check_verify(r)
+                        if violation is not None:
+                            steps.append({'state': label, 'skill': 'verify',
+                                          'ok': False, 'error': violation,
+                                          'attempt': vattempt,
+                                          'evidence_id': getattr(r, 'evidence_id', '')})
+                            trace.append('%s:FAIL:ERR_SKILL_CONTRACT_VIOLATION' % label)
+                            return finish(result_type.OUTCOME_FAILED,
+                                          result_type.ERR_SKILL_CONTRACT_VIOLATION,
+                                          'post-condition violation on %s: %s'
+                                          % (label, violation))
+                    verify_results[tag.lower()] = r
+                    steps.append({'state': label, 'skill': 'verify', 'ok': v_ok,
+                                  'error': err or (r.detail if r else ''),
+                                  'attempt': vattempt,
+                                  'position_error_m':
+                                      float(r.position_error_m)
+                                      if r is not None and r.has_measured_pose else None,
+                                  'evidence_id': getattr(r, 'evidence_id', '') if r else ''})
+                    trace.append('%s:%s' % (label, 'OK' if v_ok else 'FAIL'))
+                    if v_ok:
+                        history.append(HistoryRecord(
+                            action=ACTION_VERIFY, target=decision.target,
+                            outcome=0, error_code=0, attempt=vattempt,
+                            world_revision=last_world_revision,
+                            evidence_id=getattr(r, 'evidence_id', '') if r else ''))
+                    else:
+                        last_fail_label = label
+                        if goal_handle.is_cancel_requested:
+                            return finish(result_type.OUTCOME_CANCELED,
+                                          result_type.ERR_CANCELED,
+                                          'canceled during %s (trace=%s)'
+                                          % (label, ','.join(trace)))
+                        history.append(HistoryRecord(
+                            action=ACTION_VERIFY, target=decision.target,
+                            outcome=(int(r.outcome) if r is not None else 255),
+                            error_code=(int(r.error_code) if r is not None else -1),
+                            attempt=vattempt,
+                            world_revision=last_world_revision,
+                            evidence_id=getattr(r, 'evidence_id', '') if r else ''))
+                    continue
+
+                # ---------------- ABORT (typed policy abort) ----------------
+                # The policy owns the abort verdict; the executor owns the
+                # typed task code (audit P1-2: BUDGET_EXHAUSTED-class aborts
+                # used to degenerate into ERR_SKILL_FAILED + "policy state
+                # error" via the PolicyStateError path - the dead abort_error
+                # assignments this branch replaces were its residue).
+                if decision.action == ACTION_ABORT:
+                    episode.record_executor_result()
+                    return finish(result_type.OUTCOME_FAILED,
+                                  task_abort_error_code(decision.reason_code),
+                                  task_abort_detail(decision.reason_code,
+                                                    decision.explanation,
+                                                    trace, prev))
+
+                # ---------------- WAIT / unknown ----------------
+                if decision.action == 'WAIT':
+                    episode.record_executor_result()
+                    continue
+                raise PolicyStateError(
+                    'policy returned unsupported action %r' % decision.action)
+
+        except PolicyStateError as exc:
+            self.get_logger().error('policy state error: %s' % exc)
+            return finish(result_type.OUTCOME_FAILED,
+                          result_type.ERR_SKILL_FAILED,
+                          'policy state error: %s' % exc)
+        except Exception as exc:  # crash guard (issue #20): rclpy's fallback
+            # for a raising execute callback is a default Result with
+            # outcome=0 = OUTCOME_SUCCEEDED - never let that happen
+            return finish(result_type.OUTCOME_FAILED,
+                          result_type.ERR_SKILL_FAILED, crash_detail(exc))
+        finally:
+            self._finish_arm_state(owns_arm)
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = TaskFsmServer()
+    ex = MultiThreadedExecutor(num_threads=6)
+    ex.add_node(node)
+    try:
+        ex.spin()
+    except KeyboardInterrupt:
+        pass
+    finally:
+        node.destroy_node()
+        if rclpy.ok():
+            rclpy.shutdown()
+
+
+if __name__ == '__main__':
+    main()

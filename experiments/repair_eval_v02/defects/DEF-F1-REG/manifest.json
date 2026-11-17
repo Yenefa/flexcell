@@ -1,0 +1,19 @@
+{
+  "defect_id": "DEF-F1-REG",
+  "family": "F1_OBJECT_REGISTRATION",
+  "repair_surface": "configuration",
+  "injection_point": "src/flexcell/flexcell_skills/config/week1.yaml",
+  "mechanism": "no real object is registered -> the perception layer publishes no B for the demo objects -> the task layer cannot fetch B",
+  "declared_mechanism_deviation": "TASKS.md says 'registry missing'. Measured 2026-11-16: an empty tracked_objects list (params file or CLI) raises ParameterUninitializedException, so the node dies instead of running without a registry. The realization therefore registers a name the world does not contain, which leaves the node running and no real object observed. The difference is visible to the repairer and is recorded rather than glossed.",
+  "artifact": "override.yaml",
+  "artifact_sha256": "6c4da05fe04e0ee8eb0016046af998b7b1dddf7c6c0775cdfda695665588e16e",
+  "pristine_sha256": "7107bd766aaa1206069c87f77b4df182ebedf9865e1f0dccf4dbad6c850a4bdd",
+  "affected_files": [
+    "src/flexcell/flexcell_skills/config/week1.yaml"
+  ],
+  "expected_observable": "observe_server has an empty tracked list, so no object state is published for the demo objects",
+  "pinned_by": [
+    "src/flexcell/flexcell_skills/test/test_level_release_profile.py:76",
+    "src/flexcell/flexcell_skills/test/test_three_object_scene.py:30"
+  ]
+}

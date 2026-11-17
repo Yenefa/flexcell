@@ -1,0 +1,566 @@
+# #252 对照矩阵：机制试运行（DRY RUN）
+
+> **状态：DRY RUN —— 没有任何模型参与，不是能力结果，不得进入任何分母。**
+> 本目录证明的是"24 槽矩阵、条件路由、可见性边界、契约判定、新鲜度门能够端到端串起来"，
+> 不证明任何关于模型能力的结论。
+
+## 为什么先做这一步
+
+本机**没有模型凭据**，实测三处全部为空：
+
+| 来源 | 结果 |
+| --- | --- |
+| `DEEPSEEK_API_KEY` / `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `FLEXCELL_PILOT_API_KEY` | 全部 unset |
+| gate 脚本 `/mnt/c/Users/fuker/.../evobot_llm_key.sh` | 路径不存在 |
+| `~/.config/flexcell/pilot.env` | 不存在 |
+| Windows 注册表 `HKCU` / `HKLM` 的 `FLEXCELL_PILOT_API_KEY` | 均未设置 |
+
+在拿不到 key 的情况下，选择是：把 24 槽标成 NOT_RUN 等授权，或者用仓库自带的 `ScriptedAgent`
+把**同一套 24 槽、同一个适配器**跑一遍。选后者，理由是本仓库已经吃过两次同样的教训——
+**一条从未端到端执行过的流水线不是流水线，是计划**。如果第一次端到端跑发生在有真模型的那天，
+harness 的每个 bug 都会静默变成"能力结果"。
+
+事实证明这个判断是对的：这次试运行抓出了 **4 个缺陷**，其中 2 个会让整个矩阵静默归零。
+
+## 试运行抓到的缺陷
+
+| # | 缺陷 | 后果 | 归属 |
+| --- | --- | --- | --- |
+| 1 | `CANDIDATE_SCHEMA` 是死常量，从未被读 | 别的 harness 的报告被判 ACCEPT | #250，已修 `7c19876` |
+| 2 | 身份回显被硬 REJECT | 每条运行都 REJECT（假失败污染） | #250，已修 `721b31e` |
+| 3 | 物体名叫 `target`/`goal`/`version` 被判"篡改不可变字段" | **24/24 静默 REJECT** | #250，已修 `16e7ca5` |
+| 4 | `editable_fields` 写目录形式授权不了任何文件 | **24/24 静默 REJECT** | #250，已修 `16e7ca5` |
+
+第 3、4 条是这次试运行的直接产出：它们不会让任何一条现有测试变红（7 例语料用的是
+`block_a`、且 `editable_fields` 用的是文件形式），只有把 24 槽真跑一遍才会暴露。
+
+## 试运行结果
+
+`
+python3 experiments/repair_eval_v02/dry_run_matrix.py
+`
+
+| 项 | 值 |
+| --- | --- |
+| 槽位 | 24 / 24（2 族 × 4 条件 × 3 次） |
+| 状态 | 24 `DRY_RUN_COMPLETE` |
+| 裁决 | 24 `ACCEPT`，`codes` 全空 |
+| 可见性一致性 | 24/24 的 `gate/` 为 `sealed_material` |
+| `policy_fingerprint` | `a48651c0…` |
+
+### 这个结果不能说明什么（重要）
+
+**4 个条件全部 6/6 ACCEPT，是因为 agent 是固定脚本**——它在每个条件下都执行同一个已知修复。
+所以这份记录**不能**用来比较条件之间谁更好，也**不能**说"反馈没用"。要回答那个问题必须有真模型，
+因为只有模型的行为才会随信息供给变化。
+
+它证明的是**机制**：条件路由确实给了不同信息（见下表），判定确实按契约执行，门确实把评估器封印了。
+
+| 条件 | 反馈通道实际返回 |
+| --- | --- |
+| A_STATIC | `policy_denied`（拿不到，符合协议） |
+| B_REAL_FEEDBACK | `missing_material`（本试运行没有真运行产物） |
+| C_MISMATCHED_FEEDBACK | `present`（从固定 donor 取，符合协议） |
+| D_GUIDED | `missing_material` + 指导文本 |
+
+B 和 D 返回 `missing_material` 不是缺陷：试运行没有"上一条真实执行"可供回放。真跑时这里应当是
+本 run 的执行日志。
+
+## 复现
+
+`
+git checkout codex/evobot-paper-v02-control-runs
+python3 experiments/repair_eval_v02/dry_run_matrix.py | head -40
+`
+
+输出里每行都带 `"qualification": "DRY_RUN"`，汇总里带
+`"qualification": "DRY_RUN_SCRIPTED_AGENT_NOT_A_MODEL_RESULT"`。
+
+## 真跑还缺什么
+
+| 项 | 状态 |
+| --- | --- |
+| 模型凭据（gate 脚本或 env 文件） | **缺** |
+| 执行源码 40 位 SHA 冻结 | 缺（分支仍是候选） |
+| 镜像 digest、模型 id、提示 sha256 | 缺 |
+| `seed` 与 C 的 donor 绑定 | 缺（协议标 TBD） |
+| 运行窗口与串行约定 | 缺 |
+
+在这些补齐之前，本目录的记录保持 `DRY_RUN`，不计入 `ADMISSION.md` 的任何一项。
+
+## 预算层：协议 5.1 第一次被执行
+
+上表那份 DRY RUN 用的是固定脚本 agent，**从不花 token**，所以 5.1 的三条规则
+（6 次交互上限、20,000 token 上限、BUDGET_EXHAUSTED 不计成功）在整个仓库里
+**没有一行代码在执行**。一条只存在于文档里的上限不是上限。
+
+本目录新增：
+
+| 文件 | 作用 |
+| --- | --- |
+| `budget.py` | `Ledger`：唯一能到达模型的入口。**调用前**检查交互与 token 上限（会超的那次调用根本不发出，不花钱）；token 只能在调用后知道，所以调用后再查一次。任一上限触发即**永久关闭**账本（5.1 禁止“再给一次机会”） |
+| `agent.py` | `RepairAgent`：从可见性边界**拼提示词**，且只通过 `ToolFacade` 写文件，所以评估器、裁决、隐藏答案都读不到 |
+| `test_budget.py` | 23 条用例，逐条对应 5.1 / 5.2 |
+| `budget_matrix.py` | 24 槽全部走真实 repair loop + 真实账本 |
+
+### 24 槽账本结果
+
+```
+terminal_states: {DONE: 22, BUDGET_EXHAUSTED: 2}
+counted_in_denominator: 22
+excluded_budget_exhausted: 2
+every_row_has_full_account: true
+no_row_exceeds_cap: true
+qualification: SCRIPTED_TRANSPORT_NOT_A_MODEL_RESULT
+```
+
+两槽（`r3` 的 `D_GUIDED`）**故意烧掉预算**，用真实矩阵行证明“耗尽不计入分母”，
+而不是只在单元测试里成立。
+
+### 变异验证（用例能失败）
+
+删掉规则看用例是否变红——5 条全部被杀：
+
+| 变异 | 结果 |
+| --- | --- |
+| 去掉调用前的交互检查 | 5 failed |
+| 耗尽不再压过成功声明 | 2 failed |
+| 调用后不查 token 上限 | 1 failed |
+| 关闭的账本允许再试一次 | 1 failed |
+| 循环停在 cap（旧写法） | 1 failed |
+
+第 4 条一开始**没被杀掉**（22 passed）。原因是“不可追加”此前只经过交互检查那条路，
+而它自己也会拒绝。补了一条“因执行次数关闭的账本，即使交互与 token 都还空着也必须拒绝
+新调用”之后才杀死。这条用例缺口是变异测试自己发现的。
+
+### 顺带抓到的两个真 bug
+
+1. **循环停在 cap 时永远发现不了耗尽**：`range(max_interactions)` 用完就正常退出，
+   账本没有机会拒绝，于是“用光次数但没完成”被记成 `INVALID`（像是放弃），而不是
+   `BUDGET_EXHAUSTED`（如实记录耗尽）。改成循环上界 `cap+1`——多出来的那次在到达
+   transport 之前就被拒，因此**发现耗尽不花钱**。
+2. **`_feedback()` 吞异常**：原本 `except Exception: return ""`，会把“策略拒绝”和
+   “harness 坏了”混成同一个结果，让坏掉的运行看起来像一次正常的 A 条件运行。现在只对
+   `policy_denied` 返回空，其它异常照抛。
+
+### 新鲜度门的正确用法
+
+第一版夹具把 `candidate/telemetry` 写在 `assert_fresh_run()` 之前，被 `StaleArtifact` 拒了。
+这不是 bug——门的本意就是“新 run 不得继承上一轮的反馈”。正确顺序是：
+断言新鲜 → 执行产出 telemetry → agent 读反馈。已在代码注释里写明。
+
+## 保留场景门（#253）：把"不许偷看"变成机制
+
+#253 的候选依赖 #252 的真跑，**无法执行**。但其中有一条纪律是可以离线固化的：
+
+> 固定候选源码 SHA……选择过程不得查看保留场景结果。
+
+写成承诺就不可验证——等你能证明偷看时，数字已经进论文了。`holdout.py` 把它变成代码：
+
+| 规则 | 机制 |
+| --- | --- |
+| 候选必须先冻结 | `HoldoutPlan` 构造需要 `Freeze`，不给就抛 |
+| 评估的就是冻结的那个 | `assert_frozen()` 每次执行前比对 SHA |
+| **结果不能早于冻结** | `record()` 比较 `frozen_at`，结果时间戳早于冻结即拒 |
+| 失败不能被改写 | 槽位一次写入，第二次抛，`FAIL` 保留原身份 |
+| 修复数与保留执行数分开报 | `counts()` 分别给 `repair_runs` / `holdout_executions` |
+
+第三条是关键：**冻结时间晚于某条结果**，意味着被冻结的候选可能是照着那条结果挑的，
+再怎么解释都救不回来。
+
+### 变异验证
+
+| 变异 | 结果 |
+| --- | --- |
+| 允许结果早于冻结 | KILLED |
+| 允许改写已有结果 | KILLED |
+| 放行任意候选 SHA | KILLED |
+| 无冻结也能建计划 | KILLED |
+| 逐槽不校验 SHA | KILLED |
+
+15 条用例，5 个变异全部被杀。
+
+### 它不做什么
+
+它**不能**阻止人绕开代码去读保留答案，也不假装能。它只关掉会留下痕迹的两条路：
+事后补一个冻结时间、或结果公布后换掉候选。这条限制写在模块 docstring 里。
+
+## 运行记录对表：DATA_DICTIONARY §3.3–§3.6
+
+驱动脚本产出的东西以前只是“接近”声明的 schema。把三份字段表逐条对了一遍，发现**四处不一致**：
+
+| # | 不一致 | 谁对 |
+| --- | --- | --- |
+| 1 | `budget_exhausted_at` 我输出的是 dict | 文档要 string（`interaction:7`） |
+| 2 | `final_scenes` 完全没有 | 文档必填 |
+| 3 | C 条件的 `feedback_source` 策略里叫 `mismatch_run`，记录里叫 `donor_run` | 两套词表，需要显式映射 |
+| 4 | D 条件策略里是 `own_run` + guidance，记录里要求一个值 `own_run_plus_guidance` | 同上 |
+
+### 词表映射写进代码，不静默转换
+
+```
+policy feedback_source      记录 feedback_source
+none                    ->  none                   (A)
+own_run  + no guidance  ->  own_run                (B)
+mismatch_run            ->  donor_run              (C)
+own_run  + guidance     ->  own_run_plus_guidance  (D)
+```
+
+`POLICY_TO_RECORD` 是唯一真源，四条臂各有用例；出现未映射的词表值一律 `RecordError`，**不透传**。
+
+### 文档是 schema 的唯一真源
+
+`test_run_record.py` 直接**解析 `DATA_DICTIONARY.md` 的表格**，而不是在测试里重抄一遍：
+
+- 文档加字段 → 测试红，直到代码跟上；
+- 代码发明文档没写的字段 → 测试红（双向检查）；
+- 只要求 `必填 = 是` 的字段存在，`notes` 这种可选字段不强制。
+
+### 一个诚实的更正
+
+上一轮我报“24 槽全部 ACCEPT”。接上真实 schema 后，同样的 24 槽产出的是：
+
+```
+terminal_states: {UNKNOWN: 22, BUDGET_EXHAUSTED: 2}
+```
+
+原因：`SUCCESS_VERIFIED` 要求 **G1–G4 全通过**，而试运行没有跑独立验收（保留场景），
+`gate_independent` 是 `NOT_RUN`。没有任何一道门失败，但也没有验证——那就是 `UNKNOWN`，
+不是成功。
+
+**“24/24 ACCEPT”是契约层的裁决，不是运行记录的终态**。混用会让一份没验证过的运行看起来像成功的。
+这条也顺带说明了为什么要把记录接到真 schema 上：自造的字段名看起来更好看，但它不在词表里。
+
+### `false_accept` 由代码推导，不允许调用方声明
+
+§3.5 定义是“声称成功但 G1–G4 未全通过”。实现按字面：
+
+- 认作“全通过”要求 `gate_target` / `gate_contract` / `gate_independent` 都是 `PASS`，且每个保留场景都是 `PASS`；
+- **`NOT_RUN` 算作“未通过”**——没跑过的门不算通过，否则一次没测量的运行会被算成真阳性；
+- `false_reject` 永远不由代码推断（文档要求人工复核后才可置 true）。
+
+## 清单对账：手写表与真记录（`reconcile.py`）
+
+`RUN_MANIFEST.md` §1 是手写的 24 行表，表头自称「状态列是权威计数」。**此前没有任何东西核对它和记录是否一致**——现有自检只断言「24 行全是 `NOT_RUN`」，那只能证明本包没执行过，看不出表和旁边的记录对不上。
+
+### 三种漂移，两个方向
+
+| 漂移 | 后果 |
+| --- | --- |
+| 槽位标了终态但没有记录 | 一个没有底账的声明 |
+| 记录到了终态但表还写 `NOT_RUN` | 做了却没被计入 |
+| **试运行记录提升了槽位** | 从「没跑过」到「跑过」的痕迹被抹掉 |
+
+第三条是这里最危险的，所以单独处理：任何 `qualification` 含 `DRY_RUN` / `SCRIPTED` 的记录**一律排除**，并在报告里列出（不静默丢弃）。
+
+```
+$ reconcile.py --manifest RUN_MANIFEST.md
+manifest slots   : 24
+records read     : 0
+excluded non-real: 0
+verdict          : CONSISTENT
+
+$ reconcile.py --manifest RUN_MANIFEST.md \
+      --records evidence/budget_matrix.json
+manifest slots   : 24
+records read     : 24
+excluded non-real: 24      <- 24 条矩阵记录一条都没能提升槽位
+verdict          : CONSISTENT
+```
+
+### 结构上直接拒绝（不是记一条警告）
+
+- 记录指向表里没有的槽位；
+- 同一槽位两条**真**记录（补跑应新增 `.re2` 行，不是盖在同一条上）；
+- 记录的状态不在 §4 词表内；
+- 表里出现词表外的状态。
+
+### 变异验证
+
+| 变异 | 结果 |
+| --- | --- |
+| 试运行当真实记录 | KILLED (4 failed) |
+| 忽略「有终态无记录」 | KILLED |
+| 放行表外槽位 | KILLED |
+| 解析器接受任意状态 | KILLED |
+| 允许同槽位两条记录 | KILLED |
+
+15 条用例，5 个变异全部被杀。其中 4 条用例专门盯「试运行不得提升槽位」。
+## 接缝测试：从散文变成用例（`test_seam.py`）
+
+`INTEGRATION_SEAM.md`（#254）当时写了四条实测结论，并留了一句：探针**不进仓库**，因为依赖两个尚未合并的分支；等 #257 与 #258 合并后应变成测试。
+
+这条分支就是三者汇合的地方，所以那四句话现在有测试了：
+
+| 断言 | 机制 |
+| --- | --- |
+| A 读裁决 → `reserved_name`，读候选源码 → 允许 | 拒绝是机制不是提示 |
+| 候选目录里留了裁决 → `StaleArtifact` | 新运行不继承旧反馈 |
+| 翻转 `claim_success` → `status` 与 `codes` 都不变 | 记录但不采信 |
+| 目标改到容差外再声称成功 → `REJECT / GOAL_NOT_MET` | 自述救不回没达成的目标 |
+
+另加两条身份断言：一条记录必须能同时写下 `policy_id` / `policy_fingerprint` / `condition` / `contract.sha256()` / `contract.version`；并且**策略内容一改指纹就变**（否则「记录了指纹」证明不了任何事——规则可以在名字不动的情况下被换掉）。
+
+### 变异验证
+
+| 变异 | 结果 |
+| --- | --- |
+| 让候选的自述决定裁决 | KILLED (2 failed) |
+| 指纹变成常量 | KILLED |
+| 放行读裁决 | KILLED |
+
+前两个变异第一次跑时**显示 SURVIVED**，查下来是我的变异脚本替换锚点没命中、文件根本没被改——**一个静默无效的检查**，正是我这几轮一直在挑的那类毛病。加了「替换没有实际改变文件就判 INVALID」之后，三条全部 KILLED。
+## 验收条件审计（`audit_acceptance.py`）
+
+六轮下来每个 issue 的交付报告都是一段散文说「做完了」。散文没法复跑。这一版把 #249–#254 的**验收条件逐条变成检查**：能机械验证的验证，不能的如实标 `MANUAL` 并写原因。
+
+```
+ summary: {"MET": 15, "MANUAL": 8}
+```
+
+| 结果 | 含义 |
+| --- | --- |
+| `MET` | 有可复跑的检查通过 |
+| `UNMET` | 检查失败——**审计要能打印它，否则它不是审计而是总结** |
+| `MANUAL` | 无法机械验证，且必须写明为什么（有用例强制这一点） |
+
+### 覆盖到的（节选）
+
+| Issue | 条件 | 实测 |
+| --- | --- | --- |
+| #249 | 无反馈条件取不到结果 | `reserved_name` / `parent_traversal` / `absolute_path` 三道都拒，候选源码可读 |
+| #249 | 记录反馈来源与摘要 | `source=own_run digest=f6dad5c24a16` |
+| #250 | 至少六类负例 | 6 例，覆盖 7 个理由码 |
+| #250 | 分别记录错误接纳/错误拒绝 | `false_accept 0 / false_reject 0 / cases 7` |
+| #251 | 24 槽保持 NOT_RUN | `[ OK ] slot status: 24 NOT_RUN, 0 terminal` |
+| #251 | 6 次交互上限落实 | `cap refused: interaction:2` |
+| #254 | 关键表格从原始记录重算 | `19 records, 0 disagreements` |
+| #254 | 错误接纳与旧 claim_success 区分 | `false_accept` 独立推导为 True 而 `claim_success` 也为 True |
+
+### 8 条 MANUAL 就是剩余工作的清单
+
+| Issue | 项 | 为什么不能自动验 |
+| --- | --- | --- |
+| #249/#250 | PR 正文的例子与命令 | 在 PR 描述里，不在代码里 |
+| #251 | 批次额度/窗口/超时 | 协议 §5.3 标 TBD，需负责人签字 |
+| #252 | 24 槽真跑 | 缺模型凭据 |
+| #253 | 6 个保留场景 | 依赖 #252 的冻结候选 |
+| #254 | 四条件比较结论 | 依赖 #252/#253 |
+| #254 | 相关工作与方法 | 未撰写 |
+| #254 | 作者/单位/授权 | 需实际参与者提供 |
+
+### 审计先抓到了自己三个 bug
+
+第一版跑出 3 条 `UNMET`，全是**审计自身**的问题：
+
+1. `PolicyError` 没有 `as_dict`，我按 `BoundaryError` 处理了；
+2. 两条检查把 `bool` 当状态词返回；
+3. 更早一次是 `MANUAL` 常量被后面的同名列表覆盖，状态变成 list ⇒ `unhashable type`。
+
+第 2 条正是被「返回值不像状态就该报错」这道门救下来的——如果运行时把任何值 `str()` 一下，三条都会打印成看起来合理的输出。现在有用例专门锁这一条。
+## 审计的审计：46 条验收条件，不是 24 条
+
+上一版审计列了 24 行，标题写着「验收条件审计」。**六个 issue 实际有 46 个复选框**——22 条验收条件根本没有对应行，而审计看起来是完整的。
+
+这比没有审计更糟：一份漏掉一半的清单会被当成「都查过了」。
+
+### 现在每条都有 id
+
+`249.1` … `254.9`，共 46 条。每条要么有检查，要么标 `MANUAL` 并写明理由；**两者都没有的判 `UNMET`**（`no check and no stated reason for skipping`），所以漏覆盖会失败而不是消失。
+
+```
+covered criteria: 46 of 46
+summary: {"MET": 25, "MANUAL": 21}   ← 0 UNMET
+```
+
+### 门禁
+
+| 用例 | 防的是 |
+| --- | --- |
+| `criteria == 46` | 覆盖数缩水 |
+| 无 `UNMET` | 真的失败 |
+| id 唯一且前缀等于 issue 号 | 编号漂移 |
+| `MANUAL` 必须带理由且长度足够 | 「同上」这种不算理由 |
+| 无检查无理由 → `UNMET` | 静默漏覆盖 |
+| 非状态词返回值 → `UNMET` | 把 bool 当状态打印 |
+
+### 顺带抓到的第 4、5、6 个自伤
+
+1. `k249_5` 第二次构造边界时目录没创建 → `PolicyError`；
+2. `k250_2` 返回 `(bool, str)`，把 `True` 当状态；
+3. `k250_5` 同样的问题。
+
+「返回值不像状态词就报错」这道门把 2、3 直接拦下——**这已经是它第二次救场了。**
+
+### 一处设计取舍
+
+`METHOD.md` / `HISTORICAL_V01.md` 在 #259 分支，不在本分支。缺失时判 `MANUAL` 并写明「文件在 #259，合并树上是 MET」——不是判 `MET`（那是在没有文件时谎称有），也不是判 `UNMET`（那会把分支归属问题伪装成失败）。合并后这三条自动转 `MET`。
+
+## 审计分级：文档存在 ≠ 事情成立
+
+上一版审计有 25 条 `MET`。回头逐条问「把被检查的东西弄坏，这条还会通过吗」，发现**有 8 条只是在文档里 grep 关键词**：
+
+```python
+ok = '限制' in text and 'policy_fingerprint' in text      # 找到词就算通过
+ok = 'editable' in tasks.lower() or '允许修改' in tasks
+```
+
+找到词不等于事情成立。把它们判 `MET` 是把自己的检查说大了。
+
+### 两条改成行为验证
+
+| 检查 | 原来 | 现在 |
+| --- | --- | --- |
+| 249.7 接口版本与限制 | grep 关键词 | **文档里印的 fingerprint 必须等于活策略的 fingerprint**，且限制章节存在 |
+| 251.5 过程字段 | grep 字段名 | **构造一条记录，逐字段检查类型**（含 `bool` 不算 `int`） |
+
+249.7 做了变异验证：把文档里的 `a48651c0` 改成 `deadbeef` → `UNMET`；删掉限制章节 → `UNMET`；恢复 → `MET`。
+
+### 六条如实降级为 PARTIAL
+
+`251.1` / `251.6` / `251.8` / `254.2` / `254.5` / `254.7` 只能证明**文档写了这件事**，不能证明它成立。
+
+```
+本分支：MET 22  PARTIAL 3   MANUAL 21  UNMET 0
+合并树：MET 25  PARTIAL 6   MANUAL 15  UNMET 0      ← 三条论文相关转为 PARTIAL
+```
+
+`PARTIAL` 的含义写进 README：**文档级证据，未验证正确性**。门禁用例强制这六条不得被判 `MET`。
+
+### 为什么这比多几条 MET 重要
+
+一份「25 项全绿」的审计，读者会以为 25 件事都被验证过。实际是 17 件行为验证 + 8 件「文档里提到过」。把后者标成 `MET` 是在借前者的信用。
+## 交叉一致性检查（`crosscheck_docs.py`）
+
+同一套词汇出现在四处：可见性策略与文档（#249）、契约与文档（#250）、协议包（#251）、方法章节（#254）。**每处都有自己的测试，每个测试只检查自己那份文件**——这正是协议能给 B 条件一个策略已经封住的裁决、而接口表列了 6 个拒绝码（实际 15 个）的原因。
+
+并排读文档没发现这两处；机械比对发现了。所以比对成了脚本。
+
+### 检查什么
+
+| 项 | 来源 A | 来源 B |
+| --- | --- | --- |
+| 预算上限 | `budget.py` 默认值 | PROTOCOL **与** DATA_DICTIONARY（逐份） |
+| 状态词表 | `reconcile.KNOWN_STATUSES` | RUN_MANIFEST §4 |
+| 信息供给枚举 | `run_record.FEEDBACK_SOURCES` | DATA_DICTIONARY §3.3 |
+| 拒绝码（15 个） | `visibility.py` 的常量 | VISIBILITY.md **与** ASSUMPTIONS 接口表 |
+| 理由码（16 个） | `acceptance.REASONS` | TASK_CONTRACT.md |
+
+```
+denial codes in the module: 15
+reason codes in the evaluator: 16
+documents and code agree
+```
+
+### 变异验证，以及它抓到的第二个自己的 bug
+
+第一轮四个变异全部 SURVIVED——但那是**变异脚本**的问题：文档里同一个词出现两次，我只替换了第一处。改成全量替换后 3 个立刻 KILLED，第 4 个仍然存活。
+
+第 4 个是真问题：预算检查写的是 `str(20000) not in (proto + dic)`——**把两份文档拼起来找数字**，只要任一份有就算通过。改成逐份检查后：
+
+```
+all denial mentions removed from VISIBILITY.md   KILLED
+all status mentions renamed in RUN_MANIFEST     KILLED
+all reason mentions removed from TASK_CONTRACT  KILLED
+all budget numbers changed in DATA_DICTIONARY   KILLED   ← 之前 SURVIVED
+```
+
+这条已经写进代码注释：**合并两份文档再检查，等于让一份的正确掩盖另一份的错误。**
+### 补充：不只查「码存在」，还查「级别对不对」
+
+原来的交叉检查只验证 16 个理由码在 `TASK_CONTRACT.md` 里**出现过**。这不够——一个被文档写成 `REJECT`、而代码返回 `UNKNOWN` 的码，两份文件各自读起来都正常。
+
+现在解析文档表格的级别列，与 `acceptance.REASONS` 逐条比对：
+
+```
+baseline : documents and code agree
+mutation : reason code 'GOAL_NOT_MET' is documented as UNKNOWN but the evaluator returns it as REJECT
+restore  : documents and code agree
+```
+
+写这条时又犯了一次同类错误：正则里把 `{3,}` 写成了 `{{3,}}`（下意识按 f-string 转义），结果两个码被误报为「文档里没有那一行」。**是回头查了文档实际内容才确认那是我的正则错，不是文档缺行。**
+
+## 真实模型跑批（24 槽，2026-11-16）
+
+用 `deepseek-flash`、温度 0、经 `gated_chat` 的账本 gate 取 key，跑满 2 个缺陷族 × 4 条件 × 3 次重复。
+
+| 条件 | n | 平均交互 | 平均 tokens | 契约 ACCEPT |
+| --- | --- | --- | --- | --- |
+| A 无反馈 | 6 | 4.7 | 10,326 | 3/6 |
+| B 真实反馈 | 6 | 2.2 | 4,504 | **6/6** |
+| C 失配反馈 | 6 | 4.5 | 9,832 | 3/6 |
+| D 真实反馈 + 显式指导 | 6 | 1.2 | 1,634 | **6/6** |
+
+总量 157,776 tokens，24/24 槽全部产出记录。
+
+**读法**：B、D 都能治好（6/6），而 C（结构相同但内容来自另一条 run）与 A（完全没有反馈）落在同一水平（各 3/6，平均交互 4.5 与 4.7）。这正是协议要分离的东西——**不匹配的反馈并不比没有反馈更有用**。
+
+**这批数据的三条限制**（记录在 `real_matrix.json` 的 summary 里）：
+
+1. 独立裁决门是 `NOT_RUN`，所以即使契约 ACCEPT，终态仍记为 `UNKNOWN`；`FAIL` 才是被判定的失败。
+2. 任务是合成缺陷（`skill/registry.py`、`skill/mapping.py`），不是真机械臂任务。
+3. 单个模型、每组 3 次重复。
+
+### 这批数据差点是假的
+
+第一版 harness 在跑批开始前写**一句固定文本**当执行反馈，然后原样交给 agent 六次。它有文件、有失败字样，看起来像日志——但不含任何信息。后果是 B/C/D 全部退化成 A：
+
+```
+F2 的 12 个槽位全部 6 次交互、13,527~13,647 tokens、BUDGET_EXHAUSTED
+同一条件下的三次重复 token 数完全一致 —— 这就是「模型没有获得任何新信息」的指纹
+```
+
+修复后同一格（F2-B，同模型）：**1 次交互 / 475 tokens / ACCEPT**。
+
+被污染的整批（258,557 tokens）已改名为 `real_matrix_static_feedback_INVALIDATED.json` 留证，不作为结果。
+
+### 另一个陷阱：陈旧字节码
+
+给反馈刷新写回归测试时发现：Python 的 `.pyc` 用「修改时间秒数 + 文件大小」判有效，**同一秒内写入等长内容会命中旧字节码**。测试里 `return 0` 改成 `return 7` 长度相同，pytest 仍读到 0。现在 `refresh_feedback` 每次评估前清 `__pycache__`。
+
+## 真实缺陷实例（DEF-F1-REG / DEF-F2-MAP）
+
+`instances.py` 把 `defects/` 下的两个工件变成修复者可以对着干的候选工作区：
+
+| 族 | 可编辑面 | 封印面 |
+| --- | --- | --- |
+| F1 | `config/week1.yaml` | `gate/check.py` + `gate/observe_server.py` |
+| F2 | `src/task_fsm_server.py` | `gate/check.py` |
+
+```
+python3 experiments/repair_eval_v02/dry_run_instances.py
+```
+
+它给每个实例同时递上**坏的工作区**和**修好的工作区**，要求两次判定不同：
+
+```
+DEF-F1-REG   injected=OBJECT_NOT_REGISTERED repaired=PASS   discriminates=True
+DEF-F2-MAP   injected=WRONG_ZONE_ASSIGNMENT repaired=PASS   discriminates=True
+```
+
+### 这个 dry run 当场抓到一个致命错误
+
+F1 的门第一版写的是 `ok = not (set(tracked) & real)`——意思是「没有真实物体被注册就通过」。
+而**注入状态正是那个样子**，于是：
+
+```
+injected=PASS  repaired=OBJECT_STILL_REGISTERED   ← 符号反了
+```
+
+如果没跑这一步，24 个 F1 槽位会在**什么都不修**的情况下全部判过，而且所有条件看起来一样好。
+凡是一个门只输出一种值（全过或全不过），从外面看是一样的；唯一能分辨的办法就是同时递上坏的和好的，要求答案不同。
+
+### 补：stand-in 太聪明，就测不到边界
+
+上轮的脚本化 dry run 能全绿，是因为脚本 agent **直接写 `IN.editable_rel(instance)` 这个正确路径**——它从外部知道答案，绕开了「agent 只能写它被授权的可编辑面」这一层。
+
+于是 24 槽真跑时，`editable_fields` 还是合成契约的 `skill/`，agent 照着做，四条全部 FAIL，35,140 tokens 换来一个本该由 stand-in 提前发现的 bug。
+
+现在脚本 agent **只根据自己被授予的 `editable_fields` 决定写到哪里**。把修复撤掉做变异，不需要任何额外断言，流水线自己就复现了真跑的失败：
+
+```
+F1: writes=['skill/week1.yaml']        verdict=REJECT  terminal=FAIL
+F2: writes=['skill/task_fsm_server.py'] verdict=REJECT  terminal=FAIL
+```
+
+**一个替身如果知道正确答案，它验证的是门，不是通往门的边界。**

@@ -1,0 +1,46 @@
+{
+  "summary": {
+    "slots_attempted": 2,
+    "slots_planned": 2,
+    "tokens_spent": 0,
+    "batch_budget": 30000,
+    "model": "deepseek-flash",
+    "stopped": null,
+    "terminal_states": {
+      "NOT_RUN": 2
+    },
+    "by_condition": {
+      "C_MISMATCHED_FEEDBACK": [
+        "NOT_RUN",
+        "NOT_RUN"
+      ]
+    },
+    "qualification": "REAL_MODEL_RUN"
+  },
+  "rows": [
+    {
+      "slot_id": "F1-C-r1",
+      "condition": "C_MISMATCHED_FEEDBACK",
+      "terminal_status": "NOT_RUN",
+      "qualification": "REAL_MODEL_RUN",
+      "seed": 5101,
+      "source_sha": "5458f1df6272e9a798e1e8092ffcfdd79829128f",
+      "notes": "no B run of this family at another seed exists to borrow from",
+      "tokens_total": 0,
+      "interactions_used": 0,
+      "edited_paths": []
+    },
+    {
+      "slot_id": "F1-C-r2",
+      "condition": "C_MISMATCHED_FEEDBACK",
+      "terminal_status": "NOT_RUN",
+      "qualification": "REAL_MODEL_RUN",
+      "seed": 5102,
+      "source_sha": "5458f1df6272e9a798e1e8092ffcfdd79829128f",
+      "notes": "no B run of this family at another seed exists to borrow from",
+      "tokens_total": 0,
+      "interactions_used": 0,
+      "edited_paths": []
+    }
+  ]
+}
