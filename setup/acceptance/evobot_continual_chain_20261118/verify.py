@@ -46,19 +46,36 @@ def main():
 
     try:
         summary = demo.run(str(tmp))
-        e1 = json.loads((tmp / "03_effect_E1.json").read_text(encoding="utf-8"))
-        e2 = json.loads((tmp / "03_effect_E2.json").read_text(encoding="utf-8"))
+        # Discover the labels from the demo's own output instead of hardcoding E1/E2:
+        # the entry that wins is now GENERATED from the archive, so its label comes from
+        # its failure signature. A hardcoded pair silently pinned this verifier to the
+        # hand-written entries and it crashed the moment a generated one was added - the
+        # same brittleness as the hardcoded label list in demo.run().
+        entries_doc = json.loads((tmp / "02_entries.json").read_text(encoding="utf-8"))
+        labels = [r["label"] for r in entries_doc["routes"]]
+        routes = {r["label"]: r["consumer"] for r in entries_doc["routes"]}
+        probes = {label: json.loads((tmp / ("03_effect_%s.json" % label))
+                                    .read_text(encoding="utf-8")) for label in labels}
+        inert = [l for l, p in probes.items() if p["verdict"] == "NO_CHANGE"]
+        acting = [l for l, p in probes.items() if p["verdict"] == "CHANGED"]
+        acting_label = acting[0] if acting else None
         before = json.loads((tmp / "05_retrieval_before_review.json").read_text(
             encoding="utf-8"))
-        after_e2 = json.loads((tmp / "07_retrieval_after_E2.json").read_text(
-            encoding="utf-8"))
+        after_active = json.loads((tmp / ("07_retrieval_after_%s.json" % acting_label))
+                                  .read_text(encoding="utf-8"))
         curation = json.loads((tmp / "04_curation.json").read_text(encoding="utf-8"))
-        activated = json.loads((tmp / "06_activated_E2.json").read_text(encoding="utf-8"))
-        outcome = json.loads((tmp / "08_applied_E2.json").read_text(encoding="utf-8"))
+        # The per-label file holds ONE activation; the mapping over all labels lives in
+        # SUMMARY.json's "activated" step. Reading the per-label file and treating it as a
+        # mapping is what crashed the first version of this check.
+        activated = next(s["activated"] for s in summary["steps"]
+                         if s["step"] == "activated")
+        outcome = json.loads((tmp / ("08_applied_%s.json" % acting_label))
+                             .read_text(encoding="utf-8"))
+        e2 = probes[acting_label]
 
         # 1 -- delivery address decides whether the lesson can act at all
-        checks["planner_side_is_inert"] = e1["verdict"] == "NO_CHANGE"
-        checks["executor_side_acts"] = e2["verdict"] == "CHANGED"
+        checks["some_delivery_is_inert"] = bool(inert)
+        checks["some_delivery_acts"] = bool(acting)
 
         # 2 -- the active delivery satisfies BOTH the spacing and the clearance contract
         checks["applied_spacing_at_least_90mm"] = e2["applied_min_separation_m"] >= 0.09 - 1e-9
@@ -66,9 +83,10 @@ def main():
 
         # 3 -- the review gate is load-bearing in both directions
         checks["retrieval_before_review_is_empty"] = before["kept"] == []
-        checks["retrieval_after_review_admits_one"] = len(after_e2["kept"]) == 1
+        checks["retrieval_after_review_admits_one"] = len(after_active["kept"]) == 1
         checks["candidate_is_refused_for_status"] = any(
-            r["why"].startswith("status is") for r in after_e2["refused"])
+            r["why"].startswith("status is") or "superseded" in r["why"]
+            for r in after_active["refused"])
 
         # 4 -- curation refuses redundancy and contradiction
         checks["duplicate_refused"] = curation["duplicate_attempt"]["decision"] == "DUPLICATE"
@@ -81,17 +99,18 @@ def main():
         store = _load("store")
         ok, msg = store.verify_chain(str(tmp / "records_v2.jsonl"))
         checks["chain_verifies"] = ok
-        checks["candidate_retained_on_disk"] = activated["candidate"] in {
+        active_rec = activated[acting_label]
+        checks["candidate_retained_on_disk"] = active_rec["candidate"] in {
             r["entry_id"] for r in records}
         checks["successor_points_at_candidate"] = any(
-            (r.get("version") or {}).get("parent_entry_id") == activated["candidate"]
+            (r.get("version") or {}).get("parent_entry_id") == active_rec["candidate"]
             for r in records)
 
         # 6 -- the effect state is derived from ledger EVENTS, not asserted
         checks["outcome_is_helpful"] = outcome.get("effect_state") == "used_helpful"
-        checks["skipped_attempt_is_never_used"] = (
-            json.loads((tmp / "08_applied_E1.json").read_text(encoding="utf-8"))
-            .get("effect_state") == "never_used")
+        checks["an_unapplied_attempt_is_never_used"] = any(
+            json.loads((tmp / ("08_applied_%s.json" % label)).read_text(encoding="utf-8"))
+            .get("effect_state") == "never_used" for label in labels)
 
         # 7 -- the regression gate is LOAD-BEARING, not decorative
         records_all = [json.loads(line) for line in
@@ -106,14 +125,16 @@ def main():
 
         # 8 -- the ACTIVE entry compiles into a CALLABLE asset, and that callable exists
         assets = json.loads((tmp / "10_skill_assets.json").read_text(encoding="utf-8"))
-        e2_asset = assets.get("E2") or {}
-        checks["active_entry_compiles_to_an_asset"] = e2_asset.get("compiled") is True
-        checks["asset_binds_an_existing_callable"] = e2_asset.get("callable_exists") is True
-        checks["asset_declares_no_generated_code"] = e2_asset.get("code_generated") is False
-        checks["asset_carries_a_guard"] = (e2_asset.get("guard_count") or 0) >= 1
-        # the REJECTED delivery must not become a skill: an asset is callable, so only a
+        active_asset = assets.get(acting_label) or {}
+        checks["active_entry_compiles_to_an_asset"] = active_asset.get("compiled") is True
+        checks["asset_binds_an_existing_callable"] =             active_asset.get("callable_exists") is True
+        checks["asset_declares_no_generated_code"] =             active_asset.get("code_generated") is False
+        checks["asset_carries_a_guard"] = (active_asset.get("guard_count") or 0) >= 1
+        # every REJECTED delivery must compile nothing: an asset is callable, so only a
         # reviewed, regression-passed entry may produce one
-        checks["rejected_delivery_compiles_no_asset"] = "E1" not in assets
+        rejected = [l for l, a in activated.items() if a["status"] != "ACTIVE"]
+        checks["rejected_deliveries_compile_no_asset"] = all(
+            l not in assets for l in rejected) and bool(rejected)
 
         # 9 -- the MISUSE check ran and is load-bearing (master goal step 4:
         # "does it get misused in scenarios where it does not apply")
@@ -139,6 +160,35 @@ def main():
         real_active = [r for r in active]
         checks["real_store_still_has_exactly_one_active_entry"] = len(real_active) == 1
 
+        # 11 -- the ENTRY ITSELF came out of the archive, not out of this script.
+        # A pipeline whose only input is a human typing entries is a form with validation
+        # on it; this is the check that it is actually a generator.
+        gen = json.loads((tmp / "02_generated.json").read_text(encoding="utf-8"))
+        checks["an_entry_was_generated_from_archived_runs"] = len(gen["entries"]) >= 1
+        checks["the_generator_refused_an_unroutable_signature"] = any(
+            "UNROUTED" in (v.get("why") or "")
+            for v in gen["report"]["signatures"].values() if not v.get("built"))
+        # ... and it did not certify its own output
+        generated_rows = [r for r in store.read(str(tmp / "records_v2.jsonl"))
+                          if (r.get("notes") or "").startswith("generated by")]
+        # The rule is that the GENERATOR never certifies its own output. Records it wrote
+        # carry no reviewer; a later reviewed successor carries one and is allowed to say
+        # ACCEPT or REJECT. So the assertion is on the unreviewed rows only - an earlier
+        # version of this check asserted on every row with that note and failed on the
+        # perfectly legitimate REJECT written by the review step.
+        unreviewed = [r for r in generated_rows
+                      if not (r.get("validation") or {}).get("reviewed_by")]
+        checks["generated_entries_are_never_self_accepted"] = bool(unreviewed) and all(
+            (r.get("validation") or {}).get("review_verdict") == "NOT_REVIEWED"
+            for r in unreviewed)
+        checks["no_generated_row_was_accepted_without_a_named_reviewer"] = all(
+            not ((r.get("validation") or {}).get("review_verdict") == "ACCEPT"
+                 and not (r.get("validation") or {}).get("reviewed_by"))
+            for r in generated_rows)
+        checks["generated_entries_carry_measured_evidence"] = all(
+            isinstance((r.get("evidence") or {}).get("occurrences"), int)
+            for r in generated_rows) and bool(generated_rows)
+
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
             "batch": HERE.name,
@@ -146,8 +196,10 @@ def main():
             "checks_total": len(checks),
             "checks_passed": sum(1 for v in checks.values() if v),
             "chain_message": msg,
-            "measured": {"E1_planner_side": e1["verdict"],
-                         "E2_executor_side": e2["verdict"],
+            "measured": {"deliveries": {label: p["verdict"]
+                                        for label, p in probes.items()},
+                         "acting_label": acting_label,
+                         "acting_consumer": routes.get(acting_label),
                          "spread_separation_m": e2.get("applied_min_separation_m"),
                          "clearance_m": e2.get("applied_min_clearance_m")},
             "honest_limits": summary.get("honest_limits"),

@@ -21,8 +21,8 @@
 
 | 步骤 | 本轮落点 | 机制 |
 | --- | --- | --- |
-| ① 抽出一个机制 | `evolution/experience/schema.py` | v2 条目：来源、原始证据、适用任务、适用条件、已知失效条件、置信状态、验证记录（master goal §11.2 的七字段），外加 **consumer / action_kind / effect_spec / version** |
-| ② 转成经验条目 | `schema.make_entry` | 缺 effect_spec 的条目在写入时即被拒绝——**不能被执行的"效果"只是主张** |
+| ① 抽出一个机制 | `evolution/experience/schema.py` | v2 条目：来源、原始证据、适用任务、适用条件、已知失效条件、置信状态、验证记录（master goal §11.2 的七字段），外加 **consumer / action_kind / effect_spec / invalid_probes / version** |
+| ② 转成经验条目 | `schema.make_entry` + **`postmortem.py`** | 缺 effect_spec 的条目在写入时即被拒绝——**不能被执行的"效果"只是主张**；条目现在**从归档运行日志自动生成**，不是人手写 |
 | ③ 形成可用产物 | `consumers.py` | 消费模块**主动声明**自己能执行哪些 `action_kind`；条目按能力路由，而不是按关键词猜地址 |
 | ④ 本地验证后再启用 | `effect.py` + `regression.py` + `misuse.py` + `curate.py` + `retrieve.py` | 效果**被执行**再判定；**回归门 KEEP 才允许启用**；**误用检查 BLOCKED 才允许启用**；重复/冲突拒绝；检索要求独立 ACCEPT；启用采用**追加式**版本链 |
 | ⑤ 记录后续使用效果 | `ledger.py` + `lifecycle.py` | RETRIEVED / APPLIED / OUTCOME 三类事件分开记；`effect_of()` 只从事件推导状态；**有害则停用（追加式 RETIRE）** |
@@ -56,6 +56,32 @@
 `apply_respread` 只会沿 +x 展开，在这份计划上把第二个落点推到距 box_b 46 mm（< 50 mm 契约），
 于是重试第三次被拒为"declared destination occupied"。修改为**按余量选轴**，并且两轴都不满足契约时**拒绝**而不是发出一个必然被拒的计划；
 不传 avoid 时行为与旧实现**逐字节相同**，11/11 `benchmark/tests/test_recovery_driver.py` 仍通过。
+
+## 4.5 条目从哪来：自动生成，不自审（master goal 第 1、2 步）
+
+上一轮所有条目都是脚本里手写的。**只有人手输入经验的管道不是持续演进，是带校验的表单。**
+
+`postmortem.py` 扫归档运行产物，按**可观测签名**聚类，满足门槛才产出 CANDIDATE 条目：
+
+| 规则 | 理由 |
+| --- | --- |
+| 至少 **2 次**出现 | 本仓库曾把单次运行的观察当教训发表，后来发现是错误归因 |
+| evidence 只取**解析出来的字段** | 散文是"关于测量的主张"，不是测量 |
+| 消费者必须**已声明且入口存在** | 否则报 UNROUTED——"这个栈没地方放这条知识"是真实发现，不该用猜测掩盖 |
+| effect_spec 必须**可执行** | 否则报 NOT_READY，不产出一条"效果只能被断言"的条目 |
+| 失效条件与探针**必须一一对应** | 否则报 NOT_READY，避免下游必然 UNPROBED |
+| 永不写 ACCEPT | 生成者自审会让审阅门、回归门、误用门**同时**变成摆设 |
+
+**在真实归档上的结果（51 次失败）**：
+
+| 签名 | 次数 | 结果 |
+| --- | --- | --- |
+| `occupied_destination` | 5 | **生成条目**，路由到 `spread_policy` |
+| `unconfirmed_native` | **46** | **UNROUTED**：本栈没有能执行"resume from measured state"的可调用函数 |
+
+46/51 的失败**在本栈里无处安放**——这是关于这个机器人栈的发现，不是脚本的缺口。
+把它硬塞进一个 `respread_apply` 的 effect_spec 里，测的就是另一个函数，
+那正是"经验送给没能力执行它的模块"的同一类错误。
 
 ## 5. 检索门（四道，每道都对应一次真实事故）
 
@@ -154,7 +180,7 @@
 | 新机器人运行验证 | **未做**：所有结果来自归档输入 |
 | 规划器（prompt 层）效果测量 | **不可离线测量**，报 UNMEASURED |
 | 跨任务族迁移 | **未验证**：当前 ACTIVE 条目只覆盖 T13 任务族，n=1 |
-| 经验条目的自动生成（从运行日志到条目） | **未做**：条目仍由脚本构造 |
+| 经验条目的自动生成 | **已做**：`postmortem.py` 从 51 次归档失败生成 1 条、拒绝 1 类（46 次）并给出理由；但签名→消费模块的映射表仍由人维护 |
 | GEPA 式候选搜索 | **未做**：本轮只做单候选，多候选与成本权衡留待后续 |
 | 技能资产的自主编排（组合已有资产完成新任务） | **未做**：本轮只到"资产可被调用"，没有组合 |
 | 回归门覆盖全部 109 个验证器 | **未做**：按消费模块固定子集（2 个），全量跑约数分钟且大多与本条目无关 |
@@ -169,7 +195,7 @@ python3 evolution/experience/demo_continual.py
 python3 -m pytest evolution/experience/test_continual_chain.py -q
 ```
 
-verifier 会**重新执行**整条链并断言 **29 项检查**，不读取 SUMMARY 里的自述。其中关键几项：
+verifier 会**重新执行**整条链并断言 **34 项检查**，不读取 SUMMARY 里的自述。其中关键几项：
 
 - 规划侧不生效（NO_CHANGE）、执行侧生效（CHANGED）；
 - 启用前后检索分别为 0 与 1；
@@ -178,4 +204,5 @@ verifier 会**重新执行**整条链并断言 **29 项检查**，不读取 SUMM
 - ACTIVE 条目编译出的资产**绑定到一个真实存在的可调用函数**，且 `code_generated == false`；
 - **被拒绝的投递（E1）不产出任何资产**——资产是可调用的，只有过审且过回归的条目才配变成技能；
 - 生命周期复盘给出 KEEP/RETIRE 判定，**退避转换真的追加了 RETIRED 版本**、父指针正确、链仍完好；
-- 退役演示跑在**副本**上，真实 store 仍只有一个 ACTIVE 条目。
+- 退役演示跑在**副本**上，真实 store 仍只有一个 ACTIVE 条目；
+- **至少一条条目来自归档自动生成**，生成器拒绝了一个 UNROUTED 签名，且**没有任何生成记录在无具名审阅者时被 ACCEPT**。

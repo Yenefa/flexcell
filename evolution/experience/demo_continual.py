@@ -39,6 +39,7 @@ import curate  # noqa: E402
 import effect  # noqa: E402
 import ledger  # noqa: E402
 import lifecycle  # noqa: E402
+import postmortem  # noqa: E402
 import retrieve  # noqa: E402
 import schema  # noqa: E402
 import skill_asset  # noqa: E402
@@ -239,16 +240,27 @@ def run(dest=OUT):
     steps.append({"step": "measured_failure", "error_code": failure.get("error_code"),
                   "detail": failure.get("detail")})
 
-    # 2 -- two entries, routed by declared capability
-    entries = [entry_planner_side(), entry_executor_side()]
+    # 2 -- entries. The FIRST one is generated from the archive by postmortem.py, not
+    # written here: a pipeline whose only input is a human typing entries is a form with
+    # validation on it, not a continual loop. The second is written to contrast the
+    # planner-side delivery with the executor-side one.
+    generated, pm_report = postmortem.generate()
+    _write(os.path.join(dest, "02_generated.json"),
+           {"report": pm_report,
+            "entries": [e["entry_id"] for e in generated]})
+    entries = generated + [entry_executor_side()]
     routes = []
     for entry in entries:
         consumer, why = consumers.route(entry)
         routes.append({"label": entry["version"]["label"], "consumer": consumer,
                        "why": why})
+    labels = [entry["version"]["label"] for entry in entries]
     _write(os.path.join(dest, "02_entries.json"),
            {"entries": entries, "routes": routes})
-    steps.append({"step": "entries_built", "routes": routes})
+    steps.append({"step": "entries_built", "labels": labels, "routes": routes,
+                  "generated_from_archive": len(generated),
+                  "generator_refused": [s for s, v in pm_report["signatures"].items()
+                                        if not v["built"]]})
 
     # 3 -- effect, executed not asserted, for BOTH delivery addresses
     probes = {}
@@ -267,10 +279,17 @@ def run(dest=OUT):
                                          ledger_path=ledger_path)
         admissions.append({"label": entry["version"]["label"],
                            "decision": decision, "payload": payload})
-    dup = entry_planner_side()
+    # Duplicate / conflict probes use a STORED entry, not a freshly built one: re-using
+    # entry_planner_side() here looked like a duplicate test but silently stopped being
+    # one when the generated entry replaced it in the store - the "duplicate" then had no
+    # counterpart and reported ADD. Deriving the probe from what was actually admitted
+    # keeps the test tied to the thing it claims to duplicate.
+    dup = json.loads(json.dumps(entries[0]))
+    for key in ("prev_sha256", "chain_sha256"):
+        dup.pop(key, None)
     dup_decision, dup_payload = curate.admit(dup, store_path=store_path,
                                              ledger_path=ledger_path)
-    conflict = entry_planner_side()
+    conflict = json.loads(json.dumps(entries[0]))
     conflict["effect_spec"] = dict(conflict["effect_spec"], operator="respread_apply")
     conflict["entry_id"] = schema.digest(schema._body(conflict))
     conflict["record_sha256"] = schema.digest(
@@ -313,8 +332,11 @@ def run(dest=OUT):
 
     # 7 -- retrieval AFTER review, for the consumer that can act
     from_report = {}
-    for label in ("E1", "E2"):
-        consumer = [r["consumer"] for r in routes if r["label"] == label][0]
+    # Driven by the labels actually built, not a hardcoded ("E1", "E2"): the generated
+    # entry's label comes from its signature, so a hardcoded list silently skipped it.
+    for route in routes:
+        label = route["label"]
+        consumer = route["consumer"]
         kept, report = retrieve.retrieve(consumer,
                                          task_family=entries[0]["task_family"],
                                          store_path=store_path, ledger_path=ledger_path,
@@ -405,12 +427,16 @@ def run(dest=OUT):
         "ran_at": "2026-11-18",
         "what": "two deliveries of one lesson through generate -> route -> measure -> "
                 "curate -> retrieve -> apply -> outcome, on real archived inputs",
-        "measured_result": {
-            "E1_planner_side": probes["E1"].get("verdict"),
-            "E2_executor_side": probes["E2"].get("verdict"),
-            "why": "spread() groups by exact pose and finds no group; apply_respread() "
-                   "clusters by distance and finds the pair",
-        },
+        "measured_result": {label: probe.get("verdict")
+                            for label, probe in probes.items()},
+        "why": ("the generated occupied_destination entry and the planner-side one both "
+                "declare landing_spacing; at spread() they report NO_CHANGE because the "
+                "plan builder had already offset the pair, while the executor-side "
+                "respread clusters by distance and CHANGES it (56 mm -> 90 mm)"),
+        "generator": {"scanned": pm_report["scanned"],
+                      "built": len(generated),
+                      "refused": {s: v["why"] for s, v in pm_report["signatures"].items()
+                                  if not v["built"]}},
         "honest_limits": [
             "the review artifact is written by a separate step of the same run, not by "
             "an outside reviewer; a real round needs the latter",

@@ -60,9 +60,16 @@ capability is what makes that visible instead of leaving it to an audit.
    it. Note: nothing in this batch made a run worse, so the transition is demonstrated on
    a **copy** with a synthetic WORSE event; the real store is untouched.
 
-`verify.py` asserts **29 checks**, including that both gates really ran, that the asset
-binds to a function that exists, that the rejected delivery produced no asset, and that
-retirement still lets retrieval see nothing.
+11. **entry generation** — the first entry is not written in the demo script; it is
+   produced by `postmortem.py` from 51 archived failures. The generator emitted one entry
+   (`occupied_destination`, 5 occurrences) and **refused** the largest cluster
+   (`unconfirmed_native`, 46 occurrences) as UNROUTED: this stack has no callable function
+   that resumes from a measured state, so the knowledge has nowhere to act.
+
+`verify.py` asserts **34 checks**, including that both gates really ran, that the asset
+binds to a function that exists, that the rejected delivery produced no asset, that
+retirement still lets retrieval see nothing, and that **no generated record was ever
+ACCEPTed without a named reviewer**.
 
 ---
 
@@ -106,8 +113,12 @@ It touches no evaluator, tolerance, threshold or held-out answer. 11/11
 8. **RETIRE has never fired on real evidence.** No run in this batch made anything worse,
    so the transition is shown on a copy with a synthetic WORSE outcome. A retirement
    driven by a real regression is still missing.
-9. The misuse probes cover the spacing and respread consumers only (5 probes). The
+9. The misuse probes cover the spacing and respread consumers only (6 probes). The
    harness and development consumers have none, so their entries would report UNPROBED.
+10. **Entry generation is automatic but narrow.** The generator reads archived failures
+    and emits candidates, but the signature→consumer mapping table is hand-maintained,
+    and 46 of 51 archived failures fall outside it (UNROUTED, honestly reported rather
+    than forced into a spec that measures a different function).
 
 ---
 

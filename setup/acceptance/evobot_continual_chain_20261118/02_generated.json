@@ -1,0 +1,28 @@
+{
+  "entries": [
+    "8b47d987d9b9d2eccb5dd36c2ab0458fa9d7f21af5c5c251768d5550cf70c034"
+  ],
+  "report": {
+    "entries": [
+      {
+        "consumer": "spread_policy",
+        "entry_id": "8b47d987d9b9d2eccb5dd36c2ab0458fa9d7f21af5c5c251768d5550cf70c034",
+        "occurrences": 5,
+        "signature": "occupied_destination"
+      }
+    ],
+    "scanned": 51,
+    "signatures": {
+      "occupied_destination": {
+        "built": true,
+        "occurrences": 5,
+        "why": "5 occurrence(s), consumer 'spread_policy' declares 'landing_spacing'"
+      },
+      "unconfirmed_native": {
+        "built": false,
+        "occurrences": 46,
+        "why": "UNROUTED: no consumer in this stack declares a change for 'unconfirmed_native', so the knowledge would be stored and unable to act"
+      }
+    }
+  }
+}

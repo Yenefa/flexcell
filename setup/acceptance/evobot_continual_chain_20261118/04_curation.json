@@ -2,10 +2,10 @@
   "admissions": [
     {
       "decision": "ADD",
-      "label": "E1",
+      "label": "auto-occupied_destination",
       "payload": {
         "decision": "ADD",
-        "entry_id": "fc4cd7d2c0740a4fede7eac424862e5a77192e85988de3c28be4ba60dd3a7d88",
+        "entry_id": "8b47d987d9b9d2eccb5dd36c2ab0458fa9d7f21af5c5c251768d5550cf70c034",
         "related": [],
         "why": "no stored entry shares this fingerprint",
         "written": true
@@ -27,10 +27,10 @@
     "decision": "CONFLICT",
     "payload": {
       "decision": "CONFLICT",
-      "entry_id": "dce3aae786b8af17b70d0ff56fda25a60e8649ec36012afc5162e2b7ae115e9f",
+      "entry_id": "83d292773553884b507aef390e35ab8607dc40e2f5625550e5bc09d465a57777",
       "needs": "a human decision: two entries prescribe different changes",
       "related": [
-        "fc4cd7d2c0740a4fede7eac424862e5a77192e85988de3c28be4ba60dd3a7d88"
+        "8b47d987d9b9d2eccb5dd36c2ab0458fa9d7f21af5c5c251768d5550cf70c034"
       ],
       "why": "same condition, different operators: the entries prescribe different kinds of change and a human must choose",
       "written": false
@@ -40,9 +40,9 @@
     "decision": "DUPLICATE",
     "payload": {
       "decision": "DUPLICATE",
-      "entry_id": "fc4cd7d2c0740a4fede7eac424862e5a77192e85988de3c28be4ba60dd3a7d88",
+      "entry_id": "8b47d987d9b9d2eccb5dd36c2ab0458fa9d7f21af5c5c251768d5550cf70c034",
       "related": [
-        "fc4cd7d2c0740a4fede7eac424862e5a77192e85988de3c28be4ba60dd3a7d88"
+        "8b47d987d9b9d2eccb5dd36c2ab0458fa9d7f21af5c5c251768d5550cf70c034"
       ],
       "why": "same fingerprint and same parameters; appending it would double-count one observation",
       "written": false
