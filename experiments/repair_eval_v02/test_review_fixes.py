@@ -124,8 +124,12 @@ REG_CASE = ROOT / "benchmark/repair_eval/contracts/cases/p1_valid_repair.json"
 def test_selection_keeps_registered_order_even_when_filters_are_reversed():
     plan = DP.load()
     selected = DP.select(plan, list(reversed(R.FAMILIES)), list(reversed(R.CONDITIONS)), [3, 2, 1])
+    # The registered order now runs every A/B repetition before any C, because a
+    # C slot's registered donor has to exist when it is dispatched. Measured on
+    # the first real dispatch: in the previous order both C slots came back
+    # NOT_RUN and the batch stopped.
     assert [r["slot_id"] for r in selected[:6]] == [
-        "F1-A-r1", "F2-A-r1", "F1-B-r1", "F2-B-r1", "F1-C-r1", "F2-C-r1"]
+        "F1-A-r1", "F2-A-r1", "F1-A-r2", "F2-A-r2", "F1-A-r3", "F2-A-r3"]
     assert selected == plan["slots"]
     with pytest.raises(ValueError, match="not registered"):
         DP.select(plan, [R.FAMILIES[0]], ["A_STATIC"], [4])
@@ -151,9 +155,15 @@ def test_dispatch_uses_exact_registered_donor_and_keeps_missing_donor_not_run(tm
     sha = health.checked_run(["git", "rev-parse", "HEAD"], cwd=ROOT).stdout.strip()
     report = R.execute_batch(args, None, [R.FAMILIES[0]], ["B_REAL_FEEDBACK", "C_MISMATCHED_FEEDBACK"],
                              [1, 2], sha, {})
-    assert [r["slot_id"] for r in report["rows"]] == ["F1-B-r1", "F1-C-r1", "F1-C-r2", "F1-B-r2"]
-    assert report["rows"][1]["terminal_status"] == "NOT_RUN"
-    assert calls == [("F1-B-r1", None, 5101), ("F1-C-r2", "F1-B-r1", 5102), ("F1-B-r2", None, 5102)]
+    # With the reordered plan both B repetitions run before the C slots, so the
+    # donor a C slot names already exists when it is dispatched.
+    assert [r["slot_id"] for r in report["rows"]] == [
+        "F1-B-r1", "F1-B-r2", "F1-C-r1", "F1-C-r2"]
+    assert report["rows"][2]["terminal_status"] == "FAIL"
+    assert calls[0] == ("F1-B-r1", None, 5101)
+    assert calls[1] == ("F1-B-r2", None, 5102)
+    assert [c[0] for c in calls[2:]] == ["F1-C-r1", "F1-C-r2"]
+    assert all(c[1] for c in calls[2:]), "a C slot ran without a donor"
     assert report["summary"]["plan_sha256"] == DP.load()["sha256"]
 
 
@@ -162,3 +172,24 @@ def test_status_agreement_does_not_hide_order_deviation():
         {"slot_id": "b", "terminal_status": "FAIL"},
         {"slot_id": "a", "terminal_status": "FAIL"}])
     assert report["consistent"] and not report["order_matches"]
+
+
+def test_a_c_slot_without_its_donor_stays_not_run(tmp_path, monkeypatch):
+    """The donor rule survives the reorder: selecting C alone cannot invent one."""
+    calls = []
+
+    def run(family, condition, rep, work, *args, **kwargs):
+        calls.append(kwargs["donor_run_id"])
+        (work / "candidate").mkdir()
+        (work / "candidate/source.py").write_text("source")
+        return {"terminal_status": "FAIL", "action_terminal": health.TYPED_FAILURE,
+                "tokens_total": 0, "qualification": "SCRIPTED_TEST"}
+
+    monkeypatch.setattr(R, "run_slot", run)
+    args = Namespace(out=str(tmp_path / "batch.json"), model="SCRIPTED_TEST", limit=0,
+                     budget=100, max_interactions=6, source="instances", task_variant="v2")
+    sha = health.checked_run(["git", "rev-parse", "HEAD"], cwd=ROOT).stdout.strip()
+    report = R.execute_batch(args, None, [R.FAMILIES[0]], ["C_MISMATCHED_FEEDBACK"],
+                             [1, 2], sha, {})
+    assert [r["terminal_status"] for r in report["rows"]] == ["NOT_RUN", "NOT_RUN"]
+    assert calls == []
