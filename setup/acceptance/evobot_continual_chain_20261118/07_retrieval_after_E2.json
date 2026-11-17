@@ -1,0 +1,23 @@
+{
+  "chain": "chain intact (4 records)",
+  "consumer": "executor_recovery",
+  "kept": [
+    "ddafab3bce44a99e57755dcc7361d2dd364028803317e7fdfa6bf119aef80e7e"
+  ],
+  "refused": [
+    {
+      "entry_id": "31f2bd715bbfe0aae9b277d40702a293b3655dfa6f0d77aecf1771f1735d19fd",
+      "why": "status is 'CANDIDATE', not ACTIVE"
+    },
+    {
+      "entry_id": "e0561cd28ffcb52138866a3b9be4966b24e7d1a315de227244161ed27e7ff684",
+      "why": "status is 'CANDIDATE', not ACTIVE"
+    },
+    {
+      "entry_id": "aa65e90726419a9f9869806852ca90ac4afa9a25469a57b75103dd3a74edcd80",
+      "why": "status is 'REJECTED', not ACTIVE"
+    }
+  ],
+  "store_records": 4,
+  "task_family": "T13-conditional-two-boxes"
+}

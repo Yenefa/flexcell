@@ -72,7 +72,8 @@ def decide(evidence, attempt=1):
             "attempt": attempt, "budget": MAX_RETRIES}
 
 
-def apply_respread(plan, spread_step=0.090, bin_radius=0.06, cluster_m=0.12):
+def apply_respread(plan, spread_step=0.090, bin_radius=0.06, cluster_m=0.12,
+                   avoid=None, clearance=0.05):
     """Widen spacing for stages that land in the SAME bin.
 
     TWO BUGS FIXED HERE, both found by running it on the robot:
@@ -101,19 +102,50 @@ def apply_respread(plan, spread_step=0.090, bin_radius=0.06, cluster_m=0.12):
                 break
         else:
             groups.append({"centre": [x, y], "idx": [i]})
+    own = [[float(a[0]), float(a[1])] for a in (avoid or [])]
+
+    def _margin(points):
+        if not own:
+            return float("inf")
+        return min(math.hypot(px - ax, py - ay)
+                   for px, py in points for ax, ay in own)
+
     for g in groups:
         idxs = g["idx"]
         if len(idxs) < 2:
             continue
         cx = sum(float(stages[i]["place_pose"][0]) for i in idxs) / len(idxs)
         cy = sum(float(stages[i]["place_pose"][1]) for i in idxs) / len(idxs)
+        offsets = [(rank - (len(idxs) - 1) / 2.0) * spread_step
+                   for rank in range(len(idxs))]
+        # AXIS IS CHOSEN, NOT ASSUMED (2026-11-18). Before this, the offsets always ran
+        # along +x. On the archived T13 plan that pushed the second landing point to
+        # 46 mm from box_b's spawn - below the 50 mm clearance contract - so the retry
+        # was refused as "occupied destination" for the third time, this time by the
+        # recovery path rather than the planner. The planner-side spread had already
+        # solved it by choosing between axes; the executor-side respread had not, and one
+        # delivery address fixing it did not fix the other. With no avoid list supplied
+        # the behaviour is byte-identical to before (x axis), so every existing caller and
+        # test is unaffected.
+        axis = 0
+        if own:
+            def _pts(ax):
+                return [[cx + o, cy] if ax == 0 else [cx, cy + o] for o in offsets]
+            margins = {ax: _margin(_pts(ax)) for ax in (0, 1)}
+            axis = 1 if margins[1] > margins[0] else 0
+            if margins[axis] < clearance:
+                raise ValueError(
+                    "no respread axis keeps every destination %.3f m clear of the "
+                    "other objects; refusing rather than emitting a plan that will be "
+                    "rejected on the robot" % clearance)
         for rank, i in enumerate(idxs):
-            offset = (rank - (len(idxs) - 1) / 2.0) * spread_step
-            cand = [cx + offset, cy, float(stages[i]["place_pose"][2])]
+            offset = offsets[rank]
+            cand = ([cx + offset, cy] if axis == 0 else [cx, cy + offset])
             if abs(offset) > bin_radius:
                 raise ValueError("respread would leave the %.3f m bin" % bin_radius)
-            stages[i]["place_pose"] = cand
+            stages[i]["place_pose"] = cand + [float(stages[i]["place_pose"][2])]
             stages[i]["recovery_offset_m"] = round(offset, 5)
+            stages[i]["recovery_axis"] = "x" if axis == 0 else "y"
     out = dict(plan)
     out["stages"] = stages
     out["recovered"] = True

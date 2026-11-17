@@ -107,6 +107,11 @@ RUNGS = {
     "evobot_tall_bottles_20261111": "Tall bottle grasp (teammate, in progress)",
     "evobot_bowl_grasp_20261111": "Bowl grasp mechanism (stale pre-settle pose, rbound inflation 1.503x, ring rim vs jaw width; rim-offset grasp works, guarded)",
     "evobot_redteam_20261111": "Zero-context audit of my own work (2 blockers, 8 major; falsified the grasp-approach narrative)",
+    "evobot_continual_chain_20261118": ("Implemented + Unit Tested + offline chain measurement "
+                                        "(entry -> capability routing -> executed effect -> "
+                                        "curation -> review-gated retrieval -> append-only "
+                                        "activation -> ledger outcome; NO new robot run, so "
+                                        "NOT Simulation Tested)"),
 }
 
 

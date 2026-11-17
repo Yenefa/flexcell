@@ -138,7 +138,12 @@ def main(argv=None):
     if decision["action"] == "respread":
         plan = json.loads((run / "plan.json").read_text(encoding="utf-8"))
         try:
-            retried = recover.apply_respread(plan)
+            # The avoid list is the OTHER objects' declared positions. Passing it lets the
+            # respread choose its axis instead of always walking +x, which is how the T13
+            # retry put a landing point 46 mm from box_b and was refused as occupied.
+            avoid = [o["position"][:2] for o in plan.get("initial_objects", [])
+                     if o.get("position")]
+            retried = recover.apply_respread(plan, avoid=avoid)
         except ValueError as exc:
             (run / "recovery_blocked.txt").write_text(str(exc), encoding="utf-8")
             print("respread refused:", exc)

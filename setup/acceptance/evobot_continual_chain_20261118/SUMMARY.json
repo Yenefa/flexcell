@@ -1,0 +1,131 @@
+{
+  "honest_limits": [
+    "the review artifact is written by a separate step of the same run, not by an outside reviewer; a real round needs the latter",
+    "each outcome is the effect_spec's own expectation met on an ARCHIVED input; no new robot run was made this round",
+    "the planner consumer is not measurable offline; a prompt-level delivery is reported UNMEASURED rather than scored as no-effect"
+  ],
+  "measured_result": {
+    "E1_planner_side": "NO_CHANGE",
+    "E2_executor_side": "CHANGED",
+    "why": "spread() groups by exact pose and finds no group; apply_respread() clusters by distance and finds the pair"
+  },
+  "ran_at": "2026-11-18",
+  "record_kind": "EVOBOT_CONTINUAL_CHAIN_DEMO",
+  "steps": [
+    {
+      "detail": "state drift or occupied destination before target_box_b-1",
+      "error_code": 61,
+      "step": "measured_failure"
+    },
+    {
+      "routes": [
+        {
+          "consumer": "spread_policy",
+          "label": "E1",
+          "why": "routed by declared capability (landing_spacing -> spread_policy)"
+        },
+        {
+          "consumer": "executor_recovery",
+          "label": "E2",
+          "why": "routed by declared capability (recovery_action -> executor_recovery)"
+        }
+      ],
+      "step": "entries_built"
+    },
+    {
+      "changed": {
+        "E1": false,
+        "E2": true
+      },
+      "step": "effect_probe",
+      "verdicts": {
+        "E1": "NO_CHANGE",
+        "E2": "CHANGED"
+      }
+    },
+    {
+      "conflict": "CONFLICT",
+      "decisions": [
+        "ADD",
+        "ADD"
+      ],
+      "duplicate": "DUPLICATE",
+      "step": "curation"
+    },
+    {
+      "consumer": "spread_policy",
+      "kept": 0,
+      "refused": 2,
+      "step": "retrieval_before_review"
+    },
+    {
+      "activated": {
+        "E1": {
+          "active": "aa65e90726419a9f9869806852ca90ac4afa9a25469a57b75103dd3a74edcd80",
+          "candidate": "31f2bd715bbfe0aae9b277d40702a293b3655dfa6f0d77aecf1771f1735d19fd",
+          "status": "REJECTED",
+          "verdict": "REJECT"
+        },
+        "E2": {
+          "active": "ddafab3bce44a99e57755dcc7361d2dd364028803317e7fdfa6bf119aef80e7e",
+          "candidate": "e0561cd28ffcb52138866a3b9be4966b24e7d1a315de227244161ed27e7ff684",
+          "status": "ACTIVE",
+          "verdict": "ACCEPT"
+        }
+      },
+      "step": "activated"
+    },
+    {
+      "by_label": {
+        "E1": {
+          "consumer": "spread_policy",
+          "kept": [],
+          "refused_count": 4
+        },
+        "E2": {
+          "consumer": "executor_recovery",
+          "kept": [
+            "ddafab3bce44a99e57755dcc7361d2dd364028803317e7fdfa6bf119aef80e7e"
+          ],
+          "refused_count": 3
+        }
+      },
+      "step": "retrieval_after_review"
+    },
+    {
+      "by_label": {
+        "E1": {
+          "delta": {
+            "applied_min_clearance_m": 0.06003332407921455,
+            "applied_min_separation_m": 0.055999999999999994,
+            "baseline_min_clearance_m": 0.06003332407921455,
+            "baseline_min_separation_m": 0.055999999999999994,
+            "changed": false
+          },
+          "effect_state": "never_used",
+          "entry_id": "aa65e90726419a9f9869806852ca90ac4afa9a25469a57b75103dd3a74edcd80"
+        },
+        "E2": {
+          "delta": {
+            "applied_min_clearance_m": 0.08139410298049855,
+            "applied_min_separation_m": 0.09000000000000001,
+            "baseline_min_clearance_m": 0.06003332407921455,
+            "baseline_min_separation_m": 0.055999999999999994,
+            "changed": true
+          },
+          "effect_state": "used_helpful",
+          "entry_id": "ddafab3bce44a99e57755dcc7361d2dd364028803317e7fdfa6bf119aef80e7e"
+        }
+      },
+      "step": "applied_and_outcome"
+    },
+    {
+      "chains": 2,
+      "conflicts": 0,
+      "duplicates": 0,
+      "entries": 4,
+      "step": "store_report"
+    }
+  ],
+  "what": "two deliveries of one lesson through generate -> route -> measure -> curate -> retrieve -> apply -> outcome, on real archived inputs"
+}

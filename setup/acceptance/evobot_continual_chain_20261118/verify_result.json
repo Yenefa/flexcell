@@ -1,0 +1,35 @@
+{
+  "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
+  "batch": "evobot_continual_chain_20261118",
+  "checks": {
+    "planner_side_is_inert": true,
+    "executor_side_acts": true,
+    "applied_spacing_at_least_90mm": true,
+    "applied_clearance_at_least_50mm": true,
+    "retrieval_before_review_is_empty": true,
+    "retrieval_after_review_admits_one": true,
+    "candidate_is_refused_for_status": true,
+    "duplicate_refused": true,
+    "conflict_refused": true,
+    "chain_verifies": true,
+    "candidate_retained_on_disk": true,
+    "successor_points_at_candidate": true,
+    "outcome_is_helpful": true,
+    "skipped_attempt_is_never_used": true
+  },
+  "checks_total": 14,
+  "checks_passed": 14,
+  "chain_message": "chain intact (4 records)",
+  "measured": {
+    "E1_planner_side": "NO_CHANGE",
+    "E2_executor_side": "CHANGED",
+    "spread_separation_m": 0.09000000000000001,
+    "clearance_m": 0.08139410298049855
+  },
+  "honest_limits": [
+    "the review artifact is written by a separate step of the same run, not by an outside reviewer; a real round needs the latter",
+    "each outcome is the effect_spec's own expectation met on an ARCHIVED input; no new robot run was made this round",
+    "the planner consumer is not measurable offline; a prompt-level delivery is reported UNMEASURED rather than scored as no-effect"
+  ],
+  "level": "Implemented + Unit Tested + offline chain measurement; NOT Simulation Tested (no new robot run this round)"
+}
