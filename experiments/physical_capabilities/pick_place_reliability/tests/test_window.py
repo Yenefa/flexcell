@@ -94,6 +94,9 @@ class SourceScopeTest(unittest.TestCase):
         self.assertIn('scripts/sim_smoke.py', rw.source_hashes())
 
     def test_configuration_is_hashed(self):
+        config = pathlib.Path(rw.ROOT) / 'config'
+        if not config.is_dir():
+            self.skipTest('this checkout has no config/ directory')
         hashes = rw.source_hashes()
         self.assertTrue(any(key.startswith('config/') for key in hashes))
 
