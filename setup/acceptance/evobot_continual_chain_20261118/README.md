@@ -149,7 +149,21 @@ capability is what makes that visible instead of leaving it to an audit.
     gate. Result: **E2 is now offered to T13, T12 and T03, still withheld from T14**, and
     on T12+T03's 18 below-contract plans it fixes **18/18**.
 
-`verify.py` asserts **77 checks**, including that both gates really ran, that the asset
+20. **the planner is not "unmeasurable" — it is unmeasurable on ONE thing.**
+    `measurable_offline=False` was right about a plan's *quality* needing a model call. It
+    is wrong as a statement that nothing about the planner can be checked. The planner's own
+    SYSTEM PROMPT says *"If the instruction fixes an order, follow it exactly"* — and
+    `validate_plan` only verified that the names were known. **That sentence had never been
+    checked.** The archive holds one plan that reversed a required order; it was found only
+    **after a full run** — the most expensive way to learn something knowable before the arm
+    moves. `check_plan_order` now refuses it, and is **inert** when the instruction fixes no
+    order. It is still **not** a correctness judgement: a wrong bin does not trip it.
+    A real trap: all 16 same-run plans obeyed the order; the one reversal is a plan authored
+    for one task and executed against **another**, so it appears only against the *host*
+    instruction. A probe scanning same-run pairs alone reports **0 violations** and the check
+    looks untested. `plan_order` therefore reports both numbers.
+
+`verify.py` asserts **82 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -161,7 +175,8 @@ worse**, and that **every active entry reached its consumer** while an entry wit
 actionable text is reported DROPPED rather than accepted, and that **an order-clause
 failure is told apart from a truncated run**, and that **the gate covers every verifier
 while not running the one that contains it**, and that **an entry measured to help another
-task family is actually offered to it while an unmeasured family is still withheld**.
+task family is actually offered to it while an unmeasured family is still withheld**, and that **the planner refuses a reversed
+order while staying inert when the instruction fixes none**.
 
 ---
 

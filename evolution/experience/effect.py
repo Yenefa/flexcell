@@ -87,7 +87,7 @@ FIXTURES = {
 }
 
 OPERATORS = ("spread_step", "respread_apply", "recovery_action",
-             "harness_capacity", "delivery", "none")
+             "harness_capacity", "delivery", "plan_order", "none")
 
 
 def _digest(obj):
@@ -285,7 +285,17 @@ def probe(entry):
     # model. It does not say DELIVERY is unmeasurable, and treating the two as one meant a
     # planner entry could never be checked at all - even for the one thing that IS
     # deterministic about it, namely whether its text reaches the prompt renderer.
-    if not consumers.CONSUMERS[consumer]["measurable_offline"] and operator != "delivery":
+    #
+    # Two operators now do measure something real about the planner without a model call:
+    #   delivery    whether the entry's text reaches the prompt renderer (an ENVELOPE fact)
+    #   plan_order  whether the planner's own validator refuses a plan that reverses an
+    #               order the instruction fixed (a RULE, not a judgement - the evaluator
+    #               still owns whether a plan is correct)
+    # Neither claims the plan IMPROVED. That claim still needs a model, and the verdict for
+    # it stays UNMEASURED.
+    MODEL_FREE = ("delivery", "plan_order")
+    if (not consumers.CONSUMERS[consumer]["measurable_offline"]
+            and operator not in MODEL_FREE):
         out.update(verdict="UNMEASURED",
                    why="%r delivers at the %s layer; a model call is required and this "
                        "prober does not make one" % (consumer,
@@ -304,6 +314,97 @@ def probe(entry):
     # does NOT claim the plan changed. "Delivered" and "effective" are different, and
     # conflating them is how a delivered-but-inert lesson gets recorded as evidence about
     # the lesson rather than about the envelope.
+    # PLAN_ORDER, for the planner consumer. Unlike delivery this measures an EFFECT: the
+    # planner's own validator runs over archived (instruction, plan) pairs and the operator
+    # counts plans it now refuses. It is deterministic and model-free because the check is a
+    # rule, not a judgement - the evaluator still owns whether a plan is CORRECT.
+    if operator == "plan_order":
+        import glob as _glob
+        import re as _re
+        sys.path.insert(0, os.path.join(WT, "runtime", "planner"))
+        import agent_planner
+        rows = []
+        for path in _glob.glob(os.path.join(WT, "setup", "acceptance", "**",
+                                            "agent_reply.json"), recursive=True):
+            run = os.path.dirname(path)
+            obs_path = os.path.join(run, "observation_input.json")
+            if not os.path.exists(obs_path):
+                continue
+            try:
+                reply = json.load(open(path, encoding="utf-8"))
+                observation = json.load(open(obs_path, encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            text = str(observation.get("instruction") or "")
+            m = _re.search(r"the (\w+) block must be put there FIRST", text, _re.I)
+            if not m:
+                continue
+            colours = {str(o.get("color", "")).lower(): o.get("name")
+                       for o in observation.get("objects") or []}
+            required = colours.get(m.group(1).lower())
+            moves = (reply.get("agent_plan") or {}).get("moves") or []
+            first = moves[0].get("object") if moves else None
+            compliant = (required == first)
+            flagged = agent_planner.check_plan_order(observation, moves) is not None
+            rows.append({"run": os.path.relpath(path, WT)[:80], "compliant": compliant,
+                         "flagged": flagged})
+        # THE ARCHIVE'S ONLY GENUINE REORDERING IS A DIFFERENT SHAPE. Every plan the agent
+        # wrote for its OWN task obeyed the order. The one reversal is the wrongplan probe,
+        # where a plan authored for HO-128c6a was executed against HO-0dcde4d - so the
+        # violation is "this plan, checked against THAT instruction". Scanning only
+        # same-run pairs therefore reports zero violations and the check looks untested.
+        foreign = os.path.join(WT, "setup", "acceptance", "evobot_wrongplan_probe_20261111",
+                               "run_foreign_plan")
+        foreign_caught = None
+        if os.path.isdir(foreign):
+            try:
+                f_plan = json.load(open(os.path.join(foreign, "plan.json"),
+                                        encoding="utf-8"))
+                f_verdict = json.load(open(os.path.join(foreign, "verdict.json"),
+                                           encoding="utf-8"))
+                host = os.path.join(WT, "setup", "acceptance",
+                                    "evobot_crosstype_20261111", "runs_T14_ordered_pair",
+                                    str(f_verdict.get("task_id")),
+                                    "observation_input.json")
+                if os.path.exists(host):
+                    host_obs = json.load(open(host, encoding="utf-8"))
+                    f_moves = [{"object": s.get("object_name"), "zone": s.get("zone_name")}
+                               for s in f_plan.get("stages") or []]
+                    foreign_caught = (agent_planner.check_plan_order(host_obs, f_moves)
+                                      is not None)
+            except (OSError, ValueError):
+                foreign_caught = None
+        caught = sum(1 for r in rows if not r["compliant"] and r["flagged"])
+        false_pos = sum(1 for r in rows if r["compliant"] and r["flagged"])
+        viol = sum(1 for r in rows if not r["compliant"])
+        out["detail"] = {"order_fixing_replies": len(rows),
+                         "violations": viol, "caught": caught,
+                         "false_positives": false_pos,
+                         "compliant_passed_through": len(rows) - viol - false_pos,
+                         "archived_foreign_reordering_caught": foreign_caught,
+                         "archived_foreign_reordering": (
+                             "evobot_wrongplan_probe_20261111/run_foreign_plan")}
+        positive = caught > 0 or bool(foreign_caught)
+        out["changed"] = positive or false_pos > 0
+        out["verdict"] = ("IMPROVED" if positive and not false_pos
+                          else ("BROKEN" if false_pos else "NO_CHANGE"))
+        out["why"] = ("%d same-run plan(s) whose instruction fixes an order (%d reversed, "
+                      "%d caught, %d wrongly refused); the archive's one genuine reordering "
+                      "is the foreign plan, caught=%s"
+                      % (len(rows), viol, caught, false_pos, foreign_caught))
+        expect = spec.get("expect") or {}
+        got = {}
+        for key, want in expect.items():
+            if key == "catches_violations":
+                got[key] = positive == bool(want)
+            elif key == "no_false_positives":
+                got[key] = (false_pos == 0) == bool(want)
+            else:
+                got[key] = False
+        out["expectations"] = got
+        out["expectations_met"] = all(got.values()) if got else None
+        return out
+
     if operator == "delivery":
         import delivery as _delivery
         import public_observation as _po

@@ -76,9 +76,16 @@ SIGNATURES = {
         "action_kind": "move_order",
         "consumer": "planner",
         "failure_class": "planning",
-        "effect_spec": {"fixture": "t14_ordered_pair", "operator": "delivery",
+        # plan_order, not delivery: this is an EFFECT the planner can be measured on
+        # without a model. The planner's own validator refuses a plan that reverses an order
+        # the instruction fixed, which is a rule the SYSTEM PROMPT already states and that
+        # nothing checked until now. The one genuine reordering in this archive was found
+        # only AFTER a full run; a plan-side check costs nothing and runs before the robot
+        # moves. It does not claim the plan IMPROVED - that still needs a model.
+        "effect_spec": {"fixture": "t14_ordered_pair", "operator": "plan_order",
                         "params": {},
-                        "expect": {"delivered": True}},
+                        "expect": {"catches_violations": True,
+                                   "no_false_positives": True}},
         "applicable_when": [
             "the instruction fixes which object must be moved first",
             "the grading report lists an 'order' clause as failed",

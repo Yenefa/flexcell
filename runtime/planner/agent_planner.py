@@ -21,6 +21,7 @@ It never grades itself, and a plan it produces is not evidence of anything until
 independent evaluator has seen the resulting world state.
 """
 import json
+import re
 
 MAX_STAGES = 8
 
@@ -90,8 +91,55 @@ def parse_reply(text):
     return json.loads(t[start:end + 1])
 
 
+# The instruction's own ordering clause. This is NOT a grading rule - the evaluator owns
+# whether a plan is correct, and this module must never see a tolerance or a verdict. It is
+# the planner checking itself against a rule the SYSTEM PROMPT already tells it to follow:
+#   "If the instruction fixes an order, follow it exactly."
+# Until this existed that sentence was advice nobody checked. The archive holds one plan that
+# reversed a required order; it was found only after a full run, because validate_plan only
+# looked at whether the names were known.
+_ORDER_FIRST = re.compile(r"the (\w+) block must be put there FIRST", re.I)
+
+
+def _required_first(observation):
+    """Which object the instruction says must be moved first, or None if it says nothing."""
+    text = str((observation or {}).get("instruction") or "")
+    m = _ORDER_FIRST.search(text)
+    if not m:
+        return None
+    colour = m.group(1).lower()
+    for obj in (observation or {}).get("objects") or []:
+        if str(obj.get("color", "")).lower() == colour:
+            return obj.get("name")
+    return None
+
+
+def check_plan_order(observation, moves):
+    """Return a problem string when the plan reverses an order the instruction fixed.
+
+    WHY A PLAN-SIDE CHECK AND NOT ANOTHER EVALUATOR CLAUSE: the evaluator already grades
+    'order', but only AFTER the robot has moved. A plan that reverses the order is knowable
+    before execution, and rejecting it then costs nothing while running it costs a run.
+    """
+    required = _required_first(observation)
+    if not required or not moves:
+        return None
+    first = moves[0].get("object")
+    if first == required:
+        return None
+    moved = [m.get("object") for m in moves]
+    if required not in moved:
+        return None  # the required object is not moved at all; that is a different fault
+    return ("the instruction requires %r to be moved FIRST, but the plan starts with %r"
+            % (required, first))
+
+
 def validate_plan(reply, observation):
-    """Structural checks only. Whether the plan is CORRECT is the evaluator's job."""
+    """Structural checks plus the instruction's own order clause.
+
+    Whether the plan is CORRECT is still the evaluator's job: this only refuses a plan that
+    contradicts a rule the instruction states explicitly.
+    """
     problems = []
     known_objects = {o["name"] for o in observation["objects"]}
     known_zones = {z["name"] for z in observation["zones"]}
@@ -123,6 +171,9 @@ def validate_plan(reply, observation):
     moved = [c["object"] for c in clean]
     if not moved:
         problems.append("no valid moves after validation")
+    order_problem = check_plan_order(observation, clean)
+    if order_problem:
+        problems.append(order_problem)
     return {"moves": clean, "unmoved": list(unmoved or []),
             "confidence": reply.get("confidence"),
             "uncertainty": str(reply.get("uncertainty", ""))[:300]}, problems

@@ -431,6 +431,42 @@ def main():
             r.get("task_family") == "T05_relay" for r in rows_after
             if "harness" in str(r.get("version", {}).get("label")))
 
+        # 20 -- THE PLANNER IS MEASURABLE WITHOUT A MODEL, but only on ONE thing.
+        # consumers.CONSUMERS marks the planner measurable_offline=False because a plan's
+        # QUALITY needs a model call. That is not the same as "nothing about the planner can
+        # be checked". Its own validator now refuses a plan that reverses an order the
+        # instruction fixed - a rule the SYSTEM PROMPT already stated and nothing verified.
+        sys.path.insert(0, str(WT / "runtime" / "planner"))
+        import agent_planner as _ap
+        effect = _load("effect")
+        order_obs = {
+            "instruction": ("Put both blocks in the left bin. The blue block must be put "
+                            "there FIRST, then the red block."),
+            "objects": [{"name": "a", "color": "red"}, {"name": "b", "color": "blue"}],
+            "zones": [{"name": "z", "position": [0.12, -0.15, 0.0]}]}
+        reversed_moves = [{"object": "a", "zone": "z"}, {"object": "b", "zone": "z"}]
+        ordered_moves = [{"object": "b", "zone": "z"}, {"object": "a", "zone": "z"}]
+        checks["the_planner_refuses_a_plan_that_reverses_a_required_order"] = bool(
+            _ap.check_plan_order(order_obs, reversed_moves))
+        checks["the_planner_accepts_the_required_order"] = (
+            _ap.check_plan_order(order_obs, ordered_moves) is None)
+        # ... and it must be INERT when the instruction fixes no order at all
+        checks["the_order_check_is_inert_when_the_instruction_fixes_none"] = (
+            _ap.check_plan_order({"instruction": "Put both blocks in the right bin.",
+                                  "objects": order_obs["objects"],
+                                  "zones": order_obs["zones"]}, reversed_moves) is None)
+        # the probe must catch the archive's one genuine reversal, which is a FOREIGN plan
+        order_probe = effect.probe({
+            "entry_id": "planner-order-probe", "consumer": "planner",
+            "failure_class": "planning",
+            "effect_spec": {"fixture": "t14_ordered_pair", "operator": "plan_order",
+                            "expect": {"catches_violations": True,
+                                       "no_false_positives": True}}})
+        checks["the_planner_has_a_model_free_measured_effect"] = (
+            order_probe["verdict"] == "IMPROVED")
+        checks["that_probe_refuses_none_of_the_compliant_plans"] = (
+            order_probe["detail"]["false_positives"] == 0)
+
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
             "batch": HERE.name,

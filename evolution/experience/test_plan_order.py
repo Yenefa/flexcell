@@ -1,0 +1,134 @@
+#!/usr/bin/env python3
+"""Tests for the plan-side order check, and for measuring the planner without a model.
+
+WHY THIS EXISTS
+    The planner's SYSTEM PROMPT says "If the instruction fixes an order, follow it exactly."
+    Until this check existed that sentence was advice nobody verified: validate_plan looked
+    only at whether object and bin names were known. The archive holds ONE plan that reversed
+    a required order, and it was found only AFTER a full robot run - which is the expensive
+    way to find out something knowable before the arm moves.
+
+    The subtlety these tests pin: every plan the agent wrote for its OWN task obeyed the
+    order. The single archived reversal is a plan authored for one task and executed against
+    ANOTHER, so it only shows up when the check is given the HOST instruction. A probe that
+    scans same-run pairs alone reports zero violations and the check looks untested.
+"""
+import json
+import os
+import sys
+
+import pytest
+
+WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(WT, "runtime", "planner"))
+sys.path.insert(0, os.path.join(WT, "evolution", "experience"))
+
+import agent_planner  # noqa: E402
+import effect  # noqa: E402
+
+ORDER_OBS = {
+    "instruction": ("Put both blocks in the left bin. The blue block must be put there "
+                    "FIRST, then the red block. Doing it in the other order is not "
+                    "acceptable even if both end up in the right bin."),
+    "objects": [{"name": "target_box_a", "color": "red"},
+                {"name": "target_box_b", "color": "blue"}],
+    "zones": [{"name": "zone_1", "position": [0.12, -0.15, 0.0]}],
+}
+NO_ORDER_OBS = {
+    "instruction": "Put both blocks in the right bin.",
+    "objects": [{"name": "target_box_a", "color": "red"},
+                {"name": "target_box_b", "color": "blue"}],
+    "zones": [{"name": "zone_1", "position": [0.12, -0.15, 0.0]}],
+}
+GREEN_THEN_RED = [{"object": "target_box_b", "zone": "zone_1"},
+                  {"object": "target_box_a", "zone": "zone_1"}]
+RED_THEN_GREEN = [{"object": "target_box_a", "zone": "zone_1"},
+                  {"object": "target_box_b", "zone": "zone_1"}]
+
+
+# ---------------------------------------------------------------- the check
+
+def test_a_reversed_order_is_refused():
+    problem = agent_planner.check_plan_order(ORDER_OBS, RED_THEN_GREEN)
+    assert problem
+    assert "target_box_b" in problem and "FIRST" in problem
+
+
+def test_the_required_order_is_accepted():
+    assert agent_planner.check_plan_order(ORDER_OBS, GREEN_THEN_RED) is None
+
+
+def test_an_instruction_with_no_order_clause_is_inert():
+    """The check must not invent a requirement the instruction never stated."""
+    assert agent_planner.check_plan_order(NO_ORDER_OBS, RED_THEN_GREEN) is None
+    assert agent_planner.check_plan_order(NO_ORDER_OBS, GREEN_THEN_RED) is None
+
+
+def test_a_plan_that_ignores_the_object_entirely_is_a_different_fault():
+    """Not moving it at all is not 'out of order', and a check that conflates them
+    reports a fault it did not find."""
+    assert agent_planner.check_plan_order(
+        ORDER_OBS, [{"object": "target_box_a", "zone": "zone_1"}]) is None
+
+
+def test_validate_plan_carries_the_order_problem():
+    _, problems = agent_planner.validate_plan({"moves": RED_THEN_GREEN}, ORDER_OBS)
+    assert any("FIRST" in p for p in problems)
+    _, clean = agent_planner.validate_plan({"moves": GREEN_THEN_RED}, ORDER_OBS)
+    assert clean == []
+
+
+def test_the_check_is_still_not_a_correctness_judgement():
+    """It refuses an order reversal, not a wrong bin: the evaluator owns correctness."""
+    wrong_bin = [{"object": "target_box_b", "zone": "zone_1"},
+                 {"object": "target_box_a", "zone": "zone_1"}]
+    _, problems = agent_planner.validate_plan({"moves": wrong_bin}, ORDER_OBS)
+    assert problems == []
+
+
+# ---------------------------------------------------------------- the measurement
+
+def test_the_planner_now_has_a_model_free_effect_operator():
+    out = effect.probe({"entry_id": "x", "consumer": "planner",
+                        "failure_class": "planning",
+                        "effect_spec": {"fixture": "t14_ordered_pair",
+                                        "operator": "plan_order",
+                                        "expect": {"catches_violations": True,
+                                                   "no_false_positives": True}}})
+    assert out["verdict"] == "IMPROVED", out
+    assert out["expectations_met"] is True
+
+
+def test_the_probe_catches_the_archived_foreign_reordering():
+    """The archive's one genuine reversal is a plan run against ANOTHER task's instruction."""
+    out = effect.probe({"entry_id": "x", "consumer": "planner",
+                        "failure_class": "planning",
+                        "effect_spec": {"fixture": "t14_ordered_pair",
+                                        "operator": "plan_order"}})
+    assert out["detail"]["archived_foreign_reordering_caught"] is True
+
+
+def test_the_probe_wrongly_refuses_nothing():
+    out = effect.probe({"entry_id": "x", "consumer": "planner",
+                        "failure_class": "planning",
+                        "effect_spec": {"fixture": "t14_ordered_pair",
+                                        "operator": "plan_order"}})
+    assert out["detail"]["false_positives"] == 0
+    assert out["detail"]["compliant_passed_through"] == 16
+
+
+def test_the_operator_does_not_claim_the_plan_IMPROVED_end_to_end():
+    """It measures the validator, not the model's plan. Same-run violations are zero."""
+    out = effect.probe({"entry_id": "x", "consumer": "planner",
+                        "failure_class": "planning",
+                        "effect_spec": {"fixture": "t14_ordered_pair",
+                                        "operator": "plan_order"}})
+    assert out["detail"]["violations"] == 0
+
+
+def test_the_order_lesson_is_still_refused_for_lack_of_occurrences():
+    """A working check does not make ONE reordering enough evidence for a lesson."""
+    import postmortem
+    report = postmortem.generate()[1]["signatures"]
+    if "order_clause_violated" in report:
+        assert report["order_clause_violated"]["built"] is False
