@@ -266,6 +266,7 @@ def activate(candidate_id, validation, store_path=STORE, ledger_path=LEDGER,
     # branch stays on disk (DGM), and nothing becomes live. The gate applies only to the
     # decision that would make the entry ACTIVE.
     if gate and validation["review_verdict"] == "ACCEPT":
+        import misuse
         import regression
         gate_result = regression.gate_activation(cand, validation,
                                                  acceptance=acceptance,
@@ -273,6 +274,16 @@ def activate(candidate_id, validation, store_path=STORE, ledger_path=LEDGER,
         if not gate_result["activate"]:
             raise schema.EntryError("regression gate refused activation: "
                                     + gate_result["why"])
+        # MISUSE BEFORE ACTIVATION (master goal step 4). Regression asks "do old tasks
+        # still pass"; it cannot ask "does this entry fire where it says it must not".
+        # An entry with a disclaimer nobody tested is not safe just because the tests it
+        # did run are green, so UNPROBED is refused exactly like MISUSABLE.
+        misuse_result = misuse.check(cand)
+        gate_result = dict(gate_result, misuse=misuse_result)
+        if misuse_result["verdict"] != "BLOCKED":
+            raise schema.EntryError(
+                "misuse check refused activation: %s (%s)"
+                % (misuse_result["verdict"], misuse_result["why"]))
     successor = json.loads(json.dumps(cand))
     for key in ("prev_sha256", "chain_sha256", "record_sha256"):
         successor.pop(key, None)
@@ -284,6 +295,12 @@ def activate(candidate_id, validation, store_path=STORE, ledger_path=LEDGER,
                                 parent_entry_id=candidate_id)
     if gate_result is not None:
         successor["regression"] = gate_result["regression"]
+        if gate_result.get("misuse") is not None:
+            successor["misuse_check"] = {
+                "verdict": gate_result["misuse"]["verdict"],
+                "probed": len(gate_result["misuse"]["probed"]),
+                "why": gate_result["misuse"]["why"],
+            }
     successor["entry_id"] = schema.digest(schema._body(successor))
     successor["record_sha256"] = schema.digest(
         {k: v for k, v in successor.items() if k != "record_sha256"})

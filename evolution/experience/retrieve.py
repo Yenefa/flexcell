@@ -44,8 +44,30 @@ class RetrievalRefused(RuntimeError):
     """The store itself cannot be trusted. Distinct from 'nothing matched'."""
 
 
-def _gate(entry, consumer=None, task_family=None):
+def superseded_ids(rows):
+    """Entry ids that a later record names as its parent or as superseded.
+
+    WHY THE GATE NEEDS THIS: entry_id is a digest of the body and the body includes
+    version.status, so an entry gains a NEW id at every transition. Records are
+    append-only, so after a retirement the store holds BOTH the old record that still
+    says ACTIVE and the new one that says RETIRED. Gating on the record alone therefore
+    kept serving the retired entry - a retirement that changes nothing observable is the
+    same defect as a gate nobody runs.
+    """
+    out = set()
+    for row in rows:
+        v = row.get("version") or {}
+        if v.get("parent_entry_id"):
+            out.add(v["parent_entry_id"])
+        for p in v.get("supersedes") or []:
+            out.add(p)
+    return out
+
+
+def _gate(entry, consumer=None, task_family=None, superseded=None):
     """Return (ok, reason). Every reason is a statement about this entry, not a score."""
+    if superseded and entry.get("entry_id") in superseded:
+        return False, "superseded by a later version on this lineage"
     if (entry.get("version") or {}).get("status") != "ACTIVE":
         return False, "status is %r, not ACTIVE" % (
             (entry.get("version") or {}).get("status"),)
@@ -69,9 +91,11 @@ def retrieve(consumer, task_family=None, store_path=STORE, ledger_path=LEDGER,
         raise RetrievalRefused("experience chain is broken; refusing to learn from it: "
                                + msg)
     rows = store.read(store_path)
+    superseded = superseded_ids(rows)
     kept, refused = [], []
     for e in rows:
-        good, why = _gate(e, consumer=consumer, task_family=task_family)
+        good, why = _gate(e, consumer=consumer, task_family=task_family,
+                          superseded=superseded)
         (kept if good else refused).append({"entry_id": e.get("entry_id"), "why": why,
                                             "entry": e})
     kept.sort(key=lambda r: (str((r["entry"].get("version") or {}).get("label")),

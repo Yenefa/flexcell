@@ -27,6 +27,10 @@ import retrieve  # noqa: E402
 import schema  # noqa: E402
 import store  # noqa: E402
 
+# Every fixture declares an invalid condition AND the probe that exercises it, because
+# activation now refuses an entry whose disclaimers cannot be tested (misuse.py). The
+# first version of these fixtures declared the condition without a probe and the gate
+# correctly refused them - the boilerplate below is what that refusal forced.
 BASE = dict(
     origin="AGENT_GENERATED",
     task_family="T13-conditional-two-boxes",
@@ -35,6 +39,8 @@ BASE = dict(
     evidence={"clearance_m": 0.05, "place_error_m": 0.00965},
     applicable_when=["two stages land in the same bin"],
     known_invalid_when=["a single stage lands in the bin"],
+    invalid_probes=[{"condition": "a single stage lands in the bin",
+                     "probe": "spread.single_stage"}],
     suggested_action="separate same-bin landing points by clearance plus measured drift",
     effect_spec={"fixture": "t13_two_boxes_one_bin", "operator": "spread_step",
                  "params": {"step_m": 0.090}},

@@ -61,14 +61,14 @@
     {
       "activated": {
         "E1": {
-          "active": "aa65e90726419a9f9869806852ca90ac4afa9a25469a57b75103dd3a74edcd80",
-          "candidate": "31f2bd715bbfe0aae9b277d40702a293b3655dfa6f0d77aecf1771f1735d19fd",
+          "active": "6b24363683a78a180195c25a25caef1e2b59078fe5b3cf3d3f2d270aee8777fe",
+          "candidate": "fc4cd7d2c0740a4fede7eac424862e5a77192e85988de3c28be4ba60dd3a7d88",
           "status": "REJECTED",
           "verdict": "REJECT"
         },
         "E2": {
-          "active": "ee7177a04560eb9aa28d0efcc5e91110a7e8f6b8d8bf407286863bbb2a680739",
-          "candidate": "e0561cd28ffcb52138866a3b9be4966b24e7d1a315de227244161ed27e7ff684",
+          "active": "58b2223d12710ca8dfcef23c476bac7d0181bce335db5a0b1d06fcbf3f7fe672",
+          "candidate": "9393dfe6881cecd5fe624e9d0482fd7ec1c808d5cff63a36770073ff93088dc8",
           "status": "ACTIVE",
           "verdict": "ACCEPT"
         }
@@ -85,7 +85,7 @@
         "E2": {
           "consumer": "executor_recovery",
           "kept": [
-            "ee7177a04560eb9aa28d0efcc5e91110a7e8f6b8d8bf407286863bbb2a680739"
+            "58b2223d12710ca8dfcef23c476bac7d0181bce335db5a0b1d06fcbf3f7fe672"
           ],
           "refused_count": 3
         }
@@ -103,7 +103,7 @@
             "changed": false
           },
           "effect_state": "never_used",
-          "entry_id": "aa65e90726419a9f9869806852ca90ac4afa9a25469a57b75103dd3a74edcd80"
+          "entry_id": "6b24363683a78a180195c25a25caef1e2b59078fe5b3cf3d3f2d270aee8777fe"
         },
         "E2": {
           "delta": {
@@ -114,7 +114,7 @@
             "changed": true
           },
           "effect_state": "used_helpful",
-          "entry_id": "ee7177a04560eb9aa28d0efcc5e91110a7e8f6b8d8bf407286863bbb2a680739"
+          "entry_id": "58b2223d12710ca8dfcef23c476bac7d0181bce335db5a0b1d06fcbf3f7fe672"
         }
       },
       "step": "applied_and_outcome"
@@ -122,7 +122,7 @@
     {
       "by_label": {
         "E2": {
-          "asset_id": "skill.executor_recovery.ee7177a04560",
+          "asset_id": "skill.executor_recovery.58b2223d1271",
           "asset_version": 1,
           "callable": {
             "function": "apply_respread",
@@ -139,6 +139,39 @@
         }
       },
       "step": "skill_assets"
+    },
+    {
+      "decisions": [
+        {
+          "decision": "KEEP",
+          "effect": "used_helpful",
+          "label": "E2"
+        }
+      ],
+      "retire_transition_demo": {
+        "chain_ok": true,
+        "decision_after": [],
+        "decision_before": [
+          {
+            "applied": 2,
+            "decision": "RETIRE",
+            "effect": "used_harmful",
+            "entry_id": "58b2223d12710ca8dfcef23c476bac7d0181bce335db5a0b1d06fcbf3f7fe672",
+            "harmful": 1,
+            "helpful": 1,
+            "label": "E2",
+            "why": "applied 2 time(s) and at least one outcome was WORSE"
+          }
+        ],
+        "note": "synthetic harm on a COPY; the real store was not touched",
+        "parent_linked": true,
+        "ran": true,
+        "retired": true,
+        "retired_entry_id": "52d3428bcbe7c080928bf5e6093b5d94ebadcde59abcd0dd032b8376dfb4d407",
+        "retired_reason": "applied 2 time(s) and at least one outcome was WORSE",
+        "status_after": "RETIRED"
+      },
+      "step": "lifecycle"
     },
     {
       "chains": 2,

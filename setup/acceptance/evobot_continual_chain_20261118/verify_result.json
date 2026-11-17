@@ -22,10 +22,18 @@
     "asset_binds_an_existing_callable": true,
     "asset_declares_no_generated_code": true,
     "asset_carries_a_guard": true,
-    "rejected_delivery_compiles_no_asset": true
+    "rejected_delivery_compiles_no_asset": true,
+    "activation_carries_a_misuse_verdict": true,
+    "misuse_probes_actually_ran": true,
+    "every_invalid_condition_was_probed": true,
+    "lifecycle_review_produces_a_decision": true,
+    "retire_transition_appends_a_retired_version": true,
+    "retire_keeps_the_harmful_version": true,
+    "retire_is_on_a_copy_not_the_real_store": true,
+    "real_store_still_has_exactly_one_active_entry": true
   },
-  "checks_total": 21,
-  "checks_passed": 21,
+  "checks_total": 29,
+  "checks_passed": 29,
   "chain_message": "chain intact (4 records)",
   "measured": {
     "E1_planner_side": "NO_CHANGE",

@@ -38,6 +38,7 @@ import consumers  # noqa: E402
 import curate  # noqa: E402
 import effect  # noqa: E402
 import ledger  # noqa: E402
+import lifecycle  # noqa: E402
 import retrieve  # noqa: E402
 import schema  # noqa: E402
 import skill_asset  # noqa: E402
@@ -75,6 +76,28 @@ _COMMON = dict(
 )
 
 
+# Each declared invalid condition names an executable probe (misuse.py owns the
+# implementations). Without these the entry can be written and reviewed but NOT activated:
+# a disclaimer nobody can test is not a safeguard.
+_PLANNER_PROBES = [
+    {"condition": "a single stage lands in the bin (nothing to separate)",
+     "probe": "spread.single_stage"},
+    {"condition": "the separation would push a landing outside the bin radius",
+     "probe": "spread.narrow_bin"},
+    {"condition": "another object sits inside the corridor the spread would use",
+     "probe": "spread.three_in_one_bin"},
+]
+
+_EXECUTOR_PROBES = [
+    {"condition": "a single stage lands in the bin (nothing to separate)",
+     "probe": "respread.single_stage"},
+    {"condition": "the separation would push a landing outside the bin radius",
+     "probe": "respread.narrow_bin"},
+    {"condition": "another object sits inside the corridor the spread would use",
+     "probe": "respread.corridor_blocked"},
+]
+
+
 def entry_planner_side():
     """The lesson addressed to the PLANNER-side spread policy (expected inert)."""
     return schema.make_entry(
@@ -85,6 +108,7 @@ def entry_planner_side():
                                 "applied_min_separation_m_gte": 0.09}},
         version={"label": "E1", "status": "CANDIDATE", "parent_entry_id": None},
         notes="planner-side consumer: groups by exact pose, so this is expected inert",
+        invalid_probes=_PLANNER_PROBES,
         **_COMMON)
 
 
@@ -99,7 +123,66 @@ def entry_executor_side():
                                 "applied_min_clearance_m_gte": 0.05}},
         version={"label": "E2", "status": "CANDIDATE", "parent_entry_id": None},
         notes="executor-side consumer: clusters by distance, so the same lesson acts",
+        invalid_probes=_EXECUTOR_PROBES,
         **_COMMON)
+
+
+def _demonstrate_retirement(store_path, ledger_path, dest):
+    """Prove the RETIRE transition on a copy, with a synthetic WORSE outcome.
+
+    WHY NOT RETIRE THE REAL ENTRY: nothing in this batch made a run worse, so there is no
+    harm to act on. Retiring it anyway would manufacture a failure to demonstrate a
+    recovery - the same class of dishonesty as manufacturing a success. The transition is
+    exercised on a temp copy and the copy is discarded.
+    """
+    import shutil
+    import tempfile
+    tmp = tempfile.mkdtemp(prefix="lifecycle_")
+    try:
+        cstore = os.path.join(tmp, "records_v2.jsonl")
+        cledger = os.path.join(tmp, "usage_ledger.jsonl")
+        shutil.copyfile(store_path, cstore)
+        shutil.copyfile(ledger_path, cledger)
+        active = [r for r in store.read(cstore)
+                  if (r.get("version") or {}).get("status") == "ACTIVE"]
+        if not active:
+            return {"ran": False, "why": "no ACTIVE entry to retire"}
+        target = active[0]["entry_id"]
+        ledger.append(cledger, target, "APPLIED", run_id="synthetic-harm-demo",
+                      consumer=active[0].get("consumer"), changed=True,
+                      detail={"why": "synthetic application, NOT a measured run"},
+                      recorded_by="demo.retirement_demo")
+        ledger.append(cledger, target, "OUTCOME", run_id="synthetic-harm-demo",
+                      consumer=active[0].get("consumer"), outcome="WORSE",
+                      detail="synthetic WORSE outcome, NOT a measured run",
+                      recorded_by="demo.retirement_demo")
+        before = lifecycle.review(cstore, cledger)
+        result = lifecycle.apply(cstore, cledger)
+        after = lifecycle.review(cstore, cledger)
+        # Read the LINEAGE, not the entry_id: entry_id changes with version.status, so
+        # looking the target up by its original id finds the still-ACTIVE ancestor and
+        # would report "not retired" after a successful retirement. (It did, in the first
+        # version of this function.)
+        rows = store.read(cstore)
+        new_id, head = lifecycle.latest(rows, target)
+        out = {
+            "ran": True,
+            "note": "synthetic harm on a COPY; the real store was not touched",
+            "decision_before": [d for d in before if d["entry_id"] == target],
+            "retired": len(result["retired"]) == 1,
+            "decision_after": [d for d in after if d["entry_id"] == target],
+            "retired_entry_id": new_id,
+            "status_after": (head.get("version") or {}).get("status") if head else None,
+            "parent_linked": ((head.get("version") or {}).get("parent_entry_id") == target
+                              if head else None),
+            "retired_reason": ((head.get("version") or {}).get("retired_reason")
+                               if head else None),
+            "chain_ok": store.verify_chain(cstore)[0],
+        }
+        _write(os.path.join(dest, "10_retirement_transition.json"), out)
+        return out
+    finally:
+        shutil.rmtree(tmp, ignore_errors=True)
 
 
 def _review(entry, out_dir, probe, reviewer="chain-demo-reviewer"):
@@ -293,7 +376,23 @@ def run(dest=OUT):
     _write(os.path.join(dest, "10_skill_assets.json"), assets)
     steps.append({"step": "skill_assets", "by_label": assets})
 
-    # 10 -- the store's own curation report, computed from the records on disk
+    # 10 -- LIFECYCLE: what the ledger says should happen to each ACTIVE entry.
+    # The master goal's fifth step is "revise or retire based on the actual result". The
+    # first version of this chain computed that verdict and then did nothing with it, so
+    # a harmful entry would have stayed ACTIVE and kept being retrievable.
+    lifecycle_decisions = lifecycle.review(store_path, ledger_path)
+    _write(os.path.join(dest, "10_lifecycle_review.json"), lifecycle_decisions)
+    # Demonstrate the retire transition on a THROWAWAY copy of the store, with a
+    # synthetic WORSE outcome. Retiring the real entry here would be dishonest: no run
+    # in this batch made anything worse, so there is no harm to act on. The transition
+    # is proven on a copy and the real store is left exactly as the ledger describes it.
+    harm_demo = _demonstrate_retirement(store_path, ledger_path, dest)
+    steps.append({"step": "lifecycle",
+                  "decisions": [{"label": d["label"], "effect": d["effect"],
+                                 "decision": d["decision"]} for d in lifecycle_decisions],
+                  "retire_transition_demo": harm_demo})
+
+    # 11 -- the store's own curation report, computed from the records on disk
     report = curate.curate(store.read(store_path))
     _write(os.path.join(dest, "09_store_report.json"), report)
     steps.append({"step": "store_report", "entries": report["entries"],

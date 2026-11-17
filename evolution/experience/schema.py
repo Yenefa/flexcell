@@ -88,7 +88,7 @@ def _body(entry):
 def make_entry(origin, task_family, failure_class, source_run, evidence,
                applicable_when, known_invalid_when, suggested_action, action_kind,
                consumer, effect_spec, version, validation=None, evidence_files=None,
-               provenance_verified=False, notes=""):
+               provenance_verified=False, notes="", invalid_probes=None):
     """Build one entry. Every argument is checked; nothing is inferred from prose.
 
     validation defaults to NOT_REVIEWED. It is deliberately not this function's to set:
@@ -135,6 +135,11 @@ def make_entry(origin, task_family, failure_class, source_run, evidence,
         "action_kind": action_kind,
         "consumer": consumer,
         "effect_spec": effect_spec,
+        # Executable probes for the declared invalid conditions (misuse.py owns the
+        # implementations). Optional in the schema so an entry can still be written and
+        # reviewed before its disclaimers are testable - but an entry with declared
+        # invalid conditions and no probes is reported UNPROBED, never "safe".
+        "invalid_probes": list(invalid_probes or []),
         "validation": val,
         "version": ver,
         "stats": {"retrieved": 0, "applied": 0, "helpful": 0, "harmful": 0},
@@ -177,6 +182,27 @@ def validate(entry):
     if entry["origin"] == "AGENT_GENERATED" and entry["validation"].get(
             "review_verdict") == "ACCEPT" and not entry["validation"].get("reviewed_by"):
         problems.append("AGENT_GENERATED entry claims ACCEPT without a reviewer")
+    # Every declared invalid condition must name an executable probe. An entry may be
+    # written with none (so it can be reviewed before its disclaimers are testable), but
+    # then misuse.check reports UNPROBED rather than BLOCKED. What is refused here is a
+    # PARTIAL probe list: declaring three conditions and probing one would let a reader
+    # believe all three were checked.
+    probes = entry.get("invalid_probes") or []
+    if probes:
+        if not isinstance(probes, list):
+            problems.append("invalid_probes must be a list")
+        else:
+            for i, item in enumerate(probes):
+                if not isinstance(item, dict) or not item.get("probe"):
+                    problems.append("invalid_probes[%d] needs a probe id" % i)
+                elif not item.get("condition"):
+                    problems.append("invalid_probes[%d] needs the condition it covers" % i)
+            covered = {p.get("condition") for p in probes if isinstance(p, dict)}
+            declared = set(entry.get("known_invalid_when") or [])
+            uncovered = sorted(declared - covered)
+            if uncovered:
+                problems.append("declared invalid condition(s) with no probe: %s"
+                                % uncovered)
     expected = digest(_body(entry))
     if entry.get("entry_id") != expected:
         problems.append("entry_id does not match the body (edited after write?)")

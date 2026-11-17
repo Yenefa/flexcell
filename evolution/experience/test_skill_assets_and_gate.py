@@ -34,6 +34,14 @@ BASE = dict(
     applicable_when=["two stages land in the same bin"],
     known_invalid_when=["a single stage lands in the bin",
                         "the separation would leave the bin radius"],
+    # Probes are mandatory for activation: a declared invalid condition with no probe is
+    # UNPROBED, and UNPROBED is refused (see misuse.py).
+    invalid_probes=[
+        {"condition": "a single stage lands in the bin",
+         "probe": "spread.single_stage"},
+        {"condition": "the separation would leave the bin radius",
+         "probe": "spread.narrow_bin"},
+    ],
     suggested_action="separate same-bin landings by clearance plus measured drift",
 )
 

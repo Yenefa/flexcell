@@ -52,8 +52,17 @@ capability is what makes that visible instead of leaving it to an audit.
    delivery compiles nothing: an asset can be called, so only a reviewed,
    regression-passed entry may become one.
 
-`verify.py` asserts **21 checks**, including that the gate really ran verifiers, that the
-asset binds to a function that exists, and that the rejected delivery produced no asset.
+9. **misuse check** — every declared invalid condition is executed as a real scenario;
+   the consumer must refuse or stay inert. **UNPROBED is refused, not passed**: a
+   disclaimer nobody tested is the same thing as a gate nobody runs.
+10. **lifecycle** — the ledger's verdict becomes an action. A harmful entry is RETIRED by
+   appending a successor (the harmful version stays on disk), and retrieval stops serving
+   it. Note: nothing in this batch made a run worse, so the transition is demonstrated on
+   a **copy** with a synthetic WORSE event; the real store is untouched.
+
+`verify.py` asserts **29 checks**, including that both gates really ran, that the asset
+binds to a function that exists, that the rejected delivery produced no asset, and that
+retirement still lets retrieval see nothing.
 
 ---
 
@@ -94,6 +103,11 @@ It touches no evaluator, tolerance, threshold or held-out answer. 11/11
    visible rather than implied to be complete.
 7. The skill asset binds parameters to an **already-tested** function. It generates no
    robot code, and nothing here shows an asset can be *composed* into a new task.
+8. **RETIRE has never fired on real evidence.** No run in this batch made anything worse,
+   so the transition is shown on a copy with a synthetic WORSE outcome. A retirement
+   driven by a real regression is still missing.
+9. The misuse probes cover the spacing and respread consumers only (5 probes). The
+   harness and development consumers have none, so their entries would report UNPROBED.
 
 ---
 

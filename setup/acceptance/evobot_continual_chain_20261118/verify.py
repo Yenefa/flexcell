@@ -115,6 +115,30 @@ def main():
         # reviewed, regression-passed entry may produce one
         checks["rejected_delivery_compiles_no_asset"] = "E1" not in assets
 
+        # 9 -- the MISUSE check ran and is load-bearing (master goal step 4:
+        # "does it get misused in scenarios where it does not apply")
+        checks["activation_carries_a_misuse_verdict"] = bool(
+            active and (active[0].get("misuse_check") or {}).get("verdict") == "BLOCKED")
+        checks["misuse_probes_actually_ran"] = bool(
+            active and (active[0].get("misuse_check") or {}).get("probed", 0) >= 1)
+        # every declared invalid condition must be covered, or the disclaimer is partial
+        declared = len(active[0].get("known_invalid_when") or []) if active else 0
+        probed = (active[0].get("misuse_check") or {}).get("probed", 0) if active else 0
+        checks["every_invalid_condition_was_probed"] = declared > 0 and probed == declared
+
+        # 10 -- the LIFECYCLE half exists: the ledger produces a decision, and the RETIRE
+        # transition really changes what retrieval serves
+        life = json.loads((tmp / "10_lifecycle_review.json").read_text(encoding="utf-8"))
+        checks["lifecycle_review_produces_a_decision"] = bool(
+            life and all(d.get("decision") in ("KEEP", "RETIRE") for d in life))
+        demo = json.loads((tmp / "10_retirement_transition.json").read_text(encoding="utf-8"))
+        checks["retire_transition_appends_a_retired_version"] = (
+            demo.get("status_after") == "RETIRED" and demo.get("parent_linked") is True)
+        checks["retire_keeps_the_harmful_version"] = demo.get("chain_ok") is True
+        checks["retire_is_on_a_copy_not_the_real_store"] = "COPY" in (demo.get("note") or "")
+        real_active = [r for r in active]
+        checks["real_store_still_has_exactly_one_active_entry"] = len(real_active) == 1
+
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
             "batch": HERE.name,

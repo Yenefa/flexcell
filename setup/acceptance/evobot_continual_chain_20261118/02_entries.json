@@ -19,7 +19,7 @@
           "step_m": 0.09
         }
       },
-      "entry_id": "31f2bd715bbfe0aae9b277d40702a293b3655dfa6f0d77aecf1771f1735d19fd",
+      "entry_id": "fc4cd7d2c0740a4fede7eac424862e5a77192e85988de3c28be4ba60dd3a7d88",
       "evidence": {
         "clearance_m": 0.05,
         "final_position_error_m": 0.009651925313011562,
@@ -31,6 +31,20 @@
         "setup/acceptance/evobot_recover_n6_20261111/runs/HO-90899d657e68/sim/skills/task_fsm.jsonl"
       ],
       "failure_class": "control",
+      "invalid_probes": [
+        {
+          "condition": "a single stage lands in the bin (nothing to separate)",
+          "probe": "spread.single_stage"
+        },
+        {
+          "condition": "the separation would push a landing outside the bin radius",
+          "probe": "spread.narrow_bin"
+        },
+        {
+          "condition": "another object sits inside the corridor the spread would use",
+          "probe": "spread.three_in_one_bin"
+        }
+      ],
       "known_invalid_when": [
         "a single stage lands in the bin (nothing to separate)",
         "the separation would push a landing outside the bin radius",
@@ -39,7 +53,7 @@
       "notes": "planner-side consumer: groups by exact pose, so this is expected inert",
       "origin": "AGENT_GENERATED",
       "provenance_verified": true,
-      "record_sha256": "2ffb7cad2b3c03efe8b301a6251f07b08818cf95a2bc0bca8443fd9b4a9dca7f",
+      "record_sha256": "4ebc1ae19088ede350b504765c8b64cff054a81c64ff1b20752fc1bff683ac6b",
       "schema_version": "experience-entry/2",
       "source_run": "setup/acceptance/evobot_recover_n6_20261111/runs/HO-90899d657e68",
       "stats": {
@@ -81,7 +95,7 @@
           "step_m": 0.09
         }
       },
-      "entry_id": "e0561cd28ffcb52138866a3b9be4966b24e7d1a315de227244161ed27e7ff684",
+      "entry_id": "9393dfe6881cecd5fe624e9d0482fd7ec1c808d5cff63a36770073ff93088dc8",
       "evidence": {
         "clearance_m": 0.05,
         "final_position_error_m": 0.009651925313011562,
@@ -93,6 +107,20 @@
         "setup/acceptance/evobot_recover_n6_20261111/runs/HO-90899d657e68/sim/skills/task_fsm.jsonl"
       ],
       "failure_class": "control",
+      "invalid_probes": [
+        {
+          "condition": "a single stage lands in the bin (nothing to separate)",
+          "probe": "respread.single_stage"
+        },
+        {
+          "condition": "the separation would push a landing outside the bin radius",
+          "probe": "respread.narrow_bin"
+        },
+        {
+          "condition": "another object sits inside the corridor the spread would use",
+          "probe": "respread.corridor_blocked"
+        }
+      ],
       "known_invalid_when": [
         "a single stage lands in the bin (nothing to separate)",
         "the separation would push a landing outside the bin radius",
@@ -101,7 +129,7 @@
       "notes": "executor-side consumer: clusters by distance, so the same lesson acts",
       "origin": "AGENT_GENERATED",
       "provenance_verified": true,
-      "record_sha256": "54ab2260ef2e8eb94700762bd630e5ee6685b1a88dfc661320d6db22b16a720d",
+      "record_sha256": "f23b90583c5474aee1b9bbbdd8c70afc9b1497466ed806f4698a004fc55ffd16",
       "schema_version": "experience-entry/2",
       "source_run": "setup/acceptance/evobot_recover_n6_20261111/runs/HO-90899d657e68",
       "stats": {
