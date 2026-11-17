@@ -24,8 +24,9 @@
 | ① 抽出一个机制 | `evolution/experience/schema.py` | v2 条目：来源、原始证据、适用任务、适用条件、已知失效条件、置信状态、验证记录（master goal §11.2 的七字段），外加 **consumer / action_kind / effect_spec / version** |
 | ② 转成经验条目 | `schema.make_entry` | 缺 effect_spec 的条目在写入时即被拒绝——**不能被执行的"效果"只是主张** |
 | ③ 形成可用产物 | `consumers.py` | 消费模块**主动声明**自己能执行哪些 `action_kind`；条目按能力路由，而不是按关键词猜地址 |
-| ④ 本地验证后再启用 | `effect.py` + `curate.py` + `retrieve.py` | 效果**被执行**再判定；重复/冲突拒绝；检索要求独立 ACCEPT；启用采用**追加式**版本链 |
+| ④ 本地验证后再启用 | `effect.py` + `regression.py` + `curate.py` + `retrieve.py` | 效果**被执行**再判定；**回归门 KEEP 才允许启用**；重复/冲突拒绝；检索要求独立 ACCEPT；启用采用**追加式**版本链 |
 | ⑤ 记录后续使用效果 | `ledger.py` | RETRIEVED / APPLIED / OUTCOME 三类事件分开记；`effect_of()` 只从事件推导状态 |
+| ⑥ 沉淀为可执行技能 | `skill_asset.py` | ACTIVE 且已审核的条目**编译成可调用资产**（模块+函数+绑定参数+失效护栏），可被后续任务直接调用 |
 
 ## 3. 消费模块能力表（写死在代码里，可被测试检查）
 
@@ -64,6 +65,41 @@
 3. **能力匹配** —— 消费模块必须声明该 action_kind
 4. **状态 ACTIVE** —— CANDIDATE / RETIRED / REJECTED 一律不进计划
 
+## 5.5 回归门：决定"保留还是回退"（DGM 式）
+
+启用不是"审核通过就上线"。`regression.check()` 按条目所属消费模块跑**固定的一组**验收验证器，
+与 `known_failures.json` 比对：
+
+| 结果 | 含义 | 后果 |
+| --- | --- | --- |
+| **KEEP** | 没有新增失败 | 允许启用 |
+| **REVERT** | 出现**新增**失败 | 拒绝启用，候选留在库里 |
+| **UNKNOWN** | 门跑不起来（无验证器 / 基线不可读） | **同样拒绝**——"检查不了"不等于"没问题" |
+
+这条"UNKNOWN 不是通过"的规则来自本仓库的真实教训：`gate_differential.py` 记录过一次，
+"缺少基线"曾被当成放行。启用记录里会写下 `regression.verdict` 与实际跑过的验证器名，
+所以"过了回归"是可复算的陈述，不是形容词。
+
+## 5.6 Voyager 式技能资产
+
+一条经验只有在**能被下一次任务直接调用**时才算技能，否则它只是一条需要人读的笔记。
+`skill_asset.compile_asset()` 把 ACTIVE 且 ACCEPT 的条目编译成资产：
+
+```json
+{"asset_id": "skill.executor_recovery.ee7177a04560",
+ "callable": {"module": "runtime.recovery.recover", "function": "apply_respread",
+              "kwargs": {"spread_step": 0.09, "cluster_m": 0.12}},
+ "guard": ["a single stage lands in the bin", "..."],
+ "source_entry": "ee7177a04560...", "code_generated": false}
+```
+
+三条硬约束：
+- **参数必须有绑定**：effect_spec 里出现、但该消费模块没有对应形参的键，**拒绝编译**而不是静默丢弃
+  （静默丢弃会让资产做的事与条目说的不是一回事）；
+- **必须有护栏**：`known_invalid_when` 为空即拒绝——没有护栏的技能可以在已知会失败的场景被调用；
+- **不生成新代码**：`code_generated: false` 写进资产。把自然语言直接变成机器人代码，
+  本仓库没有证据支持，所以只把**已验证的参数改动**绑定到**已测试的函数**上。
+
 ## 6. 版本与回滚（DGM 式）
 
 - 每个版本有 `parent_entry_id`；启用 = **追加**一个 reviewed successor，候选体保留在库中
@@ -81,6 +117,8 @@
 | 跨任务族迁移 | **未验证**：当前 ACTIVE 条目只覆盖 T13 任务族，n=1 |
 | 经验条目的自动生成（从运行日志到条目） | **未做**：条目仍由脚本构造 |
 | GEPA 式候选搜索 | **未做**：本轮只做单候选，多候选与成本权衡留待后续 |
+| 技能资产的自主编排（组合已有资产完成新任务） | **未做**：本轮只到"资产可被调用"，没有组合 |
+| 回归门覆盖全部 109 个验证器 | **未做**：按消费模块固定子集（2 个），全量跑约数分钟且大多与本条目无关 |
 
 ## 8. 复算方式
 
@@ -90,5 +128,10 @@ python3 evolution/experience/demo_continual.py
 python3 -m pytest evolution/experience/test_continual_chain.py -q
 ```
 
-verifier 会**重新执行**整条链并断言 14 项检查（其中包含"规划侧不生效、执行侧生效"与
-"启用前后检索分别为 0 与 1"），不读取 SUMMARY 里的自述。
+verifier 会**重新执行**整条链并断言 **21 项检查**，不读取 SUMMARY 里的自述。其中关键几项：
+
+- 规划侧不生效（NO_CHANGE）、执行侧生效（CHANGED）；
+- 启用前后检索分别为 0 与 1；
+- 启用记录里带 `regression.verdict == KEEP` 且**真的跑过验证器**；
+- ACTIVE 条目编译出的资产**绑定到一个真实存在的可调用函数**，且 `code_generated == false`；
+- **被拒绝的投递（E1）不产出任何资产**——资产是可调用的，只有过审且过回归的条目才配变成技能。

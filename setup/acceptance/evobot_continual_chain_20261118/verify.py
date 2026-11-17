@@ -93,6 +93,28 @@ def main():
             json.loads((tmp / "08_applied_E1.json").read_text(encoding="utf-8"))
             .get("effect_state") == "never_used")
 
+        # 7 -- the regression gate is LOAD-BEARING, not decorative
+        records_all = [json.loads(line) for line in
+                       (tmp / "records_v2.jsonl").read_text(encoding="utf-8").splitlines()
+                       if line.strip()]
+        active = [r for r in records_all
+                  if (r.get("version") or {}).get("status") == "ACTIVE"]
+        checks["activation_carries_a_regression_verdict"] = bool(
+            active and (active[0].get("regression") or {}).get("verdict") == "KEEP")
+        checks["regression_actually_ran_verifiers"] = bool(
+            active and (active[0].get("regression") or {}).get("ran"))
+
+        # 8 -- the ACTIVE entry compiles into a CALLABLE asset, and that callable exists
+        assets = json.loads((tmp / "10_skill_assets.json").read_text(encoding="utf-8"))
+        e2_asset = assets.get("E2") or {}
+        checks["active_entry_compiles_to_an_asset"] = e2_asset.get("compiled") is True
+        checks["asset_binds_an_existing_callable"] = e2_asset.get("callable_exists") is True
+        checks["asset_declares_no_generated_code"] = e2_asset.get("code_generated") is False
+        checks["asset_carries_a_guard"] = (e2_asset.get("guard_count") or 0) >= 1
+        # the REJECTED delivery must not become a skill: an asset is callable, so only a
+        # reviewed, regression-passed entry may produce one
+        checks["rejected_delivery_compiles_no_asset"] = "E1" not in assets
+
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
             "batch": HERE.name,

@@ -67,7 +67,7 @@
           "verdict": "REJECT"
         },
         "E2": {
-          "active": "ddafab3bce44a99e57755dcc7361d2dd364028803317e7fdfa6bf119aef80e7e",
+          "active": "ee7177a04560eb9aa28d0efcc5e91110a7e8f6b8d8bf407286863bbb2a680739",
           "candidate": "e0561cd28ffcb52138866a3b9be4966b24e7d1a315de227244161ed27e7ff684",
           "status": "ACTIVE",
           "verdict": "ACCEPT"
@@ -85,7 +85,7 @@
         "E2": {
           "consumer": "executor_recovery",
           "kept": [
-            "ddafab3bce44a99e57755dcc7361d2dd364028803317e7fdfa6bf119aef80e7e"
+            "ee7177a04560eb9aa28d0efcc5e91110a7e8f6b8d8bf407286863bbb2a680739"
           ],
           "refused_count": 3
         }
@@ -114,10 +114,31 @@
             "changed": true
           },
           "effect_state": "used_helpful",
-          "entry_id": "ddafab3bce44a99e57755dcc7361d2dd364028803317e7fdfa6bf119aef80e7e"
+          "entry_id": "ee7177a04560eb9aa28d0efcc5e91110a7e8f6b8d8bf407286863bbb2a680739"
         }
       },
       "step": "applied_and_outcome"
+    },
+    {
+      "by_label": {
+        "E2": {
+          "asset_id": "skill.executor_recovery.ee7177a04560",
+          "asset_version": 1,
+          "callable": {
+            "function": "apply_respread",
+            "kwargs": {
+              "cluster_m": 0.12,
+              "spread_step": 0.09
+            },
+            "module": "runtime.recovery.recover"
+          },
+          "callable_exists": true,
+          "code_generated": false,
+          "compiled": true,
+          "guard_count": 3
+        }
+      },
+      "step": "skill_assets"
     },
     {
       "chains": 2,

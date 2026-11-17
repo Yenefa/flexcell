@@ -40,6 +40,7 @@ import effect  # noqa: E402
 import ledger  # noqa: E402
 import retrieve  # noqa: E402
 import schema  # noqa: E402
+import skill_asset  # noqa: E402
 import store  # noqa: E402
 
 OUT = os.path.join(WT, "setup", "acceptance", "evobot_continual_chain_20261118")
@@ -115,10 +116,35 @@ def _review(entry, out_dir, probe, reviewer="chain-demo-reviewer"):
     return {"review_verdict": verdict, "review_ref": ref, "reviewed_by": reviewer}
 
 
+# Files this script OWNS and may therefore replace. Everything else in the directory is
+# kept. This list exists because the first version called shutil.rmtree(dest) and deleted
+# the batch's own README.md and verify.py - a demonstration that destroys the evidence it
+# is meant to support is worse than no demonstration.
+GENERATED_PREFIXES = ("01_", "02_", "03_", "04_", "05_", "06_", "07_", "08_", "09_",
+                      "10_")
+GENERATED_FILES = ("SUMMARY.json", "records_v2.jsonl", "usage_ledger.jsonl",
+                   "skill_assets.jsonl", "review_artifact_E1.json",
+                   "review_artifact_E2.json")
+
+
+def _clear_generated(dest):
+    """Remove ONLY this script's own outputs; leave README.md / verify.py alone."""
+    if not os.path.isdir(dest):
+        return []
+    removed = []
+    for name in sorted(os.listdir(dest)):
+        path = os.path.join(dest, name)
+        if not os.path.isfile(path):
+            continue
+        if name in GENERATED_FILES or name.startswith(GENERATED_PREFIXES):
+            os.remove(path)
+            removed.append(name)
+    return removed
+
+
 def run(dest=OUT):
-    if os.path.isdir(dest):
-        shutil.rmtree(dest)
     os.makedirs(dest, exist_ok=True)
+    _clear_generated(dest)
     store_path = os.path.join(dest, "records_v2.jsonl")
     ledger_path = os.path.join(dest, "usage_ledger.jsonl")
     steps = []
@@ -242,7 +268,32 @@ def run(dest=OUT):
         _write(os.path.join(dest, "08_applied_%s.json" % label), applied[label])
     steps.append({"step": "applied_and_outcome", "by_label": applied})
 
-    # 9 -- the store's own curation report, computed from the records on disk
+    # 9 -- compile the ACTIVE entry into a CALLABLE asset (Voyager-style skill asset).
+    # An entry that only steers while a human reads it is not a stored skill; this is the
+    # step that makes the lesson something the next task can call.
+    assets = {}
+    active_rows = [r for r in store.read(store_path)
+                   if (r.get("version") or {}).get("status") == "ACTIVE"]
+    for row in active_rows:
+        try:
+            asset = skill_asset.compile_asset(row)
+        except skill_asset.AssetError as exc:
+            assets[row["version"]["label"]] = {"compiled": False, "why": str(exc)}
+            continue
+        asset_path = os.path.join(dest, "skill_assets.jsonl")
+        stored = skill_asset.append(asset_path, asset)
+        assets[row["version"]["label"]] = {
+            "compiled": True, "asset_id": stored["asset_id"],
+            "asset_version": stored["asset_version"],
+            "callable": stored["callable"],
+            "callable_exists": skill_asset.callable_exists(stored),
+            "guard_count": len(stored["guard"]),
+            "code_generated": stored["code_generated"],
+        }
+    _write(os.path.join(dest, "10_skill_assets.json"), assets)
+    steps.append({"step": "skill_assets", "by_label": assets})
+
+    # 10 -- the store's own curation report, computed from the records on disk
     report = curate.curate(store.read(store_path))
     _write(os.path.join(dest, "09_store_report.json"), report)
     steps.append({"step": "store_report", "entries": report["entries"],

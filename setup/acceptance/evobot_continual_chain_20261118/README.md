@@ -44,6 +44,16 @@ capability is what makes that visible instead of leaving it to an audit.
    chain still verifies ("chain intact (4 records)")
 6. **apply + outcome** — APPLIED records the measured delta, OUTCOME records the verdict,
    and the entry's state is derived from those events: `used_helpful`
+7. **regression gate** — activation requires `KEEP` from the pinned verifier subset, not
+   only an ACCEPT review. `REVERT` and `UNKNOWN` both refuse. The verdict is written into
+   the activated record, so "it passed regression" is re-checkable.
+8. **skill asset** — the ACTIVE entry compiles into a **callable** asset bound to
+   `recover.apply_respread` with fixed parameters and a three-item guard. The REJECTED
+   delivery compiles nothing: an asset can be called, so only a reviewed,
+   regression-passed entry may become one.
+
+`verify.py` asserts **21 checks**, including that the gate really ran verifiers, that the
+asset binds to a function that exists, and that the rejected delivery produced no asset.
 
 ---
 
@@ -79,6 +89,11 @@ It touches no evaluator, tolerance, threshold or held-out answer. 11/11
    batch shows transfer to a different task type.
 5. `used_helpful` means: applied once, measured once, expectation met on the archive.
    It is not a success rate, and n=1.
+6. The regression gate runs a **pinned two-verifier subset** per consumer, not all 109.
+   It can miss a regression outside that subset; the subset is written down so the gap is
+   visible rather than implied to be complete.
+7. The skill asset binds parameters to an **already-tested** function. It generates no
+   robot code, and nothing here shows an asset can be *composed* into a new task.
 
 ---
 

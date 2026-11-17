@@ -15,10 +15,17 @@
     "candidate_retained_on_disk": true,
     "successor_points_at_candidate": true,
     "outcome_is_helpful": true,
-    "skipped_attempt_is_never_used": true
+    "skipped_attempt_is_never_used": true,
+    "activation_carries_a_regression_verdict": true,
+    "regression_actually_ran_verifiers": true,
+    "active_entry_compiles_to_an_asset": true,
+    "asset_binds_an_existing_callable": true,
+    "asset_declares_no_generated_code": true,
+    "asset_carries_a_guard": true,
+    "rejected_delivery_compiles_no_asset": true
   },
-  "checks_total": 14,
-  "checks_passed": 14,
+  "checks_total": 21,
+  "checks_passed": 21,
   "chain_message": "chain intact (4 records)",
   "measured": {
     "E1_planner_side": "NO_CHANGE",

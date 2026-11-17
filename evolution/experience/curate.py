@@ -233,7 +233,7 @@ def admit(new, store_path=STORE, ledger_path=LEDGER, dry_run=False):
 
 
 def activate(candidate_id, validation, store_path=STORE, ledger_path=LEDGER,
-             label=None):
+             label=None, gate=True, acceptance=None, known_path=None):
     """Promote a CANDIDATE to ACTIVE by APPENDING its successor, never by rewriting it.
 
     WHY NOT EDIT IN PLACE: the store is hash-chained, so a rewrite would either break the
@@ -250,12 +250,29 @@ def activate(candidate_id, validation, store_path=STORE, ledger_path=LEDGER,
     if not (validation or {}).get("reviewed_by"):
         raise schema.EntryError("activation needs a named reviewer")
     rows = store.read(store_path)
+    gate_result = None
     matches = [r for r in rows if r.get("entry_id") == candidate_id]
     if not matches:
         raise schema.EntryError("no such entry in the store: %r" % (candidate_id,))
     cand = matches[-1]
     if (cand.get("version") or {}).get("status") == "ACTIVE":
         raise schema.EntryError("entry is already ACTIVE: %r" % (candidate_id,))
+    # REGRESSION BEFORE ACTIVATION. A reviewer approving an entry says the entry is
+    # justified; it does not say the stack still works. The master goal requires the
+    # regression check to decide whether an update is KEPT, so an ACCEPT alone is not
+    # enough to activate: the gate must return KEEP, and anything else leaves the
+    # candidate on disk unreviewed-but-inert rather than live.
+    # A REJECT verdict needs no gate: it appends a REJECTED successor so the failed
+    # branch stays on disk (DGM), and nothing becomes live. The gate applies only to the
+    # decision that would make the entry ACTIVE.
+    if gate and validation["review_verdict"] == "ACCEPT":
+        import regression
+        gate_result = regression.gate_activation(cand, validation,
+                                                 acceptance=acceptance,
+                                                 known_path=known_path)
+        if not gate_result["activate"]:
+            raise schema.EntryError("regression gate refused activation: "
+                                    + gate_result["why"])
     successor = json.loads(json.dumps(cand))
     for key in ("prev_sha256", "chain_sha256", "record_sha256"):
         successor.pop(key, None)
@@ -265,6 +282,8 @@ def activate(candidate_id, validation, store_path=STORE, ledger_path=LEDGER,
                                         else "REJECTED"),
                                 label=label or cand["version"].get("label"),
                                 parent_entry_id=candidate_id)
+    if gate_result is not None:
+        successor["regression"] = gate_result["regression"]
     successor["entry_id"] = schema.digest(schema._body(successor))
     successor["record_sha256"] = schema.digest(
         {k: v for k, v in successor.items() if k != "record_sha256"})
