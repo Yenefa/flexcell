@@ -84,6 +84,14 @@ D = 真实反馈 + 显式指导。定义见 [PROTOCOL.md](PROTOCOL.md) §2。
 >
 > **主结论是零结果**：四条件在成功率上分不出来（F1 全过；F2 为 2/2/3/4，A 对 D 的 Fisher p=0.57）。详见 `ANALYSIS.md §6.02`。第一批 v1（题面写出答案）的数据保留在 `real_instances_matrix.json`，不并入。
 
+> **2026-11-17 第二批（主分析批次）**：题面切到 `task_variant=v2`，48 槽（每格 6 次），535,151 tokens。表中 24 行为其中重复 1–3 的对应槽；重复 4–6 是额外样本，用于把 n 提到 6，单独记录在 `v2_matrix_n6.json`。
+>
+> **主结论是零结果**：四条件在成功率上分不出来（F1 全过；F2 为 2/2/3/4，A 对 D 的 Fisher p=0.57）。详见 `ANALYSIS.md §6.02`。第一批 v1（题面写出答案）的数据保留在 `real_instances_matrix.json`，不并入。
+
+> **派发顺序偏差（2026-11-17，审查发现）**：`real_instances_matrix.json` 与 `v2_matrix_n6.json` 两批，
+> 均由执行器的「族 → 条件 → 重复」嵌套循环派发，与 §3 登记的交替顺序不同（实际前六条是 F1-A-r1/r2/r3、F1-B-r1/r2/r3）。
+> 执行器现支持 `--plan RUN_MANIFEST.md` 读取登记顺序；历史偏差在此登记，不追溯修改记录。
+
 ## 6. 状态计数（随运行更新，当前为初始值）
 
 > **2026-11-17 首次真实派发（head `6d5fd5d`，模型 `deepseek-flash`）：24 槽全部产出记录，合计 144,133 tokens。seed 已按 (族, 重复) 配对写入，C 的 donor 为同族另一 seed 的 B 记录。
