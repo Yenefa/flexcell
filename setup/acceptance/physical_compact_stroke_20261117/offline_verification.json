@@ -1,0 +1,443 @@
+{
+  "archive_sha256": "630c6c0e2feb827cbaffe92a3eb0f4e9fb72002461c66dfd0cbcfeed08035c58",
+  "manifest_files": 517,
+  "all_hashes_match": true,
+  "same_task_and_world": true,
+  "independently_reproduced": true,
+  "all_slots_qualified": true,
+  "physical_executions": 0,
+  "slots": [
+    {
+      "label": "CONTROL",
+      "verdict_passed": false,
+      "failed_gates": [
+        "terminal",
+        "pusher_contact"
+      ],
+      "runtime_status": "FAILED",
+      "detail": "PushTaskRejected: goal cannot be reached with the registered direction, primitive and budget",
+      "net_signed_m": 0.0,
+      "motion_goals": 0,
+      "runtime_wall_s": 0.07166272400002072,
+      "task_sha256": "d8d983f86d3675289e6e8d2c2f57ef95acc0f9873b66e726c01a077159be5b9b",
+      "world_sha256": "9c3145f49bec2a76bb3bbe746b906066965716f1f1066d4996c3b74a9ffa56ee",
+      "receipts": [],
+      "qualified": true
+    },
+    {
+      "label": "COMPACT_1",
+      "verdict_passed": true,
+      "failed_gates": [],
+      "runtime_status": "TASK_COMPLETED",
+      "detail": null,
+      "net_signed_m": 0.09135820012026033,
+      "motion_goals": 27,
+      "runtime_wall_s": 158.112615813,
+      "task_sha256": "d8d983f86d3675289e6e8d2c2f57ef95acc0f9873b66e726c01a077159be5b9b",
+      "world_sha256": "9c3145f49bec2a76bb3bbe746b906066965716f1f1066d4996c3b74a9ffa56ee",
+      "receipts": [
+        {
+          "request_id": "contact-db1a4871ec4e48b798fdf4e217f02618",
+          "stage_id": "push_00",
+          "used": 9,
+          "dispatches": {
+            "HOVER": 1,
+            "APPROACH": 1,
+            "STROKE": 5,
+            "UNLOAD": 1,
+            "RETURN": 1
+          },
+          "ready": true,
+          "receipt_age_s": 0.048361319,
+          "physical_contact_observed": true,
+          "signed_displacement_m": 0.030468147183403165,
+          "checkpoints": [
+            0.004,
+            0.008,
+            0.016,
+            0.024,
+            0.032,
+            0.034999999999999996
+          ],
+          "goal_limit": 10
+        },
+        {
+          "request_id": "contact-f9a5962598d54502b63f69d6b81b4459",
+          "stage_id": "push_01",
+          "used": 9,
+          "dispatches": {
+            "HOVER": 1,
+            "APPROACH": 1,
+            "STROKE": 5,
+            "UNLOAD": 1,
+            "RETURN": 1
+          },
+          "ready": true,
+          "receipt_age_s": 0.04726859,
+          "physical_contact_observed": true,
+          "signed_displacement_m": 0.03044069234481644,
+          "checkpoints": [
+            0.004,
+            0.008,
+            0.016,
+            0.024,
+            0.032,
+            0.034999999999999996
+          ],
+          "goal_limit": 10
+        },
+        {
+          "request_id": "contact-563232b00f204b509a98b5c2369c198b",
+          "stage_id": "push_02",
+          "used": 9,
+          "dispatches": {
+            "HOVER": 1,
+            "APPROACH": 1,
+            "STROKE": 5,
+            "UNLOAD": 1,
+            "RETURN": 1
+          },
+          "ready": true,
+          "receipt_age_s": 0.048698094,
+          "physical_contact_observed": true,
+          "signed_displacement_m": 0.03044938640927375,
+          "checkpoints": [
+            0.004,
+            0.008,
+            0.016,
+            0.024,
+            0.032,
+            0.034999999999999996
+          ],
+          "goal_limit": 10
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "label": "COMPACT_2",
+      "verdict_passed": true,
+      "failed_gates": [],
+      "runtime_status": "TASK_COMPLETED",
+      "detail": null,
+      "net_signed_m": 0.09136504573139698,
+      "motion_goals": 27,
+      "runtime_wall_s": 157.558420758,
+      "task_sha256": "d8d983f86d3675289e6e8d2c2f57ef95acc0f9873b66e726c01a077159be5b9b",
+      "world_sha256": "9c3145f49bec2a76bb3bbe746b906066965716f1f1066d4996c3b74a9ffa56ee",
+      "receipts": [
+        {
+          "request_id": "contact-0928e9f8f08e4c9b9e9ff72c62feec70",
+          "stage_id": "push_00",
+          "used": 9,
+          "dispatches": {
+            "HOVER": 1,
+            "APPROACH": 1,
+            "STROKE": 5,
+            "UNLOAD": 1,
+            "RETURN": 1
+          },
+          "ready": true,
+          "receipt_age_s": 0.041245045,
+          "physical_contact_observed": true,
+          "signed_displacement_m": 0.030470475421322193,
+          "checkpoints": [
+            0.004,
+            0.008,
+            0.016,
+            0.024,
+            0.032,
+            0.034999999999999996
+          ],
+          "goal_limit": 10
+        },
+        {
+          "request_id": "contact-4b401bc050a8416ca741a842395c838e",
+          "stage_id": "push_01",
+          "used": 9,
+          "dispatches": {
+            "HOVER": 1,
+            "APPROACH": 1,
+            "STROKE": 5,
+            "UNLOAD": 1,
+            "RETURN": 1
+          },
+          "ready": true,
+          "receipt_age_s": 0.051651987,
+          "physical_contact_observed": true,
+          "signed_displacement_m": 0.030442273418336906,
+          "checkpoints": [
+            0.004,
+            0.008,
+            0.016,
+            0.024,
+            0.032,
+            0.034999999999999996
+          ],
+          "goal_limit": 10
+        },
+        {
+          "request_id": "contact-614e5b0cff2541d48a7e4998c288c5e1",
+          "stage_id": "push_02",
+          "used": 9,
+          "dispatches": {
+            "HOVER": 1,
+            "APPROACH": 1,
+            "STROKE": 5,
+            "UNLOAD": 1,
+            "RETURN": 1
+          },
+          "ready": true,
+          "receipt_age_s": 0.028065058,
+          "physical_contact_observed": true,
+          "signed_displacement_m": 0.03045231869876132,
+          "checkpoints": [
+            0.004,
+            0.008,
+            0.016,
+            0.024,
+            0.032,
+            0.034999999999999996
+          ],
+          "goal_limit": 10
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "label": "ANCHOR",
+      "verdict_passed": true,
+      "failed_gates": [],
+      "runtime_status": "TASK_COMPLETED",
+      "detail": null,
+      "net_signed_m": 0.06093731627328697,
+      "motion_goals": 24,
+      "runtime_wall_s": 118.35299583400001,
+      "task_sha256": "afdeb9063fce3e72428902624fd8e8d1bbcaeb7b8df42b3947d6958232286306",
+      "world_sha256": "c10e6b27e274254bbb6a46c93a097ab9d2b4c5a740f1bdb15e942b54da685115",
+      "receipts": [
+        {
+          "request_id": "contact-34ec8de7110242668dca85ac7d67795b",
+          "stage_id": "push_00",
+          "used": 12,
+          "dispatches": {
+            "HOVER": 1,
+            "APPROACH": 1,
+            "STROKE": 8,
+            "UNLOAD": 1,
+            "RETURN": 1
+          },
+          "ready": true,
+          "receipt_age_s": 0.051356282,
+          "physical_contact_observed": true,
+          "signed_displacement_m": 0.03046893822998176,
+          "checkpoints": [
+            0.004,
+            0.008,
+            0.012,
+            0.016,
+            0.02,
+            0.024,
+            0.028,
+            0.032,
+            0.034999999999999996
+          ],
+          "goal_limit": 13
+        },
+        {
+          "request_id": "contact-dbf8672c5d164a728f16bc8446dd9d12",
+          "stage_id": "push_01",
+          "used": 12,
+          "dispatches": {
+            "HOVER": 1,
+            "APPROACH": 1,
+            "STROKE": 8,
+            "UNLOAD": 1,
+            "RETURN": 1
+          },
+          "ready": true,
+          "receipt_age_s": 0.065811107,
+          "physical_contact_observed": true,
+          "signed_displacement_m": 0.03046838767118405,
+          "checkpoints": [
+            0.004,
+            0.008,
+            0.012,
+            0.016,
+            0.02,
+            0.024,
+            0.028,
+            0.032,
+            0.034999999999999996
+          ],
+          "goal_limit": 13
+        }
+      ],
+      "qualified": true
+    },
+    {
+      "label": "REG_NORMAL",
+      "qualified": true,
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "velocity_servo",
+        "skill_backend": "legacy",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "normal",
+        "object": "target_box_a",
+        "out": "/artifacts/REG_NORMAL/run-8adca59f50fa",
+        "decision_policy": "fsm",
+        "hybrid_threshold": null,
+        "resume_completed": false,
+        "model_env": {
+          "FLEXCELL_LLM_ENDPOINT": null,
+          "FLEXCELL_LLM_MODEL": null,
+          "FLEXCELL_LLM_BACKEND": null,
+          "FLEXCELL_JEV_ENDPOINT": null,
+          "FLEXCELL_JEV_MODEL": null,
+          "FLEXCELL_JEV_BACKEND": null
+        },
+        "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+        "semantic_config_sha256": "2e4906170d7755c6966d5dab71a5d101b3cf0fd0279ce22134e8e36be04f2bc1",
+        "runtime_fingerprint": "5761170e342e333f05909ed0a87e6cd5b800d47aa3ce20d06f09c6367ce26779",
+        "task_start_monotonic_ns": 895622787926,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "zone_2_pose": null,
+        "config_override": null,
+        "task_end_monotonic_ns": 910823781150,
+        "task": {
+          "action": "task",
+          "goal_uuid": "b387dfc8776347b383b47bb6e9063c7c",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-7ab396ee",
+          "wall_seconds": 14.548,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 0.007252025813516343,
+          "skip_verify": false
+        },
+        "actual_routing": {
+          "decisions": 4,
+          "sources": {
+            "fsm": 4
+          },
+          "leaves": {
+            "fsm": 4
+          },
+          "fallbacks": 0,
+          "models": [],
+          "backends": [],
+          "fast_calls": 0,
+          "slow_calls": 0,
+          "model_calls": 0,
+          "calls_without_identity": 0
+        },
+        "model_calls": 0,
+        "fast_calls": 0,
+        "slow_calls": 0,
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    },
+    {
+      "label": "REG_DUAL",
+      "qualified": true,
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "velocity_servo",
+        "skill_backend": "legacy",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "dual_object",
+        "object": "target_box_a",
+        "out": "/artifacts/REG_DUAL/run-7b05d6f974df",
+        "decision_policy": "fsm",
+        "hybrid_threshold": null,
+        "resume_completed": false,
+        "model_env": {
+          "FLEXCELL_LLM_ENDPOINT": null,
+          "FLEXCELL_LLM_MODEL": null,
+          "FLEXCELL_LLM_BACKEND": null,
+          "FLEXCELL_JEV_ENDPOINT": null,
+          "FLEXCELL_JEV_MODEL": null,
+          "FLEXCELL_JEV_BACKEND": null
+        },
+        "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+        "semantic_config_sha256": "2e4906170d7755c6966d5dab71a5d101b3cf0fd0279ce22134e8e36be04f2bc1",
+        "runtime_fingerprint": "5761170e342e333f05909ed0a87e6cd5b800d47aa3ce20d06f09c6367ce26779",
+        "task_start_monotonic_ns": 963423169073,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "zone_2_pose": null,
+        "config_override": null,
+        "task_end_monotonic_ns": 992423120070,
+        "task": {
+          "action": "demo",
+          "goal_uuid": "cddbee4fd002453598f834a8453d8e17",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "week1_demo_v1-b434411a",
+          "wall_seconds": 28.361,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK",
+            "PICK_B(attempt=1):OK",
+            "PLACE_B:OK",
+            "VERIFY_B(attempt=1):OK"
+          ],
+          "object_a_at_zone": true,
+          "object_b_at_zone": true,
+          "zone_a_error_m": 0.0016471160480237754,
+          "zone_b_error_m": 0.006076451102938587,
+          "run_id": "week1_demo_v1-7975fdcd",
+          "scenario_id": "week1_demo_v1"
+        },
+        "actual_routing": {
+          "decisions": 8,
+          "sources": {
+            "fsm": 8
+          },
+          "leaves": {
+            "fsm": 8
+          },
+          "fallbacks": 0,
+          "models": [],
+          "backends": [],
+          "fast_calls": 0,
+          "slow_calls": 0,
+          "model_calls": 0,
+          "calls_without_identity": 0
+        },
+        "model_calls": 0,
+        "fast_calls": 0,
+        "slow_calls": 0,
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      }
+    }
+  ]
+}

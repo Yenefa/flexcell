@@ -1,0 +1,1043 @@
+{
+  "source_revision": "58ab8d95d85067a4f3e619b8c1d37b566b4fdaf3",
+  "results": [
+    {
+      "label": "CONTROL",
+      "kind": "push",
+      "expected": "BUDGET_REFUSAL",
+      "driver_exit": 0,
+      "qualified": true,
+      "task_sha256": "d8d983f86d3675289e6e8d2c2f57ef95acc0f9873b66e726c01a077159be5b9b",
+      "world_sha256": "9c3145f49bec2a76bb3bbe746b906066965716f1f1066d4996c3b74a9ffa56ee",
+      "status": {
+        "backend": "finger_tcp",
+        "label": "CONTROL",
+        "status": "EXECUTED",
+        "agent_claimed_success": false,
+        "driver_exit": 2,
+        "runtime_status": "FAILED"
+      },
+      "runtime": {
+        "kind": "PUBLIC_TASK_RUNTIME",
+        "agent_claimed_success": false,
+        "status": "FAILED",
+        "model_calls": 0,
+        "detail": "PushTaskRejected: goal cannot be reached with the registered direction, primitive and budget",
+        "wall_s": 0.07166272400002072
+      },
+      "verdict": {
+        "evaluator_version": "0.5.0",
+        "task_id": "T08-compact-stroke-budget30",
+        "template_id": "T08_push",
+        "passed": false,
+        "terminal_passed": false,
+        "clauses": [
+          {
+            "clause": "unmoved:target_box_a",
+            "ok": true,
+            "evidence": {
+              "distance_m": 0.0,
+              "tolerance_m": 0.015
+            }
+          },
+          {
+            "clause": "push:target_box_b",
+            "ok": false,
+            "evidence": {
+              "displacement_m": 0.0,
+              "min_displacement_m": 0.03,
+              "max_displacement_m": 0.15,
+              "vertical_m": 0.0,
+              "max_vertical_m": 0.02,
+              "direction_cosine": null,
+              "min_direction_cosine": 0.9,
+              "zone": "zone_1",
+              "distance_m": 0.13,
+              "radius_m": 0.06,
+              "inside_zone": false,
+              "max_lift_m": -0.0,
+              "max_lift_allowed_m": 0.005
+            }
+          }
+        ],
+        "failed_clauses": [
+          "push:target_box_b"
+        ],
+        "agent_claimed_success": false,
+        "false_success": false,
+        "false_failure": false,
+        "evidence": {
+          "verifier_version": "1.0.0",
+          "physical_outcome": "UNKNOWN",
+          "evidence_status": "INCOMPLETE_OR_INVALID_EVIDENCE",
+          "failure_reason": "terminal: terminal evaluator did not pass (failed: None)",
+          "passed": false,
+          "gates": [
+            {
+              "gate": "terminal",
+              "ok": false,
+              "reason": "terminal evaluator did not pass (failed: None)",
+              "evidence": {
+                "evaluator_version": null,
+                "passed": false
+              }
+            },
+            {
+              "gate": "trajectory",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "objects": [
+                  "target_box_a",
+                  "target_box_b"
+                ],
+                "total_samples": 2186
+              }
+            },
+            {
+              "gate": "table_support",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "off_table_samples": 0,
+                "tolerance_m": 0.01
+              }
+            },
+            {
+              "gate": "protected_unmoved",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_excursion_m": 0.0,
+                "tolerance_m": 0.005
+              }
+            },
+            {
+              "gate": "no_lift",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_lift_m": -0.0,
+                "allowed_m": 0.02
+              }
+            },
+            {
+              "gate": "pusher_contact",
+              "ok": false,
+              "reason": "the object never moved, so there is no push to attribute",
+              "evidence": {}
+            },
+            {
+              "gate": "gripper",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "joint": "gripper_left_joint",
+                "samples": 338,
+                "aperture_travel_rad": 0.0,
+                "limit_rad": 0.002,
+                "min_aperture_rad": -0.0,
+                "max_aperture_rad": -0.0
+              }
+            },
+            {
+              "gate": "no_attachment",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "events": 0
+              }
+            },
+            {
+              "gate": "no_teleport",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_jump_m": 0.0,
+                "threshold_m": 0.03,
+                "declared_jump_m": 0.0,
+                "measured_jump_m": 0.0
+              }
+            }
+          ],
+          "failed_gates": [
+            "terminal",
+            "pusher_contact"
+          ]
+        }
+      },
+      "components": [],
+      "stages_completed": 0,
+      "motion_goals_used": 0,
+      "net_signed_m": 0.0,
+      "unknown_terminal": false
+    },
+    {
+      "label": "COMPACT_1",
+      "kind": "push",
+      "expected": "PUSH_PASS",
+      "driver_exit": 0,
+      "qualified": true,
+      "task_sha256": "d8d983f86d3675289e6e8d2c2f57ef95acc0f9873b66e726c01a077159be5b9b",
+      "world_sha256": "9c3145f49bec2a76bb3bbe746b906066965716f1f1066d4996c3b74a9ffa56ee",
+      "status": {
+        "backend": "finger_tcp",
+        "label": "COMPACT_1",
+        "status": "EXECUTED",
+        "agent_claimed_success": true,
+        "driver_exit": 0,
+        "runtime_status": "TASK_COMPLETED"
+      },
+      "runtime": {
+        "kind": "PUBLIC_TASK_RUNTIME",
+        "agent_claimed_success": true,
+        "status": "TASK_COMPLETED",
+        "model_calls": 0,
+        "runtime_result": {
+          "outcome": 0,
+          "error_code": 0,
+          "run_id": "composite-e70ba04082af4047",
+          "completed_stage_ids": [
+            "push_00",
+            "push_01",
+            "push_02"
+          ],
+          "component_run_ids": [
+            "contact-db1a4871ec4e48b798fdf4e217f02618",
+            "contact-f9a5962598d54502b63f69d6b81b4459",
+            "contact-563232b00f204b509a98b5c2369c198b"
+          ],
+          "component_goal_uuids": [
+            "588aee81559149c1a662a4327a09fb2f",
+            "47d5a25c155b4359ba0077c0cfab5829",
+            "5c96ebbebbf240ecbbfc44f408ebb6e5"
+          ],
+          "evidence_id": "/artifacts/COMPACT_1/sim/skills/composites/composite-e70ba04082af4047.jsonl",
+          "detail": "all native stages and fresh joint conditions confirmed",
+          "resumed_from_run_id": "",
+          "inherited_stages": 0
+        },
+        "runtime_action_status": 4,
+        "runtime_goal_uuid": "121df2d265184d78b67ad89914a547b4",
+        "wall_s": 158.112615813
+      },
+      "verdict": {
+        "evaluator_version": "0.5.0",
+        "task_id": "T08-compact-stroke-budget30",
+        "template_id": "T08_push",
+        "passed": true,
+        "terminal_passed": true,
+        "clauses": [
+          {
+            "clause": "unmoved:target_box_a",
+            "ok": true,
+            "evidence": {
+              "distance_m": 0.0,
+              "tolerance_m": 0.015
+            }
+          },
+          {
+            "clause": "push:target_box_b",
+            "ok": true,
+            "evidence": {
+              "displacement_m": 0.09136,
+              "min_displacement_m": 0.03,
+              "max_displacement_m": 0.15,
+              "vertical_m": 0.0,
+              "max_vertical_m": 0.02,
+              "direction_cosine": 1.0,
+              "min_direction_cosine": 0.9,
+              "zone": "zone_1",
+              "distance_m": 0.03864,
+              "radius_m": 0.06,
+              "inside_zone": true,
+              "max_lift_m": 3e-05,
+              "max_lift_allowed_m": 0.005
+            }
+          }
+        ],
+        "failed_clauses": [],
+        "agent_claimed_success": true,
+        "false_success": false,
+        "false_failure": false,
+        "evidence": {
+          "verifier_version": "1.0.0",
+          "physical_outcome": "PUSHED",
+          "evidence_status": "COMPLETE",
+          "failure_reason": null,
+          "passed": true,
+          "gates": [
+            {
+              "gate": "terminal",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "evaluator_version": null,
+                "passed": true
+              }
+            },
+            {
+              "gate": "trajectory",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "objects": [
+                  "target_box_a",
+                  "target_box_b"
+                ],
+                "total_samples": 60866
+              }
+            },
+            {
+              "gate": "table_support",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "off_table_samples": 0,
+                "tolerance_m": 0.01
+              }
+            },
+            {
+              "gate": "protected_unmoved",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_excursion_m": 0.0,
+                "tolerance_m": 0.005
+              }
+            },
+            {
+              "gate": "no_lift",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_lift_m": 2.5e-05,
+                "allowed_m": 0.02
+              }
+            },
+            {
+              "gate": "pusher_contact",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "motion_windows": 4998,
+                "overlapping_windows": 4998,
+                "contact_intervals": 3,
+                "pusher_links": [
+                  "open_manipulator_x::gripper_left_link::gripper_left_link_collision",
+                  "open_manipulator_x::gripper_right_link::gripper_right_link_collision",
+                  "open_manipulator_x::link5::link5_collision"
+                ]
+              }
+            },
+            {
+              "gate": "gripper",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "joint": "gripper_left_joint",
+                "samples": 14996,
+                "aperture_travel_rad": 0.0,
+                "limit_rad": 0.002,
+                "min_aperture_rad": -0.0,
+                "max_aperture_rad": -0.0
+              }
+            },
+            {
+              "gate": "no_attachment",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "events": 0
+              }
+            },
+            {
+              "gate": "no_teleport",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_jump_m": 4.8e-05,
+                "threshold_m": 0.03,
+                "declared_jump_m": 4.8e-05,
+                "measured_jump_m": 4.8e-05
+              }
+            }
+          ],
+          "failed_gates": []
+        }
+      },
+      "components": [
+        {
+          "outcome": 0,
+          "error_code": 0,
+          "request_id": "contact-563232b00f204b509a98b5c2369c198b",
+          "goal_uuid": "5c96ebbebbf240ecbbfc44f408ebb6e5",
+          "arm_ready": true,
+          "return_completed": true,
+          "motion_terminal_known": true,
+          "motion_goals_used": 9,
+          "detail": ""
+        },
+        {
+          "outcome": 0,
+          "error_code": 0,
+          "request_id": "contact-db1a4871ec4e48b798fdf4e217f02618",
+          "goal_uuid": "588aee81559149c1a662a4327a09fb2f",
+          "arm_ready": true,
+          "return_completed": true,
+          "motion_terminal_known": true,
+          "motion_goals_used": 9,
+          "detail": ""
+        },
+        {
+          "outcome": 0,
+          "error_code": 0,
+          "request_id": "contact-f9a5962598d54502b63f69d6b81b4459",
+          "goal_uuid": "47d5a25c155b4359ba0077c0cfab5829",
+          "arm_ready": true,
+          "return_completed": true,
+          "motion_terminal_known": true,
+          "motion_goals_used": 9,
+          "detail": ""
+        }
+      ],
+      "stages_completed": 3,
+      "motion_goals_used": 27,
+      "net_signed_m": 0.09135820012026033,
+      "unknown_terminal": false
+    },
+    {
+      "label": "COMPACT_2",
+      "kind": "push",
+      "expected": "PUSH_PASS",
+      "driver_exit": 0,
+      "qualified": true,
+      "task_sha256": "d8d983f86d3675289e6e8d2c2f57ef95acc0f9873b66e726c01a077159be5b9b",
+      "world_sha256": "9c3145f49bec2a76bb3bbe746b906066965716f1f1066d4996c3b74a9ffa56ee",
+      "status": {
+        "backend": "finger_tcp",
+        "label": "COMPACT_2",
+        "status": "EXECUTED",
+        "agent_claimed_success": true,
+        "driver_exit": 0,
+        "runtime_status": "TASK_COMPLETED"
+      },
+      "runtime": {
+        "kind": "PUBLIC_TASK_RUNTIME",
+        "agent_claimed_success": true,
+        "status": "TASK_COMPLETED",
+        "model_calls": 0,
+        "runtime_result": {
+          "outcome": 0,
+          "error_code": 0,
+          "run_id": "composite-8ecc62edc12b46b1",
+          "completed_stage_ids": [
+            "push_00",
+            "push_01",
+            "push_02"
+          ],
+          "component_run_ids": [
+            "contact-0928e9f8f08e4c9b9e9ff72c62feec70",
+            "contact-4b401bc050a8416ca741a842395c838e",
+            "contact-614e5b0cff2541d48a7e4998c288c5e1"
+          ],
+          "component_goal_uuids": [
+            "9fca1b52838a469d82348974c196fdcc",
+            "69cd76a4c3414b8899021734b139563b",
+            "61f4e6a14000436a8d5ee60a3f10bed3"
+          ],
+          "evidence_id": "/artifacts/COMPACT_2/sim/skills/composites/composite-8ecc62edc12b46b1.jsonl",
+          "detail": "all native stages and fresh joint conditions confirmed",
+          "resumed_from_run_id": "",
+          "inherited_stages": 0
+        },
+        "runtime_action_status": 4,
+        "runtime_goal_uuid": "3a6ae39efd8e4eb7967edf0dbb9dd43d",
+        "wall_s": 157.558420758
+      },
+      "verdict": {
+        "evaluator_version": "0.5.0",
+        "task_id": "T08-compact-stroke-budget30",
+        "template_id": "T08_push",
+        "passed": true,
+        "terminal_passed": true,
+        "clauses": [
+          {
+            "clause": "unmoved:target_box_a",
+            "ok": true,
+            "evidence": {
+              "distance_m": 0.0,
+              "tolerance_m": 0.015
+            }
+          },
+          {
+            "clause": "push:target_box_b",
+            "ok": true,
+            "evidence": {
+              "displacement_m": 0.09137,
+              "min_displacement_m": 0.03,
+              "max_displacement_m": 0.15,
+              "vertical_m": 0.0,
+              "max_vertical_m": 0.02,
+              "direction_cosine": 1.0,
+              "min_direction_cosine": 0.9,
+              "zone": "zone_1",
+              "distance_m": 0.03864,
+              "radius_m": 0.06,
+              "inside_zone": true,
+              "max_lift_m": 3e-05,
+              "max_lift_allowed_m": 0.005
+            }
+          }
+        ],
+        "failed_clauses": [],
+        "agent_claimed_success": true,
+        "false_success": false,
+        "false_failure": false,
+        "evidence": {
+          "verifier_version": "1.0.0",
+          "physical_outcome": "PUSHED",
+          "evidence_status": "COMPLETE",
+          "failure_reason": null,
+          "passed": true,
+          "gates": [
+            {
+              "gate": "terminal",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "evaluator_version": null,
+                "passed": true
+              }
+            },
+            {
+              "gate": "trajectory",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "objects": [
+                  "target_box_a",
+                  "target_box_b"
+                ],
+                "total_samples": 60554
+              }
+            },
+            {
+              "gate": "table_support",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "off_table_samples": 0,
+                "tolerance_m": 0.01
+              }
+            },
+            {
+              "gate": "protected_unmoved",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_excursion_m": 0.0,
+                "tolerance_m": 0.005
+              }
+            },
+            {
+              "gate": "no_lift",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_lift_m": 2.6e-05,
+                "allowed_m": 0.02
+              }
+            },
+            {
+              "gate": "pusher_contact",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "motion_windows": 4979,
+                "overlapping_windows": 4979,
+                "contact_intervals": 3,
+                "pusher_links": [
+                  "open_manipulator_x::gripper_left_link::gripper_left_link_collision",
+                  "open_manipulator_x::gripper_right_link::gripper_right_link_collision",
+                  "open_manipulator_x::link5::link5_collision"
+                ]
+              }
+            },
+            {
+              "gate": "gripper",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "joint": "gripper_left_joint",
+                "samples": 14941,
+                "aperture_travel_rad": 0.0,
+                "limit_rad": 0.002,
+                "min_aperture_rad": -0.0,
+                "max_aperture_rad": -0.0
+              }
+            },
+            {
+              "gate": "no_attachment",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "events": 0
+              }
+            },
+            {
+              "gate": "no_teleport",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_jump_m": 4.7e-05,
+                "threshold_m": 0.03,
+                "declared_jump_m": 4.7e-05,
+                "measured_jump_m": 4.7e-05
+              }
+            }
+          ],
+          "failed_gates": []
+        }
+      },
+      "components": [
+        {
+          "outcome": 0,
+          "error_code": 0,
+          "request_id": "contact-0928e9f8f08e4c9b9e9ff72c62feec70",
+          "goal_uuid": "9fca1b52838a469d82348974c196fdcc",
+          "arm_ready": true,
+          "return_completed": true,
+          "motion_terminal_known": true,
+          "motion_goals_used": 9,
+          "detail": ""
+        },
+        {
+          "outcome": 0,
+          "error_code": 0,
+          "request_id": "contact-4b401bc050a8416ca741a842395c838e",
+          "goal_uuid": "69cd76a4c3414b8899021734b139563b",
+          "arm_ready": true,
+          "return_completed": true,
+          "motion_terminal_known": true,
+          "motion_goals_used": 9,
+          "detail": ""
+        },
+        {
+          "outcome": 0,
+          "error_code": 0,
+          "request_id": "contact-614e5b0cff2541d48a7e4998c288c5e1",
+          "goal_uuid": "61f4e6a14000436a8d5ee60a3f10bed3",
+          "arm_ready": true,
+          "return_completed": true,
+          "motion_terminal_known": true,
+          "motion_goals_used": 9,
+          "detail": ""
+        }
+      ],
+      "stages_completed": 3,
+      "motion_goals_used": 27,
+      "net_signed_m": 0.09136504573139698,
+      "unknown_terminal": false
+    },
+    {
+      "label": "ANCHOR",
+      "kind": "push",
+      "expected": "PUSH_PASS",
+      "driver_exit": 0,
+      "qualified": true,
+      "task_sha256": "afdeb9063fce3e72428902624fd8e8d1bbcaeb7b8df42b3947d6958232286306",
+      "world_sha256": "c10e6b27e274254bbb6a46c93a097ab9d2b4c5a740f1bdb15e942b54da685115",
+      "status": {
+        "backend": "finger_tcp",
+        "label": "ANCHOR",
+        "status": "EXECUTED",
+        "agent_claimed_success": true,
+        "driver_exit": 0,
+        "runtime_status": "TASK_COMPLETED"
+      },
+      "runtime": {
+        "kind": "PUBLIC_TASK_RUNTIME",
+        "agent_claimed_success": true,
+        "status": "TASK_COMPLETED",
+        "model_calls": 0,
+        "runtime_result": {
+          "outcome": 0,
+          "error_code": 0,
+          "run_id": "composite-28cf875007e64b12",
+          "completed_stage_ids": [
+            "push_00",
+            "push_01"
+          ],
+          "component_run_ids": [
+            "contact-34ec8de7110242668dca85ac7d67795b",
+            "contact-dbf8672c5d164a728f16bc8446dd9d12"
+          ],
+          "component_goal_uuids": [
+            "bd2f19c1868741df8a90aac1712fc7b7",
+            "713d984b2b354424b1f14deb244f0697"
+          ],
+          "evidence_id": "/artifacts/ANCHOR/sim/skills/composites/composite-28cf875007e64b12.jsonl",
+          "detail": "all native stages and fresh joint conditions confirmed",
+          "resumed_from_run_id": "",
+          "inherited_stages": 0
+        },
+        "runtime_action_status": 4,
+        "runtime_goal_uuid": "9ad53efef2f747cc9301570ba7af9825",
+        "wall_s": 118.35299583400001
+      },
+      "verdict": {
+        "evaluator_version": "0.5.0",
+        "task_id": "T08-push-seed2000",
+        "template_id": "T08_push_manipulation",
+        "passed": true,
+        "terminal_passed": true,
+        "clauses": [
+          {
+            "clause": "unmoved:target_box_b",
+            "ok": true,
+            "evidence": {
+              "distance_m": 0.0,
+              "tolerance_m": 0.015
+            }
+          },
+          {
+            "clause": "push:target_box_a",
+            "ok": true,
+            "evidence": {
+              "displacement_m": 0.06094,
+              "min_displacement_m": 0.03,
+              "max_displacement_m": 0.15,
+              "vertical_m": 0.0,
+              "max_vertical_m": 0.02,
+              "direction_cosine": 1.0,
+              "min_direction_cosine": 0.9,
+              "zone": "zone_push",
+              "distance_m": 0.03906,
+              "radius_m": 0.06,
+              "inside_zone": true,
+              "max_lift_m": 2e-05,
+              "max_lift_allowed_m": 0.005
+            }
+          }
+        ],
+        "failed_clauses": [],
+        "agent_claimed_success": true,
+        "false_success": false,
+        "false_failure": false,
+        "evidence": {
+          "verifier_version": "1.0.0",
+          "physical_outcome": "PUSHED",
+          "evidence_status": "COMPLETE",
+          "failure_reason": null,
+          "passed": true,
+          "gates": [
+            {
+              "gate": "terminal",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "evaluator_version": null,
+                "passed": true
+              }
+            },
+            {
+              "gate": "trajectory",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "objects": [
+                  "target_box_a",
+                  "target_box_b"
+                ],
+                "total_samples": 46000
+              }
+            },
+            {
+              "gate": "table_support",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "off_table_samples": 0,
+                "tolerance_m": 0.01
+              }
+            },
+            {
+              "gate": "protected_unmoved",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_excursion_m": 0.0,
+                "tolerance_m": 0.005
+              }
+            },
+            {
+              "gate": "no_lift",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_lift_m": 2e-05,
+                "allowed_m": 0.02
+              }
+            },
+            {
+              "gate": "pusher_contact",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "motion_windows": 4367,
+                "overlapping_windows": 4367,
+                "contact_intervals": 2,
+                "pusher_links": [
+                  "open_manipulator_x::gripper_left_link::gripper_left_link_collision",
+                  "open_manipulator_x::gripper_right_link::gripper_right_link_collision",
+                  "open_manipulator_x::link5::link5_collision"
+                ]
+              }
+            },
+            {
+              "gate": "gripper",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "joint": "gripper_left_joint",
+                "samples": 11280,
+                "aperture_travel_rad": 0.0,
+                "limit_rad": 0.002,
+                "min_aperture_rad": -0.0,
+                "max_aperture_rad": -0.0
+              }
+            },
+            {
+              "gate": "no_attachment",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "events": 0
+              }
+            },
+            {
+              "gate": "no_teleport",
+              "ok": true,
+              "reason": null,
+              "evidence": {
+                "max_jump_m": 3.1e-05,
+                "threshold_m": 0.03,
+                "declared_jump_m": 3.1e-05,
+                "measured_jump_m": 3.1e-05
+              }
+            }
+          ],
+          "failed_gates": []
+        }
+      },
+      "components": [
+        {
+          "outcome": 0,
+          "error_code": 0,
+          "request_id": "contact-34ec8de7110242668dca85ac7d67795b",
+          "goal_uuid": "bd2f19c1868741df8a90aac1712fc7b7",
+          "arm_ready": true,
+          "return_completed": true,
+          "motion_terminal_known": true,
+          "motion_goals_used": 12,
+          "detail": ""
+        },
+        {
+          "outcome": 0,
+          "error_code": 0,
+          "request_id": "contact-dbf8672c5d164a728f16bc8446dd9d12",
+          "goal_uuid": "713d984b2b354424b1f14deb244f0697",
+          "arm_ready": true,
+          "return_completed": true,
+          "motion_terminal_known": true,
+          "motion_goals_used": 12,
+          "detail": ""
+        }
+      ],
+      "stages_completed": 2,
+      "motion_goals_used": 24,
+      "net_signed_m": 0.06093731627328697,
+      "unknown_terminal": false
+    },
+    {
+      "label": "REG_NORMAL",
+      "kind": "ordinary",
+      "expected": "FUNCTIONAL_SMOKE_PASS",
+      "driver_exit": 0,
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "velocity_servo",
+        "skill_backend": "legacy",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "normal",
+        "object": "target_box_a",
+        "out": "/artifacts/REG_NORMAL/run-8adca59f50fa",
+        "decision_policy": "fsm",
+        "hybrid_threshold": null,
+        "resume_completed": false,
+        "model_env": {
+          "FLEXCELL_LLM_ENDPOINT": null,
+          "FLEXCELL_LLM_MODEL": null,
+          "FLEXCELL_LLM_BACKEND": null,
+          "FLEXCELL_JEV_ENDPOINT": null,
+          "FLEXCELL_JEV_MODEL": null,
+          "FLEXCELL_JEV_BACKEND": null
+        },
+        "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+        "semantic_config_sha256": "2e4906170d7755c6966d5dab71a5d101b3cf0fd0279ce22134e8e36be04f2bc1",
+        "runtime_fingerprint": "5761170e342e333f05909ed0a87e6cd5b800d47aa3ce20d06f09c6367ce26779",
+        "task_start_monotonic_ns": 895622787926,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "zone_2_pose": null,
+        "config_override": null,
+        "task_end_monotonic_ns": 910823781150,
+        "task": {
+          "action": "task",
+          "goal_uuid": "b387dfc8776347b383b47bb6e9063c7c",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "pick_place_v1-7ab396ee",
+          "wall_seconds": 14.548,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK"
+          ],
+          "object_at_place": true,
+          "final_position_error_m": 0.007252025813516343,
+          "skip_verify": false
+        },
+        "actual_routing": {
+          "decisions": 4,
+          "sources": {
+            "fsm": 4
+          },
+          "leaves": {
+            "fsm": 4
+          },
+          "fallbacks": 0,
+          "models": [],
+          "backends": [],
+          "fast_calls": 0,
+          "slow_calls": 0,
+          "model_calls": 0,
+          "calls_without_identity": 0
+        },
+        "model_calls": 0,
+        "fast_calls": 0,
+        "slow_calls": 0,
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      },
+      "result_path": "/artifacts/REG_NORMAL/run-8adca59f50fa/result.json",
+      "qualified": true,
+      "unknown_terminal": false
+    },
+    {
+      "label": "REG_DUAL",
+      "kind": "ordinary",
+      "expected": "FUNCTIONAL_SMOKE_PASS",
+      "driver_exit": 0,
+      "result": {
+        "schema_version": 1,
+        "status": "PASS",
+        "backend": "velocity_servo",
+        "skill_backend": "legacy",
+        "physical_tasks_dispatched": 1,
+        "qualification": "FUNCTIONAL_SMOKE_ONLY",
+        "case": "dual_object",
+        "object": "target_box_a",
+        "out": "/artifacts/REG_DUAL/run-7b05d6f974df",
+        "decision_policy": "fsm",
+        "hybrid_threshold": null,
+        "resume_completed": false,
+        "model_env": {
+          "FLEXCELL_LLM_ENDPOINT": null,
+          "FLEXCELL_LLM_MODEL": null,
+          "FLEXCELL_LLM_BACKEND": null,
+          "FLEXCELL_JEV_ENDPOINT": null,
+          "FLEXCELL_JEV_MODEL": null,
+          "FLEXCELL_JEV_BACKEND": null
+        },
+        "world_sha256": "f78a469d4bb7d9ee2e32bdc14f1abbf64246aff0e267fb6aa3e2d10a602bb187",
+        "semantic_config_sha256": "2e4906170d7755c6966d5dab71a5d101b3cf0fd0279ce22134e8e36be04f2bc1",
+        "runtime_fingerprint": "5761170e342e333f05909ed0a87e6cd5b800d47aa3ce20d06f09c6367ce26779",
+        "task_start_monotonic_ns": 963423169073,
+        "goal_pose": [
+          0.12,
+          -0.15,
+          0.0175
+        ],
+        "zone_2_pose": null,
+        "config_override": null,
+        "task_end_monotonic_ns": 992423120070,
+        "task": {
+          "action": "demo",
+          "goal_uuid": "cddbee4fd002453598f834a8453d8e17",
+          "outcome": "OUTCOME_SUCCEEDED",
+          "outcome_val": 0,
+          "error_code": "ERR_NONE",
+          "detail": "task done: all assignments verified",
+          "evidence_id": "week1_demo_v1-b434411a",
+          "wall_seconds": 28.361,
+          "fsm_trace": [
+            "PICK_A(attempt=1):OK",
+            "PLACE_A:OK",
+            "VERIFY_A(attempt=1):OK",
+            "PICK_B(attempt=1):OK",
+            "PLACE_B:OK",
+            "VERIFY_B(attempt=1):OK"
+          ],
+          "object_a_at_zone": true,
+          "object_b_at_zone": true,
+          "zone_a_error_m": 0.0016471160480237754,
+          "zone_b_error_m": 0.006076451102938587,
+          "run_id": "week1_demo_v1-7975fdcd",
+          "scenario_id": "week1_demo_v1"
+        },
+        "actual_routing": {
+          "decisions": 8,
+          "sources": {
+            "fsm": 8
+          },
+          "leaves": {
+            "fsm": 8
+          },
+          "fallbacks": 0,
+          "models": [],
+          "backends": [],
+          "fast_calls": 0,
+          "slow_calls": 0,
+          "model_calls": 0,
+          "calls_without_identity": 0
+        },
+        "model_calls": 0,
+        "fast_calls": 0,
+        "slow_calls": 0,
+        "expectation_met": true,
+        "recorder_exit": 0,
+        "owned_launch_exit": 0,
+        "unavailable_numeric_fields": {}
+      },
+      "result_path": "/artifacts/REG_DUAL/run-7b05d6f974df/result.json",
+      "qualified": true,
+      "unknown_terminal": false
+    }
+  ],
+  "source_unchanged": true,
+  "stop_reason": null,
+  "all_slots_qualified": true,
+  "formal_held_out": false,
+  "baseline_promoted": false
+}

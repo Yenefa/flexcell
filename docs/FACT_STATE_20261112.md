@@ -1388,3 +1388,21 @@ Evidence c0ed8b27f8731d89efe75ba728731bddf55eda3a is pushed. Independent
 offline CI43461083976 PASS; repository-layout CI43461084005 PASS. These
 checks execute no physical task and add no trials. Version index separates
 implementation3c6292f8, physically executed31a002f6 and evidencec0ed8b27.
+
+### Registered three-stage stroke at a thirty-goal budget
+
+Fixed CI44167822674 executed58ab8d95 with the compact cadence from b8ce146e.
+The standard cadence refused the same 30-goal task before motion. The two
+compact trials each completed three stages at 27/30 goals, with net displacement
+91.358 and 91.365 mm and full9/9 independent acceptance. The 40-goal comparison
+from CI43455056965 used 36 goals per trial at the same initial world and model.
+Each compact stage dispatched five stroke trajectories instead of eight and
+retained the four goals for approach, unload and return. The original two-stage
+anchor and ordinary single and dual placement smoke cases all passed.
+
+The replay in `setup/acceptance/physical_compact_stroke_20261117/` verifies 517
+raw file hashes, four reconstructed evidence bundles, actual dispatch counts and
+eight ready return receipts. The nine frozen files and push contract match their
+pinned hashes. The registered capability covers this exposed simulation scene.
+Legacy is the default. The formal baseline is NOT_PROMOTED, T08 is
+CALIBRATION_UNSUPPORTED, and the physical objective stays active.
