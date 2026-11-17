@@ -78,8 +78,18 @@ def _gate(entry, consumer=None, task_family=None, superseded=None):
         kind = entry.get("action_kind")
         if kind not in consumers.CONSUMERS.get(consumer, {}).get("action_kinds", ()):
             return False, "consumer %r does not declare %r" % (consumer, kind)
-    if task_family is not None and entry.get("task_family") != task_family:
-        return False, "task_family %r != %r" % (entry.get("task_family"), task_family)
+    if task_family is not None:
+        # The union of where the lesson was LEARNED and where it was MEASURED to work.
+        # Gating on task_family alone withheld the lesson from families it had been
+        # measured to fix: the reuse audit showed 4 of 7 fixed instances sat in two other
+        # families, and an exact-match gate made every one of them undeliverable. A
+        # measurement the delivery channel cannot act on is a number in a document.
+        families = {entry.get("task_family")} | set(entry.get("measured_families") or [])
+        if task_family not in families:
+            return False, ("task_family %r not in %s (learned in %r, measured in %s)"
+                           % (task_family, sorted(f for f in families if f),
+                              entry.get("task_family"),
+                              sorted(entry.get("measured_families") or [])))
     return True, "passed all gates"
 
 

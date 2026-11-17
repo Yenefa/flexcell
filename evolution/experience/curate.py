@@ -233,7 +233,8 @@ def admit(new, store_path=STORE, ledger_path=LEDGER, dry_run=False):
 
 
 def activate(candidate_id, validation, store_path=STORE, ledger_path=LEDGER,
-             label=None, gate=True, acceptance=None, known_path=None):
+             label=None, gate=True, acceptance=None, known_path=None,
+             measured_families=None):
     """Promote a CANDIDATE to ACTIVE by APPENDING its successor, never by rewriting it.
 
     WHY NOT EDIT IN PLACE: the store is hash-chained, so a rewrite would either break the
@@ -285,6 +286,15 @@ def activate(candidate_id, validation, store_path=STORE, ledger_path=LEDGER,
                 "misuse check refused activation: %s (%s)"
                 % (misuse_result["verdict"], misuse_result["why"]))
     successor = json.loads(json.dumps(cand))
+    # The MEASURED cross-family scope, recorded on the version that becomes live.
+    # WHY IT IS WRITTEN HERE AND NOT LEFT IN A REPORT: retrieval gates on the families an
+    # entry claims, and until this field existed it claimed only the one it was learned in.
+    # The reuse audit measured 4 of 7 fixes in two other families and retrieval withheld
+    # every one of them - a measurement the delivery channel could not act on. Recording it
+    # at activation is what makes the measurement load-bearing.
+    if measured_families is not None:
+        successor["measured_families"] = sorted(set(measured_families)
+                                                - {successor.get("task_family")})
     for key in ("prev_sha256", "chain_sha256", "record_sha256"):
         successor.pop(key, None)
     successor["validation"] = dict(validation)

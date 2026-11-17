@@ -60,9 +60,17 @@ def _write(path, obj):
         fh.write(json.dumps(obj, indent=2, sort_keys=True) + "\n")
 
 
+# Families the reuse audit MEASURES each lesson to fix, keyed by label. Filled at run time
+# from reuse.audit, so this is a measurement and not a declaration: an empty entry means the
+# audit found nothing beyond the source family.
+MEASURED_FAMILIES = {}
+
 _COMMON = dict(
     origin="AGENT_GENERATED",
-    task_family="T13-conditional-two-boxes",
+    # The template id the benchmark uses, not a made-up label: reuse.template_of() reports
+    # families as T13_geometric_conditional, and two vocabularies for one thing is how a
+    # measured cross-family win became undeliverable.
+    task_family="T13_geometric_conditional",
     failure_class="control",
     source_run=FAILURE,
     evidence={"clearance_m": 0.05,
@@ -370,13 +378,26 @@ def run(dest=OUT):
 
     # 6 -- review then activate, by APPENDING the reviewed successor
     activated = {}
+    measurements = {}
     for entry in entries:
         label = entry["version"]["label"]
         validation = _review(entry, dest, probes[label])
         candidate_id = [a["payload"]["entry_id"] for a in admissions
                         if a["label"] == label][0]
+        # The MEASURED cross-family scope travels with the activation. Leaving it in a
+        # report would mean retrieval never offers the lesson to the families the reuse
+        # audit measured it fixing, which is a number nobody can act on.
+        # Measured HERE, before the successor exists: activation is where the field is
+        # written, so measuring afterwards would be too late to change this version.
+        measurement = reuse.measure_for_entry(
+            entry, source_task="HO-90899d657e68",
+            acceptance=os.path.join(WT, "setup", "acceptance"))
+        MEASURED_FAMILIES[label] = measurement["families_with_fixes"]
+        measured = MEASURED_FAMILIES.get(label) or []
+        measurements[label] = measurement
         successor = curate.activate(candidate_id, validation, store_path=store_path,
-                                    ledger_path=ledger_path, label=label)
+                                    ledger_path=ledger_path, label=label,
+                                    measured_families=measured)
         activated[label] = {"candidate": candidate_id,
                             "active": successor["entry_id"],
                             "status": successor["version"]["status"],
@@ -391,8 +412,11 @@ def run(dest=OUT):
     for route in routes:
         label = route["label"]
         consumer = route["consumer"]
-        kept, report = retrieve.retrieve(consumer,
-                                         task_family=entries[0]["task_family"],
+        # Ask as the task the entry was LEARNED from, per label. Using entries[0]'s family
+        # for every label worked only while every entry declared the same family - which
+        # was the mislabelling this round fixed. A shared family was hiding the difference.
+        family = ([e for e in entries if e["version"]["label"] == label][0]["task_family"])
+        kept, report = retrieve.retrieve(consumer, task_family=family,
                                          store_path=store_path, ledger_path=ledger_path,
                                          run_id="chain-demo", record=True)
         from_report[label] = {"consumer": consumer, "kept": report["kept"],

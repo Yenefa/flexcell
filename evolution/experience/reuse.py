@@ -193,6 +193,34 @@ def audit(asset, acceptance=None, source_task=None):
     }
 
 
+def measure_for_entry(entry, source_task=None, acceptance=None):
+    """Which families does THIS entry fix, measured before it is activated.
+
+    WHY THIS CAN RUN BEFORE ACTIVATION: compile_asset refuses a non-ACTIVE entry, correctly
+    - an unreviewed asset must not be callable. But the measurement has to exist BEFORE the
+    activation, because activation is where the measured scope is written onto the version
+    that becomes live. Building a provisional asset from the binding is enough: the audit
+    calls the bound function directly and never needs the store record.
+
+    Returns {"families_with_fixes": [...], "beyond_source": [...], "total": n}.
+    A consumer with no callable binding measures as empty, not as an error: a prompt-level
+    entry has no parameter to vary and this instrument cannot see it.
+    """
+    import skill_asset
+    try:
+        binding = skill_asset.binding_for(entry)
+    except skill_asset.AssetError:
+        return {"families_with_fixes": [], "beyond_source": [], "total": 0,
+                "why": "no callable binding, so the reuse instrument cannot see this entry"}
+    provisional = {"asset_id": "provisional.%s" % (entry.get("entry_id", "unknown"),),
+                   "callable": binding}
+    report = audit(provisional, acceptance=acceptance, source_task=source_task)
+    return {"families_with_fixes": report["families_with_fixes"],
+            "beyond_source": report["families_fixed_beyond_the_source"],
+            "total": report["total_instances_fixed"],
+            "families": report["families"]}
+
+
 def reuse_assets(assets_path, source_task=None, acceptance=None):
     """Audit every compiled asset in a skill_assets.jsonl."""
     assets = skill_asset.read(assets_path)

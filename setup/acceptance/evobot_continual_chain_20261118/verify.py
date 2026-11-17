@@ -404,6 +404,33 @@ def main():
             "390166948abbbecc96f90e29054ed8804f089576"
             in (known_doc.get("measured_scope") or ""))
 
+        # 19 -- THE MEASURED CROSS-FAMILY SCOPE MUST BE DELIVERABLE, not just reported.
+        # The reuse audit measured the spacing lesson fixing 4 instances in two other
+        # families, while retrieval gated on an EXACT task_family match - so every one of
+        # those measured wins was withheld. A measurement the delivery channel cannot act
+        # on is a number in a document.
+        rows_after = store.read(str(tmp / "records_v2.jsonl"))
+        active_rows = [r for r in rows_after
+                       if (r.get("version") or {}).get("status") == "ACTIVE"]
+        checks["an_active_entry_carries_a_measured_cross_family_scope"] = any(
+            r.get("measured_families") for r in active_rows)
+        _rev = _load("retrieve")
+        checks["retrieval_offers_the_lesson_to_a_measured_OTHER_family"] = any(
+            kept for kept in [
+                [e.get("version", {}).get("label")
+                 for e in _rev.retrieve("executor_recovery", task_family=fam,
+                                        store_path=str(tmp / "records_v2.jsonl"),
+                                        record=False)[0]]
+                for fam in ("T12_triple_revisit", "T03_ordered")])
+        # ... and it must stay WITHHELD from a family nobody measured it on
+        checks["retrieval_still_withholds_it_from_an_unmeasured_family"] = (
+            _rev.retrieve("executor_recovery", task_family="T14_ordered_pair",
+                          store_path=str(tmp / "records_v2.jsonl"), record=False)[0] == [])
+        # the family label must be DERIVED, so the harness lesson says T05 not T13
+        checks["a_generated_entry_names_the_family_its_evidence_came_from"] = any(
+            r.get("task_family") == "T05_relay" for r in rows_after
+            if "harness" in str(r.get("version", {}).get("label")))
+
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
             "batch": HERE.name,

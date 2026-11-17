@@ -88,7 +88,8 @@ def _body(entry):
 def make_entry(origin, task_family, failure_class, source_run, evidence,
                applicable_when, known_invalid_when, suggested_action, action_kind,
                consumer, effect_spec, version, validation=None, evidence_files=None,
-               provenance_verified=False, notes="", invalid_probes=None):
+               provenance_verified=False, notes="", invalid_probes=None,
+               measured_families=None):
     """Build one entry. Every argument is checked; nothing is inferred from prose.
 
     validation defaults to NOT_REVIEWED. It is deliberately not this function's to set:
@@ -132,6 +133,14 @@ def make_entry(origin, task_family, failure_class, source_run, evidence,
         "applicable_when": list(applicable_when),
         "known_invalid_when": list(known_invalid_when),
         "suggested_action": str(suggested_action)[:500],
+        # WHERE THE LESSON WAS MEASURED TO WORK, as opposed to where it was learned.
+        # task_family is provenance: the family the evidence came from. Retrieval gated on
+        # it with an exact match, so a lesson measured to fix 4 instances in two OTHER
+        # families could never be offered to them - the measurement existed and the
+        # delivery channel could not act on it. This field carries the measurement, and
+        # retrieval uses the union. Empty means "no measurement beyond its own family",
+        # never "works everywhere".
+        "measured_families": list(measured_families or []),
         "action_kind": action_kind,
         "consumer": consumer,
         "effect_spec": effect_spec,

@@ -436,7 +436,81 @@ def cluster(failures):
     return buckets
 
 
-def build(signature, failures, task_family="T13-conditional-two-boxes", split="dev"):
+# The batch-name prefix says which task TEMPLATE the runs exercised: evobot_t05_batch_...
+# and evobot_t05_n6_... are T05. Reading it beats a default because the default was WRONG
+# in a way nothing caught: every generated entry declared "T13-conditional-two-boxes",
+# including the harness lesson whose evidence comes from T05 batches. Because retrieval
+# gates on an EXACT task_family match, that entry was offered to spacing tasks and never
+# offered to the family it actually came from - mislabelled in both directions at once.
+_BATCH_FAMILY = re.compile(r"evobot_t(\d\d)_")
+
+# Template ids as the benchmark names them, so an entry's family matches what
+# reuse.template_of() reports. A vocabulary mismatch between two modules is how a
+# measured cross-family win became undeliverable.
+TEMPLATE_FAMILY = {
+    "T01": "T01_multi_object_sorting",
+    "T02": "T02_two_bins",
+    "T03": "T03_ordered",
+    "T04": "T04_duplicates",
+    "T05": "T05_relay",
+    "T06": "T06_revisit",
+    "T08": "T08_contact_push",
+    "T12": "T12_triple_revisit",
+    "T13": "T13_geometric_conditional",
+    "T14": "T14_ordered_pair",
+}
+
+
+def family_of(failures):
+    """The task family an entry's evidence came from, derived - not defaulted.
+
+    TWO SOURCES, IN ORDER OF RELIABILITY. The batch name when it names a template
+    (evobot_t05_batch_...). Otherwise the per-RUN template ids, resolved from the archive the
+    same way reuse.template_of does, so both modules speak the same vocabulary.
+
+    UNKNOWN is returned rather than a fallback. A default here once labelled the T05 harness
+    lesson as a T13 spacing lesson, and because retrieval gates on the family, that entry was
+    offered to the wrong tasks and invisible to the right ones.
+    """
+    seen = set()
+    for f in failures:
+        m = _BATCH_FAMILY.search(str(f.get("batch") or ""))
+        if m:
+            seen.add("T" + m.group(1))
+    source = "derived from the batch name"
+    if not seen:
+        import reuse
+        root = os.path.join(WT, "setup", "acceptance")
+        for f in failures:
+            for tid in _task_ids_of(f["path"], root):
+                template = reuse.template_of(tid, root)
+                if template and template != "UNKNOWN":
+                    seen.add(template)
+        source = "derived from the run's template id"
+    if len(seen) == 1:
+        key = seen.pop()
+        return TEMPLATE_FAMILY.get(key, key), source
+    if not seen:
+        return "UNKNOWN", ("neither the batch name nor any run resolves to a task "
+                           "template; refusing to default a family that retrieval gates on")
+    return "UNKNOWN", ("evidence spans several templates %s; a single family label would "
+                       "be a guess, and retrieval acts on the label" % sorted(seen))
+
+
+_TASK_ID = re.compile(r"\bHO-[0-9a-f]{12}\b")
+
+
+def _task_ids_of(rel_path, root):
+    """Task ids named by one failure row: in its own path, or in its batch directory."""
+    ids = set(_TASK_ID.findall(str(rel_path)))
+    if not ids:
+        batch = os.path.join(root, str(rel_path).split(os.sep)[0])
+        ids = {os.path.basename(os.path.dirname(p))
+               for p in glob.glob(os.path.join(batch, "**", "task.out"), recursive=True)}
+    return sorted(ids)
+
+
+def build(signature, failures, task_family=None, split="dev"):
     """Return (entry_or_None, reason). Refuses thin evidence and unknown consumers."""
     if len(failures) < MIN_OCCURRENCES:
         return None, ("only %d occurrence(s) of %s; need %d - a single run is a "
@@ -465,6 +539,13 @@ def build(signature, failures, task_family="T13-conditional-two-boxes", split="d
     if not consumers.implemented(consumer):
         return None, ("UNROUTED: %r declares this kind but its entrypoint is missing "
                       "from this checkout" % consumer)
+    # DERIVE the family. A default here labelled the T05 harness lesson as a T13 spacing
+    # lesson, and because retrieval matches task_family exactly, that entry was offered to
+    # the wrong tasks and invisible to the right ones.
+    derived, family_why = family_of(failures)
+    if derived == "UNKNOWN":
+        return None, "NOT_READY: cannot derive a task family - " + family_why
+    task_family = task_family or derived
     # Evidence comes from PARSED FIELDS of the runs, one row per contributing run.
     evidence = {
         "occurrences": len(failures),
@@ -507,7 +588,7 @@ def build(signature, failures, task_family="T13-conditional-two-boxes", split="d
                    % (len(failures), consumer, spec["action_kind"]))
 
 
-def generate(acceptance=None, task_family="T13-conditional-two-boxes",
+def generate(acceptance=None, task_family=None,
              include_held_out=False, split=None):
     """Scan, cluster, build. Returns (entries, report). Never writes.
 

@@ -135,7 +135,21 @@ capability is what makes that visible instead of leaving it to an audit.
     failures**, not a green repository — a gate that requires the impossible gets switched
     off, which had already happened here once.
 
-`verify.py` asserts **73 checks**, including that both gates really ran, that the asset
+19. **a measured win must be deliverable, not just measured.** `reuse.py` measured the
+    spacing lesson fixing **4 instances in T12 and T03**; `retrieve.py` gated on an
+    **exact task_family match** and withheld every one of them. Both modules were
+    internally consistent and the number was arithmetically right — **it just could not
+    reach the caller.** Underneath sat a second defect: `task_family` was a hardcoded
+    **default**, so the harness lesson learned from **T05** batches declared itself a
+    **T13** spacing lesson — and retrieval acts on that label, making the entry offered to
+    the wrong family and invisible to the right one **at once**. Fixed by deriving
+    `task_family` from the evidence (batch name, or the run's own template id; **UNKNOWN
+    and refused** rather than defaulted), by recording `measured_families` on the activated
+    version separately from where it was learned, and by using the union in the retrieval
+    gate. Result: **E2 is now offered to T13, T12 and T03, still withheld from T14**, and
+    on T12+T03's 18 below-contract plans it fixes **18/18**.
+
+`verify.py` asserts **77 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -146,7 +160,8 @@ INERT**, and that **several candidates were compared with the losers kept and ex
 worse**, and that **every active entry reached its consumer** while an entry with no
 actionable text is reported DROPPED rather than accepted, and that **an order-clause
 failure is told apart from a truncated run**, and that **the gate covers every verifier
-while not running the one that contains it**.
+while not running the one that contains it**, and that **an entry measured to help another
+task family is actually offered to it while an unmeasured family is still withheld**.
 
 ---
 
