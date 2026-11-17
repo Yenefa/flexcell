@@ -226,11 +226,11 @@ def materialize(family, root, variant="v1", layout=None):
     return root
 
 
-def check(family, root, variant="v1"):
+def check(family, root, variant="v1", timeout=30):
     """Run the sealed gate. Returns (ok, payload)."""
     root = Path(root)
     ran = subprocess.run([sys.executable, str(root / "gate" / "check.py"), str(root), family, variant],
-                         capture_output=True, text=True)
+                         capture_output=True, text=True, timeout=timeout)
     if ran.returncode != 0:
         return False, {"code": "GATE_FAILED", "detail": (ran.stderr or ran.stdout)[-300:]}
     payload = json.loads(ran.stdout.strip().splitlines()[-1])

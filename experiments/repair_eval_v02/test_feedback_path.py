@@ -72,7 +72,9 @@ def test_the_second_interaction_is_told_the_gates_answer():
             work.mkdir()
             row = R.run_slot("F1_OBJECT_REGISTRATION", "B_REAL_FEEDBACK", 1, work,
                              policy, donor, "scripted", 4, seed=5101,
-                             source_sha="scripted", source="instances")
+                             source_sha=R.health.checked_run(
+                                 ["git", "rev-parse", "HEAD"], cwd=R.ROOT).stdout.strip(),
+                             source="instances")
     finally:
         R.GatedTransport = original
 

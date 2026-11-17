@@ -122,7 +122,8 @@ def main():
             work = tmp / "slot"
             work.mkdir()
             row = R.run_slot(family, "B_REAL_FEEDBACK", 1, work, policy, donor,
-                             "scripted", 3, seed=5101, source_sha="scripted",
+                             "scripted", 3, seed=5101, source_sha=R.health.checked_run(
+                                 ["git", "rev-parse", "HEAD"], cwd=R.ROOT).stdout.strip(),
                              source="instances")
         R.GatedTransport = original
         R.RepairAgent = original_agent

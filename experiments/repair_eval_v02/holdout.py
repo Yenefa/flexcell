@@ -22,6 +22,7 @@ WHAT IT DELIBERATELY DOES NOT DO
 """
 import hashlib
 import json
+import math
 import time
 
 
@@ -43,8 +44,14 @@ def digest(payload):
 class Freeze:
     """The record that says which candidate was fixed before the hold-out ran."""
 
+    def __setattr__(self, name, value):
+        if hasattr(self, name):
+            raise HoldoutError("freeze fields cannot be changed; create a new version")
+        object.__setattr__(self, name, value)
+
     def __init__(self, candidate_sha, source_run_id, selection_basis,
-                 frozen_at=None, repair_runs=0):
+                 frozen_at=None, repair_runs=0, reference_sha=None,
+                 reference_basis=None):
         for name, value in (("candidate_sha", candidate_sha),
                             ("source_run_id", source_run_id),
                             ("selection_basis", selection_basis)):
@@ -56,14 +63,24 @@ class Freeze:
         self.source_run_id = source_run_id
         self.selection_basis = selection_basis
         self.frozen_at = frozen_at if frozen_at is not None else time.time()
+        if not isinstance(self.frozen_at, (float, int)) or not math.isfinite(self.frozen_at):
+            raise HoldoutError("freeze timestamp must be finite")
         self.repair_runs = repair_runs
+        if reference_sha is not None and (not isinstance(reference_sha, str)
+                or not reference_sha.strip() or not isinstance(reference_basis, str)
+                or not reference_basis.strip()):
+            raise HoldoutError("a reference requires its SHA and selection basis")
+        self.reference_sha = reference_sha
+        self.reference_basis = reference_basis
 
     def as_dict(self):
         return {"candidate_sha": self.candidate_sha,
                 "source_run_id": self.source_run_id,
                 "selection_basis": self.selection_basis,
                 "frozen_at": self.frozen_at,
-                "repair_runs": self.repair_runs}
+                "repair_runs": self.repair_runs,
+                "reference_sha": self.reference_sha,
+                "reference_basis": self.reference_basis}
 
     def sha(self):
         return digest(self.as_dict())
@@ -84,9 +101,12 @@ class HoldoutPlan:
         self.layouts = tuple(layouts)
         self.initial_states = tuple(initial_states)
         self._slots = {}
+        self._reference = {}
+        self._regressions = {}
         for layout in self.layouts:
             for state in self.initial_states:
                 self._slots["%s|%s" % (layout, state)] = NOT_RUN
+                self._reference["%s|%s" % (layout, state)] = NOT_RUN
 
     # ------------------------------------------------------------- planning
     @property
@@ -100,30 +120,38 @@ class HoldoutPlan:
         repair = self.freeze.repair_runs
         holdout = sum(1 for s in self._slots.values() if s in TERMINAL)
         return {"repair_runs": repair, "holdout_executions": holdout,
+                "reference_executions": sum(s in TERMINAL for s in self._reference.values()),
                 "holdout_planned": len(self._slots),
                 "reported_separately": True}
 
     # ------------------------------------------------------------ execution
-    def record(self, slot_id, outcome, *, evaluated_sha, at=None):
+    def record(self, slot_id, outcome, *, evaluated_sha, at=None, arm="candidate"):
         """Write one result, once.
 
         Refuses a second write: #253 says a failure that triggers a new repair
         starts a new version, and the older result keeps its identity. Allowing
         an overwrite is how a failed row quietly becomes a pass.
         """
-        if slot_id not in self._slots:
+        if arm not in ("candidate", "reference"):
+            raise HoldoutError("unknown comparison arm")
+        slots = self._slots if arm == "candidate" else self._reference
+        expected_sha = (self.freeze.candidate_sha if arm == "candidate"
+                        else self.freeze.reference_sha)
+        if not expected_sha:
+            raise HoldoutError("no reference frozen before execution")
+        if slot_id not in slots:
             raise HoldoutError("unknown slot %r" % (slot_id,))
         if outcome not in TERMINAL:
             raise HoldoutError("outcome must be one of %s, got %r"
                                % (", ".join(TERMINAL), outcome))
-        if self._slots[slot_id] != NOT_RUN:
+        if slots[slot_id] != NOT_RUN:
             raise HoldoutError(
                 "slot %r already recorded as %s; a re-run is a new record, "
-                "not an overwrite" % (slot_id, self._slots[slot_id]))
-        if evaluated_sha != self.freeze.candidate_sha:
+                "not an overwrite" % (slot_id, slots[slot_id]))
+        if evaluated_sha != expected_sha:
             raise HoldoutError(
                 "candidate evaluated (%s) is not the frozen candidate (%s)"
-                % (evaluated_sha, self.freeze.candidate_sha))
+                % (evaluated_sha, expected_sha))
         moment = at if at is not None else time.time()
         if moment < self.freeze.frozen_at:
             # the result predates the freeze: whatever was frozen may have been
@@ -131,17 +159,44 @@ class HoldoutPlan:
             raise HoldoutError(
                 "hold-out result recorded before the candidate was frozen; the "
                 "selection could have seen it")
-        self._slots[slot_id] = outcome
+        slots[slot_id] = outcome
         return self.statuses()
+
+    def record_regressions(self, arm, results):
+        if arm not in ("candidate", "reference") or arm in self._regressions:
+            raise HoldoutError("invalid or already recorded regression arm")
+        expected_sha = self.freeze.candidate_sha if arm == "candidate" else self.freeze.reference_sha
+        if {r["case_id"] for r in results} != {"N1", "N2", "N3", "N4", "N5", "N6", "P1"} \
+                or len(results) != 7 or any(r.get("evaluated_sha") != expected_sha
+                                          or r.get("status") not in ("PASS", "FAIL")
+                                          for r in results):
+            raise HoldoutError("seven candidate-bound fixed regression results required")
+        self._regressions[arm] = results
 
     def report(self):
         statuses = self.statuses()
+        comparison = [{"slot_id": slot, "candidate": status,
+                       "reference": self._reference[slot]} for slot, status in statuses.items()]
+        comparison_complete = bool(self.freeze.reference_sha) and all(
+            row[arm] in TERMINAL for row in comparison for arm in ("candidate", "reference"))
+        regression_complete = set(self._regressions) == {"candidate", "reference"}
         return {"candidate_sha": self.freeze.candidate_sha,
+                "reference_sha": self.freeze.reference_sha,
+                "reference_basis": self.freeze.reference_basis,
                 "freeze_sha": self.freeze.sha(),
                 "source_run_id": self.freeze.source_run_id,
                 "selection_basis": self.freeze.selection_basis,
                 "counts": self.counts(),
                 "slots": statuses,
+                "comparison": comparison,
+                "comparison_complete": comparison_complete,
+                "regressions": self._regressions,
+                "regression_complete": regression_complete,
+                "checks_passed": comparison_complete and regression_complete and
+                    all(s == "PASS" for s in statuses.values()) and
+                    all(r["status"] == "PASS" for results in self._regressions.values()
+                        for r in results),
+                "scope": "only this retained set; no cross-embodiment or hardware inference",
                 "all_terminal": all(s in TERMINAL for s in statuses.values())}
 
 

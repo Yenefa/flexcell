@@ -12,6 +12,7 @@ WHAT THIS ADDS OVER THE SCRIPTED DRY RUN
     point of routing file access through it rather than open-coding paths.
 """
 import json
+import health
 
 from budget import BUDGET_EXHAUSTED, BudgetExhausted, DONE, INVALID, Ledger  # noqa: F401
 
@@ -95,6 +96,8 @@ class RepairAgent:
         """One interaction. Returns True when the agent says it is done."""
         response = self.ledger.chat(self.messages())
         text = (response or {}).get("text") or ""
+        if not text.strip():
+            raise health.UnconfirmedAction(health.NO_RESPONSE, "model returned no response content")
         self.transcript.append({"role": "assistant", "content": text})
         payload = _parse(text)
         if payload is None:

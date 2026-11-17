@@ -344,7 +344,9 @@ def k253_4():
                                holdout.Freeze("a" * 40, "RUN-1", "basis"))
     plan.record("l1|s1", "FAIL", evaluated_sha="a" * 40)
     ok = plan.statuses()["l1|s1"] == "FAIL"
-    return (MET if ok else UNMET), "a recorded failure keeps its identity: %s" % ok
+    return (PARTIAL if ok else UNMET), (
+        "failures remain immutable; seven fixed cases are wired through frozen_regressions.py; "
+        "historical model workspaces were not archived, and ordinary physical regression is NOT_RUN")
 
 
 def k253_6():
@@ -503,14 +505,14 @@ MANUAL_REASONS = {
     "251.2": "记录已带源码 40 位 SHA、模型接口参数（base_url/temperature/max_tokens）与策略/契约摘要；仍缺构建来源与镜像 digest，提示摘要未落库，协议未冻结",
     "251.9": "沿用既有费用账本需负责人确认；本任务卡声明不新增授权",
     "252.2": "机制已被真实调用验证（24 槽 + 4 个真实例槽），但派发未按 RUN_MANIFEST 的预登记顺序执行，且无额度跑完 24 槽",
-    "252.4": "没有正在进行的派发，停止条件无法被行使或观察",
+    "252.4": "health.py 与串行派发已接通，健康/超时/无响应/归档失败注入见 test_health_dispatch.py；历史记录不追补健康证明",
     "252.5": "真实例已提供外部固定任务与封印门，4 个候选已判出区分性理由码；但目标失败与回归失败尚未分别记录（门只给一个码）",
     "252.6": "已有 112 条真实记录的逐槽 token 与耗时；但 D1 分母恒为 0（终态 UNKNOWN），分组核对尚无有效分母",
     "252.7": "记录已带源码 SHA / 模型 / 策略指纹，历史 E2 与 v0.2 在结论表里分段；但尚无同一身份下的可比批次，分池规则未被真正行使",
     "252.8": "24 槽矩阵未完成（额度耗尽）；现有 4 个真实例槽不足以写支持范围",
     "253.2": "保留材料与答案清单未提供，无摘要可留存",
-    "253.5": "需与 #247 的持有者协调后端/技能/环境来源",
-    "253.7": "无保留场景结果，无法与参考版本比较",
+    "253.5": "provenance_247.json 已记录 zyx-dc / velocity_servo / legacy；尚待实际构建来源与共同窗口确认；不要求镜像",
+    "253.7": "evaluate_holdout.py 可冻结显式参考、输出六槽逐项对照；模型工作区与普通任务物理保留集尚未执行，不可把机械验证认作完成",
     "254.3": "四条件比较依赖 #252/#253 的结果",
     "254.8": "作者、单位、贡献与授权需实际参与者提供",
     "254.9": "论文/计划书/PPT 尚未成稿，无从核对同一口径",
