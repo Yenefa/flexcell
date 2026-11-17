@@ -66,10 +66,11 @@ capability is what makes that visible instead of leaving it to an audit.
    (`unconfirmed_native`, 46 occurrences) as UNROUTED: this stack has no callable function
    that resumes from a measured state, so the knowledge has nowhere to act.
 
-`verify.py` asserts **34 checks**, including that both gates really ran, that the asset
+`verify.py` asserts **40 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
-retirement still lets retrieval see nothing, and that **no generated record was ever
-ACCEPTed without a named reviewer**.
+retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
+without a named reviewer**, and that **every entry declares which split its evidence came
+from** — with the dev split tried first and reported as producing nothing.
 
 ---
 
@@ -94,6 +95,19 @@ It touches no evaluator, tolerance, threshold or held-out answer. 11/11
 
 ## Honest limits (do not quote past these)
 
+0. **THE EVIDENCE IS HELD-OUT, SO THIS IS NOT A GENERALIZATION RESULT.** Every entry in
+   this batch — both hand-written ones and the generated one — reads
+   `HO-90899d657e68`, which lives in `benchmark/held_out/unseen_public`. The T12/T13 task
+   families exist **only** in the held-out set; `benchmark/tasks/train` and `.../val`
+   contain T01–T06 and no T13 at all. So there is no development-split T13 to learn from,
+   and the chain learned from the set it would be measured on. It demonstrates a
+   **mechanism**; it does not show that the agent generalizes. Every entry carries
+   `evidence.evidence_split == "held_out"` and the verifier asserts it.
+
+   The generator now refuses held-out evidence by default (two independent rules: the
+   batch's `evidence_index` rung says "Generalization Tested", and the run cites an
+   instance in the current sealed set). Its honest dev-split output is **zero entries**,
+   and the report says so.
 1. The review artifact is written by a **separate step of the same run**, not by an
    outside reviewer. The schema forbids an AGENT_GENERATED entry from carrying its own
    ACCEPT, but a machine step is still not a person.

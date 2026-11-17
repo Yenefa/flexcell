@@ -1,17 +1,29 @@
 {
+  "dev_split_built": 0,
   "entries": [
-    "8b47d987d9b9d2eccb5dd36c2ab0458fa9d7f21af5c5c251768d5550cf70c034"
+    "026e9b6f416d9e46ea1573595a1e1ed56f0a45a756b27f962a9478cd517b57ae"
   ],
   "report": {
     "entries": [
       {
         "consumer": "spread_policy",
-        "entry_id": "8b47d987d9b9d2eccb5dd36c2ab0458fa9d7f21af5c5c251768d5550cf70c034",
+        "entry_id": "026e9b6f416d9e46ea1573595a1e1ed56f0a45a756b27f962a9478cd517b57ae",
         "occurrences": 5,
         "signature": "occupied_destination"
       }
     ],
+    "excluded_held_out": {},
+    "held_out_batches": [
+      "evobot_bc_pair_20261111",
+      "evobot_crosstype_20261111",
+      "evobot_generalization_20261111",
+      "evobot_heldout_n6_20261111",
+      "evobot_unseen_bc_20261111",
+      "evobot_unseen_n6_20261111"
+    ],
+    "held_out_would_exclude": 20,
     "scanned": 51,
+    "sealed_instances": 42,
     "signatures": {
       "occupied_destination": {
         "built": true,
@@ -23,6 +35,8 @@
         "occurrences": 46,
         "why": "UNROUTED: no consumer in this stack declares a change for 'unconfirmed_native', so the knowledge would be stored and unable to act"
       }
-    }
-  }
+    },
+    "split": "held_out"
+  },
+  "split": "held_out"
 }

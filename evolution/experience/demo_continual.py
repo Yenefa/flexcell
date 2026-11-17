@@ -62,7 +62,15 @@ _COMMON = dict(
     source_run=FAILURE,
     evidence={"clearance_m": 0.05,
               "final_position_error_m": 0.009651925313011562,
-              "place_error_m": 0.009658022849775898},
+              "place_error_m": 0.009658022849775898,
+              # THE SPLIT THIS EVIDENCE CAME FROM, recorded so nobody can quietly read
+              # this result as a generalization claim. HO-90899d657e68 is in
+              # benchmark/held_out/unseen_public - the T12/T13 unseen-task-type set - and
+              # T13 exists ONLY there, so there is no development-split T13 to learn from.
+              # The chain therefore demonstrates a MECHANISM on held-out evidence; it does
+              # not show that the agent generalizes, because it learned from the set it
+              # would be measured on.
+              "evidence_split": "held_out"},
     evidence_files=[FAILURE + "/plan.json", FAILURE + "/sim/skills/place.jsonl",
                     FAILURE + "/sim/skills/task_fsm.jsonl"],
     provenance_verified=True,
@@ -108,7 +116,9 @@ def entry_planner_side():
                      "expect": {"changed": True,
                                 "applied_min_separation_m_gte": 0.09}},
         version={"label": "E1", "status": "CANDIDATE", "parent_entry_id": None},
-        notes="planner-side consumer: groups by exact pose, so this is expected inert",
+        notes=("planner-side consumer: groups by exact pose, so this is expected inert; "
+               "evidence is HELD-OUT, so this demonstrates a mechanism, not a "
+               "generalization result"),
         invalid_probes=_PLANNER_PROBES,
         **_COMMON)
 
@@ -123,7 +133,9 @@ def entry_executor_side():
                                 "applied_min_separation_m_gte": 0.09,
                                 "applied_min_clearance_m_gte": 0.05}},
         version={"label": "E2", "status": "CANDIDATE", "parent_entry_id": None},
-        notes="executor-side consumer: clusters by distance, so the same lesson acts",
+        notes=("executor-side consumer: clusters by distance, so the same lesson acts; "
+               "evidence is HELD-OUT, so this demonstrates a mechanism, not a "
+               "generalization result"),
         invalid_probes=_EXECUTOR_PROBES,
         **_COMMON)
 
@@ -244,9 +256,18 @@ def run(dest=OUT):
     # written here: a pipeline whose only input is a human typing entries is a form with
     # validation on it, not a continual loop. The second is written to contrast the
     # planner-side delivery with the executor-side one.
+    # SPLIT: the dev split is tried first and produces NOTHING, because this repository's
+    # T12/T13 task families exist only in the held-out set. Falling back to held-out is a
+    # deliberate, recorded choice, and every entry it produces is stamped with the split
+    # so no downstream reader can mistake it for a generalization result.
     generated, pm_report = postmortem.generate()
+    dev_entries = list(generated)
+    if not generated:
+        generated, pm_report = postmortem.generate(split="held_out")
     _write(os.path.join(dest, "02_generated.json"),
            {"report": pm_report,
+            "dev_split_built": len(dev_entries),
+            "split": pm_report["split"],
             "entries": [e["entry_id"] for e in generated]})
     entries = generated + [entry_executor_side()]
     routes = []
@@ -259,6 +280,8 @@ def run(dest=OUT):
            {"entries": entries, "routes": routes})
     steps.append({"step": "entries_built", "labels": labels, "routes": routes,
                   "generated_from_archive": len(generated),
+                  "generator_split": pm_report["split"],
+                  "dev_split_produced": len(dev_entries),
                   "generator_refused": [s for s, v in pm_report["signatures"].items()
                                         if not v["built"]]})
 

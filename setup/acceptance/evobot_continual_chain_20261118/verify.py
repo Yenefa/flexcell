@@ -19,6 +19,8 @@ WHAT IT ASSERTS (each one is a claim that could be false)
     6. the ledger's verdict for the used entry is "used_helpful", computed from events
 """
 import json
+import os
+import re
 import shutil
 import subprocess
 import sys
@@ -188,6 +190,50 @@ def main():
         checks["generated_entries_carry_measured_evidence"] = all(
             isinstance((r.get("evidence") or {}).get("occurrences"), int)
             for r in generated_rows) and bool(generated_rows)
+        # ... and it never learned from the batches that exist to MEASURE generalization.
+        # An experience partly learned from the measuring instrument cannot later be cited
+        # as evidence that the agent generalizes: the instrument has been read into the
+        # thing it measures.
+        held = set(gen["report"].get("held_out_batches") or [])
+        # The report must say how many failures the held-out rule WOULD drop even when the
+        # run deliberately included them; otherwise a held-out run looks like there was
+        # nothing to exclude.
+        checks["the_generator_reports_its_held_out_exclusions"] = bool(
+            held and gen["report"].get("held_out_would_exclude", 0) > 0)
+        # THE SPLIT IS RECORDED AND THE DEV SPLIT WAS TRIED FIRST. This repository's
+        # T12/T13 task families exist only in the held-out set, so the honest dev-split
+        # result is ZERO entries; the chain falls back to held-out explicitly and stamps
+        # every entry with the split it came from.
+        checks["the_dev_split_was_tried_first_and_recorded"] = (
+            gen.get("dev_split_built") == 0)
+        checks["the_fallback_to_held_out_is_recorded"] = gen.get("split") == "held_out"
+        checks["every_generated_entry_declares_its_split"] = bool(generated_rows) and all(
+            (r.get("evidence") or {}).get("evidence_split") == "held_out"
+            for r in generated_rows if not (r.get("validation") or {}).get("reviewed_by"))
+        # ... and no entry claims to be a development-split result while citing held-out
+        # instances, which is the specific way this chain could misreport itself.
+        sealed = set()
+        pubdir = WT / "benchmark" / "held_out"
+        for name in ("public", "unseen_public"):
+            if (pubdir / name).is_dir():
+                sealed |= {p.stem for p in (pubdir / name).glob("*.json")}
+        # EVERY entry in the store must declare its split, including the hand-written
+        # ones. The hand-written pair reads the same sealed instance as the generated
+        # entry, so leaving them unlabelled would let the one honest label sit next to two
+        # silent ones and imply the chain has development-split evidence. It does not.
+        live = [r for r in store.read(str(tmp / "records_v2.jsonl"))
+                if (r.get("version") or {}).get("status") in ("ACTIVE", "CANDIDATE")]
+        checks["every_entry_declares_its_evidence_split"] = bool(live) and all(
+            (r.get("evidence") or {}).get("evidence_split") in ("dev", "held_out")
+            for r in live)
+        checks["no_dev_split_entry_cites_a_sealed_instance"] = all(
+            not (set(re.findall(r"\bHO-[0-9a-f]{12}(?![0-9a-f])",
+                                (r.get("source_run") or ""))
+                     | {m for p in (r.get("evidence_files") or [])
+                        for m in re.findall(r"\bHO-[0-9a-f]{12}(?![0-9a-f])", p or "")})
+                 & sealed)
+            for r in generated_rows
+            if (r.get("evidence") or {}).get("evidence_split") == "dev")
 
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
