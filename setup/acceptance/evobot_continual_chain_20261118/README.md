@@ -194,7 +194,21 @@ capability is what makes that visible instead of leaving it to an audit.
     Also: `apply()` looped over `{"RETIRE"}` only, so a review that returned **REVISE**
     changed nothing — **a loop whose action half ignores half its own findings.**
 
-`verify.py` asserts **93 checks**, including that both gates really ran, that the asset
+23. **the ledger must name the TASK.** The master goal's fifth step is *"record how it was
+    used afterwards: **which task** retrieved it, what action changed, what the result was."*
+    Every ledger row said `run_id="chain-demo"` — **the answer to "which task" was a demo
+    label, not a task.** The reason is concrete: the reuse audit is the only place in the
+    package that applies a skill to tasks it was **not** built from, and it wrote the result
+    into a report file **and nowhere else**. A usage record that omits the usage makes an
+    entry with real reuse evidence look identical to one that was **never tried**.
+    Now `record=True` writes **three rows per task instance** — `RETRIEVED` (was it offered),
+    `APPLIED` (did behaviour change), `OUTCOME` (what happened) — because a single blended
+    row would make *"offered but inert"* and *"applied and helped"* look alike. The ledger
+    went from **2 applications under one label** to **7 distinct task ids** (`0 → 7` rows
+    naming a real task). `record=False` writes nothing, and turning it on does not change a
+    single number in the audit.
+
+`verify.py` asserts **96 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -209,7 +223,8 @@ while not running the one that contains it**, and that **an entry measured to he
 task family is actually offered to it while an unmeasured family is still withheld**, and that **the planner refuses a reversed
 order while staying inert when the instruction fixes none**, and that **a record narrower
 than its measurement is revised while the lesson text stays untouched**, and that
-**an over-claiming record is caught in the other direction too**.
+**an over-claiming record is caught in the other direction too**, and that **the ledger names
+the real tasks a skill was used on, each with its own three events**.
 
 ---
 

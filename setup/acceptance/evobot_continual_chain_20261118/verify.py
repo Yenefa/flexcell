@@ -532,6 +532,32 @@ def main():
         checks["apply_carries_out_a_revision_not_only_a_retirement"] = (
             "REVISE" in src and "revise(" in src)
 
+        # 23 -- THE LEDGER MUST NAME THE TASK. The master goal's fifth step is "record how
+        # it was used afterwards: WHICH TASK retrieved it, what action changed, what the
+        # result was". The reuse audit is the only place a skill is applied to tasks it was
+        # not built from, and it wrote that into a report file and nowhere else: the ledger
+        # said two applications under one demo label while SEVEN real tasks had been handled.
+        lg_rows = [json.loads(line) for line in
+                   (tmp / "usage_ledger.jsonl").read_text(encoding="utf-8").splitlines()
+                   if line.strip()]
+        task_ids = {r.get("run_id") for r in lg_rows
+                    if str(r.get("run_id") or "").startswith("HO-")}
+        checks["the_ledger_names_the_tasks_a_skill_was_used_on"] = len(task_ids) >= 5
+        # ... and each of those tasks carries its own RETRIEVED/APPLIED/OUTCOME triple,
+        # because "offered but inert" and "applied and helped" must not look alike.
+        per_task = {}
+        for row in lg_rows:
+            rid = row.get("run_id")
+            if str(rid or "").startswith("HO-"):
+                per_task.setdefault(rid, set()).add(row.get("event"))
+        checks["each_recorded_task_has_retrieved_applied_and_outcome"] = bool(per_task) and all(
+            {"RETRIEVED", "APPLIED", "OUTCOME"} <= events
+            for events in per_task.values())
+        # the recorded APPLIED count must match what the reuse audit actually fixed
+        audit_totals = [r["total_instances_fixed"] for r in audit]
+        checks["the_recorded_applications_match_the_audit"] = (
+            len(per_task) >= max(audit_totals or [0]))
+
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
             "batch": HERE.name,

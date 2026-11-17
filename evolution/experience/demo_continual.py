@@ -578,8 +578,14 @@ def run(dest=OUT):
     # and it is the one a demo naturally produces; the objective's claim is that a lesson
     # accumulated on one task is reused on LATER ones, which is a statement about tasks it
     # was not built from.
+    # record=True so the audit's per-task use reaches the LEDGER. The master goal's fifth
+    # step is "record WHICH TASK retrieved it, what changed, what the result was"; this audit
+    # is the only place a skill is applied to tasks it was not built from, and it used to
+    # write that into a report file and nowhere else - the ledger said two applications under
+    # one demo label while seven real tasks had actually been handled.
     reuse_report = reuse.reuse_assets(os.path.join(dest, "skill_assets.jsonl"),
-                                      source_task="HO-90899d657e68")
+                                      source_task="HO-90899d657e68",
+                                      ledger_path=ledger_path, record=True)
     _write(os.path.join(dest, "09b_reuse_audit.json"), reuse_report)
     steps.append({"step": "reuse_audit",
                   "total_instances_fixed": [r["total_instances_fixed"]

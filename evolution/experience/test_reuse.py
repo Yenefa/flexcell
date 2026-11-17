@@ -101,6 +101,65 @@ def test_a_refusing_asset_is_recorded_not_crashed(tmp_path):
     assert report["total_instances_fixed"] == 0
 
 
+# ---------------------------------------------------------------- the ledger
+
+def test_the_audit_can_record_each_task_it_used_the_skill_on(tmp_path):
+    """Step 5 asks WHICH TASK. The audit used to write that to a report and nowhere else,
+    so the ledger showed two applications under one demo label while seven real tasks had
+    been handled."""
+    import ledger as ledger_mod
+    path = str(tmp_path / "l.jsonl")
+    assets = skill_asset.read(ASSETS)
+    entry_id = "e" * 64
+    report = reuse.audit(assets[0], acceptance=os.path.join(WT, "setup", "acceptance"),
+                         source_task=SOURCE, ledger_path=path, entry_id=entry_id,
+                         record=True)
+    summary = ledger_mod.summary(path)
+    rec = summary[entry_id]
+    assert rec["applied"] == report["total_instances_fixed"] > 0
+    assert rec["harmful"] == 0
+
+
+def test_every_recorded_task_gets_its_own_three_rows(tmp_path):
+    """'offered but inert' and 'applied and helped' must not look alike."""
+    import ledger as ledger_mod
+    path = str(tmp_path / "l.jsonl")
+    assets = skill_asset.read(ASSETS)
+    reuse.audit(assets[0], acceptance=os.path.join(WT, "setup", "acceptance"),
+                source_task=SOURCE, ledger_path=path, entry_id="e" * 64, record=True)
+    by_run = {}
+    for line in open(path, encoding="utf-8"):
+        row = json.loads(line)
+        by_run.setdefault(row["run_id"], set()).add(row["event"])
+    assert by_run
+    for run, events in by_run.items():
+        assert run.startswith("HO-"), run
+        assert {"RETRIEVED", "APPLIED", "OUTCOME"} <= events, run
+
+
+def test_recording_off_writes_nothing(tmp_path):
+    """The measurement must stay usable as a pure report."""
+    path = tmp_path / "l.jsonl"
+    assets = skill_asset.read(ASSETS)
+    reuse.audit(assets[0], acceptance=os.path.join(WT, "setup", "acceptance"),
+                source_task=SOURCE, ledger_path=str(path), entry_id="e" * 64,
+                record=False)
+    assert not path.exists()
+
+
+def test_the_audit_result_is_unchanged_by_recording(tmp_path):
+    """Turn on the ledger and the numbers must be identical: recording is not part of the
+    measurement."""
+    assets = skill_asset.read(ASSETS)
+    plain = reuse.audit(assets[0], acceptance=os.path.join(WT, "setup", "acceptance"),
+                        source_task=SOURCE)
+    recorded = reuse.audit(assets[0], acceptance=os.path.join(WT, "setup", "acceptance"),
+                           source_task=SOURCE, ledger_path=str(tmp_path / "l.jsonl"),
+                           entry_id="e" * 64, record=True)
+    for key in ("total_instances_fixed", "total_made_worse", "families_with_fixes"):
+        assert plain[key] == recorded[key], key
+
+
 def test_an_empty_archive_reports_no_claims(tmp_path):
     report = reuse.audit(_asset(), acceptance=str(tmp_path), source_task="X")
     assert report["total_instances_fixed"] == 0

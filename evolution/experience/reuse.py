@@ -126,8 +126,22 @@ def _stages(doc):
             if isinstance(s, dict) and isinstance(s.get("place_pose"), (list, tuple))]
 
 
-def audit(asset, acceptance=None, source_task=None):
-    """Run one asset over every archived multi-stage plan. Returns a report dict."""
+def audit(asset, acceptance=None, source_task=None, ledger_path=None,
+          entry_id=None, record=False):
+    """Run one asset over every archived multi-stage plan. Returns a report dict.
+
+    WHY record= WRITES TO THE USAGE LEDGER: the master goal's fifth step is "record how it
+    was used afterwards: WHICH TASK retrieved it, what action changed, what the result was".
+    This audit is the only place in the package that applies a skill to tasks it was not
+    built from - and until this flag existed it wrote the answers into a report file and
+    nowhere else. The ledger said two applications under one demo label while the audit had
+    actually applied the skill to seven real tasks. A usage record that omits the usage is
+    how an entry with real reuse evidence looks identical to one that was never tried.
+
+    Each task instance gets its own RETRIEVED / APPLIED / OUTCOME triple, keyed by task id,
+    so "which task" has an answer that is a task id rather than a demo label.
+    """
+    import ledger as ledger_mod
     root = acceptance or os.path.join(WT, "setup", "acceptance")
     per_family = collections.defaultdict(lambda: {"fixed": 0, "untouched": 0,
                                                   "worse": 0, "refused": 0,
@@ -167,6 +181,15 @@ def audit(asset, acceptance=None, source_task=None):
                 seen.add(key)
                 per_family[family]["fixed"] += 1
                 per_family[family]["instances"].add(task_id)
+                if record and ledger_path and entry_id:
+                    _record_task_use(ledger_mod, ledger_path, entry_id, task_id, family,
+                                     before, after, changed=True, outcome="IMPROVED")
+                continue
+        if record and ledger_path and entry_id and key not in seen:
+            # Applied and it did NOT reach the contract: an honest UNCHANGED, recorded so a
+            # skill that never fires is visible as such instead of only counting fixes.
+            _record_task_use(ledger_mod, ledger_path, entry_id, task_id, family,
+                             before, after, changed=False, outcome="UNCHANGED")
     families = {}
     for family, row in per_family.items():
         families[family] = {"newly_fixed_instances": row["fixed"],
@@ -191,6 +214,30 @@ def audit(asset, acceptance=None, source_task=None):
         "claim": ("cross-FAMILY reuse only; every instance in this archive is held-out, "
                   "so this is NOT cross-split transfer"),
     }
+
+
+def _record_task_use(ledger_mod, ledger_path, entry_id, task_id, family, before, after,
+                     changed, outcome):
+    """One RETRIEVED/APPLIED/OUTCOME triple for one task instance.
+
+    Three rows rather than one because they answer three different questions and the ledger
+    keeps them separate everywhere else: was it offered, did the consumer's behaviour change,
+    and did the run get better. A single blended row would make "offered but inert" and
+    "applied and helped" look the same.
+    """
+    detail = {"task_family": family,
+              "min_separation_before_m": before,
+              "min_separation_after_m": after,
+              "instrument": "reuse.audit over an archived plan"}
+    ledger_mod.append(ledger_path, entry_id, "RETRIEVED", run_id=task_id,
+                      consumer="executor_recovery", detail=detail,
+                      recorded_by="reuse.audit")
+    ledger_mod.append(ledger_path, entry_id, "APPLIED", run_id=task_id,
+                      consumer="executor_recovery", changed=changed, detail=detail,
+                      recorded_by="reuse.audit")
+    ledger_mod.append(ledger_path, entry_id, "OUTCOME", run_id=task_id,
+                      consumer="executor_recovery", outcome=outcome, detail=detail,
+                      recorded_by="reuse.audit")
 
 
 def measure_for_entry(entry, source_task=None, acceptance=None):
@@ -221,10 +268,28 @@ def measure_for_entry(entry, source_task=None, acceptance=None):
             "families": report["families"]}
 
 
-def reuse_assets(assets_path, source_task=None, acceptance=None):
-    """Audit every compiled asset in a skill_assets.jsonl."""
+def reuse_assets(assets_path, source_task=None, acceptance=None, ledger_path=None,
+                 record=False):
+    """Audit every compiled asset in a skill_assets.jsonl.
+
+    With record=True each asset's task-level use is written to the usage ledger under the
+    ENTRY that produced the asset, so the ledger answers "which task" with a task id.
+    """
     assets = skill_asset.read(assets_path)
-    return [audit(a, acceptance=acceptance, source_task=source_task) for a in assets]
+    out = []
+    for asset in assets:
+        entry_id = None
+        if record:
+            # asset_id is "skill.<consumer>.<entry_id[:12]>" - the full id is not in the
+            # asset, so take the ENTRY id the demo recorded alongside it.
+            # source_entry is the entry id as a STRING, not a nested object.
+            source_entry = asset.get("source_entry")
+            if isinstance(source_entry, dict):
+                source_entry = source_entry.get("entry_id")
+            entry_id = asset.get("entry_id") or source_entry
+        out.append(audit(asset, acceptance=acceptance, source_task=source_task,
+                         ledger_path=ledger_path, entry_id=entry_id, record=record))
+    return out
 
 
 if __name__ == "__main__":
