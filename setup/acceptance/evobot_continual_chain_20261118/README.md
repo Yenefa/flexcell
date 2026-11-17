@@ -182,7 +182,19 @@ capability is what makes that visible instead of leaving it to an audit.
     transition, not an outcome** (counting it as helpful use would credit an entry for a
     bookkeeping change).
 
-`verify.py` asserts **90 checks**, including that both gates really ran, that the asset
+22. **staleness is two-sided, and only one side is safe.** The first version computed
+    `added = measured - recorded` and called an empty diff *"not stale"* — so a record
+    claiming a task family the instrument **cannot confirm** passed review, and **retrieval
+    acts on the claim**, turning an over-claim into an unjustified application. Under-claiming
+    costs a **missed reuse**; over-claiming costs a **wrong action**. **Both can be true at
+    once** (one family missing, another invented), and an `if/elif` reports only the first
+    it checks — so the direction is reported as `both_directions` and the revision fixes
+    both. A revision that could only **widen** would leave an over-claim in place forever.
+
+    Also: `apply()` looped over `{"RETIRE"}` only, so a review that returned **REVISE**
+    changed nothing — **a loop whose action half ignores half its own findings.**
+
+`verify.py` asserts **93 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -196,7 +208,8 @@ failure is told apart from a truncated run**, and that **the gate covers every v
 while not running the one that contains it**, and that **an entry measured to help another
 task family is actually offered to it while an unmeasured family is still withheld**, and that **the planner refuses a reversed
 order while staying inert when the instruction fixes none**, and that **a record narrower
-than its measurement is revised while the lesson text stays untouched**.
+than its measurement is revised while the lesson text stays untouched**, and that
+**an over-claiming record is caught in the other direction too**.
 
 ---
 

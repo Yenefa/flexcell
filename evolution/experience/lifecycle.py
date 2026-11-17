@@ -128,8 +128,11 @@ def review(store_path=STORE, ledger_path=LEDGER, min_trials=MIN_TRIALS,
             scope = stale_scope(row, acceptance=acceptance, source_task=source_task)
             if scope["stale"]:
                 decision = "REVISE"
-                why = ("the record lists %s but a fresh measurement reaches %s"
-                       % (scope["recorded"], scope["measured"]))
+                # The DIRECTION is reported because the two are not interchangeable: a
+                # record narrower than its evidence costs a missed reuse, and one WIDER
+                # than its evidence applies a lesson where nothing was measured.
+                why = ("%s: the record lists %s, a fresh measurement reaches %s"
+                       % (scope["direction"], scope["recorded"], scope["measured"]))
         out.append({"entry_id": eid, "label": (row.get("version") or {}).get("label"),
                     "effect": effect, "applied": applied, "helpful": rec.get("helpful", 0),
                     "harmful": rec.get("harmful", 0), "decision": decision, "why": why,
@@ -176,7 +179,19 @@ def stale_scope(entry, acceptance=None, source_task=None):
     about it - retrieval withholds the lesson from a family it demonstrably fixes. The
     measurement is right and the record is out of date.
 
-    Returns {"stale": bool, "recorded": [...], "measured": [...], "added": [...]}.
+    STALENESS IS TWO-SIDED, and only one side is safe.
+
+      record NARROWER than the measurement  -> the lesson is withheld from a family it
+                                              demonstrably fixes. Costs a missed reuse.
+      record WIDER than the measurement     -> the lesson is OFFERED to a family nobody
+                                              measured. Costs a wrong action.
+
+    The second is the worse one and it is the one the first version of this check missed:
+    it computed added = measured - recorded and called an empty diff "not stale", so a
+    record claiming a family the instrument cannot confirm passed review. Retrieval acts on
+    the claim, so an over-claim becomes an application to a family no evidence covers.
+
+    Returns {"stale", "direction", "recorded", "measured", "added", "unconfirmed"}.
     A consumer with no callable binding measures nothing, and that is NOT staleness: it is
     the instrument saying it cannot see this entry. Reporting it as stale would revise a
     record on the strength of a blind spot.
@@ -186,15 +201,40 @@ def stale_scope(entry, acceptance=None, source_task=None):
     measured = reuse.measure_for_entry(entry, source_task=source_task,
                                        acceptance=acceptance)
     if not measured.get("families_with_fixes") and measured.get("why"):
-        return {"stale": False, "recorded": sorted(f for f in recorded if f),
-                "measured": [], "added": [],
+        return {"stale": False, "direction": None,
+                "recorded": sorted(f for f in recorded if f),
+                "measured": [], "added": [], "unconfirmed": [],
                 "why": measured["why"]}
     fresh = set(measured["families_with_fixes"])
     added = sorted(fresh - recorded)
-    return {"stale": bool(added), "recorded": sorted(f for f in recorded if f),
+    # An entry's OWN family is not an over-claim: task_family says where it was learned, and
+    # a lesson is not required to still be able to fix the instance it came from.
+    unconfirmed = sorted(recorded - fresh - {entry.get("task_family")})
+    # BOTH can be true at once - a record can under-claim one family and over-claim another -
+    # and 'elif' would hide whichever was checked second. Reporting only one direction would
+    # say "narrower", revise, and leave the over-claim in place.
+    if added and unconfirmed:
+        direction = "both_directions"
+    elif added:
+        direction = "narrower_than_measurement"
+    elif unconfirmed:
+        direction = "wider_than_measurement"
+    else:
+        direction = None
+    if direction == "both_directions":
+        why = ("the record misses %s and claims %s that a fresh measurement does not reach"
+               % (added, unconfirmed))
+    elif direction == "narrower_than_measurement":
+        why = "the recorded scope is narrower than a fresh measurement"
+    elif direction == "wider_than_measurement":
+        why = ("the record claims %s but a fresh measurement does not reach %s"
+               % (unconfirmed, sorted(fresh)))
+    else:
+        why = "the record matches the measured scope"
+    return {"stale": direction is not None, "direction": direction,
+            "recorded": sorted(f for f in recorded if f),
             "measured": sorted(fresh), "added": added,
-            "why": ("the recorded scope is narrower than a fresh measurement"
-                    if added else "the record already covers the measured scope")}
+            "unconfirmed": unconfirmed, "why": why}
 
 
 def revise(entry_id, store_path=STORE, ledger_path=LEDGER, acceptance=None,
@@ -228,11 +268,16 @@ def revise(entry_id, store_path=STORE, ledger_path=LEDGER, acceptance=None,
     # measured_families is stored WITHOUT the entry's own family: task_family already says
     # where it was learned, and repeating it here would make the two fields disagree the
     # moment one of them changed.
+    # The successor takes the MEASURED set exactly - which also REMOVES a family the record
+    # used to claim and the instrument can no longer confirm. A revision that could only
+    # widen would leave an over-claim in place forever, and retrieval acts on the claim.
     successor["measured_families"] = sorted(set(scope["measured"])
                                             - {current.get("task_family")})
     successor["version"] = dict(current["version"], parent_entry_id=entry_id,
                                 revised_reason=scope["why"],
+                                revised_direction=scope["direction"],
                                 revised_added=scope["added"],
+                                revised_removed=scope["unconfirmed"],
                                 revised_by=recorded_by)
     successor["entry_id"] = schema.digest(schema._body(successor))
     successor["record_sha256"] = schema.digest(
@@ -242,18 +287,50 @@ def revise(entry_id, store_path=STORE, ledger_path=LEDGER, acceptance=None,
         raise schema.EntryError("refusing to revise into an invalid entry: %s" % problems)
     store.append(store_path, successor)
     ledger.append(ledger_path, entry_id, "REVISED",
-                  detail={"added_families": scope["added"],
+                  detail={"direction": scope["direction"],
+                          "added_families": scope["added"],
+                          "removed_families": scope["unconfirmed"],
                           "measured": scope["measured"]},
                   recorded_by=recorded_by)
     return successor
 
 
-def apply(store_path=STORE, ledger_path=LEDGER, dry_run=False, min_trials=MIN_TRIALS):
-    """Run the review and carry out every RETIRE. Returns the decisions taken."""
-    decisions = review(store_path, ledger_path, min_trials)
+def apply(store_path=STORE, ledger_path=LEDGER, dry_run=False, min_trials=MIN_TRIALS,
+          acceptance=None, source_task=None, measure=False):
+    """Run the review and carry out every RETIRE and REVISE. Returns the decisions taken.
+
+    WHY REVISE IS CARRIED OUT HERE TOO: the first version of this function looped over
+    {"RETIRE"} only. review() could return REVISE and apply() would silently skip it, so a
+    review that said "this record is out of date" produced no change - a loop whose action
+    half ignores half its own findings. A transition the module can report but not perform
+    is a report.
+    """
+    decisions = review(store_path, ledger_path, min_trials,
+                       acceptance=acceptance, source_task=source_task, measure=measure)
     done = []
     for d in decisions:
-        if d["decision"] != "RETIRE":
+        if d["decision"] not in ("RETIRE", "REVISE"):
+            continue
+        if dry_run:
+            done.append(dict(d, written=False))
+            continue
+        if d["decision"] == "REVISE":
+            rows = store.read(store_path)
+            _latest_id, head = latest(rows, d["entry_id"])
+            if head is None or (head.get("version") or {}).get("status") != "ACTIVE":
+                done.append(dict(d, written=False, why="not ACTIVE on its lineage"))
+                continue
+            # Re-check rather than trusting the earlier verdict: the store may have moved
+            # between the review and this write, and revise() is what owns the decision.
+            try:
+                successor = revise(d["entry_id"], store_path=store_path,
+                                   ledger_path=ledger_path, acceptance=acceptance,
+                                   source_task=source_task)
+            except schema.EntryError as exc:
+                done.append(dict(d, written=False, why=str(exc)))
+                continue
+            done.append(dict(d, written=True,
+                             scope_after=successor.get("measured_families")))
             continue
         if dry_run:
             done.append(dict(d, written=False))
@@ -269,7 +346,11 @@ def apply(store_path=STORE, ledger_path=LEDGER, dry_run=False, min_trials=MIN_TR
             continue
         retire(d["entry_id"], d["why"], store_path, ledger_path)
         done.append(dict(d, written=True))
-    return {"reviewed": len(decisions), "retired": [d for d in done if d.get("written")],
+    return {"reviewed": len(decisions),
+            "retired": [d for d in done
+                        if d.get("written") and d["decision"] == "RETIRE"],
+            "revised": [d for d in done
+                        if d.get("written") and d["decision"] == "REVISE"],
             "decisions": decisions}
 
 

@@ -173,6 +173,106 @@ def test_harm_outranks_staleness(tmp_path):
     assert decisions[0]["decision"] == "RETIRE"
 
 
+# ---------------------------------------------------------------- the other direction
+
+def test_a_record_WIDER_than_its_measurement_is_stale():
+    """The worse direction, and the one the first version of this check missed.
+
+    A record narrower than its evidence costs a missed reuse. A record WIDER than its
+    evidence applies the lesson to a family nothing was measured on - and retrieval acts on
+    the claim, so an over-claim becomes a wrong action.
+    """
+    entry = _entry(measured_families=["T03_ordered", "T12_triple_revisit", "T99_bogus"])
+    scope = lifecycle.stale_scope(entry, acceptance=ACCEPTANCE, source_task=SOURCE)
+    assert scope["stale"] is True
+    assert scope["direction"] == "wider_than_measurement"
+    assert scope["unconfirmed"] == ["T99_bogus"]
+
+
+def test_a_revision_REMOVES_a_family_the_measurement_cannot_confirm(tmp_path):
+    """Revision must be able to narrow. One that could only widen leaves an over-claim
+    in place forever."""
+    entry = _entry(measured_families=["T03_ordered", "T12_triple_revisit", "T99_bogus"])
+    s, l = _store(tmp_path, entry)
+    successor = lifecycle.revise(entry["entry_id"], store_path=s, ledger_path=l,
+                                 acceptance=ACCEPTANCE, source_task=SOURCE)
+    assert "T99_bogus" not in successor["measured_families"]
+    assert successor["version"]["revised_removed"] == ["T99_bogus"]
+    assert successor["version"]["revised_direction"] == "wider_than_measurement"
+
+
+def test_both_directions_can_be_true_at_once():
+    """A record can under-claim one family and over-claim another. An if/elif reports only
+    the first it checks, revises, and leaves the other in place."""
+    entry = _entry(measured_families=["T99_bogus"])
+    scope = lifecycle.stale_scope(entry, acceptance=ACCEPTANCE, source_task=SOURCE)
+    assert scope["direction"] == "both_directions"
+    assert "T03_ordered" in scope["added"]
+    assert scope["unconfirmed"] == ["T99_bogus"]
+
+
+def test_a_both_directions_revision_fixes_both(tmp_path):
+    entry = _entry(measured_families=["T99_bogus"])
+    s, l = _store(tmp_path, entry)
+    successor = lifecycle.revise(entry["entry_id"], store_path=s, ledger_path=l,
+                                 acceptance=ACCEPTANCE, source_task=SOURCE)
+    assert "T99_bogus" not in successor["measured_families"]
+    assert set(successor["measured_families"]) == {"T03_ordered", "T12_triple_revisit"}
+
+
+def test_the_entrys_own_family_is_not_an_over_claim():
+    """task_family says where it was LEARNED; a lesson need not still fix its source
+    instance, so counting that as an over-claim would revise every honest entry."""
+    entry = _entry(measured_families=["T03_ordered", "T12_triple_revisit"])
+    scope = lifecycle.stale_scope(entry, acceptance=ACCEPTANCE, source_task=SOURCE)
+    assert scope["stale"] is False
+    assert "T13_geometric_conditional" in scope["recorded"]
+
+
+def test_the_direction_is_reported_because_the_two_differ():
+    narrow = lifecycle.stale_scope(_entry(measured_families=[]),
+                                   acceptance=ACCEPTANCE, source_task=SOURCE)
+    wide = lifecycle.stale_scope(
+        _entry(measured_families=["T03_ordered", "T12_triple_revisit", "T99_bogus"]),
+        acceptance=ACCEPTANCE, source_task=SOURCE)
+    assert narrow["direction"] == "narrower_than_measurement"
+    assert wide["direction"] == "wider_than_measurement"
+    assert narrow["direction"] != wide["direction"]
+
+
+# ---------------------------------------------------------------- apply() must act
+
+def test_apply_carries_out_a_REVISE_not_only_a_RETIRE(tmp_path):
+    """apply() looped over {"RETIRE"} only, so a review that said REVISE changed nothing:
+    a loop whose action half ignores half its own findings."""
+    entry = _entry(measured_families=[])
+    s, l = _store(tmp_path, entry)
+    result = lifecycle.apply(s, l, acceptance=ACCEPTANCE, source_task=SOURCE, measure=True)
+    assert len(result["revised"]) == 1
+    assert result["retired"] == []
+    after = [r for r in store.read(s) if r["version"]["status"] == "ACTIVE"
+             and r.get("measured_families")]
+    assert after, "apply() reported a revision but the store gained none"
+
+
+def test_apply_is_idempotent_for_a_revision(tmp_path):
+    """A second pass must not revise the same entry again."""
+    entry = _entry(measured_families=[])
+    s, l = _store(tmp_path, entry)
+    lifecycle.apply(s, l, acceptance=ACCEPTANCE, source_task=SOURCE, measure=True)
+    second = lifecycle.apply(s, l, acceptance=ACCEPTANCE, source_task=SOURCE, measure=True)
+    assert second["revised"] == []
+
+
+def test_apply_without_measure_revises_nothing(tmp_path):
+    """The revision branch is not evaluated unless asked, so it cannot fire on a
+    ledger-only review."""
+    entry = _entry(measured_families=[])
+    s, l = _store(tmp_path, entry)
+    result = lifecycle.apply(s, l)
+    assert result["revised"] == []
+
+
 def test_a_revised_entry_is_no_longer_stale(tmp_path):
     """It must SETTLE. A transition that re-fires on its own output is a loop, not a fix."""
     entry = _entry(measured_families=[])

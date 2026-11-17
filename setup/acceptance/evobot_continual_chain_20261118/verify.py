@@ -178,12 +178,17 @@ def main():
         # transition really changes what retrieval serves
         life = json.loads((tmp / "10_lifecycle_review.json").read_text(encoding="utf-8"))
         checks["lifecycle_review_produces_a_decision"] = bool(
-            life and all(d.get("decision") in ("KEEP", "RETIRE") for d in life))
-        demo = json.loads((tmp / "10_retirement_transition.json").read_text(encoding="utf-8"))
+            life and all(d.get("decision") in ("KEEP", "RETIRE", "REVISE") for d in life))
+        # NOT named "demo": that is the module handle, and shadowing it here made every
+        # later reference to demo.<function> fail with "'dict' object has no attribute".
+        retire_demo = json.loads((tmp / "10_retirement_transition.json").read_text(
+            encoding="utf-8"))
         checks["retire_transition_appends_a_retired_version"] = (
-            demo.get("status_after") == "RETIRED" and demo.get("parent_linked") is True)
-        checks["retire_keeps_the_harmful_version"] = demo.get("chain_ok") is True
-        checks["retire_is_on_a_copy_not_the_real_store"] = "COPY" in (demo.get("note") or "")
+            retire_demo.get("status_after") == "RETIRED"
+            and retire_demo.get("parent_linked") is True)
+        checks["retire_keeps_the_harmful_version"] = retire_demo.get("chain_ok") is True
+        checks["retire_is_on_a_copy_not_the_real_store"] = "COPY" in (
+            retire_demo.get("note") or "")
         real_active = [r for r in active]
         # TWO active entries now, on two DIFFERENT consumers, one dev-split and one
         # held-out. The count is asserted rather than the old ==1 so a silent third one
@@ -496,6 +501,36 @@ def main():
         lg = _load("ledger")
         checks["a_revision_is_not_recorded_as_a_usage_outcome"] = (
             "REVISED" in lg.EVENTS and "REVISED" not in lg.OUTCOMES)
+
+        # 22 -- STALENESS IS TWO-SIDED, and only one side is safe. The first version of the
+        # check computed added = measured - recorded and called an empty diff "not stale",
+        # so a record claiming a family the instrument cannot confirm passed review - and
+        # retrieval acts on the claim, turning an over-claim into a wrong action.
+        _lc = _load("lifecycle")
+        narrowed = _lc.stale_scope(demo.entry_executor_side(), acceptance=str(WT / "setup" / "acceptance"),
+                                   source_task="HO-90899d657e68")
+        checks["a_record_narrower_than_its_measurement_is_stale"] = (
+            narrowed["stale"] is True
+            and narrowed["direction"] == "narrower_than_measurement")
+        # the over-claim direction: a family nobody measured must be reported, and removable
+        over = dict(demo.entry_executor_side())
+        # The demo entry has not been measured yet when this runs, so its record under-claims
+        # AND (once the bogus family is added) over-claims: both directions at once, which is
+        # exactly the case an if/elif hid.
+        over["measured_families"] = list(over.get("measured_families") or []) + ["T99_bogus"]
+        over["version"] = dict(over["version"], status="ACTIVE")
+        over["validation"] = {"review_verdict": "ACCEPT", "reviewed_by": "probe"}
+        over_scope = _lc.stale_scope(over, acceptance=str(WT / "setup" / "acceptance"),
+                                     source_task="HO-90899d657e68")
+        checks["a_record_WIDER_than_its_measurement_is_stale_too"] = (
+            over_scope["stale"] is True
+            and over_scope["direction"] in ("wider_than_measurement", "both_directions")
+            and "T99_bogus" in over_scope["unconfirmed"])
+        # ... and apply() must carry out a REVISE, not only a RETIRE
+        import inspect as _insp
+        src = _insp.getsource(_lc.apply)
+        checks["apply_carries_out_a_revision_not_only_a_retirement"] = (
+            "REVISE" in src and "revise(" in src)
 
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
