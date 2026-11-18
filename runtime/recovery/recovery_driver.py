@@ -34,33 +34,45 @@ def execution_evidence(task_out):
             "completed_stage_ids": result.get("completed_stage_ids") or []}
 
 
-def _experience_kwargs(args):
-    """Resolve reviewed live parameters, WITHOUT importing the experience package at module
-    load. Failure is a refusal ({}), never an exception: a broken experience lookup must not
-    take down a recovering robot."""
-    if not (args.experience_asset and args.experience_entries):
-        return {}, "no --experience-asset/--experience-entries: frozen baseline defaults"
-    try:
-        root = str(WT)
-        if root not in sys.path:
-            sys.path.insert(0, root)
-        from evolution.experience.live_binding import resolve
-        # Pass the real plan so the entry's own invalid conditions are checked against the
-        # ACTUAL run before its parameters may drive a robot (objective step 4).
-        observation = None
-        if getattr(args, "experience_observation", None):
-            try:
-                observation = {"plan": json.loads(
-                    Path(args.experience_observation).read_text(encoding="utf-8"))}
-            except Exception:  # noqa: BLE001 - an unreadable plan is a refusal, not a crash
-                return {}, "observation unreadable; using defaults"
-        return resolve(args.experience_asset, "executor_recovery",
-                       args.experience_entries,
-                       review_ledger=getattr(args, "experience_review_ledger", None),
-                       observation=observation)
-    except Exception as exc:  # noqa: BLE001 - fail closed, keep the defaults
-        return {}, "experience binding unavailable: %s" % exc
+def _append_usage(path, entry_id, event, run_id, consumer, outcome=None,
+                  detail=None, changed=None, recorded_by=None):
+    """Append one usage event in the SAME format as evolution.experience.ledger.
 
+    ADR-002 forbids runtime importing evolution, so this is a minimal local reimplementation
+    of ledger.append (a sha256-chained JSONL line). The format is byte-compatible: the
+    development-side ledger.read/summary consume these rows unchanged. This writes the
+    runtime's own evidence channel; it imports no decision logic from the development layer.
+    """
+    import hashlib
+    line = {"event": event, "entry_id": entry_id, "run_id": run_id,
+            "consumer": consumer, "outcome": outcome, "detail": detail,
+            "changed": changed, "recorded_by": recorded_by}
+    line["line_sha256"] = hashlib.sha256(
+        json.dumps(line, sort_keys=True).encode("utf-8")).hexdigest()
+    with open(path, "a", encoding="utf-8") as fh:
+        fh.write(json.dumps(line, sort_keys=True, ensure_ascii=False) + "\n")
+
+
+def _experience_kwargs(args):
+    """Read the resolved binding as PLAIN DATA - no import from evolution.
+
+    ADR-002 / skill_boundaries forbids the execution layer from importing the development
+    layer. resolve_live.py (development side) computes the kwargs and writes them to
+    --experience-binding; this function only reads that file. A missing/unreadable binding
+    is a refusal ({}) and keeps the frozen defaults, never an exception that could take down
+    a recovering robot.
+    """
+    path = getattr(args, "experience_binding", None)
+    if not path:
+        return {}, "no --experience-binding: frozen baseline defaults"
+    try:
+        payload = json.loads(Path(path).read_text(encoding="utf-8"))
+    except Exception:  # noqa: BLE001 - an unreadable binding is a refusal
+        return {}, "experience binding unreadable; using defaults"
+    kwargs = payload.get("kwargs") or {}
+    if not isinstance(kwargs, dict):
+        return {}, "experience binding malformed; using defaults"
+    return kwargs, payload.get("why", "resolved binding")
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
@@ -79,6 +91,8 @@ def main(argv=None):
                     help="append RETRIEVED/APPLIED/OUTCOME here when an entry actually ran")
     ap.add_argument("--experience-entry-id",
                     help="the entry id whose parameters were applied; required to log")
+    ap.add_argument("--experience-binding",
+                    help="JSON written by evolution/experience/resolve_live.py")
     ap.add_argument("--experience-observation",
                     help="the real plan.json; the entry's invalid conditions are checked "
                          "against it before its parameters are used")
@@ -214,21 +228,17 @@ def main(argv=None):
         entry_id_used = getattr(args, "experience_entry_id", None)
         if ledger_path and entry_id_used and kwargs:
             try:
-                root = str(WT)
-                if root not in sys.path:
-                    sys.path.insert(0, root)
-                from evolution.experience import ledger as usage
                 run_id = str(run)
                 detail = {"consumer": "executor_recovery", "kwargs": kwargs,
                           "fixture": "live_run", "binding": binding_why}
-                usage.append(ledger_path, entry_id_used, "RETRIEVED", run_id=run_id,
+                _append_usage(ledger_path, entry_id_used, "RETRIEVED", run_id=run_id,
                              consumer="executor_recovery", detail=detail,
                              recorded_by="recovery_driver")
-                usage.append(ledger_path, entry_id_used, "APPLIED", run_id=run_id,
+                _append_usage(ledger_path, entry_id_used, "APPLIED", run_id=run_id,
                              consumer="executor_recovery", detail=detail, changed=True,
                              recorded_by="recovery_driver")
                 changed = retried.get("stages") != plan.get("stages")
-                usage.append(ledger_path, entry_id_used, "OUTCOME", run_id=run_id,
+                _append_usage(ledger_path, entry_id_used, "OUTCOME", run_id=run_id,
                              consumer="executor_recovery",
                              outcome="IMPROVED" if changed else "UNCHANGED",
                              detail=detail, changed=changed,

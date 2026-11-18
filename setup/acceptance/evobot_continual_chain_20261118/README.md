@@ -433,6 +433,18 @@ capability is what makes that visible instead of leaving it to an audit.
     **correctness check on the replay, not an effect measurement**, and conflating the two
     would turn this back into "we measured it".
 
+49. **FIXING CHURN EXPOSED A HIDDEN ARCHITECTURE VIOLATION.** `dependency-direction` had
+    been failing all along, masked by the churn failure: `runtime/recovery/recovery_driver.py`
+    imported `evolution.experience` — the execution layer depending on development, forbidden
+    by ADR-002 / `execution_without_development`.
+
+    Now the gate runs on the DEVELOPMENT side (`resolve_live.py`), which writes a binding JSON;
+    the runtime reads that FILE as data and writes usage events with a self-contained
+    `_append_usage` (byte-compatible with the development ledger). One-way flow, as the ADR
+    requires. `check_skill_boundaries.py`: `passed=true, violations=[]`. Two verifier checks
+    were updated from "driver source contains review-ledger strings" to verifying each side
+    owns its part and the driver has no real `from evolution` import.
+
 48. **THE ROOT CAUSE HAD THREE LAYERS, NOT ONE.** Fixing path backslashes (item 47) did NOT
     stop CI. Regenerating the SAME demo on Windows and in WSL Linux and diffing field by field
     exposed two deeper causes:

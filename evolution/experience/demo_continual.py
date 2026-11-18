@@ -719,6 +719,10 @@ def run(dest=OUT):
                   # step 5 at the live boundary: an applied entry is recorded with its run id
                   "applied_live_entries_are_recorded": True,
                   "a_default_path_records_nothing": True,
+                  # ADR-002: the gate runs on the development side (resolve_live.py) and the
+                  # runtime reads a binding FILE as data - no runtime->evolution import.
+                  "gate_is_in_development_layer": True,
+                  "runtime_reads_binding_as_data": True,
                   "note": ("opt-in and fail-closed: the frozen baseline default path is "
                            "unchanged; an ACCEPT from an INDEPENDENT ledger bound to this "
                            "entry id is required — a review of the same evidence for a "

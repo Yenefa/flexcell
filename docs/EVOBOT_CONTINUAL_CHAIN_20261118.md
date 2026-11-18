@@ -57,6 +57,27 @@
 于是重试第三次被拒为"declared destination occupied"。修改为**按余量选轴**，并且两轴都不满足契约时**拒绝**而不是发出一个必然被拒的计划；
 不传 avoid 时行为与旧实现**逐字节相同**，11/11 `benchmark/tests/test_recovery_driver.py` 仍通过。
 
+## 3.93 churn 修好后，暴露了一直被掩盖的架构违规
+
+CI 的 `skill-boundaries` 一直失败（早被 churn 掩盖）：`dependency-direction` 报
+`runtime/recovery/recovery_driver.py` import `evolution.experience`——
+**执行层反向依赖开发层**，违反 ADR-002 与 `config/skill_boundaries.json`
+的 `execution_without_development` 规则。
+
+### 修正：单向数据流
+
+| 之前（违规） | 现在（合规） |
+| --- | --- |
+| driver 直接 `from evolution.experience.live_binding import resolve` | `resolve_live.py`（开发侧）算好决议，写 binding JSON |
+| driver 直接 `from evolution.experience import ledger` | driver 用自包含的 `_append_usage`（格式兼容，仅写数据） |
+
+门控逻辑全在**开发侧**，runtime 只读一个 binding 文件——**ADR-002 要求的单向流动**。
+账本写入是 runtime 自己的证据通道，格式与开发侧 `ledger.py` 逐字节兼容。
+
+`check_skill_boundaries.py` 现在 `passed=true, violations=[]`。
+两个 verifier 检查从"driver 源码含 review-ledger 字符串"改为核对**两侧各司其职**，
+并断言 driver 无真实 `from evolution` import。
+
 ## 3.94 根因不止路径：**验证快照进了身份摘要**
 
 上一节修了路径反斜杠，但 CI 仍失败。用 WSL 在真正的 Linux 上重新生成并与 Windows 逐字段对比，

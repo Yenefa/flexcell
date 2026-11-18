@@ -432,11 +432,13 @@
       "a_default_path_records_nothing": true,
       "applicability_checked_on_the_real_plan": true,
       "applied_live_entries_are_recorded": true,
+      "gate_is_in_development_layer": true,
       "no_flags_kwargs": {},
       "note": "opt-in and fail-closed: the frozen baseline default path is unchanged; an ACCEPT from an INDEPENDENT ledger bound to this entry id is required \u2014 a review of the same evidence for a different claim does NOT authorise it",
       "real_ledger_other_claim_kwargs": {},
       "review_ledger_is_chained": true,
       "review_ledger_limits": "proves no edit/reorder/middle-deletion; does NOT prove reviewer identity, stop a new review, or detect tail truncation",
+      "runtime_reads_binding_as_data": true,
       "self_reviewed_kwargs": {},
       "step": "live_wiring"
     },

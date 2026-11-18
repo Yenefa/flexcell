@@ -839,8 +839,14 @@ def main():
             encoding="utf-8")
         checks["the_driver_passes_resolved_kwargs_to_apply_respread"] = (
             "**kwargs" in drv_src and "_experience_kwargs" in drv_src)
+        # ADR-002: the runtime must NOT import evolution. The gate (independent ledger,
+        # real plan) now runs on the development side in resolve_live.py and writes a binding
+        # file; the driver reads it as data. Check each side owns its part.
+        resolve_src = (WT / "evolution" / "experience" / "resolve_live.py").read_text(
+            encoding="utf-8")
         checks["the_wire_requires_an_independent_ledger"] = (
-            "experience_review_ledger" in drv_src)
+            "review-ledger" in resolve_src and "review_ledger" in resolve_src
+            and "experience_binding" in drv_src)
         # 37 -- THE INDEPENDENT LEDGER ITSELF MUST NOT BE FORGEABLE. Before this, a reviewer
         # could be invented by appending one plain JSONL line, which would authorise a live
         # robot parameter. The ledger is now a hash chain and the gate refuses an unpacked or
@@ -855,8 +861,12 @@ def main():
         # apply_respread; an already-conforming plan must get the defaults, not a rotation.
         checks["applicability_is_checked_on_the_real_run"] = (
             wire.get("applicability_checked_on_the_real_plan") is True)
+        import re as _re
+        real_evo_imports = [ln for ln in drv_src.splitlines()
+                            if _re.match(r"^\s*from evolution\b", ln)]
         checks["the_driver_supplies_the_real_plan_to_the_gate"] = (
-            "experience_observation" in drv_src)
+            "observation" in resolve_src and "experience_binding" in drv_src
+            and not real_evo_imports)
         # 41 -- FULL PROBE COVERAGE. The live gate used to hard-code two probe ids and was
         # blind to three of E2's four declared invalid conditions, including a spelling
         # mismatch (respread.single_stage vs spread.single_stage). Every declared condition

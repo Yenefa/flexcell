@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Verify the live recovery call can consume a REVIEWED entry without changing defaults.
+"""Verify the live recovery call consumes a REVIEWED entry through the ADR-compliant path.
 
-This connects the last mile: entry -> review gate -> live call kwargs -> result. It is opt-in
-and fail-closed, so the frozen baseline default path stays byte-identical.
+The runtime must NOT import evolution (ADR-002 / skill_boundaries). resolve_live.py runs on
+the development side and writes a binding JSON; recovery_driver reads it as plain data. These
+tests build that file with the real gate and check the runtime path consumes it faithfully.
 """
 import json
 import os
@@ -16,6 +17,7 @@ sys.path.insert(0, os.path.join(WT, "evolution", "experience"))
 
 import recovery_driver  # noqa: E402
 import store  # noqa: E402
+import resolve_live  # noqa: E402
 
 ASSETS = os.path.join(WT, "setup", "acceptance", "evobot_continual_chain_20261118",
                       "skill_assets.jsonl")
@@ -30,26 +32,11 @@ def _e2_identity(entries_path):
 
 
 class Args:
-    def __init__(self, asset=None, entries=None):
-        self.experience_asset = asset
-        self.experience_entries = entries
-        self.experience_review_ledger = None
-        self.experience_observation = None
+    def __init__(self, binding=None):
+        self.experience_binding = binding
 
 
-def test_without_flags_the_call_site_defaults_are_untouched():
-    kwargs, why = recovery_driver._experience_kwargs(Args())
-    assert kwargs == {}
-    assert "frozen baseline defaults" in why
-
-
-def test_with_unreviewed_flags_the_defaults_are_still_used():
-    kwargs, why = recovery_driver._experience_kwargs(Args(ASSETS, ENTRIES))
-    assert kwargs == {}
-    assert "gate" in why or "defaults" in why
-
-
-def test_with_an_independently_reviewed_entry_the_kwargs_reach_the_call(tmp_path):
+def _reviewed_store(tmp_path):
     path = tmp_path / "records.jsonl"
     rows = [json.loads(l) for l in open(ENTRIES, encoding="utf-8") if l.strip()]
     for i, row in enumerate(rows):
@@ -66,11 +53,40 @@ def test_with_an_independently_reviewed_entry_the_kwargs_reach_the_call(tmp_path
     chain.append(str(ledger), {"entry_id": eid, "verdict": "ACCEPT",
                                "reviewed_by": "gate-auditor",
                                "entry_chain_sha256": sha})
-    args = Args(ASSETS, str(path))
-    args.experience_review_ledger = str(ledger)
-    kwargs, why = recovery_driver._experience_kwargs(args)
+    return str(path), str(ledger)
+
+
+def test_without_a_binding_the_defaults_are_untouched():
+    kwargs, why = recovery_driver._experience_kwargs(Args())
+    assert kwargs == {}
+    assert "frozen baseline defaults" in why
+
+
+def test_an_unreadable_binding_is_a_refusal(tmp_path):
+    kwargs, why = recovery_driver._experience_kwargs(Args(str(tmp_path / "missing.json")))
+    assert kwargs == {}
+    assert "unreadable" in why
+
+
+def test_a_reviewed_entry_reaches_the_runtime_through_a_binding_file(tmp_path):
+    entries, ledger = _reviewed_store(tmp_path)
+    out = tmp_path / "binding.json"
+    resolve_live.main(["--asset", ASSETS, "--entries", entries,
+                       "--review-ledger", ledger, "--out", str(out)])
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["kwargs"] == {"spread_step": 0.09, "cluster_m": 0.12}
+    kwargs, why = recovery_driver._experience_kwargs(Args(str(out)))
     assert kwargs == {"spread_step": 0.09, "cluster_m": 0.12}
     assert "accepted" in why
+
+
+def test_an_unreviewed_entry_writes_an_empty_binding(tmp_path):
+    out = tmp_path / "binding.json"
+    resolve_live.main(["--asset", ASSETS, "--entries", ENTRIES, "--out", str(out)])
+    payload = json.loads(out.read_text(encoding="utf-8"))
+    assert payload["kwargs"] == {}
+    kwargs, _ = recovery_driver._experience_kwargs(Args(str(out)))
+    assert kwargs == {}
 
 
 def test_the_respread_call_accepts_the_resolved_kwargs():
