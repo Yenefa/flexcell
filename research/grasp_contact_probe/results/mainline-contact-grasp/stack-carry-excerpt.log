@@ -1,0 +1,23 @@
+[INFO] [carry_server-12]: process started with pid [564]
+[carry_server-12] [INFO] [1795033760.344199149] [carry_server]: Carry servo up | backend=contact_grasp service=/world/empty/set_pose period=0.10s state=/flexcell/carry_state
+[carry_server-12] [INFO] [1795033784.923974246] [carry_server]: carry RELEASED
+[carry_server-12] [INFO] [1795033784.933476300] [carry_server]: carry RELEASED
+[carry_server-12] [INFO] [1795033785.228793847] [carry_server]: carry RELEASED
+[INFO] [carry_server-12]: sending signal 'SIGINT' to process[carry_server-12]
+[carry_server-12] Traceback (most recent call last):
+[carry_server-12]   File "/home/ros/grasp-install/flexcell_skills/lib/flexcell_skills/carry_server", line 33, in <module>
+[carry_server-12]     sys.exit(load_entry_point('flexcell-skills==0.1.0', 'console_scripts', 'carry_server')())
+[carry_server-12]              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[carry_server-12]   File "/home/ros/grasp-install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/carry_server.py", line 653, in main
+[carry_server-12]     node._on_stop(None, cause='shutdown')
+[carry_server-12]   File "/home/ros/grasp-install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/carry_server.py", line 394, in _on_stop
+[carry_server-12]     contact_release = (self._contact_request('release', {})[0]
+[carry_server-12]                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[carry_server-12]   File "/home/ros/grasp-install/flexcell_skills/lib/python3.12/site-packages/flexcell_skills/carry_server.py", line 462, in _contact_request
+[carry_server-12]     reply = self._gz_node.request(service, request, self._String, self._String, 4000)
+[carry_server-12]             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[carry_server-12]   File "/opt/ros/jazzy/opt/gz_transport_vendor/lib/python/gz/transport13/__init__.py", line 147, in request
+[carry_server-12]     result, serialized_response = self.request_raw(
+[carry_server-12]                                   ^^^^^^^^^^^^^^^^^
+[carry_server-12] KeyboardInterrupt
+[ERROR] [carry_server-12]: process has died [pid 564, exit code -2, cmd '/home/ros/grasp-install/flexcell_skills/lib/flexcell_skills/carry_server --ros-args -r __node:=carry_server --params-file /home/ros/contact-run/run-1225081fb07f/params.yaml'].

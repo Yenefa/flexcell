@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "status": "ROBOT_FAILURE",
+  "backend": "contact_grasp",
+  "skill_backend": "legacy",
+  "physical_tasks_dispatched": 1,
+  "qualification": "FUNCTIONAL_SMOKE_ONLY",
+  "case": "normal",
+  "object": "target_box_a",
+  "out": "/home/ros/contact-run/run-1225081fb07f",
+  "decision_policy": "fsm",
+  "hybrid_threshold": null,
+  "resume_completed": false,
+  "model_env": {
+    "FLEXCELL_LLM_ENDPOINT": null,
+    "FLEXCELL_LLM_MODEL": null,
+    "FLEXCELL_LLM_BACKEND": null,
+    "FLEXCELL_JEV_ENDPOINT": null,
+    "FLEXCELL_JEV_MODEL": null,
+    "FLEXCELL_JEV_BACKEND": null
+  },
+  "world_sha256": "1721a4f2dc4bf8324b28bdeff097453bae328ef55873687832872411887e9a5e",
+  "semantic_config_sha256": "7ba2f96eaa0d6819f9d472bdf79420db43b59ac2951877c8ac1932cf97165182",
+  "runtime_fingerprint": "b2f4d8fbc05462f037d3d54162216f9d32b7d3e54cb33bcdba2f0e11a7e56e33",
+  "task_start_monotonic_ns": 627424493014,
+  "goal_pose": [
+    0.12,
+    -0.15,
+    0.0175
+  ],
+  "zone_2_pose": null,
+  "config_override": null,
+  "task_end_monotonic_ns": 650158582734,
+  "task": {
+    "action": "task",
+    "goal_uuid": "cc2803a9a5134d3ab92ce84f02d98a47",
+    "outcome": "OUTCOME_FAILED",
+    "outcome_val": 1,
+    "error_code": "ERR_RECOVERY_EXHAUSTED",
+    "detail": "policy abort (BUDGET_EXHAUSTED): pick attempt 2 failed (error 30) (trace=PICK_A(attempt=1):FAIL:ERR_MOTION_FAILED,RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1)),PICK_A(attempt=2):FAIL:ERR_MOTION_FAILED); previous_skill=PICK cause=ERR_MOTION_FAILED legacy_error_code=30",
+    "evidence_id": "pick_place_v1-51d55071",
+    "wall_seconds": 20.788,
+    "fsm_trace": [
+      "PICK_A(attempt=1):FAIL:ERR_MOTION_FAILED",
+      "RECOVERY:REOBSERVE+RETRY(after PICK_A(attempt=1))",
+      "PICK_A(attempt=2):FAIL:ERR_MOTION_FAILED"
+    ],
+    "object_at_place": false,
+    "final_position_error_m": null,
+    "skip_verify": false
+  },
+  "actual_routing": {
+    "decisions": 5,
+    "sources": {
+      "fsm": 5
+    },
+    "leaves": {
+      "fsm": 5
+    },
+    "fallbacks": 0,
+    "models": [],
+    "backends": [],
+    "fast_calls": 0,
+    "slow_calls": 0,
+    "model_calls": 0,
+    "calls_without_identity": 0
+  },
+  "model_calls": 0,
+  "fast_calls": 0,
+  "slow_calls": 0,
+  "error": "typed task failure retained; no replacement task",
+  "recorder_exit": 0,
+  "owned_launch_exit": 0,
+  "unavailable_numeric_fields": {
+    "task.final_position_error_m": "nan"
+  }
+}
