@@ -88,7 +88,8 @@ def summary(path):
         eid = row.get("entry_id")
         rec = out.setdefault(eid, {"retrieved": 0, "applied": 0, "outcomes": {},
                                    "last_outcome": None, "retired": False,
-                                   "rejected": False, "runs": []})
+                                   "rejected": False, "runs": [],
+                                   "unattributed_outcomes": []})
         ev = row.get("event")
         if ev == "RETRIEVED":
             rec["retrieved"] += 1
@@ -98,8 +99,19 @@ def summary(path):
                 rec["runs"].append(row["run_id"])
         elif ev == "OUTCOME":
             oc = row.get("outcome") or "UNKNOWN"
-            rec["outcomes"][oc] = rec["outcomes"].get(oc, 0) + 1
-            rec["last_outcome"] = oc
+            # An OUTCOME must belong to a run where this entry was actually APPLIED. A
+            # standalone "WORSE" line with no matching APPLIED run is either a broken writer
+            # or a forged harm signal -- and lifecycle.review RETIREs on harmful > 0. Counting
+            # it would let one stray line disable an entry. Keep the line VISIBLE (never delete
+            # evidence) but do not let it drive a decision: report it separately instead.
+            run = row.get("run_id")
+            if run is not None and run in rec["runs"]:
+                rec["outcomes"][oc] = rec["outcomes"].get(oc, 0) + 1
+                rec["last_outcome"] = oc
+            else:
+                rec["unattributed_outcomes"].append(
+                    {"run_id": run, "outcome": oc,
+                     "why": "no APPLIED event for this entry on that run"})
         elif ev == "RETIRED":
             rec["retired"] = True
         elif ev == "REJECTED":
