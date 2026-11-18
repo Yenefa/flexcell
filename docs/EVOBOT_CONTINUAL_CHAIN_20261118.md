@@ -57,6 +57,42 @@
 于是重试第三次被拒为"declared destination occupied"。修改为**按余量选轴**，并且两轴都不满足契约时**拒绝**而不是发出一个必然被拒的计划；
 不传 avoid 时行为与旧实现**逐字节相同**，11/11 `benchmark/tests/test_recovery_driver.py` 仍通过。
 
+## 4.08 整条链是**正确的，但没插上电**
+
+前面所有工作证明的是**链自己内部**跑得通：生成 → 审核 → 门控 → 投递 → 检索 → 应用到归档运行 → 记账。
+**这没有证明机器人做计划时用的是这条链。**
+
+**它不是。** 有**两个存储、两套模式**：
+
+| 存储 | 读取者 | 字段 |
+| --- | --- | --- |
+| `evolution/experience/records.jsonl` | **真实路径** `experiments/baselines/baseline_c.py` | `lesson` · `validated` · `provenance_verified` · `record_sha256` |
+| `.../evobot_continual_chain_.../records_v2.jsonl` | **链** | `entry_id` · `suggested_action` · `consumer` · `action_kind` · `version` · `validation` |
+
+**两条经验没有一条同时出现在两边。** 测量结果：
+
+| 项 | 值 |
+| --- | --- |
+| 链上的 ACTIVE 条目 | **2** |
+| 真实路径能看见的 | **0** |
+| 原因 | 1 个没有 `provenance_verified`；1 个在审核账本里没有独立 ACCEPT |
+
+而且**顺序规则在真实路径里也永远不会触发**：`baseline_c` 写出的经验项**没有 `_entry_id`**，
+所以上一轮加的那道门会判它不被准入。**门是对的——没有条目就不该有规则——但结果是那条规则
+在唯一会跑机器人的路径上处于惰性状态。**
+
+### 为什么测出来，而不是直接接上
+
+接上意味着**选哪套模式赢**，而两种选法都有代价：
+
+| 选项 | 代价 |
+| --- | --- |
+| 把 v2 写进 live 存储 | live 检索要 `provenance_verified`、`evidence_files`、**按 `record_sha256` 索引的审核账本**——v2 一个都没有，过滤器会**一条都不放行**（fail-closed 正在尽职） |
+| 让 live 路径读 v2 | 它就还需要 v2 的审核判决和谱系状态，**而那个文件是冻结基线实验在读的文件** |
+
+**这不是一行改动，悄悄选一个正是应该被看见的那类决定。** 所以如实报数字和两条路，
+**不假装循环已经闭合。**
+
 ## 4.09 第三种答案：**模块存在，但这份归档量不出它的效果**
 
 上一轮把 `UNROUTED` 拆成"已经对了"和"还没量"。**还漏了第三种。**
@@ -856,6 +892,7 @@ ROS 启动教训确实在动——它在 `harness` 上（改 `cyclonedds.xml`）
 | 技能资产的自主编排（组合已有资产完成新任务） | **未做**：本轮只到"资产可被调用"，没有组合 |
 | 回归门覆盖全部验证器 | **已做**：范围从固定的 2/70 扩到 **69/70**（排除"装着门的那一项"，具名报出）；18 项基线失败在 PR base 上**实测**复现，52 项通过，0 项新失败 |
 | RETIRE 的**真实触发** | **未做**：本轮没有任何运行把结果变差，所以退役只在**副本 + 合成有害事件**上演示；真实 store 未被触碰 |
+| 链与真实机器人路径的连通 | **未接通**：2 个 ACTIVE 条目对 `baseline_c` 可见 0 个；`baseline_c` 的经验项不带 `_entry_id`，顺序规则在那条路径上永远不会触发；两套模式的选择有代价，故上报而不擅改 |
 | `graded_push` 的效果 | **不可用本归档测量**：`push_recover` 存在且有记录的 2/5→4/5，但尝试序列由该策略自身产生，**选择效应**；需要一段"无该策略"的尝试记录才能做有/无对照 |
 | `UNROUTED` 的其余 6 个签名 | **UNMEASURED**：`graded_push`(23) / `unconfirmed_native`(31) / `graded_visit`(12) / `graded_visit_sequence`(6) / `graded_unmoved`(4) / `graded_relative`(2) 都还没有探针，是否有模块能承载**未知**，不是已知为否 |
 | 误用探针的覆盖面 | **有限**：8 个探针覆盖落点/重排/harness 三类消费者，`development` 仍无探针 |
@@ -872,7 +909,7 @@ python3 evolution/experience/demo_continual.py
 python3 -m pytest evolution/experience/test_continual_chain.py -q
 ```
 
-verifier 会**重新执行**整条链并断言 **127 项检查**，不读取 SUMMARY 里的自述。其中关键几项：
+verifier 会**重新执行**整条链并断言 **131 项检查**，不读取 SUMMARY 里的自述。其中关键几项：
 
 - 规划侧不生效（NO_CHANGE）、执行侧生效（CHANGED）；
 - 启用前后检索分别为 0 与 1；
@@ -887,6 +924,7 @@ verifier 会**重新执行**整条链并断言 **127 项检查**，不读取 SUM
 - **至少一条条目来自归档自动生成**，生成器拒绝了一个 UNROUTED 签名，且**没有任何生成记录在无具名审阅者时被 ACCEPT**；
 - **每条条目都声明了自己的证据 split**；开发集确实产出了条目（不是零）；没有任何被标为 `dev` 的条目引用封存实例；
 - **两个不同消费者都能生效**（executor_recovery 与 harness），且 ACTIVE 条目**覆盖两种 split**；
+- **链是否正确接入真实路径被显式测量**：2 个 ACTIVE 条目、**0 个**对真实路径可见，原因逐条给出；两种接线方案连代价一起报，**不假装已闭合**；
 - **模块存在但归档量不出效果时单独报**：`graded_push` 有 `push_recover`（记录 2/5 → 4/5），但记录的尝试是**该策略自己产生的**，回放量不出它改变了什么——报 UNMEASURED + `module_found`，并写明**选择效应**；回放 5/5 复现已记录判决，但那只是回放正确性；
 - **UNROUTED 逐条受检**：7 个签名（覆盖 92/98 失败）不再用一句话带过；量出 `placement_clause_failed` 是 **ALREADY_CORRECT**（规划器 6/6 已选对箱子），其余如实报 **UNMEASURED**，假设标注为假设；
 - **第四条路由有投递路径且不说谎**：渲染为候选、`effect: NOT_MEASURED`、点名缺 entrypoints/tests/mutation，无触发条件则 DROPPED；

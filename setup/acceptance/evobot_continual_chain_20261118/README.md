@@ -433,7 +433,35 @@ capability is what makes that visible instead of leaving it to an audit.
     **correctness check on the replay, not an effect measurement**, and conflating the two
     would turn this back into "we measured it".
 
-`verify.py` asserts **127 checks**, including that both gates really ran, that the asset
+32. **the loop can be correct and unplugged.** Everything the demo proves is proved INSIDE
+    the chain's own harness. The code that hands experience to the planner for a REAL robot
+    run (`experiments/baselines/baseline_c.py`) reads a **different store with a different
+    schema**:
+
+    | store | reader | fields |
+    | --- | --- | --- |
+    | `evolution/experience/records.jsonl` | **live path** | `lesson`, `validated`, `provenance_verified`, `record_sha256` |
+    | `.../evobot_continual_chain_.../records_v2.jsonl` | **the chain** | `entry_id`, `suggested_action`, `consumer`, `action_kind`, `version`, `validation` |
+
+    **Zero lessons appear in both.** Measured: **2 ACTIVE entries, 0 visible to the live
+    path** — one has no `provenance_verified`; one has no independent ACCEPT in the review
+    ledger. The order rule also **never fires** on the live path, because `baseline_c` writes
+    experience items **without `_entry_id`** and the gate correctly declines them. The gate
+    is right; the consequence is that a rule is inert in the only path that runs a robot.
+
+    This is **measured rather than silently wired up**, because closing it means choosing
+    which schema wins, and **both choices have a cost**:
+
+    | option | cost |
+    | --- | --- |
+    | write v2 into the live store | live retrieval needs `provenance_verified`, `evidence_files` and a review ledger keyed by `record_sha256`; **v2 has none**, so the filter would admit nothing — **fail-closed doing its job** |
+    | teach the live path v2 | it would need v2's review verdict and lineage status, and **the file it reads is the one a frozen baseline experiment uses** |
+
+    **Not a one-line change; choosing one quietly is exactly the decision that should be
+    visible.** The artifact reports the numbers and both options, and **does not pretend the
+    loop is closed.**
+
+`verify.py` asserts **131 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -458,7 +486,9 @@ ids, numbers and file set match a fresh run to the byte**, that **the developmen
 routing renders a candidate that does not claim PROPOSED and names its own missing tests**,
 that **every unrouted signature states what is actually known rather than being dismissed
 with one sentence**, and that **a capable module with an unmeasurable archive is reported as
-a selection effect rather than as any of the three tempting answers**.
+a selection effect rather than as any of the three tempting answers**, and that **the
+chain's connection to the live planning path is measured and reported as unplugged, with the
+cost of both ways to close it**.
 
 ---
 

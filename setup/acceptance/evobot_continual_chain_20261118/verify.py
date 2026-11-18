@@ -747,6 +747,27 @@ def main():
             for row in unrouted["unrouted"]
             if row["state"] == "UNMEASURED" and not row.get("module_found"))
 
+        # 32 -- THE LOOP CAN BE CORRECT AND UNPLUGGED. Everything the demo proves is proved
+        # INSIDE the chain's own harness. The code that hands experience to the planner for a
+        # real robot run reads a different store with a different schema, so a reader must
+        # not take "the chain works" as "the robot uses it".
+        live = json.loads((tmp / "10d_live_path.json").read_text(encoding="utf-8"))
+        checks["the_live_path_connection_is_measured"] = (
+            isinstance(live.get("visible_to_live_path"), int)
+            and "active_entries" in live)
+        # the numbers must actually add up, or the report is decorative
+        checks["every_invisible_entry_states_a_reason"] = (
+            sum(live["by_reason"].values()) + live["visible_to_live_path"]
+            == live["active_entries"])
+        # ... and it must be able to say ZERO. A report that cannot is not measuring.
+        checks["the_report_can_say_the_loop_is_unplugged"] = (
+            live["visible_to_live_path"] < live["active_entries"]
+            or live["active_entries"] == 0)
+        # the two ways to close it are named WITH their cost; picking one silently would be
+        # the kind of schema decision that has to be visible
+        checks["closing_the_gap_is_stated_as_a_choice_with_a_cost"] = (
+            len(live["options"]) == 2 and all(o.get("cost") for o in live["options"]))
+
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
             "batch": HERE.name,

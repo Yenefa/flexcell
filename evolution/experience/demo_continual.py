@@ -44,6 +44,7 @@ import retrieve  # noqa: E402
 import reuse  # noqa: E402
 import routing_coverage  # noqa: E402
 import unrouted as unrouted_mod  # noqa: E402
+import live_path  # noqa: E402
 import delivery  # noqa: E402
 import candidate_search  # noqa: E402
 import schema  # noqa: E402
@@ -671,6 +672,18 @@ def run(dest=OUT):
                   "signatures": len(unrouted["unrouted"]),
                   "failures_covered": unrouted["failures_covered"],
                   "by_state": unrouted["by_state"]})
+
+    # 10d -- IS THE LOOP PLUGGED IN? Everything up to here is connected inside the chain's
+    # own harness. The code that hands experience to the planner for a REAL robot run reads a
+    # different store with a different schema, so the loop can be correct and unplugged at
+    # the same time. That distinction has to be on the artifact or "the chain works" will be
+    # read as "the robot uses it".
+    live = live_path.report()
+    _write(os.path.join(dest, "10d_live_path.json"), live)
+    steps.append({"step": "live_path",
+                  "active_entries": live["active_entries"],
+                  "visible_to_live_path": live["visible_to_live_path"],
+                  "by_reason": live["by_reason"]})
 
     # 11 -- the store's own curation report, computed from the records on disk
     report = curate.curate(store.read(store_path))
