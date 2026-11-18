@@ -317,7 +317,8 @@ class JsonlLog:
         rec['wall_ts'] = time.time()
         try:
             with open(self.path, 'a') as fh:
-                fh.write(json.dumps(rec, default=str) + '\n')
+                fh.write(json.dumps(json_safe(rec), default=str,
+                                    allow_nan=False) + '\n')
         except OSError as exc:  # never let logging kill a skill
             self._node.get_logger().error('log write failed: %s' % exc)
 
@@ -325,6 +326,17 @@ class JsonlLog:
 def new_evidence(request_id, seq):
     rid = request_id or ('auto-%d-%s' % (seq, uuid.uuid4().hex[:8]))
     return rid, '%s-%s' % (rid, uuid.uuid4().hex[:8])
+
+
+def json_safe(value):
+    """Replace non-finite floats with None so JSON output is standards-compliant."""
+    if isinstance(value, float):
+        return value if math.isfinite(value) else None
+    if isinstance(value, dict):
+        return {str(key): json_safe(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [json_safe(item) for item in value]
+    return value
 
 
 def crash_detail(exc):

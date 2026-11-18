@@ -56,8 +56,10 @@ from flexcell_skills.contracts.composite_checkpoint import (
 
 from flexcell_skills.contracts.episode import EpisodeRecorder, EpisodeStore
 from flexcell_skills.contracts.benchmark_protocol import load_protocol
+from flexcell_skills.contracts.error_codes import ERR_OBJECT_NOT_FOUND
 from flexcell_skills.contracts.safety_gate import (
     destination_clear, metrics as safety_metrics,
+    rejection_canonical_code,
     sanitize as sanitize_decision, validate)
 from flexcell_skills.contracts.recovery import (
     RECIPE_PICK, RECIPE_VERIFY, recovery_eligible)
@@ -813,8 +815,14 @@ class TaskFsmServer(Node):
                     episode.record_executor_result(
                         detail='safety rejection: %s' % gate_reason,
                         post_condition='SAFETY_REJECTED')
-                    return finish(result_type.OUTCOME_FAILED,
-                                  result_type.ERR_SAFETY_REJECTED,
+                    canonical = rejection_canonical_code(gate_reason)
+                    # 21 is present in both action definitions; the remaining
+                    # canonical vocabulary is not on the wire yet, so keep the
+                    # existing ERR_SAFETY_REJECTED for those cases.
+                    code = (result_type.ERR_OBJECT_NOT_FOUND
+                            if canonical == ERR_OBJECT_NOT_FOUND
+                            else result_type.ERR_SAFETY_REJECTED)
+                    return finish(result_type.OUTCOME_FAILED, code,
                                   'safety gate rejected %s on %r: %s'
                                   % (decision.action, decision.target,
                                      gate_reason))
