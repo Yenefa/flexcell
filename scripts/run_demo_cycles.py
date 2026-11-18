@@ -35,12 +35,28 @@ def wait_future(node, future, timeout_s):
     return future.done()
 
 
-def reset_scene(repo, timeout_s=120):
-    proc = subprocess.run(
-        [sys.executable, str(repo / 'setup/flexcell_admin.py'), 'reset'],
-        cwd=str(repo), capture_output=True, text=True, timeout=timeout_s)
-    ok = proc.returncode == 0 and '"ok": true' in (proc.stdout or '')
-    return ok, (proc.stdout or proc.stderr or '')[-400:]
+def reset_scene(repo, timeout_s=240, attempts=2):
+    """Reset the scene; a GUI+encoder run can push one attempt past the old 120 s."""
+    last = ''
+    for _ in range(attempts):
+        try:
+            proc = subprocess.run(
+                [sys.executable, str(repo / 'setup/flexcell_admin.py'), 'reset'],
+                cwd=str(repo), capture_output=True, text=True, timeout=timeout_s)
+        except subprocess.TimeoutExpired:
+            last = 'reset timed out after %ss' % timeout_s
+            time.sleep(3)
+            continue
+        out = proc.stdout or ''
+        try:
+            ok = json.loads(out).get('ok') is True
+        except ValueError:
+            ok = False
+        if proc.returncode == 0 and ok:
+            return True, out[-400:]
+        last = (out or proc.stderr or '')[-400:]
+        time.sleep(3)
+    return False, last
 
 
 def main(argv=None):

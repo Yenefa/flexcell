@@ -1,11 +1,9 @@
 #!/usr/bin/env bash
-# Start the demo stack plus a software-rendered Gazebo GUI and keep it alive.
+# Start the demo stack plus a Gazebo GUI and keep it alive.
 #
 # Usage: scripts/demo_serve.sh SOURCE_RUN_DIR OUT_DIR
-# SOURCE_RUN_DIR must contain world.sdf and params.yaml (a previous sim run).
-#
-# The D3D12 GUI segfaulted in the NVIDIA driver on 2026-11-18, so this uses
-# llvmpipe for the GUI. The stack itself is headless either way.
+# Env: DEMO_GUI=gpu|soft (default soft). GPU uses Mesa D3D12; if the driver
+# segfaults, fall back to soft (llvmpipe).
 set +u
 REPO="$(cd "$(dirname "$0")/.." && pwd)"
 SRC=${1:?source run dir}
@@ -25,8 +23,13 @@ cd "$REPO" || exit 1
 export FLEXCELL_REPO="$REPO" FLEXCELL_WS="$REPO" FLEXCELL_INSTALL="$REPO/install"
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp ROS_DOMAIN_ID=45
 export GZ_PARTITION=pp-video
-export LIBGL_ALWAYS_SOFTWARE=1
-unset GALLIUM_DRIVER MESA_D3D12_DEFAULT_ADAPTER_NAME
+if [ "${DEMO_GUI:-soft}" = "gpu" ]; then
+  export GALLIUM_DRIVER=d3d12 MESA_D3D12_DEFAULT_ADAPTER_NAME=NVIDIA
+  unset LIBGL_ALWAYS_SOFTWARE
+else
+  export LIBGL_ALWAYS_SOFTWARE=1
+  unset GALLIUM_DRIVER MESA_D3D12_DEFAULT_ADAPTER_NAME
+fi
 
 nohup ros2 launch flexcell_skills trusted_sim.launch.py \
   world:="$SRC/world.sdf" params_file:="$SRC/params.yaml" camera:=false \

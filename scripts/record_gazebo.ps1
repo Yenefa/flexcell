@@ -16,7 +16,8 @@ param(
   [int]$Cycles = 1,
   [string]$WslRepo = "/home/ros/flexcell-physical",
   [string]$Distro = "Ubuntu-24.04",
-  [string]$User = "ros"
+  [string]$User = "ros",
+  [ValidateSet('gpu', 'soft')][string]$Gui = 'soft'
 )
 
 Add-Type @"
@@ -45,8 +46,8 @@ Start-Sleep -Seconds 4
 
 # 2. start stack + GUI in WSL, keep the handle so we can stop it later
 $serve = Start-Process -FilePath 'wsl' -ArgumentList @(
-  '-d', $Distro, '-u', $User, '--', 'bash', "$WslRepo/scripts/demo_serve.sh",
-  $SourceRun, '/tmp/demo-serve-video'
+  '-d', $Distro, '-u', $User, '--', 'env', "DEMO_GUI=$Gui", 'bash',
+  "$WslRepo/scripts/demo_serve.sh", $SourceRun, '/tmp/demo-serve-video'
 ) -PassThru -WindowStyle Hidden
 
 $ready = $false
