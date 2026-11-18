@@ -203,6 +203,8 @@ class Sample:
     gap_target: float | None
     lift_target: float | None
     pad_force_n: tuple[float, float] | None
+    cmd: dict[str, float] | None
+    obj_contacts: int | None
 
 
 @dataclass(frozen=True)
@@ -230,6 +232,8 @@ class Protocol:
     max_initial_jitter_m: float | None
     lift_contact_min: float | None
     lift_ground_max: float | None
+    lift_height_m: float | None
+    lift_s: float | None
     step_s: float | None
     engine: str | None
     resolved_keys: dict[str, str]
@@ -365,9 +369,6 @@ def load_protocol(run_dir: Path) -> Protocol:
     stage = raw.get("stage")
     if stage is not None:
         require(isinstance(stage, str), "protocol.stage: expected a string")
-        require(stage == "acceptance",
-                "protocol stage %r is exploratory; only the acceptance stage has "
-                "preregistered pass criteria, so no verdict can be issued" % stage)
 
     physics = raw.get("physics") if isinstance(raw.get("physics"), dict) else {}
     step_s = physics.get("step_s", raw.get("step_s"))
@@ -481,14 +482,17 @@ def load_protocol(run_dir: Path) -> Protocol:
         require(required is not None, "protocol: missing trials_required_pass")
     required = as_int(required, "protocol.trials_required_pass")
     require(required >= 1, "protocol: trials_required_pass must be positive")
-    if declared is not None:
-        require(required == len(declared),
-                "protocol: trials_required_pass %d differs from %d declared trials"
-                % (required, len(declared)))
-    if all(value is not None for value in expected_trials.values()):
-        require(required == sum(value for value in expected_trials.values() if value is not None),
-                "protocol: trials_required_pass %d differs from the per-object sum %d"
-                % (required, sum(value for value in expected_trials.values() if value is not None)))
+
+    rig = raw.get("rig") if isinstance(raw.get("rig"), dict) else {}
+    phases = raw.get("phases_s") if isinstance(raw.get("phases_s"), dict) else {}
+    lift_height_m = rig.get("lift_height_m")
+    if lift_height_m is not None:
+        lift_height_m = as_number(lift_height_m, "protocol.rig.lift_height_m")
+        require(lift_height_m > 0.0, "protocol: lift_height_m must be positive")
+    lift_s = phases.get("lift")
+    if lift_s is not None:
+        lift_s = as_number(lift_s, "protocol.phases_s.lift")
+        require(lift_s > 0.0, "protocol: phases_s.lift must be positive")
 
     protocol_id = raw.get("protocol_id") or raw.get("run_id") or raw.get("kind")
     require(isinstance(protocol_id, str) and protocol_id, "protocol: missing protocol_id/run_id")
@@ -508,6 +512,8 @@ def load_protocol(run_dir: Path) -> Protocol:
         max_initial_jitter_m=jitter_limit,
         lift_contact_min=lift_contact,
         lift_ground_max=lift_ground,
+        lift_height_m=lift_height_m,
+        lift_s=lift_s,
         step_s=step_s,
         engine=engine,
         resolved_keys=resolved,
@@ -564,6 +570,19 @@ def parse_sample(raw: Any, where: str) -> Sample:
         require(pad_force[0] >= 0.0 and pad_force[1] >= 0.0,
                 where + ".contacts.*_pad_force: negative magnitude")
 
+    obj_contacts = raw.get("obj_contacts")
+    if obj_contacts is not None:
+        obj_contacts = as_int(obj_contacts, where + ".obj_contacts")
+        require(obj_contacts >= 0, where + ".obj_contacts: negative contact count")
+    command = None
+    command_raw = raw.get("cmd")
+    if command_raw is not None:
+        require(isinstance(command_raw, dict), where + ".cmd: expected a map")
+        command = {}
+        for name in ("left", "right", "lift"):
+            require(name in command_raw, "%s.cmd.%s: missing" % (where, name))
+            command[name] = as_number(command_raw[name], "%s.cmd.%s" % (where, name))
+
     gap_target = raw.get("gap_target")
     lift_target = raw.get("lift_target")
     return Sample(
@@ -581,6 +600,8 @@ def parse_sample(raw: Any, where: str) -> Sample:
         gap_target=None if gap_target is None else as_number(gap_target, where + ".gap_target"),
         lift_target=None if lift_target is None else as_number(lift_target, where + ".lift_target"),
         pad_force_n=pad_force,
+        cmd=command,
+        obj_contacts=obj_contacts,
     )
 
 
@@ -683,8 +704,7 @@ def _max_with_time(pairs: Iterable[tuple[float, float]]) -> tuple[float, float |
     return best_value, best_time
 
 
-def _force_stats(samples: list[Sample], names: tuple[str, ...]) -> dict[str, float]:
-    values = [abs(sample.joints[name].f) for sample in samples for name in names]
+def _window_stats(values: list[float]) -> dict[str, float]:
     if not values:
         return {"max_abs_n": 0.0, "mean_abs_n": 0.0, "samples": 0}
     return {"max_abs_n": max(values), "mean_abs_n": math.fsum(values) / len(values),
@@ -711,7 +731,7 @@ def parse_jitter(value: Any, where: str) -> tuple[float | None, float | None]:
     raise AnalysisError(where + ": expected a number or a map with x/y/yaw_deg")
 
 
-def analyze_trial(trial: Trial, protocol: Protocol) -> dict[str, Any]:
+def analyze_trial(trial: Trial, protocol: Protocol, exploratory: bool = False) -> dict[str, Any]:
     meta = trial.meta
     where = trial.name + "/meta.json"
     object_name = meta.get("object_name")
@@ -727,13 +747,16 @@ def analyze_trial(trial: Trial, protocol: Protocol) -> dict[str, Any]:
             where + ": size_m, mass_kg and mu must be positive")
 
     identity_checked = all(value is not None for value in (spec.size_m, spec.mass_kg, spec.mu))
+    identity_mismatch = []
     if identity_checked:
         for label, actual, declared in (("size_m", size, spec.size_m),
                                         ("mass_kg", mass, spec.mass_kg),
                                         ("mu", mu, spec.mu)):
-            require(math.isclose(actual, declared, rel_tol=1e-6, abs_tol=1e-12),
-                    "%s: %s=%r differs from the preregistered %r; this trial is not the "
-                    "declared experiment" % (where, label, actual, declared))
+            if not math.isclose(actual, declared, rel_tol=1e-6, abs_tol=1e-12):
+                identity_mismatch.append("%s=%r vs protocol %r" % (label, actual, declared))
+        require(not identity_mismatch or exploratory,
+                "%s: %s; this trial is not the declared experiment"
+                % (where, "; ".join(identity_mismatch)))
 
     exit_code = meta.get("exit_code")
     if exit_code is not None:
@@ -828,26 +851,87 @@ def analyze_trial(trial: Trial, protocol: Protocol) -> dict[str, Any]:
             ground_lost_t = after[0]
         else:
             ground_still_touching_at_end = True
+    ground_before_lift = (ground_fraction["settle"] > 0.5
+                          or ground_fraction["close"] > 0.5)
+    if ground_still_touching_at_end:
+        ground_evidence = "still_touching_at_end"
+    elif not touching:
+        ground_evidence = "never_observed"
+    elif ground_before_lift and ground_fraction["hold"] == 0.0:
+        ground_evidence = "lost_after_lift"
+    elif ground_fraction["hold"] > 0.0:
+        ground_evidence = "present_in_hold"
+    else:
+        ground_evidence = "unavailable"
+    ground_lost_delay_s = None if ground_lost_t is None else ground_lost_t - close_end
+    if (not exploratory and ground_still_touching_at_end
+            and drift_translation_mm < protocol.drop_norm_mm):
+        raise AnalysisError(
+            "%s: the object is reported in ground contact at t=%.3f while its base-frame pose "
+            "followed the gripper (drift %.3f mm); contact data and pose data contradict each "
+            "other, so no verdict can be issued" % (where, samples[-1].t, drift_translation_mm))
 
-    forces = {
-        "close": _force_stats(close, ("left", "right")),
-        "lift": _force_stats(lift, ("left", "right")),
-        "lift_joint_lift": _force_stats(lift, ("lift",)),
+    command_available = any(sample.cmd is not None for sample in samples)
+
+    def command_values(phase_samples: list[Sample], names: tuple[str, ...]) -> list[float]:
+        if command_available:
+            return [abs(sample.cmd[name]) for sample in phase_samples
+                    if sample.cmd is not None for name in names]
+        # Older logs only carry JointForceCmd, which gz-sim clears before PostUpdate;
+        # such a log can only report zeros and is labelled accordingly.
+        return [abs(sample.joints[name].f) for sample in phase_samples for name in names]
+
+    forces: dict[str, Any] = {
+        "commanded": {
+            "close": _window_stats(command_values(close, ("left", "right"))),
+            "lift": _window_stats(command_values(lift, ("left", "right"))),
+            "lift_joint": _window_stats(command_values(lift, ("lift",))),
+            "source": ("cmd (PreUpdate cache); the joint force component is cleared by gz-sim "
+                       "before PostUpdate, so joints.f is not the applied effort"
+                       if command_available else
+                       "joints.f fallback (this log has no cmd field and may already be cleared)"),
+            "note": ("commanded finger effort is an upper bound on the normal load, not a "
+                     "measured contact force"),
+        },
     }
-    max_abs_qd = max(abs(sample.joints[name].qd) for sample in samples for name in ("left", "right", "lift"))
-    max_abs_joint_force = max(abs(sample.joints[name].f) for sample in samples for name in ("left", "right"))
-
-    measured_pad_force = None
-    pad_forces = [magnitude for sample in close + lift if sample.pad_force_n
-                  for magnitude in sample.pad_force_n]
-    if pad_forces:
-        measured_pad_force = {
-            "max_abs_n": max(pad_forces),
-            "mean_abs_n": math.fsum(pad_forces) / len(pad_forces),
-            "samples": len(pad_forces),
-            "weight_ratio_max": max(pad_forces) / (mass * 9.8),
-            "note": "extra signal logged by the plugin; not part of the preregistered metric set",
+    pad_rows = [sample for sample in samples if sample.pad_force_n is not None]
+    if pad_rows:
+        per_phase = {}
+        for phase_name in ("close", "lift", "hold"):
+            rows = [sample for sample in _phase(samples, phase_name) if sample.pad_force_n is not None]
+            peaks = [max(sample.pad_force_n) for sample in rows]
+            totals = [sum(sample.pad_force_n) for sample in rows]
+            per_phase[phase_name] = {
+                "per_pad_peak_max_n": max(peaks) if peaks else 0.0,
+                "per_pad_peak_mean_n": math.fsum(peaks) / len(peaks) if peaks else 0.0,
+                "total_max_n": max(totals) if totals else 0.0,
+                "total_mean_n": math.fsum(totals) / len(totals) if totals else 0.0,
+                "samples": len(rows),
+            }
+        forces["measured_contact"] = {
+            "per_phase": per_phase,
+            "weight_ratio_total_max": per_phase["lift"]["total_max_n"] / (mass * 9.8),
+            "note": ("solver-integrated contact wrench; the plugin logs a per-pad single-point "
+                     "peak, which under-reports the total normal load carried by the pads"),
         }
+    applied_per_pad = max(
+        (abs(sample.cmd[name]) for sample in close + lift if sample.cmd is not None
+         for name in ("left", "right")),
+        default=0.0,
+    )
+    measured_per_pad = max(
+        (max(sample.pad_force_n) for sample in close + lift if sample.pad_force_n is not None),
+        default=0.0,
+    )
+    forces["normal_force_applied_per_pad_n"] = applied_per_pad
+    forces["normal_force_measured_per_pad_n"] = measured_per_pad
+    max_abs_qd = max(abs(sample.joints[name].qd) for sample in samples for name in ("left", "right", "lift"))
+    max_abs_finger_command = max(
+        (abs(sample.cmd[name]) for sample in samples if sample.cmd is not None
+         for name in ("left", "right")),
+        default=max((abs(sample.joints[name].f) for sample in samples
+                     for name in ("left", "right")), default=0.0),
+    )
 
     deltas_mm = [distance(current.rel_p, previous.rel_p) * 1000.0
                  for previous, current in zip(after_close, after_close[1:])]
@@ -892,8 +976,11 @@ def analyze_trial(trial: Trial, protocol: Protocol) -> dict[str, Any]:
         "meta": {
             "size_m": size, "mass_kg": mass, "mu": mu,
             "jitter_m": jitter_m, "jitter_yaw_deg": jitter_yaw_deg,
-            "identity_checked": identity_checked,
-            "identity_source": "protocol_and_meta" if identity_checked else "meta_only",
+            "identity_checked": identity_checked and not identity_mismatch,
+            "identity_source": ("protocol_and_meta" if identity_checked and not identity_mismatch
+                                else "exploratory_override" if identity_mismatch
+                                else "meta_only"),
+            "identity_mismatch": identity_mismatch,
             "raw": meta,
         },
         "samples": len(samples),
@@ -948,20 +1035,23 @@ def analyze_trial(trial: Trial, protocol: Protocol) -> dict[str, Any]:
             "obj_ground_fraction": ground_fraction,
             "obj_ground_last_t": ground_last_t,
             "obj_ground_lost_t": ground_lost_t,
+            "obj_ground_lost_delay_s": ground_lost_delay_s,
             "obj_ground_still_touching_at_end": ground_still_touching_at_end,
+            "obj_ground_evidence": ground_evidence,
+            "obj_contacts_present": any(sample.obj_contacts is not None for sample in samples),
         },
         "forces": forces,
         "max_abs_qd_rad_s": max_abs_qd,
-        "max_abs_finger_command_n": max_abs_joint_force,
-        "measured_pad_force": measured_pad_force,
+        "max_abs_finger_command_n": max_abs_finger_command,
         "heuristics": {
             "oscillation_ratio": oscillation_ratio,
             "max_frame_rel_jump_mm": max_frame_jump_mm,
             "max_rel_norm_m": max_rel_norm_m,
             "solver_divergence": solver_divergence,
         },
-        "pass": passed,
-        "failure_modes": [] if passed else classify_failure(
+        "observed_slip": bool(not pass_translation or drop),
+        "pass": None if exploratory else passed,
+        "failure_modes": [] if (passed or exploratory) else classify_failure(
             drop=drop,
             pad_fraction=pad_fraction,
             ground_fraction=ground_fraction,
@@ -1034,31 +1124,184 @@ def discover_trials(run_dir: Path, protocol: Protocol) -> list[Path]:
     return [entry for _, _, entry in ordered]
 
 
-def analyze_run(run_dir: Path) -> dict[str, Any]:
+GRAVITY_M_S2 = 9.8
+
+
+def _lift_acceleration(protocol: Protocol) -> tuple[float, str]:
+    """Acceleration a in m(g+a), from the declared smoothstep lift profile."""
+    if protocol.lift_height_m is not None and protocol.lift_s is not None:
+        return (6.0 * protocol.lift_height_m / (protocol.lift_s ** 2),
+                "protocol rig.lift_height_m / phases_s.lift (smoothstep, 6h/T^2)")
+    return 0.0, "unavailable: no rig.lift_height_m/phases_s.lift, acceleration ignored"
+
+
+def friction_cone_check(trials: list[dict[str, Any]], protocol: Protocol) -> dict[str, Any]:
+    """Compare observed slip against the Coulomb capacity implied by the logged forces.
+
+    Capacity uses the commanded finger effort (the total normal load the servo
+    applies to each pad), because the logged per-pad contact value is a single
+    contact-point peak: a pad pressed with 7.5 N reports 2.0 N when the load is
+    shared by four points.
+    """
+    acceleration, acceleration_source = _lift_acceleration(protocol)
+    controls = protocol.raw.get("controls") if isinstance(protocol.raw.get("controls"), dict) else {}
+    declared_mass = None
+    prediction_text = controls.get("load_ladder_prediction")
+    if isinstance(prediction_text, str):
+        match = re.search(r"=\s*([0-9]+(?:\.[0-9]+)?)\s*kg", prediction_text)
+        if match is not None:
+            declared_mass = float(match.group(1))
+
+    rows: list[dict[str, Any]] = []
+    for trial in trials:
+        meta = trial["meta"]
+        mass = meta["mass_kg"]
+        mu = meta["mu"]
+        applied = trial["forces"].get("normal_force_applied_per_pad_n") or 0.0
+        measured = trial["forces"].get("normal_force_measured_per_pad_n") or 0.0
+        capacity = mu * 2.0 * applied
+        capacity_peak = mu * 2.0 * measured
+        load = mass * (GRAVITY_M_S2 + acceleration)
+        predicted = capacity < load
+        predicted_peak = capacity_peak < load
+        observed = bool(trial.get("observed_slip"))
+        rows.append({
+            "trial": trial["trial"],
+            "mass_kg": mass,
+            "mu": mu,
+            "size_m": meta["size_m"],
+            "normal_force_applied_n": applied,
+            "normal_force_measured_n": measured,
+            "normal_force_total_applied_n": 2.0 * applied,
+            "friction_capacity_n": capacity,
+            "friction_capacity_from_pad_peak_n": capacity_peak,
+            "gravity_load_n": load,
+            "lift_acceleration_m_s2": acceleration,
+            "predicted_slip": predicted,
+            "predicted_slip_from_pad_peak": predicted_peak,
+            "observed_slip": observed,
+            "observed_drift_mm": trial["drift"]["translation_mm"],
+            "agreement": predicted == observed,
+            "agreement_from_pad_peak": predicted_peak == observed,
+            "predicted_slip_mass_kg": (capacity / (GRAVITY_M_S2 + acceleration)) if capacity > 0.0 else None,
+        })
+
+    agreements = sum(1 for row in rows if row["agreement"])
+    peak_agreements = sum(1 for row in rows if row["agreement_from_pad_peak"])
+    held = [row["mass_kg"] for row in rows if row["mu"] == 1.0 and not row["observed_slip"]]
+    slipped = [row["mass_kg"] for row in rows if row["mu"] == 1.0 and row["observed_slip"]]
+    boundary = ({"held_max_kg": max(held), "slip_min_kg": min(slipped)}
+                if held and slipped else None)
+    masses = sorted(row["predicted_slip_mass_kg"] for row in rows
+                    if row["predicted_slip_mass_kg"] is not None)
+
+    if not rows:
+        status = "无法判定"
+        conclusion = "无法判定：run 中没有 trial。"
+    elif not any(row["friction_capacity_n"] > 0.0 for row in rows):
+        status = "无法判定"
+        conclusion = "无法判定：没有可用的指令指力数据，无法计算 mu*N 摩擦容量。"
+    elif not any(row["predicted_slip"] for row in rows) and not any(row["observed_slip"] for row in rows):
+        status = "无法判定"
+        conclusion = ("无法判定：本 run 的全部 trial 都被预测托住且观测也全部托住，"
+                      "缺少滑移负控制，不能检验库仑模型；这是 acceptance run 的固有限制，"
+                      "需要 stress run 的负控制补上。")
+    elif agreements == len(rows):
+        status = "符合"
+        conclusion = ("符合：%d/%d trial 的观测滑移与库仑预测一致（容量 = mu x 两侧指令指力）。"
+                      % (agreements, len(rows)))
+        if boundary is not None:
+            conclusion += ("mu=1.0 时观测翻转区间为 %s-%s kg"
+                           % (_number_text(boundary["held_max_kg"], 2),
+                              _number_text(boundary["slip_min_kg"], 2)))
+            if declared_mass is not None:
+                inside = boundary["held_max_kg"] < declared_mass <= boundary["slip_min_kg"]
+                conclusion += "，预注册预测 %s kg %s。" % (
+                    _number_text(declared_mass, 2),
+                    "落在该区间内" if inside else "不在该区间内")
+            else:
+                conclusion += "。"
+        if peak_agreements != len(rows):
+            conclusion += (" 注：若用日志中的单点接触峰值代替指令指力，只有 %d/%d trial 一致——"
+                           "该峰值是单点力而不是总法向力，不能直接作为 mu*N 的 N。"
+                           % (peak_agreements, len(rows)))
+    else:
+        status = "偏离"
+        too_strong = [row["trial"] for row in rows
+                      if row["predicted_slip"] and not row["observed_slip"]]
+        too_weak = [row["trial"] for row in rows
+                    if row["observed_slip"] and not row["predicted_slip"]]
+        conclusion = ("偏离：%d/%d trial 与库仑预测不一致" % (len(rows) - agreements, len(rows)))
+        if too_strong:
+            conclusion += "；预测会滑移但实际托住：%s（有效摩擦强于 mu*N）" % "、".join(too_strong)
+        if too_weak:
+            conclusion += "；预测会托住但实际滑移：%s（有效摩擦弱于 mu*N）" % "、".join(too_weak)
+        conclusion += "。"
+
+    return {
+        "status": status,
+        "conclusion": conclusion,
+        "model": "capacity = mu * (commanded left finger effort + commanded right finger effort)",
+        "gravity_m_s2": GRAVITY_M_S2,
+        "lift_acceleration_m_s2": acceleration,
+        "acceleration_source": acceleration_source,
+        "declared_predicted_slip_mass_kg": declared_mass,
+        "predicted_slip_mass_kg": (declared_mass if declared_mass is not None
+                                   else (masses[len(masses) // 2] if masses else None)),
+        "observed_boundary_kg": boundary,
+        "agreement_count": agreements,
+        "agreement_from_pad_peak_count": peak_agreements,
+        "trial_count": len(rows),
+        "trials": rows,
+    }
+
+
+def analyze_run(run_dir: Path, exploratory: bool = False) -> dict[str, Any]:
     protocol = load_protocol(run_dir)
+    if exploratory:
+        require(protocol.stage is not None,
+                "run: exploratory mode needs protocol.stage so the report can name the stage")
+        require(protocol.stage != "acceptance",
+                "run: stage 'acceptance' must be analyzed in acceptance mode, not exploratory")
+    else:
+        require(protocol.stage in (None, "acceptance"),
+                "protocol stage %r is exploratory; run with --stage %s or --exploratory and "
+                "keep its results out of the acceptance verdict"
+                % (protocol.stage, protocol.stage))
+        if protocol.declared_trials is not None:
+            require(protocol.required_trials == len(protocol.declared_trials),
+                    "protocol: trials_required_pass %d differs from %d declared trials"
+                    % (protocol.required_trials, len(protocol.declared_trials)))
+        if all(value is not None for value in protocol.expected_trials.values()):
+            total = sum(value for value in protocol.expected_trials.values() if value is not None)
+            require(protocol.required_trials == total,
+                    "protocol: trials_required_pass %d differs from the per-object sum %d"
+                    % (protocol.required_trials, total))
+
     trial_dirs = discover_trials(run_dir, protocol)
-    trials = [analyze_trial(load_trial(path), protocol) for path in trial_dirs]
+    trials = [analyze_trial(load_trial(path), protocol, exploratory) for path in trial_dirs]
 
     by_object: dict[str, list[dict[str, Any]]] = {name: [] for name in protocol.objects}
     for trial in trials:
         by_object[trial["object"]].append(trial)
-    for name, spec in protocol.objects.items():
-        expected = protocol.expected_trials.get(name)
-        found = len(by_object[name])
-        if expected is not None:
-            require(found == expected,
-                    "run: object %s has %d trials, protocol declares %d "
-                    "(missing trial directory)" % (name, found, expected))
-    require(len(trials) == protocol.required_trials,
-            "run: found %d trials, protocol requires %d"
-            % (len(trials), protocol.required_trials))
+    if not exploratory:
+        for name in protocol.objects:
+            expected = protocol.expected_trials.get(name)
+            found = len(by_object[name])
+            if expected is not None:
+                require(found == expected,
+                        "run: object %s has %d trials, protocol declares %d "
+                        "(missing trial directory)" % (name, found, expected))
+        require(len(trials) == protocol.required_trials,
+                "run: found %d trials, protocol requires %d"
+                % (len(trials), protocol.required_trials))
 
-    failed = [trial for trial in trials if not trial["pass"]]
+    failed = [trial for trial in trials if trial.get("pass") is False]
     failure_modes: dict[str, list[str]] = {}
     for trial in failed:
         for mode in trial["failure_modes"]:
             failure_modes.setdefault(mode, []).append(trial["trial"])
-    overall_pass = not failed and len(trials) == protocol.required_trials
+    overall_pass = (not exploratory) and not failed and len(trials) == protocol.required_trials
 
     objects = []
     for name, spec in protocol.objects.items():
@@ -1070,15 +1313,17 @@ def analyze_run(run_dir: Path) -> dict[str, Any]:
             "mu": spec.mu,
             "declared_trials": protocol.expected_trials.get(name),
             "found_trials": len(rows),
-            "passed": sum(1 for row in rows if row["pass"]),
+            "passed": sum(1 for row in rows if row.get("pass") is True),
         })
 
+    friction = friction_cone_check(trials, protocol)
     return {
         "schema_version": SCHEMA_VERSION,
         "kind": KIND,
         "protocol_id": protocol.protocol_id,
         "protocol_sha256": protocol.sha256,
         "stage": protocol.stage,
+        "mode": "exploratory" if exploratory else "acceptance",
         "engine": protocol.engine,
         "run_dir": str(run_dir),
         "ref_window_s": REF_WINDOW_S,
@@ -1099,10 +1344,12 @@ def analyze_run(run_dir: Path) -> dict[str, Any]:
         },
         "objects": objects,
         "trials": trials,
-        "verdict": "PASS" if overall_pass else "FAIL",
-        "passed_trials": sum(1 for trial in trials if trial["pass"]),
-        "failed_trials": [trial["trial"] for trial in failed],
-        "failure_modes": failure_modes,
+        "friction_cone_check": friction,
+        "verdict": ("EXPLORATORY" if exploratory
+                    else ("PASS" if overall_pass else "FAIL")),
+        "passed_trials": None if exploratory else sum(1 for trial in trials if trial.get("pass") is True),
+        "failed_trials": [] if exploratory else [trial["trial"] for trial in failed],
+        "failure_modes": {} if exploratory else failure_modes,
         "limitations": list(LIMITATIONS),
         "interpretation": INTERPRETATION,
     }
@@ -1121,14 +1368,22 @@ def _percent(value: float) -> str:
 
 def render_markdown(summary: dict[str, Any]) -> str:
     criteria = summary["criteria"]
+    friction = summary["friction_cone_check"]
+    exploratory = summary["mode"] == "exploratory"
     lines: list[str] = []
-    lines.append("# 真实接触抓取探针：预注册分析报告")
+    lines.append("# 真实接触抓取探针：%s"
+                 % ("探索分析报告（不产生 PASS/FAIL）" if exploratory else "预注册分析报告"))
     lines.append("")
     lines.append("- run: %s" % summary["run_dir"])
     lines.append("- 协议: %s (protocol.json sha256 %s)"
                  % (summary["protocol_id"], summary["protocol_sha256"]))
+    lines.append("- 模式: %s"
+                 % ("探索（--stage/--exploratory）：只出指标与表格，不参与 verdict，"
+                    "不得写入 acceptance 结论"
+                    if exploratory else "预注册 acceptance：按 protocol.json 判据给出 PASS/FAIL"))
     if summary.get("engine"):
-        lines.append("- 物理引擎（协议声明，未在运行时校验）: %s" % summary["engine"])
+        lines.append("- 物理引擎（协议声明；运行期加载身份见各 trial meta.json）: %s"
+                     % summary["engine"])
     lines.append("- 判据来源: protocol.json；本报告不改动任何阈值，ref 固定在 close 最后 50 ms。")
     lines.append("")
     lines.append("## 预注册判据")
@@ -1150,11 +1405,16 @@ def render_markdown(summary: dict[str, Any]) -> str:
     lines.append("| 总体判据 | %d/%d 全部通过 |"
                  % (criteria["required_trials"], criteria["required_trials"]))
     lines.append("")
+    if exploratory:
+        lines.append("> 探索模式不改变上述判据；它只用于核对物理趋势（摩擦、载荷、几何），"
+                     "任何探索结果都不得写入 acceptance 结论。")
+        lines.append("")
     lines.append("## 运行与完整性")
     lines.append("")
     lines.append("| 项目 | 值 |")
     lines.append("| --- | --- |")
-    lines.append("| stage | %s |" % (summary["stage"] or "未声明"))
+    lines.append("| stage / mode | %s / %s |"
+                 % (summary["stage"] or "未声明", summary["mode"]))
     lines.append("| trial 数 | %d（预注册要求 %d） |"
                  % (len(summary["trials"]), criteria["required_trials"]))
     widths = ["%s×%d" % (item["name"], item["found_trials"]) for item in summary["objects"]]
@@ -1162,62 +1422,94 @@ def render_markdown(summary: dict[str, Any]) -> str:
     dt_med = sorted(trial["dt"]["median_s"] for trial in summary["trials"])
     lines.append("| 采样 | 每 trial %d-%d 帧，中位步长 %.6f s |"
                  % (min(trial["samples"] for trial in summary["trials"]),
-                    max(trial["samples"] for trial in summary["trials"]), dt_med[len(dt_med) // 2]))
+                    max(trial["samples"] for trial in summary["trials"]),
+                    dt_med[len(dt_med) // 2]))
     lines.append("| 时间戳 | 全部严格递增（分析器拒绝乱序/重复 iter） |")
     identities = {trial["meta"]["identity_source"] for trial in summary["trials"]}
     if identities == {"protocol_and_meta"}:
         identity_text = "protocol+meta（尺寸/质量/摩擦逐 trial 交叉校验）"
+    elif identities == {"meta_only"}:
+        identity_text = "meta_only（协议未声明 object_specs，无法交叉校验）"
     else:
-        identity_text = ("meta_only（协议未声明 object_specs：尺寸/质量/摩擦只来自 meta，"
-                         "无法交叉校验）")
+        identity_text = "+".join(sorted(identities))
     lines.append("| 对象身份校验 | %s |" % identity_text)
     lines.append("")
     lines.append("## 每 trial 指标")
     lines.append("")
-    lines.append("| trial | 对象 | 采样 | 时长/s | drift_t/mm | drift_r/° | drop | lift 双侧接触 "
-                 "| hold 对地 | 对地消失 t/s | f_close max/mean N | f_lift max/mean N | 判定 | 失败模式 |")
-    lines.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
+    if exploratory:
+        lines.append("| trial | 对象 | 采样 | drift_t/mm | drift_r/° | drop | lift 双侧接触 "
+                     "| hold 对地 | 对地消失 t/s | 指令力 close max/mean N | 指令力 lift max/mean N "
+                     "| 实测接触力 lift 峰值 N | 观测滑移 | 对地证据 |")
+        lines.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
+    else:
+        lines.append("| trial | 对象 | 采样 | drift_t/mm | drift_r/° | drop | lift 双侧接触 "
+                     "| hold 对地 | 对地消失 t/s | 指令力 close max/mean N | 指令力 lift max/mean N "
+                     "| 实测接触力 lift 峰值 N | 判定 | 失败模式 |")
+        lines.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
     for trial in summary["trials"]:
         contacts = trial["contacts"]
-        lines.append(
-            "| %s | %s | %d | %.2f | %s | %s | %s | %s | %s | %s | %s / %s | %s / %s | %s | %s |"
-            % (trial["trial"], trial["object"], trial["samples"], trial["sim_duration_s"],
-               _number_text(trial["drift"]["translation_mm"]),
-               _number_text(trial["drift"]["rotation_deg"]),
-               "是" if trial["drop"]["drop"] else "否",
-               _percent(contacts["pad_fraction"]["lift"]["both"]),
-               _percent(contacts["obj_ground_fraction"]["hold"]),
-               _number_text(contacts["obj_ground_lost_t"], 2),
-               _number_text(trial["forces"]["close"]["max_abs_n"]),
-               _number_text(trial["forces"]["close"]["mean_abs_n"]),
-               _number_text(trial["forces"]["lift"]["max_abs_n"]),
-               _number_text(trial["forces"]["lift"]["mean_abs_n"]),
-               "PASS" if trial["pass"] else "FAIL",
-               ", ".join(trial["failure_modes"]) if trial["failure_modes"] else "—"))
+        commanded = trial["forces"]["commanded"]
+        measured = (trial["forces"].get("measured_contact") or {}).get("per_phase", {})
+        measured_lift = (measured.get("lift") or {}).get("per_pad_peak_max_n")
+        lost = contacts["obj_ground_lost_t"]
+        ground_evidence = contacts.get("obj_ground_evidence", "unavailable")
+        cells = [
+            trial["trial"], trial["object"], str(trial["samples"]),
+            _number_text(trial["drift"]["translation_mm"]),
+            _number_text(trial["drift"]["rotation_deg"]),
+            "是" if trial["drop"]["drop"] else "否",
+            _percent(contacts["pad_fraction"]["lift"]["both"]),
+            _percent(contacts["obj_ground_fraction"]["hold"]),
+            _number_text(lost, 2),
+            "%s / %s" % (_number_text(commanded["close"]["max_abs_n"]),
+                         _number_text(commanded["close"]["mean_abs_n"])),
+            "%s / %s" % (_number_text(commanded["lift"]["max_abs_n"]),
+                         _number_text(commanded["lift"]["mean_abs_n"])),
+            _number_text(measured_lift, 2),
+        ]
+        if exploratory:
+            cells += ["是" if trial["observed_slip"] else "否", ground_evidence]
+        else:
+            cells += ["PASS" if trial["pass"] else "FAIL",
+                      ", ".join(trial["failure_modes"]) if trial["failure_modes"] else "—"]
+        lines.append("| " + " | ".join(cells) + " |")
+    lines.append("")
+    lines.append("力列说明：指令力取自 steps.jsonl 的 cmd.*（PreUpdate 缓存，是 pad 法向力的上界）；"
+                 "实测接触力取自 contacts.*_pad_force（求解器接触点 wrench 的单点峰值）。"
+                 "二者不等价：一个 pad 上可能有多个接触点，单点峰值小于该 pad 承担的总法向力，"
+                 "因此不能用实测单点峰值直接当 mu*N 的 N。")
     lines.append("")
     lines.append("## 每 trial 一行摘要")
     lines.append("")
     for trial in summary["trials"]:
         lines.append(
-            "- **%s** (%s): %s；drift %.3f mm / %.3f°；对地接触消失 t=%s；"
-            "lift 双侧接触 %s；close 力 max %.2f N；失败模式: %s"
-            % (trial["trial"], trial["object"], "PASS" if trial["pass"] else "FAIL",
+            "- **%s** (%s): %s；drift %.3f mm / %.3f°；对地接触消失 t=%s（证据 %s）；"
+            "lift 双侧接触 %s；指令力 close 峰值 %.2f N；实测接触力 lift 峰值 %s N；观测滑移 %s"
+            % (trial["trial"], trial["object"],
+               "—" if exploratory else ("PASS" if trial["pass"] else "FAIL"),
                trial["drift"]["translation_mm"], trial["drift"]["rotation_deg"],
                _number_text(trial["contacts"]["obj_ground_lost_t"], 2),
+               trial["contacts"].get("obj_ground_evidence", "unavailable"),
                _percent(trial["contacts"]["pad_fraction"]["lift"]["both"]),
-               trial["forces"]["close"]["max_abs_n"],
-               ", ".join(trial["failure_modes"]) if trial["failure_modes"] else "无"))
+               trial["forces"]["commanded"]["close"]["max_abs_n"],
+               _number_text((trial["forces"].get("measured_contact") or {}).get("per_phase", {})
+                            .get("lift", {}).get("per_pad_peak_max_n"), 2),
+               "是" if trial["observed_slip"] else "否"))
     lines.append("")
     lines.append("## 总体结论")
     lines.append("")
-    if summary["verdict"] == "PASS":
+    if exploratory:
+        lines.append("**探索模式：不产生 PASS/FAIL。** 本 run 只有逐 trial 指标与摩擦/载荷对照，"
+                     "不参与 acceptance 判据，也不能用于声称可行性。")
+    elif summary["verdict"] == "PASS":
         lines.append("**PASS**：%d/%d trial 全部满足预注册判据（平移漂移 < %s mm、旋转 < %s° 且未判 drop）。"
                      % (summary["passed_trials"], len(summary["trials"]),
                         _number_text(criteria["drift_translation_max_mm"]),
                         "—" if criteria["drift_rotation_max_deg"] is None
                         else _number_text(criteria["drift_rotation_max_deg"])))
         lines.append("")
-        lines.append("该结论只覆盖本固定场景、固定对象、固定摩擦系数与协议声明的物理引擎/步长。")
+        lines.append("该结论只覆盖本固定场景、固定对象、固定摩擦系数与协议声明的物理引擎/步长；"
+                     "不表示抓取成功率，也不构成部署资格。")
     else:
         lines.append("**FAIL**：%d/%d trial 通过，失败 trial：%s。"
                      % (summary["passed_trials"], len(summary["trials"]),
@@ -1228,25 +1520,62 @@ def render_markdown(summary: dict[str, Any]) -> str:
             for mode, trials in sorted(summary["failure_modes"].items()):
                 lines.append("- %s: %s" % (mode, "、".join(trials)))
     lines.append("")
-    lines.append("## 失败 trial 清单")
+    lines.append("## 摩擦锥核对（friction_cone_check）")
     lines.append("")
-    if not summary["failed_trials"]:
-        lines.append("无。")
-    else:
-        for trial in summary["trials"]:
-            if trial["pass"]:
-                continue
-            lines.append(
-                "- **%s** (%s): drift_t %.3f mm（限 %s）、drift_r %.3f°、drop=%s"
-                "（z 下降 %.3f mm / norm 偏差 %.3f mm）、lift 双侧接触 %s、hold 对地 %s → 模式 %s"
-                % (trial["trial"], trial["object"], trial["drift"]["translation_mm"],
-                   _number_text(criteria["drift_translation_max_mm"]),
-                   trial["drift"]["rotation_deg"], trial["drop"]["drop"],
-                   trial["drop"]["base_z_decline_mm"], trial["drop"]["rel_norm_deviation_mm"],
-                   _percent(trial["contacts"]["pad_fraction"]["lift"]["both"]),
-                   _percent(trial["contacts"]["obj_ground_fraction"]["hold"]),
-                   ", ".join(trial["failure_modes"])))
+    lines.append("容量 = mu ×（左右指令指力之和）；载荷 = m × (g + a)，a 由预注册抬升曲线取最大值，"
+                 "本 run 取 %.2f m/s²（%s）。" % (friction["lift_acceleration_m_s2"],
+                                                 friction["acceleration_source"]))
     lines.append("")
+    lines.append("| trial | 质量 kg | mu | 单侧指令指力 N | 单侧实测峰值 N | 容量 muN N "
+                 "| 载荷 N | 预测滑移 | 观测滑移 | 一致 | 预测滑移质量 kg |")
+    lines.append("| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |")
+    for row in friction["trials"]:
+        lines.append("| %s | %s | %s | %s | %s | %s | %s | %s | %s | %s | %s |"
+                     % (row["trial"], _number_text(row["mass_kg"], 2),
+                        _number_text(row["mu"], 2),
+                        _number_text(row["normal_force_applied_n"], 2),
+                        _number_text(row["normal_force_measured_n"], 2),
+                        _number_text(row["friction_capacity_n"], 2),
+                        _number_text(row["gravity_load_n"], 2),
+                        "是" if row["predicted_slip"] else "否",
+                        "是" if row["observed_slip"] else "否",
+                        "是" if row["agreement"] else "否",
+                        _number_text(row["predicted_slip_mass_kg"], 2)))
+    lines.append("")
+    lines.append("**结论**：%s — %s" % (friction["status"], friction["conclusion"]))
+    if friction["declared_predicted_slip_mass_kg"] is not None:
+        lines.append("")
+        lines.append("预注册预测：滑移质量 %s kg（protocol.controls.load_ladder_prediction）。"
+                     % _number_text(friction["declared_predicted_slip_mass_kg"], 2))
+    if friction["observed_boundary_kg"] is not None:
+        lines.append("")
+        lines.append("观测翻转区间：%s kg 仍托住，%s kg 已滑移。"
+                     % (_number_text(friction["observed_boundary_kg"]["held_max_kg"], 2),
+                        _number_text(friction["observed_boundary_kg"]["slip_min_kg"], 2)))
+    lines.append("")
+    if not exploratory:
+        lines.append("## 失败 trial 清单")
+        lines.append("")
+        if not summary["failed_trials"]:
+            lines.append("无。")
+        else:
+            for trial in summary["trials"]:
+                if trial["pass"]:
+                    continue
+                lines.append(
+                    "- **%s** (%s): drift_t %.3f mm（限 %s）、drift_r %.3f°、drop=%s"
+                    "（z 下降 %.3f mm / norm 偏差 %.3f mm）、lift 双侧接触 %s、hold 对地 %s、"
+                    "对地证据 %s → 模式 %s"
+                    % (trial["trial"], trial["object"], trial["drift"]["translation_mm"],
+                       _number_text(criteria["drift_translation_max_mm"]),
+                       trial["drift"]["rotation_deg"], trial["drop"]["drop"],
+                       trial["drop"]["base_z_decline_mm"],
+                       trial["drop"]["rel_norm_deviation_mm"],
+                       _percent(trial["contacts"]["pad_fraction"]["lift"]["both"]),
+                       _percent(trial["contacts"]["obj_ground_fraction"]["hold"]),
+                       trial["contacts"].get("obj_ground_evidence", "unavailable"),
+                       ", ".join(trial["failure_modes"])))
+        lines.append("")
     lines.append("## 本结果不能证明什么")
     lines.append("")
     for index, limitation in enumerate(summary["limitations"], start=1):
@@ -1283,10 +1612,19 @@ def main(argv: list[str] | None = None) -> int:
                         help="write the JSON summary here (exclusive create)")
     parser.add_argument("--md-out", type=Path, default=None,
                         help="write the Markdown report here (exclusive create)")
+    parser.add_argument("--exploratory", action="store_true",
+                        help="only per-trial metrics and tables; no PASS/FAIL, exit 0")
+    parser.add_argument("--stage", default=None,
+                        help="exploratory stage name (stress/smoke); validates protocol.stage")
     args = parser.parse_args(argv)
 
+    exploratory = args.exploratory or (args.stage is not None and args.stage != "acceptance")
     try:
-        summary = analyze_run(args.run_dir)
+        summary = analyze_run(args.run_dir, exploratory)
+        if args.stage is not None:
+            require(summary["stage"] == args.stage,
+                    "protocol stage %r does not match --stage %r"
+                    % (summary["stage"], args.stage))
         json_out = args.json_out or (args.run_dir / "analysis" / "summary.json")
         md_out = args.md_out or (args.run_dir / "analysis" / "REPORT.md")
         write_outputs(summary, json_out, md_out)
@@ -1297,17 +1635,24 @@ def main(argv: list[str] | None = None) -> int:
         print("analyze.py: INVALID INPUT: %r" % error, file=sys.stderr)
         return 2
 
-    verdict = summary["verdict"]
-    print("%s: %d/%d trials passed; failed: %s"
-          % (verdict, summary["passed_trials"], len(summary["trials"]),
-             ", ".join(summary["failed_trials"]) or "none"))
-    if summary["failure_modes"]:
-        print("failure modes: " + "; ".join(
-            "%s=%s" % (mode, ",".join(trials))
-            for mode, trials in sorted(summary["failure_modes"].items())))
+    friction = summary["friction_cone_check"]
+    print("friction_cone_check: %s" % friction["status"])
+    if exploratory:
+        print("EXPLORATORY: %d trials, no verdict (stage %s)"
+              % (len(summary["trials"]), summary["stage"]))
+    else:
+        print("%s: %d/%d trials passed; failed: %s"
+              % (summary["verdict"], summary["passed_trials"], len(summary["trials"]),
+                 ", ".join(summary["failed_trials"]) or "none"))
+        if summary["failure_modes"]:
+            print("failure modes: " + "; ".join(
+                "%s=%s" % (mode, ",".join(trials))
+                for mode, trials in sorted(summary["failure_modes"].items())))
     print("json: %s" % json_out)
     print("markdown: %s" % md_out)
-    return 0 if verdict == "PASS" else 1
+    if exploratory:
+        return 0
+    return 0 if summary["verdict"] == "PASS" else 1
 
 
 if __name__ == "__main__":

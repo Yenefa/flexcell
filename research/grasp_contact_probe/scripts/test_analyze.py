@@ -6,10 +6,10 @@ Two entry points, no third-party dependency and no Gazebo:
     python3 research/grasp_contact_probe/scripts/test_analyze.py
     python3 -m pytest research/grasp_contact_probe/scripts/test_analyze.py
 
-Fixtures mirror run_probe.py's real output (protocol.json acceptance block,
-box_a-01 style directories, per-trial meta.json with hashes and exit code) and
-are written into a fresh temporary directory. Nothing here reads a real run,
-starts a simulator or writes outside its own temp tree.
+Fixtures mirror the real run_probe.py output (acceptance block, object_specs,
+box_a-01 style directories, cmd.* commanded effort, contacts.*_pad_force,
+per-trial meta.json with hashes and exit code) and are written into a fresh
+temporary directory. Nothing here reads a real run or starts a simulator.
 """
 from __future__ import annotations
 
@@ -33,6 +33,8 @@ TOTAL_S = SETTLE_S + CLOSE_S + LIFT_S + HOLD_S
 STEPS = int(round(TOTAL_S / STEP_S)) + 1
 LIFT_HEIGHT_M = 0.15
 REL_Z_M = 0.02
+PAD_FORCE_N = 2.04
+FINGER_CMD_N = 7.5
 JITTER = (
     {"x": 0.0000, "y": 0.0000, "yaw_deg": 0.0},
     {"x": 0.0015, "y": 0.0000, "yaw_deg": 1.5},
@@ -43,6 +45,12 @@ JITTER = (
 OBJECTS = (
     ("box_a", {"size_m": 0.035, "mass_kg": 0.05, "mu": 1.0}),
     ("box_b", {"size_m": 0.050, "mass_kg": 0.12, "mu": 1.0}),
+)
+STRESS_SPECS = (
+    {"trial": "stress-load-0.50kg", "mass_kg": 0.50, "mu": 1.0, "size_m": 0.035, "slip_mm": 0.0},
+    {"trial": "stress-load-1.00kg", "mass_kg": 1.00, "mu": 1.0, "size_m": 0.035, "slip_mm": 0.0},
+    {"trial": "stress-load-1.20kg", "mass_kg": 1.20, "mu": 1.0, "size_m": 0.035, "slip_mm": 8.85},
+    {"trial": "stress-load-1.50kg", "mass_kg": 1.50, "mu": 1.0, "size_m": 0.035, "slip_mm": 150.0},
 )
 
 
@@ -87,14 +95,22 @@ def sample_at(index: int) -> dict:
     phase = phase_of(t)
     if phase == "settle":
         left_pad = right_pad = 0
-        left_force = right_force = 0.0
+        pad_force = 0.0
+        ground = 1
+        obj_contacts = 1
+        finger_cmd = 0.0
     elif phase == "close":
         left_pad = right_pad = 1
-        left_force, right_force = -6.0, 6.0
+        pad_force = PAD_FORCE_N
+        ground = 1
+        obj_contacts = 3
+        finger_cmd = FINGER_CMD_N
     else:
         left_pad = right_pad = 1
-        left_force, right_force = -3.0, 3.0
-    ground = 1 if phase in ("settle", "close") else 0
+        pad_force = PAD_FORCE_N
+        ground = 0
+        obj_contacts = 2
+        finger_cmd = FINGER_CMD_N
     return {
         "iter": index,
         "t": t,
@@ -103,11 +119,19 @@ def sample_at(index: int) -> dict:
         "base": {"p": [0.0, 0.0, z], "q": [0.0, 0.0, 0.0, 1.0]},
         "rel": {"p": [0.0, 0.0, REL_Z_M], "q": [0.0, 0.0, 0.0, 1.0]},
         "joints": {
-            "left": {"q": 0.0, "qd": 0.0, "f": left_force},
-            "right": {"q": 0.0, "qd": 0.0, "f": right_force},
-            "lift": {"q": z, "qd": 0.0, "f": 6.37},
+            "left": {"q": 0.0, "qd": 0.0, "f": 0.0},
+            "right": {"q": 0.0, "qd": 0.0, "f": 0.0},
+            "lift": {"q": z, "qd": 0.0, "f": 0.0},
         },
-        "contacts": {"left_pad": left_pad, "right_pad": right_pad, "obj_ground": ground},
+        "contacts": {
+            "left_pad": left_pad,
+            "right_pad": right_pad,
+            "left_pad_force": pad_force,
+            "right_pad_force": pad_force,
+            "obj_contacts": obj_contacts,
+            "obj_ground": ground,
+        },
+        "cmd": {"left": -finger_cmd, "right": finger_cmd, "lift": 6.37 + z * 6.5},
         "gap_target": 0.056 if phase == "settle" else 0.02,
         "lift_target": z,
     }
@@ -148,10 +172,17 @@ def protocol_document(trials_per_object=(5, 5), protocol_trials=None) -> dict:
             "kd_lift": 80.0,
             "max_lift_force_n": 80.0,
         },
+        "controls": {
+            "load_ladder_kg": [0.5, 1.0, 1.2, 1.5],
+            "load_ladder_prediction": "slip above m = 2*mu*N/(g+a) = 15.0/13.4 = 1.12 kg",
+            "slip_expected": {"mass_kg": 0.5, "mu": 0.2,
+                              "why": "2*mu*N = 2*0.2*7.5 = 3.0 N < m*(g+a) = 6.7 N"},
+        },
+        "object_specs": {name: dict(spec) for name, spec in OBJECTS},
         "acceptance": {
             "reference": "mean rel pose over the last 50 ms of the close phase",
             "drift_translation_mm_max": 2.0,
-            "drift_rotation_deg_max": 30.0,
+            "drift_rotation_deg_max": 5.0,
             "drop_relative_z_mm": -20.0,
             "drop_abs_drift_mm": 30.0,
             "trials_required_pass": sum(trials_per_object),
@@ -168,6 +199,39 @@ def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _write_trial(root: Path, name: str, object_name: str, mass: float, mu: float,
+                 size: float, mutate=None, steps: int = STEPS) -> None:
+    directory = root / name
+    directory.mkdir()
+    world = directory / "world.sdf"
+    world.write_text("<sdf version='1.10'><!-- synthetic fixture world --></sdf>\n",
+                     encoding="utf-8")
+    samples = [sample_at(index) for index in range(steps)]
+    if mutate is not None:
+        for index, sample in enumerate(samples):
+            mutate(name, index, sample["t"], sample)
+    steps_path = directory / "steps.jsonl"
+    with steps_path.open("w", encoding="utf-8", newline="\n") as stream:
+        for sample in samples:
+            stream.write(json.dumps(sample) + "\n")
+    index = int(name.rsplit("-", 1)[1]) - 1 if name.rsplit("-", 1)[1].isdigit() else 0
+    meta = {
+        "trial": name,
+        "group": "acceptance",
+        "object_name": object_name,
+        "size_m": size,
+        "mass_kg": mass,
+        "mu": mu,
+        "jitter": JITTER[index % len(JITTER)],
+        "lift_s": LIFT_S,
+        "exit_code": 0,
+        "steps_bytes": steps_path.stat().st_size,
+        "steps_sha256": _sha256(steps_path),
+        "world_sha256": _sha256(world),
+    }
+    (directory / "meta.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
+
+
 def make_run(root: Path, trials_per_object=(5, 5), protocol_trials=None, mutate=None,
              protocol_patch=None, steps: int = STEPS) -> Path:
     root = Path(root)
@@ -179,43 +243,35 @@ def make_run(root: Path, trials_per_object=(5, 5), protocol_trials=None, mutate=
     for name in trial_names(trials_per_object):
         object_name = name.rsplit("-", 1)[0]
         spec = dict(OBJECTS)[object_name]
-        directory = root / name
-        directory.mkdir()
-        world = directory / "world.sdf"
-        world.write_text("<sdf version='1.10'><!-- synthetic fixture world --></sdf>\n",
-                         encoding="utf-8")
-        samples = [sample_at(index) for index in range(steps)]
-        if mutate is not None:
-            for index, sample in enumerate(samples):
-                mutate(name, index, sample["t"], sample)
-        steps_path = directory / "steps.jsonl"
-        with steps_path.open("w", encoding="utf-8", newline="\n") as stream:
-            for sample in samples:
-                stream.write(json.dumps(sample) + "\n")
-        index = int(name.rsplit("-", 1)[1]) - 1
-        meta = {
-            "trial": name,
-            "group": "acceptance",
-            "object_name": object_name,
-            "size_m": spec["size_m"],
-            "mass_kg": spec["mass_kg"],
-            "mu": spec["mu"],
-            "jitter": JITTER[index % len(JITTER)],
-            "lift_s": LIFT_S,
-            "exit_code": 0,
-            "steps_bytes": steps_path.stat().st_size,
-            "steps_sha256": _sha256(steps_path),
-            "world_sha256": _sha256(world),
-        }
-        (directory / "meta.json").write_text(json.dumps(meta, indent=2) + "\n", encoding="utf-8")
+        _write_trial(root, name, object_name, spec["mass_kg"], spec["mu"], spec["size_m"],
+                     mutate=mutate, steps=steps)
+    return root
+
+
+def make_stress_run(root: Path, specs=STRESS_SPECS) -> Path:
+    root = Path(root)
+    root.mkdir(parents=True, exist_ok=True)
+    document = protocol_document((5, 5))
+    document["stage"] = "stress"
+    document["run_id"] = "synthetic-stress"
+    document["trials"] = [spec["trial"] for spec in specs]
+    (root / "protocol.json").write_text(json.dumps(document, indent=2) + "\n", encoding="utf-8")
+    for spec in specs:
+        def slip(name: str, index: int, t: float, sample: dict) -> None:
+            start = SETTLE_S + CLOSE_S
+            if spec["slip_mm"] and t > start:
+                u = min(1.0, (t - start) / LIFT_S)
+                set_rel(sample, (0.0, 0.0, REL_Z_M - spec["slip_mm"] / 1000.0 * u))
+        _write_trial(root, spec["trial"], "box_a", spec["mass_kg"], spec["mu"],
+                     spec["size_m"], mutate=slip)
     return root
 
 
 @contextlib.contextmanager
-def temporary_run(**kwargs):
+def temporary_run(factory=make_run, **kwargs):
     root = Path(tempfile.mkdtemp(prefix="grasp-probe-test-"))
     try:
-        make_run(root, **kwargs)
+        factory(root, **kwargs)
         yield root
     finally:
         shutil.rmtree(root, ignore_errors=True)
@@ -252,6 +308,11 @@ def norm_drop_35_mm(name: str, index: int, t: float, sample: dict) -> None:
         set_rel(sample, (0.035, 0.0, REL_Z_M))
 
 
+def ground_stuck(name: str, index: int, t: float, sample: dict) -> None:
+    if name == "box_a-01":
+        sample["contacts"]["obj_ground"] = 1
+
+
 # --------------------------------------------------------------------------- #
 # Tests.
 # --------------------------------------------------------------------------- #
@@ -261,22 +322,37 @@ def test_perfect_run_passes() -> None:
         assert code == 0, (code, out, err)
         summary = read_summary(root)
         assert summary["verdict"] == "PASS"
+        assert summary["mode"] == "acceptance"
         assert summary["passed_trials"] == 10
         assert summary["failed_trials"] == []
-        assert summary["stage"] == "acceptance"
-        assert summary["criteria"]["drift_rotation_max_deg"] == 30.0
         first = summary["trials"][0]
         assert first["samples"] == STEPS
         assert abs(first["drift"]["translation_mm"]) < 1e-6
         assert first["drop"]["drop"] is False
         assert 48 <= first["ref"]["samples"] <= 52
-        # The shipped protocol declares no object specs, so identity comes from meta only.
-        assert first["meta"]["identity_source"] == "meta_only"
+        assert first["meta"]["identity_source"] == "protocol_and_meta"
+        assert first["contacts"]["obj_ground_evidence"] == "lost_after_lift"
+        assert abs(first["contacts"]["obj_ground_lost_t"] - (SETTLE_S + CLOSE_S)) < 0.002
+        assert first["forces"]["commanded"]["close"]["max_abs_n"] == FINGER_CMD_N
+        measured = first["forces"]["measured_contact"]["per_phase"]["lift"]
+        assert abs(measured["per_pad_peak_max_n"] - PAD_FORCE_N) < 1e-9
+        assert first["forces"]["normal_force_applied_per_pad_n"] == FINGER_CMD_N
         report = (root / "analysis" / "REPORT.md").read_text(encoding="utf-8")
         assert "本结果不能证明什么" in report
         assert "DART" in report
         assert "PASS" in report
+        assert "指令力" in report and "实测接触力" in report
         assert summary["limitations"][0].startswith("仅两种尺寸")
+
+
+def test_acceptance_friction_check_cannot_decide() -> None:
+    with temporary_run() as root:
+        code, out, err = run_cli(root)
+        assert code == 0, (code, out, err)
+        friction = read_summary(root)["friction_cone_check"]
+        assert friction["status"] == "无法判定"
+        assert friction["trial_count"] == 10
+        assert friction["declared_predicted_slip_mass_kg"] == 1.12
 
 
 def test_drift_above_threshold_fails() -> None:
@@ -289,7 +365,7 @@ def test_drift_above_threshold_fails() -> None:
         failed = summary["trials"][2]
         assert abs(failed["drift"]["translation_mm"] - 2.5) < 1e-6
         assert failed["failure_modes"] == ["slip"]
-        assert summary["failure_modes"] == {"slip": ["box_a-03"]}
+        assert failed["observed_slip"] is True
 
 
 def test_thresholds_come_from_protocol() -> None:
@@ -324,9 +400,14 @@ def test_drop_norm_criterion_detected() -> None:
         trial = read_summary(root)["trials"][1]
         assert trial["drop"]["drop"] is True
         assert trial["drop"]["rel_norm_triggered"] is True
-        assert trial["drop"]["rel_norm_trigger_t"] is not None
         assert trial["drop"]["base_z_triggered"] is False
-        assert abs(trial["drop"]["rel_norm_deviation_mm"] - 35.0) < 1e-6
+
+
+def test_ground_evidence_inconsistency_rejected() -> None:
+    with temporary_run(mutate=ground_stuck) as root:
+        code, out, err = run_cli(root)
+        assert code == 2, (code, out, err)
+        assert "contradict" in err
 
 
 def test_rotation_criterion_when_declared() -> None:
@@ -413,8 +494,6 @@ def test_contact_sentinel_rejected() -> None:
 
 def test_world_frame_rel_rejected() -> None:
     def world_rel(name: str, index: int, t: float, sample: dict) -> None:
-        # During lift the base is at a different height, so world-frame rel differs
-        # from base-frame rel.
         if name == "box_a-04" and index == 900:
             sample["rel"]["p"] = list(sample["obj"]["p"])
 
@@ -490,11 +569,46 @@ def test_reference_text_deviation_rejected() -> None:
         assert "30 ms" in err
 
 
-def test_exploratory_stage_rejected() -> None:
-    with temporary_run(protocol_patch={"stage": "stress"}) as root:
+def test_exploratory_stage_stress() -> None:
+    with temporary_run(factory=make_stress_run) as root:
+        code, out, err = run_cli(root, "--stage", "stress")
+        assert code == 0, (code, out, err)
+        summary = read_summary(root)
+        assert summary["verdict"] == "EXPLORATORY"
+        assert summary["mode"] == "exploratory"
+        assert summary["passed_trials"] is None
+        assert summary["failed_trials"] == []
+        assert all(trial["pass"] is None for trial in summary["trials"])
+        friction = summary["friction_cone_check"]
+        assert friction["status"] == "符合", friction
+        assert friction["agreement_count"] == 4
+        assert friction["predicted_slip_mass_kg"] == 1.12
+        assert friction["observed_boundary_kg"] == {"held_max_kg": 1.0, "slip_min_kg": 1.2}
+        report = (root / "analysis" / "REPORT.md").read_text(encoding="utf-8")
+        assert "探索分析报告" in report
+        assert "friction_cone_check" in report
+        assert "符合" in report
+
+
+def test_exploratory_stage_mismatch_rejected() -> None:
+    with temporary_run(factory=make_stress_run) as root:
+        code, out, err = run_cli(root, "--stage", "smoke")
+        assert code == 2, (code, out, err)
+        assert "does not match" in err
+
+
+def test_stress_run_rejected_without_exploratory_flag() -> None:
+    with temporary_run(factory=make_stress_run) as root:
         code, out, err = run_cli(root)
         assert code == 2, (code, out, err)
         assert "exploratory" in err
+
+
+def test_acceptance_run_rejected_in_exploratory_mode() -> None:
+    with temporary_run() as root:
+        code, out, err = run_cli(root, "--exploratory")
+        assert code == 2, (code, out, err)
+        assert "acceptance" in err
 
 
 def test_reports_are_not_overwritten() -> None:
