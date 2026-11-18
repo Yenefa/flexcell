@@ -1,0 +1,2506 @@
+{
+  "schema_version": 1,
+  "kind": "GRASP_CONTACT_PROBE_ANALYSIS",
+  "protocol_id": "stress-v3",
+  "protocol_sha256": "e7644f9bb02c71dac202c4a8c4444138d4fe2cdf4e208e896c7ba9515f8137f7",
+  "stage": "stress",
+  "mode": "exploratory",
+  "engine": "gz-sim 8 dartsim",
+  "run_dir": "results/stress-v3",
+  "ref_window_s": 0.05,
+  "criteria": {
+    "drift_translation_max_mm": 2.0,
+    "drift_rotation_max_deg": 5.0,
+    "drop_base_z_mm": 20.0,
+    "drop_rel_norm_mm": 30.0,
+    "required_trials": 10,
+    "max_initial_jitter_m": null,
+    "min_pad_contact_fraction_lift": null,
+    "max_obj_ground_fraction_lift": null,
+    "step_s": 0.001,
+    "pass_rule": "per trial: drift_translation_mm < limit, not drop, and the optional contact-evidence criteria when declared; overall: required_trials / required_trials pass",
+    "resolved_keys": {
+      "drift_translation_mm_max": "acceptance.drift_translation_mm_max",
+      "drift_rotation_deg_max": "acceptance.drift_rotation_deg_max",
+      "drop_relative_z_mm": "acceptance.drop_relative_z_mm",
+      "drop_abs_drift_mm": "acceptance.drop_abs_drift_mm",
+      "step_s": "physics.step_s",
+      "reference": "acceptance.reference",
+      "object_specs": "protocol.object_specs",
+      "trials": "protocol.trials",
+      "required_trials": "acceptance.trials_required_pass"
+    }
+  },
+  "objects": [
+    {
+      "name": "box_a",
+      "size_m": 0.035,
+      "mass_kg": 0.05,
+      "mu": 1.0,
+      "declared_trials": 5,
+      "found_trials": 10,
+      "passed": 0
+    },
+    {
+      "name": "box_b",
+      "size_m": 0.05,
+      "mass_kg": 0.12,
+      "mu": 1.0,
+      "declared_trials": 5,
+      "found_trials": 0,
+      "passed": 0
+    }
+  ],
+  "trials": [
+    {
+      "trial": "stress-load-0.05kg",
+      "object": "box_a",
+      "meta": {
+        "size_m": 0.035,
+        "mass_kg": 0.05,
+        "mu": 1.0,
+        "jitter_m": 0.0,
+        "jitter_yaw_deg": 0.0,
+        "identity_checked": true,
+        "identity_source": "protocol_and_meta",
+        "identity_mismatch": [],
+        "raw": {
+          "command": [
+            "gz",
+            "sim",
+            "-s",
+            "-r",
+            "--iterations",
+            "1701",
+            "results/stress-v3/stress-load-0.05kg/world.sdf"
+          ],
+          "dartsim_loaded": true,
+          "engine_libraries": {
+            "/opt/ros/jazzy/opt/gz_physics_vendor/lib/gz-physics-7/engine-plugins/libgz-physics7-dartsim-plugin.so.7.8.0": "75617f959d603e052048c6258fbe912d16c66ceebeada7688e6d5be4650cf878",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-physics-system.so.8.15.0": "3b375a1f93e6cfd7794165df9229acd1bfdec2812e1b92cdb2e7a5399f4fad91",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gui.so.8.15.0": "b6205045d4a7d5df123e50267235aad10b2eac2057ab3b342659f2db8b63cc1d",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gz.so.8.15.0": "03ca2b7142fb4143eb188226aa2f146bf472d719193af463e31ea8efd4088d0f",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8.so.8.15.0": "a348e4d28376de4e59ba58402142d0ce9e2abd7852ab76e721a34bafa569ef19"
+          },
+          "exit_code": 0,
+          "group": "stress",
+          "jitter": {
+            "x": 0.0,
+            "y": 0.0,
+            "yaw_deg": 0.0
+          },
+          "lift_s": 0.5,
+          "mass_kg": 0.05,
+          "mu": 1.0,
+          "object_name": "box_a",
+          "plugin_sha256": "d40c932fdffe4e561c94f57c74f9f65a59d30fa17d657dbea3a2d9f29eb8b9fb",
+          "size_m": 0.035,
+          "steps_bytes": 1843322,
+          "steps_sha256": "fdd9b132be1842c05d5408676dec5407bd8a4bc989a9b49f94e03de1a7b0282e",
+          "trial": "stress-load-0.05kg",
+          "wall_s": 3.897,
+          "world_sha256": "99609d3f3000075bd3508518f1392b95c08339b5d08588ec3cdce56b8e147bd0"
+        }
+      },
+      "samples": 1701,
+      "sim_duration_s": 1.7000000000000002,
+      "first_t": 0.001,
+      "last_t": 1.701,
+      "phase_counts": {
+        "settle": 299,
+        "close": 400,
+        "lift": 500,
+        "hold": 502
+      },
+      "dt": {
+        "min_s": 0.0009999999999998899,
+        "median_s": 0.0010000000000000009,
+        "max_s": 0.001000000000000112,
+        "frames": 1701
+      },
+      "integrity": {
+        "rel_frame_offset_mm": 0.0
+      },
+      "files": {
+        "steps_sha256": "fdd9b132be1842c05d5408676dec5407bd8a4bc989a9b49f94e03de1a7b0282e",
+        "meta_sha256": "175edeb1aba874fee9d480bbd6eb44e009238ed0a2d79a3f2a073e03bd00642e"
+      },
+      "ref": {
+        "window_s": 0.05,
+        "t_start": 0.649,
+        "t_end": 0.699,
+        "samples": 51,
+        "position_m": [
+          1.4209620931139817e-22,
+          9.573866299645156e-23,
+          -0.06137686987677277
+        ],
+        "quaternion": [
+          -1.2325083711156532e-20,
+          5.405491874397948e-20,
+          -4.9455770408456294e-21,
+          1.0
+        ],
+        "translation_spread_mm": 6.938893903907228e-15,
+        "rotation_spread_deg": 4.192464897984552e-33
+      },
+      "drift": {
+        "translation_mm": 0.0011416364146046853,
+        "translation_at_s": 0.71,
+        "rotation_deg": 3.0146258395041656e-15,
+        "rotation_at_s": 1.327,
+        "window_start_s": 0.699,
+        "translation_limit_mm": 2.0,
+        "rotation_limit_deg": 5.0,
+        "translation_within_limit": true,
+        "rotation_within_limit": true
+      },
+      "contact_evidence": {
+        "requires_pad_contact_in_lift": null,
+        "lift_both_pad_fraction": 1.0,
+        "max_obj_ground_fraction_lift": null,
+        "lift_obj_ground_fraction": 0.02,
+        "within_limit": true
+      },
+      "drop": {
+        "base_z_decline_mm": 0.0011416364146046853,
+        "base_z_limit_mm": 20.0,
+        "base_z_triggered": false,
+        "base_z_trigger_t": null,
+        "rel_norm_deviation_mm": 0.0011416364146046853,
+        "rel_norm_limit_mm": 30.0,
+        "rel_norm_triggered": false,
+        "rel_norm_trigger_t": null,
+        "drop": false
+      },
+      "contacts": {
+        "pad_fraction": {
+          "close": {
+            "left": 0.3925,
+            "right": 0.3925,
+            "both": 0.3925
+          },
+          "lift": {
+            "left": 1.0,
+            "right": 1.0,
+            "both": 1.0
+          },
+          "hold": {
+            "left": 1.0,
+            "right": 1.0,
+            "both": 1.0
+          }
+        },
+        "obj_ground_fraction": {
+          "settle": 1.0,
+          "close": 1.0,
+          "lift": 0.02,
+          "hold": 0.0
+        },
+        "obj_ground_last_t": 0.709,
+        "obj_ground_lost_t": 0.71,
+        "obj_ground_lost_delay_s": 0.01100000000000001,
+        "obj_ground_still_touching_at_end": false,
+        "obj_ground_evidence": "lost_after_lift",
+        "obj_contacts_present": false
+      },
+      "forces": {
+        "commanded": {
+          "close": {
+            "max_abs_n": 7.492994567544316,
+            "mean_abs_n": 2.0601426880115383,
+            "samples": 800
+          },
+          "lift": {
+            "max_abs_n": 7.499831205654636,
+            "mean_abs_n": 7.498587267253088,
+            "samples": 1000
+          },
+          "lift_joint": {
+            "max_abs_n": 9.816436482519626,
+            "mean_abs_n": 7.449766891921892,
+            "samples": 500
+          },
+          "source": "cmd (PreUpdate cache); the joint force component is cleared by gz-sim before PostUpdate, so joints.f is not the applied effort",
+          "note": "commanded finger effort is an upper bound on the normal load, not a measured contact force"
+        },
+        "measured_contact": {
+          "per_phase": {
+            "close": {
+              "per_pad_peak_max_n": 2.0369905625525333,
+              "per_pad_peak_mean_n": 0.5599978564777442,
+              "total_max_n": 4.073981124991507,
+              "total_mean_n": 1.1199957129411797,
+              "samples": 400
+            },
+            "lift": {
+              "per_pad_peak_max_n": 2.0397617696015415,
+              "per_pad_peak_mean_n": 2.039489340872736,
+              "total_max_n": 4.079523539191057,
+              "total_mean_n": 4.078978681676965,
+              "samples": 500
+            },
+            "hold": {
+              "per_pad_peak_max_n": 2.039804132932107,
+              "per_pad_peak_mean_n": 2.039767244234065,
+              "total_max_n": 4.079608265805996,
+              "total_mean_n": 4.07953448836441,
+              "samples": 502
+            }
+          },
+          "weight_ratio_total_max": 8.325558243247055,
+          "note": "solver-integrated contact wrench; the plugin logs a per-pad single-point peak, which under-reports the total normal load carried by the pads"
+        },
+        "normal_force_applied_per_pad_n": 7.499831205654636,
+        "normal_force_measured_per_pad_n": 2.0397617696015415
+      },
+      "max_abs_qd_rad_s": 0.44967361197367406,
+      "max_abs_finger_command_n": 7.499873914619146,
+      "heuristics": {
+        "oscillation_ratio": 0.8026518960093384,
+        "max_frame_rel_jump_mm": 0.0013438331031082051,
+        "max_rel_norm_m": 0.0614993000979983,
+        "solver_divergence": false
+      },
+      "observed_slip": false,
+      "pass": null,
+      "failure_modes": []
+    },
+    {
+      "trial": "stress-load-0.50kg",
+      "object": "box_a",
+      "meta": {
+        "size_m": 0.035,
+        "mass_kg": 0.5,
+        "mu": 1.0,
+        "jitter_m": 0.0,
+        "jitter_yaw_deg": 0.0,
+        "identity_checked": false,
+        "identity_source": "exploratory_override",
+        "identity_mismatch": [
+          "mass_kg=0.5 vs protocol 0.05"
+        ],
+        "raw": {
+          "command": [
+            "gz",
+            "sim",
+            "-s",
+            "-r",
+            "--iterations",
+            "1701",
+            "results/stress-v3/stress-load-0.50kg/world.sdf"
+          ],
+          "dartsim_loaded": true,
+          "engine_libraries": {
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-bullet.so.6.13.2": "0ca5fa82b2d37e86e6aa4fcd38ba43d4b51f82b4cae2dff4c53b569b86e51a33",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-ode.so.6.13.2": "b50d9d8174333d857ec04bdca0699db7921101bccef05ce2c5010bd265b9deb6",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-external-odelcpsolver.so.6.13.2": "7c7698c181c18a30c491cb1945cd4a9d4f4e03fa4c0c6b767ad2358b3e382816",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart.so.6.13.2": "cb4f008188d1ea13cba9b43470c9d46cf819e8df0e4fdc818fa1e4f81b396426",
+            "/opt/ros/jazzy/opt/gz_physics_vendor/lib/gz-physics-7/engine-plugins/libgz-physics7-dartsim-plugin.so.7.8.0": "75617f959d603e052048c6258fbe912d16c66ceebeada7688e6d5be4650cf878",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-contact-system.so.8.15.0": "a63faf0de27a6d3052b2ba50c3b05826a5a59c98ffe47bfddb159e8de3266cfb",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-physics-system.so.8.15.0": "3b375a1f93e6cfd7794165df9229acd1bfdec2812e1b92cdb2e7a5399f4fad91",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-scene-broadcaster-system.so.8.15.0": "8521047b5ae40b4e0f2c4b55e1ff2899568fc6e12fe90a6456afb87fb837366a",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-user-commands-system.so.8.15.0": "82a671d7f44207b456ea9abfa2ad3982781c8b196ba08e35dad5d5cec805d0e3",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gui.so.8.15.0": "b6205045d4a7d5df123e50267235aad10b2eac2057ab3b342659f2db8b63cc1d",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gz.so.8.15.0": "03ca2b7142fb4143eb188226aa2f146bf472d719193af463e31ea8efd4088d0f",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8.so.8.15.0": "a348e4d28376de4e59ba58402142d0ce9e2abd7852ab76e721a34bafa569ef19"
+          },
+          "exit_code": 0,
+          "group": "stress",
+          "jitter": {
+            "x": 0.0,
+            "y": 0.0,
+            "yaw_deg": 0.0
+          },
+          "lift_s": 0.5,
+          "mass_kg": 0.5,
+          "mu": 1.0,
+          "object_name": "box_a",
+          "plugin_sha256": "d40c932fdffe4e561c94f57c74f9f65a59d30fa17d657dbea3a2d9f29eb8b9fb",
+          "size_m": 0.035,
+          "steps_bytes": 1843355,
+          "steps_sha256": "1a5e2bf20efd52f58eace8b1739a7729911c94f69653e3e23cf81e4a9a2f9372",
+          "trial": "stress-load-0.50kg",
+          "wall_s": 3.89,
+          "world_sha256": "d95cb79f1ef0c829623b6f459895876ed621d1fc1e59325295113ae5f6710666"
+        }
+      },
+      "samples": 1701,
+      "sim_duration_s": 1.7000000000000002,
+      "first_t": 0.001,
+      "last_t": 1.701,
+      "phase_counts": {
+        "settle": 299,
+        "close": 400,
+        "lift": 500,
+        "hold": 502
+      },
+      "dt": {
+        "min_s": 0.0009999999999998899,
+        "median_s": 0.0010000000000000009,
+        "max_s": 0.001000000000000112,
+        "frames": 1701
+      },
+      "integrity": {
+        "rel_frame_offset_mm": 0.0
+      },
+      "files": {
+        "steps_sha256": "1a5e2bf20efd52f58eace8b1739a7729911c94f69653e3e23cf81e4a9a2f9372",
+        "meta_sha256": "f594982151ec1853d1eaa949d5e18378527593cc7c1f3aaefad4ce4b854938f5"
+      },
+      "ref": {
+        "window_s": 0.05,
+        "t_start": 0.649,
+        "t_end": 0.699,
+        "samples": 51,
+        "position_m": [
+          -1.1971695820226573e-21,
+          6.613682972926895e-22,
+          -0.06247963639403105
+        ],
+        "quaternion": [
+          -2.354748162484381e-20,
+          -2.2818453160907888e-21,
+          -1.1705774880999419e-20,
+          1.0
+        ],
+        "translation_spread_mm": 0.0,
+        "rotation_spread_deg": 2.404989719531381e-33
+      },
+      "drift": {
+        "translation_mm": 0.0010672055771321354,
+        "translation_at_s": 0.728,
+        "rotation_deg": 1.7171661665182679e-15,
+        "rotation_at_s": 1.004,
+        "window_start_s": 0.699,
+        "translation_limit_mm": 2.0,
+        "rotation_limit_deg": 5.0,
+        "translation_within_limit": true,
+        "rotation_within_limit": true
+      },
+      "contact_evidence": {
+        "requires_pad_contact_in_lift": null,
+        "lift_both_pad_fraction": 1.0,
+        "max_obj_ground_fraction_lift": null,
+        "lift_obj_ground_fraction": 0.056,
+        "within_limit": true
+      },
+      "drop": {
+        "base_z_decline_mm": 0.0010672055771321354,
+        "base_z_limit_mm": 20.0,
+        "base_z_triggered": false,
+        "base_z_trigger_t": null,
+        "rel_norm_deviation_mm": 0.0010672055771321354,
+        "rel_norm_limit_mm": 30.0,
+        "rel_norm_triggered": false,
+        "rel_norm_trigger_t": null,
+        "drop": false
+      },
+      "contacts": {
+        "pad_fraction": {
+          "close": {
+            "left": 0.3925,
+            "right": 0.3925,
+            "both": 0.3925
+          },
+          "lift": {
+            "left": 1.0,
+            "right": 1.0,
+            "both": 1.0
+          },
+          "hold": {
+            "left": 1.0,
+            "right": 1.0,
+            "both": 1.0
+          }
+        },
+        "obj_ground_fraction": {
+          "settle": 1.0,
+          "close": 1.0,
+          "lift": 0.056,
+          "hold": 0.0
+        },
+        "obj_ground_last_t": 0.727,
+        "obj_ground_lost_t": 0.728,
+        "obj_ground_lost_delay_s": 0.029000000000000026,
+        "obj_ground_still_touching_at_end": false,
+        "obj_ground_evidence": "lost_after_lift",
+        "obj_contacts_present": false
+      },
+      "forces": {
+        "commanded": {
+          "close": {
+            "max_abs_n": 7.493050907619683,
+            "mean_abs_n": 2.0601544117077766,
+            "samples": 800
+          },
+          "lift": {
+            "max_abs_n": 7.499910736913229,
+            "mean_abs_n": 7.498662351393846,
+            "samples": 1000
+          },
+          "lift_joint": {
+            "max_abs_n": 17.06691432556084,
+            "mean_abs_n": 11.755295481596596,
+            "samples": 500
+          },
+          "source": "cmd (PreUpdate cache); the joint force component is cleared by gz-sim before PostUpdate, so joints.f is not the applied effort",
+          "note": "commanded finger effort is an upper bound on the normal load, not a measured contact force"
+        },
+        "measured_contact": {
+          "per_phase": {
+            "close": {
+              "per_pad_peak_max_n": 1.928965385323085,
+              "per_pad_peak_mean_n": 0.5302992395140379,
+              "total_max_n": 3.857930770591997,
+              "total_mean_n": 1.0605984790106973,
+              "samples": 400
+            },
+            "lift": {
+              "per_pad_peak_max_n": 2.124694043510188,
+              "per_pad_peak_mean_n": 2.0274663073496275,
+              "total_max_n": 4.249388086985642,
+              "total_mean_n": 4.054932614593036,
+              "samples": 500
+            },
+            "hold": {
+              "per_pad_peak_max_n": 2.032095481383473,
+              "per_pad_peak_mean_n": 2.0232358681267195,
+              "total_max_n": 4.064190962633026,
+              "total_mean_n": 4.046471736079179,
+              "samples": 502
+            }
+          },
+          "weight_ratio_total_max": 0.8672220585684984,
+          "note": "solver-integrated contact wrench; the plugin logs a per-pad single-point peak, which under-reports the total normal load carried by the pads"
+        },
+        "normal_force_applied_per_pad_n": 7.499910736913229,
+        "normal_force_measured_per_pad_n": 2.124694043510188
+      },
+      "max_abs_qd_rad_s": 0.4513084806358896,
+      "max_abs_finger_command_n": 7.499953600050583,
+      "heuristics": {
+        "oscillation_ratio": 0.7754267014044292,
+        "max_frame_rel_jump_mm": 0.0010672055771321354,
+        "max_rel_norm_m": 0.06249885174125293,
+        "solver_divergence": false
+      },
+      "observed_slip": false,
+      "pass": null,
+      "failure_modes": []
+    },
+    {
+      "trial": "stress-load-1.00kg",
+      "object": "box_a",
+      "meta": {
+        "size_m": 0.035,
+        "mass_kg": 1.0,
+        "mu": 1.0,
+        "jitter_m": 0.0,
+        "jitter_yaw_deg": 0.0,
+        "identity_checked": false,
+        "identity_source": "exploratory_override",
+        "identity_mismatch": [
+          "mass_kg=1.0 vs protocol 0.05"
+        ],
+        "raw": {
+          "command": [
+            "gz",
+            "sim",
+            "-s",
+            "-r",
+            "--iterations",
+            "1701",
+            "results/stress-v3/stress-load-1.00kg/world.sdf"
+          ],
+          "dartsim_loaded": true,
+          "engine_libraries": {
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-bullet.so.6.13.2": "0ca5fa82b2d37e86e6aa4fcd38ba43d4b51f82b4cae2dff4c53b569b86e51a33",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-ode.so.6.13.2": "b50d9d8174333d857ec04bdca0699db7921101bccef05ce2c5010bd265b9deb6",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-external-odelcpsolver.so.6.13.2": "7c7698c181c18a30c491cb1945cd4a9d4f4e03fa4c0c6b767ad2358b3e382816",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart.so.6.13.2": "cb4f008188d1ea13cba9b43470c9d46cf819e8df0e4fdc818fa1e4f81b396426",
+            "/opt/ros/jazzy/opt/gz_physics_vendor/lib/gz-physics-7/engine-plugins/libgz-physics7-dartsim-plugin.so.7.8.0": "75617f959d603e052048c6258fbe912d16c66ceebeada7688e6d5be4650cf878",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-contact-system.so.8.15.0": "a63faf0de27a6d3052b2ba50c3b05826a5a59c98ffe47bfddb159e8de3266cfb",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-physics-system.so.8.15.0": "3b375a1f93e6cfd7794165df9229acd1bfdec2812e1b92cdb2e7a5399f4fad91",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-scene-broadcaster-system.so.8.15.0": "8521047b5ae40b4e0f2c4b55e1ff2899568fc6e12fe90a6456afb87fb837366a",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-user-commands-system.so.8.15.0": "82a671d7f44207b456ea9abfa2ad3982781c8b196ba08e35dad5d5cec805d0e3",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gui.so.8.15.0": "b6205045d4a7d5df123e50267235aad10b2eac2057ab3b342659f2db8b63cc1d",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gz.so.8.15.0": "03ca2b7142fb4143eb188226aa2f146bf472d719193af463e31ea8efd4088d0f",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8.so.8.15.0": "a348e4d28376de4e59ba58402142d0ce9e2abd7852ab76e721a34bafa569ef19"
+          },
+          "exit_code": 0,
+          "group": "stress",
+          "jitter": {
+            "x": 0.0,
+            "y": 0.0,
+            "yaw_deg": 0.0
+          },
+          "lift_s": 0.5,
+          "mass_kg": 1.0,
+          "mu": 1.0,
+          "object_name": "box_a",
+          "plugin_sha256": "d40c932fdffe4e561c94f57c74f9f65a59d30fa17d657dbea3a2d9f29eb8b9fb",
+          "size_m": 0.035,
+          "steps_bytes": 1839221,
+          "steps_sha256": "583e234f2901f505839da49bc77354a196ea3e4c597ce299c95aa1276d33d51f",
+          "trial": "stress-load-1.00kg",
+          "wall_s": 3.838,
+          "world_sha256": "5f0281983383ebd0a1cbf7dc839cc56e4febc7f2dc25b40ab82b7fdc97ad1931"
+        }
+      },
+      "samples": 1701,
+      "sim_duration_s": 1.7000000000000002,
+      "first_t": 0.001,
+      "last_t": 1.701,
+      "phase_counts": {
+        "settle": 299,
+        "close": 400,
+        "lift": 500,
+        "hold": 502
+      },
+      "dt": {
+        "min_s": 0.0009999999999998899,
+        "median_s": 0.0010000000000000009,
+        "max_s": 0.001000000000000112,
+        "frames": 1701
+      },
+      "integrity": {
+        "rel_frame_offset_mm": 0.0
+      },
+      "files": {
+        "steps_sha256": "583e234f2901f505839da49bc77354a196ea3e4c597ce299c95aa1276d33d51f",
+        "meta_sha256": "087a69c7024106a7716fc036d2a8d0222b9ab73c5793471902618ac7f28966fc"
+      },
+      "ref": {
+        "window_s": 0.05,
+        "t_start": 0.649,
+        "t_end": 0.699,
+        "samples": 51,
+        "position_m": [
+          3.4445405603435637e-22,
+          -2.610499567234226e-22,
+          -0.06370434043341354
+        ],
+        "quaternion": [
+          1.2014309890053397e-20,
+          1.7501013660248786e-20,
+          -3.70808432657714e-21,
+          1.0
+        ],
+        "translation_spread_mm": 0.0,
+        "rotation_spread_deg": 2.5471885573739562e-33
+      },
+      "drift": {
+        "translation_mm": 0.0010841553959306527,
+        "translation_at_s": 0.739,
+        "rotation_deg": 2.2631298811987812e-15,
+        "rotation_at_s": 1.474,
+        "window_start_s": 0.699,
+        "translation_limit_mm": 2.0,
+        "rotation_limit_deg": 5.0,
+        "translation_within_limit": true,
+        "rotation_within_limit": true
+      },
+      "contact_evidence": {
+        "requires_pad_contact_in_lift": null,
+        "lift_both_pad_fraction": 1.0,
+        "max_obj_ground_fraction_lift": null,
+        "lift_obj_ground_fraction": 0.078,
+        "within_limit": true
+      },
+      "drop": {
+        "base_z_decline_mm": 0.0010841553959306527,
+        "base_z_limit_mm": 20.0,
+        "base_z_triggered": false,
+        "base_z_trigger_t": null,
+        "rel_norm_deviation_mm": 0.0010841553959306527,
+        "rel_norm_limit_mm": 30.0,
+        "rel_norm_triggered": false,
+        "rel_norm_trigger_t": null,
+        "drop": false
+      },
+      "contacts": {
+        "pad_fraction": {
+          "close": {
+            "left": 0.3925,
+            "right": 0.3925,
+            "both": 0.3925
+          },
+          "lift": {
+            "left": 1.0,
+            "right": 1.0,
+            "both": 1.0
+          },
+          "hold": {
+            "left": 1.0,
+            "right": 1.0,
+            "both": 1.0
+          }
+        },
+        "obj_ground_fraction": {
+          "settle": 1.0,
+          "close": 1.0,
+          "lift": 0.078,
+          "hold": 0.0
+        },
+        "obj_ground_last_t": 0.738,
+        "obj_ground_lost_t": 0.739,
+        "obj_ground_lost_delay_s": 0.040000000000000036,
+        "obj_ground_still_touching_at_end": false,
+        "obj_ground_evidence": "lost_after_lift",
+        "obj_contacts_present": false
+      },
+      "forces": {
+        "commanded": {
+          "close": {
+            "max_abs_n": 7.493054047381777,
+            "mean_abs_n": 2.060155065053911,
+            "samples": 800
+          },
+          "lift": {
+            "max_abs_n": 7.499915169109929,
+            "mean_abs_n": 7.498666535752617,
+            "samples": 1000
+          },
+          "lift_joint": {
+            "max_abs_n": 25.35576098702292,
+            "mean_abs_n": 16.40994050941918,
+            "samples": 500
+          },
+          "source": "cmd (PreUpdate cache); the joint force component is cleared by gz-sim before PostUpdate, so joints.f is not the applied effort",
+          "note": "commanded finger effort is an upper bound on the normal load, not a measured contact force"
+        },
+        "measured_contact": {
+          "per_phase": {
+            "close": {
+              "per_pad_peak_max_n": 1.9101110103690202,
+              "per_pad_peak_mean_n": 0.5251158588855364,
+              "total_max_n": 3.8202220206758106,
+              "total_mean_n": 1.050231717744433,
+              "samples": 400
+            },
+            "lift": {
+              "per_pad_peak_max_n": 2.688838753449098,
+              "per_pad_peak_mean_n": 2.2696446108590127,
+              "total_max_n": 5.377677506885205,
+              "total_mean_n": 4.53928922160454,
+              "samples": 500
+            },
+            "hold": {
+              "per_pad_peak_max_n": 2.309609259794132,
+              "per_pad_peak_mean_n": 2.26205044129487,
+              "total_max_n": 4.61921851956796,
+              "total_mean_n": 4.52410088246179,
+              "samples": 502
+            }
+          },
+          "weight_ratio_total_max": 0.5487426027433883,
+          "note": "solver-integrated contact wrench; the plugin logs a per-pad single-point peak, which under-reports the total normal load carried by the pads"
+        },
+        "normal_force_applied_per_pad_n": 7.499915169109929,
+        "normal_force_measured_per_pad_n": 2.688838753449098
+      },
+      "max_abs_qd_rad_s": 0.4535123154304102,
+      "max_abs_finger_command_n": 7.499958040839786,
+      "heuristics": {
+        "oscillation_ratio": 0.5389240212959323,
+        "max_frame_rel_jump_mm": 0.0010841553959306527,
+        "max_rel_norm_m": 0.06374957409523417,
+        "solver_divergence": false
+      },
+      "observed_slip": false,
+      "pass": null,
+      "failure_modes": []
+    },
+    {
+      "trial": "stress-load-1.20kg",
+      "object": "box_a",
+      "meta": {
+        "size_m": 0.035,
+        "mass_kg": 1.2,
+        "mu": 1.0,
+        "jitter_m": 0.0,
+        "jitter_yaw_deg": 0.0,
+        "identity_checked": false,
+        "identity_source": "exploratory_override",
+        "identity_mismatch": [
+          "mass_kg=1.2 vs protocol 0.05"
+        ],
+        "raw": {
+          "command": [
+            "gz",
+            "sim",
+            "-s",
+            "-r",
+            "--iterations",
+            "1701",
+            "results/stress-v3/stress-load-1.20kg/world.sdf"
+          ],
+          "dartsim_loaded": true,
+          "engine_libraries": {
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-bullet.so.6.13.2": "0ca5fa82b2d37e86e6aa4fcd38ba43d4b51f82b4cae2dff4c53b569b86e51a33",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-ode.so.6.13.2": "b50d9d8174333d857ec04bdca0699db7921101bccef05ce2c5010bd265b9deb6",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-external-odelcpsolver.so.6.13.2": "7c7698c181c18a30c491cb1945cd4a9d4f4e03fa4c0c6b767ad2358b3e382816",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart.so.6.13.2": "cb4f008188d1ea13cba9b43470c9d46cf819e8df0e4fdc818fa1e4f81b396426",
+            "/opt/ros/jazzy/opt/gz_physics_vendor/lib/gz-physics-7/engine-plugins/libgz-physics7-dartsim-plugin.so.7.8.0": "75617f959d603e052048c6258fbe912d16c66ceebeada7688e6d5be4650cf878",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-contact-system.so.8.15.0": "a63faf0de27a6d3052b2ba50c3b05826a5a59c98ffe47bfddb159e8de3266cfb",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-physics-system.so.8.15.0": "3b375a1f93e6cfd7794165df9229acd1bfdec2812e1b92cdb2e7a5399f4fad91",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-scene-broadcaster-system.so.8.15.0": "8521047b5ae40b4e0f2c4b55e1ff2899568fc6e12fe90a6456afb87fb837366a",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-user-commands-system.so.8.15.0": "82a671d7f44207b456ea9abfa2ad3982781c8b196ba08e35dad5d5cec805d0e3",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gui.so.8.15.0": "b6205045d4a7d5df123e50267235aad10b2eac2057ab3b342659f2db8b63cc1d",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gz.so.8.15.0": "03ca2b7142fb4143eb188226aa2f146bf472d719193af463e31ea8efd4088d0f",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8.so.8.15.0": "a348e4d28376de4e59ba58402142d0ce9e2abd7852ab76e721a34bafa569ef19"
+          },
+          "exit_code": 0,
+          "group": "stress",
+          "jitter": {
+            "x": 0.0,
+            "y": 0.0,
+            "yaw_deg": 0.0
+          },
+          "lift_s": 0.5,
+          "mass_kg": 1.2,
+          "mu": 1.0,
+          "object_name": "box_a",
+          "plugin_sha256": "d40c932fdffe4e561c94f57c74f9f65a59d30fa17d657dbea3a2d9f29eb8b9fb",
+          "size_m": 0.035,
+          "steps_bytes": 1841513,
+          "steps_sha256": "eb6440e50b9661f7b373ba5d46e55ebe2466c98a3a5ca3030dbf4a0d3155fda2",
+          "trial": "stress-load-1.20kg",
+          "wall_s": 3.839,
+          "world_sha256": "7a98570afc631717f6588a2562868e6ec4414cec57a0452c82a963c5669bec3c"
+        }
+      },
+      "samples": 1701,
+      "sim_duration_s": 1.7000000000000002,
+      "first_t": 0.001,
+      "last_t": 1.701,
+      "phase_counts": {
+        "settle": 299,
+        "close": 400,
+        "lift": 500,
+        "hold": 502
+      },
+      "dt": {
+        "min_s": 0.0009999999999998899,
+        "median_s": 0.0010000000000000009,
+        "max_s": 0.001000000000000112,
+        "frames": 1701
+      },
+      "integrity": {
+        "rel_frame_offset_mm": 0.0
+      },
+      "files": {
+        "steps_sha256": "eb6440e50b9661f7b373ba5d46e55ebe2466c98a3a5ca3030dbf4a0d3155fda2",
+        "meta_sha256": "fab0a6548d32b889246a503d73eb807451cb518a4c53416ee9f7880e73ff33ad"
+      },
+      "ref": {
+        "window_s": 0.05,
+        "t_start": 0.649,
+        "t_end": 0.699,
+        "samples": 51,
+        "position_m": [
+          2.8078738618452865e-22,
+          -9.017291520714506e-23,
+          -0.06419467375060846
+        ],
+        "quaternion": [
+          4.231194924290264e-21,
+          -2.862483743546691e-20,
+          1.2765317685113168e-20,
+          1.0
+        ],
+        "translation_spread_mm": 0.0,
+        "rotation_spread_deg": 2.162117362184806e-33
+      },
+      "drift": {
+        "translation_mm": 8.85161510068909,
+        "translation_at_s": 1.571,
+        "rotation_deg": 3.122726556893915e-15,
+        "rotation_at_s": 1.571,
+        "window_start_s": 0.699,
+        "translation_limit_mm": 2.0,
+        "rotation_limit_deg": 5.0,
+        "translation_within_limit": false,
+        "rotation_within_limit": true
+      },
+      "contact_evidence": {
+        "requires_pad_contact_in_lift": null,
+        "lift_both_pad_fraction": 1.0,
+        "max_obj_ground_fraction_lift": null,
+        "lift_obj_ground_fraction": 0.086,
+        "within_limit": true
+      },
+      "drop": {
+        "base_z_decline_mm": 8.85161510068909,
+        "base_z_limit_mm": 20.0,
+        "base_z_triggered": false,
+        "base_z_trigger_t": null,
+        "rel_norm_deviation_mm": 8.85161510068909,
+        "rel_norm_limit_mm": 30.0,
+        "rel_norm_triggered": false,
+        "rel_norm_trigger_t": null,
+        "drop": false
+      },
+      "contacts": {
+        "pad_fraction": {
+          "close": {
+            "left": 0.3925,
+            "right": 0.3925,
+            "both": 0.3925
+          },
+          "lift": {
+            "left": 1.0,
+            "right": 1.0,
+            "both": 1.0
+          },
+          "hold": {
+            "left": 1.0,
+            "right": 1.0,
+            "both": 1.0
+          }
+        },
+        "obj_ground_fraction": {
+          "settle": 1.0,
+          "close": 1.0,
+          "lift": 0.086,
+          "hold": 0.0
+        },
+        "obj_ground_last_t": 0.742,
+        "obj_ground_lost_t": 0.743,
+        "obj_ground_lost_delay_s": 0.04400000000000004,
+        "obj_ground_still_touching_at_end": false,
+        "obj_ground_evidence": "lost_after_lift",
+        "obj_contacts_present": false
+      },
+      "forces": {
+        "commanded": {
+          "close": {
+            "max_abs_n": 7.493054568975451,
+            "mean_abs_n": 2.0601551735911734,
+            "samples": 800
+          },
+          "lift": {
+            "max_abs_n": 7.499916350301137,
+            "mean_abs_n": 7.498667514222862,
+            "samples": 1000
+          },
+          "lift_joint": {
+            "max_abs_n": 26.0883819318257,
+            "mean_abs_n": 18.244323668310006,
+            "samples": 500
+          },
+          "source": "cmd (PreUpdate cache); the joint force component is cleared by gz-sim before PostUpdate, so joints.f is not the applied effort",
+          "note": "commanded finger effort is an upper bound on the normal load, not a measured contact force"
+        },
+        "measured_contact": {
+          "per_phase": {
+            "close": {
+              "per_pad_peak_max_n": 1.9064191475645045,
+              "per_pad_peak_mean_n": 0.5241009061779857,
+              "total_max_n": 3.8128382950260438,
+              "total_mean_n": 1.0482018123335795,
+              "samples": 400
+            },
+            "lift": {
+              "per_pad_peak_max_n": 2.727036263182996,
+              "per_pad_peak_mean_n": 2.4228291483960787,
+              "total_max_n": 5.454072526348121,
+              "total_mean_n": 4.845658296645155,
+              "samples": 500
+            },
+            "hold": {
+              "per_pad_peak_max_n": 2.4844454298692775,
+              "per_pad_peak_mean_n": 2.4131056658700967,
+              "total_max_n": 4.968890859693128,
+              "total_mean_n": 4.82621133152002,
+              "samples": 502
+            }
+          },
+          "weight_ratio_total_max": 0.4637816774105545,
+          "note": "solver-integrated contact wrench; the plugin logs a per-pad single-point peak, which under-reports the total normal load carried by the pads"
+        },
+        "normal_force_applied_per_pad_n": 7.499916350301137,
+        "normal_force_measured_per_pad_n": 2.727036263182996
+      },
+      "max_abs_qd_rad_s": 0.45904842524043815,
+      "max_abs_finger_command_n": 7.499959230853263,
+      "heuristics": {
+        "oscillation_ratio": 0.0,
+        "max_frame_rel_jump_mm": 0.09650346710166069,
+        "max_rel_norm_m": 0.07304628885129755,
+        "solver_divergence": false
+      },
+      "observed_slip": true,
+      "pass": null,
+      "failure_modes": []
+    },
+    {
+      "trial": "stress-load-1.50kg",
+      "object": "box_a",
+      "meta": {
+        "size_m": 0.035,
+        "mass_kg": 1.5,
+        "mu": 1.0,
+        "jitter_m": 0.0,
+        "jitter_yaw_deg": 0.0,
+        "identity_checked": false,
+        "identity_source": "exploratory_override",
+        "identity_mismatch": [
+          "mass_kg=1.5 vs protocol 0.05"
+        ],
+        "raw": {
+          "command": [
+            "gz",
+            "sim",
+            "-s",
+            "-r",
+            "--iterations",
+            "1701",
+            "results/stress-v3/stress-load-1.50kg/world.sdf"
+          ],
+          "dartsim_loaded": true,
+          "engine_libraries": {
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-bullet.so.6.13.2": "0ca5fa82b2d37e86e6aa4fcd38ba43d4b51f82b4cae2dff4c53b569b86e51a33",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-ode.so.6.13.2": "b50d9d8174333d857ec04bdca0699db7921101bccef05ce2c5010bd265b9deb6",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-external-odelcpsolver.so.6.13.2": "7c7698c181c18a30c491cb1945cd4a9d4f4e03fa4c0c6b767ad2358b3e382816",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart.so.6.13.2": "cb4f008188d1ea13cba9b43470c9d46cf819e8df0e4fdc818fa1e4f81b396426",
+            "/opt/ros/jazzy/opt/gz_physics_vendor/lib/gz-physics-7/engine-plugins/libgz-physics7-dartsim-plugin.so.7.8.0": "75617f959d603e052048c6258fbe912d16c66ceebeada7688e6d5be4650cf878",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-contact-system.so.8.15.0": "a63faf0de27a6d3052b2ba50c3b05826a5a59c98ffe47bfddb159e8de3266cfb",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-physics-system.so.8.15.0": "3b375a1f93e6cfd7794165df9229acd1bfdec2812e1b92cdb2e7a5399f4fad91",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-scene-broadcaster-system.so.8.15.0": "8521047b5ae40b4e0f2c4b55e1ff2899568fc6e12fe90a6456afb87fb837366a",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-user-commands-system.so.8.15.0": "82a671d7f44207b456ea9abfa2ad3982781c8b196ba08e35dad5d5cec805d0e3",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gui.so.8.15.0": "b6205045d4a7d5df123e50267235aad10b2eac2057ab3b342659f2db8b63cc1d",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gz.so.8.15.0": "03ca2b7142fb4143eb188226aa2f146bf472d719193af463e31ea8efd4088d0f",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8.so.8.15.0": "a348e4d28376de4e59ba58402142d0ce9e2abd7852ab76e721a34bafa569ef19"
+          },
+          "exit_code": 0,
+          "group": "stress",
+          "jitter": {
+            "x": 0.0,
+            "y": 0.0,
+            "yaw_deg": 0.0
+          },
+          "lift_s": 0.5,
+          "mass_kg": 1.5,
+          "mu": 1.0,
+          "object_name": "box_a",
+          "plugin_sha256": "d40c932fdffe4e561c94f57c74f9f65a59d30fa17d657dbea3a2d9f29eb8b9fb",
+          "size_m": 0.035,
+          "steps_bytes": 1833835,
+          "steps_sha256": "738e6ce1224ac1572b4091941901bdaf74d2f74fecc02d02188190f5e901c2a8",
+          "trial": "stress-load-1.50kg",
+          "wall_s": 3.838,
+          "world_sha256": "0512911db195d8cf4fafdc0dbe9651fecedf7c43d1e8a97a98fd89ad731d8d2e"
+        }
+      },
+      "samples": 1701,
+      "sim_duration_s": 1.7000000000000002,
+      "first_t": 0.001,
+      "last_t": 1.701,
+      "phase_counts": {
+        "settle": 299,
+        "close": 400,
+        "lift": 500,
+        "hold": 502
+      },
+      "dt": {
+        "min_s": 0.0009999999999998899,
+        "median_s": 0.0010000000000000009,
+        "max_s": 0.001000000000000112,
+        "frames": 1701
+      },
+      "integrity": {
+        "rel_frame_offset_mm": 0.0
+      },
+      "files": {
+        "steps_sha256": "738e6ce1224ac1572b4091941901bdaf74d2f74fecc02d02188190f5e901c2a8",
+        "meta_sha256": "e2facbda8d096fc5f404de9d4de4847df5a5913ba9c1042a51f53f611e166c43"
+      },
+      "ref": {
+        "window_s": 0.05,
+        "t_start": 0.649,
+        "t_end": 0.699,
+        "samples": 51,
+        "position_m": [
+          8.552460854714022e-22,
+          4.36129379196283e-22,
+          -0.06492923322016682
+        ],
+        "quaternion": [
+          -4.252427593837425e-20,
+          -9.319335298078027e-21,
+          -4.120032371888094e-21,
+          1.0
+        ],
+        "translation_spread_mm": 0.0,
+        "rotation_spread_deg": 4.8430807449224954e-33
+      },
+      "drift": {
+        "translation_mm": 150.06114537295966,
+        "translation_at_s": 1.234,
+        "rotation_deg": 3.2271678964785385e-05,
+        "rotation_at_s": 0.891,
+        "window_start_s": 0.699,
+        "translation_limit_mm": 2.0,
+        "rotation_limit_deg": 5.0,
+        "translation_within_limit": false,
+        "rotation_within_limit": true
+      },
+      "contact_evidence": {
+        "requires_pad_contact_in_lift": null,
+        "lift_both_pad_fraction": 0.344,
+        "max_obj_ground_fraction_lift": null,
+        "lift_obj_ground_fraction": 0.712,
+        "within_limit": true
+      },
+      "drop": {
+        "base_z_decline_mm": 150.06114537295934,
+        "base_z_limit_mm": 20.0,
+        "base_z_triggered": true,
+        "base_z_trigger_t": 0.848,
+        "rel_norm_deviation_mm": 150.06114537295966,
+        "rel_norm_limit_mm": 30.0,
+        "rel_norm_triggered": true,
+        "rel_norm_trigger_t": 0.876,
+        "drop": true
+      },
+      "contacts": {
+        "pad_fraction": {
+          "close": {
+            "left": 0.3925,
+            "right": 0.3925,
+            "both": 0.3925
+          },
+          "lift": {
+            "left": 0.344,
+            "right": 0.344,
+            "both": 0.344
+          },
+          "hold": {
+            "left": 0.0,
+            "right": 0.0,
+            "both": 0.0
+          }
+        },
+        "obj_ground_fraction": {
+          "settle": 1.0,
+          "close": 1.0,
+          "lift": 0.712,
+          "hold": 1.0
+        },
+        "obj_ground_last_t": 1.701,
+        "obj_ground_lost_t": null,
+        "obj_ground_lost_delay_s": null,
+        "obj_ground_still_touching_at_end": true,
+        "obj_ground_evidence": "still_touching_at_end",
+        "obj_contacts_present": false
+      },
+      "forces": {
+        "commanded": {
+          "close": {
+            "max_abs_n": 7.493055088792359,
+            "mean_abs_n": 2.0601552817587114,
+            "samples": 800
+          },
+          "lift": {
+            "max_abs_n": 7.498814681540534,
+            "mean_abs_n": 2.67536653620129,
+            "samples": 1000
+          },
+          "lift_joint": {
+            "max_abs_n": 26.224389627915755,
+            "mean_abs_n": 11.167011563678333,
+            "samples": 500
+          },
+          "source": "cmd (PreUpdate cache); the joint force component is cleared by gz-sim before PostUpdate, so joints.f is not the applied effort",
+          "note": "commanded finger effort is an upper bound on the normal load, not a measured contact force"
+        },
+        "measured_contact": {
+          "per_phase": {
+            "close": {
+              "per_pad_peak_max_n": 1.9024608305254398,
+              "per_pad_peak_mean_n": 0.5230127016444697,
+              "total_max_n": 3.8049216610366563,
+              "total_mean_n": 1.0460254032719418,
+              "samples": 400
+            },
+            "lift": {
+              "per_pad_peak_max_n": 2.7131813825508235,
+              "per_pad_peak_mean_n": 0.8682963612134641,
+              "total_max_n": 5.426362764899332,
+              "total_mean_n": 1.7365551565128112,
+              "samples": 500
+            },
+            "hold": {
+              "per_pad_peak_max_n": 0.0,
+              "per_pad_peak_mean_n": 0.0,
+              "total_max_n": 0.0,
+              "total_mean_n": 0.0,
+              "samples": 502
+            }
+          },
+          "weight_ratio_total_max": 0.36914032414281167,
+          "note": "solver-integrated contact wrench; the plugin logs a per-pad single-point peak, which under-reports the total normal load carried by the pads"
+        },
+        "normal_force_applied_per_pad_n": 7.498814681540534,
+        "normal_force_measured_per_pad_n": 2.7131813825508235
+      },
+      "max_abs_qd_rad_s": 0.5248202615536317,
+      "max_abs_finger_command_n": 7.498814681540534,
+      "heuristics": {
+        "oscillation_ratio": 0.0008065327023335511,
+        "max_frame_rel_jump_mm": 0.6913787071714395,
+        "max_rel_norm_m": 0.21499037859312636,
+        "solver_divergence": false
+      },
+      "observed_slip": true,
+      "pass": null,
+      "failure_modes": []
+    },
+    {
+      "trial": "stress-load-2.00kg",
+      "object": "box_a",
+      "meta": {
+        "size_m": 0.035,
+        "mass_kg": 2.0,
+        "mu": 1.0,
+        "jitter_m": 0.0,
+        "jitter_yaw_deg": 0.0,
+        "identity_checked": false,
+        "identity_source": "exploratory_override",
+        "identity_mismatch": [
+          "mass_kg=2.0 vs protocol 0.05"
+        ],
+        "raw": {
+          "command": [
+            "gz",
+            "sim",
+            "-s",
+            "-r",
+            "--iterations",
+            "1701",
+            "results/stress-v3/stress-load-2.00kg/world.sdf"
+          ],
+          "dartsim_loaded": true,
+          "engine_libraries": {
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-bullet.so.6.13.2": "0ca5fa82b2d37e86e6aa4fcd38ba43d4b51f82b4cae2dff4c53b569b86e51a33",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-ode.so.6.13.2": "b50d9d8174333d857ec04bdca0699db7921101bccef05ce2c5010bd265b9deb6",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-external-odelcpsolver.so.6.13.2": "7c7698c181c18a30c491cb1945cd4a9d4f4e03fa4c0c6b767ad2358b3e382816",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart.so.6.13.2": "cb4f008188d1ea13cba9b43470c9d46cf819e8df0e4fdc818fa1e4f81b396426",
+            "/opt/ros/jazzy/opt/gz_physics_vendor/lib/gz-physics-7/engine-plugins/libgz-physics7-dartsim-plugin.so.7.8.0": "75617f959d603e052048c6258fbe912d16c66ceebeada7688e6d5be4650cf878",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-contact-system.so.8.15.0": "a63faf0de27a6d3052b2ba50c3b05826a5a59c98ffe47bfddb159e8de3266cfb",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-physics-system.so.8.15.0": "3b375a1f93e6cfd7794165df9229acd1bfdec2812e1b92cdb2e7a5399f4fad91",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-scene-broadcaster-system.so.8.15.0": "8521047b5ae40b4e0f2c4b55e1ff2899568fc6e12fe90a6456afb87fb837366a",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-user-commands-system.so.8.15.0": "82a671d7f44207b456ea9abfa2ad3982781c8b196ba08e35dad5d5cec805d0e3",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gui.so.8.15.0": "b6205045d4a7d5df123e50267235aad10b2eac2057ab3b342659f2db8b63cc1d",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gz.so.8.15.0": "03ca2b7142fb4143eb188226aa2f146bf472d719193af463e31ea8efd4088d0f",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8.so.8.15.0": "a348e4d28376de4e59ba58402142d0ce9e2abd7852ab76e721a34bafa569ef19"
+          },
+          "exit_code": 0,
+          "group": "stress",
+          "jitter": {
+            "x": 0.0,
+            "y": 0.0,
+            "yaw_deg": 0.0
+          },
+          "lift_s": 0.5,
+          "mass_kg": 2.0,
+          "mu": 1.0,
+          "object_name": "box_a",
+          "plugin_sha256": "d40c932fdffe4e561c94f57c74f9f65a59d30fa17d657dbea3a2d9f29eb8b9fb",
+          "size_m": 0.035,
+          "steps_bytes": 1532051,
+          "steps_sha256": "aeafd1dc9137f65c50e2e1c980d6b6bfb219d7598b839489dbd9a115813d62c5",
+          "trial": "stress-load-2.00kg",
+          "wall_s": 6.85,
+          "world_sha256": "abb980f43357f057e7bb391fac0888fb08c55992633a8cd96d49db970c0617c8"
+        }
+      },
+      "samples": 1701,
+      "sim_duration_s": 1.7000000000000002,
+      "first_t": 0.001,
+      "last_t": 1.701,
+      "phase_counts": {
+        "settle": 299,
+        "close": 400,
+        "lift": 500,
+        "hold": 502
+      },
+      "dt": {
+        "min_s": 0.0009999999999998899,
+        "median_s": 0.0010000000000000009,
+        "max_s": 0.001000000000000112,
+        "frames": 1701
+      },
+      "integrity": {
+        "rel_frame_offset_mm": 0.0
+      },
+      "files": {
+        "steps_sha256": "aeafd1dc9137f65c50e2e1c980d6b6bfb219d7598b839489dbd9a115813d62c5",
+        "meta_sha256": "2ebfd5d161eb6f02d845372cbdfe5a2071e3919fd4f788c6679af03101f3bb04"
+      },
+      "ref": {
+        "window_s": 0.05,
+        "t_start": 0.649,
+        "t_end": 0.699,
+        "samples": 51,
+        "position_m": [
+          0.0,
+          0.0,
+          -0.06615495975709383
+        ],
+        "quaternion": [
+          0.0,
+          -1.6594931211514162e-20,
+          0.0,
+          1.0
+        ],
+        "translation_spread_mm": 0.0,
+        "rotation_spread_deg": 1.7241821476758432e-33
+      },
+      "drift": {
+        "translation_mm": 150.05864326920653,
+        "translation_at_s": 1.234,
+        "rotation_deg": 1.7241821476758432e-33,
+        "rotation_at_s": 0.7,
+        "window_start_s": 0.699,
+        "translation_limit_mm": 2.0,
+        "rotation_limit_deg": 5.0,
+        "translation_within_limit": false,
+        "rotation_within_limit": true
+      },
+      "contact_evidence": {
+        "requires_pad_contact_in_lift": null,
+        "lift_both_pad_fraction": 0.328,
+        "max_obj_ground_fraction_lift": null,
+        "lift_obj_ground_fraction": 1.0,
+        "within_limit": true
+      },
+      "drop": {
+        "base_z_decline_mm": 150.05864326920653,
+        "base_z_limit_mm": 20.0,
+        "base_z_triggered": true,
+        "base_z_trigger_t": 0.845,
+        "rel_norm_deviation_mm": 150.05864326920653,
+        "rel_norm_limit_mm": 30.0,
+        "rel_norm_triggered": true,
+        "rel_norm_trigger_t": 0.871,
+        "drop": true
+      },
+      "contacts": {
+        "pad_fraction": {
+          "close": {
+            "left": 0.3925,
+            "right": 0.3925,
+            "both": 0.3925
+          },
+          "lift": {
+            "left": 0.328,
+            "right": 0.328,
+            "both": 0.328
+          },
+          "hold": {
+            "left": 0.0,
+            "right": 0.0,
+            "both": 0.0
+          }
+        },
+        "obj_ground_fraction": {
+          "settle": 1.0,
+          "close": 1.0,
+          "lift": 1.0,
+          "hold": 1.0
+        },
+        "obj_ground_last_t": 1.701,
+        "obj_ground_lost_t": null,
+        "obj_ground_lost_delay_s": null,
+        "obj_ground_still_touching_at_end": true,
+        "obj_ground_evidence": "still_touching_at_end",
+        "obj_contacts_present": false
+      },
+      "forces": {
+        "commanded": {
+          "close": {
+            "max_abs_n": 7.49305560487079,
+            "mean_abs_n": 2.060155389148315,
+            "samples": 800
+          },
+          "lift": {
+            "max_abs_n": 7.498709478340475,
+            "mean_abs_n": 2.5553826483481488,
+            "samples": 1000
+          },
+          "lift_joint": {
+            "max_abs_n": 26.225737258534583,
+            "mean_abs_n": 10.927184606337907,
+            "samples": 500
+          },
+          "source": "cmd (PreUpdate cache); the joint force component is cleared by gz-sim before PostUpdate, so joints.f is not the applied effort",
+          "note": "commanded finger effort is an upper bound on the normal load, not a measured contact force"
+        },
+        "measured_contact": {
+          "per_phase": {
+            "close": {
+              "per_pad_peak_max_n": 1.8980894375422288,
+              "per_pad_peak_mean_n": 0.5218109368433352,
+              "total_max_n": 3.7961788749283505,
+              "total_mean_n": 1.0436218736611782,
+              "samples": 400
+            },
+            "lift": {
+              "per_pad_peak_max_n": 2.698282942450277,
+              "per_pad_peak_mean_n": 0.8223940225173799,
+              "total_max_n": 5.396565884772282,
+              "total_mean_n": 1.6447880449843906,
+              "samples": 500
+            },
+            "hold": {
+              "per_pad_peak_max_n": 0.0,
+              "per_pad_peak_mean_n": 0.0,
+              "total_max_n": 0.0,
+              "total_mean_n": 0.0,
+              "samples": 502
+            }
+          },
+          "weight_ratio_total_max": 0.2753349941210348,
+          "note": "solver-integrated contact wrench; the plugin logs a per-pad single-point peak, which under-reports the total normal load carried by the pads"
+        },
+        "normal_force_applied_per_pad_n": 7.498709478340475,
+        "normal_force_measured_per_pad_n": 2.698282942450277
+      },
+      "max_abs_qd_rad_s": 0.514848371658728,
+      "max_abs_finger_command_n": 7.498709478340475,
+      "heuristics": {
+        "oscillation_ratio": 0.0007931389311544024,
+        "max_frame_rel_jump_mm": 0.514848371658716,
+        "max_rel_norm_m": 0.21621360302630035,
+        "solver_divergence": false
+      },
+      "observed_slip": true,
+      "pass": null,
+      "failure_modes": []
+    },
+    {
+      "trial": "stress-load-5.00kg",
+      "object": "box_a",
+      "meta": {
+        "size_m": 0.035,
+        "mass_kg": 5.0,
+        "mu": 1.0,
+        "jitter_m": 0.0,
+        "jitter_yaw_deg": 0.0,
+        "identity_checked": false,
+        "identity_source": "exploratory_override",
+        "identity_mismatch": [
+          "mass_kg=5.0 vs protocol 0.05"
+        ],
+        "raw": {
+          "command": [
+            "gz",
+            "sim",
+            "-s",
+            "-r",
+            "--iterations",
+            "1701",
+            "results/stress-v3/stress-load-5.00kg/world.sdf"
+          ],
+          "dartsim_loaded": true,
+          "engine_libraries": {
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-bullet.so.6.13.2": "0ca5fa82b2d37e86e6aa4fcd38ba43d4b51f82b4cae2dff4c53b569b86e51a33",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-ode.so.6.13.2": "b50d9d8174333d857ec04bdca0699db7921101bccef05ce2c5010bd265b9deb6",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-external-odelcpsolver.so.6.13.2": "7c7698c181c18a30c491cb1945cd4a9d4f4e03fa4c0c6b767ad2358b3e382816",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart.so.6.13.2": "cb4f008188d1ea13cba9b43470c9d46cf819e8df0e4fdc818fa1e4f81b396426",
+            "/opt/ros/jazzy/opt/gz_physics_vendor/lib/gz-physics-7/engine-plugins/libgz-physics7-dartsim-plugin.so.7.8.0": "75617f959d603e052048c6258fbe912d16c66ceebeada7688e6d5be4650cf878",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-contact-system.so.8.15.0": "a63faf0de27a6d3052b2ba50c3b05826a5a59c98ffe47bfddb159e8de3266cfb",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-physics-system.so.8.15.0": "3b375a1f93e6cfd7794165df9229acd1bfdec2812e1b92cdb2e7a5399f4fad91",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-scene-broadcaster-system.so.8.15.0": "8521047b5ae40b4e0f2c4b55e1ff2899568fc6e12fe90a6456afb87fb837366a",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-user-commands-system.so.8.15.0": "82a671d7f44207b456ea9abfa2ad3982781c8b196ba08e35dad5d5cec805d0e3",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gui.so.8.15.0": "b6205045d4a7d5df123e50267235aad10b2eac2057ab3b342659f2db8b63cc1d",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gz.so.8.15.0": "03ca2b7142fb4143eb188226aa2f146bf472d719193af463e31ea8efd4088d0f",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8.so.8.15.0": "a348e4d28376de4e59ba58402142d0ce9e2abd7852ab76e721a34bafa569ef19"
+          },
+          "exit_code": 0,
+          "group": "stress",
+          "jitter": {
+            "x": 0.0,
+            "y": 0.0,
+            "yaw_deg": 0.0
+          },
+          "lift_s": 0.5,
+          "mass_kg": 5.0,
+          "mu": 1.0,
+          "object_name": "box_a",
+          "plugin_sha256": "d40c932fdffe4e561c94f57c74f9f65a59d30fa17d657dbea3a2d9f29eb8b9fb",
+          "size_m": 0.035,
+          "steps_bytes": 1816312,
+          "steps_sha256": "7a7b2e4d6d401fa5fe81a588b13e248f941269becaeb199246a93a0a39c0e8e3",
+          "trial": "stress-load-5.00kg",
+          "wall_s": 3.89,
+          "world_sha256": "e9b4cb94efa372b94936898d717e7631d2aeea265cd92d489cd7d25cca42eea7"
+        }
+      },
+      "samples": 1701,
+      "sim_duration_s": 1.7000000000000002,
+      "first_t": 0.001,
+      "last_t": 1.701,
+      "phase_counts": {
+        "settle": 299,
+        "close": 400,
+        "lift": 500,
+        "hold": 502
+      },
+      "dt": {
+        "min_s": 0.0009999999999998899,
+        "median_s": 0.0010000000000000009,
+        "max_s": 0.001000000000000112,
+        "frames": 1701
+      },
+      "integrity": {
+        "rel_frame_offset_mm": 0.0
+      },
+      "files": {
+        "steps_sha256": "7a7b2e4d6d401fa5fe81a588b13e248f941269becaeb199246a93a0a39c0e8e3",
+        "meta_sha256": "508c272d0d397f2c9f095b081c735858e7d4b3b544b96dc73a805b9678cedf95"
+      },
+      "ref": {
+        "window_s": 0.05,
+        "t_start": 0.649,
+        "t_end": 0.699,
+        "samples": 51,
+        "position_m": [
+          6.930626636896813e-22,
+          4.912331437728079e-22,
+          -0.07350502552234305
+        ],
+        "quaternion": [
+          -3.1080813075019745e-20,
+          4.648435347584119e-20,
+          -1.2354785826801178e-21,
+          1.0
+        ],
+        "translation_spread_mm": 0.0,
+        "rotation_spread_deg": 3.084990388239778e-33
+      },
+      "drift": {
+        "translation_mm": 150.05857750371447,
+        "translation_at_s": 1.234,
+        "rotation_deg": 3.084990388239778e-33,
+        "rotation_at_s": 0.7,
+        "window_start_s": 0.699,
+        "translation_limit_mm": 2.0,
+        "rotation_limit_deg": 5.0,
+        "translation_within_limit": false,
+        "rotation_within_limit": true
+      },
+      "contact_evidence": {
+        "requires_pad_contact_in_lift": null,
+        "lift_both_pad_fraction": 0.286,
+        "max_obj_ground_fraction_lift": null,
+        "lift_obj_ground_fraction": 1.0,
+        "within_limit": true
+      },
+      "drop": {
+        "base_z_decline_mm": 150.05857750371447,
+        "base_z_limit_mm": 20.0,
+        "base_z_triggered": true,
+        "base_z_trigger_t": 0.845,
+        "rel_norm_deviation_mm": 150.05857750371447,
+        "rel_norm_limit_mm": 30.0,
+        "rel_norm_triggered": true,
+        "rel_norm_trigger_t": 0.866,
+        "drop": true
+      },
+      "contacts": {
+        "pad_fraction": {
+          "close": {
+            "left": 0.3925,
+            "right": 0.3925,
+            "both": 0.3925
+          },
+          "lift": {
+            "left": 0.286,
+            "right": 0.286,
+            "both": 0.286
+          },
+          "hold": {
+            "left": 0.0,
+            "right": 0.0,
+            "both": 0.0
+          }
+        },
+        "obj_ground_fraction": {
+          "settle": 1.0,
+          "close": 1.0,
+          "lift": 1.0,
+          "hold": 1.0
+        },
+        "obj_ground_last_t": 1.701,
+        "obj_ground_lost_t": null,
+        "obj_ground_lost_delay_s": null,
+        "obj_ground_still_touching_at_end": true,
+        "obj_ground_evidence": "still_touching_at_end",
+        "obj_contacts_present": false
+      },
+      "forces": {
+        "commanded": {
+          "close": {
+            "max_abs_n": 7.493056493033924,
+            "mean_abs_n": 2.0601555739641837,
+            "samples": 800
+          },
+          "lift": {
+            "max_abs_n": 7.498416710608667,
+            "mean_abs_n": 2.2404310263195506,
+            "samples": 1000
+          },
+          "lift_joint": {
+            "max_abs_n": 26.22573998886797,
+            "mean_abs_n": 10.297306944187254,
+            "samples": 500
+          },
+          "source": "cmd (PreUpdate cache); the joint force component is cleared by gz-sim before PostUpdate, so joints.f is not the applied effort",
+          "note": "commanded finger effort is an upper bound on the normal load, not a measured contact force"
+        },
+        "measured_contact": {
+          "per_phase": {
+            "close": {
+              "per_pad_peak_max_n": 1.8869362812176143,
+              "per_pad_peak_mean_n": 0.5187447659348465,
+              "total_max_n": 3.7738725624189575,
+              "total_mean_n": 1.0374895318435342,
+              "samples": 400
+            },
+            "lift": {
+              "per_pad_peak_max_n": 2.6700598005936556,
+              "per_pad_peak_mean_n": 0.7044047402798248,
+              "total_max_n": 5.340119601180035,
+              "total_mean_n": 1.4088094805258642,
+              "samples": 500
+            },
+            "hold": {
+              "per_pad_peak_max_n": 0.0,
+              "per_pad_peak_mean_n": 0.0,
+              "total_max_n": 0.0,
+              "total_mean_n": 0.0,
+              "samples": 502
+            }
+          },
+          "weight_ratio_total_max": 0.10898203267714357,
+          "note": "solver-integrated contact wrench; the plugin logs a per-pad single-point peak, which under-reports the total normal load carried by the pads"
+        },
+        "normal_force_applied_per_pad_n": 7.498416710608667,
+        "normal_force_measured_per_pad_n": 2.6700598005936556
+      },
+      "max_abs_qd_rad_s": 0.4844245628448307,
+      "max_abs_finger_command_n": 7.498416710608667,
+      "heuristics": {
+        "oscillation_ratio": 0.0007931392752213995,
+        "max_frame_rel_jump_mm": 0.48442456284483737,
+        "max_rel_norm_m": 0.22356360302605752,
+        "solver_divergence": false
+      },
+      "observed_slip": true,
+      "pass": null,
+      "failure_modes": []
+    },
+    {
+      "trial": "stress-mu-0.20-mass-500g",
+      "object": "box_a",
+      "meta": {
+        "size_m": 0.035,
+        "mass_kg": 0.5,
+        "mu": 0.2,
+        "jitter_m": 0.0,
+        "jitter_yaw_deg": 0.0,
+        "identity_checked": false,
+        "identity_source": "exploratory_override",
+        "identity_mismatch": [
+          "mass_kg=0.5 vs protocol 0.05",
+          "mu=0.2 vs protocol 1.0"
+        ],
+        "raw": {
+          "command": [
+            "gz",
+            "sim",
+            "-s",
+            "-r",
+            "--iterations",
+            "1701",
+            "results/stress-v3/stress-mu-0.20-mass-500g/world.sdf"
+          ],
+          "dartsim_loaded": true,
+          "engine_libraries": {
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-bullet.so.6.13.2": "0ca5fa82b2d37e86e6aa4fcd38ba43d4b51f82b4cae2dff4c53b569b86e51a33",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-ode.so.6.13.2": "b50d9d8174333d857ec04bdca0699db7921101bccef05ce2c5010bd265b9deb6",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-external-odelcpsolver.so.6.13.2": "7c7698c181c18a30c491cb1945cd4a9d4f4e03fa4c0c6b767ad2358b3e382816",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart.so.6.13.2": "cb4f008188d1ea13cba9b43470c9d46cf819e8df0e4fdc818fa1e4f81b396426",
+            "/opt/ros/jazzy/opt/gz_physics_vendor/lib/gz-physics-7/engine-plugins/libgz-physics7-dartsim-plugin.so.7.8.0": "75617f959d603e052048c6258fbe912d16c66ceebeada7688e6d5be4650cf878",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-contact-system.so.8.15.0": "a63faf0de27a6d3052b2ba50c3b05826a5a59c98ffe47bfddb159e8de3266cfb",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-physics-system.so.8.15.0": "3b375a1f93e6cfd7794165df9229acd1bfdec2812e1b92cdb2e7a5399f4fad91",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-scene-broadcaster-system.so.8.15.0": "8521047b5ae40b4e0f2c4b55e1ff2899568fc6e12fe90a6456afb87fb837366a",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-user-commands-system.so.8.15.0": "82a671d7f44207b456ea9abfa2ad3982781c8b196ba08e35dad5d5cec805d0e3",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gui.so.8.15.0": "b6205045d4a7d5df123e50267235aad10b2eac2057ab3b342659f2db8b63cc1d",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gz.so.8.15.0": "03ca2b7142fb4143eb188226aa2f146bf472d719193af463e31ea8efd4088d0f",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8.so.8.15.0": "a348e4d28376de4e59ba58402142d0ce9e2abd7852ab76e721a34bafa569ef19"
+          },
+          "exit_code": 0,
+          "group": "stress",
+          "jitter": {
+            "x": 0.0,
+            "y": 0.0,
+            "yaw_deg": 0.0
+          },
+          "lift_s": 0.5,
+          "mass_kg": 0.5,
+          "mu": 0.2,
+          "object_name": "box_a",
+          "plugin_sha256": "d40c932fdffe4e561c94f57c74f9f65a59d30fa17d657dbea3a2d9f29eb8b9fb",
+          "size_m": 0.035,
+          "steps_bytes": 1825379,
+          "steps_sha256": "bfcae665e1f6e918fce9f9fc8f74e19bbdf15e02066de149ea85d5d462b7c8a7",
+          "trial": "stress-mu-0.20-mass-500g",
+          "wall_s": 3.839,
+          "world_sha256": "2ba6c606c73cf67cafbcc0914a7806c36cd4e114f51fd3c257e2e7d443433a50"
+        }
+      },
+      "samples": 1701,
+      "sim_duration_s": 1.7000000000000002,
+      "first_t": 0.001,
+      "last_t": 1.701,
+      "phase_counts": {
+        "settle": 299,
+        "close": 400,
+        "lift": 500,
+        "hold": 502
+      },
+      "dt": {
+        "min_s": 0.0009999999999998899,
+        "median_s": 0.0010000000000000009,
+        "max_s": 0.001000000000000112,
+        "frames": 1701
+      },
+      "integrity": {
+        "rel_frame_offset_mm": 0.0
+      },
+      "files": {
+        "steps_sha256": "bfcae665e1f6e918fce9f9fc8f74e19bbdf15e02066de149ea85d5d462b7c8a7",
+        "meta_sha256": "c175c22cd12b1bec5f7e71608b0c79498c21394e45754e3869715e0c4d839dc8"
+      },
+      "ref": {
+        "window_s": 0.05,
+        "t_start": 0.649,
+        "t_end": 0.699,
+        "samples": 51,
+        "position_m": [
+          -1.1971695820226573e-21,
+          6.613682972926895e-22,
+          -0.06247963639403105
+        ],
+        "quaternion": [
+          -2.354748162484381e-20,
+          -2.2818453160907888e-21,
+          -1.1705774880999419e-20,
+          1.0
+        ],
+        "translation_spread_mm": 0.0,
+        "rotation_spread_deg": 2.404989719531381e-33
+      },
+      "drift": {
+        "translation_mm": 150.05896663228074,
+        "translation_at_s": 1.234,
+        "rotation_deg": 2.404989719531381e-33,
+        "rotation_at_s": 0.7,
+        "window_start_s": 0.699,
+        "translation_limit_mm": 2.0,
+        "rotation_limit_deg": 5.0,
+        "translation_within_limit": false,
+        "rotation_within_limit": true
+      },
+      "contact_evidence": {
+        "requires_pad_contact_in_lift": null,
+        "lift_both_pad_fraction": 0.332,
+        "max_obj_ground_fraction_lift": null,
+        "lift_obj_ground_fraction": 1.0,
+        "within_limit": true
+      },
+      "drop": {
+        "base_z_decline_mm": 150.05896663228074,
+        "base_z_limit_mm": 20.0,
+        "base_z_triggered": true,
+        "base_z_trigger_t": 0.836,
+        "rel_norm_deviation_mm": 150.05896663228074,
+        "rel_norm_limit_mm": 30.0,
+        "rel_norm_triggered": true,
+        "rel_norm_trigger_t": 0.865,
+        "drop": true
+      },
+      "contacts": {
+        "pad_fraction": {
+          "close": {
+            "left": 0.3925,
+            "right": 0.3925,
+            "both": 0.3925
+          },
+          "lift": {
+            "left": 0.332,
+            "right": 0.332,
+            "both": 0.332
+          },
+          "hold": {
+            "left": 0.0,
+            "right": 0.0,
+            "both": 0.0
+          }
+        },
+        "obj_ground_fraction": {
+          "settle": 1.0,
+          "close": 1.0,
+          "lift": 1.0,
+          "hold": 1.0
+        },
+        "obj_ground_last_t": 1.701,
+        "obj_ground_lost_t": null,
+        "obj_ground_lost_delay_s": null,
+        "obj_ground_still_touching_at_end": true,
+        "obj_ground_evidence": "still_touching_at_end",
+        "obj_contacts_present": false
+      },
+      "forces": {
+        "commanded": {
+          "close": {
+            "max_abs_n": 7.493050907619683,
+            "mean_abs_n": 2.0601544117077766,
+            "samples": 800
+          },
+          "lift": {
+            "max_abs_n": 7.498728327651813,
+            "mean_abs_n": 2.585376580990475,
+            "samples": 1000
+          },
+          "lift_joint": {
+            "max_abs_n": 12.610812973502387,
+            "mean_abs_n": 7.868528145808486,
+            "samples": 500
+          },
+          "source": "cmd (PreUpdate cache); the joint force component is cleared by gz-sim before PostUpdate, so joints.f is not the applied effort",
+          "note": "commanded finger effort is an upper bound on the normal load, not a measured contact force"
+        },
+        "measured_contact": {
+          "per_phase": {
+            "close": {
+              "per_pad_peak_max_n": 1.928965385323085,
+              "per_pad_peak_mean_n": 0.5302992395140379,
+              "total_max_n": 3.857930770591997,
+              "total_mean_n": 1.0605984790106973,
+              "samples": 400
+            },
+            "lift": {
+              "per_pad_peak_max_n": 2.0317809826230917,
+              "per_pad_peak_mean_n": 0.6600098593545097,
+              "total_max_n": 4.063561965180715,
+              "total_mean_n": 1.3200197186878508,
+              "samples": 500
+            },
+            "hold": {
+              "per_pad_peak_max_n": 0.0,
+              "per_pad_peak_mean_n": 0.0,
+              "total_max_n": 0.0,
+              "total_mean_n": 0.0,
+              "samples": 502
+            }
+          },
+          "weight_ratio_total_max": 0.8292983602409622,
+          "note": "solver-integrated contact wrench; the plugin logs a per-pad single-point peak, which under-reports the total normal load carried by the pads"
+        },
+        "normal_force_applied_per_pad_n": 7.498728327651813,
+        "normal_force_measured_per_pad_n": 2.0317809826230917
+      },
+      "max_abs_qd_rad_s": 0.44934811295366806,
+      "max_abs_finger_command_n": 7.498728327651813,
+      "heuristics": {
+        "oscillation_ratio": 0.000793137222777851,
+        "max_frame_rel_jump_mm": 0.4493481129536625,
+        "max_rel_norm_m": 0.2125386030263118,
+        "solver_divergence": false
+      },
+      "observed_slip": true,
+      "pass": null,
+      "failure_modes": []
+    },
+    {
+      "trial": "stress-fast-lift-1ms",
+      "object": "box_a",
+      "meta": {
+        "size_m": 0.035,
+        "mass_kg": 0.05,
+        "mu": 1.0,
+        "jitter_m": 0.0,
+        "jitter_yaw_deg": 0.0,
+        "identity_checked": true,
+        "identity_source": "protocol_and_meta",
+        "identity_mismatch": [],
+        "raw": {
+          "command": [
+            "gz",
+            "sim",
+            "-s",
+            "-r",
+            "--iterations",
+            "1701",
+            "results/stress-v3/stress-fast-lift-1ms/world.sdf"
+          ],
+          "dartsim_loaded": true,
+          "engine_libraries": {
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-bullet.so.6.13.2": "0ca5fa82b2d37e86e6aa4fcd38ba43d4b51f82b4cae2dff4c53b569b86e51a33",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-ode.so.6.13.2": "b50d9d8174333d857ec04bdca0699db7921101bccef05ce2c5010bd265b9deb6",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-external-odelcpsolver.so.6.13.2": "7c7698c181c18a30c491cb1945cd4a9d4f4e03fa4c0c6b767ad2358b3e382816",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart.so.6.13.2": "cb4f008188d1ea13cba9b43470c9d46cf819e8df0e4fdc818fa1e4f81b396426",
+            "/opt/ros/jazzy/opt/gz_physics_vendor/lib/gz-physics-7/engine-plugins/libgz-physics7-dartsim-plugin.so.7.8.0": "75617f959d603e052048c6258fbe912d16c66ceebeada7688e6d5be4650cf878",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-contact-system.so.8.15.0": "a63faf0de27a6d3052b2ba50c3b05826a5a59c98ffe47bfddb159e8de3266cfb",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-physics-system.so.8.15.0": "3b375a1f93e6cfd7794165df9229acd1bfdec2812e1b92cdb2e7a5399f4fad91",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-scene-broadcaster-system.so.8.15.0": "8521047b5ae40b4e0f2c4b55e1ff2899568fc6e12fe90a6456afb87fb837366a",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-user-commands-system.so.8.15.0": "82a671d7f44207b456ea9abfa2ad3982781c8b196ba08e35dad5d5cec805d0e3",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gui.so.8.15.0": "b6205045d4a7d5df123e50267235aad10b2eac2057ab3b342659f2db8b63cc1d",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gz.so.8.15.0": "03ca2b7142fb4143eb188226aa2f146bf472d719193af463e31ea8efd4088d0f",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8.so.8.15.0": "a348e4d28376de4e59ba58402142d0ce9e2abd7852ab76e721a34bafa569ef19"
+          },
+          "exit_code": 0,
+          "group": "stress",
+          "jitter": {
+            "x": 0.0,
+            "y": 0.0,
+            "yaw_deg": 0.0
+          },
+          "lift_s": 0.15,
+          "mass_kg": 0.05,
+          "mu": 1.0,
+          "object_name": "box_a",
+          "plugin_sha256": "d40c932fdffe4e561c94f57c74f9f65a59d30fa17d657dbea3a2d9f29eb8b9fb",
+          "size_m": 0.035,
+          "steps_bytes": 1841368,
+          "steps_sha256": "863e6bcbdc2cc653bccaf5303b1f2e30e5ea3f578c4862cc23bb3bf7db0661aa",
+          "trial": "stress-fast-lift-1ms",
+          "wall_s": 3.838,
+          "world_sha256": "d9ebe63d27453806df2fd7cdfa85c1397a10f4258547d546d313e1288dbeedd3"
+        }
+      },
+      "samples": 1701,
+      "sim_duration_s": 1.7000000000000002,
+      "first_t": 0.001,
+      "last_t": 1.701,
+      "phase_counts": {
+        "settle": 299,
+        "close": 400,
+        "lift": 150,
+        "hold": 852
+      },
+      "dt": {
+        "min_s": 0.0009999999999998899,
+        "median_s": 0.0010000000000000009,
+        "max_s": 0.001000000000000112,
+        "frames": 1701
+      },
+      "integrity": {
+        "rel_frame_offset_mm": 0.0
+      },
+      "files": {
+        "steps_sha256": "863e6bcbdc2cc653bccaf5303b1f2e30e5ea3f578c4862cc23bb3bf7db0661aa",
+        "meta_sha256": "b55eedb5d20ec01b323afd8312b4d653572051cdf32ba85f63b1e4e3ce7fa4bb"
+      },
+      "ref": {
+        "window_s": 0.05,
+        "t_start": 0.649,
+        "t_end": 0.699,
+        "samples": 51,
+        "position_m": [
+          1.4209620931139817e-22,
+          9.573866299645156e-23,
+          -0.06137686987677277
+        ],
+        "quaternion": [
+          -1.2325083711156532e-20,
+          5.405491874397948e-20,
+          -4.9455770408456294e-21,
+          1.0
+        ],
+        "translation_spread_mm": 6.938893903907228e-15,
+        "rotation_spread_deg": 4.192464897984552e-33
+      },
+      "drift": {
+        "translation_mm": 0.0006507135718245016,
+        "translation_at_s": 1.023,
+        "rotation_deg": 2.8328934336073378e-15,
+        "rotation_at_s": 0.982,
+        "window_start_s": 0.699,
+        "translation_limit_mm": 2.0,
+        "rotation_limit_deg": 5.0,
+        "translation_within_limit": true,
+        "rotation_within_limit": true
+      },
+      "contact_evidence": {
+        "requires_pad_contact_in_lift": null,
+        "lift_both_pad_fraction": 1.0,
+        "max_obj_ground_fraction_lift": null,
+        "lift_obj_ground_fraction": 0.02666666666666667,
+        "within_limit": true
+      },
+      "drop": {
+        "base_z_decline_mm": 0.0006507135718245016,
+        "base_z_limit_mm": 20.0,
+        "base_z_triggered": false,
+        "base_z_trigger_t": null,
+        "rel_norm_deviation_mm": 0.0006507135718245016,
+        "rel_norm_limit_mm": 30.0,
+        "rel_norm_triggered": false,
+        "rel_norm_trigger_t": null,
+        "drop": false
+      },
+      "contacts": {
+        "pad_fraction": {
+          "close": {
+            "left": 0.3925,
+            "right": 0.3925,
+            "both": 0.3925
+          },
+          "lift": {
+            "left": 1.0,
+            "right": 1.0,
+            "both": 1.0
+          },
+          "hold": {
+            "left": 1.0,
+            "right": 1.0,
+            "both": 1.0
+          }
+        },
+        "obj_ground_fraction": {
+          "settle": 1.0,
+          "close": 1.0,
+          "lift": 0.02666666666666667,
+          "hold": 0.0
+        },
+        "obj_ground_last_t": 0.703,
+        "obj_ground_lost_t": 0.704,
+        "obj_ground_lost_delay_s": 0.0050000000000000044,
+        "obj_ground_still_touching_at_end": false,
+        "obj_ground_evidence": "lost_after_lift",
+        "obj_contacts_present": false
+      },
+      "forces": {
+        "commanded": {
+          "close": {
+            "max_abs_n": 7.492994567544316,
+            "mean_abs_n": 2.0601426880115383,
+            "samples": 800
+          },
+          "lift": {
+            "max_abs_n": 7.498425330343141,
+            "mean_abs_n": 7.496512309418728,
+            "samples": 300
+          },
+          "lift_joint": {
+            "max_abs_n": 80.0,
+            "mean_abs_n": 52.59703772259771,
+            "samples": 150
+          },
+          "source": "cmd (PreUpdate cache); the joint force component is cleared by gz-sim before PostUpdate, so joints.f is not the applied effort",
+          "note": "commanded finger effort is an upper bound on the normal load, not a measured contact force"
+        },
+        "measured_contact": {
+          "per_phase": {
+            "close": {
+              "per_pad_peak_max_n": 2.0369905625525333,
+              "per_pad_peak_mean_n": 0.5599978564777442,
+              "total_max_n": 4.073981124991507,
+              "total_mean_n": 1.1199957129411797,
+              "samples": 400
+            },
+            "lift": {
+              "per_pad_peak_max_n": 2.050702800456782,
+              "per_pad_peak_mean_n": 2.0415739232266983,
+              "total_max_n": 4.101405600867497,
+              "total_mean_n": 4.083147846388357,
+              "samples": 150
+            },
+            "hold": {
+              "per_pad_peak_max_n": 2.043756921596819,
+              "per_pad_peak_mean_n": 2.0398070391387773,
+              "total_max_n": 4.087513843145327,
+              "total_mean_n": 4.079614078197906,
+              "samples": 852
+            }
+          },
+          "weight_ratio_total_max": 8.370215511974482,
+          "note": "solver-integrated contact wrench; the plugin logs a per-pad single-point peak, which under-reports the total normal load carried by the pads"
+        },
+        "normal_force_applied_per_pad_n": 7.498425330343141,
+        "normal_force_measured_per_pad_n": 2.050702800456782
+      },
+      "max_abs_qd_rad_s": 1.0000000001037859,
+      "max_abs_finger_command_n": 7.499873914619516,
+      "heuristics": {
+        "oscillation_ratio": 0.005783297112319397,
+        "max_frame_rel_jump_mm": 0.0006399799947764961,
+        "max_rel_norm_m": 0.0614993000979983,
+        "solver_divergence": false
+      },
+      "observed_slip": false,
+      "pass": null,
+      "failure_modes": []
+    },
+    {
+      "trial": "stress-thin-20mm",
+      "object": "box_a",
+      "meta": {
+        "size_m": 0.02,
+        "mass_kg": 0.03,
+        "mu": 1.0,
+        "jitter_m": 0.0,
+        "jitter_yaw_deg": 0.0,
+        "identity_checked": false,
+        "identity_source": "exploratory_override",
+        "identity_mismatch": [
+          "size_m=0.02 vs protocol 0.035",
+          "mass_kg=0.03 vs protocol 0.05"
+        ],
+        "raw": {
+          "command": [
+            "gz",
+            "sim",
+            "-s",
+            "-r",
+            "--iterations",
+            "1701",
+            "results/stress-v3/stress-thin-20mm/world.sdf"
+          ],
+          "dartsim_loaded": true,
+          "engine_libraries": {
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-bullet.so.6.13.2": "0ca5fa82b2d37e86e6aa4fcd38ba43d4b51f82b4cae2dff4c53b569b86e51a33",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-ode.so.6.13.2": "b50d9d8174333d857ec04bdca0699db7921101bccef05ce2c5010bd265b9deb6",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-external-odelcpsolver.so.6.13.2": "7c7698c181c18a30c491cb1945cd4a9d4f4e03fa4c0c6b767ad2358b3e382816",
+            "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart.so.6.13.2": "cb4f008188d1ea13cba9b43470c9d46cf819e8df0e4fdc818fa1e4f81b396426",
+            "/opt/ros/jazzy/opt/gz_physics_vendor/lib/gz-physics-7/engine-plugins/libgz-physics7-dartsim-plugin.so.7.8.0": "75617f959d603e052048c6258fbe912d16c66ceebeada7688e6d5be4650cf878",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-contact-system.so.8.15.0": "a63faf0de27a6d3052b2ba50c3b05826a5a59c98ffe47bfddb159e8de3266cfb",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-physics-system.so.8.15.0": "3b375a1f93e6cfd7794165df9229acd1bfdec2812e1b92cdb2e7a5399f4fad91",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-scene-broadcaster-system.so.8.15.0": "8521047b5ae40b4e0f2c4b55e1ff2899568fc6e12fe90a6456afb87fb837366a",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-user-commands-system.so.8.15.0": "82a671d7f44207b456ea9abfa2ad3982781c8b196ba08e35dad5d5cec805d0e3",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gui.so.8.15.0": "b6205045d4a7d5df123e50267235aad10b2eac2057ab3b342659f2db8b63cc1d",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gz.so.8.15.0": "03ca2b7142fb4143eb188226aa2f146bf472d719193af463e31ea8efd4088d0f",
+            "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8.so.8.15.0": "a348e4d28376de4e59ba58402142d0ce9e2abd7852ab76e721a34bafa569ef19"
+          },
+          "exit_code": 0,
+          "group": "stress",
+          "jitter": {
+            "x": 0.0,
+            "y": 0.0,
+            "yaw_deg": 0.0
+          },
+          "lift_s": 0.5,
+          "mass_kg": 0.03,
+          "mu": 1.0,
+          "object_name": "box_a",
+          "plugin_sha256": "d40c932fdffe4e561c94f57c74f9f65a59d30fa17d657dbea3a2d9f29eb8b9fb",
+          "size_m": 0.02,
+          "steps_bytes": 1812083,
+          "steps_sha256": "bdc5716a25449394c970ce34920e604f5f7cb3cc875aabf792d3673e7597f83e",
+          "trial": "stress-thin-20mm",
+          "wall_s": 3.839,
+          "world_sha256": "a5df539cd02b638e99b1322f6ae8f0d689c84f6d9f6c296fdf031dd103b76236"
+        }
+      },
+      "samples": 1701,
+      "sim_duration_s": 1.7000000000000002,
+      "first_t": 0.001,
+      "last_t": 1.701,
+      "phase_counts": {
+        "settle": 299,
+        "close": 400,
+        "lift": 500,
+        "hold": 502
+      },
+      "dt": {
+        "min_s": 0.0009999999999998899,
+        "median_s": 0.0010000000000000009,
+        "max_s": 0.001000000000000112,
+        "frames": 1701
+      },
+      "integrity": {
+        "rel_frame_offset_mm": 0.0
+      },
+      "files": {
+        "steps_sha256": "bdc5716a25449394c970ce34920e604f5f7cb3cc875aabf792d3673e7597f83e",
+        "meta_sha256": "ecd346aa23f8eced6fa632562ad788c723a0c4a726eb45ceae30c044589b0284"
+      },
+      "ref": {
+        "window_s": 0.05,
+        "t_start": 0.649,
+        "t_end": 0.699,
+        "samples": 51,
+        "position_m": [
+          8.52874982553959e-22,
+          -6.332638291599993e-22,
+          -0.06882830346978235
+        ],
+        "quaternion": [
+          6.658281874022228e-20,
+          4.911332984492714e-20,
+          3.656393825748485e-21,
+          1.0
+        ],
+        "translation_spread_mm": 0.0,
+        "rotation_spread_deg": 2.7897659661005927e-38
+      },
+      "drift": {
+        "translation_mm": 150.05879955650582,
+        "translation_at_s": 1.234,
+        "rotation_deg": 2.7897659661005927e-38,
+        "rotation_at_s": 0.7,
+        "window_start_s": 0.699,
+        "translation_limit_mm": 2.0,
+        "rotation_limit_deg": 5.0,
+        "translation_within_limit": false,
+        "rotation_within_limit": true
+      },
+      "contact_evidence": {
+        "requires_pad_contact_in_lift": null,
+        "lift_both_pad_fraction": 0.0,
+        "max_obj_ground_fraction_lift": null,
+        "lift_obj_ground_fraction": 1.0,
+        "within_limit": true
+      },
+      "drop": {
+        "base_z_decline_mm": 150.05879955650582,
+        "base_z_limit_mm": 20.0,
+        "base_z_triggered": true,
+        "base_z_trigger_t": 0.834,
+        "rel_norm_deviation_mm": 150.05879955650582,
+        "rel_norm_limit_mm": 30.0,
+        "rel_norm_triggered": true,
+        "rel_norm_trigger_t": 0.863,
+        "drop": true
+      },
+      "contacts": {
+        "pad_fraction": {
+          "close": {
+            "left": 0.0,
+            "right": 0.0,
+            "both": 0.0
+          },
+          "lift": {
+            "left": 0.0,
+            "right": 0.0,
+            "both": 0.0
+          },
+          "hold": {
+            "left": 0.0,
+            "right": 0.0,
+            "both": 0.0
+          }
+        },
+        "obj_ground_fraction": {
+          "settle": 1.0,
+          "close": 1.0,
+          "lift": 1.0,
+          "hold": 1.0
+        },
+        "obj_ground_last_t": 1.701,
+        "obj_ground_lost_t": null,
+        "obj_ground_lost_delay_s": null,
+        "obj_ground_still_touching_at_end": true,
+        "obj_ground_evidence": "still_touching_at_end",
+        "obj_contacts_present": false
+      },
+      "forces": {
+        "commanded": {
+          "close": {
+            "max_abs_n": 0.030206250007335483,
+            "mean_abs_n": 0.015166351920220833,
+            "samples": 800
+          },
+          "lift": {
+            "max_abs_n": 0.03037500000693169,
+            "mean_abs_n": 0.0012588187502524035,
+            "samples": 1000
+          },
+          "lift_joint": {
+            "max_abs_n": 9.07977688357733,
+            "mean_abs_n": 6.958377440000001,
+            "samples": 500
+          },
+          "source": "cmd (PreUpdate cache); the joint force component is cleared by gz-sim before PostUpdate, so joints.f is not the applied effort",
+          "note": "commanded finger effort is an upper bound on the normal load, not a measured contact force"
+        },
+        "measured_contact": {
+          "per_phase": {
+            "close": {
+              "per_pad_peak_max_n": 0.0,
+              "per_pad_peak_mean_n": 0.0,
+              "total_max_n": 0.0,
+              "total_mean_n": 0.0,
+              "samples": 400
+            },
+            "lift": {
+              "per_pad_peak_max_n": 0.0,
+              "per_pad_peak_mean_n": 0.0,
+              "total_max_n": 0.0,
+              "total_mean_n": 0.0,
+              "samples": 500
+            },
+            "hold": {
+              "per_pad_peak_max_n": 0.0,
+              "per_pad_peak_mean_n": 0.0,
+              "total_max_n": 0.0,
+              "total_mean_n": 0.0,
+              "samples": 502
+            }
+          },
+          "weight_ratio_total_max": 0.0,
+          "note": "solver-integrated contact wrench; the plugin logs a per-pad single-point peak, which under-reports the total normal load carried by the pads"
+        },
+        "normal_force_applied_per_pad_n": 0.03037500000693169,
+        "normal_force_measured_per_pad_n": 0.0
+      },
+      "max_abs_qd_rad_s": 0.44949360552820716,
+      "max_abs_finger_command_n": 0.03037500000693169,
+      "heuristics": {
+        "oscillation_ratio": 0.0007931381051548003,
+        "max_frame_rel_jump_mm": 0.44949360552820616,
+        "max_rel_norm_m": 0.21888710302628817,
+        "solver_divergence": false
+      },
+      "observed_slip": true,
+      "pass": null,
+      "failure_modes": []
+    }
+  ],
+  "friction_cone_check": {
+    "status": "符合",
+    "conclusion": "符合：10/10 trial 的观测滑移与库仑预测一致（容量 = mu x 两侧指令指力）。mu=1.0 时观测翻转区间为 1.00-0.03 kg，预注册预测 1.12 kg 不在该区间内。 注：若用日志中的单点接触峰值代替指令指力，只有 8/10 trial 一致——该峰值是单点力而不是总法向力，不能直接作为 mu*N 的 N。",
+    "model": "capacity = mu * (commanded left finger effort + commanded right finger effort)",
+    "gravity_m_s2": 9.8,
+    "lift_acceleration_m_s2": 3.5999999999999996,
+    "acceleration_source": "protocol rig.lift_height_m / phases_s.lift (smoothstep, 6h/T^2)",
+    "declared_predicted_slip_mass_kg": 1.12,
+    "predicted_slip_mass_kg": 1.12,
+    "observed_boundary_kg": {
+      "held_max_kg": 1.0,
+      "slip_min_kg": 0.03
+    },
+    "agreement_count": 10,
+    "agreement_from_pad_peak_count": 8,
+    "trial_count": 10,
+    "trials": [
+      {
+        "trial": "stress-load-0.05kg",
+        "mass_kg": 0.05,
+        "mu": 1.0,
+        "size_m": 0.035,
+        "normal_force_applied_n": 7.499831205654636,
+        "normal_force_measured_n": 2.0397617696015415,
+        "normal_force_total_applied_n": 14.999662411309272,
+        "friction_capacity_n": 14.999662411309272,
+        "friction_capacity_from_pad_peak_n": 4.079523539203083,
+        "gravity_load_n": 0.67,
+        "lift_acceleration_m_s2": 3.5999999999999996,
+        "predicted_slip": false,
+        "predicted_slip_from_pad_peak": false,
+        "observed_slip": false,
+        "observed_drift_mm": 0.0011416364146046853,
+        "agreement": true,
+        "agreement_from_pad_peak": true,
+        "predicted_slip_mass_kg": 1.1193777918887515
+      },
+      {
+        "trial": "stress-load-0.50kg",
+        "mass_kg": 0.5,
+        "mu": 1.0,
+        "size_m": 0.035,
+        "normal_force_applied_n": 7.499910736913229,
+        "normal_force_measured_n": 2.124694043510188,
+        "normal_force_total_applied_n": 14.999821473826458,
+        "friction_capacity_n": 14.999821473826458,
+        "friction_capacity_from_pad_peak_n": 4.249388087020376,
+        "gravity_load_n": 6.7,
+        "lift_acceleration_m_s2": 3.5999999999999996,
+        "predicted_slip": false,
+        "predicted_slip_from_pad_peak": true,
+        "observed_slip": false,
+        "observed_drift_mm": 0.0010672055771321354,
+        "agreement": true,
+        "agreement_from_pad_peak": false,
+        "predicted_slip_mass_kg": 1.119389662225855
+      },
+      {
+        "trial": "stress-load-1.00kg",
+        "mass_kg": 1.0,
+        "mu": 1.0,
+        "size_m": 0.035,
+        "normal_force_applied_n": 7.499915169109929,
+        "normal_force_measured_n": 2.688838753449098,
+        "normal_force_total_applied_n": 14.999830338219859,
+        "friction_capacity_n": 14.999830338219859,
+        "friction_capacity_from_pad_peak_n": 5.377677506898196,
+        "gravity_load_n": 13.4,
+        "lift_acceleration_m_s2": 3.5999999999999996,
+        "predicted_slip": false,
+        "predicted_slip_from_pad_peak": true,
+        "observed_slip": false,
+        "observed_drift_mm": 0.0010841553959306527,
+        "agreement": true,
+        "agreement_from_pad_peak": false,
+        "predicted_slip_mass_kg": 1.1193903237477507
+      },
+      {
+        "trial": "stress-load-1.20kg",
+        "mass_kg": 1.2,
+        "mu": 1.0,
+        "size_m": 0.035,
+        "normal_force_applied_n": 7.499916350301137,
+        "normal_force_measured_n": 2.727036263182996,
+        "normal_force_total_applied_n": 14.999832700602274,
+        "friction_capacity_n": 14.999832700602274,
+        "friction_capacity_from_pad_peak_n": 5.454072526365992,
+        "gravity_load_n": 16.08,
+        "lift_acceleration_m_s2": 3.5999999999999996,
+        "predicted_slip": true,
+        "predicted_slip_from_pad_peak": true,
+        "observed_slip": true,
+        "observed_drift_mm": 8.85161510068909,
+        "agreement": true,
+        "agreement_from_pad_peak": true,
+        "predicted_slip_mass_kg": 1.1193905000449458
+      },
+      {
+        "trial": "stress-load-1.50kg",
+        "mass_kg": 1.5,
+        "mu": 1.0,
+        "size_m": 0.035,
+        "normal_force_applied_n": 7.498814681540534,
+        "normal_force_measured_n": 2.7131813825508235,
+        "normal_force_total_applied_n": 14.997629363081067,
+        "friction_capacity_n": 14.997629363081067,
+        "friction_capacity_from_pad_peak_n": 5.426362765101647,
+        "gravity_load_n": 20.1,
+        "lift_acceleration_m_s2": 3.5999999999999996,
+        "predicted_slip": true,
+        "predicted_slip_from_pad_peak": true,
+        "observed_slip": true,
+        "observed_drift_mm": 150.06114537295966,
+        "agreement": true,
+        "agreement_from_pad_peak": true,
+        "predicted_slip_mass_kg": 1.1192260718717215
+      },
+      {
+        "trial": "stress-load-2.00kg",
+        "mass_kg": 2.0,
+        "mu": 1.0,
+        "size_m": 0.035,
+        "normal_force_applied_n": 7.498709478340475,
+        "normal_force_measured_n": 2.698282942450277,
+        "normal_force_total_applied_n": 14.99741895668095,
+        "friction_capacity_n": 14.99741895668095,
+        "friction_capacity_from_pad_peak_n": 5.396565884900554,
+        "gravity_load_n": 26.8,
+        "lift_acceleration_m_s2": 3.5999999999999996,
+        "predicted_slip": true,
+        "predicted_slip_from_pad_peak": true,
+        "observed_slip": true,
+        "observed_drift_mm": 150.05864326920653,
+        "agreement": true,
+        "agreement_from_pad_peak": true,
+        "predicted_slip_mass_kg": 1.1192103699015634
+      },
+      {
+        "trial": "stress-load-5.00kg",
+        "mass_kg": 5.0,
+        "mu": 1.0,
+        "size_m": 0.035,
+        "normal_force_applied_n": 7.498416710608667,
+        "normal_force_measured_n": 2.6700598005936556,
+        "normal_force_total_applied_n": 14.996833421217334,
+        "friction_capacity_n": 14.996833421217334,
+        "friction_capacity_from_pad_peak_n": 5.340119601187311,
+        "gravity_load_n": 67.0,
+        "lift_acceleration_m_s2": 3.5999999999999996,
+        "predicted_slip": true,
+        "predicted_slip_from_pad_peak": true,
+        "observed_slip": true,
+        "observed_drift_mm": 150.05857750371447,
+        "agreement": true,
+        "agreement_from_pad_peak": true,
+        "predicted_slip_mass_kg": 1.1191666732251742
+      },
+      {
+        "trial": "stress-mu-0.20-mass-500g",
+        "mass_kg": 0.5,
+        "mu": 0.2,
+        "size_m": 0.035,
+        "normal_force_applied_n": 7.498728327651813,
+        "normal_force_measured_n": 2.0317809826230917,
+        "normal_force_total_applied_n": 14.997456655303626,
+        "friction_capacity_n": 2.9994913310607254,
+        "friction_capacity_from_pad_peak_n": 0.8127123930492367,
+        "gravity_load_n": 6.7,
+        "lift_acceleration_m_s2": 3.5999999999999996,
+        "predicted_slip": true,
+        "predicted_slip_from_pad_peak": true,
+        "observed_slip": true,
+        "observed_drift_mm": 150.05896663228074,
+        "agreement": true,
+        "agreement_from_pad_peak": true,
+        "predicted_slip_mass_kg": 0.22384263664632278
+      },
+      {
+        "trial": "stress-fast-lift-1ms",
+        "mass_kg": 0.05,
+        "mu": 1.0,
+        "size_m": 0.035,
+        "normal_force_applied_n": 7.498425330343141,
+        "normal_force_measured_n": 2.050702800456782,
+        "normal_force_total_applied_n": 14.996850660686283,
+        "friction_capacity_n": 14.996850660686283,
+        "friction_capacity_from_pad_peak_n": 4.101405600913564,
+        "gravity_load_n": 0.67,
+        "lift_acceleration_m_s2": 3.5999999999999996,
+        "predicted_slip": false,
+        "predicted_slip_from_pad_peak": false,
+        "observed_slip": false,
+        "observed_drift_mm": 0.0006507135718245016,
+        "agreement": true,
+        "agreement_from_pad_peak": true,
+        "predicted_slip_mass_kg": 1.1191679597527076
+      },
+      {
+        "trial": "stress-thin-20mm",
+        "mass_kg": 0.03,
+        "mu": 1.0,
+        "size_m": 0.02,
+        "normal_force_applied_n": 0.03037500000693169,
+        "normal_force_measured_n": 0.0,
+        "normal_force_total_applied_n": 0.06075000001386338,
+        "friction_capacity_n": 0.06075000001386338,
+        "friction_capacity_from_pad_peak_n": 0.0,
+        "gravity_load_n": 0.40199999999999997,
+        "lift_acceleration_m_s2": 3.5999999999999996,
+        "predicted_slip": true,
+        "predicted_slip_from_pad_peak": true,
+        "observed_slip": true,
+        "observed_drift_mm": 150.05879955650582,
+        "agreement": true,
+        "agreement_from_pad_peak": true,
+        "predicted_slip_mass_kg": 0.00453358209058682
+      }
+    ]
+  },
+  "verdict": "EXPLORATORY",
+  "passed_trials": null,
+  "failed_trials": [],
+  "failure_modes": {},
+  "limitations": [
+    "仅两种尺寸/质量组合（35 mm-50 g、50 mm-120 g）与单一摩擦系数，未扫描尺寸-质量-摩擦参数空间；对其它几何、质量或摩擦组合的抓取能力没有任何证据。",
+    "无视觉、无位姿误差、无传感器噪声注入：物体与基座位姿是仿真真值，夹持位姿完全由预注册几何决定；不能证明存在感知误差、标定偏差或物体位姿不确定性时的可行性。",
+    "单一物理引擎（DART）与单一 1 ms 步长：接触刚度、摩擦锥离散化和穿透恢复都与步长、求解器耦合，结论不能迁移到其它引擎、其它步长或实时控制频率，也不能外推到真实硬件。"
+  ],
+  "interpretation": "本报告只在 protocol.json 的预注册判据内给出 PASS/FAIL。PASS 表示该固定场景、固定参数下全部 trial 的基座系相对漂移低于阈值且未判为掉落；它不表示抓取成功率、不表示可部署性、不表示真实接触优于磁吸替代，也不表示物体在更重、更滑或更小的夹持余量下仍能被持住。"
+}

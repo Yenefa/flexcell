@@ -1,0 +1,38 @@
+{
+  "command": [
+    "gz",
+    "sim",
+    "-s",
+    "-r",
+    "--iterations",
+    "1701",
+    "results/magnet-v1/magnet-0-05kg/world.sdf"
+  ],
+  "dartsim_loaded": true,
+  "engine_libraries": {
+    "/opt/ros/jazzy/opt/gz_physics_vendor/lib/gz-physics-7/engine-plugins/libgz-physics7-dartsim-plugin.so.7.8.0": "75617f959d603e052048c6258fbe912d16c66ceebeada7688e6d5be4650cf878",
+    "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-physics-system.so.8.15.0": "3b375a1f93e6cfd7794165df9229acd1bfdec2812e1b92cdb2e7a5399f4fad91",
+    "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gui.so.8.15.0": "b6205045d4a7d5df123e50267235aad10b2eac2057ab3b342659f2db8b63cc1d",
+    "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gz.so.8.15.0": "03ca2b7142fb4143eb188226aa2f146bf472d719193af463e31ea8efd4088d0f",
+    "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8.so.8.15.0": "a348e4d28376de4e59ba58402142d0ce9e2abd7852ab76e721a34bafa569ef19"
+  },
+  "exit_code": 0,
+  "group": "magnet",
+  "jitter": {
+    "x": 0.0,
+    "y": 0.0,
+    "yaw_deg": 0.0
+  },
+  "lift_s": 0.5,
+  "mass_kg": 0.05,
+  "mode": "magnet",
+  "mu": 1.0,
+  "object_name": "box_a",
+  "plugin_sha256": "d40c932fdffe4e561c94f57c74f9f65a59d30fa17d657dbea3a2d9f29eb8b9fb",
+  "size_m": 0.035,
+  "steps_bytes": 1294571,
+  "steps_sha256": "cf13030eab3efa4d5ba85d3e679a36af1cccab0cbf9fc27eedd571648cee493e",
+  "trial": "magnet-0-05kg",
+  "wall_s": 3.946,
+  "world_sha256": "22df844a5585d24106fbaf9393df35ffea791538e660febdc56c37d3ccd91012"
+}

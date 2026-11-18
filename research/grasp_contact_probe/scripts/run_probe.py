@@ -28,6 +28,7 @@ import time
 import uuid
 from pathlib import Path
 
+NL = chr(10)
 ROOT = Path(__file__).resolve().parents[1]
 TEMPLATE = ROOT / "worlds" / "grasp_probe.sdf.tmpl"
 BUILD = ROOT / "build"
@@ -92,6 +93,10 @@ OBJECTS = {
     "box_b": {"size_m": 0.050, "mass_kg": 0.12, "mu": 1.0},
 }
 
+# Load ladder shared by the contact controls and the magnet baseline, so both
+# rows of the comparison table refer to the same payloads.
+MAGNET_LADDER_KG = (0.05, 0.50, 1.00, 1.20, 1.50, 2.00, 5.00)
+
 
 def trial_specs(stage: str) -> list[dict]:
     trials: list[dict] = []
@@ -113,10 +118,13 @@ def trial_specs(stage: str) -> list[dict]:
     elif stage == "stress":
         # Exploratory only: not part of the 10/10 acceptance verdict.
         variants = [
+            ("load-0.05kg", {"mass_kg": 0.05}),
             ("load-0.50kg", {"mass_kg": 0.50}),
             ("load-1.00kg", {"mass_kg": 1.00}),
             ("load-1.20kg", {"mass_kg": 1.20}),
             ("load-1.50kg", {"mass_kg": 1.50}),
+            ("load-2.00kg", {"mass_kg": 2.00}),
+            ("load-5.00kg", {"mass_kg": 5.00}),
             ("mu-0.20-mass-500g", {"mu": 0.20, "mass_kg": 0.50}),
             ("fast-lift-1ms", {"lift_s": 0.15}),
             ("thin-20mm", {"size_m": 0.020, "mass_kg": 0.03}),
@@ -134,6 +142,21 @@ def trial_specs(stage: str) -> list[dict]:
                 "mu": props["mu"],
                 "jitter": JITTER[0],
                 "lift_s": props.get("lift_s", PROTOCOL["phases_s"]["lift"]),
+            })
+    elif stage == "magnet":
+        # Same rig, same ladder, but the object is carried by a detachable joint
+        # instead of contact. Fingers never close, so no pad can touch it.
+        for mass in MAGNET_LADDER_KG:
+            trials.append({
+                "trial": f"magnet-{mass:.2f}kg".replace(".", "-"),
+                "group": "magnet",
+                "mode": "magnet",
+                "object_name": "box_a",
+                "size_m": OBJECTS["box_a"]["size_m"],
+                "mass_kg": mass,
+                "mu": OBJECTS["box_a"]["mu"],
+                "jitter": JITTER[0],
+                "lift_s": PROTOCOL["phases_s"]["lift"],
             })
     else:
         raise SystemExit(f"unknown stage: {stage}")
@@ -165,8 +188,22 @@ def build_plugin(rebuild: bool) -> None:
 def render_world(spec: dict, log_path: Path) -> str:
     text = TEMPLATE.read_text()
     inertia = spec["mass_kg"] / 12.0 * (2.0 * spec["size_m"] ** 2)
+    magnet_block = ""
+    if spec.get("mode") == "magnet":
+        magnet_block = (
+            "      <plugin filename='gz-sim-detachable-joint-system' "
+            "name='gz::sim::systems::DetachableJoint'>" + NL +
+            "        <parent_link>base_link</parent_link>" + NL +
+            f"        <child_model>{spec['object_name']}</child_model>" + NL +
+            "        <child_link>link</child_link>" + NL +
+            "        <attach_topic>/probe/magnet/attach</attach_topic>" + NL +
+            "        <detach_topic>/probe/magnet/detach</detach_topic>" + NL +
+            "        <output_topic>/probe/magnet/state</output_topic>" + NL +
+            "      </plugin>")
     values = {
         "@LOG_PATH@": str(log_path),
+        "@MODE@": spec.get("mode", "contact"),
+        "@MAGNET_BLOCK@": magnet_block,
         "@OBJECT_NAME@": spec["object_name"],
         "@OBJECT_SIZE@": f"{spec['size_m']:.6f}",
         "@OBJECT_MASS@": f"{spec['mass_kg']:.6f}",
@@ -267,7 +304,7 @@ def gz_version() -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--stage", choices=["acceptance", "stress", "smoke"], default="acceptance")
+    parser.add_argument("--stage", choices=["acceptance", "stress", "smoke", "magnet"], default="acceptance")
     parser.add_argument("--out", type=Path)
     parser.add_argument("--only", type=int, help="run a single trial index (1-based)")
     parser.add_argument("--rebuild", action="store_true")
@@ -289,7 +326,11 @@ def main() -> int:
 
     protocol = dict(PROTOCOL)
     protocol.update(stage=args.stage, run_id=run_dir.name, gz_version=gz_version(),
-                    steps_per_trial=steps_total, trials=[spec["trial"] for spec in specs])
+                    steps_per_trial=steps_total, trials=[spec["trial"] for spec in specs],
+                    mode="magnet" if args.stage == "magnet" else "contact")
+    if args.stage == "magnet":
+        protocol["magnet_ladder_kg"] = list(MAGNET_LADDER_KG)
+        protocol["carrier"] = "gz::sim::systems::DetachableJoint (rigid joint, no contact)"
     (run_dir / "protocol.json").write_text(json.dumps(protocol, indent=2, sort_keys=True) + "\n")
 
     failures = []

@@ -55,6 +55,8 @@
       <max_lift_force>@MAX_LIFT_FORCE@</max_lift_force>
       <gripper_mass>@GRIPPER_MASS@</gripper_mass>
       <payload_mass>@OBJECT_MASS@</payload_mass>
+      <mode>@MODE@</mode>
+      <attach_topic>/probe/magnet/attach</attach_topic>
     </plugin>
 
     <model name='ground_plane'>
@@ -163,6 +165,8 @@
           <contact><collision>right_pad</collision></contact>
         </sensor>
       </link>
+
+      @MAGNET_BLOCK@
 
       <joint name='finger_right_joint' type='prismatic'>
         <parent>base_link</parent>

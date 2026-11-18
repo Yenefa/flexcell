@@ -8,7 +8,9 @@
 //
 // Deterministic by construction: all motion is a function of simulation time,
 // so a trial can be replayed bit-for-bit from the same world file.
+#include <gz/msgs/empty.pb.h>
 #include <gz/plugin/Register.hh>
+#include <gz/transport/Node.hh>
 #include <gz/sim/Link.hh>
 #include <gz/sim/Model.hh>
 #include <gz/sim/System.hh>
@@ -91,6 +93,14 @@ class GraspContactProbe final : public gz::sim::System,
     maxLiftForce_ = Param<double>(config, "max_lift_force", 80.0);
     gripperMass_ = Param<double>(config, "gripper_mass", 0.6);
     payloadMass_ = Param<double>(config, "payload_mass", 0.05);
+    mode_ = Param<std::string>(config, "mode", "contact");
+    if (mode_ != "contact" && mode_ != "magnet")
+      throw std::runtime_error("grasp probe: mode must be contact or magnet");
+    magnet_ = mode_ == "magnet";
+    if (magnet_) {
+      attachTopic_ = Param<std::string>(config, "attach_topic", "/probe/magnet/attach");
+      attachPub_ = node_.Advertise<gz::msgs::Empty>(attachTopic_);
+    }
 
     // Entity creation happens after world plugins are configured, so the whole
     // graph is resolved lazily on the first step (see Resolve).
@@ -131,6 +141,16 @@ class GraspContactProbe final : public gz::sim::System,
     } else {
       gapTarget = closedGap_;
       liftTarget = liftHeight_;
+    }
+    if (magnet_) {
+      // Magnet backend: the jaw never touches the object. Everything the object
+      // gets comes from the detachable joint that the mainline would use.
+      gapTarget = openGap_;
+      if (t >= closeEnd && !attachSent_) {
+        gz::msgs::Empty message;
+        attachPub_.Publish(message);
+        attachSent_ = true;
+      }
     }
     gapTarget_ = gapTarget;
     liftTarget_ = liftTarget;
@@ -173,7 +193,8 @@ class GraspContactProbe final : public gz::sim::System,
     const double gapActual = openGap_ - (ql + qr);
 
     log_ << "{\"iter\":" << info.iterations << ",\"t\":" << t
-         << ",\"phase\":\"" << phase << "\"";
+         << ",\"phase\":\"" << phase << "\""
+         << ",\"mode\":\"" << mode_ << "\",\"attached\":" << (attachSent_ ? "true" : "false");
     WritePose("obj", objPose);
     WritePose("base", basePose);
     WritePose("rel", rel);
@@ -347,6 +368,10 @@ class GraspContactProbe final : public gz::sim::System,
   Entity rightFingerLink_{gz::sim::kNullEntity};
   bool resolved_{false};
   double cmdLeft_{0.0}, cmdRight_{0.0}, cmdLift_{0.0};
+  std::string mode_{"contact"}, attachTopic_;
+  bool magnet_{false}, attachSent_{false};
+  gz::transport::Node node_;
+  gz::transport::Node::Publisher attachPub_;
   std::ofstream log_;
 };
 

@@ -8,7 +8,7 @@
 - 插件：`src/GraspContactProbe.cc`（力控伺服 + 逐毫秒位姿/接触记录）
 - 运行：`scripts/run_probe.py`
 - 分析：`scripts/analyze.py`（由独立分析员实现，只读原始 JSONL）
-- 结论：`REPORT.md`；对抗性评审：`REVIEW.md`
+- 结论：`REPORT.md`；磁吸对照：`MAGNET_BASELINE.md`；对抗性评审：`REVIEW.md`
 
 ## 为什么不是「接个库就完事」
 
@@ -23,7 +23,8 @@ source /opt/ros/jazzy/setup.bash
 cd research/grasp_contact_probe
 
 python3 scripts/run_probe.py --stage acceptance --out results/acceptance-v2 --rebuild
-python3 scripts/run_probe.py --stage stress     --out results/stress-v2
+python3 scripts/run_probe.py --stage stress     --out results/stress-v3
+python3 scripts/run_probe.py --stage magnet     --out results/magnet-v1   # 磁吸基线
 
 python3 scripts/analyze.py --run-dir results/acceptance-v3 \
     --json-out results/acceptance-v3/summary.json \
