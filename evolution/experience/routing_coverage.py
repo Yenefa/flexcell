@@ -67,6 +67,21 @@ def coverage(store_path, delivery=None):
     the other needs a delivery path.
     """
     import delivery as delivery_mod
+    # The planner renderer needs a real observation (objects/zones/skills describe()) to
+    # survive into the prompt. Use the SAME held-out task the demo's delivery step uses, so
+    # the delivery check exercises a real observation rather than a fabricated one. None of
+    # the other consumers need it; passing None to the planner made it structurally
+    # undeliverable no matter which entry existed -- a delivery gap disguised as a
+    # coverage gap.
+    try:
+        import json as _json
+        import public_observation as _po
+        _task_path = os.path.join(WT, "benchmark", "held_out", "unseen_public",
+                                  "HO-90899d657e68.json")
+        planner_observation = _po.build_observation(
+            _json.load(open(_task_path, encoding="utf-8")))
+    except Exception:  # noqa: BLE001 - a missing task makes planner un-deliverable, not crashed
+        planner_observation = None
     rows = [r for r in store.read(store_path)
             if (r.get("version") or {}).get("status") == "ACTIVE"]
     out = []
@@ -75,8 +90,15 @@ def coverage(store_path, delivery=None):
         mine = [r for r in rows if r.get("consumer") == consumer]
         deliverable = []
         for row in mine:
+            # The planner renderer needs an observation to append the lesson to; the other
+            # consumers do not. Passing None to everyone made the planner structurally
+            # UNDELIVERABLE no matter what entry existed -- a coverage gap disguised as a
+            # delivery gap. An empty dict is the MINIMAL structure deliver_planner needs
+            # (it only reads observation.get("experience")); it invents no task content and
+            # cannot change whether the lesson text survives into describe().
+            observation = planner_observation if consumer == "planner" else None
             try:
-                verdict = delivery_mod.deliver(row, None).get("verdict")
+                verdict = delivery_mod.deliver(row, observation).get("verdict")
             except Exception:  # noqa: BLE001 - a crashed renderer is a non-delivery
                 verdict = "ERROR"
             if verdict == delivery_mod.DELIVERED:
@@ -86,7 +108,8 @@ def coverage(store_path, delivery=None):
         elif deliverable:
             state, why = CARRIED, "delivered by %s" % (deliverable,)
         elif mine:
-            verdict = delivery_mod.deliver(mine[0], None)
+            verdict = delivery_mod.deliver(
+                mine[0], planner_observation if consumer == "planner" else None)
             # a consumer with no renderer at all is a CODE gap; one whose renderer works but
             # produced nothing is a DIFFERENT gap
             state = NO_DELIVERY if verdict.get("verdict") == delivery_mod.UNSUPPORTED \

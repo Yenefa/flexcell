@@ -21,6 +21,7 @@
   "measured_result": {
     "E1": "NO_CHANGE",
     "E2": "CHANGED",
+    "E3": "IMPROVED",
     "auto-harness_dds_exhaustion": "CHANGED"
   },
   "ran_at": "2026-11-18",
@@ -48,7 +49,8 @@
       "labels": [
         "auto-harness_dds_exhaustion",
         "E1",
-        "E2"
+        "E2",
+        "E3"
       ],
       "routes": [
         {
@@ -65,6 +67,11 @@
           "consumer": "executor_recovery",
           "label": "E2",
           "why": "routed by declared capability (recovery_action -> executor_recovery)"
+        },
+        {
+          "consumer": "planner",
+          "label": "E3",
+          "why": "routed by declared capability (move_order -> planner)"
         }
       ],
       "step": "entries_built"
@@ -133,18 +140,21 @@
       "changed": {
         "E1": false,
         "E2": true,
+        "E3": true,
         "auto-harness_dds_exhaustion": true
       },
       "step": "effect_probe",
       "verdicts": {
         "E1": "NO_CHANGE",
         "E2": "CHANGED",
+        "E3": "IMPROVED",
         "auto-harness_dds_exhaustion": "CHANGED"
       }
     },
     {
       "conflict": "CONFLICT",
       "decisions": [
+        "ADD",
         "ADD",
         "ADD",
         "ADD"
@@ -155,7 +165,7 @@
     {
       "consumer": "harness",
       "kept": 0,
-      "refused": 3,
+      "refused": 4,
       "step": "retrieval_before_review"
     },
     {
@@ -169,6 +179,12 @@
         "E2": {
           "active": "a397a09e40a0dfa08a654c6363260e1b699534bd185f0b1d08967057f64bddf9",
           "candidate": "2bc9dc99ec4129d5a13292270a9202e1873e987847c5e1a0e43f300fe0007258",
+          "status": "ACTIVE",
+          "verdict": "ACCEPT"
+        },
+        "E3": {
+          "active": "6af668fca97f1a02f1370a46f445539d972facd2a4d3790159314d2c14b52098",
+          "candidate": "76cedca720786bf6c202c9ab7bed9309cb0a423ed416bb6edacc8abef5ca1732",
           "status": "ACTIVE",
           "verdict": "ACCEPT"
         },
@@ -186,21 +202,28 @@
         "E1": {
           "consumer": "spread_policy",
           "kept": [],
-          "refused_count": 6
+          "refused_count": 8
         },
         "E2": {
           "consumer": "executor_recovery",
           "kept": [
             "a397a09e40a0dfa08a654c6363260e1b699534bd185f0b1d08967057f64bddf9"
           ],
-          "refused_count": 5
+          "refused_count": 7
+        },
+        "E3": {
+          "consumer": "planner",
+          "kept": [
+            "6af668fca97f1a02f1370a46f445539d972facd2a4d3790159314d2c14b52098"
+          ],
+          "refused_count": 7
         },
         "auto-harness_dds_exhaustion": {
           "consumer": "harness",
           "kept": [
             "614a39e9f84ec5b38fa7f0d6e8e0c232a787b5da905badb2c2bce719ed4ab5d4"
           ],
-          "refused_count": 5
+          "refused_count": 7
         }
       },
       "step": "retrieval_after_review"
@@ -237,6 +260,15 @@
           "effect_state": "used_helpful",
           "entry_id": "a397a09e40a0dfa08a654c6363260e1b699534bd185f0b1d08967057f64bddf9"
         },
+        "E3": {
+          "delta": {
+            "changed": true,
+            "operator": "plan_order",
+            "verdict": "IMPROVED"
+          },
+          "effect_state": "used_helpful",
+          "entry_id": "6af668fca97f1a02f1370a46f445539d972facd2a4d3790159314d2c14b52098"
+        },
         "auto-harness_dds_exhaustion": {
           "delta": {
             "applied_harness_failures": 0,
@@ -271,6 +303,10 @@
           "compiled": true,
           "guard_count": 4
         },
+        "E3": {
+          "compiled": false,
+          "why": "consumer 'planner' has no callable binding: this stack has no function that could execute its change"
+        },
         "auto-harness_dds_exhaustion": {
           "compiled": false,
           "why": "consumer 'harness' has no callable binding: this stack has no function that could execute its change"
@@ -282,6 +318,10 @@
       "by_label": {
         "E2": {
           "consumer": "executor_recovery",
+          "verdict": "DELIVERED"
+        },
+        "E3": {
+          "consumer": "planner",
           "verdict": "DELIVERED"
         },
         "auto-harness_dds_exhaustion": {
@@ -329,6 +369,11 @@
           "decision": "KEEP",
           "effect": "used_helpful",
           "label": "E2"
+        },
+        {
+          "decision": "KEEP",
+          "effect": "used_helpful",
+          "label": "E3"
         }
       ],
       "retire_transition_demo": {
@@ -371,6 +416,11 @@
             "decision": "REVISE",
             "label": "E2",
             "why": "narrower_than_measurement: the record lists ['T13_geometric_conditional'], a fresh measurement reaches ['T03_ordered', 'T12_triple_revisit', 'T13_geometric_conditional']"
+          },
+          {
+            "decision": "KEEP",
+            "label": "E3",
+            "why": "no harm recorded"
           }
         ],
         "label": "E2",
@@ -389,7 +439,7 @@
       "step": "lifecycle"
     },
     {
-      "carried": 1,
+      "carried": 2,
       "carried_by_an_unnamed_consumer": [
         "harness"
       ],
@@ -397,7 +447,7 @@
       "states": {
         "development": "NO_ENTRY",
         "executor_recovery": "CARRIED",
-        "planner": "NO_ENTRY",
+        "planner": "CARRIED",
         "spread_policy": "NO_ENTRY"
       },
       "step": "routing_coverage"
@@ -412,18 +462,20 @@
       "step": "unrouted_analysis"
     },
     {
-      "active_entries": 2,
+      "active_entries": 3,
       "bridge_would_help": [
         false,
-        false
+        false,
+        true
       ],
       "by_reason": {
-        "no independent ACCEPT in the review ledger": 1,
+        "no independent ACCEPT in the review ledger": 2,
         "no provenance_verified": 1
       },
       "live_consumers": {
         "executor_recovery": true,
-        "harness": false
+        "harness": false,
+        "planner": false
       },
       "step": "live_path",
       "visible_to_live_path": 0
@@ -479,10 +531,10 @@
       "step": "push_without_policy_comparison"
     },
     {
-      "chains": 3,
+      "chains": 4,
       "conflicts": 0,
       "duplicates": 0,
-      "entries": 6,
+      "entries": 8,
       "step": "store_report"
     }
   ],

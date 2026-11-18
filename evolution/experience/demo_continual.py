@@ -164,6 +164,40 @@ def entry_executor_side():
         **_COMMON)
 
 
+def entry_order_rule():
+    """The operation-order lesson addressed to the PLANNER (a fourth routed consumer).
+
+    The objective names "operation order lessons go to the planner". This entry turns the
+    planner's order check into a real experience entry with a call entry, so the order route
+    can be CARRIED rather than a path with no entry. Its effect is measured by the plan_order
+    operator on 16 archived order-fixing plans (0 wrongly refused, the one genuine foreign
+    reordering caught) and its misuse guard is probed by order.no_fixed_order.
+    """
+    return schema.make_entry(
+        origin="AGENT_GENERATED",
+        action_kind="move_order", consumer="planner",
+        task_family="T14_ordered_pair", failure_class="planning",
+        source_run="evobot_crosstype_20261111/runs_T14_ordered_pair",
+        evidence={"order_fixing_replies": 16, "violations": 0,
+                  "false_positives": 0, "foreign_reordering_caught": True,
+                  "evidence_split": "dev"},
+        evidence_files=["evobot_wrongplan_probe_20261111/run_foreign_plan/plan.json"],
+        provenance_verified=True,
+        applicable_when=["the instruction fixes an order the plan must follow"],
+        known_invalid_when=["the instruction fixes no order"],
+        suggested_action=("when the instruction fixes an order, validate the plan before "
+                          "execution and refuse a move that reverses it"),
+        effect_spec={"fixture": "t14_ordered_pair", "operator": "plan_order",
+                     "params": {},
+                     "expect": {"catches_violations": True, "no_false_positives": True}},
+        invalid_probes=[{"condition": "the instruction fixes no order",
+                         "probe": "order.no_fixed_order"}],
+        version={"label": "E3", "status": "CANDIDATE", "parent_entry_id": None},
+        notes=("planner-side order rule; effect measured on 16 archived order-fixing "
+               "plans, no model call; a foreign-plan reordering is caught"),
+    )
+
+
 def _demonstrate_revision(store_path, ledger_path, dest):
     """Prove the REVISE transition on a copy whose measured scope was narrowed first.
 
@@ -383,7 +417,8 @@ def run(dest=OUT):
     # pair that shows the ADDRESS problem - the same lesson inert at the planner-side
     # spread() and active at the executor-side respread(). Dropping the inert one would
     # silently remove the batch's only negative control.
-    entries = generated + [entry_planner_side(), entry_executor_side()]
+    entries = generated + [entry_planner_side(), entry_executor_side(),
+                           entry_order_rule()]
     routes = []
     for entry in entries:
         consumer, why = consumers.route(entry)

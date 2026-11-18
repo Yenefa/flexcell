@@ -1,5 +1,5 @@
 {
-  "chain": "chain intact (6 records)",
+  "chain": "chain intact (8 records)",
   "consumer": "spread_policy",
   "kept": [],
   "refused": [
@@ -16,6 +16,10 @@
       "why": "superseded by a later version on this lineage"
     },
     {
+      "entry_id": "76cedca720786bf6c202c9ab7bed9309cb0a423ed416bb6edacc8abef5ca1732",
+      "why": "superseded by a later version on this lineage"
+    },
+    {
       "entry_id": "614a39e9f84ec5b38fa7f0d6e8e0c232a787b5da905badb2c2bce719ed4ab5d4",
       "why": "consumer 'spread_policy' does not declare 'harness_config'"
     },
@@ -26,8 +30,12 @@
     {
       "entry_id": "a397a09e40a0dfa08a654c6363260e1b699534bd185f0b1d08967057f64bddf9",
       "why": "consumer 'spread_policy' does not declare 'recovery_action'"
+    },
+    {
+      "entry_id": "6af668fca97f1a02f1370a46f445539d972facd2a4d3790159314d2c14b52098",
+      "why": "consumer 'spread_policy' does not declare 'move_order'"
     }
   ],
-  "store_records": 6,
+  "store_records": 8,
   "task_family": "T13_geometric_conditional"
 }

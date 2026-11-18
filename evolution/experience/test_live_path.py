@@ -101,16 +101,21 @@ def test_the_claim_says_unplugged_not_broken(report):
     assert "UNPLUGGED" in report["claim"]
 
 
-def test_a_schema_bridge_cannot_rescue_these_entries(report):
-    """The FIRST version of the report blamed the two-store schema mismatch. That was too
-    coarse: both ACTIVE entries are tooling/control class and the live retrieve() admits only
-    planning/state, with a word list excluding landing/spread/participant. They are refused
-    by design, so a bridge would change nothing."""
+def test_a_schema_bridge_cannot_rescue_the_tooling_and_control_entries(report):
+    """The FIRST version blamed the two-store schema mismatch. That was too coarse: the
+    tooling/control entries are refused by the live planner filter BY DESIGN, so a bridge
+    changes nothing for them. E3 later added a genuine planning-class entry the filter
+    DOES admit -- so the honest invariant is about the two refused classes, not "no entry
+    can ever cross". Asserting the latter would now be a false claim."""
     assert report["planner_filter_result"]
-    assert not any(x["would_a_bridge_help"]
-                   for x in report["planner_filter_result"])
-    for row in report["planner_filter_result"]:
-        assert row["class_admitted"] is False
+    by_entry = {x["entry"]: x for x in report["planner_filter_result"]}
+    for name in ("auto-harness_dds_exhaustion", "E2"):
+        if name in by_entry:
+            assert by_entry[name]["class_admitted"] is False
+            assert by_entry[name]["would_a_bridge_help"] is False
+    if "E3" in by_entry:  # the planning-class order entry
+        assert by_entry["E3"]["class_admitted"] is True
+        assert by_entry["E3"]["would_a_bridge_help"] is True
 
 
 def test_the_executor_consumer_exists_and_now_reads_a_reviewed_entry(report):

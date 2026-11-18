@@ -15,6 +15,16 @@
     "verdict": "DELIVERED",
     "why": "bound to runtime.recovery.recover.apply_respread with {'spread_step': 0.09, 'cluster_m': 0.12}"
   },
+  "E3": {
+    "consumer": "planner",
+    "delivered": true,
+    "entry_id": "6af668fca97f1a02f1370a46f445539d972facd2a4d3790159314d2c14b52098",
+    "prompt_sha": "7a07d14960998d46",
+    "text": "when the instruction fixes an order, validate the plan before execution and refuse a move that reverses it",
+    "text_source": "suggested_action",
+    "verdict": "DELIVERED",
+    "why": "the lesson text appears in the rendered prompt"
+  },
   "auto-harness_dds_exhaustion": {
     "config": {
       "declared_value": 120,

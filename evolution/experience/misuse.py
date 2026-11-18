@@ -52,6 +52,32 @@ def _recover_module():
     return recover
 
 
+def _planner_module():
+    sys.path.insert(0, os.path.join(WT, "runtime", "planner"))
+    import agent_planner
+    return agent_planner
+
+
+def probe_no_fixed_order(params):
+    """The order rule must stay INERT when the instruction fixes no order.
+
+    This is the order rule's real invalid condition: "pass through X first" is absent, so
+    a plan that moves the block straight to its bin is correct and must NOT be refused.
+    Returning INERT (no problem flagged) is the blocked outcome; flagging a problem where
+    the instruction was silent is the misuse this probe exists to catch.
+    """
+    ap = _planner_module()
+    observation = {"instruction": "Move the blue block to the left bin.",
+                   "objects": [{"name": "b", "color": "blue"}],
+                   "zones": [{"name": "zone_1", "position": [0.12, -0.15, 0.0175]},
+                             {"name": "zone_2", "position": [0.25, 0.05, 0.0175]}]}
+    moves = [{"object": "b", "zone": "zone_1"}]
+    problem = ap.check_plan_order(observation, moves)
+    if problem is None:
+        return "INERT", "no fixed order in the instruction; rule stayed silent"
+    return "APPLIED", "rule fired with no fixed order: %s" % problem
+
+
 Z = [0.12, -0.15, 0.0175]
 
 
@@ -256,6 +282,7 @@ PROBES = {
     "respread.corridor_blocked": probe_corridor_blocked,
     "respread.single_stage": probe_single_stage_respread,
     "respread.narrow_bin": probe_narrow_bin_respread,
+    "order.no_fixed_order": probe_no_fixed_order,
 }
 
 

@@ -1,5 +1,5 @@
 {
-  "chain": "chain intact (6 records)",
+  "chain": "chain intact (8 records)",
   "consumer": "harness",
   "kept": [
     "614a39e9f84ec5b38fa7f0d6e8e0c232a787b5da905badb2c2bce719ed4ab5d4"
@@ -18,14 +18,22 @@
       "why": "superseded by a later version on this lineage"
     },
     {
+      "entry_id": "76cedca720786bf6c202c9ab7bed9309cb0a423ed416bb6edacc8abef5ca1732",
+      "why": "superseded by a later version on this lineage"
+    },
+    {
       "entry_id": "32ec193f3c9d2c62156c973dfa21e3aac7897b40fce56bdef8a0900c360f4a86",
       "why": "status is 'REJECTED', not ACTIVE"
     },
     {
       "entry_id": "a397a09e40a0dfa08a654c6363260e1b699534bd185f0b1d08967057f64bddf9",
       "why": "consumer 'harness' does not declare 'recovery_action'"
+    },
+    {
+      "entry_id": "6af668fca97f1a02f1370a46f445539d972facd2a4d3790159314d2c14b52098",
+      "why": "consumer 'harness' does not declare 'move_order'"
     }
   ],
-  "store_records": 6,
+  "store_records": 8,
   "task_family": "T05_relay"
 }

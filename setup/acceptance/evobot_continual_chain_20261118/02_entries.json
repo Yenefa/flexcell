@@ -239,6 +239,68 @@
         "parent_entry_id": null,
         "status": "CANDIDATE"
       }
+    },
+    {
+      "action_kind": "move_order",
+      "applicable_when": [
+        "the instruction fixes an order the plan must follow"
+      ],
+      "consumer": "planner",
+      "effect_spec": {
+        "expect": {
+          "catches_violations": true,
+          "no_false_positives": true
+        },
+        "fixture": "t14_ordered_pair",
+        "operator": "plan_order",
+        "params": {}
+      },
+      "entry_id": "76cedca720786bf6c202c9ab7bed9309cb0a423ed416bb6edacc8abef5ca1732",
+      "evidence": {
+        "evidence_split": "dev",
+        "false_positives": 0,
+        "foreign_reordering_caught": true,
+        "order_fixing_replies": 16,
+        "violations": 0
+      },
+      "evidence_files": [
+        "evobot_wrongplan_probe_20261111/run_foreign_plan/plan.json"
+      ],
+      "failure_class": "planning",
+      "invalid_probes": [
+        {
+          "condition": "the instruction fixes no order",
+          "probe": "order.no_fixed_order"
+        }
+      ],
+      "known_invalid_when": [
+        "the instruction fixes no order"
+      ],
+      "measured_families": [],
+      "notes": "planner-side order rule; effect measured on 16 archived order-fixing plans, no model call; a foreign-plan reordering is caught",
+      "origin": "AGENT_GENERATED",
+      "provenance_verified": true,
+      "record_sha256": "bda8ed727be47534d810de6343035dd0afb0c8ee5ba253d55e4c153d54bc3f23",
+      "schema_version": "experience-entry/2",
+      "source_run": "evobot_crosstype_20261111/runs_T14_ordered_pair",
+      "stats": {
+        "applied": 0,
+        "harmful": 0,
+        "helpful": 0,
+        "retrieved": 0
+      },
+      "suggested_action": "when the instruction fixes an order, validate the plan before execution and refuse a move that reverses it",
+      "task_family": "T14_ordered_pair",
+      "validation": {
+        "review_ref": null,
+        "review_verdict": "NOT_REVIEWED",
+        "reviewed_by": null
+      },
+      "version": {
+        "label": "E3",
+        "parent_entry_id": null,
+        "status": "CANDIDATE"
+      }
     }
   ],
   "routes": [
@@ -256,6 +318,11 @@
       "consumer": "executor_recovery",
       "label": "E2",
       "why": "routed by declared capability (recovery_action -> executor_recovery)"
+    },
+    {
+      "consumer": "planner",
+      "label": "E3",
+      "why": "routed by declared capability (move_order -> planner)"
     }
   ]
 }

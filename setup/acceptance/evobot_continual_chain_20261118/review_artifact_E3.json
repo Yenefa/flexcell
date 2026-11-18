@@ -1,0 +1,27 @@
+{
+  "probe": {
+    "changed": true,
+    "consumer": "planner",
+    "detail": {
+      "archived_foreign_reordering": "evobot_wrongplan_probe_20261111/run_foreign_plan",
+      "archived_foreign_reordering_caught": true,
+      "caught": 0,
+      "compliant_passed_through": 16,
+      "false_positives": 0,
+      "order_fixing_replies": 16,
+      "violations": 0
+    },
+    "entry_id": "76cedca720786bf6c202c9ab7bed9309cb0a423ed416bb6edacc8abef5ca1732",
+    "expectations": {
+      "catches_violations": true,
+      "no_false_positives": true
+    },
+    "expectations_met": true,
+    "fixture": "t14_ordered_pair",
+    "operator": "plan_order",
+    "verdict": "IMPROVED",
+    "why": "16 same-run plan(s) whose instruction fixes an order (0 reversed, 0 caught, 0 wrongly refused); the archive's one genuine reordering is the foreign plan, caught=True"
+  },
+  "reviewer": "chain-demo-reviewer",
+  "verdict": "ACCEPT"
+}

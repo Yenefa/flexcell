@@ -57,6 +57,42 @@
 于是重试第三次被拒为"declared destination occupied"。修改为**按余量选轴**，并且两轴都不满足契约时**拒绝**而不是发出一个必然被拒的计划；
 不传 avoid 时行为与旧实现**逐字节相同**，11/11 `benchmark/tests/test_recovery_driver.py` 仍通过。
 
+## 3.92 顺序规则从"演示触发"变成**真实 ACTIVE 条目**
+
+上一轮证明了顺序规则**能**被一条经验触发，但那是一份临时演示条目。
+路由表仍诚实地报 `order => NO_ENTRY`——**一条测过、门控过、演示过的规则，
+没有一条真实条目占着那个路由**。本轮把它补成正式的 ACE 式条目 E3。
+
+### E3 走完整链路（不是绕过门直接写入）
+
+| 环节 | 结果 |
+| --- | --- |
+| 生成 | `move_order → planner` 由声明的能力路由 |
+| effect | `plan_order` operator 在 16 条归档指令上跑：0 反序、0 误报，唯一的异地反序被抓 → **IMPROVED** |
+| 误用门 | 新增 `order.no_fixed_order` 探针：指令没固定顺序时规则**不触发**（INERT=BLOCKED） |
+| review | 期望改为 `catches_violations/no_false_positives`（不是套用 spacing 的 `changed`）→ **ACCEPT** |
+| regression | 69 个 verifier KEEP |
+| activate | **ACTIVE**，status/父指针/链完整 |
+
+效果期望写错（`changed: true`）时 review 正确给了 REJECT——**门真的会拒绝**，
+不是走过场。
+
+### 交付检查的结构性歧视
+
+E3 激活后路由报 **NO_DELIVERY**：`delivery.deliver(row, None)` 给 planner 传 None，
+而规划器渲染需要真实 observation（`objects/zones/skills`）。**其他 consumer 不需要 observation，
+统一传 None 就把 planner 结构性判成不可交付**——交付缺口伪装成覆盖缺口。
+
+修法：`routing_coverage` 用 demo 同一份 held-out task 经 `public_observation.build_observation`
+构建**真实 observation**（不虚构任务内容）。结果：
+
+| 路由 | 之前 | 现在 |
+| --- | --- | --- |
+| order | NO_ENTRY | **CARRIED (E3)** |
+| recovery | CARRIED (E2) | CARRIED (E2) |
+
+**目标点名的四条路由从 1/4 提升到 2/4**，剩下 spread / ROS launch 仍诚实报 NO_ENTRY。
+
 ## 3.93 churn 修好后，暴露了一直被掩盖的架构违规
 
 CI 的 `skill-boundaries` 一直失败（早被 churn 掩盖）：`dependency-direction` 报
@@ -1392,7 +1428,7 @@ verifier 会**重新执行**整条链并断言 **161 项检查**，不读取 SUM
 - **第四条路由有投递路径且不说谎**：渲染为候选、`effect: NOT_MEASURED`、点名缺 entrypoints/tests/mutation，无触发条件则 DROPPED；
 - **已提交的证据与代码一致**：数字漂移 0、id 变动 0、缺文件 0（`review_ref` 原来把**绝对运行路径**嵌进条目正文，导致同一份代码在不同目录得到不同 `entry_id`——那条引用还指着一个**从未写出的文件**）；
 - **没有无支撑的活规则**：规划器的顺序规则**只在有准入条目时生效**，无条目时行为与改动前完全一致；
-- **目标点名的四条路由逐条报告**：**1/4 CARRIED**（其余 NAMED_BUT_EMPTY），不把"已声明"当"已覆盖"；
+- **目标点名的四条路由逐条报告**：**2/4 CARRIED**（recovery=E2、order=E3；spread/ROS launch 仍 NO_ENTRY），不把"已声明"当"已覆盖"。E3 是真实 ACTIVE 顺序条目，经 admit→effect(IMPROVED)→review(ACCEPT)→regression/misuse→activate→deliver 全链路；planner 交付必须传真实 observation，传 None 会把它误报成 NO_DELIVERY；
 - **命中率在同一单位里算**：109 个任务实例里 7 个生效（**6.4%**），294 个计划文件里 7 个改动（**2.4%**）——两个数都报，绝不跨单位相除；
 - **账本能说出"哪次任务"**：7 个真实任务 ID，每个各带 RETRIEVED / APPLIED / OUTCOME 三行；
 - **过时检查是双向的**：记录宽于测量（过量声明）同样被判过时并**收窄**，且 `apply()` 真的执行修订而不只是报告；

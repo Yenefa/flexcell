@@ -433,6 +433,22 @@ capability is what makes that visible instead of leaving it to an audit.
     **correctness check on the replay, not an effect measurement**, and conflating the two
     would turn this back into "we measured it".
 
+50. **THE ORDER RULE BECAME A REAL ACTIVE ENTRY, NOT JUST A DEMO.** The order rule was
+    measured, gated and seen firing in a one-off demo, but no real entry occupied the `order`
+    routing: it still reported `NO_ENTRY` — a mechanism with nobody carrying it. E3 now walks
+    the full ACE path: `move_order → planner` routing, `plan_order` effect (16 archived
+    order-fixing plans, 0 false positives, the one foreign reordering caught → IMPROVED),
+    a new `order.no_fixed_order` misuse probe (rule stays INERT when no order is fixed),
+    review ACCEPT (with the CORRECT expectation keys — writing `changed: true` got a real
+    REJECT, proving the gate bites), regression KEEP, activation ACTIVE, delivery.
+
+    Delivery then reported `NO_DELIVERY` because `deliver(row, None)` passed no observation
+    and the planner renderer needs objects/zones/skills. Other consumers need no observation;
+    passing None to everyone made the planner STRUCTURALLY undeliverable — a coverage gap
+    disguised as a delivery gap. `routing_coverage` now builds a real observation from the
+    same held-out task the demo uses. `order` routing: `NO_ENTRY → CARRIED (E3)`;
+    objective routings: 1/4 → **2/4 CARRIED**.
+
 49. **FIXING CHURN EXPOSED A HIDDEN ARCHITECTURE VIOLATION.** `dependency-direction` had
     been failing all along, masked by the churn failure: `runtime/recovery/recovery_driver.py`
     imported `evolution.experience` — the execution layer depending on development, forbidden

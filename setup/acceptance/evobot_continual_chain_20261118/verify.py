@@ -784,10 +784,19 @@ def main():
         # WAS. Both ACTIVE entries are tooling/control class, and the live retrieve() admits
         # only planning/state while its word list rejects landing/spread/participant. They are
         # excluded BY DESIGN. There is no consumer for either in the live run scripts.
+        # A bridge was once claimed unable to rescue any entry -- true only while the store
+        # held tooling/control entries the planner filter rejects by design. E3 is a genuine
+        # planning-class entry the filter admits, so "no entry can cross" is no longer the
+        # invariant. What MUST stay true: the entries the filter rejects for cause (tooling,
+        # control) are NOT silently rescued, and the one planning entry IS admitted. That is
+        # the honest, still-falsifiable claim.
+        pf = live["planner_filter_result"] or []
+        by_entry = {x["entry"]: x for x in pf}
         checks["a_schema_bridge_cannot_rescue_these_entries"] = (
-            live["planner_filter_result"]
-            and not any(x["would_a_bridge_help"]
-                        for x in live["planner_filter_result"]))
+            bool(pf)
+            and all(not by_entry[e]["would_a_bridge_help"]
+                    for e in ("auto-harness_dds_exhaustion", "E2") if e in by_entry)
+            and by_entry.get("E3", {}).get("would_a_bridge_help") is True)
         checks["the_missing_consumers_are_named"] = (
             any(not c["has_a_live_consumer"]
                 for c in live["consumers_in_live_path"].values()))

@@ -1,7 +1,7 @@
 {
-  "active_entries": 2,
+  "active_entries": 3,
   "by_reason": {
-    "no independent ACCEPT in the review ledger": 1,
+    "no independent ACCEPT in the review ledger": 2,
     "no provenance_verified": 1
   },
   "chain_store": "setup/acceptance/evobot_continual_chain_20261118/records_v2.jsonl",
@@ -18,6 +18,11 @@
       "call_sites_in_live_scripts": [],
       "has_a_live_consumer": false,
       "reads_the_entry": true
+    },
+    "planner": {
+      "call_sites_in_live_scripts": [],
+      "has_a_live_consumer": false,
+      "reads_the_entry": false
     }
   },
   "entries": [
@@ -28,6 +33,11 @@
     },
     {
       "entry": "E2",
+      "visible": false,
+      "why": "no independent ACCEPT in the review ledger"
+    },
+    {
+      "entry": "E3",
       "visible": false,
       "why": "no independent ACCEPT in the review ledger"
     }
@@ -77,6 +87,13 @@
       "failure_class": "control",
       "word_admitted": false,
       "would_a_bridge_help": false
+    },
+    {
+      "class_admitted": true,
+      "entry": "E3",
+      "failure_class": "planning",
+      "word_admitted": true,
+      "would_a_bridge_help": true
     }
   ],
   "visible_to_live_path": 0

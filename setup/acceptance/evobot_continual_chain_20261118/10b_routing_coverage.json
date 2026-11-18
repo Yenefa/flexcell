@@ -1,5 +1,5 @@
 {
-  "carried": 1,
+  "carried": 2,
   "carried_by_an_unnamed_consumer": {
     "harness": [
       "auto-harness_dds_exhaustion"
@@ -10,11 +10,13 @@
   "named": 4,
   "routings": [
     {
-      "active_entries": [],
+      "active_entries": [
+        "E3"
+      ],
       "consumer": "planner",
       "routing": "order (\u64cd\u4f5c\u987a\u5e8f)",
-      "state": "NO_ENTRY",
-      "why": "no ACTIVE entry names this consumer (a delivery path exists)"
+      "state": "CARRIED",
+      "why": "delivered by ['E3']"
     },
     {
       "active_entries": [],
