@@ -755,7 +755,7 @@ def analyze_trial(trial: Trial, protocol: Protocol, exploratory: bool = False) -
             if not math.isclose(actual, declared, rel_tol=1e-6, abs_tol=1e-12):
                 identity_mismatch.append("%s=%r vs protocol %r" % (label, actual, declared))
         require(not identity_mismatch or exploratory,
-                "%s: %s; this trial is not the declared experiment"
+                "%s: %s; trial identity differs from the preregistered experiment"
                 % (where, "; ".join(identity_mismatch)))
 
     exit_code = meta.get("exit_code")
