@@ -2,13 +2,15 @@
 #
 # WSLg renders windows as Wayland surfaces, so ffmpeg's x11grab inside WSL sees a
 # black frame. This script records from Windows instead: it starts the stack and a
-# software-rendered Gazebo GUI in WSL, finds the window, maximizes it, and captures
-# exactly the window's client rectangle with gdigrab.
+# Gazebo GUI in WSL, finds the window, maximizes it, and captures exactly the
+# window's client rectangle with gdigrab.
 #
 # Usage (from a Windows shell):
 #   powershell -ExecutionPolicy Bypass -File scripts/record_gazebo.ps1 `
 #     -SourceRun /tmp/carry-window3/out/NORMAL_1/run-7c231a57a747 `
-#     -Out D:\demo\gazebo.mp4 -Seconds 60 -Cycles 1
+#     -Out D:\demo\gazebo.mp4 -Seconds 60 -Cycles 1 -Gui gpu
+#
+# -Gui gpu uses Mesa D3D12; -Gui soft (default) forces llvmpipe.
 param(
   [Parameter(Mandatory = $true)][string]$SourceRun,
   [string]$Out = "$PWD\gazebo-demo.mp4",
