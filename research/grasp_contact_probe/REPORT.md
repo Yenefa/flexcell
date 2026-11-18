@@ -8,7 +8,7 @@
 - 分支：`research/grasp-contact-probe-20261119`
 - 原始数据：`results/acceptance-v3/`（10 trial）、`results/stress-v2/`（7 个对照）
 - 预注册判据：`results/acceptance-v3/protocol.json`（sha256 见 summary.json）
-- 对抗性评审：`REVIEW.md`
+- 对抗性评审：`REVIEW.md`（分析员撰写，未及落盘）；评审记录与落实：`REVIEW_NOTES.md`
 
 ## 1. 探针是什么
 
