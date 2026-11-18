@@ -1,0 +1,118 @@
+{
+  "schema_version": "repair-eval-visibility/1",
+  "policy_id": "flexcell.repair_eval.visibility/2026-11-16-issue249-r2",
+  "comment": "Versioned condition -> visibility table for the v0.2 repair-eval path (issue #249). The no-feedback condition cannot see feedback, diagnosis, verification or hidden answers; verification stays sealed in every condition so the independent judge is never an input to the agent. gate/ is sealed in every condition: the evaluator source and its thresholds stay in the candidate only so the gate subprocess can run, and reading them would let a repair tune to the ruler instead of fixing the task. Editing this table is a protocol change: bump policy_id and record it in docs/repair_eval/VISIBILITY.md.",
+  "reserved_names": [
+    "verdict.json",
+    "result.json",
+    "judge_verdict.json",
+    "hidden_answer.txt"
+  ],
+  "static_prefixes": [
+    "task.md",
+    "tests/"
+  ],
+  "sealed_prefixes": [
+    "gate/"
+  ],
+  "paths": {
+    "telemetry": "telemetry/execution.log",
+    "telemetry_prefix": "telemetry/",
+    "verdict": "verdict.json"
+  },
+  "freshness": {
+    "forbidden": [
+      "verdict.json",
+      "result.json",
+      "judge_verdict.json",
+      "hidden_answer.txt",
+      "evidence.json",
+      "episode.json",
+      "fingerprint.json",
+      "diagnosis.json",
+      "telemetry/",
+      "experience/"
+    ],
+    "max_depth": 6
+  },
+  "protected_writes": [
+    "task.md",
+    "gate/",
+    "tests/test_regression.py",
+    "verdict.json",
+    "result.json",
+    "telemetry/",
+    "experience/",
+    "diagnosis.json"
+  ],
+  "guidance_max_chars": 1200,
+  "diagnosis": {
+    "projection": [
+      "returncode",
+      "passed",
+      "stdout",
+      "stderr",
+      "trace",
+      "target"
+    ],
+    "truncate_chars": 400,
+    "max_tail_lines": 20
+  },
+  "conditions": {
+    "A_STATIC": {
+      "comment": "No feedback: the task goal, the regression definition and the candidate source only.",
+      "visible": {
+        "static_input": true,
+        "candidate_source": true,
+        "execution_feedback": false,
+        "diagnosis": false,
+        "verification": false,
+        "hidden_answer": false
+      },
+      "feedback_source": "none"
+    },
+    "B_REAL_FEEDBACK": {
+      "comment": "The run's own execution feedback, raw and structured; the independent verdict stays sealed.",
+      "visible": {
+        "static_input": true,
+        "candidate_source": true,
+        "execution_feedback": true,
+        "diagnosis": true,
+        "verification": false,
+        "hidden_answer": false
+      },
+      "feedback_source": "own_run"
+    },
+    "C_MISMATCHED_FEEDBACK": {
+      "comment": "Same information shape as B, drawn from one fixed other run; the packet is tagged mismatched=true with that run's id.",
+      "visible": {
+        "static_input": true,
+        "candidate_source": true,
+        "execution_feedback": true,
+        "diagnosis": true,
+        "verification": false,
+        "hidden_answer": false
+      },
+      "feedback_source": "mismatch_run"
+    },
+    "D_GUIDED": {
+      "comment": "B plus explicit bounded guidance from this policy document.",
+      "visible": {
+        "static_input": true,
+        "candidate_source": true,
+        "execution_feedback": true,
+        "diagnosis": true,
+        "verification": false,
+        "hidden_answer": false
+      },
+      "feedback_source": "own_run",
+      "guidance": "Consume the remaining retry budget before giving up: after a recoverable failure the decision must attempt recovery while budget remains, and abort only when the budget is exhausted."
+    }
+  },
+  "model_interface": {
+    "model_id": "PLACEHOLDER_UNSET",
+    "tool_interface_version": "flexcell.repair_eval.tools/1",
+    "prompt_template_version": "PLACEHOLDER_UNSET",
+    "harness_version": "PLACEHOLDER_UNSET"
+  }
+}
