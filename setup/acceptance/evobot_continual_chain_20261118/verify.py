@@ -787,8 +787,11 @@ def main():
         checks["the_executor_consumer_exists_in_the_shell_runner"] = (
             exec_c.get("has_a_live_consumer") is True
             and bool(exec_c.get("call_sites_in_live_scripts")))
-        checks["but_it_does_not_read_an_experience_entry"] = (
-            exec_c.get("reads_the_entry") is False)
+        # This check used to assert reads_the_entry is False. That pinned the PRE-WIRING
+        # defect. The wire now landed, so the correct assertion flipped; deleting it would
+        # have turned "the gap closed" into "the guard went away".
+        checks["the_executor_consumer_now_reads_a_reviewed_entry"] = (
+            exec_c.get("reads_the_entry") is True)
         checks["the_claim_does_not_say_no_consumer"] = (
             "no harness/executor consumer" not in live["claim"])
 
@@ -804,11 +807,20 @@ def main():
         # run that made the entry, which is not independent
         checks["a_self_reviewed_entry_cannot_drive_the_live_call"] = (
             wire.get("self_reviewed_kwargs") == {})
+        # 36 -- THE REAL INDEPENDENT ACCEPT IS FOR A DIFFERENT CLAIM. The repo's ledger has
+        # an ACCEPT for a control fact built on exactly E2's three evidence files. An
+        # independent review of the SAME EVIDENCE for a DIFFERENT CLAIM must not authorise
+        # E2's actionable spacing recommendation. The gate reads a separate ledger keyed by
+        # entry_id, not the entry's own validation block (which its authoring round wrote).
+        checks["a_review_of_another_claim_cannot_drive_the_live_call"] = (
+            wire.get("real_ledger_other_claim_kwargs") == {})
         # and the driver really passes the resolved kwargs through to the call
         drv_src = (WT / "runtime" / "recovery" / "recovery_driver.py").read_text(
             encoding="utf-8")
         checks["the_driver_passes_resolved_kwargs_to_apply_respread"] = (
             "**kwargs" in drv_src and "_experience_kwargs" in drv_src)
+        checks["the_wire_requires_an_independent_ledger"] = (
+            "experience_review_ledger" in drv_src)
 
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",

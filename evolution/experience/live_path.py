@@ -200,6 +200,12 @@ def _consumer_reads_entry(consumer):
         if not os.path.exists(path):
             continue
         src = open(path, encoding="utf-8").read()
+        # The driver now delegates to live_binding.resolve(). Following the call matters:
+        # checking only the driver's own text would report "never reads an entry" after the
+        # wiring landed, and the verifier would fail on a stale measurement rather than a
+        # real defect. The resolver is where the entry is actually opened and gated.
+        if "_experience_kwargs" in src or "live_binding" in src:
+            return True
         if any(marker in src for marker in markers):
             return True
     return False

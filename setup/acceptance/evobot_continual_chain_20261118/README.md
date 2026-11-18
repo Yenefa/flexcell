@@ -433,6 +433,35 @@ capability is what makes that visible instead of leaving it to an audit.
     **correctness check on the replay, not an effect measurement**, and conflating the two
     would turn this back into "we measured it".
 
+36. **AUTHORISATION MUST COME FROM AN INDEPENDENT LEDGER BOUND TO THE EXACT CLAIM.** The
+    previous round's gate read `entry["validation"]["reviewed_by"]` — a field the SAME round
+    that authored the entry wrote into the hash chain. **A chain proves a field was not
+    tampered with afterwards; it does not prove anybody independent signed off.**
+
+    The repo DOES have a real independent ACCEPT: `gate-auditor`, with a `REVIEW.md`. It is for a
+    **CONTROL FACT** built on **exactly E2's three evidence files**. That is a review of a
+    **DIFFERENT CLAIM** on the same evidence, and it must not authorise E2's actionable
+    spacing recommendation. **Borrowing it would be using a real review to backstop a
+    different claim.**
+
+    `resolve()` now reads a SEPARATE review ledger and requires:
+
+        ledger exists -> entry_id EQUALS this entry's identity
+                      -> verdict == ACCEPT
+                      -> reviewed_by is not chain-demo-reviewer
+
+    Even an ACCEPT on the very same evidence files fails the `entry_id` gate.
+
+    | case | result |
+    | --- | --- |
+    | no independent ledger | `{}` — defaults |
+    | ledger ACCEPTs a different claim | `{}` — defaults |
+    | ledger ACCEPTs this entry_id | kwargs reach the call site |
+
+    Two stale assertions (one in `verify.py`, one test) pinned "consumer never reads an
+    entry". After the wire landed they were **changed to assert the new behaviour, not
+    deleted** — so "the gap closed" did not become "the guard went away".
+
 35. **"CONSUMER NEVER READS AN ENTRY" NOW HAS A REAL WIRE — OPT-IN AND FAIL-CLOSED.**
     `recovery_driver.py` accepts optional `--experience-asset` / `--experience-entries`;
     `live_binding.resolve()` re-checks FOUR gates before any parameter reaches
@@ -537,7 +566,7 @@ capability is what makes that visible instead of leaving it to an audit.
     visible.** The artifact reports the numbers and both options, and **does not pretend the
     loop is closed.**
 
-`verify.py` asserts **139 checks**, including that both gates really ran, that the asset
+`verify.py` asserts **141 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -565,7 +594,7 @@ with one sentence**, and that **a capable module with an unmeasurable archive is
 a selection effect rather than as any of the three tempting answers**, and that **the
 chain's connection to the live planning path is measured and reported as unplugged, with the
 cost of both ways to close it**, that **a schema bridge cannot rescue these entries**, and
-that **the executor consumer exists in the shell runner**, that **the new opt-in wire leaves the no-flag path at its defaults**, and that **a self-reviewed entry cannot drive the live call**.
+that **the executor consumer exists in the shell runner**, that **the new opt-in wire leaves the no-flag path at its defaults**, that **a self-reviewed entry cannot drive the live call**, and that **an ACCEPT for a different claim on the same evidence cannot drive it either**.
 
 ---
 

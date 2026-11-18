@@ -46,7 +46,8 @@ def _experience_kwargs(args):
             sys.path.insert(0, root)
         from evolution.experience.live_binding import resolve
         return resolve(args.experience_asset, "executor_recovery",
-                       args.experience_entries)
+                       args.experience_entries,
+                       review_ledger=getattr(args, "experience_review_ledger", None))
     except Exception as exc:  # noqa: BLE001 - fail closed, keep the defaults
         return {}, "experience binding unavailable: %s" % exc
 
@@ -64,6 +65,9 @@ def main(argv=None):
     # therefore never break a run or drive a robot from an unreviewed artifact.
     ap.add_argument("--experience-asset")
     ap.add_argument("--experience-entries")
+    ap.add_argument("--experience-review-ledger",
+                    help="an independent review ledger keyed by entry_id; without it no "
+                         "entry can authorise a live parameter change")
     args = ap.parse_args(argv)
     run = Path(args.run)
     ev = execution_evidence(run / "task.out")

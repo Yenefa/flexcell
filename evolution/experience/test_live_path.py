@@ -113,17 +113,17 @@ def test_a_schema_bridge_cannot_rescue_these_entries(report):
         assert row["class_admitted"] is False
 
 
-def test_the_executor_consumer_exists_but_never_reads_an_entry(report):
-    """THE SECOND CORRECTION. "No consumer" was wrong: the earlier scan looked only at
-    Python baseline scripts and missed the shell runner, which calls recovery_driver.py,
-    which does call apply_respread. The real gap is narrower: that call uses DEFAULT kwargs
-    and performs no experience lookup, so a revised entry can never reach the robot."""
+def test_the_executor_consumer_exists_and_now_reads_a_reviewed_entry(report):
+    """THE SECOND CORRECTION AND ITS RESOLUTION. "No consumer" was wrong: the earlier scan
+    missed the shell runner. Then the call used DEFAULT kwargs and no lookup. That gap is now
+    closed by an opt-in, fail-closed wire, so reads_the_entry is True. This assertion used to
+    require False; leaving it would pin a fixed defect as if it were correct behaviour."""
     presence = report["consumers_in_live_path"]
     executor = presence["executor_recovery"]
     assert executor["has_a_live_consumer"] is True
     assert executor["call_sites_in_live_scripts"], \
         "the shell runner's call to recovery_driver must be visible"
-    assert executor["reads_the_entry"] is False
+    assert executor["reads_the_entry"] is True
 
 
 def test_the_claim_does_not_repeat_the_no_consumer_error(report):

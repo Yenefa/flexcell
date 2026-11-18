@@ -27,6 +27,7 @@ class Args:
     def __init__(self, asset=None, entries=None):
         self.experience_asset = asset
         self.experience_entries = entries
+        self.experience_review_ledger = None
 
 
 def test_without_flags_the_call_site_defaults_are_untouched():
@@ -52,7 +53,14 @@ def test_with_an_independently_reviewed_entry_the_kwargs_reach_the_call(tmp_path
             row.pop(key, None)
         row["record_sha256"] = store._hash(row)
         store.append(str(path), row)
-    kwargs, why = recovery_driver._experience_kwargs(Args(ASSETS, str(path)))
+    ledger = tmp_path / "review_ledger.jsonl"
+    eid = [r for r in [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+           if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    ledger.write_text(json.dumps({"entry_id": eid, "verdict": "ACCEPT",
+                                  "reviewed_by": "gate-auditor"}) + "\n", encoding="utf-8")
+    args = Args(ASSETS, str(path))
+    args.experience_review_ledger = str(ledger)
+    kwargs, why = recovery_driver._experience_kwargs(args)
     assert kwargs == {"spread_step": 0.09, "cluster_m": 0.12}
     assert "accepted" in why
 

@@ -139,14 +139,16 @@
     "a_schema_bridge_cannot_rescue_these_entries": true,
     "the_missing_consumers_are_named": true,
     "the_executor_consumer_exists_in_the_shell_runner": true,
-    "but_it_does_not_read_an_experience_entry": true,
+    "the_executor_consumer_now_reads_a_reviewed_entry": true,
     "the_claim_does_not_say_no_consumer": true,
     "the_live_wire_exists_and_defaults_are_untouched": true,
     "a_self_reviewed_entry_cannot_drive_the_live_call": true,
-    "the_driver_passes_resolved_kwargs_to_apply_respread": true
+    "a_review_of_another_claim_cannot_drive_the_live_call": true,
+    "the_driver_passes_resolved_kwargs_to_apply_respread": true,
+    "the_wire_requires_an_independent_ledger": true
   },
-  "checks_total": 139,
-  "checks_passed": 139,
+  "checks_total": 141,
+  "checks_passed": 141,
   "chain_message": "chain intact (6 records)",
   "measured": {
     "deliveries": {

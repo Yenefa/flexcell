@@ -697,12 +697,21 @@ def run(dest=OUT):
     wire_defaults, why_defaults = lb.resolve("", "executor_recovery", store_path)
     wire_reviewed, why_reviewed = lb.resolve(
         os.path.join(dest, "skill_assets.jsonl"), "executor_recovery", store_path)
+    # The repo DOES have an independent ACCEPT — for a CONTROL FACT built on exactly E2's
+    # three evidence files, not for E2's actionable claim. A review of the same evidence for
+    # a DIFFERENT claim must not authorise a live parameter change. Prove that here.
+    real_ledger = os.path.join(WT, "evolution", "experience", "review_ledger.jsonl")
+    other_claim, other_why = lb.resolve(
+        os.path.join(dest, "skill_assets.jsonl"), "executor_recovery", store_path,
+        review_ledger=real_ledger)
     steps.append({"step": "live_wiring",
                   "no_flags_kwargs": wire_defaults,
                   "self_reviewed_kwargs": wire_reviewed,
+                  "real_ledger_other_claim_kwargs": other_claim,
                   "note": ("opt-in and fail-closed: the frozen baseline default path is "
-                           "unchanged; a REVISED entry with an independent ACCEPT would "
-                           "supply these kwargs to apply_respread")})
+                           "unchanged; an ACCEPT from an INDEPENDENT ledger bound to this "
+                           "entry id is required — a review of the same evidence for a "
+                           "different claim does NOT authorise it")})
 
     # 11 -- the store's own curation report, computed from the records on disk
     report = curate.curate(store.read(store_path))

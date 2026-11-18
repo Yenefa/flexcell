@@ -49,7 +49,8 @@ CONSUMER_FUNCTIONS = {
 }
 
 
-def resolve(asset_path, consumer, entry_store, ledger_path=None, asset_version=None):
+def resolve(asset_path, consumer, entry_store, ledger_path=None, asset_version=None,
+            review_ledger=None):
     """Return (kwargs, why). kwargs == {} means REFUSED — caller must use its defaults.
 
     Never raises. A live path cannot take down a robot run because an experience lookup
@@ -57,6 +58,24 @@ def resolve(asset_path, consumer, entry_store, ledger_path=None, asset_version=N
     """
     if not asset_path or not os.path.exists(asset_path):
         return {}, "no asset path supplied; using the call site's defaults"
+
+    # THE INDEPENDENT REVIEW LEDGER. A live parameter change must be authorised by a review
+    # that is OUTSIDE the entry. Until now the gate read entry["validation"]["reviewed_by"],
+    # which the SAME round that authored the entry wrote into the hash chain - a chain proves
+    # the field was not tampered with afterwards; it does NOT prove anybody independent
+    # signed off. And a review of the SAME EVIDENCE for a DIFFERENT CLAIM does not count:
+    # the repo has an independent ACCEPT for a control fact built on exactly E2's three
+    # evidence files, and it must not authorise E2's actionable spacing claim.
+    review_rows = []
+    if review_ledger and os.path.exists(review_ledger):
+        try:
+            for line in open(review_ledger, encoding="utf-8"):
+                line = line.strip()
+                if not line or line.startswith("#"):
+                    continue
+                review_rows.append(json.loads(line))
+        except (OSError, ValueError) as exc:
+            return {}, "review ledger unreadable: %s" % exc
 
     # gate 1: the entry chain must be intact
     try:
@@ -95,12 +114,15 @@ def resolve(asset_path, consumer, entry_store, ledger_path=None, asset_version=N
         if lineage and lineage[-1].get("entry_id") != entry.get("entry_id"):
             continue
 
-        # gate 3: explicit ACCEPT, never a missing or REJECT verdict
-        validation = entry.get("validation") or {}
-        if validation.get("review_verdict") != "ACCEPT":
-            continue
-        if validation.get("reviewed_by") in (None, "", "chain-demo-reviewer"):
-            # a self-review is not the independent acceptance a live change needs
+        # gate 3: an ACCEPT from the INDEPENDENT LEDGER, bound to THIS entry's identity.
+        # Not entry["validation"] - that is authored by the same round as the entry.
+        # A review of another claim, even on the same evidence files, must not pass.
+        authorisations = [row for row in review_rows
+                          if row.get("entry_id") == entry.get("entry_id")
+                          and row.get("verdict") == "ACCEPT"
+                          and row.get("reviewed_by") not in (None, "",
+                                                             "chain-demo-reviewer")]
+        if not authorisations:
             continue
 
         # gate 4: the callable and kwargs are what this consumer expects

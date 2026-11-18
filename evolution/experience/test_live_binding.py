@@ -63,10 +63,55 @@ def test_a_self_reviewed_entry_is_refused():
 
 
 def test_an_independent_accept_yields_the_asset_kwargs(tmp_path):
+    """The ACCEPT must come from a SEPARATE ledger bound to the entry id, not from the
+    entry's own validation block, which the same round that authored it wrote."""
     path = _rebuilt(tmp_path)
-    kwargs, why = live_binding.resolve(ASSETS, "executor_recovery", path)
+    rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+    eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    ledger = tmp_path / "review_ledger.jsonl"
+    ledger.write_text(json.dumps({"entry_id": eid, "verdict": "ACCEPT",
+                                  "reviewed_by": "gate-auditor"}) + "\n", encoding="utf-8")
+    kwargs, why = live_binding.resolve(ASSETS, "executor_recovery", path,
+                                       review_ledger=str(ledger))
     assert kwargs == {"spread_step": 0.09, "cluster_m": 0.12}
     assert "accepted" in why
+
+
+def test_a_review_of_a_different_claim_does_not_authorise_this_one(tmp_path):
+    """THE SHARP CASE. The repo has a real independent ACCEPT for a CONTROL FACT built on
+    exactly E2's three evidence files. An independent review of the same evidence for a
+    DIFFERENT claim must not authorise E2's actionable spacing recommendation."""
+    path = _rebuilt(tmp_path)
+    ledger = tmp_path / "review_ledger.jsonl"
+    ledger.write_text(json.dumps({
+        "entry_id": "T13-recover-clearance-margin", "verdict": "ACCEPT",
+        "reviewed_by": "gate-auditor",
+        "evidence_files": [
+            "setup/acceptance/evobot_recover_n6_20261111/runs/HO-90899d657e68/plan.json"]},
+        ensure_ascii=False) + "\n", encoding="utf-8")
+    assert live_binding.resolve(ASSETS, "executor_recovery", path,
+                                review_ledger=str(ledger))[0] == {}
+
+
+def test_no_review_ledger_is_a_refusal_even_with_self_attestation(tmp_path):
+    """An entry saying reviewed_by=independent-reviewer in its own body is NOT enough: the
+    chain proves it was not tampered with, not that anybody independent signed off."""
+    path = _rebuilt(tmp_path)
+    kwargs, why = live_binding.resolve(ASSETS, "executor_recovery", path)
+    assert kwargs == {}
+    assert "defaults" in why
+
+
+def test_a_self_reviewer_name_in_the_ledger_is_refused(tmp_path):
+    path = _rebuilt(tmp_path)
+    rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+    eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    ledger = tmp_path / "review_ledger.jsonl"
+    ledger.write_text(json.dumps({"entry_id": eid, "verdict": "ACCEPT",
+                                  "reviewed_by": "chain-demo-reviewer"}) + "\n",
+                      encoding="utf-8")
+    assert live_binding.resolve(ASSETS, "executor_recovery", path,
+                                review_ledger=str(ledger))[0] == {}
 
 
 def test_a_rejected_entry_is_refused(tmp_path):
@@ -132,11 +177,17 @@ def test_a_tampered_asset_callable_cannot_drive_the_robot(tmp_path):
     """Deliberate: the asset is a derivative. Its cached kwargs must never override the
     reviewed entry, or editing an artifact file would change a live robot call."""
     path = _rebuilt(tmp_path)
+    rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+    eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    ledger = tmp_path / "review_ledger.jsonl"
+    ledger.write_text(json.dumps({"entry_id": eid, "verdict": "ACCEPT",
+                                  "reviewed_by": "gate-auditor"}) + "\n", encoding="utf-8")
     a2 = tmp_path / "assets.jsonl"
-    rows = [json.loads(l) for l in open(ASSETS, encoding="utf-8") if l.strip()]
-    rows[0]["callable"]["kwargs"]["spread_step"] = 999
-    a2.write_text("\n".join(json.dumps(r) for r in rows) + "\n", encoding="utf-8")
-    kwargs, _ = live_binding.resolve(str(a2), "executor_recovery", path)
+    asset_rows = [json.loads(l) for l in open(ASSETS, encoding="utf-8") if l.strip()]
+    asset_rows[0]["callable"]["kwargs"]["spread_step"] = 999
+    a2.write_text("\n".join(json.dumps(r) for r in asset_rows) + "\n", encoding="utf-8")
+    kwargs, _ = live_binding.resolve(str(a2), "executor_recovery", path,
+                                     review_ledger=str(ledger))
     assert kwargs == {"spread_step": 0.09, "cluster_m": 0.12}
 
 
