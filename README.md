@@ -94,6 +94,9 @@ discussion → Issue/ADR → milestone task → implementation → experiment ev
 **Maintenance rule:** before coding — which Issue? which ADR? which docs need updating?
 After coding — update the Issue, record evidence in EXPERIMENTS.md, link the commit.
 
+**Contribution quickstart:** [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) — issue-first,
+branch, local test commands, PR checklist and the known baseline-red checks.
+
 ---
 
 ## Status

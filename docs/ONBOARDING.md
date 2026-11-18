@@ -150,3 +150,5 @@ bash setup/102_mainline_runtime.sh cold fsm      # FSM 臂
 - commit：`<type>(<scope>): <summary>`
 - **推 main 需要人授权**，agent 不自己 push
 - 证据（`setup/acceptance/`）随代码进 Git；凭据、权重、编译产物不进
+
+独立 PR 的 issue、分支、本地测试和 PR 模板见 [CONTRIBUTING.md](CONTRIBUTING.md)。
