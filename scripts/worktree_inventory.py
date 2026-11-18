@@ -4,8 +4,47 @@ import argparse
 import json
 from pathlib import Path
 import subprocess
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+class UsageError(Exception):
+    """Bad input or bad configuration: exit 2, never a partial report."""
+
+
+def load_config(path):
+    try:
+        raw = Path(path).read_text(encoding='utf-8')
+    except OSError as exc:
+        raise UsageError('cannot read config %s: %s' % (path, exc))
+    try:
+        config = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise UsageError('config %s is not valid JSON: %s' % (path, exc))
+    if not isinstance(config, dict):
+        raise UsageError('config %s must be a JSON object' % path)
+    streams = config.get('workstreams')
+    if not isinstance(streams, list) or not streams:
+        raise UsageError('config %s needs a non-empty workstreams list' % path)
+    for index, stream in enumerate(streams):
+        if not isinstance(stream, dict):
+            raise UsageError('workstreams[%d] must be an object' % index)
+        for key in ('id', 'branch', 'status'):
+            if not isinstance(stream.get(key), str) or not stream[key]:
+                raise UsageError('workstreams[%d].%s must be a non-empty string'
+                                 % (index, key))
+    roles = config.get('worktree_roles', [])
+    if not isinstance(roles, list):
+        raise UsageError('worktree_roles must be a list')
+    for index, role in enumerate(roles):
+        if not isinstance(role, dict):
+            raise UsageError('worktree_roles[%d] must be an object' % index)
+        for key in ('branch', 'role'):
+            if not isinstance(role.get(key), str) or not role[key]:
+                raise UsageError('worktree_roles[%d].%s must be a non-empty string'
+                                 % (index, key))
+    return config
 
 
 def git(root, *args):
@@ -53,17 +92,37 @@ def collect(root, config):
                 worktrees=trees, workstreams=streams)
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, default=ROOT)
     parser.add_argument('--out', type=Path)
-    args = parser.parse_args()
-    config = json.loads((args.root / 'config/development_branches.json').read_text())
-    encoded = json.dumps(collect(args.root, config), indent=2) + '\n'
+    parser.add_argument('--strict', action='store_true',
+                        help='exit 1 if any worktree is missing, dirty or prunable')
+    args = parser.parse_args(argv)
+    try:
+        config = load_config(args.root / 'config/development_branches.json')
+        report = collect(args.root, config)
+    except (UsageError, RuntimeError) as exc:
+        print('ERROR: ' + str(exc), file=sys.stderr)
+        return 2
+    encoded = json.dumps(report, indent=2) + '\n'
     if args.out:
-        args.out.write_text(encoded)
+        try:
+            args.out.write_text(encoded)
+        except OSError as exc:
+            print('ERROR: cannot write %s: %s' % (args.out, exc), file=sys.stderr)
+            return 2
     print(encoded, end='')
+    if args.strict:
+        bad = [row for row in report['worktrees']
+               if not row['exists'] or row['dirty'] or row['prunable']]
+        if bad:
+            print('ERROR: strict inventory found %d missing/dirty/prunable '
+                  'worktree(s): %s' % (len(bad), ', '.join(row['path'] for row in bad)),
+                  file=sys.stderr)
+            return 1
+    return 0
 
 
 if __name__ == '__main__':
-    main()
+    raise SystemExit(main())
