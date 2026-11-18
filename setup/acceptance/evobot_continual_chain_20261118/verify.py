@@ -814,6 +814,13 @@ def main():
         # entry_id, not the entry's own validation block (which its authoring round wrote).
         checks["a_review_of_another_claim_cannot_drive_the_live_call"] = (
             wire.get("real_ledger_other_claim_kwargs") == {})
+        # 40 -- ORDERING: entry_id is a digest of a predictable body, so a review could be
+        # pre-generated before the entry is stored. The gate now requires the review to also
+        # name the entry's chain_sha256, which is fixed only once the entry and its
+        # append-only predecessors exist. A pre-generated review has no anchor.
+        checks["a_review_must_be_anchored_to_the_entry_chain"] = (
+            "entry_chain_sha256" in
+            (WT / "evolution" / "experience" / "live_binding.py").read_text(encoding="utf-8"))
         # and the driver really passes the resolved kwargs through to the call
         drv_src = (WT / "runtime" / "recovery" / "recovery_driver.py").read_text(
             encoding="utf-8")

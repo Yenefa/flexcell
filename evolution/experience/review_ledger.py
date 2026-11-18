@@ -27,7 +27,8 @@ import json
 import os
 
 GENESIS = "0" * 64
-_HASH_FIELDS = ("entry_id", "verdict", "reviewed_by", "reason", "review_ref")
+_HASH_FIELDS = ("entry_id", "verdict", "reviewed_by", "reason", "review_ref",
+               "entry_chain_sha256")
 
 
 def _digest(record):

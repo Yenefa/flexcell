@@ -28,6 +28,14 @@ ENTRIES = os.path.join(WT, "setup", "acceptance", "evobot_continual_chain_202611
                        "records_v2.jsonl")
 
 
+def _e2_identity(path):
+    """The entry id AND its chain anchor. A review must name both, or it could have been
+    pre-generated before the entry was stored."""
+    rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+    entry = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]
+    return entry["entry_id"], entry["chain_sha256"]
+
+
 def _rebuilt(tmp_path, reviewer="independent-reviewer"):
     """A fresh store with the same rows, one reviewer field changed, chain rebuilt."""
     path = tmp_path / "records.jsonl"
@@ -67,11 +75,12 @@ def test_an_independent_accept_yields_the_asset_kwargs(tmp_path):
     entry's own validation block, which the same round that authored it wrote."""
     path = _rebuilt(tmp_path)
     rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
-    eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    eid, sha = _e2_identity(path)
     ledger = tmp_path / "review_ledger.jsonl"
     import review_ledger as chain
     chain.append(str(ledger), {"entry_id": eid, "verdict": "ACCEPT",
-                               "reviewed_by": "gate-auditor"})
+                               "reviewed_by": "gate-auditor",
+                               "entry_chain_sha256": sha})
     kwargs, why = live_binding.resolve(ASSETS, "executor_recovery", path,
                                        review_ledger=str(ledger))
     assert kwargs == {"spread_step": 0.09, "cluster_m": 0.12}
@@ -83,7 +92,7 @@ def test_a_forged_plain_review_line_is_refused(tmp_path):
     independent reviewer and the gate would hand parameters to a live robot call."""
     path = _rebuilt(tmp_path)
     rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
-    eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    eid, sha = _e2_identity(path)
     ledger = tmp_path / "ledger.jsonl"
     ledger.write_text(json.dumps({"entry_id": eid, "verdict": "ACCEPT",
                                   "reviewed_by": "any-made-up-name"}) + "\n",
@@ -99,10 +108,11 @@ def test_an_edited_chained_review_is_refused(tmp_path):
     import review_ledger as chain
     path = _rebuilt(tmp_path)
     rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
-    eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    eid, sha = _e2_identity(path)
     ledger = tmp_path / "ledger.jsonl"
     chain.append(str(ledger), {"entry_id": eid, "verdict": "ACCEPT",
-                               "reviewed_by": "gate-auditor"})
+                               "reviewed_by": "gate-auditor",
+                               "entry_chain_sha256": sha})
     row = json.loads(open(ledger, encoding="utf-8").readline())
     row["verdict"] = "REJECT"
     ledger.write_text(json.dumps(row) + "\n", encoding="utf-8")
@@ -138,7 +148,7 @@ def test_no_review_ledger_is_a_refusal_even_with_self_attestation(tmp_path):
 def test_a_self_reviewer_name_in_the_ledger_is_refused(tmp_path):
     path = _rebuilt(tmp_path)
     rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
-    eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    eid, sha = _e2_identity(path)
     ledger = tmp_path / "review_ledger.jsonl"
     ledger.write_text(json.dumps({"entry_id": eid, "verdict": "ACCEPT",
                                   "reviewed_by": "chain-demo-reviewer"}) + "\n",
@@ -164,11 +174,12 @@ def test_a_rejected_entry_is_refused(tmp_path):
 def test_a_broken_chain_is_refused(tmp_path):
     path = _rebuilt(tmp_path)
     rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
-    eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    eid, sha = _e2_identity(path)
     import review_ledger as chain
     ledger = tmp_path / "review_ledger.jsonl"
     chain.append(str(ledger), {"entry_id": eid, "verdict": "ACCEPT",
-                               "reviewed_by": "gate-auditor"})
+                               "reviewed_by": "gate-auditor",
+                               "entry_chain_sha256": sha})
     lines = open(path, encoding="utf-8").readlines()
     # tamper a field that actually EXISTS in the record body; changing a key that is not
     # there would leave the hash intact and the test would silently pass for the wrong
@@ -218,11 +229,12 @@ def test_a_tampered_asset_callable_cannot_drive_the_robot(tmp_path):
     reviewed entry, or editing an artifact file would change a live robot call."""
     path = _rebuilt(tmp_path)
     rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
-    eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    eid, sha = _e2_identity(path)
     import review_ledger as chain
     ledger = tmp_path / "review_ledger.jsonl"
     chain.append(str(ledger), {"entry_id": eid, "verdict": "ACCEPT",
-                               "reviewed_by": "gate-auditor"})
+                               "reviewed_by": "gate-auditor",
+                               "entry_chain_sha256": sha})
     a2 = tmp_path / "assets.jsonl"
     asset_rows = [json.loads(l) for l in open(ASSETS, encoding="utf-8") if l.strip()]
     asset_rows[0]["callable"]["kwargs"]["spread_step"] = 999
@@ -239,10 +251,11 @@ def test_an_inapplicable_live_plan_refuses_the_parameters(tmp_path):
     import review_ledger as chain
     path = _rebuilt(tmp_path)
     rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
-    eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    eid, sha = _e2_identity(path)
     ledger = tmp_path / "ledger.jsonl"
     chain.append(str(ledger), {"entry_id": eid, "verdict": "ACCEPT",
-                               "reviewed_by": "gate-auditor"})
+                               "reviewed_by": "gate-auditor",
+                               "entry_chain_sha256": sha})
     # 90 mm apart: already meets the 90 mm contract, so respread must NOT fire
     obs = {"plan": {"stages": [{"place_pose": [0.20, 0.0, 0.0175]},
                                {"place_pose": [0.29, 0.0, 0.0175]}]}}
@@ -254,10 +267,11 @@ def test_an_applicable_live_plan_accepts_the_parameters(tmp_path):
     import review_ledger as chain
     path = _rebuilt(tmp_path)
     rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
-    eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    eid, sha = _e2_identity(path)
     ledger = tmp_path / "ledger.jsonl"
     chain.append(str(ledger), {"entry_id": eid, "verdict": "ACCEPT",
-                               "reviewed_by": "gate-auditor"})
+                               "reviewed_by": "gate-auditor",
+                               "entry_chain_sha256": sha})
     # 56 mm apart: below the 90 mm contract, so the lesson applies
     obs = {"plan": {"stages": [{"place_pose": [0.20, 0.0, 0.0175]},
                                {"place_pose": [0.256, 0.0, 0.0175]}]}}
@@ -270,10 +284,11 @@ def test_a_single_stage_is_an_invalid_condition(tmp_path):
     import review_ledger as chain
     path = _rebuilt(tmp_path)
     rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
-    eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    eid, sha = _e2_identity(path)
     ledger = tmp_path / "ledger.jsonl"
     chain.append(str(ledger), {"entry_id": eid, "verdict": "ACCEPT",
-                               "reviewed_by": "gate-auditor"})
+                               "reviewed_by": "gate-auditor",
+                               "entry_chain_sha256": sha})
     obs = {"plan": {"stages": [{"place_pose": [0.20, 0.0, 0.0175]}]}}
     assert live_binding.resolve(ASSETS, "executor_recovery", path,
                                 review_ledger=str(ledger), observation=obs)[0] == {}

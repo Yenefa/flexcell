@@ -84,6 +84,27 @@ def test_an_inserted_line_is_detected(tmp_path):
     assert review_ledger.verify(str(path))[0] is False
 
 
+def test_a_pregenerated_review_cannot_authorise_an_entry(tmp_path):
+    """THE ORDERING GAP. entry_id is a digest of a predictable body, so a reviewer could
+    write ACCEPT for an id BEFORE the entry is stored. A review must also name the entry's
+    chain_sha256, which is fixed only once the entry and its predecessors are appended."""
+    import live_binding as lb
+    rows_path = os.path.join(WT, "setup", "acceptance",
+                             "evobot_continual_chain_20261118", "records_v2.jsonl")
+    rows = [json.loads(l) for l in open(rows_path, encoding="utf-8") if l.strip()]
+    entry = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]
+    ledger = tmp_path / "ledger.jsonl"
+    # a perfectly valid chained review, no timestamp, exact entry_id — but no chain anchor
+    review_ledger.append(str(ledger), {"entry_id": entry["entry_id"],
+                                       "verdict": "ACCEPT", "reviewed_by": "auditor"})
+    kwargs, why = lb.resolve(
+        os.path.join(WT, "setup", "acceptance", "evobot_continual_chain_20261118",
+                     "skill_assets.jsonl"),
+        "executor_recovery", rows_path, review_ledger=str(ledger))
+    assert kwargs == {}
+    assert "chain" in why or "anchor" in why or "defaults" in why
+
+
 def test_a_forged_ledger_cannot_authorise_a_live_call(tmp_path):
     """The whole point: the gate must not hand parameters to a robot from an editable file."""
     path = tmp_path / "ledger.jsonl"

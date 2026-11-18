@@ -24,12 +24,19 @@ def _result(**kw):
     return "RESULT " + json.dumps(kw)
 
 
+def _e2_identity(entries_path):
+    rows = [json.loads(l) for l in open(entries_path, encoding="utf-8") if l.strip()]
+    entry = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]
+    return entry["entry_id"], entry["chain_sha256"]
+
+
 def _reviewed(tmp_path):
     rows = [json.loads(l) for l in open(ENTRIES, encoding="utf-8") if l.strip()]
-    eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    eid, sha = _e2_identity(ENTRIES)
     led = tmp_path / "ledger.jsonl"
     chain.append(str(led), {"entry_id": eid, "verdict": "ACCEPT",
-                            "reviewed_by": "gate-auditor"})
+                            "reviewed_by": "gate-auditor",
+                            "entry_chain_sha256": sha})
     return eid, led
 
 

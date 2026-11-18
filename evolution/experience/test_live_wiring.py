@@ -23,6 +23,12 @@ ENTRIES = os.path.join(WT, "setup", "acceptance", "evobot_continual_chain_202611
                        "records_v2.jsonl")
 
 
+def _e2_identity(entries_path):
+    rows = [json.loads(l) for l in open(entries_path, encoding="utf-8") if l.strip()]
+    entry = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]
+    return entry["entry_id"], entry["chain_sha256"]
+
+
 class Args:
     def __init__(self, asset=None, entries=None):
         self.experience_asset = asset
@@ -55,11 +61,11 @@ def test_with_an_independently_reviewed_entry_the_kwargs_reach_the_call(tmp_path
         row["record_sha256"] = store._hash(row)
         store.append(str(path), row)
     ledger = tmp_path / "review_ledger.jsonl"
-    eid = [r for r in [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
-           if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    eid, sha = _e2_identity(str(path))
     import review_ledger as chain
     chain.append(str(ledger), {"entry_id": eid, "verdict": "ACCEPT",
-                               "reviewed_by": "gate-auditor"})
+                               "reviewed_by": "gate-auditor",
+                               "entry_chain_sha256": sha})
     args = Args(ASSETS, str(path))
     args.experience_review_ledger = str(ledger)
     kwargs, why = recovery_driver._experience_kwargs(args)

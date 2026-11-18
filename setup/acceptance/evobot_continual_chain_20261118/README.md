@@ -433,6 +433,24 @@ capability is what makes that visible instead of leaving it to an audit.
     **correctness check on the replay, not an effect measurement**, and conflating the two
     would turn this back into "we measured it".
 
+40. **A REVIEW CAN BE PRE-GENERATED BEFORE THE ENTRY EXISTS.** `entry_id` is a digest of a
+    predictable body. A reviewer can compute the future `entry_id`, write ACCEPT into the
+    review ledger BEFORE the entry is stored, then store the entry. The ledger has no
+    timestamp and its chain verifies, so the gate could not tell "reviewed after creation"
+    from "reviewed before creation".
+
+    Reviews must now also carry `entry_chain_sha256` — the entry's `chain_sha256`, fixed
+    only once the entry and its append-only predecessors are actually stored.
+
+    | review | result |
+    | --- | --- |
+    | entry_id + correct chain anchor | **accepted** |
+    | entry_id only (pre-generated) | **refused** |
+
+    **Honest limit:** this assumes the attacker cannot predict the whole entry-chain prefix.
+    An attacker who controls the ENTIRE chain can still construct one — that is what a
+    signature would solve, and this repo has no signing mechanism. Stated, not hidden.
+
 39. **STEP 5 AT THE LIVE BOUNDARY: AN APPLIED ENTRY IS RECORDED WITH ITS RUN ID.** Until now
     the live path applied an entry's parameters and wrote only `experience_binding.json` — it
     never touched the usage ledger. **"Which task used this entry, what changed, what
@@ -638,7 +656,7 @@ capability is what makes that visible instead of leaving it to an audit.
     visible.** The artifact reports the numbers and both options, and **does not pretend the
     loop is closed.**
 
-`verify.py` asserts **148 checks**, including that both gates really ran, that the asset
+`verify.py` asserts **149 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -666,7 +684,7 @@ with one sentence**, and that **a capable module with an unmeasurable archive is
 a selection effect rather than as any of the three tempting answers**, and that **the
 chain's connection to the live planning path is measured and reported as unplugged, with the
 cost of both ways to close it**, that **a schema bridge cannot rescue these entries**, and
-that **the executor consumer exists in the shell runner**, that **the new opt-in wire leaves the no-flag path at its defaults**, that **a self-reviewed entry cannot drive the live call**, that **an ACCEPT for a different claim on the same evidence cannot drive it either**, that **the review ledger is chained and its integrity limits are stated honestly**, that **applicability is checked on the real run plan, refusing a lesson where its own declared invalid condition fires**, and that **a live application writes RETRIEVED/APPLIED/OUTCOME with a run id while a fallback writes nothing**.
+that **the executor consumer exists in the shell runner**, that **the new opt-in wire leaves the no-flag path at its defaults**, that **a self-reviewed entry cannot drive the live call**, that **an ACCEPT for a different claim on the same evidence cannot drive it either**, that **the review ledger is chained and its integrity limits are stated honestly**, that **applicability is checked on the real run plan, refusing a lesson where its own declared invalid condition fires**, that **a live application writes RETRIEVED/APPLIED/OUTCOME with a run id while a fallback writes nothing**, and that **a review is anchored to the entry's chain hash so it cannot be pre-generated before the entry exists**.
 
 ---
 

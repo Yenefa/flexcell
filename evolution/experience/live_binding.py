@@ -128,6 +128,15 @@ def resolve(asset_path, consumer, entry_store, ledger_path=None, asset_version=N
                                                              "chain-demo-reviewer")]
         if not authorisations:
             continue
+        # ORDERING: a review written BEFORE the entry existed cannot be distinguished by
+        # entry_id alone (the id is a digest of a predictable body). Require the review to
+        # also name the entry's chain_sha256, which is fixed only once the entry and its
+        # append-only predecessors are actually stored. A pre-generated review lacks it.
+        chain_sha = entry.get("chain_sha256")
+        authorisations = [row for row in authorisations
+                          if row.get("entry_chain_sha256") == chain_sha]
+        if not authorisations:
+            continue
 
         # gate 4: the callable and kwargs are what this consumer expects
         try:
