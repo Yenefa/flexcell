@@ -66,7 +66,7 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
 
   std::string objectName{"target_box_a"}, gripperModel{"open_manipulator_x"};
   std::string leftName{"gripper_left_joint"}, rightName{"gripper_right_joint"};
-  double zeroGap{0.034}, closedGap{0.026}, maxForce{20.0}, kp{1000.0}, kd{20.0};
+  double zeroGap{0.034}, closedGap{0.026}, maxForce{1.5}, kp{30.0}, kd{1.0};
   double expectedWidth{0.035}, widthTolerance{0.006};
   std::string baseName{"base_link"}, liftName{"lift_joint"};
   double liftHeight{0.15}, liftTime{0.5}, liftStart{-1.0}, liftGoal{0.0}, liftNow{0.0};
@@ -76,6 +76,7 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
   int stallFrames{0};
   double gapNow{0.034}, objZ{0.0}, baseZ{0.0}, qLeft{0.0}, qRight{0.0};
   double signLeft_{1.0}, signRight_{1.0}, calibrateRef{0.0};
+  double offX{0.0}, offY{0.0}, offZ{0.0}, jawSpeed{0.0};
   double jointLower{-0.011}, jointUpper{0.020};
   int calibSteps{0};
 
@@ -166,7 +167,9 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
           << ",\"obj_z\":" << objZ << ",\"base_z\":" << baseZ
           << ",\"rel_z\":" << (objZ - baseZ)
           << ",\"ql\":" << qLeft << ",\"qr\":" << qRight
-          << ",\"stall\":" << stallFrames << "}";
+          << ",\"stall\":" << stallFrames
+          << ",\"ox\":" << offX << ",\"oy\":" << offY << ",\"oz\":" << offZ
+          << ",\"jaw_speed\":" << jawSpeed << "}";
       reply.set_data(out.str());
       return true;
     }
@@ -233,6 +236,8 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
     jointUpper = config->HasElement("joint_upper") ? config->Get<double>("joint_upper") : jointUpper;
     closedGap = config->HasElement("closed_gap") ? config->Get<double>("closed_gap") : closedGap;
     maxForce = config->HasElement("max_force") ? config->Get<double>("max_force") : maxForce;
+    kp = config->HasElement("kp") ? config->Get<double>("kp") : kp;
+    kd = config->HasElement("kd") ? config->Get<double>("kd") : kd;
     kp = config->HasElement("kp") ? config->Get<double>("kp") : kp;
     kd = config->HasElement("kd") ? config->Get<double>("kd") : kd;
     confirmFrames = config->HasElement("confirm_frames") ? config->Get<int>("confirm_frames") : confirmFrames;
@@ -356,13 +361,18 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
     // match alone would also fire on air.
     bool between = false;
     if (objectLink != kNullEntity && baseLink != kNullEntity) {
-      const auto obj = worldPose(objectLink, ecm).Pos();
-      const auto base = worldPose(baseLink, ecm).Pos();
-      between = std::fabs(obj.Y() - base.Y()) <= 0.025 &&
-                std::fabs(obj.Z() - base.Z()) <= 0.20;
+      const auto basePose = worldPose(baseLink, ecm);
+      const auto objPose = worldPose(objectLink, ecm);
+      // Judge the offset in the gripper frame: the jaw axis is the base Y axis,
+      // so a world-frame check fails whenever the wrist is yawed.
+      const auto offset = basePose.Rot().RotateVectorReverse(objPose.Pos() - basePose.Pos());
+      offX = offset.X(); offY = offset.Y(); offZ = offset.Z();
+      between = std::fabs(offset.Y()) <= 0.030 && std::fabs(offset.X()) <= 0.120 &&
+                std::fabs(offset.Z()) <= 0.200;
     }
+    jawSpeed = std::fabs(0.5 * (JointVelocity(ecm, leftJoint) + JointVelocity(ecm, rightJoint)));
     const bool onObject = std::fabs(gapNow - expectedWidth) <= widthTolerance && between;
-    if (closing && speed < 5e-3 && gapNow < zeroGap - 1e-3 && onObject) {
+    if (closing && speed < 5e-3 && onObject) {
       if (++stallFrames >= confirmFrames) engaged = true;
     } else if (closing) {
       stallFrames = 0;
