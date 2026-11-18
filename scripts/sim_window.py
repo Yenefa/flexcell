@@ -17,7 +17,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--manifest', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
-    parser.add_argument('--backend', choices=['velocity_servo', 'detachable_joint', 'teleport'], required=True)
+    parser.add_argument('--backend', choices=['velocity_servo', 'detachable_joint', 'teleport', 'contact_grasp'], required=True)
     parser.add_argument('--skill-backend', choices=['legacy', 'mtc'], required=True)
     args = parser.parse_args()
     declaration = json.loads(args.manifest.read_text())

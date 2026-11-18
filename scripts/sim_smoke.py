@@ -163,7 +163,7 @@ def gate_refusal_expected(task, object_name, places, verifies):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--out', type=Path, required=True)
-    parser.add_argument('--backend', choices=['velocity_servo', 'detachable_joint', 'teleport'], default='velocity_servo')
+    parser.add_argument('--backend', choices=['velocity_servo', 'detachable_joint', 'teleport', 'contact_grasp'], default='velocity_servo')
     parser.add_argument('--skill-backend', choices=['legacy', 'mtc'], default='legacy')
     parser.add_argument('--object', choices=['target_box_a', 'target_box_b'], default='target_box_a')
     parser.add_argument('--camera', action='store_true')

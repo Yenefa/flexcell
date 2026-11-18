@@ -76,7 +76,7 @@ class CarryServer(Node):
         self._world = gp('world').value
         self._period = float(gp('carry_period_s').value)
         self._backend = gp('carry_backend').value
-        if self._backend not in ('teleport', 'velocity_servo', 'detachable_joint'):
+        if self._backend not in ('teleport', 'velocity_servo', 'detachable_joint', 'contact_grasp'):
             raise ValueError('unknown carry backend')
         self._base = gp('base_frame').value
         self._ee_link = gp('end_effector_link').value
@@ -109,7 +109,7 @@ class CarryServer(Node):
         if self._false_attach is not None:
             self._false_attach.update(remaining=self._false_attach['frames'], started=False,
                                       frames_done=0, logged=False, first_sim_ns=0, last_sim_ns=0)
-        if self._backend == 'detachable_joint':
+        if self._backend in ('detachable_joint', 'contact_grasp'):
             self._follow = JointFollowMonitor()
             self._preposition = PrepositionLatch()
             self._follow_group = MutuallyExclusiveCallbackGroup()
@@ -317,6 +317,21 @@ class CarryServer(Node):
                     return False
                 preposition = dict(evidence, reference=list(reference))
             self._follow.arm(object_id, session, reference, preposition)
+        if self._backend == 'contact_grasp':
+            # Contact carry: the jaw closes on the object and the only thing that
+            # can move it afterwards is friction. The monitor is the same one the
+            # detachable path uses: it reads the object pose relative to the
+            # gripper from the physics trace, so a slip is a real measurement.
+            self._follow.arm(object_id, session, None, None)
+            ok, reply = self._contact_request('grasp', {'object': object_id})
+            self._log.write({'event': 'contact_grasp', 'object': object_id,
+                             'session': session, 'confirmed': ok, 'reply': reply})
+            if not ok:
+                self._contact_request('release', {})
+                self._retired_sessions.add(session)
+                self._engage_message = 'contact grasp was not confirmed: ' + reply
+                self.get_logger().error('contact grasp was not confirmed')
+                return False
         if self._backend in ('velocity_servo', 'detachable_joint'):
             ee = self._ee()
             if ee is None or not self._guard_request('engage', self._pose(object_id, offset, ee, session)):
@@ -342,7 +357,7 @@ class CarryServer(Node):
                                         args=(object_id, offset, stop_evt, session),
                                         daemon=True)
         self._thread.start()
-        if self._backend == 'detachable_joint':
+        if self._backend in ('detachable_joint', 'contact_grasp'):
             confirmed, reason = self._follow.wait_ready(timeout=2.)
             if not confirmed:
                 self._log.write({'event': 'follow_engage_failed', 'object': object_id,
@@ -376,8 +391,16 @@ class CarryServer(Node):
             if follow is not None:
                 follow.end_release(False)
             return False
-        if getattr(self, '_backend', 'teleport') in ('velocity_servo', 'detachable_joint'):
-            if not self._guard_release(''):
+        contact_release = (self._contact_request('release', {})[0]
+                           if getattr(self, '_backend', 'teleport') == 'contact_grasp' else None)
+        if contact_release is False:
+            if follow is not None:
+                follow.end_release(False)
+            self._log.write({'event': 'release_unconfirmed', 'backend': self._backend,
+                             'session': session, 'object': object_id, 'cause': cause})
+            return False
+        if (getattr(self, '_backend', 'teleport') in ('velocity_servo', 'detachable_joint')
+                and not self._guard_release('')):
                 if follow is not None:
                     follow.end_release(False)
                 self._log.write({'event': 'release_unconfirmed',
@@ -429,6 +452,27 @@ class CarryServer(Node):
             self._log.write({'event': 'worker_ended', 'object': self._object_id,
                              'session': getattr(self, '_session', '')})
             self._on_stop(None, cause='worker_ended')
+
+    def _contact_request(self, kind, payload):
+        """Call the contact carry guard. Returns (confirmed, raw_reply)."""
+        request = self._String()
+        request.data = json.dumps(payload)
+        service = '/world/%s/flexcell/contact/%s' % (self._world, kind)
+        try:
+            reply = self._gz_node.request(service, request, self._String, self._String, 4000)
+        except Exception as exc:  # noqa: BLE001 - a dead service must not kill carry
+            self.get_logger().error('contact %s failed: %s' % (kind, type(exc).__name__))
+            return False, ''
+        if isinstance(reply, tuple):
+            if len(reply) != 2 or not reply[0]:
+                return False, ''
+            reply = reply[-1]
+        text = getattr(reply, 'data', '') or ''
+        try:
+            body = json.loads(text)
+        except ValueError:
+            return False, text
+        return bool(body.get('ok')), text
 
     def _guard_request(self, operation, request):
         try:
@@ -483,6 +527,13 @@ class CarryServer(Node):
         return bool(getattr(rep, 'data', rep))
 
     def _loop(self, object_id, offset, stop_evt, session):
+        if self._backend == 'contact_grasp':
+            # Nothing to pin: the object is held by the jaw through contact. The
+            # thread exists so the session/stop semantics stay identical.
+            self._log.write({'event': 'contact_hold', 'object': object_id, 'session': session})
+            while not stop_evt.is_set():
+                stop_evt.wait(self._period)
+            return
         consecutive_fail = 0
         # Thread-local observations: replacement cannot give the old worker
         # the new session's identity. No TF/carry success is inferred from them.

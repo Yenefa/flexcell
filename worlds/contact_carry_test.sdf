@@ -1,0 +1,145 @@
+<?xml version="1.0"?>
+<!--
+  Service-level test of the contact carry path against the mainline object.
+
+  The gripper below is a stand-in for the OMX jaw: same prismatic two-jaw
+  kinematics, same 56 mm open / 35 mm nominal gap, same joint names as the real
+  robot (gripper_left_joint / gripper_right_joint). It is static at the base so
+  the driver can teleport the arm, exactly like the existing teleport baseline
+  moves objects. Nothing attaches the box to the jaw: the only coupling is
+  contact + friction, driven through flexcell_contact_carry.
+-->
+<sdf version='1.10'>
+  <world name='contact_carry_test'>
+    <physics name='1ms' type='ignored'>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+    <gravity>0 0 -9.8</gravity>
+
+    <plugin filename='gz-sim-physics-system' name='gz::sim::systems::Physics'/>
+    <plugin filename='gz-sim-contact-system' name='gz::sim::systems::Contact'/>
+    <plugin filename='gz-sim-user-commands-system' name='gz::sim::systems::UserCommands'/>
+    <plugin filename='gz-sim-scene-broadcaster-system' name='gz::sim::systems::SceneBroadcaster'/>
+
+    <plugin filename='libflexcell_contact_carry.so' name='flexcell::ContactCarryGuard'>
+      <object_model>target_box_a</object_model>
+      <gripper_model>open_manipulator_x</gripper_model>
+      <left_joint>gripper_left_joint</left_joint>
+      <right_joint>gripper_right_joint</right_joint>
+      <base_link>base_link</base_link>
+      <open_gap>0.056</open_gap>
+      <closed_gap>0.033</closed_gap>
+      <max_force>20</max_force>
+      <expected_object_width>0.035</expected_object_width>
+      <lift_joint>lift_joint</lift_joint>
+      <lift_height>0.15</lift_height>
+      <lift_time>0.5</lift_time>
+      <width_tolerance>0.006</width_tolerance>
+      <confirm_frames>40</confirm_frames>
+    </plugin>
+
+    <model name='ground_plane'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='ground_col'>
+          <geometry><plane><normal>0 0 1</normal><size>20 20</size></plane></geometry>
+          <surface><friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction></surface>
+        </collision>
+        <visual name='ground_vis'>
+          <geometry><plane><normal>0 0 1</normal><size>20 20</size></plane></geometry>
+          <material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.5 0.5 0.5 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name='open_manipulator_x'>
+      <static>false</static>
+      <self_collide>false</self_collide>
+      <pose>0 0 0 0 0 0</pose>
+
+      <link name='base_link'>
+        <pose>0 0 0.079 0 0 0</pose>
+        <inertial>
+          <mass>0.6</mass>
+          <inertia><ixx>3.65e-04</ixx><ixy>0</ixy><ixz>0</ixz><iyy>3.65e-04</iyy><iyz>0</iyz><izz>6.40e-04</izz></inertia>
+        </inertial>
+        <collision name='base_col'>
+          <geometry><box><size>0.080 0.080 0.030</size></box></geometry>
+        </collision>
+      </link>
+
+      <joint name='lift_joint' type='prismatic'>
+        <parent>world</parent>
+        <child>base_link</child>
+        <pose>0 0 0.079 0 0 0</pose>
+        <axis>
+          <xyz>0 0 1</xyz>
+          <limit><lower>-0.02</lower><upper>0.30</upper><effort>200</effort><velocity>1.0</velocity></limit>
+        </axis>
+      </joint>
+
+      <link name='gripper_left_link'>
+        <pose>0 -0.03 0.034 0 0 0</pose>
+        <inertial>
+          <mass>0.05</mass>
+          <inertia><ixx>1.51e-05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.56e-05</iyy><iyz>0</iyz><izz>6.67e-07</izz></inertia>
+        </inertial>
+        <collision name='left_pad'>
+          <geometry><box><size>0.012 0.004 0.060</size></box></geometry>
+          <surface><friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction></surface>
+        </collision>
+      </link>
+      <joint name='gripper_left_joint' type='prismatic'>
+        <parent>base_link</parent>
+        <child>gripper_left_link</child>
+        <pose>0 -0.03 -0.045 0 0 0</pose>
+        <axis>
+          <xyz>0 1 0</xyz>
+          <limit><lower>0.0</lower><upper>0.030</upper><effort>60</effort><velocity>0.2</velocity></limit>
+        </axis>
+      </joint>
+
+      <link name='gripper_right_link'>
+        <pose>0 0.03 0.034 0 0 0</pose>
+        <inertial>
+          <mass>0.05</mass>
+          <inertia><ixx>1.51e-05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.56e-05</iyy><iyz>0</iyz><izz>6.67e-07</izz></inertia>
+        </inertial>
+        <collision name='right_pad'>
+          <geometry><box><size>0.012 0.004 0.060</size></box></geometry>
+          <surface><friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction></surface>
+        </collision>
+      </link>
+      <joint name='gripper_right_joint' type='prismatic'>
+        <parent>base_link</parent>
+        <child>gripper_right_link</child>
+        <pose>0 0.03 -0.045 0 0 0</pose>
+        <axis>
+          <xyz>0 -1 0</xyz>
+          <limit><lower>0.0</lower><upper>0.030</upper><effort>60</effort><velocity>0.2</velocity></limit>
+        </axis>
+      </joint>
+    </model>
+
+    <model name='target_box_a'>
+      <static>false</static>
+      <pose>0 0 0.0175 0 0 0</pose>
+      <link name='link'>
+        <inertial>
+          <mass>0.05</mass>
+          <inertia><ixx>1.02e-05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.02e-05</iyy><iyz>0</iyz><izz>1.02e-05</izz></inertia>
+        </inertial>
+        <collision name='obj_col'>
+          <geometry><box><size>0.035 0.035 0.035</size></box></geometry>
+          <surface><friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction></surface>
+        </collision>
+        <visual name='obj_vis'>
+          <geometry><box><size>0.035 0.035 0.035</size></box></geometry>
+          <material><ambient>0.9 0.25 0.2 1</ambient><diffuse>0.9 0.25 0.2 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+  </world>
+</sdf>

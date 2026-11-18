@@ -10,7 +10,7 @@ import xml.etree.ElementTree as ET
 import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
-BACKENDS = ('teleport', 'velocity_servo', 'detachable_joint')
+BACKENDS = ('teleport', 'velocity_servo', 'detachable_joint', 'contact_grasp')
 
 
 DECISION_POLICIES = ('fsm', 'jev', 'llm', 'hybrid')
@@ -178,6 +178,20 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
         if three_boxes:
             for name in tracked:
                 ET.SubElement(guard, 'allowed_model').text = name
+    if backend == 'contact_grasp' and not perception_only:
+        # Contact carry: the jaw is driven by the guard, the object is held by
+        # friction only. No DetachableJoint plugin is added to this world.
+        guard = ET.SubElement(world, 'plugin', name='flexcell::ContactCarryGuard',
+                              filename='libflexcell_contact_carry.so')
+        for key, value in [('gripper_model', 'open_manipulator_x'),
+                           ('left_joint', 'gripper_left_joint'),
+                           ('right_joint', 'gripper_right_joint'),
+                           ('base_link', 'link5'),
+                           ('open_gap', '0.056'), ('closed_gap', '0.033'),
+                           ('max_force', '20'), ('expected_object_width', '0.035'),
+                           ('width_tolerance', '0.006'), ('confirm_frames', '40')]:
+            ET.SubElement(guard, key).text = value
+        ET.SubElement(guard, 'object_model').text = tracked[0]
     if contact_trace:
         physics = world.find("plugin[@name='gz::sim::systems::Physics']")
         ET.SubElement(physics, 'contacts_entity_names').text = 'true'
