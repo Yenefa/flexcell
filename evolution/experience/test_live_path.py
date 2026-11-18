@@ -101,6 +101,36 @@ def test_the_claim_says_unplugged_not_broken(report):
     assert "UNPLUGGED" in report["claim"]
 
 
+def test_a_schema_bridge_cannot_rescue_these_entries(report):
+    """The FIRST version of the report blamed the two-store schema mismatch. That was too
+    coarse: both ACTIVE entries are tooling/control class and the live retrieve() admits only
+    planning/state, with a word list excluding landing/spread/participant. They are refused
+    by design, so a bridge would change nothing."""
+    assert report["planner_filter_result"]
+    assert not any(x["would_a_bridge_help"]
+                   for x in report["planner_filter_result"])
+    for row in report["planner_filter_result"]:
+        assert row["class_admitted"] is False
+
+
+def test_the_missing_consumers_are_named(report):
+    """The real gap is that the live run scripts have no consumer for harness or executor
+    experience. Both are hard-coded in the stack, so the chain learned to improve modules the
+    robot never reads."""
+    presence = report["consumers_in_live_path"]
+    assert "harness" in presence and "executor_recovery" in presence
+    assert not presence["harness"]["has_a_live_consumer"]
+    assert not presence["executor_recovery"]["has_a_live_consumer"]
+
+
+def test_a_bridge_option_does_not_claim_it_would_work(report):
+    """An option whose cost is 'NOTHING' must say so: presenting it as a fix would be the
+    exact overstatement this correction exists to prevent."""
+    bridge = next(o for o in report["options"] if "v2" in o["option"]
+                  or "bridge" in o["option"])
+    assert "NOTHING" in bridge["cost"] or "exactly as before" in bridge["cost"]
+
+
 # ---------------------------------------------------------------- a v2 record as v1
 
 def test_a_v2_record_put_in_the_live_store_would_still_be_filtered_out(tmp_path):

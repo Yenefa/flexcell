@@ -683,7 +683,11 @@ def run(dest=OUT):
     steps.append({"step": "live_path",
                   "active_entries": live["active_entries"],
                   "visible_to_live_path": live["visible_to_live_path"],
-                  "by_reason": live["by_reason"]})
+                  "by_reason": live["by_reason"],
+                  "bridge_would_help": [x["would_a_bridge_help"]
+                                        for x in live["planner_filter_result"]],
+                  "live_consumers": {k: v["has_a_live_consumer"]
+                                     for k, v in live["consumers_in_live_path"].items()}})
 
     # 11 -- the store's own curation report, computed from the records on disk
     report = curate.curate(store.read(store_path))

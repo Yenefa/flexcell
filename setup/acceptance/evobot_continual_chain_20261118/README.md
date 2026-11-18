@@ -433,6 +433,29 @@ capability is what makes that visible instead of leaving it to an audit.
     **correctness check on the replay, not an effect measurement**, and conflating the two
     would turn this back into "we measured it".
 
+33. **THE FIRST DIAGNOSIS WAS TOO COARSE, AND IT IS CORRECTED HERE.** The previous round
+    blamed a two-store schema mismatch. Looking at the two ACTIVE entries more closely:
+
+    | entry | failure_class | consumer |
+    | --- | --- | --- |
+    | `auto-harness_dds_exhaustion` | `tooling` | `harness` |
+    | `E2` | `control` | `executor_recovery` |
+
+    The live `retrieve()` admits only `planning`/`state` and its `_NON_PLANNER` word list
+    excludes `landing`, `spread`, `participant`. **Both entries are excluded BY DESIGN, not by
+    field-name mismatch. A schema bridge would change nothing** — the robot would behave
+    exactly as before. Presenting it as a fix was the overstatement this correction removes.
+
+    | consumer | call sites in the live run scripts |
+    | --- | --- |
+    | `harness` | **0** |
+    | `executor_recovery` | **0** |
+
+    `run_baseline_b.py` and `baseline_c.py` never call `apply_respread` and never apply a DDS
+    config from an entry; both are hard-coded in the stack. **The chain learned to improve two
+    modules the robot never reads.** The only option that changes behaviour is giving the live
+    path those consumers, with a reviewed gate before each call.
+
 32. **the loop can be correct and unplugged.** Everything the demo proves is proved INSIDE
     the chain's own harness. The code that hands experience to the planner for a REAL robot
     run (`experiments/baselines/baseline_c.py`) reads a **different store with a different
@@ -461,7 +484,7 @@ capability is what makes that visible instead of leaving it to an audit.
     visible.** The artifact reports the numbers and both options, and **does not pretend the
     loop is closed.**
 
-`verify.py` asserts **131 checks**, including that both gates really ran, that the asset
+`verify.py` asserts **133 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -488,7 +511,8 @@ that **every unrouted signature states what is actually known rather than being 
 with one sentence**, and that **a capable module with an unmeasurable archive is reported as
 a selection effect rather than as any of the three tempting answers**, and that **the
 chain's connection to the live planning path is measured and reported as unplugged, with the
-cost of both ways to close it**.
+cost of both ways to close it**, that **a schema bridge cannot rescue these entries**, and
+that **the missing harness/executor consumers are named with their zero call sites**.
 
 ---
 

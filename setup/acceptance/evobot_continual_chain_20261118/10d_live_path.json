@@ -5,7 +5,17 @@
     "no provenance_verified": 1
   },
   "chain_store": "setup\\acceptance\\evobot_continual_chain_20261118\\records_v2.jsonl",
-  "claim": "the chain is correct and UNPLUGGED: its entries are invisible to the code that hands experience to the planner for a real run. Closing that is a schema decision with a cost, so it is reported rather than assumed",
+  "claim": "the chain is correct and UNPLUGGED, and a schema bridge is NOT the fix: the live path is planner-only and has no harness/executor consumer at all. The two ACTIVE entries are for consumers the robot never reads. Only adding those consumers to the live path closes the loop",
+  "consumers_in_live_path": {
+    "executor_recovery": {
+      "call_sites_in_live_scripts": [],
+      "has_a_live_consumer": false
+    },
+    "harness": {
+      "call_sites_in_live_scripts": [],
+      "has_a_live_consumer": false
+    }
+  },
   "entries": [
     {
       "entry": "auto-harness_dds_exhaustion",
@@ -22,12 +32,47 @@
   "live_store_rows": 7,
   "options": [
     {
-      "cost": "the live retrieval needs provenance_verified, evidence_files and a review ledger keyed by record_sha256; v2 carries none of those, so the live filter would admit nothing - fail-closed doing its job",
-      "option": "write v2 records into the live store"
+      "cost": "NOTHING - retrieve() admits only planning/state classes and rejects landing/spread/participant words; both entries are excluded by design, so the robot would behave exactly as before",
+      "option": "bridge the two v2 entries into the live store"
     },
     {
-      "cost": "it would then need the v2 review verdict and the lineage status, and the file it reads is the one a frozen baseline experiment uses",
-      "option": "teach the live path to read v2"
+      "cost": "run_baseline_b.py and baseline_c.py must actually CALL the executor respread and the harness config that the entries describe, with a reviewed gate before each call - this changes the frozen baseline",
+      "option": "give the live run path the missing consumers"
+    }
+  ],
+  "planner_filter": {
+    "classes": [
+      "planning",
+      "state"
+    ],
+    "non_planner": [
+      "landing",
+      "spot",
+      "centre",
+      "center",
+      "domain",
+      "participant",
+      "admission",
+      "launch",
+      "stack",
+      "pose",
+      "spread"
+    ]
+  },
+  "planner_filter_result": [
+    {
+      "class_admitted": false,
+      "entry": "auto-harness_dds_exhaustion",
+      "failure_class": "tooling",
+      "word_admitted": false,
+      "would_a_bridge_help": false
+    },
+    {
+      "class_admitted": false,
+      "entry": "E2",
+      "failure_class": "control",
+      "word_admitted": false,
+      "would_a_bridge_help": false
     }
   ],
   "visible_to_live_path": 0

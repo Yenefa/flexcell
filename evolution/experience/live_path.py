@@ -18,26 +18,33 @@ THE GAP THIS EXISTS FOR
     experiments/baselines/baseline_c.py, which is the code that hands experience to the
     planner for a real run. The loop is correct and unplugged.
 
-WHY THIS IS WORTH MEASURING RATHER THAN JUST FIXING
-    Wiring it means choosing which schema wins, and that choice has a cost either way:
+    A SCHEMA MISMATCH IS NOT THE REAL REASON, AND THIS FILE FIRST SAID IT WAS. Looking at
+    the two ACTIVE entries more closely showed the first explanation was too coarse:
 
-        write v2 into the live store   the live retrieval's filters (provenance_verified,
-                                       review ledger keyed by record_sha256) do not exist in
-                                       v2, so the live path would retrieve NOTHING - a
-                                       fail-closed filter doing its job
-        teach the live path v2         it then needs the v2 review verdict and the lineage
-                                       status, which is real work and changes the file that a
-                                       frozen baseline experiment reads
+        auto-harness_dds_exhaustion  failure_class=tooling, consumer=harness
+        E2                           failure_class=control, consumer=executor_recovery
 
-    Neither is a one-line change, and picking one silently would be the kind of decision that
-    should be visible. So this module states the gap with numbers and names the two options;
-    it does not pretend the loop closes.
+    The live path's retrieve() admits only failure_class in (planning, state) and its
+    _NON_PLANNER word list excludes "landing", "spread", "participant" - so BOTH entries
+    are excluded BY DESIGN, not by an accident of field names. No schema bridge would make
+    them visible: the live retrieve() is planner-only, and neither entry is a planner entry.
+
+    The real reason is stronger and worse: THE LIVE RUN PATH HAS NO CONSUMER for either
+    harness or executor experience. run_baseline_b.py and baseline_c.py never call
+    apply_respread and never apply a DDS config from an entry. Both are hard-coded into the
+    stack. So the chain learned to improve two consumers that the live path does not read.
+
+    Choosing a schema (the original two "options") would therefore "fix" nothing: it would
+    bridge two lessons into a filter that correctly refuses them, and the robot would behave
+    exactly as before. The options below state that plainly.
 
 WHAT IT REPORTS
     active_entries            how many ACTIVE entries the chain holds
     visible_to_live_path      how many of them the live retrieval filter would admit
     by_reason                 why each invisible one is invisible
-    options                   the two ways to close it, with what each costs
+    planner_filter_result     would the live planner filter admit a bridged entry?
+    consumers_in_live_path    which of the entry's consumers exist in the live run scripts
+    options                   the real ways to close it, with what each costs
 """
 import json
 import os
@@ -114,27 +121,98 @@ def report(live_store=None, live_ledger=None, chain_store=None):
         by_reason[reason] = by_reason.get(reason, 0) + 1
         detail.append({"entry": (row.get("version") or {}).get("label"),
                        "visible": False, "why": reason})
+    # THE LIVE PATH IS PLANNER-ONLY. Its retrieve() keeps failure_class in (planning, state)
+    # and its _NON_PLANNER word list rejects "landing", "spread", "participant". Test each
+    # ACTIVE entry against that filter directly: a schema bridge cannot rescue an entry the
+    # filter refuses by design.
+    planner_filter = _live_planner_filter()
+    filter_result = []
+    for row in chain_rows:
+        text = str(row.get("suggested_action") or row.get("lesson") or "")
+        cls = row.get("failure_class")
+        cls_ok = cls in ("planning", "state")
+        word_ok = not any(w in text.lower() for w in planner_filter["non_planner"])
+        filter_result.append({"entry": (row.get("version") or {}).get("label"),
+                              "failure_class": cls, "class_admitted": cls_ok,
+                              "word_admitted": word_ok,
+                              "would_a_bridge_help": cls_ok and word_ok})
+    live_scripts = _live_run_scripts()
+    consumer_presence = {}
+    for row in chain_rows:
+        consumer = row.get("consumer")
+        consumer_presence[consumer] = {
+            "call_sites_in_live_scripts": live_scripts.get(consumer, []),
+            "has_a_live_consumer": bool(live_scripts.get(consumer)),
+        }
     return {
         "active_entries": len(chain_rows),
         "visible_to_live_path": visible,
         "by_reason": by_reason,
         "entries": detail,
         "live_store_rows": len(live_rows),
+        "planner_filter": planner_filter,
+        "planner_filter_result": filter_result,
+        "consumers_in_live_path": consumer_presence,
         "chain_store": os.path.relpath(chain_store, WT),
         "live_store": os.path.relpath(live_store, WT),
         "options": [
-            {"option": "write v2 records into the live store",
-             "cost": ("the live retrieval needs provenance_verified, evidence_files and a "
-                      "review ledger keyed by record_sha256; v2 carries none of those, so "
-                      "the live filter would admit nothing - fail-closed doing its job")},
-            {"option": "teach the live path to read v2",
-             "cost": ("it would then need the v2 review verdict and the lineage status, and "
-                      "the file it reads is the one a frozen baseline experiment uses")},
+            {"option": "bridge the two v2 entries into the live store",
+             "cost": ("NOTHING - retrieve() admits only planning/state classes and rejects "
+                      "landing/spread/participant words; both entries are excluded by design, "
+                      "so the robot would behave exactly as before")},
+            {"option": "give the live run path the missing consumers",
+             "cost": ("run_baseline_b.py and baseline_c.py must actually CALL the executor "
+                      "respread and the harness config that the entries describe, with a "
+                      "reviewed gate before each call - this changes the frozen baseline")},
         ],
-        "claim": ("the chain is correct and UNPLUGGED: its entries are invisible to the "
-                  "code that hands experience to the planner for a real run. Closing that "
-                  "is a schema decision with a cost, so it is reported rather than assumed"),
+        "claim": ("the chain is correct and UNPLUGGED, and a schema bridge is NOT the fix: "
+                  "the live path is planner-only and has no harness/executor consumer at "
+                  "all. The two ACTIVE entries are for consumers the robot never reads. "
+                  "Only adding those consumers to the live path closes the loop"),
     }
+
+
+def _live_planner_filter():
+    """The live retrieve() constants, read from the file rather than copied by hand."""
+    path = os.path.join(WT, "experiments", "baselines", "baseline_c.py")
+    src = open(path, encoding="utf-8").read()
+    import ast
+    tree = ast.parse(src)
+    out = {"non_planner": [], "classes": []}
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Assign):
+            continue
+        for target in node.targets:
+            if isinstance(target, ast.Name) and target.id == "_NON_PLANNER":
+                try:
+                    out["non_planner"] = list(ast.literal_eval(node.value))
+                except (ValueError, TypeError):
+                    pass
+            if isinstance(target, ast.Name) and target.id == "PLANNER_RELEVANT_CLASSES":
+                try:
+                    out["classes"] = sorted(ast.literal_eval(node.value.args[0]))
+                except (ValueError, TypeError, AttributeError, IndexError):
+                    pass
+    return out
+
+
+def _live_run_scripts():
+    """Which entry consumers are actually called by the scripts that run a baseline?"""
+    root = os.path.join(WT, "experiments", "baselines")
+    calls = {"executor_recovery": ["apply_respread", "recover"],
+             "harness": ["apply_harness", "cyclonedds", "participant_capacity"],
+             "planner": ["validate_plan", "describe"],
+             "spread_policy": ["spread("]}
+    out = {consumer: [] for consumer in calls}
+    for name in sorted(os.listdir(root)):
+        if not name.startswith("run_") or not name.endswith(".py"):
+            continue
+        src = open(os.path.join(root, name), encoding="utf-8").read()
+        for consumer, symbols in calls.items():
+            for symbol in symbols:
+                if symbol in src:
+                    out[consumer].append("%s:%s" % (name, symbol))
+    return out
 
 
 if __name__ == "__main__":

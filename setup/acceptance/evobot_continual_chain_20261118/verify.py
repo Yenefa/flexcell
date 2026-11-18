@@ -767,6 +767,17 @@ def main():
         # the kind of schema decision that has to be visible
         checks["closing_the_gap_is_stated_as_a_choice_with_a_cost"] = (
             len(live["options"]) == 2 and all(o.get("cost") for o in live["options"]))
+        # 33 -- A SCHEMA BRIDGE IS NOT THE FIX, AND THE FIRST VERSION OF THIS REPORT SAID IT
+        # WAS. Both ACTIVE entries are tooling/control class, and the live retrieve() admits
+        # only planning/state while its word list rejects landing/spread/participant. They are
+        # excluded BY DESIGN. There is no consumer for either in the live run scripts.
+        checks["a_schema_bridge_cannot_rescue_these_entries"] = (
+            live["planner_filter_result"]
+            and not any(x["would_a_bridge_help"]
+                        for x in live["planner_filter_result"]))
+        checks["the_missing_consumers_are_named"] = (
+            any(not c["has_a_live_consumer"]
+                for c in live["consumers_in_live_path"].values()))
 
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
