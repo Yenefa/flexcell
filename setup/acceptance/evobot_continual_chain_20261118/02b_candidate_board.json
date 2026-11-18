@@ -1,0 +1,105 @@
+{
+  "board": [
+    {
+      "admissible": true,
+      "candidate": "respread/step=0.090",
+      "clearance_violations": 0,
+      "cost_ties": [
+        "respread/step=0.090",
+        "respread/step=0.090/cm=0.060"
+      ],
+      "fixed": 33,
+      "intent": "the incumbent",
+      "mean_displacement_m": 0.0475,
+      "plans": 33,
+      "refused": 0,
+      "tie_break": "keep the incumbent among equal-cost feasible candidates; a change needs a reason, staying does not",
+      "untouched": 0,
+      "why": "admissible",
+      "worse": 0
+    },
+    {
+      "admissible": true,
+      "candidate": "respread/step=0.090/cm=0.060",
+      "clearance_violations": 0,
+      "fixed": 33,
+      "intent": "tighter clustering",
+      "mean_displacement_m": 0.0475,
+      "plans": 33,
+      "refused": 0,
+      "untouched": 0,
+      "why": "admissible",
+      "worse": 0
+    },
+    {
+      "admissible": true,
+      "candidate": "respread/step=0.095",
+      "clearance_violations": 0,
+      "fixed": 33,
+      "intent": "slightly wider",
+      "mean_displacement_m": 0.0497,
+      "plans": 33,
+      "refused": 0,
+      "untouched": 0,
+      "why": "admissible",
+      "worse": 0
+    },
+    {
+      "admissible": true,
+      "candidate": "respread/step=0.100",
+      "clearance_violations": 0,
+      "fixed": 33,
+      "intent": "wider still",
+      "mean_displacement_m": 0.052,
+      "plans": 33,
+      "refused": 0,
+      "untouched": 0,
+      "why": "admissible",
+      "worse": 0
+    },
+    {
+      "admissible": true,
+      "candidate": "respread/step=0.110",
+      "clearance_violations": 0,
+      "fixed": 33,
+      "intent": "widest tested",
+      "mean_displacement_m": 0.0565,
+      "plans": 33,
+      "refused": 0,
+      "untouched": 0,
+      "why": "admissible",
+      "worse": 0
+    },
+    {
+      "admissible": false,
+      "candidate": "minimal_move/step=0.090",
+      "clearance_violations": 28,
+      "fixed": 33,
+      "intent": "move each landing the shortest distance",
+      "mean_displacement_m": 0.0816,
+      "plans": 33,
+      "refused": 0,
+      "untouched": 0,
+      "why": "28 plan(s) end up inside the clearance contract",
+      "worse": 0
+    }
+  ],
+  "selected": {
+    "admissible": true,
+    "candidate": "respread/step=0.090",
+    "clearance_violations": 0,
+    "cost_ties": [
+      "respread/step=0.090",
+      "respread/step=0.090/cm=0.060"
+    ],
+    "fixed": 33,
+    "intent": "the incumbent",
+    "mean_displacement_m": 0.0475,
+    "plans": 33,
+    "refused": 0,
+    "tie_break": "keep the incumbent among equal-cost feasible candidates; a change needs a reason, staying does not",
+    "untouched": 0,
+    "why": "admissible",
+    "worse": 0
+  }
+}

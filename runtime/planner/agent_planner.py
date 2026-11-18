@@ -21,6 +21,7 @@ It never grades itself, and a plan it produces is not evidence of anything until
 independent evaluator has seen the resulting world state.
 """
 import json
+import re
 
 MAX_STAGES = 8
 
@@ -90,8 +91,115 @@ def parse_reply(text):
     return json.loads(t[start:end + 1])
 
 
+# The instruction's own ordering clause. This is NOT a grading rule - the evaluator owns
+# whether a plan is correct, and this module must never see a tolerance or a verdict. It is
+# the planner checking itself against a rule the SYSTEM PROMPT already tells it to follow:
+#   "If the instruction fixes an order, follow it exactly."
+# Until this existed that sentence was advice nobody checked. The archive holds one plan that
+# reversed a required order; it was found only after a full run, because validate_plan only
+# looked at whether the names were known.
+_ORDER_FIRST = re.compile(r"the (\w+) block must be put there FIRST", re.I)
+# A SECOND order clause, found in 24 archived instructions (21 with the first move wrong):
+# "Move the blue block to the left bin, passing through the right bin first."
+# The object-level regex above only catches "the X block must be put there FIRST", so this
+# clause was invisible and check_plan_order returned None while the plan reversed the route.
+_PASS_THROUGH_FIRST = re.compile(r"passing through the (\w+) bin first", re.I)
+
+
+def _required_first(observation):
+    """Which object the instruction says must be moved first, or None if it says nothing."""
+    text = str((observation or {}).get("instruction") or "")
+    m = _ORDER_FIRST.search(text)
+    if not m:
+        return None
+    colour = m.group(1).lower()
+    for obj in (observation or {}).get("objects") or []:
+        if str(obj.get("color", "")).lower() == colour:
+            return obj.get("name")
+    return None
+
+
+def _required_first_zone(observation):
+    """Which BIN the instruction requires as the FIRST move, or None.
+
+    Resolves "passing through the RIGHT bin first" to the zone with the largest x, and
+    "left" to the smallest — from the observation's measured zones, never from the
+    evaluator's answer. Unknown bin words return None (fail closed).
+    """
+    text = str((observation or {}).get("instruction") or "")
+    match = _PASS_THROUGH_FIRST.search(text)
+    if not match:
+        return None
+    word = match.group(1).lower()
+    zones = [z for z in (observation or {}).get("zones") or []
+             if isinstance(z, dict) and isinstance(z.get("position"), (list, tuple))]
+    if len(zones) < 2:
+        return None
+    by_x = sorted(zones, key=lambda z: float(z["position"][0]))
+    if word == "left":
+        zone = by_x[0]
+    elif word == "right":
+        zone = by_x[-1]
+    else:
+        return None
+    return zone.get("name"), "instruction requires passing through the %s bin first" % word
+
+
+def order_rule_admitted(observation):
+    """Is an admitted experience entry present that asks for the order rule?
+
+    WHY THE LIVE PATH IS GATED ON THIS: the rule below was once wired straight into
+    validate_plan, which made the planner REFUSE plans it used to accept - a live behaviour
+    change with no entry behind it. Nothing could review it, probe it for misuse, record an
+    outcome for it, or retire it, because there was no entry to hang any of that on. The
+    master goal's fourth step is explicit that a change is validated and versioned BEFORE it
+    is enabled; a rule that is live but unreviewed is the case that step exists to forbid.
+
+    An entry reaches the planner through the observation's "experience" list, which is the
+    same channel describe() reads. So the rule fires exactly when a delivered entry asks for
+    it, and never on its own.
+    """
+    for item in (observation or {}).get("experience") or []:
+        if isinstance(item, dict) and item.get("_entry_id"):
+            return True
+    return False
+
+
+def check_plan_order(observation, moves):
+    """Return a problem string when the plan reverses an order the instruction fixed.
+
+    WHY A PLAN-SIDE CHECK AND NOT ANOTHER EVALUATOR CLAUSE: the evaluator already grades
+    'order', but only AFTER the robot has moved. A plan that reverses the order is knowable
+    before execution, and rejecting it then costs nothing while running it costs a run.
+    """
+    required = _required_first(observation)
+    if required and moves:
+        first = moves[0].get("object")
+        if first != required:
+            moved = [m.get("object") for m in moves]
+            if required in moved:
+                return ("the instruction requires %r to be moved FIRST, but the plan "
+                        "starts with %r" % (required, first))
+    # BIN-LEVEL order: "passing through the right bin first". This needs the first MOVE's
+    # ZONE, not the object. Measured on 24 archived instructions, 21 of which sent the
+    # object to the wrong bin first while their why-text claimed to follow the instruction.
+    first_zone = _required_first_zone(observation)
+    if first_zone and moves:
+        wanted, reason = first_zone
+        actual = moves[0].get("zone")
+        if actual != wanted:
+            zones_used = [m.get("zone") for m in moves]
+            if wanted in zones_used:
+                return ("%s, but the plan starts at %r" % (reason, actual))
+    return None
+
+
 def validate_plan(reply, observation):
-    """Structural checks only. Whether the plan is CORRECT is the evaluator's job."""
+    """Structural checks plus the instruction's own order clause.
+
+    Whether the plan is CORRECT is still the evaluator's job: this only refuses a plan that
+    contradicts a rule the instruction states explicitly.
+    """
     problems = []
     known_objects = {o["name"] for o in observation["objects"]}
     known_zones = {z["name"] for z in observation["zones"]}
@@ -123,6 +231,12 @@ def validate_plan(reply, observation):
     moved = [c["object"] for c in clean]
     if not moved:
         problems.append("no valid moves after validation")
+    # GATED ON AN ADMITTED ENTRY, not on the instruction alone. See order_rule_admitted:
+    # enabling this unconditionally made a live, unreviewed, unretirable behaviour change.
+    if order_rule_admitted(observation):
+        order_problem = check_plan_order(observation, clean)
+        if order_problem:
+            problems.append(order_problem)
     return {"moves": clean, "unmoved": list(unmoved or []),
             "confidence": reply.get("confidence"),
             "uncertainty": str(reply.get("uncertainty", ""))[:300]}, problems

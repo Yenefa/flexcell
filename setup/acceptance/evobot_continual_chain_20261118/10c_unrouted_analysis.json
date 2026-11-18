@@ -1,0 +1,250 @@
+{
+  "by_state": {
+    "ALREADY_CORRECT": 1,
+    "UNMEASURED": 6
+  },
+  "claim": "UNROUTED means no consumer declares a mapping. That is a statement about this stack's signature table, not about whether a module could act. Each one is now either measured as already correct, measured as wrong somewhere, or honestly unmeasured",
+  "failures_covered": 92,
+  "instances_covered": 59,
+  "unrouted": [
+    {
+      "candidate_consumers": [
+        "executor_recovery"
+      ],
+      "external_comparison": {
+        "claim": "control 0/3 -> feedback 3/3 full task passes on ONE dev instance; same world/task/validator, preregistered order A1 B1 B2 A2 A3 B3. n=3 per arm; does NOT isolate one component; no generalization claim",
+        "control_passes": 0,
+        "control_runs": 3,
+        "feedback_passes": 3,
+        "feedback_runs": 3,
+        "honest_limits": [
+          "n=3 per arm",
+          "one exposed dev instance",
+          "comparison does not isolate a single component",
+          "no unseen instance",
+          "no statistical superiority"
+        ],
+        "is_real_comparison": true,
+        "measured": true,
+        "pilots_separate": true,
+        "same_world_sha256": true
+      },
+      "generator_said": "UNROUTED: no consumer in this stack declares a change for 'graded_push', so the knowledge would be stored and unable to act",
+      "instances": 9,
+      "module_found": true,
+      "occurrences": 23,
+      "probe": {
+        "action_kind": "recovery_action",
+        "attempts_replayed": 11,
+        "consumer": "executor_recovery",
+        "instances_checked": 0,
+        "instances_wrong": 0,
+        "module_available": true,
+        "selection_effect": "the recorded attempts were produced by the policy under test, so replaying it over them cannot measure what it changed; a with/without comparison needs attempts recorded WITHOUT the policy",
+        "trials": [
+          {
+            "attempts": 3,
+            "recorded_outcome": 2,
+            "replayed_outcome": 2,
+            "trial": 1
+          },
+          {
+            "attempts": 3,
+            "recorded_outcome": 2,
+            "replayed_outcome": 2,
+            "trial": 2
+          },
+          {
+            "attempts": 1,
+            "recorded_outcome": 1,
+            "replayed_outcome": 1,
+            "trial": 3
+          },
+          {
+            "attempts": 1,
+            "recorded_outcome": 1,
+            "replayed_outcome": 1,
+            "trial": 4
+          },
+          {
+            "attempts": 3,
+            "recorded_outcome": 2,
+            "replayed_outcome": 2,
+            "trial": 5
+          }
+        ],
+        "verdicts_reproduced": 5,
+        "wrong": []
+      },
+      "signature": "graded_push",
+      "state": "UNMEASURED",
+      "why": "a capable module exists (executor_recovery) but the archive cannot measure its effect: the recorded attempts were produced by the policy under test, so replaying it over them cannot measure what it changed; a with/without comparison needs attempts recorded WITHOUT the policy | BUT the repo DOES hold an independently collected with/without batch outside this probe's path: control 0/3 -> feedback 3/3 (n=3, one dev instance, not isolated)"
+    },
+    {
+      "candidate_consumers": [
+        "planner"
+      ],
+      "external_comparison": {
+        "claim": "control 0/3 -> feedback 3/3 full task passes on ONE dev instance; same world/task/validator, preregistered order A1 B1 B2 A2 A3 B3. n=3 per arm; does NOT isolate one component; no generalization claim",
+        "control_passes": 0,
+        "control_runs": 3,
+        "feedback_passes": 3,
+        "feedback_runs": 3,
+        "honest_limits": [
+          "n=3 per arm",
+          "one exposed dev instance",
+          "comparison does not isolate a single component",
+          "no unseen instance",
+          "no statistical superiority"
+        ],
+        "is_real_comparison": true,
+        "measured": true,
+        "pilots_separate": true,
+        "same_world_sha256": true
+      },
+      "generator_said": "UNROUTED: no consumer in this stack declares a change for 'graded_relative', so the knowledge would be stored and unable to act",
+      "instances": 1,
+      "occurrences": 2,
+      "probe_is": "a hypothesis to test; it is NOT a measurement and must not be cited as one",
+      "signature": "graded_relative",
+      "state": "UNMEASURED",
+      "why": "no probe has been written for this signature, so whether a module could act on it is unknown - not answered | BUT the repo DOES hold an independently collected with/without batch outside this probe's path: control 0/3 -> feedback 3/3 (n=3, one dev instance, not isolated)"
+    },
+    {
+      "candidate_consumers": [
+        "executor_recovery"
+      ],
+      "external_comparison": {
+        "claim": "control 0/3 -> feedback 3/3 full task passes on ONE dev instance; same world/task/validator, preregistered order A1 B1 B2 A2 A3 B3. n=3 per arm; does NOT isolate one component; no generalization claim",
+        "control_passes": 0,
+        "control_runs": 3,
+        "feedback_passes": 3,
+        "feedback_runs": 3,
+        "honest_limits": [
+          "n=3 per arm",
+          "one exposed dev instance",
+          "comparison does not isolate a single component",
+          "no unseen instance",
+          "no statistical superiority"
+        ],
+        "is_real_comparison": true,
+        "measured": true,
+        "pilots_separate": true,
+        "same_world_sha256": true
+      },
+      "generator_said": "UNROUTED: no consumer in this stack declares a change for 'graded_unmoved', so the knowledge would be stored and unable to act",
+      "instances": 1,
+      "occurrences": 4,
+      "probe_is": "a hypothesis to test; it is NOT a measurement and must not be cited as one",
+      "signature": "graded_unmoved",
+      "state": "UNMEASURED",
+      "why": "no probe has been written for this signature, so whether a module could act on it is unknown - not answered | BUT the repo DOES hold an independently collected with/without batch outside this probe's path: control 0/3 -> feedback 3/3 (n=3, one dev instance, not isolated)"
+    },
+    {
+      "candidate_consumers": [
+        "planner"
+      ],
+      "external_comparison": {
+        "claim": "control 0/3 -> feedback 3/3 full task passes on ONE dev instance; same world/task/validator, preregistered order A1 B1 B2 A2 A3 B3. n=3 per arm; does NOT isolate one component; no generalization claim",
+        "control_passes": 0,
+        "control_runs": 3,
+        "feedback_passes": 3,
+        "feedback_runs": 3,
+        "honest_limits": [
+          "n=3 per arm",
+          "one exposed dev instance",
+          "comparison does not isolate a single component",
+          "no unseen instance",
+          "no statistical superiority"
+        ],
+        "is_real_comparison": true,
+        "measured": true,
+        "pilots_separate": true,
+        "same_world_sha256": true
+      },
+      "generator_said": "UNROUTED: no consumer in this stack declares a change for 'graded_visit', so the knowledge would be stored and unable to act",
+      "instances": 7,
+      "occurrences": 12,
+      "probe_is": "a hypothesis to test; it is NOT a measurement and must not be cited as one",
+      "signature": "graded_visit",
+      "state": "UNMEASURED",
+      "why": "no probe has been written for this signature, so whether a module could act on it is unknown - not answered | BUT the repo DOES hold an independently collected with/without batch outside this probe's path: control 0/3 -> feedback 3/3 (n=3, one dev instance, not isolated)"
+    },
+    {
+      "candidate_consumers": [
+        "planner"
+      ],
+      "external_comparison": {
+        "claim": "control 0/3 -> feedback 3/3 full task passes on ONE dev instance; same world/task/validator, preregistered order A1 B1 B2 A2 A3 B3. n=3 per arm; does NOT isolate one component; no generalization claim",
+        "control_passes": 0,
+        "control_runs": 3,
+        "feedback_passes": 3,
+        "feedback_runs": 3,
+        "honest_limits": [
+          "n=3 per arm",
+          "one exposed dev instance",
+          "comparison does not isolate a single component",
+          "no unseen instance",
+          "no statistical superiority"
+        ],
+        "is_real_comparison": true,
+        "measured": true,
+        "pilots_separate": true,
+        "same_world_sha256": true
+      },
+      "generator_said": "UNROUTED: no consumer in this stack declares a change for 'graded_visit_sequence', so the knowledge would be stored and unable to act",
+      "instances": 5,
+      "occurrences": 6,
+      "probe_is": "a hypothesis to test; it is NOT a measurement and must not be cited as one",
+      "signature": "graded_visit_sequence",
+      "state": "UNMEASURED",
+      "why": "no probe has been written for this signature, so whether a module could act on it is unknown - not answered | BUT the repo DOES hold an independently collected with/without batch outside this probe's path: control 0/3 -> feedback 3/3 (n=3, one dev instance, not isolated)"
+    },
+    {
+      "generator_said": "UNROUTED: no consumer in this stack declares a change for 'placement_clause_failed', so the knowledge would be stored and unable to act",
+      "instances": 10,
+      "occurrences": 14,
+      "probe": {
+        "action_kind": "object_set",
+        "consumer": "planner",
+        "instances_checked": 6,
+        "instances_wrong": 0,
+        "wrong": []
+      },
+      "signature": "placement_clause_failed",
+      "state": "ALREADY_CORRECT",
+      "why": "planner already produced the required output on all 6 scoreable instances, so routing the lesson there would change nothing"
+    },
+    {
+      "candidate_consumers": [
+        "executor_recovery",
+        "harness"
+      ],
+      "external_comparison": {
+        "claim": "control 0/3 -> feedback 3/3 full task passes on ONE dev instance; same world/task/validator, preregistered order A1 B1 B2 A2 A3 B3. n=3 per arm; does NOT isolate one component; no generalization claim",
+        "control_passes": 0,
+        "control_runs": 3,
+        "feedback_passes": 3,
+        "feedback_runs": 3,
+        "honest_limits": [
+          "n=3 per arm",
+          "one exposed dev instance",
+          "comparison does not isolate a single component",
+          "no unseen instance",
+          "no statistical superiority"
+        ],
+        "is_real_comparison": true,
+        "measured": true,
+        "pilots_separate": true,
+        "same_world_sha256": true
+      },
+      "generator_said": "UNROUTED: no consumer in this stack declares a change for 'unconfirmed_native', so the knowledge would be stored and unable to act",
+      "instances": 26,
+      "occurrences": 31,
+      "probe_is": "a hypothesis to test; it is NOT a measurement and must not be cited as one",
+      "signature": "unconfirmed_native",
+      "state": "UNMEASURED",
+      "why": "no probe has been written for this signature, so whether a module could act on it is unknown - not answered | BUT the repo DOES hold an independently collected with/without batch outside this probe's path: control 0/3 -> feedback 3/3 (n=3, one dev instance, not isolated)"
+    }
+  ]
+}

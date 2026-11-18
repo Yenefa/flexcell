@@ -1,0 +1,543 @@
+{
+  "generator": {
+    "built": 1,
+    "refused": {
+      "graded_push": "UNROUTED: no consumer in this stack declares a change for 'graded_push', so the knowledge would be stored and unable to act",
+      "graded_relative": "UNROUTED: no consumer in this stack declares a change for 'graded_relative', so the knowledge would be stored and unable to act",
+      "graded_unmoved": "UNROUTED: no consumer in this stack declares a change for 'graded_unmoved', so the knowledge would be stored and unable to act",
+      "graded_visit": "UNROUTED: no consumer in this stack declares a change for 'graded_visit', so the knowledge would be stored and unable to act",
+      "graded_visit_sequence": "UNROUTED: no consumer in this stack declares a change for 'graded_visit_sequence', so the knowledge would be stored and unable to act",
+      "order_clause_violated": "only 1 occurrence(s) of order_clause_violated; need 2 - a single run is a mis-attribution risk, not a lesson",
+      "placement_clause_failed": "UNROUTED: no consumer in this stack declares a change for 'placement_clause_failed', so the knowledge would be stored and unable to act",
+      "unconfirmed_native": "UNROUTED: no consumer in this stack declares a change for 'unconfirmed_native', so the knowledge would be stored and unable to act"
+    },
+    "scanned": 98
+  },
+  "honest_limits": [
+    "the review artifact is written by a separate step of the same run, not by an outside reviewer; a real round needs the latter",
+    "each outcome is the effect_spec's own expectation met on an ARCHIVED input; no new robot run was made this round",
+    "the planner consumer is not measurable offline; a prompt-level delivery is reported UNMEASURED rather than scored as no-effect"
+  ],
+  "measured_result": {
+    "E1": "NO_CHANGE",
+    "E2": "CHANGED",
+    "E3": "IMPROVED",
+    "auto-harness_dds_exhaustion": "CHANGED"
+  },
+  "ran_at": "2026-11-18",
+  "record_kind": "EVOBOT_CONTINUAL_CHAIN_DEMO",
+  "steps": [
+    {
+      "detail": "state drift or occupied destination before target_box_b-1",
+      "error_code": 61,
+      "step": "measured_failure"
+    },
+    {
+      "dev_split_produced": 1,
+      "generated_from_archive": 1,
+      "generator_refused": [
+        "unconfirmed_native",
+        "graded_push",
+        "placement_clause_failed",
+        "graded_visit",
+        "graded_visit_sequence",
+        "graded_unmoved",
+        "graded_relative",
+        "order_clause_violated"
+      ],
+      "generator_split": "dev",
+      "labels": [
+        "auto-harness_dds_exhaustion",
+        "E1",
+        "E2",
+        "E3"
+      ],
+      "routes": [
+        {
+          "consumer": "harness",
+          "label": "auto-harness_dds_exhaustion",
+          "why": "routed by declared capability (harness_config -> harness)"
+        },
+        {
+          "consumer": "spread_policy",
+          "label": "E1",
+          "why": "routed by declared capability (landing_spacing -> spread_policy)"
+        },
+        {
+          "consumer": "executor_recovery",
+          "label": "E2",
+          "why": "routed by declared capability (recovery_action -> executor_recovery)"
+        },
+        {
+          "consumer": "planner",
+          "label": "E3",
+          "why": "routed by declared capability (move_order -> planner)"
+        }
+      ],
+      "step": "entries_built"
+    },
+    {
+      "board": [
+        {
+          "admissible": true,
+          "candidate": "respread/step=0.090",
+          "clearance_violations": 0,
+          "fixed": 33,
+          "mean_displacement_m": 0.0475,
+          "plans": 33,
+          "why": "admissible"
+        },
+        {
+          "admissible": true,
+          "candidate": "respread/step=0.090/cm=0.060",
+          "clearance_violations": 0,
+          "fixed": 33,
+          "mean_displacement_m": 0.0475,
+          "plans": 33,
+          "why": "admissible"
+        },
+        {
+          "admissible": true,
+          "candidate": "respread/step=0.095",
+          "clearance_violations": 0,
+          "fixed": 33,
+          "mean_displacement_m": 0.0497,
+          "plans": 33,
+          "why": "admissible"
+        },
+        {
+          "admissible": true,
+          "candidate": "respread/step=0.100",
+          "clearance_violations": 0,
+          "fixed": 33,
+          "mean_displacement_m": 0.052,
+          "plans": 33,
+          "why": "admissible"
+        },
+        {
+          "admissible": true,
+          "candidate": "respread/step=0.110",
+          "clearance_violations": 0,
+          "fixed": 33,
+          "mean_displacement_m": 0.0565,
+          "plans": 33,
+          "why": "admissible"
+        },
+        {
+          "admissible": false,
+          "candidate": "minimal_move/step=0.090",
+          "clearance_violations": 28,
+          "fixed": 33,
+          "mean_displacement_m": 0.0816,
+          "plans": 33,
+          "why": "28 plan(s) end up inside the clearance contract"
+        }
+      ],
+      "selected": "respread/step=0.090",
+      "step": "candidate_search"
+    },
+    {
+      "changed": {
+        "E1": false,
+        "E2": true,
+        "E3": true,
+        "auto-harness_dds_exhaustion": true
+      },
+      "step": "effect_probe",
+      "verdicts": {
+        "E1": "NO_CHANGE",
+        "E2": "CHANGED",
+        "E3": "IMPROVED",
+        "auto-harness_dds_exhaustion": "CHANGED"
+      }
+    },
+    {
+      "conflict": "CONFLICT",
+      "decisions": [
+        "ADD",
+        "ADD",
+        "ADD",
+        "ADD"
+      ],
+      "duplicate": "DUPLICATE",
+      "step": "curation"
+    },
+    {
+      "consumer": "harness",
+      "kept": 0,
+      "refused": 4,
+      "step": "retrieval_before_review"
+    },
+    {
+      "activated": {
+        "E1": {
+          "active": "32ec193f3c9d2c62156c973dfa21e3aac7897b40fce56bdef8a0900c360f4a86",
+          "candidate": "a6285fcc86f4e221f63084e346111dac8e729ccbdb537c34e4b8c77b2760815b",
+          "status": "REJECTED",
+          "verdict": "REJECT"
+        },
+        "E2": {
+          "active": "a397a09e40a0dfa08a654c6363260e1b699534bd185f0b1d08967057f64bddf9",
+          "candidate": "2bc9dc99ec4129d5a13292270a9202e1873e987847c5e1a0e43f300fe0007258",
+          "status": "ACTIVE",
+          "verdict": "ACCEPT"
+        },
+        "E3": {
+          "active": "6af668fca97f1a02f1370a46f445539d972facd2a4d3790159314d2c14b52098",
+          "candidate": "76cedca720786bf6c202c9ab7bed9309cb0a423ed416bb6edacc8abef5ca1732",
+          "status": "ACTIVE",
+          "verdict": "ACCEPT"
+        },
+        "auto-harness_dds_exhaustion": {
+          "active": "614a39e9f84ec5b38fa7f0d6e8e0c232a787b5da905badb2c2bce719ed4ab5d4",
+          "candidate": "5920943a22e60c97f8b719d22a28c0dacfbc8b91e2c48d42f5689f97815292f2",
+          "status": "ACTIVE",
+          "verdict": "ACCEPT"
+        }
+      },
+      "step": "activated"
+    },
+    {
+      "by_label": {
+        "E1": {
+          "consumer": "spread_policy",
+          "kept": [],
+          "refused_count": 8
+        },
+        "E2": {
+          "consumer": "executor_recovery",
+          "kept": [
+            "a397a09e40a0dfa08a654c6363260e1b699534bd185f0b1d08967057f64bddf9"
+          ],
+          "refused_count": 7
+        },
+        "E3": {
+          "consumer": "planner",
+          "kept": [
+            "6af668fca97f1a02f1370a46f445539d972facd2a4d3790159314d2c14b52098"
+          ],
+          "refused_count": 7
+        },
+        "auto-harness_dds_exhaustion": {
+          "consumer": "harness",
+          "kept": [
+            "614a39e9f84ec5b38fa7f0d6e8e0c232a787b5da905badb2c2bce719ed4ab5d4"
+          ],
+          "refused_count": 7
+        }
+      },
+      "step": "retrieval_after_review"
+    },
+    {
+      "by_label": {
+        "E1": {
+          "delta": {
+            "applied_min_clearance_m": 0.06003332407921455,
+            "applied_min_separation_m": 0.055999999999999994,
+            "applied_sha": "0ae97180f0d2af48",
+            "baseline_min_clearance_m": 0.06003332407921455,
+            "baseline_min_separation_m": 0.055999999999999994,
+            "baseline_sha": "0ae97180f0d2af48",
+            "changed": false,
+            "operator": "spread_step",
+            "verdict": "NO_CHANGE"
+          },
+          "effect_state": "never_used",
+          "entry_id": "32ec193f3c9d2c62156c973dfa21e3aac7897b40fce56bdef8a0900c360f4a86"
+        },
+        "E2": {
+          "delta": {
+            "applied_min_clearance_m": 0.08139410298049855,
+            "applied_min_separation_m": 0.09000000000000001,
+            "applied_sha": "298aaa92866ca081",
+            "baseline_min_clearance_m": 0.06003332407921455,
+            "baseline_min_separation_m": 0.055999999999999994,
+            "baseline_sha": "0ae97180f0d2af48",
+            "changed": true,
+            "operator": "respread_apply",
+            "verdict": "CHANGED"
+          },
+          "effect_state": "used_helpful",
+          "entry_id": "a397a09e40a0dfa08a654c6363260e1b699534bd185f0b1d08967057f64bddf9"
+        },
+        "E3": {
+          "delta": {
+            "changed": true,
+            "operator": "plan_order",
+            "verdict": "IMPROVED"
+          },
+          "effect_state": "used_helpful",
+          "entry_id": "6af668fca97f1a02f1370a46f445539d972facd2a4d3790159314d2c14b52098"
+        },
+        "auto-harness_dds_exhaustion": {
+          "delta": {
+            "applied_harness_failures": 0,
+            "applied_sha": "20f580d0937f25e8",
+            "baseline_harness_failures": 2,
+            "baseline_sha": "5f2f4dd73ef44d3c",
+            "changed": true,
+            "operator": "harness_capacity",
+            "verdict": "CHANGED"
+          },
+          "effect_state": "used_helpful",
+          "entry_id": "614a39e9f84ec5b38fa7f0d6e8e0c232a787b5da905badb2c2bce719ed4ab5d4"
+        }
+      },
+      "step": "applied_and_outcome"
+    },
+    {
+      "by_label": {
+        "E2": {
+          "asset_id": "skill.executor_recovery.a397a09e40a0",
+          "asset_version": 1,
+          "callable": {
+            "function": "apply_respread",
+            "kwargs": {
+              "cluster_m": 0.12,
+              "spread_step": 0.09
+            },
+            "module": "runtime.recovery.recover"
+          },
+          "callable_exists": true,
+          "code_generated": false,
+          "compiled": true,
+          "guard_count": 4
+        },
+        "E3": {
+          "compiled": false,
+          "why": "consumer 'planner' has no callable binding: this stack has no function that could execute its change"
+        },
+        "auto-harness_dds_exhaustion": {
+          "compiled": false,
+          "why": "consumer 'harness' has no callable binding: this stack has no function that could execute its change"
+        }
+      },
+      "step": "skill_assets"
+    },
+    {
+      "by_label": {
+        "E2": {
+          "consumer": "executor_recovery",
+          "verdict": "DELIVERED"
+        },
+        "E3": {
+          "consumer": "planner",
+          "verdict": "DELIVERED"
+        },
+        "auto-harness_dds_exhaustion": {
+          "consumer": "harness",
+          "verdict": "DELIVERED"
+        }
+      },
+      "step": "delivery_check"
+    },
+    {
+      "families_fixed_beyond_source": [
+        [
+          "T03_ordered",
+          "T12_triple_revisit"
+        ]
+      ],
+      "instance_hit_rate": [
+        0.0642
+      ],
+      "instances_offered": [
+        109
+      ],
+      "made_worse": [
+        0
+      ],
+      "plans_correctly_untouched": [
+        287
+      ],
+      "plans_offered": [
+        294
+      ],
+      "step": "reuse_audit",
+      "total_instances_fixed": [
+        7
+      ]
+    },
+    {
+      "decisions": [
+        {
+          "decision": "KEEP",
+          "effect": "used_helpful",
+          "label": "auto-harness_dds_exhaustion"
+        },
+        {
+          "decision": "KEEP",
+          "effect": "used_helpful",
+          "label": "E2"
+        },
+        {
+          "decision": "KEEP",
+          "effect": "used_helpful",
+          "label": "E3"
+        }
+      ],
+      "retire_transition_demo": {
+        "chain_ok": true,
+        "decision_after": [],
+        "decision_before": [
+          {
+            "applied": 2,
+            "decision": "RETIRE",
+            "effect": "used_harmful",
+            "entry_id": "614a39e9f84ec5b38fa7f0d6e8e0c232a787b5da905badb2c2bce719ed4ab5d4",
+            "harmful": 1,
+            "helpful": 1,
+            "label": "auto-harness_dds_exhaustion",
+            "scope": null,
+            "why": "applied 2 time(s) and at least one outcome was WORSE"
+          }
+        ],
+        "note": "synthetic harm on a COPY; the real store was not touched",
+        "parent_linked": true,
+        "ran": true,
+        "retired": true,
+        "retired_entry_id": "8a9180d59c58031c90f019a15f3dbac22433d28b9d9d03727ffb874e2a0bc4ec",
+        "retired_reason": "applied 2 time(s) and at least one outcome was WORSE",
+        "status_after": "RETIRED"
+      },
+      "revise_transition_demo": {
+        "added": [
+          "T03_ordered",
+          "T12_triple_revisit"
+        ],
+        "chain_ok": true,
+        "decision_before": [
+          {
+            "decision": "KEEP",
+            "label": "auto-harness_dds_exhaustion",
+            "why": "no harm recorded"
+          },
+          {
+            "decision": "REVISE",
+            "label": "E2",
+            "why": "narrower_than_measurement: the record lists ['T13_geometric_conditional'], a fresh measurement reaches ['T03_ordered', 'T12_triple_revisit', 'T13_geometric_conditional']"
+          },
+          {
+            "decision": "KEEP",
+            "label": "E3",
+            "why": "no harm recorded"
+          }
+        ],
+        "label": "E2",
+        "lesson_unchanged": true,
+        "old_version_still_on_disk": true,
+        "parent_linked": true,
+        "ran": true,
+        "scope_after": [
+          "T03_ordered",
+          "T12_triple_revisit"
+        ],
+        "scope_before": [],
+        "status_after": "ACTIVE",
+        "still_revise_after": []
+      },
+      "step": "lifecycle"
+    },
+    {
+      "carried": 2,
+      "carried_by_an_unnamed_consumer": [
+        "harness"
+      ],
+      "named": 4,
+      "states": {
+        "development": "NO_ENTRY",
+        "executor_recovery": "CARRIED",
+        "planner": "CARRIED",
+        "spread_policy": "NO_ENTRY"
+      },
+      "step": "routing_coverage"
+    },
+    {
+      "by_state": {
+        "ALREADY_CORRECT": 1,
+        "UNMEASURED": 6
+      },
+      "failures_covered": 92,
+      "signatures": 7,
+      "step": "unrouted_analysis"
+    },
+    {
+      "active_entries": 3,
+      "bridge_would_help": [
+        false,
+        false,
+        true
+      ],
+      "by_reason": {
+        "no independent ACCEPT in the review ledger": 2,
+        "no provenance_verified": 1
+      },
+      "live_consumers": {
+        "executor_recovery": true,
+        "harness": false,
+        "planner": false
+      },
+      "step": "live_path",
+      "visible_to_live_path": 0
+    },
+    {
+      "a_default_path_records_nothing": true,
+      "applicability_checked_on_the_real_plan": true,
+      "applied_live_entries_are_recorded": true,
+      "gate_is_in_development_layer": true,
+      "no_flags_kwargs": {},
+      "note": "opt-in and fail-closed: the frozen baseline default path is unchanged; an ACCEPT from an INDEPENDENT ledger bound to this entry id is required \u2014 a review of the same evidence for a different claim does NOT authorise it",
+      "real_ledger_other_claim_kwargs": {},
+      "review_ledger_is_chained": true,
+      "review_ledger_limits": "proves no edit/reorder/middle-deletion; does NOT prove reviewer identity, stop a new review, or detect tail truncation",
+      "runtime_reads_binding_as_data": true,
+      "self_reviewed_kwargs": {},
+      "step": "live_wiring"
+    },
+    {
+      "checked": 24,
+      "clause": "passing through the <left|right> bin first",
+      "false_negatives": 0,
+      "false_positives": 0,
+      "note": "a rule that refuses a CORRECT plan is worse than one that misses a wrong one; zero false positives is the bar",
+      "step": "planner_order_clause",
+      "true_negatives": 3,
+      "true_positives": 21
+    },
+    {
+      "entry_id": "E3-order-pass-through-first",
+      "gate_fired": true,
+      "note": "the rule is not dead code: an admitted entry delivered through the real channel is required to refuse the reversed plan",
+      "step": "planner_order_fired",
+      "with_entry_problems": [
+        "instruction requires passing through the right bin first, but the plan starts at 'zone_1'"
+      ],
+      "without_entry_problems": 0
+    },
+    {
+      "control_passes": 0,
+      "control_runs": 3,
+      "feedback_passes": 3,
+      "feedback_runs": 3,
+      "honest_limits": [
+        "n=3 per arm",
+        "one exposed dev instance",
+        "comparison does not isolate a single component",
+        "no unseen instance",
+        "no statistical superiority"
+      ],
+      "is_real_comparison": true,
+      "note": "an independently collected control-vs-feedback batch, not a replay; n=3 on one dev instance and does not isolate one component",
+      "step": "push_without_policy_comparison"
+    },
+    {
+      "chains": 4,
+      "conflicts": 0,
+      "duplicates": 0,
+      "entries": 8,
+      "step": "store_report"
+    }
+  ],
+  "what": "two deliveries of one lesson through generate -> route -> measure -> curate -> retrieve -> apply -> outcome, on real archived inputs",
+  "why": "the generated occupied_destination entry and the planner-side one both declare landing_spacing; at spread() they report NO_CHANGE because the plan builder had already offset the pair, while the executor-side respread clusters by distance and CHANGES it (56 mm -> 90 mm)"
+}

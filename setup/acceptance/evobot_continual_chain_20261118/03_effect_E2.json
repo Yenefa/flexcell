@@ -1,0 +1,34 @@
+{
+  "applied_min_clearance_m": 0.08139410298049855,
+  "applied_min_separation_m": 0.09000000000000001,
+  "applied_sha": "298aaa92866ca081",
+  "baseline_min_clearance_m": 0.06003332407921455,
+  "baseline_min_separation_m": 0.055999999999999994,
+  "baseline_sha": "0ae97180f0d2af48",
+  "changed": true,
+  "consumer": "executor_recovery",
+  "detail": {
+    "avoid": [
+      [
+        0.22,
+        0.0
+      ],
+      [
+        0.2,
+        -0.18
+      ]
+    ],
+    "cluster_m": 0.12,
+    "step_m": 0.09
+  },
+  "entry_id": "2bc9dc99ec4129d5a13292270a9202e1873e987847c5e1a0e43f300fe0007258",
+  "expectations": {
+    "applied_min_clearance_m_gte": true,
+    "applied_min_separation_m_gte": true,
+    "changed": true
+  },
+  "expectations_met": true,
+  "fixture": "t13_two_boxes_one_bin",
+  "operator": "respread_apply",
+  "verdict": "CHANGED"
+}

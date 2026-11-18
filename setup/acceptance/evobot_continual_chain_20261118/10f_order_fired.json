@@ -1,0 +1,55 @@
+{
+  "claim": "the same reversed plan validates cleanly without the delivered entry and is refused with it: the rule is authorisable through the real delivery channel, not dead code",
+  "delivered_experience": [
+    {
+      "_entry_id": "E3-order-pass-through-first",
+      "_from": "suggested_action",
+      "failure_class": "order_clause_violated",
+      "lesson": "When the instruction says pass through a bin first, the first move must target that bin."
+    }
+  ],
+  "entry_id": "E3-order-pass-through-first",
+  "gate_fired": true,
+  "reversed_plan_with_entry": [
+    {
+      "confidence": null,
+      "moves": [
+        {
+          "object": "b",
+          "why": "",
+          "zone": "zone_1"
+        },
+        {
+          "object": "b",
+          "why": "",
+          "zone": "zone_2"
+        }
+      ],
+      "uncertainty": "",
+      "unmoved": []
+    },
+    [
+      "instruction requires passing through the right bin first, but the plan starts at 'zone_1'"
+    ]
+  ],
+  "reversed_plan_without_entry": [
+    {
+      "confidence": null,
+      "moves": [
+        {
+          "object": "b",
+          "why": "",
+          "zone": "zone_1"
+        },
+        {
+          "object": "b",
+          "why": "",
+          "zone": "zone_2"
+        }
+      ],
+      "uncertainty": "",
+      "unmoved": []
+    },
+    []
+  ]
+}

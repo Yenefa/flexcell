@@ -1,0 +1,45 @@
+{
+  "carried": 2,
+  "carried_by_an_unnamed_consumer": {
+    "harness": [
+      "auto-harness_dds_exhaustion"
+    ]
+  },
+  "claim": "a routing is CARRIED only when an ACTIVE entry reaches its consumer. NO_ENTRY (path works, nothing routed) and NO_DELIVERY (entry exists, cannot arrive) are reported apart because they need different work. A lesson can also act from a consumer the objective did not name, and that is reported separately rather than counted as coverage. A rule live in the code path with no entry behind it is reported as live_rules_with_no_entry - it is worse than an empty routing, not better, because it cannot be reviewed or retired",
+  "live_rules_with_no_entry": [],
+  "named": 4,
+  "routings": [
+    {
+      "active_entries": [
+        "E3"
+      ],
+      "consumer": "planner",
+      "routing": "order (\u64cd\u4f5c\u987a\u5e8f)",
+      "state": "CARRIED",
+      "why": "delivered by ['E3']"
+    },
+    {
+      "active_entries": [],
+      "consumer": "spread_policy",
+      "routing": "spread (\u843d\u70b9\u95f4\u8ddd)",
+      "state": "NO_ENTRY",
+      "why": "no ACTIVE entry names this consumer (a delivery path exists)"
+    },
+    {
+      "active_entries": [
+        "E2"
+      ],
+      "consumer": "executor_recovery",
+      "routing": "recovery (\u6293\u653e\u6062\u590d)",
+      "state": "CARRIED",
+      "why": "delivered by ['E2']"
+    },
+    {
+      "active_entries": [],
+      "consumer": "development",
+      "routing": "ROS launch (ROS \u542f\u52a8)",
+      "state": "NO_ENTRY",
+      "why": "no ACTIVE entry names this consumer (a delivery path exists)"
+    }
+  ]
+}

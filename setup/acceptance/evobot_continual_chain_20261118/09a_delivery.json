@@ -1,0 +1,42 @@
+{
+  "E2": {
+    "callable": {
+      "function": "apply_respread",
+      "kwargs": {
+        "cluster_m": 0.12,
+        "spread_step": 0.09
+      },
+      "module": "runtime.recovery.recover"
+    },
+    "consumer": "executor_recovery",
+    "entry_id": "a397a09e40a0dfa08a654c6363260e1b699534bd185f0b1d08967057f64bddf9",
+    "text": "separate same-bin landing points by at least the clearance contract plus the measured landing drift, and pick the spread axis that keeps every point clear of other objects",
+    "text_source": "suggested_action",
+    "verdict": "DELIVERED",
+    "why": "bound to runtime.recovery.recover.apply_respread with {'spread_step': 0.09, 'cluster_m': 0.12}"
+  },
+  "E3": {
+    "consumer": "planner",
+    "delivered": true,
+    "entry_id": "6af668fca97f1a02f1370a46f445539d972facd2a4d3790159314d2c14b52098",
+    "prompt_sha": "7a07d14960998d46",
+    "text": "when the instruction fixes an order, validate the plan before execution and refuse a move that reverses it",
+    "text_source": "suggested_action",
+    "verdict": "DELIVERED",
+    "why": "the lesson text appears in the rendered prompt"
+  },
+  "auto-harness_dds_exhaustion": {
+    "config": {
+      "declared_value": 120,
+      "live_value": 120,
+      "present": true,
+      "symbol": "MaxAutoParticipantIndex"
+    },
+    "consumer": "harness",
+    "entry_id": "614a39e9f84ec5b38fa7f0d6e8e0c232a787b5da905badb2c2bce719ed4ab5d4",
+    "text": "raise the DDS participant pool above the number of nodes the launch starts; a failed launch looks like a motion bug",
+    "text_source": "suggested_action",
+    "verdict": "DELIVERED",
+    "why": "MaxAutoParticipantIndex is set to 120 (entry declares 120)"
+  }
+}

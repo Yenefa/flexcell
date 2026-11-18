@@ -1,0 +1,29 @@
+{
+  "applied_harness_failures": 0,
+  "applied_sha": "20f580d0937f25e8",
+  "baseline_harness_failures": 2,
+  "baseline_sha": "5f2f4dd73ef44d3c",
+  "changed": true,
+  "consumer": "harness",
+  "detail": {
+    "after_batch": "setup/acceptance/evobot_t05_n6_clean_20261111",
+    "after_harness_failures": 0,
+    "after_runs": 7,
+    "before_batch": "setup/acceptance/evobot_t05_n6_20261111",
+    "before_harness_failures": 2,
+    "before_runs": 7,
+    "launch_nodes": 6,
+    "live_capacity": 120
+  },
+  "entry_id": "5920943a22e60c97f8b719d22a28c0dacfbc8b91e2c48d42f5689f97815292f2",
+  "expectations": {
+    "applied_harness_failures_lte": true,
+    "changed": true
+  },
+  "expectations_met": true,
+  "fixture": "t05_dds_harness",
+  "launch_nodes": 6,
+  "live_capacity": 120,
+  "operator": "harness_capacity",
+  "verdict": "CHANGED"
+}

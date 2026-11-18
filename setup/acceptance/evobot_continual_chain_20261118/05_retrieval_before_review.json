@@ -1,0 +1,25 @@
+{
+  "chain": "chain intact (4 records)",
+  "consumer": "harness",
+  "kept": [],
+  "refused": [
+    {
+      "entry_id": "5920943a22e60c97f8b719d22a28c0dacfbc8b91e2c48d42f5689f97815292f2",
+      "why": "status is 'CANDIDATE', not ACTIVE"
+    },
+    {
+      "entry_id": "a6285fcc86f4e221f63084e346111dac8e729ccbdb537c34e4b8c77b2760815b",
+      "why": "status is 'CANDIDATE', not ACTIVE"
+    },
+    {
+      "entry_id": "2bc9dc99ec4129d5a13292270a9202e1873e987847c5e1a0e43f300fe0007258",
+      "why": "status is 'CANDIDATE', not ACTIVE"
+    },
+    {
+      "entry_id": "76cedca720786bf6c202c9ab7bed9309cb0a423ed416bb6edacc8abef5ca1732",
+      "why": "status is 'CANDIDATE', not ACTIVE"
+    }
+  ],
+  "store_records": 4,
+  "task_family": "T05_relay"
+}

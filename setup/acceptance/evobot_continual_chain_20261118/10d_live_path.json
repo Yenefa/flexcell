@@ -1,0 +1,100 @@
+{
+  "active_entries": 3,
+  "by_reason": {
+    "no independent ACCEPT in the review ledger": 2,
+    "no provenance_verified": 1
+  },
+  "chain_store": "setup/acceptance/evobot_continual_chain_20261118/records_v2.jsonl",
+  "claim": "the chain is correct and UNPLUGGED, but NOT for the reasons first given. Not a schema mismatch: both entries are non-planner class and excluded by design. Not 'no consumer': the shell runner calls recovery_driver.py which does call apply_respread. The real gap is that the call uses DEFAULT kwargs and no experience lookup, so a revised entry can never reach the robot",
+  "consumers_in_live_path": {
+    "executor_recovery": {
+      "call_sites_in_live_scripts": [
+        "evobot_unified_runner_20261111/run_batch.sh:recovery_driver"
+      ],
+      "has_a_live_consumer": true,
+      "reads_the_entry": true
+    },
+    "harness": {
+      "call_sites_in_live_scripts": [],
+      "has_a_live_consumer": false,
+      "reads_the_entry": true
+    },
+    "planner": {
+      "call_sites_in_live_scripts": [],
+      "has_a_live_consumer": false,
+      "reads_the_entry": false
+    }
+  },
+  "entries": [
+    {
+      "entry": "auto-harness_dds_exhaustion",
+      "visible": false,
+      "why": "no provenance_verified"
+    },
+    {
+      "entry": "E2",
+      "visible": false,
+      "why": "no independent ACCEPT in the review ledger"
+    },
+    {
+      "entry": "E3",
+      "visible": false,
+      "why": "no independent ACCEPT in the review ledger"
+    }
+  ],
+  "live_store": "evolution/experience/records.jsonl",
+  "live_store_rows": 7,
+  "options": [
+    {
+      "cost": "NOTHING - retrieve() admits only planning/state classes and rejects landing/spread/participant words; both entries are excluded by design, so the robot would behave exactly as before",
+      "option": "bridge the two v2 entries into the live store"
+    },
+    {
+      "cost": "run_baseline_b.py and baseline_c.py must actually CALL the executor respread and the harness config that the entries describe, with a reviewed gate before each call - this changes the frozen baseline",
+      "option": "give the live run path the missing consumers"
+    }
+  ],
+  "planner_filter": {
+    "classes": [
+      "planning",
+      "state"
+    ],
+    "non_planner": [
+      "landing",
+      "spot",
+      "centre",
+      "center",
+      "domain",
+      "participant",
+      "admission",
+      "launch",
+      "stack",
+      "pose",
+      "spread"
+    ]
+  },
+  "planner_filter_result": [
+    {
+      "class_admitted": false,
+      "entry": "auto-harness_dds_exhaustion",
+      "failure_class": "tooling",
+      "word_admitted": false,
+      "would_a_bridge_help": false
+    },
+    {
+      "class_admitted": false,
+      "entry": "E2",
+      "failure_class": "control",
+      "word_admitted": false,
+      "would_a_bridge_help": false
+    },
+    {
+      "class_admitted": true,
+      "entry": "E3",
+      "failure_class": "planning",
+      "word_admitted": true,
+      "would_a_bridge_help": true
+    }
+  ],
+  "visible_to_live_path": 0
+}
