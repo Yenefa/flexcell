@@ -43,6 +43,7 @@ import postmortem  # noqa: E402
 import retrieve  # noqa: E402
 import reuse  # noqa: E402
 import routing_coverage  # noqa: E402
+import unrouted as unrouted_mod  # noqa: E402
 import delivery  # noqa: E402
 import candidate_search  # noqa: E402
 import schema  # noqa: E402
@@ -658,6 +659,18 @@ def run(dest=OUT):
                   "states": {r["consumer"]: r["state"] for r in coverage["routings"]},
                   "carried_by_an_unnamed_consumer":
                       sorted(coverage["carried_by_an_unnamed_consumer"])})
+
+    # 10c -- WHAT "UNROUTED" ACTUALLY MEANS. The generator refuses 7 of 9 signatures as
+    # UNROUTED, which covers 92 of the 98 failures in the archive. That sentence is a
+    # statement about this stack's SIGNATURE TABLE ("no consumer declares a mapping"), not
+    # about whether a module could act. Reading it as "nothing here can act" turns unwritten
+    # work into a measured limit.
+    unrouted = unrouted_mod.report()
+    _write(os.path.join(dest, "10c_unrouted_analysis.json"), unrouted)
+    steps.append({"step": "unrouted_analysis",
+                  "signatures": len(unrouted["unrouted"]),
+                  "failures_covered": unrouted["failures_covered"],
+                  "by_state": unrouted["by_state"]})
 
     # 11 -- the store's own curation report, computed from the records on disk
     report = curate.curate(store.read(store_path))

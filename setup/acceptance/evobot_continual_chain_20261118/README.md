@@ -363,7 +363,45 @@ capability is what makes that visible instead of leaving it to an audit.
     UNSUPPORTED — and a second check asserts the previously unreachable consumer is now
     reachable. Deleting it would have turned *"the gap closed"* into *"the guard went away"*.
 
-`verify.py` asserts **119 checks**, including that both gates really ran, that the asset
+30. **`UNROUTED` is a statement about our signature table, not about the world.** The
+    generator refuses **7 of 9** signatures as UNROUTED, covering **92 of the archive's 98
+    failures**:
+
+    > *"no consumer in this stack declares a change for 'graded_push', so the knowledge
+    > would be a number in a document"*
+
+    **That says "nobody wrote a mapping." It reads as "nothing here can act."** The first is
+    unwritten work; the second is a measured limit. The objective records the mirror-image
+    error: `route_lessons.py` injected a landing-coordinate lesson into a planner that emits
+    object→zone, and the plan came out **identical**. **The lesson was true; the address was
+    wrong.** UNROUTED is that failure caught one step earlier — or a capable module hiding
+    behind a missing table entry.
+
+    Each signature is now measured against a module whose **output** could carry it:
+
+    | state | meaning |
+    | --- | --- |
+    | `ALREADY_CORRECT` | right on **every** scoreable instance — routing there changes nothing |
+    | `FAILED_INSTANCES` | wrong somewhere — **the lesson has a real address and the table is missing it** |
+    | `UNMEASURED` | **no probe yet.** Reported as such, not guessed |
+
+    | signature | occurrences | state |
+    | --- | --- | --- |
+    | `placement_clause_failed` | **14** | **ALREADY_CORRECT** — the planner chose the required bin on **6 of 6** scoreable instances |
+    | `graded_push` | 23 | UNMEASURED |
+    | `unconfirmed_native` | 31 | UNMEASURED |
+    | four others | 24 | UNMEASURED |
+
+    **"Deliver the wrong-bin lesson to the planner" sounds inevitable — and the planner was
+    already right.** Delivering it would produce an identical plan, which is exactly the
+    `route_lessons.py` trap.
+
+    **The module's own first version failed its own rule:** it asserted *"no capable module"*
+    for six signatures **on the strength of their names**. *"Obviously nothing can act on a
+    grader verdict"* is still an unmeasured claim, and preventing exactly that is this
+    module's purpose. They are now `UNMEASURED` with a hypothesis attached, labelled.
+
+`verify.py` asserts **124 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -384,8 +422,10 @@ applications are recorded so the hit rate is not 100% by construction**, and tha
 one unit rather than across two**, and that **the objective's four routings are reported
 one by one with a declared-but-empty destination not counted as covered**, that **no rule is
 live in a code path without an entry admitted for it**, that **the committed evidence
-ids, numbers and file set match a fresh run to the byte**, and that **the development
-routing renders a candidate that does not claim PROPOSED and names its own missing tests**.
+ids, numbers and file set match a fresh run to the byte**, that **the development
+routing renders a candidate that does not claim PROPOSED and names its own missing tests**,
+and that **every unrouted signature states what is actually known rather than being
+dismissed with one sentence**.
 
 ---
 

@@ -702,6 +702,32 @@ def main():
         checks["the_committed_evidence_ids_match_a_fresh_run"] = not freshness["id_churn"]
         checks["every_committed_artifact_is_still_produced"] = not freshness["missing"]
 
+        # 30 -- "UNROUTED" IS A STATEMENT ABOUT OUR SIGNATURE TABLE, NOT ABOUT THE WORLD.
+        # The generator refuses 7 of 9 signatures as UNROUTED, covering 92 of the archive's
+        # 98 failures. Read as "nothing can act", that turns unwritten work into a measured
+        # limit - the same error route_lessons.py records from the other direction.
+        unrouted = json.loads((tmp / "10c_unrouted_analysis.json").read_text(encoding="utf-8"))
+        states = {row["signature"]: row["state"] for row in unrouted["unrouted"]}
+        checks["the_unrouted_signatures_are_itemised_not_counted"] = (
+            len(states) == len(unrouted["unrouted"]) > 0)
+        checks["every_unrouted_signature_states_what_is_known"] = all(
+            row.get("state") and row.get("why") for row in unrouted["unrouted"])
+        # the one that was MEASURED must say so, and must not be silently promoted either way
+        checks["the_measured_signature_is_reported_as_measured"] = (
+            states.get("placement_clause_failed") in ("ALREADY_CORRECT",
+                                                      "FAILED_INSTANCES"))
+        # ... and an unmeasured one must NOT claim a verdict. This is the assertion that
+        # caught this module's own first version, which asserted "no capable module" for six
+        # signatures on the strength of their names alone.
+        checks["an_unprobed_signature_does_not_claim_a_verdict"] = all(
+            row["state"] == "UNMEASURED" for row in unrouted["unrouted"]
+            if row["signature"] not in unrouted.get("probed", {}) and
+            not row.get("probe"))
+        # a hypothesis must be labelled as one, never cited as a measurement
+        checks["a_candidate_consumer_is_labelled_a_hypothesis"] = all(
+            "NOT a measurement" in (row.get("probe_is") or "")
+            for row in unrouted["unrouted"] if row["state"] == "UNMEASURED")
+
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
             "batch": HERE.name,

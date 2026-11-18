@@ -57,6 +57,48 @@
 于是重试第三次被拒为"declared destination occupied"。修改为**按余量选轴**，并且两轴都不满足契约时**拒绝**而不是发出一个必然被拒的计划；
 不传 avoid 时行为与旧实现**逐字节相同**，11/11 `benchmark/tests/test_recovery_driver.py` 仍通过。
 
+## 4.10 **UNROUTED 是对我们自己那张表的陈述，不是对世界的陈述**
+
+生成器把 **9 个签名里的 7 个**判成 `UNROUTED`，**覆盖归档里 98 个失败中的 92 个**：
+
+> "no consumer in this stack declares a change for 'graded_push', so the knowledge would be
+> a number in a document"
+
+**这句话说的是"没有人写过映射"，读起来却像"这里没有东西能用"。**
+前者是**未写的工作**，后者是**测出来的极限**——两者差得很远。
+
+**目标里已经记过反方向的那一版**：`route_lessons.py` 把落点坐标的经验注入只能输出
+"物体→区域"的规划器，**计划一模一样**。经验是真的，地址是错的。
+`UNROUTED` 是同一个失败**早一步被拦下**——或者，同样常见地，**是一个有能力的模块被一张缺失的表挡在后面**。
+
+### 现在逐条测量，而不是一句话带过
+
+对每个没有声明消费者的签名，**找一个输出能承载这条经验的模块，测它在归档实例上的输出是否已经是对的**：
+
+| 状态 | 含义 |
+| --- | --- |
+| `ALREADY_CORRECT` | 该模块在**每一个**可评分实例上都已正确——投过去什么都不会变。**UNROUTED 是对的，但原因从来没人量过** |
+| `FAILED_INSTANCES` | 输出有错——**这条经验有真实地址，是表漏了**。这是可行动的 |
+| `UNMEASURED` | **还没写探针**。如实报告，不猜 |
+
+### 量出来的结果
+
+| 签名 | 出现次数 | 状态 |
+| --- | --- | --- |
+| `placement_clause_failed` | **14** | **ALREADY_CORRECT**——规划器在 **6/6** 可评分实例上都选对了箱子 |
+| `graded_push` | 23 | UNMEASURED |
+| `unconfirmed_native` | 31 | UNMEASURED |
+| 其余 4 个 | 24 | UNMEASURED |
+
+**"把选错箱子的经验交给规划器"听起来天经地义——量完发现规划器早就选对了。**
+投过去只会得到一个一模一样的结果，**正是 `route_lessons.py` 那个坑**。
+
+### 这个模块自己的第一版就被它自己的检查抓住了
+
+第一版**凭签名名字**就给 6 个签名断言了"没有模块能承载"。
+**"评分器的判决显然没有模块能改变"——那仍然是一个没量过的断言**，
+而这个模块存在的意义就是阻止这种断言。现在它们是 `UNMEASURED`，附带一个**明确标注为假设**的候选消费者。
+
 ## 4.11 第四条路由**现在有投递路径了**，但诚实的做法不是把它写成 PROPOSED
 
 目标说"ROS 启动经验归入开发经验"。这条路由一直是 **UNSUPPORTED**——**即使有条目也送不进去**。
@@ -779,6 +821,7 @@ ROS 启动教训确实在动——它在 `harness` 上（改 `cyclonedds.xml`）
 | 技能资产的自主编排（组合已有资产完成新任务） | **未做**：本轮只到"资产可被调用"，没有组合 |
 | 回归门覆盖全部验证器 | **已做**：范围从固定的 2/70 扩到 **69/70**（排除"装着门的那一项"，具名报出）；18 项基线失败在 PR base 上**实测**复现，52 项通过，0 项新失败 |
 | RETIRE 的**真实触发** | **未做**：本轮没有任何运行把结果变差，所以退役只在**副本 + 合成有害事件**上演示；真实 store 未被触碰 |
+| `UNROUTED` 的其余 6 个签名 | **UNMEASURED**：`graded_push`(23) / `unconfirmed_native`(31) / `graded_visit`(12) / `graded_visit_sequence`(6) / `graded_unmoved`(4) / `graded_relative`(2) 都还没有探针，是否有模块能承载**未知**，不是已知为否 |
 | 误用探针的覆盖面 | **有限**：8 个探针覆盖落点/重排/harness 三类消费者，`development` 仍无探针 |
 | `development` 消费者的**生效验证** | **未做**：投递路径已建（渲染为 `CANDIDATE_NOT_IN_REGISTRY`，不冒充 PROPOSED），但"编码 agent 是否真的照着做"**无法确定性测量**——这正是注册表采纳率测出 0 的原因 |
 | **跨 split 迁移** | **未做**：开发集学的（harness）和 held-out 学的（spacing）是两条独立经验，没有一条"开发集学→held-out 测"的迁移证据 |
@@ -793,7 +836,7 @@ python3 evolution/experience/demo_continual.py
 python3 -m pytest evolution/experience/test_continual_chain.py -q
 ```
 
-verifier 会**重新执行**整条链并断言 **119 项检查**，不读取 SUMMARY 里的自述。其中关键几项：
+verifier 会**重新执行**整条链并断言 **124 项检查**，不读取 SUMMARY 里的自述。其中关键几项：
 
 - 规划侧不生效（NO_CHANGE）、执行侧生效（CHANGED）；
 - 启用前后检索分别为 0 与 1；
@@ -808,6 +851,7 @@ verifier 会**重新执行**整条链并断言 **119 项检查**，不读取 SUM
 - **至少一条条目来自归档自动生成**，生成器拒绝了一个 UNROUTED 签名，且**没有任何生成记录在无具名审阅者时被 ACCEPT**；
 - **每条条目都声明了自己的证据 split**；开发集确实产出了条目（不是零）；没有任何被标为 `dev` 的条目引用封存实例；
 - **两个不同消费者都能生效**（executor_recovery 与 harness），且 ACTIVE 条目**覆盖两种 split**；
+- **UNROUTED 逐条受检**：7 个签名（覆盖 92/98 失败）不再用一句话带过；量出 `placement_clause_failed` 是 **ALREADY_CORRECT**（规划器 6/6 已选对箱子），其余如实报 **UNMEASURED**，假设标注为假设；
 - **第四条路由有投递路径且不说谎**：渲染为候选、`effect: NOT_MEASURED`、点名缺 entrypoints/tests/mutation，无触发条件则 DROPPED；
 - **已提交的证据与代码一致**：数字漂移 0、id 变动 0、缺文件 0（`review_ref` 原来把**绝对运行路径**嵌进条目正文，导致同一份代码在不同目录得到不同 `entry_id`——那条引用还指着一个**从未写出的文件**）；
 - **没有无支撑的活规则**：规划器的顺序规则**只在有准入条目时生效**，无条目时行为与改动前完全一致；
