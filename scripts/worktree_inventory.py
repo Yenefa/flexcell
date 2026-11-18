@@ -16,7 +16,7 @@ class UsageError(Exception):
 def load_config(path):
     try:
         raw = Path(path).read_text(encoding='utf-8')
-    except OSError as exc:
+    except (OSError, UnicodeDecodeError) as exc:
         raise UsageError('cannot read config %s: %s' % (path, exc))
     try:
         config = json.loads(raw)

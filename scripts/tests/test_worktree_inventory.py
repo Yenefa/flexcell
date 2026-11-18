@@ -95,6 +95,13 @@ class WorktreeInventoryTest(unittest.TestCase):
                 with self.assertRaises(inventory.UsageError):
                     inventory.load_config(path)
 
+    def test_load_config_rejects_undecodable_config(self):
+        path = self.root / 'config' / 'development_branches.json'
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b'\xff\xfe{}')
+        with self.assertRaises(inventory.UsageError):
+            inventory.load_config(path)
+
     def test_main_returns_2_for_invalid_config(self):
         self.write_config({'workstreams': []})
         code, err = self.run_main()
