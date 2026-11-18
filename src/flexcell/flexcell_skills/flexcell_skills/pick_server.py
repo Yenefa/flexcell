@@ -122,6 +122,7 @@ class PickServer(Node):
         self._hover = float(gp('approach_hover_m').value)
         self._grasp_dz = float(gp('grasp_dz_m').value)
         self._grasp_dx = float(gp('grasp_dx_m').value)
+        self._attempts = {}
         self._raise = float(gp('grasp_raise_m').value)
         self._attach_radius = float(gp('attach_radius_m').value)
         self._carry_start = self.create_publisher(
@@ -485,7 +486,13 @@ class PickServer(Node):
             cancel_requested = lambda: goal_handle.is_cancel_requested  # noqa: E731
 
             def try_approach():
-                hover = [box_pos[0], box_pos[1], box_pos[2] + self._hover]
+                # The kinematics solver is position-only: the wrist attitude is
+                # whatever branch the goal point selects. Vary the hover height per
+                # attempt so a retry can land on a different branch.
+                attempt = self._attempts.get(goal.object_name, 0)
+                self._attempts[goal.object_name] = attempt + 1
+                hover_dz = self._hover + 0.03 * (attempt % 3)
+                hover = [box_pos[0], box_pos[1], box_pos[2] + hover_dz]
                 r1 = self._motion(hover, profile, rid + '-hover',
                                   cancel_check=cancel_requested)
                 if r1[0] is None or int(r1[0].outcome) != R.OUTCOME_SUCCEEDED:
