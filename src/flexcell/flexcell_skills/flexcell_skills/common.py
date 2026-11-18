@@ -509,11 +509,15 @@ class PlanningSceneOps:
         scene.world.collision_objects.append(co)
         return self._apply_scene(scene)
 
-    def attach(self, name, link='end_effector_link'):
+    def attach(self, name, link='end_effector_link', touch_links=()):
         aco = AttachedCollisionObject()
         aco.link_name = link
         aco.object.id = name
         aco.object.operation = CollisionObject.ADD
+        # Links allowed to stay in contact with the attached object. Without them
+        # MoveIt rejects every plan whose start state has the fingers on the box
+        # (measured: 2 contacts, gripper_left_link/gripper_right_link - box).
+        aco.touch_links = list(touch_links)
         scene = PlanningScene()
         scene.robot_state.attached_collision_objects.append(aco)
         scene.robot_state.is_diff = True

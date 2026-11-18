@@ -570,7 +570,12 @@ class PickServer(Node):
             if follow is not None and follow.problem():
                 return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,
                               follow_failure_detail(follow.problem()))
-            sok, serr = self._scene.attach(goal.object_name)
+            # A contact grasp leaves the fingers ON the box, so the attach must
+            # declare them as touch links or the lift plan starts in collision.
+            touch = (('gripper_left_link', 'gripper_right_link', 'link5',
+                      'end_effector_link')
+                     if self._carry_backend == 'contact_grasp' else ())
+            sok, serr = self._scene.attach(goal.object_name, touch_links=touch)
             if not sok:
                 if follow is not None:
                     return finish(R.OUTCOME_FAILED, R.ERR_INTERNAL,

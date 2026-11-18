@@ -362,11 +362,12 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
       ecm.SetComponentData<components::JointForceCmd>(rightJoint,
                             std::vector<double>{-signRight_ * squeezeForce});
     } else {
-      const double vCmdL = std::fabs(errL) < 3e-4 ? 0.0 : std::clamp(kp * errL, -0.05, 0.05);
-      const double vCmdR = std::fabs(errR) < 3e-4 ? 0.0 : std::clamp(kp * errR, -0.05, 0.05);
-      const double forceL = signLeft_ * std::clamp(kd * (vCmdL - JointVelocity(ecm, leftJoint)),
+      // Stiffness law sized for the corrected 40 g finger: kd = 2*sqrt(kp*m)
+      // puts the jaw at critical damping instead of the chatter a lighter finger
+      // produced.
+      const double forceL = signLeft_ * std::clamp(kp * errL - kd * JointVelocity(ecm, leftJoint),
                                   -maxForce, maxForce);
-      const double forceR = signRight_ * std::clamp(kd * (vCmdR - JointVelocity(ecm, rightJoint)),
+      const double forceR = signRight_ * std::clamp(kp * errR - kd * JointVelocity(ecm, rightJoint),
                                   -maxForce, maxForce);
       ecm.SetComponentData<components::JointForceCmd>(leftJoint, std::vector<double>{forceL});
       ecm.SetComponentData<components::JointForceCmd>(rightJoint, std::vector<double>{forceR});

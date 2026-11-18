@@ -74,10 +74,16 @@ def launch_stack(context):
                                            ('izz', '2.0e-05'), ('ixy', '0'), ('ixz', '0'),
                                            ('iyz', '0')):
                             inertia.set(key, value)
+        # Keep the jaw joints declared for STATE only: dropping them entirely also
+        # dropped their joint_states, and MoveIt then planned the lift with the
+        # fingers at a default pose and refused it (ERR_NO_COLLISION_FREE_PLAN).
+        # Without a command_interface nothing writes to the joints, so the guard
+        # stays the only thing driving them.
         for block in urdf.findall('ros2_control'):
             for joint in list(block.findall('joint')):
                 if joint.get('name', '').startswith('gripper_'):
-                    block.remove(joint)
+                    for command in list(joint.findall('command_interface')):
+                        joint.remove(command)
         robot = ET.tostring(urdf, encoding='unicode')
     spawn = Node(package='ros_gz_sim', executable='create', output='screen',
                  arguments=['-string', robot, '-name', 'open_manipulator_x',
