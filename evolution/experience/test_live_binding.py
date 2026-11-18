@@ -232,6 +232,53 @@ def test_a_tampered_asset_callable_cannot_drive_the_robot(tmp_path):
     assert kwargs == {"spread_step": 0.09, "cluster_m": 0.12}
 
 
+def test_an_inapplicable_live_plan_refuses_the_parameters(tmp_path):
+    """Objective step 4: check the lesson is not applied where it does not belong. The
+    entry's own disclaimer "landings ALREADY meet the spacing contract" is checked against
+    the REAL plan, not an archived fixture."""
+    import review_ledger as chain
+    path = _rebuilt(tmp_path)
+    rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+    eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    ledger = tmp_path / "ledger.jsonl"
+    chain.append(str(ledger), {"entry_id": eid, "verdict": "ACCEPT",
+                               "reviewed_by": "gate-auditor"})
+    # 90 mm apart: already meets the 90 mm contract, so respread must NOT fire
+    obs = {"plan": {"stages": [{"place_pose": [0.20, 0.0, 0.0175]},
+                               {"place_pose": [0.29, 0.0, 0.0175]}]}}
+    assert live_binding.resolve(ASSETS, "executor_recovery", path,
+                                review_ledger=str(ledger), observation=obs)[0] == {}
+
+
+def test_an_applicable_live_plan_accepts_the_parameters(tmp_path):
+    import review_ledger as chain
+    path = _rebuilt(tmp_path)
+    rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+    eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    ledger = tmp_path / "ledger.jsonl"
+    chain.append(str(ledger), {"entry_id": eid, "verdict": "ACCEPT",
+                               "reviewed_by": "gate-auditor"})
+    # 56 mm apart: below the 90 mm contract, so the lesson applies
+    obs = {"plan": {"stages": [{"place_pose": [0.20, 0.0, 0.0175]},
+                               {"place_pose": [0.256, 0.0, 0.0175]}]}}
+    assert live_binding.resolve(ASSETS, "executor_recovery", path,
+                                review_ledger=str(ledger), observation=obs)[0] == \
+        {"spread_step": 0.09, "cluster_m": 0.12}
+
+
+def test_a_single_stage_is_an_invalid_condition(tmp_path):
+    import review_ledger as chain
+    path = _rebuilt(tmp_path)
+    rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+    eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    ledger = tmp_path / "ledger.jsonl"
+    chain.append(str(ledger), {"entry_id": eid, "verdict": "ACCEPT",
+                               "reviewed_by": "gate-auditor"})
+    obs = {"plan": {"stages": [{"place_pose": [0.20, 0.0, 0.0175]}]}}
+    assert live_binding.resolve(ASSETS, "executor_recovery", path,
+                                review_ledger=str(ledger), observation=obs)[0] == {}
+
+
 def test_the_default_function_kwargs_are_unchanged():
     """resolve() never edits the function signature; the fallback is the original default."""
     sys.path.insert(0, os.path.join(WT, "runtime", "recovery"))

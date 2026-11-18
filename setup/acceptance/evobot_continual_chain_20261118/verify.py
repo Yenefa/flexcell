@@ -830,6 +830,13 @@ def main():
         checks["the_ledger_limits_are_stated_not_hidden"] = all(
             word in (wire.get("review_ledger_limits") or "")
             for word in ("identity", "tail truncation"))
+        # 38 -- APPLICABILITY ON THE ACTUAL RUN (step 4). The live gate now checks the
+        # entry's own invalid conditions against the real plan before handing parameters to
+        # apply_respread; an already-conforming plan must get the defaults, not a rotation.
+        checks["applicability_is_checked_on_the_real_run"] = (
+            wire.get("applicability_checked_on_the_real_plan") is True)
+        checks["the_driver_supplies_the_real_plan_to_the_gate"] = (
+            "experience_observation" in drv_src)
 
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",

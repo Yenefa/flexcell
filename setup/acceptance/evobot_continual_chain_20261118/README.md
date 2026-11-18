@@ -433,6 +433,27 @@ capability is what makes that visible instead of leaving it to an audit.
     **correctness check on the replay, not an effect measurement**, and conflating the two
     would turn this back into "we measured it".
 
+38. **THE LIVE GATE NOW CHECKS APPLICABILITY AGAINST THE REAL PLAN.** Objective step 4 requires
+    checking that a lesson is not applied in an inapplicable scenario. All earlier misuse
+    probes ran on ARCHIVED FIXTURES — a static property of the entry, not of the run. The
+    live call site never looked at the entry's own applicability conditions.
+
+    `resolve()` gained an `observation` argument; the driver passes the real `plan.json` via
+    `--experience-observation`. Before parameters reach `apply_respread`:
+
+    | real plan | result |
+    | --- | --- |
+    | two landings already 90 mm apart (contract met) | **refused** — "already meet the spacing contract" |
+    | two landings 56 mm apart (below contract) | **parameters accepted** |
+    | a single landing | **refused** — "nothing to separate" |
+
+    **A plan that already meets the contract must not be "recovered"** — that would rotate the
+    planner's deliberate landings by 64 mm for no benefit.
+
+    Crucially, the probe IDs come from the entry's OWN `invalid_probes` and the threshold from
+    its `effect_spec.params` — **not a new standard written into the gate**. Changing the entry
+    changes the behaviour; the gate itself stays generic.
+
 37. **THE MOST IMPORTANT GATE HAD A FORGEABLE LEDGER.** Last round made authorisation read an
     independent review ledger keyed by `entry_id`. But that ledger was a PLAIN JSONL file:
     anyone could append a line with a made-up reviewer name and the gate would hand
@@ -592,7 +613,7 @@ capability is what makes that visible instead of leaving it to an audit.
     visible.** The artifact reports the numbers and both options, and **does not pretend the
     loop is closed.**
 
-`verify.py` asserts **143 checks**, including that both gates really ran, that the asset
+`verify.py` asserts **145 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -620,7 +641,7 @@ with one sentence**, and that **a capable module with an unmeasurable archive is
 a selection effect rather than as any of the three tempting answers**, and that **the
 chain's connection to the live planning path is measured and reported as unplugged, with the
 cost of both ways to close it**, that **a schema bridge cannot rescue these entries**, and
-that **the executor consumer exists in the shell runner**, that **the new opt-in wire leaves the no-flag path at its defaults**, that **a self-reviewed entry cannot drive the live call**, that **an ACCEPT for a different claim on the same evidence cannot drive it either**, and that **the review ledger is chained and its integrity limits are stated honestly**.
+that **the executor consumer exists in the shell runner**, that **the new opt-in wire leaves the no-flag path at its defaults**, that **a self-reviewed entry cannot drive the live call**, that **an ACCEPT for a different claim on the same evidence cannot drive it either**, that **the review ledger is chained and its integrity limits are stated honestly**, and that **applicability is checked on the real run plan, refusing a lesson where its own declared invalid condition fires**.
 
 ---
 

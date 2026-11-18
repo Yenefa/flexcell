@@ -28,6 +28,7 @@ class Args:
         self.experience_asset = asset
         self.experience_entries = entries
         self.experience_review_ledger = None
+        self.experience_observation = None
 
 
 def test_without_flags_the_call_site_defaults_are_untouched():

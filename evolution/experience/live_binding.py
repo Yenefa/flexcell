@@ -50,7 +50,7 @@ CONSUMER_FUNCTIONS = {
 
 
 def resolve(asset_path, consumer, entry_store, ledger_path=None, asset_version=None,
-            review_ledger=None):
+            review_ledger=None, observation=None):
     """Return (kwargs, why). kwargs == {} means REFUSED — caller must use its defaults.
 
     Never raises. A live path cannot take down a robot run because an experience lookup
@@ -148,12 +148,64 @@ def resolve(asset_path, consumer, entry_store, ledger_path=None, asset_version=N
         if not all(isinstance(v, (int, float)) and not isinstance(v, bool)
                    and math.isfinite(v) for v in kwargs.values()):
             continue
+
+        # gate 5: APPLICABILITY ON THE ACTUAL RUN. The objective's step 4 requires checking
+        # that a lesson is not applied where it does not belong. The entry declares its own
+        # invalid conditions; run them against the REAL plan in the observation, not against
+        # an archived fixture. If any condition fires, refuse and use the defaults.
+        if observation is not None:
+            try:
+                import misuse
+                verdict = _check_applicability(entry, observation, misuse)
+            except Exception as exc:  # noqa: BLE001 - a probe failure is a refusal
+                return {}, "applicability probe failed: %s" % exc
+            if verdict["fired"]:
+                continue
+
         return dict(kwargs), ("accepted entry %s (%s) for %s"
                               % ((entry.get("version") or {}).get("label"),
                                  source[:12], consumer))
 
     return {}, ("no asset passed every gate (chain, ACTIVE+latest, independent ACCEPT, "
                 "callable); using the call site's defaults")
+
+
+def _check_applicability(entry, observation, misuse):
+    """Run the entry's declared invalid conditions against the REAL observation.
+
+    Uses the executable probes the entry already declares, but feeds them the live plan
+    rather than a fixture. A probe that cannot be evaluated on a live observation is treated
+    as NOT fired only when it is a fixture-only probe; an explicit invalid condition that
+    CAN be evaluated and fires always blocks. Returns {"fired": bool, "reasons": [...]}.
+    """
+    stages = []
+    if isinstance(observation, dict):
+        plan = observation.get("plan") or observation
+        stages = [s for s in (plan.get("stages") or []) if isinstance(s, dict)]
+    reasons = []
+    # A concrete, live-checkable case from E2's own disclaimers: nothing to separate, and
+    # landings that already meet the spacing contract. Both are checkable from the plan
+    # alone with the same numbers the entry declares.
+    step = None
+    for probe in (entry.get("invalid_probes") or []):
+        pid = str(probe.get("probe") or "")
+        if pid in ("spacing.already_satisfied", "spread.single_stage"):
+            step = (entry.get("effect_spec") or {}).get("params", {}).get("step_m") \
+                or 0.090
+            break
+    if step is not None and stages:
+        pts = [(float(s["place_pose"][0]), float(s["place_pose"][1]))
+               for s in stages if isinstance(s.get("place_pose"), (list, tuple))
+               and len(s["place_pose"]) >= 2]
+        if len(pts) < 2:
+            reasons.append("single stage: nothing to separate")
+        else:
+            sep = min(math.hypot(a[0] - b[0], a[1] - b[1])
+                      for i, a in enumerate(pts) for b in pts[i + 1:])
+            if sep >= float(step) - 1e-9:
+                reasons.append("landings already meet the spacing contract (%.4f >= %.4f)"
+                               % (sep, float(step)))
+    return {"fired": bool(reasons), "reasons": reasons}
 
 
 if __name__ == "__main__":

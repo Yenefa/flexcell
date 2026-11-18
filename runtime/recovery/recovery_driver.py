@@ -45,9 +45,19 @@ def _experience_kwargs(args):
         if root not in sys.path:
             sys.path.insert(0, root)
         from evolution.experience.live_binding import resolve
+        # Pass the real plan so the entry's own invalid conditions are checked against the
+        # ACTUAL run before its parameters may drive a robot (objective step 4).
+        observation = None
+        if getattr(args, "experience_observation", None):
+            try:
+                observation = {"plan": json.loads(
+                    Path(args.experience_observation).read_text(encoding="utf-8"))}
+            except Exception:  # noqa: BLE001 - an unreadable plan is a refusal, not a crash
+                return {}, "observation unreadable; using defaults"
         return resolve(args.experience_asset, "executor_recovery",
                        args.experience_entries,
-                       review_ledger=getattr(args, "experience_review_ledger", None))
+                       review_ledger=getattr(args, "experience_review_ledger", None),
+                       observation=observation)
     except Exception as exc:  # noqa: BLE001 - fail closed, keep the defaults
         return {}, "experience binding unavailable: %s" % exc
 
@@ -65,6 +75,9 @@ def main(argv=None):
     # therefore never break a run or drive a robot from an unreviewed artifact.
     ap.add_argument("--experience-asset")
     ap.add_argument("--experience-entries")
+    ap.add_argument("--experience-observation",
+                    help="the real plan.json; the entry's invalid conditions are checked "
+                         "against it before its parameters are used")
     ap.add_argument("--experience-review-ledger",
                     help="an independent review ledger keyed by entry_id; without it no "
                          "entry can authorise a live parameter change")

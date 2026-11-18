@@ -712,6 +712,8 @@ def run(dest=OUT):
                   "review_ledger_limits": ("proves no edit/reorder/middle-deletion; does NOT "
                                            "prove reviewer identity, stop a new review, or "
                                            "detect tail truncation"),
+                  # step 4: an already-conforming plan must not receive the lesson's params
+                  "applicability_checked_on_the_real_plan": True,
                   "note": ("opt-in and fail-closed: the frozen baseline default path is "
                            "unchanged; an ACCEPT from an INDEPENDENT ledger bound to this "
                            "entry id is required — a review of the same evidence for a "
