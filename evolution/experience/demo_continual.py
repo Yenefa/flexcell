@@ -708,6 +708,10 @@ def run(dest=OUT):
                   "no_flags_kwargs": wire_defaults,
                   "self_reviewed_kwargs": wire_reviewed,
                   "real_ledger_other_claim_kwargs": other_claim,
+                  "review_ledger_is_chained": True,
+                  "review_ledger_limits": ("proves no edit/reorder/middle-deletion; does NOT "
+                                           "prove reviewer identity, stop a new review, or "
+                                           "detect tail truncation"),
                   "note": ("opt-in and fail-closed: the frozen baseline default path is "
                            "unchanged; an ACCEPT from an INDEPENDENT ledger bound to this "
                            "entry id is required — a review of the same evidence for a "

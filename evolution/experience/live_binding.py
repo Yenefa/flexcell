@@ -69,13 +69,17 @@ def resolve(asset_path, consumer, entry_store, ledger_path=None, asset_version=N
     review_rows = []
     if review_ledger and os.path.exists(review_ledger):
         try:
-            for line in open(review_ledger, encoding="utf-8"):
-                line = line.strip()
-                if not line or line.startswith("#"):
-                    continue
-                review_rows.append(json.loads(line))
-        except (OSError, ValueError) as exc:
+            import review_ledger as review_chain
+            ok, why_chain = review_chain.verify(review_ledger)
+            if not ok:
+                # A ledger that can be edited after the fact is not evidence of an
+                # independent review: ANYone could have written the ACCEPT line.
+                return {}, "review ledger is not intact: %s" % why_chain
+            review_rows = review_chain.read(review_ledger)
+        except (OSError, ValueError, ImportError) as exc:
             return {}, "review ledger unreadable: %s" % exc
+    else:
+        return {}, "no independent review ledger; using the call site's defaults"
 
     # gate 1: the entry chain must be intact
     try:

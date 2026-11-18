@@ -821,6 +821,15 @@ def main():
             "**kwargs" in drv_src and "_experience_kwargs" in drv_src)
         checks["the_wire_requires_an_independent_ledger"] = (
             "experience_review_ledger" in drv_src)
+        # 37 -- THE INDEPENDENT LEDGER ITSELF MUST NOT BE FORGEABLE. Before this, a reviewer
+        # could be invented by appending one plain JSONL line, which would authorise a live
+        # robot parameter. The ledger is now a hash chain and the gate refuses an unpacked or
+        # edited one; its limits (identity, new reviews, tail truncation) are stated.
+        checks["the_review_ledger_is_declared_chained"] = (
+            wire.get("review_ledger_is_chained") is True)
+        checks["the_ledger_limits_are_stated_not_hidden"] = all(
+            word in (wire.get("review_ledger_limits") or "")
+            for word in ("identity", "tail truncation"))
 
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",

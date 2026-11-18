@@ -56,8 +56,9 @@ def test_with_an_independently_reviewed_entry_the_kwargs_reach_the_call(tmp_path
     ledger = tmp_path / "review_ledger.jsonl"
     eid = [r for r in [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
            if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
-    ledger.write_text(json.dumps({"entry_id": eid, "verdict": "ACCEPT",
-                                  "reviewed_by": "gate-auditor"}) + "\n", encoding="utf-8")
+    import review_ledger as chain
+    chain.append(str(ledger), {"entry_id": eid, "verdict": "ACCEPT",
+                               "reviewed_by": "gate-auditor"})
     args = Args(ASSETS, str(path))
     args.experience_review_ledger = str(ledger)
     kwargs, why = recovery_driver._experience_kwargs(args)

@@ -433,6 +433,32 @@ capability is what makes that visible instead of leaving it to an audit.
     **correctness check on the replay, not an effect measurement**, and conflating the two
     would turn this back into "we measured it".
 
+37. **THE MOST IMPORTANT GATE HAD A FORGEABLE LEDGER.** Last round made authorisation read an
+    independent review ledger keyed by `entry_id`. But that ledger was a PLAIN JSONL file:
+    anyone could append a line with a made-up reviewer name and the gate would hand
+    parameters to `apply_respread`. **Measured: a forged line was accepted.**
+
+    `review_ledger.py` now gives each review a `review_sha256` / `chain_sha256`, and
+    `resolve()` **verifies the chain before consuming any authorisation**:
+
+    | case | result |
+    | --- | --- |
+    | hand-written forged line, no chain | **refused** |
+    | properly chained review | **accepted** |
+    | ACCEPT edited to REJECT after the fact | **refused** |
+
+    ### What the chain does NOT prove, stated rather than hidden
+
+    | limit | why |
+    | --- | --- |
+    | reviewer is who they claim | **needs a signature / external identity** |
+    | reviewer cannot append a NEW review | appending is a legitimate operation |
+    | tail truncation | a forward-only chain with its last record removed is still a **valid shorter chain** |
+
+    One test originally asserted that deleting the TAIL would be detected. That asserted a
+    property a hash chain **does not provide**, so it was changed to detect a **middle
+    deletion** and the limits were written into the module docstring and the artifact.
+
 36. **AUTHORISATION MUST COME FROM AN INDEPENDENT LEDGER BOUND TO THE EXACT CLAIM.** The
     previous round's gate read `entry["validation"]["reviewed_by"]` — a field the SAME round
     that authored the entry wrote into the hash chain. **A chain proves a field was not
@@ -566,7 +592,7 @@ capability is what makes that visible instead of leaving it to an audit.
     visible.** The artifact reports the numbers and both options, and **does not pretend the
     loop is closed.**
 
-`verify.py` asserts **141 checks**, including that both gates really ran, that the asset
+`verify.py` asserts **143 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -594,7 +620,7 @@ with one sentence**, and that **a capable module with an unmeasurable archive is
 a selection effect rather than as any of the three tempting answers**, and that **the
 chain's connection to the live planning path is measured and reported as unplugged, with the
 cost of both ways to close it**, that **a schema bridge cannot rescue these entries**, and
-that **the executor consumer exists in the shell runner**, that **the new opt-in wire leaves the no-flag path at its defaults**, that **a self-reviewed entry cannot drive the live call**, and that **an ACCEPT for a different claim on the same evidence cannot drive it either**.
+that **the executor consumer exists in the shell runner**, that **the new opt-in wire leaves the no-flag path at its defaults**, that **a self-reviewed entry cannot drive the live call**, that **an ACCEPT for a different claim on the same evidence cannot drive it either**, and that **the review ledger is chained and its integrity limits are stated honestly**.
 
 ---
 

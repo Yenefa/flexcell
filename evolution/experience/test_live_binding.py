@@ -69,12 +69,45 @@ def test_an_independent_accept_yields_the_asset_kwargs(tmp_path):
     rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
     eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
     ledger = tmp_path / "review_ledger.jsonl"
-    ledger.write_text(json.dumps({"entry_id": eid, "verdict": "ACCEPT",
-                                  "reviewed_by": "gate-auditor"}) + "\n", encoding="utf-8")
+    import review_ledger as chain
+    chain.append(str(ledger), {"entry_id": eid, "verdict": "ACCEPT",
+                               "reviewed_by": "gate-auditor"})
     kwargs, why = live_binding.resolve(ASSETS, "executor_recovery", path,
                                        review_ledger=str(ledger))
     assert kwargs == {"spread_step": 0.09, "cluster_m": 0.12}
     assert "accepted" in why
+
+
+def test_a_forged_plain_review_line_is_refused(tmp_path):
+    """THE MOST IMPORTANT GATE. Before the chain, anyone could append a line naming any
+    independent reviewer and the gate would hand parameters to a live robot call."""
+    path = _rebuilt(tmp_path)
+    rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+    eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    ledger = tmp_path / "ledger.jsonl"
+    ledger.write_text(json.dumps({"entry_id": eid, "verdict": "ACCEPT",
+                                  "reviewed_by": "any-made-up-name"}) + "\n",
+                      encoding="utf-8")
+    kwargs, why = live_binding.resolve(ASSETS, "executor_recovery", path,
+                                       review_ledger=str(ledger))
+    assert kwargs == {}
+    assert "intact" in why or "chain" in why
+
+
+def test_an_edited_chained_review_is_refused(tmp_path):
+    """Editing an ACCEPT to REJECT after the fact must be detectable, not silent."""
+    import review_ledger as chain
+    path = _rebuilt(tmp_path)
+    rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+    eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    ledger = tmp_path / "ledger.jsonl"
+    chain.append(str(ledger), {"entry_id": eid, "verdict": "ACCEPT",
+                               "reviewed_by": "gate-auditor"})
+    row = json.loads(open(ledger, encoding="utf-8").readline())
+    row["verdict"] = "REJECT"
+    ledger.write_text(json.dumps(row) + "\n", encoding="utf-8")
+    assert live_binding.resolve(ASSETS, "executor_recovery", path,
+                                review_ledger=str(ledger))[0] == {}
 
 
 def test_a_review_of_a_different_claim_does_not_authorise_this_one(tmp_path):
@@ -130,6 +163,12 @@ def test_a_rejected_entry_is_refused(tmp_path):
 
 def test_a_broken_chain_is_refused(tmp_path):
     path = _rebuilt(tmp_path)
+    rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+    eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    import review_ledger as chain
+    ledger = tmp_path / "review_ledger.jsonl"
+    chain.append(str(ledger), {"entry_id": eid, "verdict": "ACCEPT",
+                               "reviewed_by": "gate-auditor"})
     lines = open(path, encoding="utf-8").readlines()
     # tamper a field that actually EXISTS in the record body; changing a key that is not
     # there would leave the hash intact and the test would silently pass for the wrong
@@ -140,7 +179,8 @@ def test_a_broken_chain_is_refused(tmp_path):
     broken = tmp_path / "broken.jsonl"
     broken.write_text("".join(lines), encoding="utf-8")
     assert store.verify_chain(str(broken))[0] is False
-    kwargs, why = live_binding.resolve(ASSETS, "executor_recovery", str(broken))
+    kwargs, why = live_binding.resolve(ASSETS, "executor_recovery", str(broken),
+                                       review_ledger=str(ledger))
     assert kwargs == {}
     assert "chain" in why
 
@@ -179,9 +219,10 @@ def test_a_tampered_asset_callable_cannot_drive_the_robot(tmp_path):
     path = _rebuilt(tmp_path)
     rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
     eid = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]["entry_id"]
+    import review_ledger as chain
     ledger = tmp_path / "review_ledger.jsonl"
-    ledger.write_text(json.dumps({"entry_id": eid, "verdict": "ACCEPT",
-                                  "reviewed_by": "gate-auditor"}) + "\n", encoding="utf-8")
+    chain.append(str(ledger), {"entry_id": eid, "verdict": "ACCEPT",
+                               "reviewed_by": "gate-auditor"})
     a2 = tmp_path / "assets.jsonl"
     asset_rows = [json.loads(l) for l in open(ASSETS, encoding="utf-8") if l.strip()]
     asset_rows[0]["callable"]["kwargs"]["spread_step"] = 999
