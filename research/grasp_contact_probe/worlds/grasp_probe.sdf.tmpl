@@ -57,6 +57,11 @@
       <payload_mass>@OBJECT_MASS@</payload_mass>
       <mode>@MODE@</mode>
       <attach_topic>/probe/magnet/attach</attach_topic>
+      <travel_joint>travel_joint</travel_joint>
+      <transport_m>@TRANSPORT_M@</transport_m>
+      <transport_s>@TRANSPORT_S@</transport_s>
+      <lower_s>@LOWER_S@</lower_s>
+      <release_s>@RELEASE_S@</release_s>
     </plugin>
 
     <model name='ground_plane'>
@@ -94,8 +99,31 @@
         </visual>
       </link>
 
-      <joint name='lift_joint' type='prismatic'>
+      <link name='carriage'>
+        <pose>0 0 0 0 0 0</pose>
+        <inertial>
+          <mass>0.01</mass>
+          <inertia><ixx>1e-06</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-06</iyy><iyz>0</iyz><izz>1e-06</izz></inertia>
+        </inertial>
+      </link>
+
+      <joint name='travel_joint' type='prismatic'>
         <parent>world</parent>
+        <child>carriage</child>
+        <pose>0 0 0 0 0 0</pose>
+        <axis>
+          <xyz>1 0 0</xyz>
+          <limit>
+            <lower>-0.05</lower>
+            <upper>0.40</upper>
+            <effort>200</effort>
+            <velocity>1.5</velocity>
+          </limit>
+        </axis>
+      </joint>
+
+      <joint name='lift_joint' type='prismatic'>
+        <parent>carriage</parent>
         <child>base_link</child>
         <pose>0 0 0.079 0 0 0</pose>
         <axis>

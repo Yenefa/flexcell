@@ -1,0 +1,239 @@
+<?xml version="1.0"?>
+<!--
+  Isolated grasp contact probe world.
+
+  Nothing here stands in for grasping: the two jaw pads and the object are
+  separate rigid bodies with friction mu = 1.000, and the only thing that can
+  couple them is the contact solver. There is no DetachableJoint, no fixed
+  joint, no teleport, and no attach/detach topic anywhere in this file.
+
+  Geometry (metres), model frame = gripper base_link frame:
+    lift joint     : prismatic z, world -> base_link, base centre at z = 0.079
+    base plate     : 0.080 x 0.080 x 0.030  (z 0.064 .. 0.094)
+    jaw pads       : 0.012 x 0.004 x 0.060  (z 0.004 .. 0.064), inner faces
+                     at y = -0.028 / +0.028, i.e. open gap 0.056
+    object         : 0.035000 cube on the ground, centre z = 0.017500
+  The closed command is a 0.020 gap, i.e. the pads are commanded
+  0.036 - 0.035000 through the object; the effort cap turns that overshoot
+  into a grip force.
+-->
+<sdf version='1.10'>
+  <world name='grasp_contact_probe'>
+    <physics name='1ms' type='ignored'>
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+    <gravity>0 0 -9.8</gravity>
+
+    <plugin filename='gz-sim-physics-system' name='gz::sim::systems::Physics'/>
+    <plugin filename='gz-sim-contact-system' name='gz::sim::systems::Contact'/>
+    <plugin filename='gz-sim-user-commands-system' name='gz::sim::systems::UserCommands'/>
+    <plugin filename='gz-sim-scene-broadcaster-system' name='gz::sim::systems::SceneBroadcaster'/>
+
+    <plugin filename='libflexcell_grasp_probe.so' name='flexcell::GraspContactProbe'>
+      <log_path>/mnt/c/Users/fuker/Desktop/workspace/project-033-flexcell/wt-grasp-probe/research/grasp_contact_probe/results/realistic-v1/r-y6/steps.jsonl</log_path>
+      <object_model>box_a</object_model>
+      <gripper_model>gripper</gripper_model>
+      <base_link>base_link</base_link>
+      <object_link>link</object_link>
+      <left_joint>finger_left_joint</left_joint>
+      <right_joint>finger_right_joint</right_joint>
+      <lift_joint>lift_joint</lift_joint>
+      <open_gap>0.056000</open_gap>
+      <closed_gap>0.033000</closed_gap>
+      <settle_s>0.3</settle_s>
+      <close_s>0.4</close_s>
+      <lift_s>0.5</lift_s>
+      <hold_s>0.5</hold_s>
+      <lift_height>0.15</lift_height>
+      <kp_finger>1000.0</kp_finger>
+      <kd_finger>20.0</kd_finger>
+      <max_finger_force>5.0</max_finger_force>
+      <kp_lift>4000.0</kp_lift>
+      <kd_lift>80.0</kd_lift>
+      <max_lift_force>80.0</max_lift_force>
+      <gripper_mass>0.6</gripper_mass>
+      <payload_mass>0.050000</payload_mass>
+      <mode>contact</mode>
+      <attach_topic>/probe/magnet/attach</attach_topic>
+      <travel_joint>travel_joint</travel_joint>
+      <transport_m>0.25</transport_m>
+      <transport_s>0.6</transport_s>
+      <lower_s>0.5</lower_s>
+      <release_s>0.4</release_s>
+    </plugin>
+
+    <model name='ground_plane'>
+      <static>true</static>
+      <link name='link'>
+        <collision name='ground_col'>
+          <geometry><plane><normal>0 0 1</normal><size>20 20</size></plane></geometry>
+          <surface><friction><ode><mu>1.0</mu><mu2>1.0</mu2></ode></friction></surface>
+        </collision>
+        <visual name='ground_vis'>
+          <geometry><plane><normal>0 0 1</normal><size>20 20</size></plane></geometry>
+          <material><ambient>0.5 0.5 0.5 1</ambient><diffuse>0.5 0.5 0.5 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+
+    <model name='gripper'>
+      <static>false</static>
+      <self_collide>false</self_collide>
+      <pose>0 0 0 0 0 0</pose>
+
+      <link name='base_link'>
+        <pose>0 0 0.079 0 0 0</pose>
+        <inertial>
+          <mass>0.6</mass>
+          <inertia><ixx>3.65e-04</ixx><ixy>0</ixy><ixz>0</ixz><iyy>3.65e-04</iyy><iyz>0</iyz><izz>6.40e-04</izz></inertia>
+        </inertial>
+        <collision name='base_col'>
+          <geometry><box><size>0.080 0.080 0.030</size></box></geometry>
+          <surface><friction><ode><mu>1.000</mu><mu2>1.000</mu2></ode></friction></surface>
+        </collision>
+        <visual name='base_vis'>
+          <geometry><box><size>0.080 0.080 0.030</size></box></geometry>
+          <material><ambient>0.25 0.25 0.25 1</ambient><diffuse>0.25 0.25 0.25 1</diffuse></material>
+        </visual>
+      </link>
+
+      <link name='carriage'>
+        <pose>0 0 0 0 0 0</pose>
+        <inertial>
+          <mass>0.01</mass>
+          <inertia><ixx>1e-06</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1e-06</iyy><iyz>0</iyz><izz>1e-06</izz></inertia>
+        </inertial>
+      </link>
+
+      <joint name='travel_joint' type='prismatic'>
+        <parent>world</parent>
+        <child>carriage</child>
+        <pose>0 0 0 0 0 0</pose>
+        <axis>
+          <xyz>1 0 0</xyz>
+          <limit>
+            <lower>-0.05</lower>
+            <upper>0.40</upper>
+            <effort>200</effort>
+            <velocity>1.5</velocity>
+          </limit>
+        </axis>
+      </joint>
+
+      <joint name='lift_joint' type='prismatic'>
+        <parent>carriage</parent>
+        <child>base_link</child>
+        <pose>0 0 0.079 0 0 0</pose>
+        <axis>
+          <xyz>0 0 1</xyz>
+          <limit>
+            <lower>-0.02</lower>
+            <upper>0.30</upper>
+            <effort>200</effort>
+            <velocity>1.0</velocity>
+          </limit>
+        </axis>
+      </joint>
+
+      <link name='left_finger'>
+        <pose>0 -0.03 0.034 0 0 0</pose>
+        <inertial>
+          <mass>0.05</mass>
+          <inertia><ixx>1.51e-05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.56e-05</iyy><iyz>0</iyz><izz>6.67e-07</izz></inertia>
+        </inertial>
+        <collision name='left_pad'>
+          <geometry><box><size>0.012 0.004 0.060</size></box></geometry>
+          <surface><friction><ode><mu>1.000</mu><mu2>1.000</mu2></ode></friction></surface>
+        </collision>
+        <visual name='left_pad_vis'>
+          <geometry><box><size>0.012 0.004 0.060</size></box></geometry>
+          <material><ambient>0.1 0.4 0.9 1</ambient><diffuse>0.1 0.4 0.9 1</diffuse></material>
+        </visual>
+        <sensor name='left_pad_contacts' type='contact'>
+          <always_on>true</always_on>
+          <update_rate>1000</update_rate>
+          <contact><collision>left_pad</collision></contact>
+        </sensor>
+      </link>
+
+      <joint name='finger_left_joint' type='prismatic'>
+        <parent>base_link</parent>
+        <child>left_finger</child>
+        <pose>0 -0.03 -0.045 0 0 0</pose>
+        <axis>
+          <xyz>0 1 0</xyz>
+          <limit>
+            <lower>0.0</lower>
+            <upper>0.030</upper>
+            <effort>60</effort>
+            <velocity>0.2</velocity>
+          </limit>
+        </axis>
+      </joint>
+
+      <link name='right_finger'>
+        <pose>0 0.03 0.034 0 0 0</pose>
+        <inertial>
+          <mass>0.05</mass>
+          <inertia><ixx>1.51e-05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.56e-05</iyy><iyz>0</iyz><izz>6.67e-07</izz></inertia>
+        </inertial>
+        <collision name='right_pad'>
+          <geometry><box><size>0.012 0.004 0.060</size></box></geometry>
+          <surface><friction><ode><mu>1.000</mu><mu2>1.000</mu2></ode></friction></surface>
+        </collision>
+        <visual name='right_pad_vis'>
+          <geometry><box><size>0.012 0.004 0.060</size></box></geometry>
+          <material><ambient>0.1 0.4 0.9 1</ambient><diffuse>0.1 0.4 0.9 1</diffuse></material>
+        </visual>
+        <sensor name='right_pad_contacts' type='contact'>
+          <always_on>true</always_on>
+          <update_rate>1000</update_rate>
+          <contact><collision>right_pad</collision></contact>
+        </sensor>
+      </link>
+
+      
+
+      <joint name='finger_right_joint' type='prismatic'>
+        <parent>base_link</parent>
+        <child>right_finger</child>
+        <pose>0 0.03 -0.045 0 0 0</pose>
+        <axis>
+          <xyz>0 -1 0</xyz>
+          <limit>
+            <lower>0.0</lower>
+            <upper>0.030</upper>
+            <effort>60</effort>
+            <velocity>0.2</velocity>
+          </limit>
+        </axis>
+      </joint>
+    </model>
+
+    <model name='box_a'>
+      <static>false</static>
+      <pose>0.000000 0.006000 0.017500 0 0 0.000000000</pose>
+      <link name='link'>
+        <inertial>
+          <mass>0.050000</mass>
+          <inertia><ixx>1.020833333333e-05</ixx><ixy>0</ixy><ixz>0</ixz><iyy>1.020833333333e-05</iyy><iyz>0</iyz><izz>1.020833333333e-05</izz></inertia>
+        </inertial>
+        <collision name='obj_col'>
+          <geometry><box><size>0.035000 0.035000 0.035000</size></box></geometry>
+          <surface><friction><ode><mu>1.000</mu><mu2>1.000</mu2></ode></friction></surface>
+        </collision>
+        <visual name='obj_vis'>
+          <geometry><box><size>0.035000 0.035000 0.035000</size></box></geometry>
+          <material><ambient>0.9 0.25 0.2 1</ambient><diffuse>0.9 0.25 0.2 1</diffuse></material>
+        </visual>
+        <sensor name='obj_contacts' type='contact'>
+          <always_on>true</always_on>
+          <update_rate>1000</update_rate>
+          <contact><collision>obj_col</collision></contact>
+        </sensor>
+      </link>
+    </model>
+  </world>
+</sdf>

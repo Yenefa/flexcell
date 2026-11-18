@@ -93,6 +93,14 @@ class GraspContactProbe final : public gz::sim::System,
     maxLiftForce_ = Param<double>(config, "max_lift_force", 80.0);
     gripperMass_ = Param<double>(config, "gripper_mass", 0.6);
     payloadMass_ = Param<double>(config, "payload_mass", 0.05);
+    const std::string travelJointName = Param<std::string>(config, "travel_joint", "");
+    transportM_ = Param<double>(config, "transport_m", 0.0);
+    transportS_ = Param<double>(config, "transport_s", 0.6);
+    lowerS_ = Param<double>(config, "lower_s", 0.5);
+    releaseS_ = Param<double>(config, "release_s", 0.4);
+    kpTravel_ = Param<double>(config, "kp_travel", 4000.0);
+    kdTravel_ = Param<double>(config, "kd_travel", 80.0);
+    maxTravelForce_ = Param<double>(config, "max_travel_force", 60.0);
     mode_ = Param<std::string>(config, "mode", "contact");
     if (mode_ != "contact" && mode_ != "magnet")
       throw std::runtime_error("grasp probe: mode must be contact or magnet");
@@ -111,6 +119,7 @@ class GraspContactProbe final : public gz::sim::System,
     leftJointName_ = leftJoint;
     rightJointName_ = rightJoint;
     liftJointName_ = liftJoint;
+    travelJointName_ = travelJointName;
 
     log_.open(logPath, std::ios::out | std::ios::trunc);
     Require(log_.good(), "cannot open step log: " + logPath);
@@ -126,21 +135,61 @@ class GraspContactProbe final : public gz::sim::System,
       if (!resolved_) return;
     }
 
-    // Phase machine: pure function of simulation time.
+    // Phase machine: pure function of simulation time. With transport_m == 0 the
+    // sequence degenerates exactly to the original settle / close / lift / hold.
     const double closeEnd = settleS_ + closeS_;
     const double liftEnd = closeEnd + liftS_;
+    const double transportEnd = liftEnd + transportS_;
+    const double lowerEnd = transportEnd + lowerS_;
+    const double releaseEnd = lowerEnd + releaseS_;
     double gapTarget = openGap_;
     double liftTarget = 0.0;
-    if (t < settleS_) {
-      gapTarget = openGap_;
+    double travelTarget = 0.0;
+    const char *phase = "hold";
+    if (transportM_ <= 0.0) {
+      if (t < settleS_) {
+        phase = "settle";
+      } else if (t < closeEnd) {
+        phase = "close";
+        gapTarget = openGap_ + (closedGap_ - openGap_) * SmoothStep((t - settleS_) / closeS_);
+      } else if (t < liftEnd) {
+        phase = "lift";
+        gapTarget = closedGap_;
+        liftTarget = liftHeight_ * SmoothStep((t - closeEnd) / liftS_);
+      } else {
+        phase = "hold";
+        gapTarget = closedGap_;
+        liftTarget = liftHeight_;
+      }
+    } else if (t < settleS_) {
+      phase = "settle";
     } else if (t < closeEnd) {
+      phase = "close";
       gapTarget = openGap_ + (closedGap_ - openGap_) * SmoothStep((t - settleS_) / closeS_);
     } else if (t < liftEnd) {
+      phase = "lift";
       gapTarget = closedGap_;
       liftTarget = liftHeight_ * SmoothStep((t - closeEnd) / liftS_);
-    } else {
+    } else if (t < transportEnd) {
+      phase = "transport";
       gapTarget = closedGap_;
       liftTarget = liftHeight_;
+      travelTarget = transportM_ * SmoothStep((t - liftEnd) / transportS_);
+    } else if (t < lowerEnd) {
+      phase = "lower";
+      gapTarget = closedGap_;
+      liftTarget = liftHeight_ * (1.0 - SmoothStep((t - transportEnd) / lowerS_));
+      travelTarget = transportM_;
+    } else if (t < releaseEnd) {
+      phase = "release";
+      gapTarget = closedGap_ + (openGap_ - closedGap_) * SmoothStep((t - lowerEnd) / releaseS_);
+      liftTarget = 0.0;
+      travelTarget = transportM_;
+    } else {
+      phase = "settled";
+      gapTarget = openGap_;
+      liftTarget = 0.0;
+      travelTarget = transportM_;
     }
     if (magnet_) {
       // Magnet backend: the jaw never touches the object. Everything the object
@@ -154,6 +203,8 @@ class GraspContactProbe final : public gz::sim::System,
     }
     gapTarget_ = gapTarget;
     liftTarget_ = liftTarget;
+    travelTarget_ = travelTarget;
+    phaseName_ = phase;
 
     // Finger position servo with effort cap. q_target is the joint travel that
     // would give the commanded gap: gap = open_gap - 2 q.
@@ -173,15 +224,21 @@ class GraspContactProbe final : public gz::sim::System,
     const double feedforward = (gripperMass_ + payloadMass_) * 9.8;
     cmdLift_ = Clamp(kpLift_ * (liftTarget - z) - kdLift_ * vz + feedforward, maxLiftForce_);
     SetForce(ecm, liftJoint_, cmdLift_);
+
+    // Horizontal transport servo (no gravity term: the axis is horizontal).
+    if (travelJoint_ != gz::sim::kNullEntity) {
+      const double x = JointPositionOf(ecm, travelJoint_);
+      const double vx = JointVelocityOf(ecm, travelJoint_);
+      cmdTravel_ = Clamp(kpTravel_ * (travelTarget - x) - kdTravel_ * vx, maxTravelForce_);
+      SetForce(ecm, travelJoint_, cmdTravel_);
+    }
   }
 
   void PostUpdate(const gz::sim::UpdateInfo &info,
                   const gz::sim::EntityComponentManager &ecm) override {
     if (info.paused || !resolved_) return;
     const double t = std::chrono::duration<double>(info.simTime).count();
-    const double closeEnd = settleS_ + closeS_;
-    const double liftEnd = closeEnd + liftS_;
-    const char *phase = t < settleS_ ? "settle" : t < closeEnd ? "close" : t < liftEnd ? "lift" : "hold";
+    const char *phase = phaseName_;
 
     const auto objPose = gz::sim::worldPose(objLink_, ecm);
     const auto basePose = gz::sim::worldPose(baseLink_, ecm);
@@ -203,7 +260,8 @@ class GraspContactProbe final : public gz::sim::System,
          << "},\"right\":{\"q\":" << qr << ",\"qd\":" << JointVelocityOf(ecm, rightJoint_)
          << ",\"f\":" << ForceOf(ecm, rightJoint_)
          << "},\"lift\":{\"q\":" << z << ",\"qd\":" << JointVelocityOf(ecm, liftJoint_)
-         << ",\"f\":" << ForceOf(ecm, liftJoint_) << "}}";
+         << ",\"f\":" << ForceOf(ecm, liftJoint_) << "},\"travel\":{\"q\":" << JointPositionOf(ecm, travelJoint_)
+         << ",\"qd\":" << JointVelocityOf(ecm, travelJoint_) << ",\"f\":" << cmdTravel_ << "}}";
     const auto leftPad = Summarize(ecm, leftPad_, {"left_pad", "right_pad", "obj_col"});
     const auto rightPad = Summarize(ecm, rightPad_, {"left_pad", "right_pad", "obj_col"});
     const auto objContacts = Summarize(ecm, objCol_, {"ground_col"});
@@ -245,6 +303,8 @@ class GraspContactProbe final : public gz::sim::System,
     leftJoint_ = gripperHandle.JointByName(ecm, leftJointName_);
     rightJoint_ = gripperHandle.JointByName(ecm, rightJointName_);
     liftJoint_ = gripperHandle.JointByName(ecm, liftJointName_);
+    if (!travelJointName_.empty())
+      travelJoint_ = gripperHandle.JointByName(ecm, travelJointName_);
     leftFingerLink_ = ecm.EntityByComponents(components::Link(), components::Name("left_finger"),
                                              components::ParentEntity(gripper));
     rightFingerLink_ = ecm.EntityByComponents(components::Link(), components::Name("right_finger"),
@@ -256,7 +316,7 @@ class GraspContactProbe final : public gz::sim::System,
         rightJoint_ == kNullEntity || liftJoint_ == kNullEntity) return false;
     // The physics engine only refreshes joint state components it finds in the
     // ECM, and setForce-style command components do not imply their presence.
-    for (const auto joint : {leftJoint_, rightJoint_, liftJoint_}) {
+    for (const auto joint : {leftJoint_, rightJoint_, liftJoint_, travelJoint_}) {
       if (ecm.Component<components::JointPosition>(joint) == nullptr)
         ecm.CreateComponent(joint, components::JointPosition());
       if (ecm.Component<components::JointVelocity>(joint) == nullptr)
@@ -352,6 +412,7 @@ class GraspContactProbe final : public gz::sim::System,
   Entity leftJoint_{gz::sim::kNullEntity};
   Entity rightJoint_{gz::sim::kNullEntity};
   Entity liftJoint_{gz::sim::kNullEntity};
+  Entity travelJoint_{gz::sim::kNullEntity};
   Entity leftPad_{gz::sim::kNullEntity};
   Entity rightPad_{gz::sim::kNullEntity};
   Entity objCol_{gz::sim::kNullEntity};
@@ -361,13 +422,16 @@ class GraspContactProbe final : public gz::sim::System,
   double kpFinger_{1000.0}, kdFinger_{20.0}, maxFingerForce_{20.0};
   double kpLift_{4000.0}, kdLift_{80.0}, maxLiftForce_{80.0};
   double gripperMass_{0.6}, payloadMass_{0.05};
-  double gapTarget_{0.056}, liftTarget_{0.0};
+  double gapTarget_{0.056}, liftTarget_{0.0}, travelTarget_{0.0};
+  double transportM_{0.0}, transportS_{0.6}, lowerS_{0.5}, releaseS_{0.4};
+  double kpTravel_{4000.0}, kdTravel_{80.0}, maxTravelForce_{60.0};
+  const char *phaseName_{"hold"};
   std::string gripperName_, objectName_, baseLinkName_, objectLinkName_;
-  std::string leftJointName_, rightJointName_, liftJointName_;
+  std::string leftJointName_, rightJointName_, liftJointName_, travelJointName_;
   Entity leftFingerLink_{gz::sim::kNullEntity};
   Entity rightFingerLink_{gz::sim::kNullEntity};
   bool resolved_{false};
-  double cmdLeft_{0.0}, cmdRight_{0.0}, cmdLift_{0.0};
+  double cmdLeft_{0.0}, cmdRight_{0.0}, cmdLift_{0.0}, cmdTravel_{0.0};
   std::string mode_{"contact"}, attachTopic_;
   bool magnet_{false}, attachSent_{false};
   gz::transport::Node node_;

@@ -44,6 +44,9 @@ PROTOCOL = {
     "physics": {"engine": "gz-sim 8 dartsim", "step_s": 0.001},
     "rig": {"open_gap_m": 0.056, "closed_gap_m": 0.020, "lift_height_m": 0.15},
     "phases_s": {"settle": 0.30, "close": 0.40, "lift": 0.50, "hold": 0.50},
+    # Full pick-lift-transport-lower-release cycle used by the envelope stage.
+    "transport": {"distance_m": 0.25, "duration_s": 0.60, "lower_s": 0.50,
+                  "release_s": 0.40, "settle_out_s": 0.40},
     "control": {
         "finger_servo": "Force = clamp(kp*(q_target-q) - kd*qd, +/-max_force)",
         "kp_finger": 1000.0,
@@ -70,6 +73,9 @@ PROTOCOL = {
     },
     # Controls, not part of the acceptance verdict: they exist to prove the probe
     # can fail. A probe that only ever passes proves nothing about friction.
+    # Realistic squeeze: the jaw is commanded only 2 mm inside the object with a
+    # 5 N effort cap, i.e. the way a real servo gripper meets a rigid box.
+    "realistic": {"closed_gap_m": 0.033, "max_finger_force_n": 5.0},
     "controls": {
         "slip_expected": {"mu": 0.20, "mass_kg": 0.50,
                           "why": "2*mu*N = 2*0.2*7.5 = 3.0 N < m*(g+a) = 6.7 N"},
@@ -158,6 +164,109 @@ def trial_specs(stage: str) -> list[dict]:
                 "jitter": JITTER[0],
                 "lift_s": PROTOCOL["phases_s"]["lift"],
             })
+    elif stage == "realistic":
+        cases = [
+            ("perfect", 0.0, 0.0, 0.0, 0.60),
+            ("y2", 0.0, 0.002, 0.0, 0.60),
+            ("y4", 0.0, 0.004, 0.0, 0.60),
+            ("y6", 0.0, 0.006, 0.0, 0.60),
+            ("y8", 0.0, 0.008, 0.0, 0.60),
+            ("y10", 0.0, 0.010, 0.0, 0.60),
+            ("x6", 0.006, 0.0, 0.0, 0.60),
+            ("yaw15", 0.0, 0.0, 15.0, 0.60),
+            ("yaw30", 0.0, 0.0, 30.0, 0.60),
+            ("fast2", 0.0, 0.0, 0.0, 0.25),
+            # Third wave: find the edge of the realistic configuration.
+            ("y12", 0.0, 0.012, 0.0, 0.60),
+            ("y15", 0.0, 0.015, 0.0, 0.60),
+            ("y20", 0.0, 0.020, 0.0, 0.60),
+            ("yaw45", 0.0, 0.0, 45.0, 0.60),
+            ("yaw60", 0.0, 0.0, 60.0, 0.60),
+            ("fast1", 0.0, 0.0, 0.0, 0.15),
+            ("mass200g", 0.0, 0.0, 0.0, 0.60),
+            ("mass500g", 0.0, 0.0, 0.0, 0.60),
+        ]
+        masses: dict[str, float] = {"mass200g": 0.200, "mass500g": 0.500}
+        for name, dx, dy, dyaw, duration in cases:
+            trials.append({
+                "trial": f"r-{name}",
+                "group": "envelope",
+                "mode": "contact",
+                "object_name": "box_a",
+                "size_m": OBJECTS["box_a"]["size_m"],
+                "mass_kg": masses.get(name, OBJECTS["box_a"]["mass_kg"]),
+                "mu": OBJECTS["box_a"]["mu"],
+                "jitter": {"x": dx, "y": dy, "yaw_deg": dyaw},
+                "lift_s": PROTOCOL["phases_s"]["lift"],
+                "transport_s": duration,
+                "transport_m": PROTOCOL["transport"]["distance_m"],
+                "closed_gap": PROTOCOL["realistic"]["closed_gap_m"],
+                "max_finger_force": PROTOCOL["realistic"]["max_finger_force_n"],
+            })
+    elif stage == "gripforce":
+        # Grip force is the one parameter that matters: the jaw closes past the
+        # object (0.020 command) and is limited only by the effort cap, exactly
+        # like a real servo gripper stalling on a rigid box.
+        for cap in (2.0, 3.0, 5.0, 8.0, 20.0):
+            for mass in (0.05, 0.20, 0.50):
+                trials.append({
+                    "trial": f"g-{cap:.0f}n-{int(mass * 1000)}g",
+                    "group": "envelope",
+                    "mode": "contact",
+                    "object_name": "box_a",
+                    "size_m": OBJECTS["box_a"]["size_m"],
+                    "mass_kg": mass,
+                    "mu": OBJECTS["box_a"]["mu"],
+                    "jitter": {"x": 0.0, "y": 0.0, "yaw_deg": 0.0},
+                    "lift_s": PROTOCOL["phases_s"]["lift"],
+                    "transport_s": PROTOCOL["transport"]["duration_s"],
+                    "transport_m": PROTOCOL["transport"]["distance_m"],
+                    "max_finger_force": cap,
+                })
+    elif stage == "transport":
+        # Perception-error proxy: the object is displaced relative to the nominal
+        # grasp. y is across the jaw, x is along the pad width, yaw rotates it.
+        cases = [
+            ("perfect", 0.0, 0.0, 0.0, 0.60),
+            ("y2", 0.0, 0.002, 0.0, 0.60),
+            ("y4", 0.0, 0.004, 0.0, 0.60),
+            ("y6", 0.0, 0.006, 0.0, 0.60),
+            ("y8", 0.0, 0.008, 0.0, 0.60),
+            ("y10", 0.0, 0.010, 0.0, 0.60),
+            ("y12", 0.0, 0.012, 0.0, 0.60),
+            ("y15", 0.0, 0.015, 0.0, 0.60),
+            ("x3", 0.003, 0.0, 0.0, 0.60),
+            ("x6", 0.006, 0.0, 0.0, 0.60),
+            ("x9", 0.009, 0.0, 0.0, 0.60),
+            ("x12", 0.012, 0.0, 0.0, 0.60),
+            ("yaw5", 0.0, 0.0, 5.0, 0.60),
+            ("yaw10", 0.0, 0.0, 10.0, 0.60),
+            ("yaw15", 0.0, 0.0, 15.0, 0.60),
+            ("yaw20", 0.0, 0.0, 20.0, 0.60),
+            ("yaw30", 0.0, 0.0, 30.0, 0.60),
+            # Second wave: push until it breaks, so the table has a real edge.
+            ("y20", 0.0, 0.020, 0.0, 0.60),
+            ("y25", 0.0, 0.025, 0.0, 0.60),
+            ("yaw45", 0.0, 0.0, 45.0, 0.60),
+            ("yaw60", 0.0, 0.0, 60.0, 0.60),
+            ("fast2", 0.0, 0.0, 0.0, 0.25),
+            ("y10-fast2", 0.0, 0.010, 0.0, 0.25),
+            ("fast", 0.0, 0.0, 0.0, 0.35),
+        ]
+        for name, dx, dy, dyaw, duration in cases:
+            trials.append({
+                "trial": f"t-{name}",
+                "group": "envelope",
+                "mode": "contact",
+                "object_name": "box_a",
+                "size_m": OBJECTS["box_a"]["size_m"],
+                "mass_kg": OBJECTS["box_a"]["mass_kg"],
+                "mu": OBJECTS["box_a"]["mu"],
+                "jitter": {"x": dx, "y": dy, "yaw_deg": dyaw},
+                "lift_s": PROTOCOL["phases_s"]["lift"],
+                "transport_s": duration,
+                "transport_m": PROTOCOL["transport"]["distance_m"],
+            })
     else:
         raise SystemExit(f"unknown stage: {stage}")
     return trials
@@ -204,6 +313,11 @@ def render_world(spec: dict, log_path: Path) -> str:
         "@LOG_PATH@": str(log_path),
         "@MODE@": spec.get("mode", "contact"),
         "@MAGNET_BLOCK@": magnet_block,
+        "@TRANSPORT_M@": ("0.0" if spec.get("group") != "envelope"
+                          else str(PROTOCOL["transport"]["distance_m"])),
+        "@TRANSPORT_S@": str(spec.get("transport_s", PROTOCOL["transport"]["duration_s"])),
+        "@LOWER_S@": str(PROTOCOL["transport"]["lower_s"]),
+        "@RELEASE_S@": str(PROTOCOL["transport"]["release_s"]),
         "@OBJECT_NAME@": spec["object_name"],
         "@OBJECT_SIZE@": f"{spec['size_m']:.6f}",
         "@OBJECT_MASS@": f"{spec['mass_kg']:.6f}",
@@ -214,7 +328,7 @@ def render_world(spec: dict, log_path: Path) -> str:
         "@OBJECT_Z@": f"{spec['size_m'] / 2.0:.6f}",
         "@MU@": f"{spec['mu']:.3f}",
         "@OPEN_GAP@": f"{PROTOCOL['rig']['open_gap_m']:.6f}",
-        "@CLOSED_GAP@": f"{PROTOCOL['rig']['closed_gap_m']:.6f}",
+        "@CLOSED_GAP@": f"{spec.get('closed_gap', PROTOCOL['rig']['closed_gap_m']):.6f}",
         "@SETTLE_S@": str(PROTOCOL["phases_s"]["settle"]),
         "@CLOSE_S@": str(PROTOCOL["phases_s"]["close"]),
         "@LIFT_S@": str(spec["lift_s"]),
@@ -222,7 +336,7 @@ def render_world(spec: dict, log_path: Path) -> str:
         "@LIFT_HEIGHT@": str(PROTOCOL["rig"]["lift_height_m"]),
         "@KP_FINGER@": str(PROTOCOL["control"]["kp_finger"]),
         "@KD_FINGER@": str(PROTOCOL["control"]["kd_finger"]),
-        "@MAX_FINGER_FORCE@": str(PROTOCOL["control"]["max_finger_force_n"]),
+        "@MAX_FINGER_FORCE@": str(spec.get("max_finger_force", PROTOCOL["control"]["max_finger_force_n"])),
         "@KP_LIFT@": str(PROTOCOL["control"]["kp_lift"]),
         "@KD_LIFT@": str(PROTOCOL["control"]["kd_lift"]),
         "@MAX_LIFT_FORCE@": str(PROTOCOL["control"]["max_lift_force_n"]),
@@ -304,7 +418,10 @@ def gz_version() -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--stage", choices=["acceptance", "stress", "smoke", "magnet"], default="acceptance")
+    parser.add_argument("--stage",
+                       choices=["acceptance", "stress", "smoke", "magnet", "transport", "realistic",
+                                "gripforce"],
+                       default="acceptance")
     parser.add_argument("--out", type=Path)
     parser.add_argument("--only", type=int, help="run a single trial index (1-based)")
     parser.add_argument("--rebuild", action="store_true")
@@ -322,7 +439,14 @@ def main() -> int:
     specs = trial_specs(args.stage)
     if args.only:
         specs = [specs[args.only - 1]]
-    steps_total = int(round(sum(PROTOCOL["phases_s"].values()) / PROTOCOL["physics"]["step_s"])) + 1
+    if args.stage in ("transport", "realistic", "gripforce"):
+        transport = PROTOCOL["transport"]
+        duration = (sum(PROTOCOL["phases_s"][key] for key in ("settle", "close", "lift"))
+                    + max(spec.get("transport_s", transport["duration_s"]) for spec in specs)
+                    + transport["lower_s"] + transport["release_s"] + transport["settle_out_s"])
+    else:
+        duration = sum(PROTOCOL["phases_s"].values())
+    steps_total = int(round(duration / PROTOCOL["physics"]["step_s"])) + 1
 
     protocol = dict(PROTOCOL)
     protocol.update(stage=args.stage, run_id=run_dir.name, gz_version=gz_version(),

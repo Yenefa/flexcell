@@ -1,0 +1,101 @@
+{
+  "acceptance": {
+    "drift_rotation_deg_max": 5.0,
+    "drift_translation_mm_max": 2.0,
+    "drop_abs_drift_mm": 30.0,
+    "drop_relative_z_mm": -20.0,
+    "objects": [
+      "box_a",
+      "box_b"
+    ],
+    "reference": "mean rel pose over the last 50 ms of the close phase",
+    "trials_required_pass": 10
+  },
+  "control": {
+    "finger_servo": "Force = clamp(kp*(q_target-q) - kd*qd, +/-max_force)",
+    "kd_finger": 20.0,
+    "kd_lift": 80.0,
+    "kp_finger": 1000.0,
+    "kp_lift": 4000.0,
+    "max_finger_force_n": 20.0,
+    "max_lift_force_n": 80.0
+  },
+  "controls": {
+    "load_ladder_kg": [
+      0.5,
+      1.0,
+      1.2,
+      1.5
+    ],
+    "load_ladder_prediction": "slip above m = 2*mu*N/(g+a) = 15.0/13.4 = 1.12 kg",
+    "slip_expected": {
+      "mass_kg": 0.5,
+      "mu": 0.2,
+      "why": "2*mu*N = 2*0.2*7.5 = 3.0 N < m*(g+a) = 6.7 N"
+    }
+  },
+  "gz_version": "Gazebo Sim, version 8.15.0",
+  "kind": "GRASP_CONTACT_PROBE",
+  "mode": "contact",
+  "object_specs": {
+    "box_a": {
+      "mass_kg": 0.05,
+      "mu": 1.0,
+      "size_m": 0.035
+    },
+    "box_b": {
+      "mass_kg": 0.12,
+      "mu": 1.0,
+      "size_m": 0.05
+    }
+  },
+  "phases_s": {
+    "close": 0.4,
+    "hold": 0.5,
+    "lift": 0.5,
+    "settle": 0.3
+  },
+  "physics": {
+    "engine": "gz-sim 8 dartsim",
+    "step_s": 0.001
+  },
+  "question": "Can a parallel jaw hold and lift a rigid box with contact friction alone?",
+  "realistic": {
+    "closed_gap_m": 0.033,
+    "max_finger_force_n": 5.0
+  },
+  "rig": {
+    "closed_gap_m": 0.02,
+    "lift_height_m": 0.15,
+    "open_gap_m": 0.056
+  },
+  "run_id": "gripforce-v1",
+  "schema_version": 1,
+  "stage": "gripforce",
+  "steps_per_trial": 3101,
+  "transport": {
+    "distance_m": 0.25,
+    "duration_s": 0.6,
+    "lower_s": 0.5,
+    "release_s": 0.4,
+    "settle_out_s": 0.4
+  },
+  "trials": [
+    "g-2n-50g",
+    "g-2n-200g",
+    "g-2n-500g",
+    "g-3n-50g",
+    "g-3n-200g",
+    "g-3n-500g",
+    "g-5n-50g",
+    "g-5n-200g",
+    "g-5n-500g",
+    "g-8n-50g",
+    "g-8n-200g",
+    "g-8n-500g",
+    "g-20n-50g",
+    "g-20n-200g",
+    "g-20n-500g"
+  ],
+  "trials_per_object": 5
+}

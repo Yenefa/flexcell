@@ -1,0 +1,49 @@
+{
+  "closed_gap": 0.033,
+  "command": [
+    "gz",
+    "sim",
+    "-s",
+    "-r",
+    "--iterations",
+    "3101",
+    "results/realistic-v1/r-yaw60/world.sdf"
+  ],
+  "dartsim_loaded": true,
+  "engine_libraries": {
+    "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-bullet.so.6.13.2": "0ca5fa82b2d37e86e6aa4fcd38ba43d4b51f82b4cae2dff4c53b569b86e51a33",
+    "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-collision-ode.so.6.13.2": "b50d9d8174333d857ec04bdca0699db7921101bccef05ce2c5010bd265b9deb6",
+    "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart-external-odelcpsolver.so.6.13.2": "7c7698c181c18a30c491cb1945cd4a9d4f4e03fa4c0c6b767ad2358b3e382816",
+    "/opt/ros/jazzy/opt/gz_dartsim_vendor/lib/libdart.so.6.13.2": "cb4f008188d1ea13cba9b43470c9d46cf819e8df0e4fdc818fa1e4f81b396426",
+    "/opt/ros/jazzy/opt/gz_physics_vendor/lib/gz-physics-7/engine-plugins/libgz-physics7-dartsim-plugin.so.7.8.0": "75617f959d603e052048c6258fbe912d16c66ceebeada7688e6d5be4650cf878",
+    "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-contact-system.so.8.15.0": "a63faf0de27a6d3052b2ba50c3b05826a5a59c98ffe47bfddb159e8de3266cfb",
+    "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-physics-system.so.8.15.0": "3b375a1f93e6cfd7794165df9229acd1bfdec2812e1b92cdb2e7a5399f4fad91",
+    "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-scene-broadcaster-system.so.8.15.0": "8521047b5ae40b4e0f2c4b55e1ff2899568fc6e12fe90a6456afb87fb837366a",
+    "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-user-commands-system.so.8.15.0": "82a671d7f44207b456ea9abfa2ad3982781c8b196ba08e35dad5d5cec805d0e3",
+    "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gui.so.8.15.0": "b6205045d4a7d5df123e50267235aad10b2eac2057ab3b342659f2db8b63cc1d",
+    "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gz.so.8.15.0": "03ca2b7142fb4143eb188226aa2f146bf472d719193af463e31ea8efd4088d0f",
+    "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8.so.8.15.0": "a348e4d28376de4e59ba58402142d0ce9e2abd7852ab76e721a34bafa569ef19"
+  },
+  "exit_code": 0,
+  "group": "envelope",
+  "jitter": {
+    "x": 0.0,
+    "y": 0.0,
+    "yaw_deg": 60.0
+  },
+  "lift_s": 0.5,
+  "mass_kg": 0.05,
+  "max_finger_force": 5.0,
+  "mode": "contact",
+  "mu": 1.0,
+  "object_name": "box_a",
+  "plugin_sha256": "f2490cc31fbac73d2099c8e2efe20d1626055324eef0059da8932f295f0cbf2d",
+  "size_m": 0.035,
+  "steps_bytes": 3897085,
+  "steps_sha256": "beab16f30ef3ee73f35fcaa2849fcff05dbd9eb481bbab9b2cc673b245b98f09",
+  "transport_m": 0.25,
+  "transport_s": 0.6,
+  "trial": "r-yaw60",
+  "wall_s": 5.241,
+  "world_sha256": "3fa0fac3c0c7cdcff2d073feff0bc52019f197d32698d59d351dbcb6ce5d27fb"
+}
