@@ -94,6 +94,63 @@ class TestMapping(unittest.TestCase):
             self.assertTrue(warning)
 
 
+class TestPushMapping(unittest.TestCase):
+    """PUSH has its own failure semantics; none of these may fall through to PLACE."""
+
+    def test_push_specific_codes(self):
+        expected = {
+            27: ec.ERR_CONTACT_NOT_MADE,
+            28: ec.ERR_CONTACT_LOST,
+            29: ec.ERR_DISPLACEMENT_OFF_AXIS,
+            31: ec.ERR_PUSH_BLOCKED,
+            36: ec.ERR_DISPLACEMENT_OVERSHOOT,
+        }
+        for code, canonical in expected.items():
+            with self.subTest(code=code):
+                self.assertEqual(ec.canonicalize('PUSH', code, 1), (canonical, None))
+                self.assertEqual(ec.canonicalize('PUSH', code, None)[0], canonical)
+
+    def test_push_shared_codes(self):
+        for code, canonical in (
+                (10, ec.ERR_IK_UNREACHABLE),
+                (30, ec.ERR_MOTION_FAILED),
+                (32, ec.ERR_CANCELED),
+                (41, ec.ERR_RESOURCE_BUSY)):
+            with self.subTest(code=code):
+                self.assertEqual(ec.canonicalize('PUSH', code, 1)[0], canonical)
+
+    def test_push_plumbing_and_unknown(self):
+        self.assertEqual(ec.canonicalize('PUSH', -1, 255), (ec.ERR_TIMEOUT, None))
+        canonical, warning = ec.canonicalize('PUSH', 99, 1)
+        self.assertEqual(canonical, ec.ERR_INTERNAL)
+        self.assertIn('unmapped', warning)
+
+    def test_push_status_derivation(self):
+        for outcome, status in ((0, ec.STATUS_SUCCESS),
+                                (1, ec.STATUS_FAILURE),
+                                (2, ec.STATUS_CANCELED),
+                                (255, ec.STATUS_NONE)):
+            with self.subTest(outcome=outcome):
+                self.assertEqual(derive_status('PUSH', outcome), status)
+
+    def test_push_error_names(self):
+        for code, name in ((ec.ERR_CONTACT_NOT_MADE, 'ERR_CONTACT_NOT_MADE'),
+                           (ec.ERR_CONTACT_LOST, 'ERR_CONTACT_LOST'),
+                           (ec.ERR_DISPLACEMENT_OFF_AXIS, 'ERR_DISPLACEMENT_OFF_AXIS'),
+                           (ec.ERR_PUSH_BLOCKED, 'ERR_PUSH_BLOCKED'),
+                           (ec.ERR_DISPLACEMENT_OVERSHOOT, 'ERR_DISPLACEMENT_OVERSHOOT')):
+            with self.subTest(code=code):
+                self.assertEqual(ec.error_name(code), name)
+
+    def test_task_abort_codes(self):
+        self.assertEqual(ec.task_abort_error_code('BUDGET_EXHAUSTED'),
+                         ec.TASK_ERR_RECOVERY_EXHAUSTED)
+        self.assertEqual(ec.task_abort_error_code('VERIFY_BUDGET_EXHAUSTED'),
+                         ec.TASK_ERR_RECOVERY_EXHAUSTED)
+        self.assertEqual(ec.task_abort_error_code('NON_RECOVERABLE'),
+                         ec.TASK_ERR_SKILL_FAILED)
+
+
 class TestStatusDerivation(unittest.TestCase):
 
     def test_pick_observe_place(self):
