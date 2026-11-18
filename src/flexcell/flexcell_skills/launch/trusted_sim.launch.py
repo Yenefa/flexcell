@@ -57,6 +57,23 @@ def launch_stack(context):
             if joint.get('name') == 'gripper_right_joint':
                 for mimic in joint.findall('mimic'):
                     joint.remove(mimic)
+        # The description gives each finger a 1 g inertial. A force-servoed jaw
+        # on a 1 g body is numerically untameable (measured: the pads left their
+        # joint range under a 20 N command), and the real OMX finger is tens of
+        # grams. Set a realistic finger mass before handing the jaw to the guard.
+        for link in urdf.findall('link'):
+            if link.get('name') in ('gripper_left_link', 'gripper_right_link'):
+                inertial = link.find('inertial')
+                if inertial is not None:
+                    mass = inertial.find('mass')
+                    if mass is not None:
+                        mass.set('value', '0.040')
+                    inertia = inertial.find('inertia')
+                    if inertia is not None:
+                        for key, value in (('ixx', '2.0e-05'), ('iyy', '2.0e-05'),
+                                           ('izz', '2.0e-05'), ('ixy', '0'), ('ixz', '0'),
+                                           ('iyz', '0')):
+                            inertia.set(key, value)
         for block in urdf.findall('ros2_control'):
             for joint in list(block.findall('joint')):
                 if joint.get('name', '').startswith('gripper_'):

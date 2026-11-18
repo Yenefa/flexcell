@@ -183,7 +183,7 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
         # contact grasp cannot do: the jaw has to straddle the box. Declare the
         # measured stand-off explicitly instead of inheriting the hover value.
         config.setdefault('pick_server', {}).setdefault('ros__parameters', {})[
-            'grasp_dz_m'] = 0.05
+            'grasp_dz_m'] = 0.02
     if backend == 'contact_grasp' and not perception_only:
         # Contact carry: the jaw is driven by the guard, the object is held by
         # friction only. No DetachableJoint plugin is added to this world.
@@ -194,7 +194,7 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
                            ('right_joint', 'gripper_right_joint'),
                            ('base_link', 'link5'),
                            ('zero_gap', '0.034'), ('closed_gap', '0.026'),
-                           ('max_force', '1.5'), ('kp', '50'), ('kd', '25'), ('expected_object_width', '0.035'),
+                           ('max_force', '1.5'), ('kp', '50'), ('kd', '25'), ('squeeze_force', '1.2'), ('squeeze_gap', '0.020'), ('expected_object_width', '0.035'),
                            ('width_tolerance', '0.012'), ('confirm_frames', '40')]:
             ET.SubElement(guard, key).text = value
         ET.SubElement(guard, 'object_model').text = tracked[0]

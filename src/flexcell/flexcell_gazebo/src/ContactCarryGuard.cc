@@ -78,6 +78,8 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
   double signLeft_{1.0}, signRight_{1.0}, calibrateRef{0.0};
   double offX{0.0}, offY{0.0}, offZ{0.0}, jawSpeed{0.0};
   double jointLower{-0.011}, jointUpper{0.020};
+  double squeezeForce{1.2}, squeezeGap{0.012};
+  bool squeezeMode{false};
   int calibSteps{0};
 
   static double Value(const std::string &json, const std::string &key, double fallback) {
@@ -242,6 +244,8 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
     zeroGap = config->HasElement("zero_gap") ? config->Get<double>("zero_gap") : zeroGap;
     jointLower = config->HasElement("joint_lower") ? config->Get<double>("joint_lower") : jointLower;
     jointUpper = config->HasElement("joint_upper") ? config->Get<double>("joint_upper") : jointUpper;
+    squeezeForce = config->HasElement("squeeze_force") ? config->Get<double>("squeeze_force") : squeezeForce;
+    squeezeGap = config->HasElement("squeeze_gap") ? config->Get<double>("squeeze_gap") : squeezeGap;
     closedGap = config->HasElement("closed_gap") ? config->Get<double>("closed_gap") : closedGap;
     maxForce = config->HasElement("max_force") ? config->Get<double>("max_force") : maxForce;
     kp = config->HasElement("kp") ? config->Get<double>("kp") : kp;
@@ -294,6 +298,7 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
         targetGap = zeroGap;
         engaged = false;
         stallFrames = 0;
+        squeezeMode = false;
         pendingRelease = command;
         pendingSince = nowT;
         continue;
@@ -344,14 +349,28 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
     // command is pure damping so the jaw settles instead of ringing.
     const double errL = qTarget - ql;
     const double errR = qTarget - qr;
-    const double vCmdL = std::fabs(errL) < 3e-4 ? 0.0 : std::clamp(kp * errL, -0.02, 0.02);
-    const double vCmdR = std::fabs(errR) < 3e-4 ? 0.0 : std::clamp(kp * errR, -0.02, 0.02);
-    const double forceL = signLeft_ * std::clamp(kd * (vCmdL - JointVelocity(ecm, leftJoint)),
-                                -maxForce, maxForce);
-    const double forceR = signRight_ * std::clamp(kd * (vCmdR - JointVelocity(ecm, rightJoint)),
-                                -maxForce, maxForce);
-    ecm.SetComponentData<components::JointForceCmd>(leftJoint, std::vector<double>{forceL});
-    ecm.SetComponentData<components::JointForceCmd>(rightJoint, std::vector<double>{forceR});
+    // Two-stage grasp. Stage 1 (velocity servo) closes quickly and stays stable
+    // on a 1 g finger. Stage 2 replaces feedback with a static squeeze once the
+    // pads are within squeezeGap of the object width: a blocked jaw then carries a
+    // constant force instead of chattering around a velocity setpoint.
+    if (pendingGrasp && !squeezeMode && gapNow <= expectedWidth + squeezeGap) {
+      squeezeMode = true;
+    }
+    if (squeezeMode) {
+      ecm.SetComponentData<components::JointForceCmd>(leftJoint,
+                            std::vector<double>{-signLeft_ * squeezeForce});
+      ecm.SetComponentData<components::JointForceCmd>(rightJoint,
+                            std::vector<double>{-signRight_ * squeezeForce});
+    } else {
+      const double vCmdL = std::fabs(errL) < 3e-4 ? 0.0 : std::clamp(kp * errL, -0.05, 0.05);
+      const double vCmdR = std::fabs(errR) < 3e-4 ? 0.0 : std::clamp(kp * errR, -0.05, 0.05);
+      const double forceL = signLeft_ * std::clamp(kd * (vCmdL - JointVelocity(ecm, leftJoint)),
+                                  -maxForce, maxForce);
+      const double forceR = signRight_ * std::clamp(kd * (vCmdR - JointVelocity(ecm, rightJoint)),
+                                  -maxForce, maxForce);
+      ecm.SetComponentData<components::JointForceCmd>(leftJoint, std::vector<double>{forceL});
+      ecm.SetComponentData<components::JointForceCmd>(rightJoint, std::vector<double>{forceR});
+    }
 
     if (liftJoint != kNullEntity) {
       liftNow = JointPosition(ecm, liftJoint);

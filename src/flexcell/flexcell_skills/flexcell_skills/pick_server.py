@@ -301,7 +301,7 @@ class PickServer(Node):
         # The server returns the existing session instead of engaging twice.
         for _ in range(2):
             future = self._carry_engage.call_async(request)
-            if wait_future(future, 2.0) == 'done':
+            if wait_future(future, 15.0) == 'done':
                 result = future.result()
                 if result.success and result.session == request.request_id:
                     self._engaged_carry_session = result.session
