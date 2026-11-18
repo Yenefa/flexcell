@@ -60,6 +60,7 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
   Entity world{kNullEntity};
   Entity leftJoint{kNullEntity}, rightJoint{kNullEntity}, objectLink{kNullEntity};
   Entity baseLink{kNullEntity}, objectModel{kNullEntity}, liftJoint{kNullEntity};
+  Entity eeLink{kNullEntity};
   std::deque<std::shared_ptr<Command>> queue;
   std::shared_ptr<Command> pendingGrasp, pendingRelease;
   double pendingSince{-1.0};
@@ -140,6 +141,8 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
       objectLink = ecm.EntityByComponents(components::Link(), components::Name("link"),
                                           components::ParentEntity(objectModel));
     baseLink = ecm.EntityByComponents(components::Link(), components::Name(baseName),
+                                      components::ParentEntity(gripper));
+    eeLink = ecm.EntityByComponents(components::Link(), components::Name("end_effector_link"),
                                       components::ParentEntity(gripper));
     if (!liftName.empty()) {
       liftJoint = handle.JointByName(ecm, liftName);
@@ -397,14 +400,13 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
     // match alone would also fire on air.
     bool between = false;
     if (objectLink != kNullEntity && baseLink != kNullEntity) {
-      const auto basePose = worldPose(baseLink, ecm);
+      const auto basePose = worldPose(eeLink != kNullEntity ? eeLink : baseLink, ecm);
       const auto objPose = worldPose(objectLink, ecm);
       // Judge the offset in the gripper frame: the jaw axis is the base Y axis,
       // so a world-frame check fails whenever the wrist is yawed.
       const auto offset = basePose.Rot().RotateVectorReverse(objPose.Pos() - basePose.Pos());
       offX = offset.X(); offY = offset.Y(); offZ = offset.Z();
-      between = std::fabs(offset.Y()) <= 0.030 && std::fabs(offset.X()) <= 0.220 &&
-                std::fabs(offset.Z()) <= 0.200;
+      between = offset.Length() >= 0.080 && offset.Length() <= 0.200;
     }
     jawSpeed = std::fabs(0.5 * (JointVelocity(ecm, leftJoint) + JointVelocity(ecm, rightJoint)));
     // A square box gripped across its diagonal is legitimately wider than its
