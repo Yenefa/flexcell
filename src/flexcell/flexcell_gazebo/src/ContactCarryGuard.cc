@@ -62,6 +62,7 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
   std::mutex mutex;
   Entity world{kNullEntity};
   Entity leftJoint{kNullEntity}, rightJoint{kNullEntity}, objectLink{kNullEntity};
+  Entity gripperEntity{kNullEntity};
   Entity baseLink{kNullEntity}, objectModel{kNullEntity}, liftJoint{kNullEntity};
   Entity eeLink{kNullEntity};
   std::deque<std::shared_ptr<Command>> queue;
@@ -121,10 +122,11 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
   }
 
   void Resolve(EntityComponentManager &ecm) {
-    if (leftJoint != kNullEntity) return;
+    if (leftJoint == kNullEntity) {
     const auto gripper = ecm.EntityByComponents(components::Model(), components::Name(gripperModel),
                                                 components::ParentEntity(world));
     if (gripper == kNullEntity) return;
+    gripperEntity = gripper;
     const gz::sim::Model handle(gripper);
     const auto left = handle.JointByName(ecm, leftName);
     const auto right = handle.JointByName(ecm, rightName);
@@ -137,8 +139,9 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
     }
     leftJoint = left;
     rightJoint = right;
+    }
 
-    if (objectLink != kNullEntity) return;
+    if (objectLink == kNullEntity) {
     objectModel = ecm.EntityByComponents(components::Model(), components::Name(objectName),
                                          components::ParentEntity(world));
     if (objectModel != kNullEntity)
@@ -157,12 +160,13 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
         break;
       }
     }
+    }
     baseLink = ecm.EntityByComponents(components::Link(), components::Name(baseName),
-                                      components::ParentEntity(gripper));
+                                      components::ParentEntity(gripperEntity));
     eeLink = ecm.EntityByComponents(components::Link(), components::Name("end_effector_link"),
-                                      components::ParentEntity(gripper));
+                                      components::ParentEntity(gripperEntity));
     if (!liftName.empty()) {
-      liftJoint = handle.JointByName(ecm, liftName);
+      liftJoint = gz::sim::Model(gripperEntity).JointByName(ecm, liftName);
       if (liftJoint != kNullEntity) {
         if (ecm.Component<components::JointPosition>(liftJoint) == nullptr)
           ecm.CreateComponent(liftJoint, components::JointPosition());
@@ -193,7 +197,10 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
           << ",\"ox\":" << offX << ",\"oy\":" << offY << ",\"oz\":" << offZ
           << ",\"jaw_speed\":" << jawSpeed
         << ",\"signL\":" << signLeft_ << ",\"signR\":" << signRight_
-        << ",\"calib\":" << calibSteps << ",\"target_gap\":" << targetGap << "}";
+        << ",\"calib\":" << calibSteps << ",\"target_gap\":" << targetGap
+        << ",\"obj_name\":\"" << objectName << "\""
+        << ",\"base_name\":\"" << baseName << "\""
+        << ",\"obj_link_ok\":" << (objectLink != kNullEntity ? "true" : "false") << "}";
       reply.set_data(out.str());
       return true;
     }
@@ -204,7 +211,10 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
         << ",\"rel_z\":" << (objZ - baseZ)
         << ",\"ql\":" << qLeft << ",\"qr\":" << qRight
         << ",\"ox\":" << offX << ",\"oy\":" << offY << ",\"oz\":" << offZ
-        << ",\"jaw_speed\":" << jawSpeed << "}";
+        << ",\"jaw_speed\":" << jawSpeed
+        << ",\"obj_name\":\"" << objectName << "\""
+        << ",\"base_name\":\"" << baseName << "\""
+        << ",\"obj_link_ok\":" << (objectLink != kNullEntity ? "true" : "false") << "}";
     reply.set_data(out.str());
     return true;
   }

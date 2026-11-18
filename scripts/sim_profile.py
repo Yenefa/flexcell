@@ -203,6 +203,10 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
                            ('max_force', '1.0'), ('kp', '120'), ('kd', '4'), ('squeeze_force', '1.0'), ('squeeze_gap', '0.020'), ('expected_object_width', '0.035'),
                            ('width_tolerance', '0.012'), ('confirm_frames', '40')]:
             ET.SubElement(guard, key).text = value
+        # No default object: the guard must resolve whichever object the grasp
+    # request names. A startup default silently kept the first object's link and
+    # made every later object measure the wrong body.
+    if False:
         ET.SubElement(guard, 'object_model').text = tracked[0]
     if contact_trace:
         physics = world.find("plugin[@name='gz::sim::systems::Physics']")
