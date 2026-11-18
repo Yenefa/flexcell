@@ -134,6 +134,26 @@ before recording.
 If the window is empty, the partition differs from the server's. Close it, re-export
 `GZ_PARTITION` and try again; do not start a second server.
 
+### Camera framing
+
+`~/.gz/sim/8/gui.config` stores the default view as:
+
+```xml
+<camera_pose>x y z roll pitch yaw</camera_pose>
+```
+
+**Roll comes before pitch and yaw.** Putting a yaw value in the roll slot tilts the
+whole horizon by that angle; on 2026-11-18 `0.785` produced a 45-degree tilt in the
+recording. A framing that shows the workcell from the front-left with a level
+horizon:
+
+```xml
+<camera_pose>-0.6 -0.6 0.6 0 0.45 0.63</camera_pose>
+```
+
+Back up the file first, and restart `gz sim -g` after editing: the GUI reads
+`gui.config` at start.
+
 ## 5. Run the demo
 
 Continuous client, one goal:
@@ -176,28 +196,44 @@ it mid-skill; it also proves the arm quarantine
 
 ## 6. Record the screen
 
-`demo_session.sh:49-63` probes a usable size first, then records:
+**On WSLg, `x11grab` cannot see the Gazebo window.** WSLg renders application
+windows as Wayland surfaces; `ffmpeg -f x11grab -i :0` captures the empty XWayland
+root and writes a black frame (measured 2026-11-18: `YAVG=16.0`, `SATAVG=0`). The
+`x11grab` path in `scripts/demo_session.sh:49-63` is a fallback for a real X11
+session only.
 
-```bash
-ffmpeg -hide_banner -loglevel warning -y \
-  -f x11grab -framerate 30 -video_size 1920x1080 -i :0 \
-  -c:v libx264 -preset veryfast -pix_fmt yuv420p demo.mp4
+Record from the Windows host and crop to the Gazebo window:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/record_gazebo.ps1 `
+  -SourceRun /tmp/carry-window3/out/NORMAL_1/run-7c231a57a747 `
+  -Out D:\demo\gazebo.mp4 -Seconds 60 -Cycles 1
 ```
 
-- `-i :0` is the X display. The script assumes `:0`, which is the WSLg default; if
-  your `DISPLAY` is different, pass that value instead (`-i "$DISPLAY"`). WSLg
-  provides the X display, so the capture is of the X11 desktop, not of a physical
-  monitor.
-- The script probes `1920x1080`, `2560x1440`, `1280x720`, `1024x768` and uses the
-  first size x11grab accepts (`demo_session.sh:50-56`). x11grab captures the whole
-  screen, so the Gazebo window is recorded together with anything else on screen.
-- **Crop / scale (not repo-verified):** either maximize the Gazebo window, or record
-  the full screen and crop in the filter chain, e.g.
-  `-vf "crop=W:H:X:Y,scale=1920:-2"`. Read `W:H:X:Y` from the real window geometry
-  (`xwininfo` / `xdotool getwindowgeometry`, if installed — TODO: verify on the demo
-  host) instead of guessing.
-- Stop ffmpeg with `Ctrl-C` / `SIGINT`: the mp4 is finalized on SIGINT.
-  `demo_session.sh:71` sends `kill -INT` and waits.
+The script:
+
+1. starts `scripts/demo_serve.sh` in WSL (stack + software-rendered GUI),
+2. waits for `/tmp/demo-ready`,
+3. finds the window titled `Gazebo Sim`, maximizes it, reads its client rectangle,
+4. records exactly that rectangle with Windows `gdigrab`,
+5. runs `scripts/run_demo_cycles.py`,
+6. stops ffmpeg after its fixed duration and prints `ffprobe`.
+
+Manual equivalent once the window is up:
+
+```powershell
+ffmpeg -f gdigrab -framerate 30 -offset_x <x> -offset_y <y> `
+  -video_size <w>x<h> -i desktop -t 60 -c:v libx264 -pix_fmt yuv420p demo.mp4
+```
+
+- `-offset_x`, `-offset_y` and `-video_size` come from the window's **client**
+  rectangle (`GetClientRect` + `ClientToScreen`), not the outer frame, so the title
+  bar and the desktop are not recorded.
+- If the D3D12 GUI segfaults in the NVIDIA driver (seen 2026-11-18), start the GUI
+  with `LIBGL_ALWAYS_SOFTWARE=1` and unset `GALLIUM_DRIVER` /
+  `MESA_D3D12_DEFAULT_ADAPTER_NAME`. `scripts/demo_serve.sh` does that.
+- Verified output on this host: 1536x816, 30 fps, 60 s, one full `RunDemo` cycle
+  (6/6 steps OK), level horizon, robot and both boxes inside the frame.
 
 ## 7. Output layout
 
@@ -233,18 +269,19 @@ together; give each session its own directory rather than appending to an old on
 
 ## 8. One command for the whole thing
 
-```bash
-scripts/demo_session.sh [SOURCE_RUN_DIR] [OUT_DIR]
+On WSLg, use the Windows recorder from §6. It starts the stack, opens the GUI,
+records only the Gazebo window, runs the demo and prints `ffprobe`:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/record_gazebo.ps1 `
+  -SourceRun /tmp/carry-window3/out/NORMAL_1/run-7c231a57a747 `
+  -Out D:\demo\gazebo.mp4 -Seconds 60 -Cycles 1
 ```
 
-It exports the environment of §1, launches the stack, waits for `/run_demo`, opens
-`gz sim -g`, starts ffmpeg, runs two cycles and prints `ffprobe` stats. Two caveats:
-
-1. `SOURCE_RUN_DIR` must already contain `world.sdf` and `params.yaml`; the default
-   points at `/tmp/carry-window2/out/NORMAL_1/run-*`, which may not exist on this host
-   (`demo_session.sh:8-14`). Generate one with §2.
-2. It uses partition `pp-demo`, while this guide's manual session uses `pp-manual`.
-   Mixing the two in one terminal session is a common cause of an empty GUI.
+On a real X11 desktop, `scripts/demo_session.sh [SOURCE_RUN_DIR] [OUT_DIR]` still
+does the same in one shot. Two caveats: `SOURCE_RUN_DIR` must already contain
+`world.sdf` and `params.yaml` (generate with §2), and it uses partition `pp-demo`
+while the manual session in this guide uses `pp-manual`.
 
 ## 9. Troubleshooting
 
@@ -256,11 +293,13 @@ It exports the environment of §1, launches the stack, waits for `/run_demo`, op
 | Goal returns `ERR_SKILL_FAILED (50)` with "motion quarantine active" | a previous stop was never confirmed | `/flexcell/task_state` reads `QUARANTINED`; call `/reset_motion_quarantine` only after checking the arm |
 | GUI at ~100% CPU, servos stutter | software rendering | `GALLIUM_DRIVER` / `LIBGL_ALWAYS_SOFTWARE` as in §1 |
 | ffmpeg "Cannot open display" | wrong `DISPLAY` or no X socket | `echo $DISPLAY`; re-run with that value |
+| recorded video is black | `x11grab` cannot see WSLg Wayland windows | use `scripts/record_gazebo.ps1` (§6), check a frame's `YAVG` |
+| horizon is tilted | `camera_pose` field order is `x y z roll pitch yaw`; a yaw value in the roll slot | set roll to 0 (§4) |
+| GUI segfaults in `libnvwgf2umx.so` / `libd3d12core.so` | D3D12 driver path | start the GUI with `LIBGL_ALWAYS_SOFTWARE=1` (`scripts/demo_serve.sh`) |
 
 ## 10. TODO (unverified here)
 
 - `pp-manual` / `pp-<label>` label naming is not in the tree; only `pp-demo` is.
-- The crop rectangle and the window geometry tool on the demo host.
 - Whether `gz sim -g` fails cleanly or waits when no server is running on the
   partition; this guide only covers "server first, GUI second" (`demo_session.sh`
   order).
