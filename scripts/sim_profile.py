@@ -178,6 +178,12 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
         if three_boxes:
             for name in tracked:
                 ET.SubElement(guard, 'allowed_model').text = name
+    if backend == 'contact_grasp':
+        # The magnetic path engaged carry from the 0.16 m hover pose, which a
+        # contact grasp cannot do: the jaw has to straddle the box. Declare the
+        # measured stand-off explicitly instead of inheriting the hover value.
+        config.setdefault('pick_server', {}).setdefault('ros__parameters', {})[
+            'grasp_dz_m'] = 0.05
     if backend == 'contact_grasp' and not perception_only:
         # Contact carry: the jaw is driven by the guard, the object is held by
         # friction only. No DetachableJoint plugin is added to this world.
