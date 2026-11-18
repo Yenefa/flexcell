@@ -42,7 +42,14 @@ ACTIONS = {
     '/run_demo': None,
     '/run_pick_place': None,
 }
-CONTROLLERS = ['arm_controller', 'gripper_controller', 'joint_state_broadcaster']
+# The jaw is actuated either by ros2_control's gripper controller or, for the
+# contact carry backend, by the flexcell_contact_carry world plugin, which owns
+# both prismatic joints. Asserting a specific controller would fail a healthy
+# contact run, so the expected set follows the declared backend.
+CARRY_BACKEND = os.environ.get('FLEXCELL_CARRY_BACKEND', '')
+CONTACT_CARRY = CARRY_BACKEND == 'contact_grasp'
+CONTROLLERS = (['arm_controller', 'joint_state_broadcaster'] if CONTACT_CARRY
+               else ['arm_controller', 'gripper_controller', 'joint_state_broadcaster'])
 REQUIRED_MODELS = ['ground_plane', 'open_manipulator_x', 'target_box_a',
                    'target_box_b', 'zone_1', 'zone_2']
 CANONICAL = {
@@ -204,6 +211,19 @@ class Admin(Node):
                 'OK' if replied else 'UNAVAILABLE (discovery or reply timeout)')
         finally:
             self.destroy_client(manager)
+        if CONTACT_CARRY:
+            # The guard must actually be serving grasp/lift/release; a missing
+            # plugin would otherwise look like a healthy idle stack.
+            try:
+                listing = subprocess.run(['gz', 'service', '-l'], capture_output=True,
+                                         text=True, timeout=15).stdout
+            except (OSError, subprocess.SubprocessError):
+                listing = ''
+            wanted = ['/flexcell/contact/grasp', '/flexcell/contact/lift',
+                      '/flexcell/contact/release', '/flexcell/contact/status']
+            missing = [topic for topic in wanted
+                       if not any(line.strip().endswith(topic) for line in listing.splitlines())]
+            checks['contact carry services'] = 'OK' if not missing else 'MISSING ' + ','.join(missing)
         for c in CONTROLLERS:
             checks['controller %s' % c] = ('OK' if states.get(c) == 'active' else 'NOT_ACTIVE')
 

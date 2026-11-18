@@ -53,9 +53,16 @@ def launch_stack(context):
     broadcaster = Node(package='controller_manager', executable='spawner', output='screen',
                        arguments=['joint_state_broadcaster', '--controller-manager-timeout', '90',
                                   '--switch-timeout', '30'])
+    # The contact carry backend drives both jaw joints from its own world plugin.
+    # A ros2_control gripper controller would command the same joints, so it is
+    # not spawned in that configuration (DART also cannot honour the URDF mimic,
+    # which leaves the right finger unactuated under the controller).
+    controller_names = ('arm_controller',)
+    if config['carry_server']['ros__parameters']['carry_backend'] != 'contact_grasp':
+        controller_names = ('arm_controller', 'gripper_controller')
     controllers = [Node(package='controller_manager', executable='spawner', output='screen',
                         arguments=[name, '--controller-manager-timeout', '90', '--switch-timeout', '30'])
-                   for name in ('arm_controller', 'gripper_controller')]
+                   for name in controller_names]
     bridges = ['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock',
                '/flexcell/physics_trace@std_msgs/msg/String[gz.msgs.StringMsg']
     remaps = []

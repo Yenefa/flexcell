@@ -187,7 +187,7 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
                            ('left_joint', 'gripper_left_joint'),
                            ('right_joint', 'gripper_right_joint'),
                            ('base_link', 'link5'),
-                           ('open_gap', '0.056'), ('closed_gap', '0.033'),
+                           ('zero_gap', '0.034'), ('closed_gap', '0.026'),
                            ('max_force', '20'), ('expected_object_width', '0.035'),
                            ('width_tolerance', '0.006'), ('confirm_frames', '40')]:
             ET.SubElement(guard, key).text = value

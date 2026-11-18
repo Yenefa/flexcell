@@ -410,7 +410,10 @@ class PlaceServer(Node):
             if not sok:
                 return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
                               'planning-scene detach failed: %s' % serr)
-            gres, gerr = self._gripper.command(self._gripper_open)
+            # The contact backend's release already opened the jaw; there is no
+            # ros2_control gripper action in that configuration.
+            gres, gerr = ((None, None) if getattr(self, '_carry_backend', '') == 'contact_grasp'
+                          else self._gripper.command(self._gripper_open))
             if gerr is not None:
                 return finish(R.OUTCOME_FAILED, R.ERR_PLACE_FAILED,
                               'gripper open failed: %s' % gerr)

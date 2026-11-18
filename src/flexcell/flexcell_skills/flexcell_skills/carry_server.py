@@ -391,8 +391,17 @@ class CarryServer(Node):
             if follow is not None:
                 follow.end_release(False)
             return False
-        contact_release = (self._contact_request('release', {})[0]
-                           if getattr(self, '_backend', 'teleport') == 'contact_grasp' else None)
+        # Only talk to the guard when a session was actually open: an engage
+        # begins with a "replace" stop, and asking for a release then would
+        # block on a service that has nothing to release.
+        contact_release = None
+        if getattr(self, '_backend', 'teleport') == 'contact_grasp' and session:
+            try:
+                contact_release = self._contact_request('release', {})[0]
+            except Exception as exc:  # noqa: BLE001 - shutdown must not hang
+                self.get_logger().error('contact release during stop failed: %s'
+                                        % type(exc).__name__)
+                contact_release = False
         if contact_release is False:
             if follow is not None:
                 follow.end_release(False)

@@ -267,7 +267,8 @@ class PickServer(Node):
 
     def _release_everything(self, name):
         """Request physical release and require scene/gripper cleanup responses."""
-        if getattr(self, '_carry_backend', 'teleport') in ('velocity_servo', 'detachable_joint'):
+        if getattr(self, '_carry_backend', 'teleport') in ('velocity_servo', 'detachable_joint',
+                                                          'contact_grasp'):
             if not self._carry_release.wait_for_service(timeout_sec=2.0):
                 return False, 'carry release dependency unavailable; no cleanup motion sent'
             future = self._carry_release.call_async(Trigger.Request())
@@ -275,7 +276,11 @@ class PickServer(Node):
                 return False, 'physical release not confirmed; no cleanup motion sent'
         else:
             self._carry_stop.publish(EmptyMsg())
-        _, gripper_error = self._gripper.command(self._gripper_open)
+        # The contact backend's jaw is opened by the carry guard on release; a
+        # ros2_control gripper action does not exist in that configuration.
+        gripper_error = None
+        if self._carry_backend != 'contact_grasp':
+            _, gripper_error = self._gripper.command(self._gripper_open)
         removed, scene_error = self._scene.remove(name, detach_attached=True)
         errors = []
         if gripper_error is not None:
@@ -443,11 +448,13 @@ class PickServer(Node):
                     return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
                                   'MTC planning failed before execution: ' + message)
 
-            # pre-open the gripper so fingers never close on air by accident
-            gres, gerr = self._gripper.command(self._gripper_open)
-            if gerr is not None:
-                return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
-                              'gripper open failed: %s' % gerr)
+            # pre-open the gripper so fingers never close on air by accident.
+            # The contact backend holds the jaw open until the grasp engages.
+            if self._carry_backend != 'contact_grasp':
+                gres, gerr = self._gripper.command(self._gripper_open)
+                if gerr is not None:
+                    return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
+                                  'gripper open failed: %s' % gerr)
 
             # ---------- APPROACHING ----------
             self._feedback(goal_handle, 'APPROACHING', t0)
@@ -501,15 +508,16 @@ class PickServer(Node):
                               'EE not at object: gap=%.3fm > radius=%.3fm '
                               '(refusing to fake a grasp)' % (gap, self._attach_radius))
 
-            gres, gerr = self._gripper.command(self._gripper_close)
-            if gerr is not None:
-                return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
-                              'gripper close failed: %s' % gerr)
+            if self._carry_backend != 'contact_grasp':
+                gres, gerr = self._gripper.command(self._gripper_close)
+                if gerr is not None:
+                    return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
+                                  'gripper close failed: %s' % gerr)
 
             # engage the carry servo at the MEASURED gripper-to-object offset
             offset = [box_pos[i] - ee_pos[i] for i in range(3)]
             rec['carry_offset'] = offset
-            if self._carry_backend in ('velocity_servo', 'detachable_joint'):
+            if self._carry_backend in ('velocity_servo', 'detachable_joint', 'contact_grasp'):
                 confirmed, message = self._engage_carry(goal.object_name, offset)
                 rec['carry_engage_confirmed'] = confirmed
                 if not confirmed:

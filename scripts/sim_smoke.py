@@ -196,6 +196,7 @@ def main():
     parser.add_argument('--place-pose', nargs=3, type=float, metavar=('X', 'Y', 'Z'),
                         help='override the first task goal (issue #121 counterexample point)')
     args = parser.parse_args()
+    os.environ['FLEXCELL_CARRY_BACKEND'] = args.backend
     out = args.out / ('run-' + uuid.uuid4().hex[:12])
     out.mkdir(parents=True, exist_ok=False)
     options = {}

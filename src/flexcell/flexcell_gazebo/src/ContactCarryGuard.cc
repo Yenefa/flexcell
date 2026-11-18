@@ -66,15 +66,15 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
 
   std::string objectName{"target_box_a"}, gripperModel{"open_manipulator_x"};
   std::string leftName{"gripper_left_joint"}, rightName{"gripper_right_joint"};
-  double openGap{0.056}, closedGap{0.033}, maxForce{20.0}, kp{1000.0}, kd{20.0};
+  double zeroGap{0.034}, closedGap{0.026}, maxForce{20.0}, kp{1000.0}, kd{20.0};
   double expectedWidth{0.035}, widthTolerance{0.006};
   std::string baseName{"base_link"}, liftName{"lift_joint"};
   double liftHeight{0.15}, liftTime{0.5}, liftStart{-1.0}, liftGoal{0.0}, liftNow{0.0};
   int confirmFrames{40};
-  double targetGap{0.056};
+  double targetGap{0.034};
   bool engaged{false};
   int stallFrames{0};
-  double gapNow{0.056}, objZ{0.0}, baseZ{0.0};
+  double gapNow{0.034}, objZ{0.0}, baseZ{0.0};
 
   static double Value(const std::string &json, const std::string &key, double fallback) {
     const auto at = json.find("\"" + key + "\"");
@@ -219,7 +219,7 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
     if (config->HasElement("gripper_model")) gripperModel = config->Get<std::string>("gripper_model");
     if (config->HasElement("left_joint")) leftName = config->Get<std::string>("left_joint");
     if (config->HasElement("right_joint")) rightName = config->Get<std::string>("right_joint");
-    openGap = config->HasElement("open_gap") ? config->Get<double>("open_gap") : openGap;
+    zeroGap = config->HasElement("zero_gap") ? config->Get<double>("zero_gap") : zeroGap;
     closedGap = config->HasElement("closed_gap") ? config->Get<double>("closed_gap") : closedGap;
     maxForce = config->HasElement("max_force") ? config->Get<double>("max_force") : maxForce;
     kp = config->HasElement("kp") ? config->Get<double>("kp") : kp;
@@ -231,7 +231,7 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
     if (config->HasElement("lift_joint")) liftName = config->Get<std::string>("lift_joint");
     if (config->HasElement("lift_height")) liftHeight = config->Get<double>("lift_height");
     if (config->HasElement("lift_time")) liftTime = config->Get<double>("lift_time");
-    targetGap = openGap;
+    targetGap = zeroGap;
 
     const auto name = ecm.Component<components::Name>(world)->Data();
     const auto prefix = "/world/" + name + "/flexcell/contact/";
@@ -267,7 +267,7 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
         pendingSince = nowT;
         continue;
       } else if (command->kind == Kind::Release) {
-        targetGap = openGap;
+        targetGap = zeroGap;
         engaged = false;
         stallFrames = 0;
         pendingRelease = command;
@@ -291,8 +291,8 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
 
     const double ql = JointPosition(ecm, leftJoint);
     const double qr = JointPosition(ecm, rightJoint);
-    gapNow = openGap - (ql + qr);
-    const double qTarget = 0.5 * (openGap - targetGap);
+    gapNow = zeroGap + (ql + qr);
+    const double qTarget = 0.5 * (targetGap - zeroGap);
     const double forceL = std::clamp(kp * (qTarget - ql) - kd * JointVelocity(ecm, leftJoint),
                                     -maxForce, maxForce);
     const double forceR = std::clamp(kp * (qTarget - qr) - kd * JointVelocity(ecm, rightJoint),
@@ -319,13 +319,22 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
     if (baseLink != kNullEntity) baseZ = worldPose(baseLink, ecm).Pos().Z();
     const double speed = std::fabs(JointVelocity(ecm, leftJoint)) +
                          std::fabs(JointVelocity(ecm, rightJoint));
-    const bool closing = targetGap < openGap - 1e-9;
-    const bool onObject = std::fabs(gapNow - expectedWidth) <= widthTolerance;
-    if (closing && speed < 5e-3 && gapNow < openGap - 2e-3 && onObject) {
+    const bool closing = targetGap < zeroGap - 1e-9;
+    // A grasp only counts when the object is really between the jaws: width
+    // match alone would also fire on air.
+    bool between = false;
+    if (objectLink != kNullEntity && baseLink != kNullEntity) {
+      const auto obj = worldPose(objectLink, ecm).Pos();
+      const auto base = worldPose(baseLink, ecm).Pos();
+      between = std::fabs(obj.Y() - base.Y()) <= 0.025 &&
+                std::fabs(obj.Z() - base.Z()) <= 0.08;
+    }
+    const bool onObject = std::fabs(gapNow - expectedWidth) <= widthTolerance && between;
+    if (closing && speed < 5e-3 && gapNow < zeroGap - 1e-3 && onObject) {
       if (++stallFrames >= confirmFrames) engaged = true;
     } else if (closing) {
       stallFrames = 0;
-    } else if (gapNow > openGap - 2e-3) {
+    } else if (gapNow > zeroGap - 1e-3) {
       engaged = false;
       stallFrames = 0;
     }
@@ -340,7 +349,7 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
         Complete(pendingGrasp, false, "TIMEOUT");
         pendingGrasp.reset();
       }
-      if (pendingRelease && gapNow > openGap - 2e-3) {
+      if (pendingRelease && gapNow > zeroGap - 2e-3) {
         Complete(pendingRelease, true, "RELEASED");
         pendingRelease.reset();
       } else if (pendingRelease && pendingSince >= 0.0 && nowT - pendingSince > 3.0) {
