@@ -778,6 +778,19 @@ def main():
         checks["the_missing_consumers_are_named"] = (
             any(not c["has_a_live_consumer"]
                 for c in live["consumers_in_live_path"].values()))
+        # 34 -- "NO CONSUMER" WAS ALSO WRONG. The shell runner calls recovery_driver.py,
+        # which does call apply_respread, so the executor consumer EXISTS. The real gap is
+        # narrower: the call site reads no entry and uses default kwargs, so a revised entry
+        # can never reach the robot. A finding that scopes itself correctly matters more than
+        # a bigger-sounding one that is false.
+        exec_c = live["consumers_in_live_path"].get("executor_recovery") or {}
+        checks["the_executor_consumer_exists_in_the_shell_runner"] = (
+            exec_c.get("has_a_live_consumer") is True
+            and bool(exec_c.get("call_sites_in_live_scripts")))
+        checks["but_it_does_not_read_an_experience_entry"] = (
+            exec_c.get("reads_the_entry") is False)
+        checks["the_claim_does_not_say_no_consumer"] = (
+            "no harness/executor consumer" not in live["claim"])
 
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",

@@ -113,14 +113,21 @@ def test_a_schema_bridge_cannot_rescue_these_entries(report):
         assert row["class_admitted"] is False
 
 
-def test_the_missing_consumers_are_named(report):
-    """The real gap is that the live run scripts have no consumer for harness or executor
-    experience. Both are hard-coded in the stack, so the chain learned to improve modules the
-    robot never reads."""
+def test_the_executor_consumer_exists_but_never_reads_an_entry(report):
+    """THE SECOND CORRECTION. "No consumer" was wrong: the earlier scan looked only at
+    Python baseline scripts and missed the shell runner, which calls recovery_driver.py,
+    which does call apply_respread. The real gap is narrower: that call uses DEFAULT kwargs
+    and performs no experience lookup, so a revised entry can never reach the robot."""
     presence = report["consumers_in_live_path"]
-    assert "harness" in presence and "executor_recovery" in presence
-    assert not presence["harness"]["has_a_live_consumer"]
-    assert not presence["executor_recovery"]["has_a_live_consumer"]
+    executor = presence["executor_recovery"]
+    assert executor["has_a_live_consumer"] is True
+    assert executor["call_sites_in_live_scripts"], \
+        "the shell runner's call to recovery_driver must be visible"
+    assert executor["reads_the_entry"] is False
+
+
+def test_the_claim_does_not_repeat_the_no_consumer_error(report):
+    assert "no harness/executor consumer" not in report["claim"]
 
 
 def test_a_bridge_option_does_not_claim_it_would_work(report):

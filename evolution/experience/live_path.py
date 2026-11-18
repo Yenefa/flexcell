@@ -18,25 +18,31 @@ THE GAP THIS EXISTS FOR
     experiments/baselines/baseline_c.py, which is the code that hands experience to the
     planner for a real run. The loop is correct and unplugged.
 
-    A SCHEMA MISMATCH IS NOT THE REAL REASON, AND THIS FILE FIRST SAID IT WAS. Looking at
-    the two ACTIVE entries more closely showed the first explanation was too coarse:
+    A SCHEMA MISMATCH IS NOT THE REASON; AND "NO CONSUMER" WAS ALSO WRONG. This file has
+    been corrected twice, and the second correction is the important one.
 
-        auto-harness_dds_exhaustion  failure_class=tooling, consumer=harness
-        E2                           failure_class=control, consumer=executor_recovery
+    First: the two ACTIVE entries are tooling/control class, and the live retrieve() admits
+    only planning/state while excluding "landing"/"spread"/"participant", so both are
+    refused BY DESIGN. A schema bridge would change nothing.
 
-    The live path's retrieve() admits only failure_class in (planning, state) and its
-    _NON_PLANNER word list excludes "landing", "spread", "participant" - so BOTH entries
-    are excluded BY DESIGN, not by an accident of field names. No schema bridge would make
-    them visible: the live retrieve() is planner-only, and neither entry is a planner entry.
+    Second: "the live path has no consumer" was wrong too. The earlier scan only looked at
+    experiments/baselines/run_*.py and missed the SHELL runner:
 
-    The real reason is stronger and worse: THE LIVE RUN PATH HAS NO CONSUMER for either
-    harness or executor experience. run_baseline_b.py and baseline_c.py never call
-    apply_respread and never apply a DDS config from an entry. Both are hard-coded into the
-    stack. So the chain learned to improve two consumers that the live path does not read.
+        setup/acceptance/evobot_unified_runner_20261111/run_batch.sh:107
+            python3 "$RECOVERY" --run "$D" --ground-truth ...
 
-    Choosing a schema (the original two "options") would therefore "fix" nothing: it would
-    bridge two lessons into a filter that correctly refuses them, and the robot would behave
-    exactly as before. The options below state that plainly.
+    That calls runtime/recovery/recovery_driver.py, which DOES reach the executor:
+    line 146 calls recover.apply_respread(plan, avoid=avoid). The consumer EXISTS.
+
+    The actual, narrower gap: that call site uses the function's DEFAULT kwargs and performs
+    NO experience lookup. The compiled E2 asset carries spread_step=0.09, cluster_m=0.12 —
+    identical to the defaults at this snapshot, so behaviour is currently the same. The
+    defect is that a FUTURE REVISION of the entry (a different spread_step, a narrowed scope)
+    can never reach the live call: the chain can revise an entry, but the robot keeps using
+    whatever the function signature says.
+
+    So: not "no consumer" (wrong), not "schema mismatch" (wrong), but "the consumer does not
+    read the entry it is supposed to execute". That is the smallest honest statement.
 
 WHAT IT REPORTS
     active_entries            how many ACTIVE entries the chain holds
@@ -143,6 +149,7 @@ def report(live_store=None, live_ledger=None, chain_store=None):
         consumer_presence[consumer] = {
             "call_sites_in_live_scripts": live_scripts.get(consumer, []),
             "has_a_live_consumer": bool(live_scripts.get(consumer)),
+            "reads_the_entry": _consumer_reads_entry(consumer),
         }
     return {
         "active_entries": len(chain_rows),
@@ -165,11 +172,37 @@ def report(live_store=None, live_ledger=None, chain_store=None):
                       "respread and the harness config that the entries describe, with a "
                       "reviewed gate before each call - this changes the frozen baseline")},
         ],
-        "claim": ("the chain is correct and UNPLUGGED, and a schema bridge is NOT the fix: "
-                  "the live path is planner-only and has no harness/executor consumer at "
-                  "all. The two ACTIVE entries are for consumers the robot never reads. "
-                  "Only adding those consumers to the live path closes the loop"),
+        "claim": ("the chain is correct and UNPLUGGED, but NOT for the reasons first given. "
+                  "Not a schema mismatch: both entries are non-planner class and excluded by "
+                  "design. Not 'no consumer': the shell runner calls recovery_driver.py which "
+                  "does call apply_respread. The real gap is that the call uses DEFAULT kwargs "
+                  "and no experience lookup, so a revised entry can never reach the robot"),
     }
+
+
+def _consumer_reads_entry(consumer):
+    """Does the LIVE call site read an experience entry, or only hard-coded defaults?
+
+    The first version of this file reported "no live consumer" because it scanned only
+    experiments/baselines/run_*.py. The shell runner also calls recovery_driver.py, which
+    does reach apply_respread. So a call-site count alone under-reports the truth: what
+    matters is whether the entry's PARAMETERS can reach the call.
+    """
+    files = {
+        "executor_recovery": ["runtime/recovery/recovery_driver.py"],
+        "harness": ["runtime/recovery/recovery_driver.py"],
+        "planner": ["experiments/baselines/baseline_c.py"],
+    }
+    markers = ("entry_id", "skill_asset", "records_v2", "binding_for")
+    paths = files.get(consumer, [])
+    for name in paths:
+        path = os.path.join(WT, name)
+        if not os.path.exists(path):
+            continue
+        src = open(path, encoding="utf-8").read()
+        if any(marker in src for marker in markers):
+            return True
+    return False
 
 
 def _live_planner_filter():
@@ -204,6 +237,23 @@ def _live_run_scripts():
              "planner": ["validate_plan", "describe"],
              "spread_policy": ["spread("]}
     out = {consumer: [] for consumer in calls}
+    # ALSO scan the shell runners. The first version of this file looked only at Python
+    # baseline scripts and therefore reported "no consumer" for the executor - wrong:
+    # evobot_unified_runner_20261111/run_batch.sh:107 calls recovery_driver.py, which calls
+    # apply_respread at line 146.
+    shell_root = os.path.join(WT, "setup", "acceptance")
+    for shell_dir in sorted(os.listdir(shell_root)):
+        shell_path = os.path.join(shell_root, shell_dir)
+        if not os.path.isdir(shell_path):
+            continue  # setup/acceptance also contains files, not only batch directories
+        for name in sorted(os.listdir(shell_path)):
+            if not name.endswith(".sh"):
+                continue
+            path = os.path.join(shell_root, shell_dir, name)
+            src = open(path, encoding="utf-8", errors="replace").read()
+            for consumer, symbols in calls.items():
+                if consumer == "executor_recovery" and "recovery_driver" in src:
+                    out[consumer].append("%s/%s:recovery_driver" % (shell_dir, name))
     for name in sorted(os.listdir(root)):
         if not name.startswith("run_") or not name.endswith(".py"):
             continue

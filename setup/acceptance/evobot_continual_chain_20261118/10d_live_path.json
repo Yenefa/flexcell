@@ -5,15 +5,19 @@
     "no provenance_verified": 1
   },
   "chain_store": "setup\\acceptance\\evobot_continual_chain_20261118\\records_v2.jsonl",
-  "claim": "the chain is correct and UNPLUGGED, and a schema bridge is NOT the fix: the live path is planner-only and has no harness/executor consumer at all. The two ACTIVE entries are for consumers the robot never reads. Only adding those consumers to the live path closes the loop",
+  "claim": "the chain is correct and UNPLUGGED, but NOT for the reasons first given. Not a schema mismatch: both entries are non-planner class and excluded by design. Not 'no consumer': the shell runner calls recovery_driver.py which does call apply_respread. The real gap is that the call uses DEFAULT kwargs and no experience lookup, so a revised entry can never reach the robot",
   "consumers_in_live_path": {
     "executor_recovery": {
-      "call_sites_in_live_scripts": [],
-      "has_a_live_consumer": false
+      "call_sites_in_live_scripts": [
+        "evobot_unified_runner_20261111/run_batch.sh:recovery_driver"
+      ],
+      "has_a_live_consumer": true,
+      "reads_the_entry": false
     },
     "harness": {
       "call_sites_in_live_scripts": [],
-      "has_a_live_consumer": false
+      "has_a_live_consumer": false,
+      "reads_the_entry": false
     }
   },
   "entries": [

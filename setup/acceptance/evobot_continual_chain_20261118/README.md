@@ -433,6 +433,33 @@ capability is what makes that visible instead of leaving it to an audit.
     **correctness check on the replay, not an effect measurement**, and conflating the two
     would turn this back into "we measured it".
 
+34. **THE SECOND DIAGNOSIS WAS ALSO WRONG, AND IT IS CORRECTED HERE.** The previous round
+    claimed the live path had NO harness/executor consumer. That scan looked only at
+    `experiments/baselines/run_*.py` and missed the SHELL runner:
+
+        setup/acceptance/evobot_unified_runner_20261111/run_batch.sh:107
+            python3 "$RECOVERY" --run "$D" --ground-truth ...
+        runtime/recovery/recovery_driver.py:146
+            retried = recover.apply_respread(plan, avoid=avoid)
+
+    **The executor consumer EXISTS.** What is missing is narrower: that call site uses the
+    function's DEFAULT kwargs and performs **no experience lookup**. The compiled E2 asset
+    carries `spread_step=0.09, cluster_m=0.12` — **identical to the defaults at this
+    snapshot**, so behaviour is currently the same. The defect is that a **FUTURE REVISION**
+    of the entry (a different spread_step, a narrowed scope) **can never reach the robot**:
+    the chain can revise an entry, but the live call keeps using the function signature.
+
+    Three diagnoses, each narrower and more accurate than the last:
+
+    | round | claim | verdict |
+    | --- | --- | --- |
+    | 1 | schema mismatch; bridge it | **wrong** — entries are non-planner class, refused by design |
+    | 2 | no live harness/executor consumer | **wrong** — missed the shell runner; executor consumer exists |
+    | 3 | consumer exists but never reads an entry | **accurate** — defaults, no lookup, revisions cannot reach the robot |
+
+    **Narrowing a diagnosis is approaching the truth, not weakening the finding.** A smaller
+    correct claim beats a larger wrong one.
+
 33. **THE FIRST DIAGNOSIS WAS TOO COARSE, AND IT IS CORRECTED HERE.** The previous round
     blamed a two-store schema mismatch. Looking at the two ACTIVE entries more closely:
 
@@ -484,7 +511,7 @@ capability is what makes that visible instead of leaving it to an audit.
     visible.** The artifact reports the numbers and both options, and **does not pretend the
     loop is closed.**
 
-`verify.py` asserts **133 checks**, including that both gates really ran, that the asset
+`verify.py` asserts **136 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -512,7 +539,7 @@ with one sentence**, and that **a capable module with an unmeasurable archive is
 a selection effect rather than as any of the three tempting answers**, and that **the
 chain's connection to the live planning path is measured and reported as unplugged, with the
 cost of both ways to close it**, that **a schema bridge cannot rescue these entries**, and
-that **the missing harness/executor consumers are named with their zero call sites**.
+that **the executor consumer exists in the shell runner yet never reads an experience entry**.
 
 ---
 
