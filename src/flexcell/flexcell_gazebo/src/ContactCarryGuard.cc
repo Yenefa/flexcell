@@ -169,7 +169,9 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
           << ",\"ql\":" << qLeft << ",\"qr\":" << qRight
           << ",\"stall\":" << stallFrames
           << ",\"ox\":" << offX << ",\"oy\":" << offY << ",\"oz\":" << offZ
-          << ",\"jaw_speed\":" << jawSpeed << "}";
+          << ",\"jaw_speed\":" << jawSpeed
+        << ",\"signL\":" << signLeft_ << ",\"signR\":" << signRight_
+        << ",\"calib\":" << calibSteps << ",\"target_gap\":" << targetGap << "}";
       reply.set_data(out.str());
       return true;
     }
@@ -178,7 +180,9 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
         << ",\"state\":\"" << command->state << "\",\"gap\":" << command->gap
         << ",\"obj_z\":" << objZ << ",\"base_z\":" << baseZ
         << ",\"rel_z\":" << (objZ - baseZ)
-        << ",\"ql\":" << qLeft << ",\"qr\":" << qRight << "}";
+        << ",\"ql\":" << qLeft << ",\"qr\":" << qRight
+        << ",\"ox\":" << offX << ",\"oy\":" << offY << ",\"oz\":" << offZ
+        << ",\"jaw_speed\":" << jawSpeed << "}";
     reply.set_data(out.str());
     return true;
   }
@@ -209,7 +213,11 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
         << (engaged ? "GRASPED" : "UNGRASPED") << "\",\"gap\":" << gapNow
         << ",\"obj_z\":" << objZ << ",\"base_z\":" << baseZ
         << ",\"rel_z\":" << (objZ - baseZ)
-        << ",\"ql\":" << qLeft << ",\"qr\":" << qRight << "}";
+        << ",\"ql\":" << qLeft << ",\"qr\":" << qRight
+        << ",\"ox\":" << offX << ",\"oy\":" << offY << ",\"oz\":" << offZ
+        << ",\"jaw_speed\":" << jawSpeed
+        << ",\"signL\":" << signLeft_ << ",\"signR\":" << signRight_
+        << ",\"calib\":" << calibSteps << ",\"target_gap\":" << targetGap << "}";
     reply.set_data(out.str());
     return true;
   }
@@ -330,9 +338,17 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
       return;
     }
     const double qTarget = std::clamp(0.5 * (targetGap - zeroGap), jointLower, jointUpper);
-    const double forceL = signLeft_ * std::clamp(kp * (qTarget - ql) - kd * JointVelocity(ecm, leftJoint),
+    // Velocity servo: a 1 g finger with a stiffness law chatters (measured
+    // 1.89 m/s of jaw speed), so command a bounded jaw speed and damp to it.
+    // A 1 g finger with a stiff loop chatters; inside 0.3 mm of the target the
+    // command is pure damping so the jaw settles instead of ringing.
+    const double errL = qTarget - ql;
+    const double errR = qTarget - qr;
+    const double vCmdL = std::fabs(errL) < 3e-4 ? 0.0 : std::clamp(kp * errL, -0.02, 0.02);
+    const double vCmdR = std::fabs(errR) < 3e-4 ? 0.0 : std::clamp(kp * errR, -0.02, 0.02);
+    const double forceL = signLeft_ * std::clamp(kd * (vCmdL - JointVelocity(ecm, leftJoint)),
                                 -maxForce, maxForce);
-    const double forceR = signRight_ * std::clamp(kp * (qTarget - qr) - kd * JointVelocity(ecm, rightJoint),
+    const double forceR = signRight_ * std::clamp(kd * (vCmdR - JointVelocity(ecm, rightJoint)),
                                 -maxForce, maxForce);
     ecm.SetComponentData<components::JointForceCmd>(leftJoint, std::vector<double>{forceL});
     ecm.SetComponentData<components::JointForceCmd>(rightJoint, std::vector<double>{forceR});
@@ -367,15 +383,19 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
       // so a world-frame check fails whenever the wrist is yawed.
       const auto offset = basePose.Rot().RotateVectorReverse(objPose.Pos() - basePose.Pos());
       offX = offset.X(); offY = offset.Y(); offZ = offset.Z();
-      between = std::fabs(offset.Y()) <= 0.030 && std::fabs(offset.X()) <= 0.120 &&
+      between = std::fabs(offset.Y()) <= 0.030 && std::fabs(offset.X()) <= 0.220 &&
                 std::fabs(offset.Z()) <= 0.200;
     }
     jawSpeed = std::fabs(0.5 * (JointVelocity(ecm, leftJoint) + JointVelocity(ecm, rightJoint)));
-    const bool onObject = std::fabs(gapNow - expectedWidth) <= widthTolerance && between;
-    if (closing && speed < 5e-3 && onObject) {
+    // A square box gripped across its diagonal is legitimately wider than its
+    // face width (35 mm -> ~50 mm), so the width test only has to show the jaw
+    // closed onto something between the pads, not match a nominal width.
+    const bool widthMatch = std::fabs(gapNow - expectedWidth) <= widthTolerance;
+    const bool onObject = between && (widthMatch || gapNow <= expectedWidth + 2e-3);
+    if (closing && onObject) {
       if (++stallFrames >= confirmFrames) engaged = true;
     } else if (closing) {
-      stallFrames = 0;
+      if (stallFrames > 0) --stallFrames;  // decay, do not erase
     } else if (gapNow > zeroGap - 1e-3) {
       engaged = false;
       stallFrames = 0;
@@ -387,7 +407,7 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
       if (pendingGrasp && engaged) {
         Complete(pendingGrasp, true, "GRASPED");
         pendingGrasp.reset();
-      } else if (pendingGrasp && pendingSince >= 0.0 && nowT - pendingSince > 3.0) {
+      } else if (pendingGrasp && pendingSince >= 0.0 && nowT - pendingSince > 10.0) {
         Complete(pendingGrasp, false, "TIMEOUT");
         pendingGrasp.reset();
       }

@@ -357,7 +357,7 @@ class CarryServer(Node):
                                         args=(object_id, offset, stop_evt, session),
                                         daemon=True)
         self._thread.start()
-        if self._backend in ('detachable_joint', 'contact_grasp'):
+        if self._backend == 'detachable_joint':
             confirmed, reason = self._follow.wait_ready(timeout=2.)
             if not confirmed:
                 self._log.write({'event': 'follow_engage_failed', 'object': object_id,
@@ -365,6 +365,15 @@ class CarryServer(Node):
                                  'follow': self._follow.summary()})
                 self._on_stop(None, cause='follow_engage_failed')
                 return False
+        if self._backend == 'contact_grasp':
+            # The guard already confirmed the grasp by measurement. The follow
+            # monitor is an extra slip watch, not the thing that makes a grasp
+            # real, so it must not retire a confirmed session.
+            confirmed, reason = self._follow.wait_ready(timeout=1.)
+            if not confirmed:
+                self._log.write({'event': 'follow_monitor_unavailable', 'object': object_id,
+                                 'session': session, 'reason': reason,
+                                 'follow': self._follow.summary()})
         self.get_logger().info(
             'carry ENGAGED object=%s offset=[%.3f %.3f %.3f]'
             % (object_id, offset[0], offset[1], offset[2]))
@@ -468,7 +477,7 @@ class CarryServer(Node):
         request.data = json.dumps(payload)
         service = '/world/%s/flexcell/contact/%s' % (self._world, kind)
         try:
-            reply = self._gz_node.request(service, request, self._String, self._String, 4000)
+            reply = self._gz_node.request(service, request, self._String, self._String, 12000)
         except Exception as exc:  # noqa: BLE001 - a dead service must not kill carry
             self.get_logger().error('contact %s failed: %s' % (kind, type(exc).__name__))
             return False, ''

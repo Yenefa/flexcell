@@ -194,8 +194,8 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
                            ('right_joint', 'gripper_right_joint'),
                            ('base_link', 'link5'),
                            ('zero_gap', '0.034'), ('closed_gap', '0.026'),
-                           ('max_force', '1.5'), ('kp', '30'), ('kd', '1'), ('expected_object_width', '0.035'),
-                           ('width_tolerance', '0.010'), ('confirm_frames', '40')]:
+                           ('max_force', '1.5'), ('kp', '50'), ('kd', '25'), ('expected_object_width', '0.035'),
+                           ('width_tolerance', '0.012'), ('confirm_frames', '40')]:
             ET.SubElement(guard, key).text = value
         ET.SubElement(guard, 'object_model').text = tracked[0]
     if contact_trace:
