@@ -57,6 +57,35 @@
 于是重试第三次被拒为"declared destination occupied"。修改为**按余量选轴**，并且两轴都不满足契约时**拒绝**而不是发出一个必然被拒的计划；
 不传 avoid 时行为与旧实现**逐字节相同**，11/11 `benchmark/tests/test_recovery_driver.py` 仍通过。
 
+## 3.94 根因不止路径：**验证快照进了身份摘要**
+
+上一节修了路径反斜杠，但 CI 仍失败。用 WSL 在真正的 Linux 上重新生成并与 Windows 逐字段对比，
+才找到两更深层的根因：
+
+| 层 | 平台差异 | 后果 |
+| --- | --- | --- |
+| 路径 | `relpath` Windows 出反斜杠 | 已修（`_rel`） |
+| 验证快照文本 | `regression.details` 存 verifier 失败原文（`WinError 267 目录名称无效` vs `/mnt/c/.../LIBERO`） | entry_id 不同 |
+| 验证快照结果 | 一个基线 verifier 在 Windows 失败、Linux 通过 → `baselined`/`recovered` 名单不同 | record_sha256/chain 不同 |
+
+**本质：`regression` / `misuse_check` 是这次运行的测量（当时哪些 verifier 恰好失败），
+不是关于这条经验的语义事实。** 把它们写进身份摘要，等于让"哪个 OS 上跑的"决定经验条目的身份。
+
+### 三层修正
+
+1. `schema._body`（entry_id）排除验证快照；
+2. `schema.record_body`（record_sha256）排除验证快照，curate/lifecycle/demo 重建副本统一用它；
+3. `store._hash`（chain_sha256）排除验证快照，`verify_chain` 复算规则与之对齐；
+4. `regression.portable()` 写入前剥离原始失败文本（可重跑得到，不丢证据）。
+
+**链仍覆盖全部语义字段**（lesson、action、evidence、version、family），
+只把派生的、平台相关的验证快照排除在外——它们仍留在记录上作审计。
+
+### 决定性验证
+
+在 **Windows 和 WSL Linux 各生成一份完整 demo**，逐文件对比：**0 个文件差异**。
+这才是 churn 真正归零的证据，而不是只看本地（Windows 对 Windows）的 churn=0。
+
 ## 3.95 本地 churn=0 掩盖了 CI 上 17 个文件的 ID 漂移
 
 `ci` workflow 连续 **7 个提交**失败，报的是 `test_the_committed_evidence_ids_do_not_drift`：

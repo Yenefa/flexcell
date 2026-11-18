@@ -193,8 +193,7 @@ def _demonstrate_revision(store_path, ledger_path, dest):
             if narrowed:
                 body["measured_families"] = []
             body["entry_id"] = schema.digest(schema._body(body))
-            body["record_sha256"] = schema.digest(
-                {k: v for k, v in body.items() if k != "record_sha256"})
+            body["record_sha256"] = schema.digest(schema.record_body(body))
             store.append(cstore, body)
         shutil.copyfile(ledger_path, cledger)
         before = lifecycle.review(cstore, cledger, measure=True,

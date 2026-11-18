@@ -52,7 +52,14 @@ FAILURE_CLASSES = ["perception", "planning", "kinematics", "control", "grasp",
 
 
 def _hash(record):
-    return hashlib.sha256(json.dumps(record, sort_keys=True).encode()).hexdigest()
+    # Verification snapshots (regression, misuse_check) are run-specific MEASUREMENTS.
+    # One baselined verifier passes on Linux and fails on Windows, so hashing the raw
+    # snapshot made the same record hash differ across platforms and churned the whole
+    # chain on CI. The lesson identity (entry_id) and all semantic fields are still
+    # covered; the snapshots remain on the record as audit evidence.
+    body = {k: v for k, v in record.items()
+            if k not in ("regression", "misuse_check")}
+    return hashlib.sha256(json.dumps(body, sort_keys=True).encode()).hexdigest()
 
 
 def _check_scope(text):

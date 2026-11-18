@@ -231,8 +231,8 @@ def _clause_failures(root, excluded_names, sealed):
     are worth a separate channel rather than folded into the runner's.
     """
     out, excluded = [], {}
-    for path in glob.glob(os.path.join(root, "evobot*", "**", "verdict*.json"),
-                          recursive=True):
+    for path in sorted(glob.glob(os.path.join(root, "evobot*", "**", "verdict*.json"),
+                          recursive=True)):
         try:
             doc = json.load(open(path, encoding="utf-8"))
         except (OSError, ValueError):
@@ -297,7 +297,7 @@ def _console_failures(root, excluded_names, sealed):
     distinguishing field is layer="HARNESS".
     """
     out, excluded = [], {}
-    for path in glob.glob(os.path.join(root, "evobot*", "summary.txt")):
+    for path in sorted(glob.glob(os.path.join(root, "evobot*", "summary.txt"))):
         rel = _rel(path, root)
         batch = rel.split("/")[0]
         if batch in excluded_names:
@@ -361,8 +361,8 @@ def scan_with_report(acceptance=None, include_held_out=False):
     excluded_names = set() if include_held_out else held_out_batches()
     sealed = set() if include_held_out else sealed_instances()
     out, excluded = [], {}
-    for path in glob.glob(os.path.join(root, "evobot*", "**", "task*.out"),
-                          recursive=True):
+    for path in sorted(glob.glob(os.path.join(root, "evobot*", "**", "task*.out"),
+                          recursive=True)):
         try:
             text = open(path, encoding="utf-8", errors="replace").read()
         except OSError:

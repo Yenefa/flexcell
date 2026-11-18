@@ -120,6 +120,22 @@ def run_verifier(name, acceptance=None):
     return True, "ok"
 
 
+def portable(result):
+    """The regression result with only platform-invariant fields.
+
+    WHY: "details" holds raw failure text from each baseline verifier -- paths, locale
+    strings, WinError codes. Those are reproducible by re-running the verifier, but they are
+    NOT stable across OS, so storing them in a digest-identified record made the same entry
+    hash differently on Windows and Linux. The DECISION fields (verdict, new_failures,
+    baselined, ran, recovered, why) are names and counts and stay; the raw diagnostic text
+    is deliberately not persisted. Dropping it loses no evidence: it is regenerable output,
+    and the names of the failing verifiers are still here.
+    """
+    out = dict(result or {})
+    out.pop("details", None)
+    return out
+
+
 def check(entry, acceptance=None, known_path=None, runner=run_verifier):
     """Gate one entry. Returns a verdict dict; never raises for a verifier failure."""
     consumer = entry.get("consumer")

@@ -167,13 +167,13 @@
           "verdict": "REJECT"
         },
         "E2": {
-          "active": "abdf8332702eb48627a5861b9604e850c9b8cad1eba113ddc2497c80b67ba820",
+          "active": "a397a09e40a0dfa08a654c6363260e1b699534bd185f0b1d08967057f64bddf9",
           "candidate": "2bc9dc99ec4129d5a13292270a9202e1873e987847c5e1a0e43f300fe0007258",
           "status": "ACTIVE",
           "verdict": "ACCEPT"
         },
         "auto-harness_dds_exhaustion": {
-          "active": "4c298529ddc56265b75bfe3457569a18cdfa7a240d90f77c8e99540e7d737583",
+          "active": "614a39e9f84ec5b38fa7f0d6e8e0c232a787b5da905badb2c2bce719ed4ab5d4",
           "candidate": "5920943a22e60c97f8b719d22a28c0dacfbc8b91e2c48d42f5689f97815292f2",
           "status": "ACTIVE",
           "verdict": "ACCEPT"
@@ -191,14 +191,14 @@
         "E2": {
           "consumer": "executor_recovery",
           "kept": [
-            "abdf8332702eb48627a5861b9604e850c9b8cad1eba113ddc2497c80b67ba820"
+            "a397a09e40a0dfa08a654c6363260e1b699534bd185f0b1d08967057f64bddf9"
           ],
           "refused_count": 5
         },
         "auto-harness_dds_exhaustion": {
           "consumer": "harness",
           "kept": [
-            "4c298529ddc56265b75bfe3457569a18cdfa7a240d90f77c8e99540e7d737583"
+            "614a39e9f84ec5b38fa7f0d6e8e0c232a787b5da905badb2c2bce719ed4ab5d4"
           ],
           "refused_count": 5
         }
@@ -235,7 +235,7 @@
             "verdict": "CHANGED"
           },
           "effect_state": "used_helpful",
-          "entry_id": "abdf8332702eb48627a5861b9604e850c9b8cad1eba113ddc2497c80b67ba820"
+          "entry_id": "a397a09e40a0dfa08a654c6363260e1b699534bd185f0b1d08967057f64bddf9"
         },
         "auto-harness_dds_exhaustion": {
           "delta": {
@@ -248,7 +248,7 @@
             "verdict": "CHANGED"
           },
           "effect_state": "used_helpful",
-          "entry_id": "4c298529ddc56265b75bfe3457569a18cdfa7a240d90f77c8e99540e7d737583"
+          "entry_id": "614a39e9f84ec5b38fa7f0d6e8e0c232a787b5da905badb2c2bce719ed4ab5d4"
         }
       },
       "step": "applied_and_outcome"
@@ -256,7 +256,7 @@
     {
       "by_label": {
         "E2": {
-          "asset_id": "skill.executor_recovery.abdf8332702e",
+          "asset_id": "skill.executor_recovery.a397a09e40a0",
           "asset_version": 1,
           "callable": {
             "function": "apply_respread",
@@ -339,7 +339,7 @@
             "applied": 2,
             "decision": "RETIRE",
             "effect": "used_harmful",
-            "entry_id": "4c298529ddc56265b75bfe3457569a18cdfa7a240d90f77c8e99540e7d737583",
+            "entry_id": "614a39e9f84ec5b38fa7f0d6e8e0c232a787b5da905badb2c2bce719ed4ab5d4",
             "harmful": 1,
             "helpful": 1,
             "label": "auto-harness_dds_exhaustion",
@@ -351,7 +351,7 @@
         "parent_linked": true,
         "ran": true,
         "retired": true,
-        "retired_entry_id": "0dee3b7d8afc66e44c8ba1438a16a8f8e977c1ff4b8b2f971f2fc124c853bc1a",
+        "retired_entry_id": "8a9180d59c58031c90f019a15f3dbac22433d28b9d9d03727ffb874e2a0bc4ec",
         "retired_reason": "applied 2 time(s) and at least one outcome was WORSE",
         "status_after": "RETIRED"
       },

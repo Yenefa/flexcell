@@ -80,9 +80,31 @@ def digest(obj):
     return hashlib.sha256(canonical(obj).encode("utf-8")).hexdigest()
 
 
+def record_body(record):
+    """Fields covered by a record digest, shared by activation, lifecycle and store.
+
+    Verification snapshots (regression, misuse_check) are MEASUREMENTS of the run that
+    activated the entry — which verifiers happened to fail on this OS. One baselined
+    verifier differs across Windows/Linux, so including them made the same record hash
+    differently on each platform and churned the whole chain on CI. The lesson identity
+    and all semantic fields remain covered; snapshots stay on the record as audit text.
+    """
+    return {k: v for k, v in record.items()
+            if k not in ("record_sha256", "regression", "misuse_check")}
+
 def _body(entry):
+    # "regression" is EXCLUDED from identity on purpose. Activation writes the regression
+    # gate's result into the record, and its "details" hold the raw last line of each
+    # baseline verifier's output -- paths, locale text, WinError strings. Those differ by
+    # platform and by what else failed in the repo at that moment. An entry's IDENTITY is
+    # its semantic content (what lesson, what action, what evidence, which version), NOT
+    # "what a verifier happened to print when this was activated". Including it made the
+    # SAME entry get DIFFERENT ids on Windows and Linux and churned the whole hash chain on
+    # CI (17 files) while local freshness still read zero. The regression result stays on
+    # the record as audit evidence; it just does not define the identity.
     return {k: v for k, v in entry.items()
-            if k not in ("entry_id", "record_sha256", "prev_sha256", "chain_sha256")}
+            if k not in ("entry_id", "record_sha256", "prev_sha256", "chain_sha256",
+                         "regression")}
 
 
 def make_entry(origin, task_family, failure_class, source_run, evidence,

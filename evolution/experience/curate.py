@@ -304,7 +304,9 @@ def activate(candidate_id, validation, store_path=STORE, ledger_path=LEDGER,
                                 label=label or cand["version"].get("label"),
                                 parent_entry_id=candidate_id)
     if gate_result is not None:
-        successor["regression"] = gate_result["regression"]
+        # Keep only portable verdict fields: raw verifier failure text is OS-specific and
+        # would make this record's hash differ across platforms (17-file churn on CI).
+        successor["regression"] = regression.portable(gate_result["regression"])
         if gate_result.get("misuse") is not None:
             successor["misuse_check"] = {
                 "verdict": gate_result["misuse"]["verdict"],
@@ -312,8 +314,10 @@ def activate(candidate_id, validation, store_path=STORE, ledger_path=LEDGER,
                 "why": gate_result["misuse"]["why"],
             }
     successor["entry_id"] = schema.digest(schema._body(successor))
-    successor["record_sha256"] = schema.digest(
-        {k: v for k, v in successor.items() if k != "record_sha256"})
+    # The verification snapshots are MEASUREMENTS of this run (which verifiers happened
+    # to fail on this OS), not facts about the lesson. They must not enter any digest:
+    # one baselined verifier differs across Windows/Linux, which churned the chain.
+    successor["record_sha256"] = schema.digest(schema.record_body(successor))
     problems = schema.validate(successor)
     if problems:
         raise schema.EntryError("refusing to activate an invalid entry: %s" % problems)

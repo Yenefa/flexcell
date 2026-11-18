@@ -433,6 +433,26 @@ capability is what makes that visible instead of leaving it to an audit.
     **correctness check on the replay, not an effect measurement**, and conflating the two
     would turn this back into "we measured it".
 
+48. **THE ROOT CAUSE HAD THREE LAYERS, NOT ONE.** Fixing path backslashes (item 47) did NOT
+    stop CI. Regenerating the SAME demo on Windows and in WSL Linux and diffing field by field
+    exposed two deeper causes:
+
+    | layer | platform difference | effect |
+    | --- | --- | --- |
+    | paths | `relpath` emits backslashes on Windows | fixed by `_rel` |
+    | snapshot text | `regression.details` holds raw verifier output (`WinError 267 目录名称无效` vs `/mnt/c/.../LIBERO`) | different entry_id |
+    | snapshot result | one baselined verifier fails on Windows, passes on Linux -> `baselined`/`recovered` lists differ | different record_sha256 / chain_sha256 |
+
+    **A verification snapshot is a MEASUREMENT of this run (which verifiers happened to fail on
+    this OS), not a semantic fact about the lesson.** Hashing it made the OS decide an entry's
+    identity. `schema._body`, `schema.record_body`, `store._hash` now all exclude `regression`
+    and `misuse_check`; `verify_chain` re-hashing was aligned; `regression.portable()` strips
+    raw failure text before writing (regenerable, so no evidence lost). The chain still covers
+    every semantic field; only the derived, platform-dependent snapshot is excluded.
+
+    **Decisive check:** generate the full demo on Windows AND WSL Linux, diff every file:
+    **0 files differ**. That, not a local Windows-vs-Windows churn=0, is what proves the fix.
+
 47. **LOCAL churn=0 HID A 17-FILE ID DRIFT ON CI.** The `ci` workflow failed on SEVEN
     consecutive commits with `test_the_committed_evidence_ids_do_not_drift`: 17 artifacts'
     entry-ids differed from a CI regeneration — while the local freshness check reported

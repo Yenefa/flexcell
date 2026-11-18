@@ -159,8 +159,7 @@ def retire(entry_id, reason, store_path=STORE, ledger_path=LEDGER,
                                 retired_reason=reason,
                                 retired_by=recorded_by)
     successor["entry_id"] = schema.digest(schema._body(successor))
-    successor["record_sha256"] = schema.digest(
-        {k: v for k, v in successor.items() if k != "record_sha256"})
+    successor["record_sha256"] = schema.digest(schema.record_body(successor))
     problems = schema.validate(successor)
     if problems:
         raise schema.EntryError("refusing to retire into an invalid entry: %s" % problems)
@@ -280,8 +279,7 @@ def revise(entry_id, store_path=STORE, ledger_path=LEDGER, acceptance=None,
                                 revised_removed=scope["unconfirmed"],
                                 revised_by=recorded_by)
     successor["entry_id"] = schema.digest(schema._body(successor))
-    successor["record_sha256"] = schema.digest(
-        {k: v for k, v in successor.items() if k != "record_sha256"})
+    successor["record_sha256"] = schema.digest(schema.record_body(successor))
     problems = schema.validate(successor)
     if problems:
         raise schema.EntryError("refusing to revise into an invalid entry: %s" % problems)
