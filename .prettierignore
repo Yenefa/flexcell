@@ -23,3 +23,11 @@ docs/
 # Pilot experiment records are byte-stable evidence (run outputs, event logs).
 # Reformatting would change the bytes a reviewer may hash; keep them raw.
 experiments/
+
+# Grasp contact probe R&D line (research/grasp_contact_probe).
+#
+# This tree holds measurement evidence, not source that anyone hand-edits:
+# results/**/*.json is emitted by scripts/run_probe.py + analyze.py, and the
+# hand-written Markdown there deliberately mirrors those tables. Reformatting it
+# would churn generated artefacts and make a diff look like a physics change.
+research/grasp_contact_probe/
