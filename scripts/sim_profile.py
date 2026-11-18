@@ -184,6 +184,11 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
         # measured stand-off explicitly instead of inheriting the hover value.
         config.setdefault('pick_server', {}).setdefault('ros__parameters', {})[
             'grasp_dz_m'] = -0.01
+        # Carrying the box at the fingers makes the transport plan harder than a
+        # bare arm move; give the planner the time it needs instead of failing at
+        # the 5 s default.
+        config.setdefault('move_to_pose_server', {}).setdefault('ros__parameters', {})[
+            'planning_timeout_s'] = 15.0
     if backend == 'contact_grasp' and not perception_only:
         # Contact carry: the jaw is driven by the guard, the object is held by
         # friction only. No DetachableJoint plugin is added to this world.
