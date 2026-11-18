@@ -15,7 +15,7 @@ ASPIRE 或新增模型 API。先启动已有 FlexCell 仿真；以下命令不�
 export ROS_DOMAIN_ID=46
 export RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
 # 如果当前 install 不在本 checkout 的 install/，指定实际路径：
-export FLEXCELL_ROS_SETUP=/home/ros/flexcell-merged/install/setup.bash
+export FLEXCELL_ROS_SETUP=/home/ros/agentic_workcell_ws/install/setup.bash
 ./scripts/ros_mcp.sh bridge
 ```
 

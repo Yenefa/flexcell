@@ -8,7 +8,7 @@
 ## 0. 先确认一件事：能不能 clone
 
 ```bash
-git clone https://github.com/Yenefa/flexcell.git && cd flexcell
+git clone https://github.com/Yenefa/flexcell.git agentic_workcell_ws && cd agentic_workcell_ws
 git fetch origin
 git status --short
 git log --oneline -1 HEAD

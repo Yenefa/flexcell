@@ -7,7 +7,24 @@
 # FAILS the start.
 set -o pipefail
 REPO=$(dirname "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")")
-RUNTIME=${FLEXCELL_WS:-$HOME/agentic_workcell_ws}
+_default_runtime() {
+  if [ -n "${FLEXCELL_WS:-}" ]; then
+    printf '%s\n' "$FLEXCELL_WS"
+    return
+  fi
+  if [ -f "$REPO/install/setup.bash" ]; then
+    printf '%s\n' "$REPO"
+    return
+  fi
+  local parent
+  parent=$(cd "$REPO/../.." 2>/dev/null && pwd)
+  if [ -n "$parent" ] && [ -f "$parent/install/setup.bash" ]; then
+    printf '%s\n' "$parent"
+    return
+  fi
+  printf '%s\n' "$REPO"
+}
+RUNTIME=$(_default_runtime)
 LC=/tmp/flexcell_lifecycle
 PIDS=$LC/pids
 LOGS=$LC/logs
@@ -16,9 +33,6 @@ READY=$REPO/setup/117_ros_ready.py
 COMPONENTS="gazebo moveit move_to_pose fleet"
 
 export FLEXCELL_WS=$RUNTIME
-if [ -z "${FLEXCELL_INSTALL:-}" ] && [ ! -f "$HOME/.local/share/flexcell/mainline/install/setup.bash" ]; then
-  export FLEXCELL_INSTALL=$RUNTIME/install
-fi
 source "$REPO/setup/104_mainline_env.sh" || exit 1
 WORLD=${FLEXCELL_WORLD:-$REPO/worlds/flexcell_world}
 [ -f "$WORLD.sdf" ] || { echo "WORLD MISSING: $WORLD.sdf" >&2; exit 1; }
@@ -67,6 +81,8 @@ cmd_start() {
     fi
   done
   echo "== flexcell start =="
+  echo "workspace: $FLEXCELL_WS"
+  echo "install: $FLEXCELL_INSTALL"
   launch gazebo ros2 launch open_manipulator_bringup open_manipulator_x_gazebo.launch.py "world:=$WORLD"
   started=$SECONDS
   deadline=$((SECONDS+60))
@@ -141,6 +157,8 @@ cmd_reset() {
 }
 
 cmd_status() {
+  echo "workspace: $FLEXCELL_WS"
+  echo "install: $FLEXCELL_INSTALL"
   echo "pid files (alive): $(alive_pids)"
   python3 "$ADMIN" health --no-strict
 }

@@ -104,7 +104,7 @@ Windows side first, or fetch it from WSL directly):
                                          # agentic_workcell.repos into src/
                                          # (skips existing), builds them
    colcon build --symlink-install --packages-select flexcell_interfaces flexcell_skills
-   source /opt/ros/jazzy/setup.bash && source install/setup.bash
+   source setup/104_mainline_env.sh
    ```
 5. Offline test ladder (no GUI needed) — or just `colcon test
 --packages-select flexcell_skills`, which runs every suite since the
@@ -123,8 +123,11 @@ Windows side first, or fetch it from WSL directly):
    python3 src/flexcell/flexcell_skills/test/test_executor_integration.py
    python3 setup/82_undefined_attr_check.py src/flexcell                 # static
    ```
-   Measured on the 2026-09-29 bring-up (i5-13500H, 16 threads, 10 GB WSL):
-   `colcon test` → **130 tests, 0 errors, 0 failures, 0 skipped** (~12 s);
+   The 2026-09-29 baseline was 130 tests / ~12 s on an i5-13500H with 10 GB WSL.
+   The suite has grown since; on 2026-11-18 (main `dfdeb615`) `colcon test`
+   reported **1191 tests, 0 errors, 0 failures, 1 skipped (~35 s)** on the same
+   CPU class. Use `colcon test-result` for the current number; the 130/12 s
+   figure is a historical baseline, not the self-check target.
    `colcon build` at 4 workers → upstream exit 0 + flexcell exit 0. The static
    scanner's class-attribute false positive (#24) is repaired as of 2026-10-07:
    definitions are class-scoped and source inheritance is resolved; missing
