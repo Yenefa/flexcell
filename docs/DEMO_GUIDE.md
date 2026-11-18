@@ -58,6 +58,11 @@ unset LIBGL_ALWAYS_SOFTWARE
   D3D12 variables above; `soft` forces llvmpipe. The D3D12 GUI segfaulted in the
   NVIDIA driver on 2026-11-18, then ran stably later the same day, so treat GPU as
   preferred with `soft` as the fallback for recording.
+- **One GPU GUI per WSL session.** After a GPU GUI exits, a second `gz sim -g` in the
+  same session can log `D3D12: Removing Device` and abort with `Failed to create
+  OpenGL context`. Run `wsl --shutdown` before the next GPU recording session (or use
+  `-Gui soft`). Verified on 2026-11-18: the first GUI after a restart rendered and
+  recorded; the next one in the same session aborted.
 
 ### `GZ_PARTITION` must match everywhere
 
@@ -284,21 +289,24 @@ concatenate:
 
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/record_gazebo.ps1 -Gui gpu `
-  -SourceRun <run-dir> -Out runA.mp4 -Seconds 45 -Cycles 1
+  -SourceRun <run-dir> -Out runA.mp4 -Seconds 60 -Cycles 1
+wsl --shutdown
 powershell -ExecutionPolicy Bypass -File scripts/record_gazebo.ps1 -Gui gpu `
-  -SourceRun <run-dir> -Out runB.mp4 -Seconds 45 -Cycles 1
+  -SourceRun <run-dir> -Out runB.mp4 -Seconds 60 -Cycles 1
 
-ffmpeg -ss 3 -i runA.mp4 -t 36 -c:v libx264 -pix_fmt yuv420p A.mp4
-ffmpeg -ss 3 -i runB.mp4 -t 36 -c:v libx264 -pix_fmt yuv420p B.mp4
+ffmpeg -ss 4.5 -i runA.mp4 -t 34 -vf fps=30 -c:v libx264 -pix_fmt yuv420p A.mp4
+ffmpeg -ss 3.5 -i runB.mp4 -t 33 -vf fps=30 -c:v libx264 -pix_fmt yuv420p B.mp4
 "file 'A.mp4'" | Out-File -Encoding ascii list.txt
 "file 'B.mp4'" | Out-File -Encoding ascii -Append list.txt
 ffmpeg -f concat -safe 0 -i list.txt -c copy two-runs.mp4
 ```
 
-Headless multi-cycle data collection is fine (`--cycles 3`); the reset retry in
-`run_demo_cycles.py` (240 s, two attempts) covers slow runs, but the GUI path should
-use one stack per recording. Verified on this host: **1536x864, 71.97 s, 1.1 MB**,
-two GPU-rendered runs back-to-back, 6/6 steps OK in each.
+For `-Gui gpu`, shut WSL down between the two recordings: the second GPU GUI in one
+session can lose the D3D12 device (§1). Headless multi-cycle data collection is fine
+(`--cycles 3`); the reset retry in `run_demo_cycles.py` (240 s, two attempts) covers
+slow runs, but the GUI path should use one stack per recording. Verified on this
+host: **1536x816, 66.97 s, 1.3 MB**, two GPU-rendered runs back-to-back, 6/6 steps
+OK in each.
 
 ## 8. One command for the whole thing
 
