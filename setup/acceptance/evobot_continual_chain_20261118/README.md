@@ -433,6 +433,32 @@ capability is what makes that visible instead of leaving it to an audit.
     **correctness check on the replay, not an effect measurement**, and conflating the two
     would turn this back into "we measured it".
 
+47. **LOCAL churn=0 HID A 17-FILE ID DRIFT ON CI.** The `ci` workflow failed on SEVEN
+    consecutive commits with `test_the_committed_evidence_ids_do_not_drift`: 17 artifacts'
+    entry-ids differed from a CI regeneration — while the local freshness check reported
+    churn=0 on every one of those commits. The local answer was the wrong one.
+
+    Root cause: `postmortem.py` used `os.path.relpath` for `source_run` / `evidence_files`.
+    **Windows emits backslashes, POSIX emits forward slashes.** Those strings are in the entry
+    body, and `entry_id` is that body's digest — so the SAME archive yields DIFFERENT ids on
+    the two platforms. Local (Windows) matched its own run; CI (Linux) did not. **A defect that
+    only reproduces on another platform is invisible to local tests.**
+
+    `_rel()` now normalizes to forward slashes everywhere (three postmortem sites plus
+    `live_path`'s chain_store/live_store), and `split(os.sep)` became `split("/")`. Entry
+    bodies now carry ZERO backslashes, so the digest is platform-neutral. Three tests pin it:
+    `_rel` never emits a backslash, the old `relpath` demonstrably does on Windows, and no
+    committed entry carries one. Backslash count in artifacts: 7 -> 0.
+
+46. **THE VERIFIER CHECKED THE RESULT OF RETIREMENT, NOT ITS CAUSE.** Step 5 requires retiring
+    *based on the actual result*. The demo produces a retirement artifact with full causality
+    (`decision_before` carrying "at least one outcome was WORSE"), but the verifier only
+    checked `status_after == RETIRED`, `parent_linked`, `chain_ok` and a "COPY" note — a
+    HARD-CODED retirement would pass all of them. The check now requires `decision=RETIRE`
+    AND `harmful >= 1` AND a reason naming WORSE: the retirement must FOLLOW FROM recorded
+    harm. A mutation test (`harmful=0`, reason "manually retired") is REJECTED, proving the
+    check is not decorative.
+
 45. **THE REPORT MUST NOT CONTRADICT THE NEW EVIDENCE.** The new probe read the real A/B batch,
     but `unrouted.report()` still told every UNMEASURED row "cannot measure its effect /
     needs attempts WITHOUT the policy". One artifact saying two opposite things is worse than
@@ -748,7 +774,7 @@ capability is what makes that visible instead of leaving it to an audit.
     visible.** The artifact reports the numbers and both options, and **does not pretend the
     loop is closed.**
 
-`verify.py` asserts **160 checks**, including that both gates really ran, that the asset
+`verify.py` asserts **161 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came

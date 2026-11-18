@@ -57,6 +57,51 @@
 于是重试第三次被拒为"declared destination occupied"。修改为**按余量选轴**，并且两轴都不满足契约时**拒绝**而不是发出一个必然被拒的计划；
 不传 avoid 时行为与旧实现**逐字节相同**，11/11 `benchmark/tests/test_recovery_driver.py` 仍通过。
 
+## 3.95 本地 churn=0 掩盖了 CI 上 17 个文件的 ID 漂移
+
+`ci` workflow 连续 **7 个提交**失败，报的是 `test_the_committed_evidence_ids_do_not_drift`：
+17 个产物的 entry-id 与 CI 重新生成的不一致。但**本地每次报 churn=0**——
+两个入口给出了相反的答案，而且本地答案错了。
+
+### 根因：路径里藏着平台差异
+
+`postmortem.py` 用 `os.path.relpath` 生成 `source_run` / `evidence_files`，
+**Windows 返回反斜杠，POSIX 返回正斜杠**。这些字符串进了 entry body，
+而 `entry_id` 是 body 的摘要——**同一份归档，在两个平台上产生不同的 ID**。
+
+> 本地（Windows）提交产物与自己重跑一致 → churn=0；
+> CI（Linux）重跑得到正斜杠版本 → 17 个 ID 不同 → 失败。
+> **一个只能在另一种平台上复现的缺陷，本地测试永远看不见。**
+
+### 修法
+
+新增 `_rel()`：`relpath` 后统一 `.replace(os.sep, "/")`。
+三处 `postmortem` 路径 + `live_path` 的 `chain_store`/`live_store` 全部改用它，
+并把 `rel.split(os.sep)` 改为 `rel.split("/")`。
+现在 entry body **零反斜杠**，摘要与平台无关。
+
+测试固定三点：`_rel` 永不产生反斜杠、旧 `relpath` 在 Windows 确实产生（缺陷被钉住）、
+提交产物里无反斜杠路径。产物中反斜杠计数从 7 降到 **0**。
+
+## 3.96 验收只看了 RETIRE 的**结果**，没看它的**原因**
+
+第 5 步要求"根据实际结果**修订或停用**"。demo 用 synthetic WORSE 在副本上演示了 RETIRE，
+产物里有完整因果（`decision_before` 带 "at least one outcome was WORSE"）。
+但 verifier 只检查：
+
+| 检查 | 漏洞 |
+| --- | --- |
+| `status_after == RETIRED` | 硬编码也能过 |
+| `parent_linked` / `chain_ok` | 与"为什么停用"无关 |
+| `note` 含 "COPY" | 只是文本 |
+
+**一个写死的 RETIRE 能通过所有检查。** 新增因果检查：必须有 `decision=RETIRE`
+且 `harmful >= 1` 且理由含 **WORSE**——即停用必须**从记录到的伤害推导出来**，
+而不是恰好发生了。
+
+变异测试固定它不是装饰品：把 `harmful=0`、理由改成 "manually retired" 的假产物
+**必须被拒绝**（实测 False）。
+
 ## 3.97 报告的"无法测量"也要修正，不能只加个新探针
 
 新探针读到了对照，但 `unrouted.report()` 仍对每条 UNMEASURED 说
@@ -1265,7 +1310,7 @@ python3 evolution/experience/demo_continual.py
 python3 -m pytest evolution/experience/test_continual_chain.py -q
 ```
 
-verifier 会**重新执行**整条链并断言 **160 项检查**，不读取 SUMMARY 里的自述。其中关键几项：
+verifier 会**重新执行**整条链并断言 **161 项检查**，不读取 SUMMARY 里的自述。其中关键几项：
 
 - 规划侧不生效（NO_CHANGE）、执行侧生效（CHANGED）；
 - 启用前后检索分别为 0 与 1；

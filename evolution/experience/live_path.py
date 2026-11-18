@@ -67,6 +67,15 @@ CHAIN_STORE = os.path.join(WT, "setup", "acceptance", "evobot_continual_chain_20
                            "records_v2.jsonl")
 
 
+def _rel(path, root):
+    """Repo-relative path with FORWARD slashes, on every platform.
+
+    WHY: os.path.relpath emits backslashes on Windows, and these strings are written into
+    an acceptance artifact. The committed artifact then differs from what a Linux CI run
+    produces, which is the same class of defect that made entry_id churn 17 files.
+    """
+    return os.path.relpath(path, root).replace(os.sep, "/")
+
 def _live_verdicts(path):
     """record_sha256 -> latest verdict, exactly as the live path reads it."""
     if not os.path.exists(path):
@@ -160,8 +169,8 @@ def report(live_store=None, live_ledger=None, chain_store=None):
         "planner_filter": planner_filter,
         "planner_filter_result": filter_result,
         "consumers_in_live_path": consumer_presence,
-        "chain_store": os.path.relpath(chain_store, WT),
-        "live_store": os.path.relpath(live_store, WT),
+        "chain_store": _rel(chain_store, WT),
+        "live_store": _rel(live_store, WT),
         "options": [
             {"option": "bridge the two v2 entries into the live store",
              "cost": ("NOTHING - retrieve() admits only planning/state classes and rejects "

@@ -189,6 +189,19 @@ def main():
         checks["retire_keeps_the_harmful_version"] = retire_demo.get("chain_ok") is True
         checks["retire_is_on_a_copy_not_the_real_store"] = "COPY" in (
             retire_demo.get("note") or "")
+        # 46 -- THE CAUSE, NOT JUST THE EFFECT. A hard-coded retirement would pass every
+        # check above: status_after=RETIRED, parent_linked, chain intact, note says COPY.
+        # The fifth step is "revise or retire based on the ACTUAL RESULT", so the verdict
+        # must be shown to FOLLOW FROM a recorded WORSE outcome — harmful >= 1, decision
+        # RETIRE, and a reason that names the harm — not merely to have happened.
+        before = retire_demo.get("decision_before") or []
+        harmful_retires = [d for d in before
+                           if d.get("decision") == "RETIRE"
+                           and (d.get("harmful") or 0) >= 1
+                           and "WORSE" in (d.get("why") or "")]
+        checks["the_retire_follows_from_recorded_harm_not_a_hardcoded_status"] = (
+            len(harmful_retires) >= 1
+            and "WORSE" in (retire_demo.get("retired_reason") or ""))
         real_active = [r for r in active]
         # TWO active entries now, on two DIFFERENT consumers, one dev-split and one
         # held-out. The count is asserted rather than the old ==1 so a silent third one

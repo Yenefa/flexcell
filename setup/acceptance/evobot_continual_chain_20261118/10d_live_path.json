@@ -4,7 +4,7 @@
     "no independent ACCEPT in the review ledger": 1,
     "no provenance_verified": 1
   },
-  "chain_store": "setup\\acceptance\\evobot_continual_chain_20261118\\records_v2.jsonl",
+  "chain_store": "setup/acceptance/evobot_continual_chain_20261118/records_v2.jsonl",
   "claim": "the chain is correct and UNPLUGGED, but NOT for the reasons first given. Not a schema mismatch: both entries are non-planner class and excluded by design. Not 'no consumer': the shell runner calls recovery_driver.py which does call apply_respread. The real gap is that the call uses DEFAULT kwargs and no experience lookup, so a revised entry can never reach the robot",
   "consumers_in_live_path": {
     "executor_recovery": {
@@ -32,7 +32,7 @@
       "why": "no independent ACCEPT in the review ledger"
     }
   ],
-  "live_store": "evolution\\experience\\records.jsonl",
+  "live_store": "evolution/experience/records.jsonl",
   "live_store_rows": 7,
   "options": [
     {

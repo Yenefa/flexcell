@@ -273,7 +273,7 @@ def test_held_out_batches_are_derived_not_hand_listed():
 def test_scan_excludes_every_held_out_batch():
     rows = postmortem.scan()
     held = postmortem.held_out_batches()
-    leaked = {r["path"].split(os.sep)[0] for r in rows} & held
+    leaked = {r["path"].split("/")[0] for r in rows} & held
     assert leaked == set(), "generator read held-out batches: %s" % sorted(leaked)
 
 
@@ -290,15 +290,15 @@ def test_the_dev_split_never_cites_a_held_out_file():
     held = set(report["held_out_batches"])
     for entry in entries:
         for path in entry.get("evidence_files") or []:
-            assert path.split(os.sep)[0] not in held, (entry["version"]["label"], path)
-        assert entry["source_run"].split(os.sep)[0] not in held
+            assert path.split("/")[0] not in held, (entry["version"]["label"], path)
+        assert entry["source_run"].split("/")[0] not in held
 
 
 def test_asking_for_held_out_data_is_possible_but_explicit():
     """The exclusion is a default, not a hidden rule: a caller can override it."""
     rows, excluded = postmortem.scan_with_report(include_held_out=True)
     assert excluded == {}
-    assert any(r["path"].split(os.sep)[0] in postmortem.held_out_batches()
+    assert any(r["path"].split("/")[0] in postmortem.held_out_batches()
                for r in rows)
 
 
@@ -323,7 +323,7 @@ def test_the_sealed_instance_criterion_can_actually_fire(tmp_path, monkeypatch):
     write("HO-aaaaaaaaaaaa", body)
     write("HO-bbbbbbbbbbbb", body)
     rows, excluded = postmortem.scan_with_report(str(tmp_path))
-    assert [r["path"].split(os.sep)[-2] for r in rows] == ["HO-bbbbbbbbbbbb"]
+    assert [r["path"].split("/")[-2] for r in rows] == ["HO-bbbbbbbbbbbb"]
     assert any("sealed_instance" in k for k in excluded), excluded
 
 

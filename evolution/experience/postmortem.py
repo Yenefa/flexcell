@@ -135,6 +135,20 @@ SIGNATURES = {
 }
 
 
+def _rel(path, root):
+    """A repo-relative path with FORWARD slashes, on every platform.
+
+    WHY THIS EXISTS: os.path.relpath returns backslashes on Windows and forward slashes on
+    POSIX. Those strings are embedded in an entry body (source_run, evidence_files), and
+    entry_id is a digest of that body - so the SAME archive produced DIFFERENT entry ids on
+    Windows and Linux. The committed artifacts then matched a local run and failed CI's
+    freshness check with 17 churned ids. A path in an identity must not depend on the OS
+    that wrote it.
+    """
+    return os.path.relpath(path, root).replace(os.sep, "/")
+
+
+
 def held_out_batches():
     """Batches that were run to MEASURE generalization, not to develop against.
 
@@ -228,8 +242,8 @@ def _clause_failures(root, excluded_names, sealed):
         clauses = [str(c) for c in (doc.get("failed_clauses") or [])]
         if not clauses:
             continue
-        rel = os.path.relpath(path, root)
-        batch = rel.split(os.sep)[0]
+        rel = _rel(path, root)
+        batch = rel.split("/")[0]
         if batch in excluded_names:
             excluded["%s:labelled_generalization_batch" % batch] = excluded.get(
                 "%s:labelled_generalization_batch" % batch, 0) + 1
@@ -284,8 +298,8 @@ def _console_failures(root, excluded_names, sealed):
     """
     out, excluded = [], {}
     for path in glob.glob(os.path.join(root, "evobot*", "summary.txt")):
-        rel = os.path.relpath(path, root)
-        batch = rel.split(os.sep)[0]
+        rel = _rel(path, root)
+        batch = rel.split("/")[0]
         if batch in excluded_names:
             continue
         for line in open(path, encoding="utf-8", errors="replace"):
@@ -361,8 +375,8 @@ def scan_with_report(acceptance=None, include_held_out=False):
             continue
         if res.get("error_code") in (0, None):
             continue
-        rel = os.path.relpath(path, root)
-        batch = rel.split(os.sep)[0]
+        rel = _rel(path, root)
+        batch = rel.split("/")[0]
         # two independent reasons to skip: a labelled measurement batch, or a run of an
         # instance that is currently sealed. Either one is disqualifying on its own.
         reason = ("labelled_generalization_batch" if batch in excluded_names
