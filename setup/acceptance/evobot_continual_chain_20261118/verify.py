@@ -494,6 +494,14 @@ def main():
             order_probe["verdict"] == "IMPROVED")
         checks["that_probe_refuses_none_of_the_compliant_plans"] = (
             order_probe["detail"]["false_positives"] == 0)
+        # IMPROVED is a REAL verdict but a WEAK one here: all 16 same-run plans already
+        # complied (caught=0), so the only positive is a foreign plan checked against another
+        # instruction. The artifact must say so, or the single word IMPROVED overstates the
+        # evidence as if a natural failure had been fixed.
+        checks["the_order_effect_names_its_evidence_strength"] = (
+            order_probe.get("evidence_strength") == "foreign_plan_caught_only"
+            and "no natural reversal" in order_probe.get("strength_note", "")
+            and order_probe["detail"]["caught"] == 0)
 
         # 21 -- THE THIRD TRANSITION. lifecycle.py's docstring lists three (RETIRE, REVISE,
         # KEEP) and only two existed. REVISE is the one that matters when the record is

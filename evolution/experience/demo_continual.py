@@ -364,7 +364,12 @@ GENERATED_PREFIXES = ("01_", "02_", "03_", "04_", "05_", "06_", "07_", "08_", "0
                       "10_")
 GENERATED_FILES = ("SUMMARY.json", "records_v2.jsonl", "usage_ledger.jsonl",
                    "skill_assets.jsonl", "review_artifact_E1.json",
-                   "review_artifact_E2.json")
+                   "review_artifact_E2.json", "review_artifact_E3.json")
+# Review artifacts are listed EXPLICITLY, not by the review_artifact_ prefix, on purpose:
+# an older artifact (auto-occupied_destination) has no entry in today's store but is
+# retained failure evidence. A prefix-based cleanup would DELETE it on every re-run, which
+# violates the "never delete evidence" rule. Adding a new label does require adding it here
+# -- a small, visible cost that keeps historic evidence safe.
 
 
 def _clear_generated(dest):

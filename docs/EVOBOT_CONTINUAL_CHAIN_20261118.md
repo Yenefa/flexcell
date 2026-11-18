@@ -57,6 +57,32 @@
 于是重试第三次被拒为"declared destination occupied"。修改为**按余量选轴**，并且两轴都不满足契约时**拒绝**而不是发出一个必然被拒的计划；
 不传 avoid 时行为与旧实现**逐字节相同**，11/11 `benchmark/tests/test_recovery_driver.py` 仍通过。
 
+## 3.91 IMPROVED 这个词不能盖过证据的真实强度
+
+E3 的 effect verdict 是 `IMPROVED`，但底层数据是：
+
+| 项 | 值 |
+| --- | --- |
+| 同任务归档指令 | 16 条，**全部本来就合规** |
+| 自然反序被抓 | **0** |
+| 唯一的正例 | 把 A 任务的计划拿去对 B 指令检查的**异地错配** |
+| 误报 | 0 |
+
+`IMPROVED` 没错——规则确实能抓错、且零误报。但单独看这个词，
+会被读成"在真实任务上改善了结果"，而实际**没有自然反序可供修复**。
+
+### 修法：verdict 保持不变，补一个强度字段
+
+effect 产物新增：
+
+- `evidence_strength: "foreign_plan_caught_only"`
+- `strength_note`：明说 16 条同任务计划本就合规、唯一正例是异地错配，
+  "这显示规则会触发且零误报，**并非**它改善了真实运行"
+
+review artifact 嵌了整个 probe，所以审核记录也带着这个诚实标注。
+verifier 新增检查：强度字段必须是 `foreign_plan_caught_only` 且 `caught == 0`，
+防止将来有人偷偷把论证偷换成自然失败。
+
 ## 3.92 顺序规则从"演示触发"变成**真实 ACTIVE 条目**
 
 上一轮证明了顺序规则**能**被一条经验触发，但那是一份临时演示条目。
@@ -1396,7 +1422,7 @@ python3 evolution/experience/demo_continual.py
 python3 -m pytest evolution/experience/test_continual_chain.py -q
 ```
 
-verifier 会**重新执行**整条链并断言 **161 项检查**，不读取 SUMMARY 里的自述。其中关键几项：
+verifier 会**重新执行**整条链并断言 **162 项检查**，不读取 SUMMARY 里的自述。其中关键几项：
 
 - 规划侧不生效（NO_CHANGE）、执行侧生效（CHANGED）；
 - 启用前后检索分别为 0 与 1；

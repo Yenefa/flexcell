@@ -388,6 +388,21 @@ def probe(entry):
         out["changed"] = positive or false_pos > 0
         out["verdict"] = ("IMPROVED" if positive and not false_pos
                           else ("BROKEN" if false_pos else "NO_CHANGE"))
+        # IMPROVED here means "the rule catches a reversal AND does not wrongly refuse a
+        # compliant plan" -- NOT "it improved a real task outcome". On this archive all 16
+        # same-run plans already complied (caught=0), so the only positive is the FOREIGN
+        # plan: a plan authored for one instruction checked against another. That is a real
+        # check of the rule, but a weaker kind of evidence than a natural failure the rule
+        # fixed. Naming the strength keeps the verdict from overstating what was shown.
+        out["evidence_strength"] = (
+            "natural_failure_caught" if caught > 0
+            else ("foreign_plan_caught_only" if foreign_caught else "no_positive_evidence"))
+        out["strength_note"] = (
+            "all %d same-run plans already complied; the only reversal detected was a "
+            "plan from a different task checked against this instruction. This shows the "
+            "rule fires correctly and has zero false positives, NOT that it improved a "
+            "real run (no natural reversal existed to fix)." % len(rows)
+            if caught == 0 else "at least one natural reversal was caught")
         out["why"] = ("%d same-run plan(s) whose instruction fixes an order (%d reversed, "
                       "%d caught, %d wrongly refused); the archive's one genuine reordering "
                       "is the foreign plan, caught=%s"

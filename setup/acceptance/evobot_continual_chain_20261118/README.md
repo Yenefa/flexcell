@@ -433,6 +433,15 @@ capability is what makes that visible instead of leaving it to an audit.
     **correctness check on the replay, not an effect measurement**, and conflating the two
     would turn this back into "we measured it".
 
+51. **IMPROVED MUST NOT OVERSTATE A WEAK EFFECT.** E3's effect verdict is `IMPROVED`, but all
+    16 same-run plans already complied (`caught=0`); the sole positive is a FOREIGN plan
+    checked against another instruction. The verdict is true (the rule fires correctly, zero
+    false positives) but reading it alone would suggest a real task was improved, when no
+    natural reversal existed to fix. The effect artifact now carries `evidence_strength:
+    foreign_plan_caught_only` and a `strength_note` stating exactly that; the review artifact
+    inherits it. A verifier check pins the strength field and `caught == 0` so the claim
+    cannot quietly become "a natural failure was fixed".
+
 50. **THE ORDER RULE BECAME A REAL ACTIVE ENTRY, NOT JUST A DEMO.** The order rule was
     measured, gated and seen firing in a one-off demo, but no real entry occupied the `order`
     routing: it still reported `NO_ENTRY` — a mechanism with nobody carrying it. E3 now walks
@@ -822,7 +831,7 @@ capability is what makes that visible instead of leaving it to an audit.
     visible.** The artifact reports the numbers and both options, and **does not pretend the
     loop is closed.**
 
-`verify.py` asserts **161 checks**, including that both gates really ran, that the asset
+`verify.py` asserts **162 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
