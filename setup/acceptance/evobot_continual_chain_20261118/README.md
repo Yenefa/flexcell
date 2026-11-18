@@ -433,6 +433,20 @@ capability is what makes that visible instead of leaving it to an audit.
     **correctness check on the replay, not an effect measurement**, and conflating the two
     would turn this back into "we measured it".
 
+41. **THE APPLICABILITY GATE CHECKED ONLY 1 OF 4 DECLARED CONDITIONS.** Last round added live
+    applicability checking, and the verifier reported "checked". Cross-checking showed the
+    gate hard-coded two probe ids, was blind to three of E2's four declared invalid conditions,
+    AND misspelled one of them (`spread.single_stage` instead of `respread.single_stage`).
+
+    `_check_applicability` now iterates EVERY declared `invalid_probes` entry:
+
+    - checkable against the real plan → checked, recorded in `checked`
+    - unknown probe id → recorded in `unprobed`; **the whole gate refuses**
+
+    An unchecked disclaimer is not a safeguard. Result: `checked=4, unprobed=0` for E2.
+    A test pins "declared set == checked set + unprobed set" and that an unknown probe
+    refuses rather than silently passes.
+
 40. **A REVIEW CAN BE PRE-GENERATED BEFORE THE ENTRY EXISTS.** `entry_id` is a digest of a
     predictable body. A reviewer can compute the future `entry_id`, write ACCEPT into the
     review ledger BEFORE the entry is stored, then store the entry. The ledger has no
@@ -656,7 +670,7 @@ capability is what makes that visible instead of leaving it to an audit.
     visible.** The artifact reports the numbers and both options, and **does not pretend the
     loop is closed.**
 
-`verify.py` asserts **149 checks**, including that both gates really ran, that the asset
+`verify.py` asserts **150 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -684,7 +698,7 @@ with one sentence**, and that **a capable module with an unmeasurable archive is
 a selection effect rather than as any of the three tempting answers**, and that **the
 chain's connection to the live planning path is measured and reported as unplugged, with the
 cost of both ways to close it**, that **a schema bridge cannot rescue these entries**, and
-that **the executor consumer exists in the shell runner**, that **the new opt-in wire leaves the no-flag path at its defaults**, that **a self-reviewed entry cannot drive the live call**, that **an ACCEPT for a different claim on the same evidence cannot drive it either**, that **the review ledger is chained and its integrity limits are stated honestly**, that **applicability is checked on the real run plan, refusing a lesson where its own declared invalid condition fires**, that **a live application writes RETRIEVED/APPLIED/OUTCOME with a run id while a fallback writes nothing**, and that **a review is anchored to the entry's chain hash so it cannot be pre-generated before the entry exists**.
+that **the executor consumer exists in the shell runner**, that **the new opt-in wire leaves the no-flag path at its defaults**, that **a self-reviewed entry cannot drive the live call**, that **an ACCEPT for a different claim on the same evidence cannot drive it either**, that **the review ledger is chained and its integrity limits are stated honestly**, that **applicability is checked on the real run plan, refusing a lesson where its own declared invalid condition fires**, that **a live application writes RETRIEVED/APPLIED/OUTCOME with a run id while a fallback writes nothing**, that **a review is anchored to the entry's chain hash so it cannot be pre-generated before the entry exists**, and that **every declared invalid condition is accounted for — unknown probes refuse rather than silently pass**.
 
 ---
 

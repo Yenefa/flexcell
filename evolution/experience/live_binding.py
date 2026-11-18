@@ -170,6 +170,10 @@ def resolve(asset_path, consumer, entry_store, ledger_path=None, asset_version=N
                 return {}, "applicability probe failed: %s" % exc
             if verdict["fired"]:
                 continue
+            if verdict["unprobed"]:
+                # A declared disclaimer with no live check is NOT a safeguard. Fail closed.
+                return {}, ("unprobed live invalid conditions: %s"
+                            % ", ".join(verdict["unprobed"]))
 
         return dict(kwargs), ("accepted entry %s (%s) for %s"
                               % ((entry.get("version") or {}).get("label"),
@@ -180,41 +184,80 @@ def resolve(asset_path, consumer, entry_store, ledger_path=None, asset_version=N
 
 
 def _check_applicability(entry, observation, misuse):
-    """Run the entry's declared invalid conditions against the REAL observation.
+    """Run EVERY declared invalid condition against the REAL observation.
 
-    Uses the executable probes the entry already declares, but feeds them the live plan
-    rather than a fixture. A probe that cannot be evaluated on a live observation is treated
-    as NOT fired only when it is a fixture-only probe; an explicit invalid condition that
-    CAN be evaluated and fires always blocks. Returns {"fired": bool, "reasons": [...]}.
+    The first version handled only two probe ids hard-coded, while E2 declares four — and
+    one of them ("respread.single_stage") was not even matched because the code looked for
+    "spread.single_stage". The gate then reported "applicability checked" while blind to
+    three declared conditions. This version accounts for ALL declared conditions and
+    REPORTS which are live-checkable and which are not, so a blind spot cannot hide.
+
+    Returns {"fired": bool, "reasons": [...], "checked": [...], "unprobed": [...]}.
     """
     stages = []
     if isinstance(observation, dict):
         plan = observation.get("plan") or observation
         stages = [s for s in (plan.get("stages") or []) if isinstance(s, dict)]
-    reasons = []
-    # A concrete, live-checkable case from E2's own disclaimers: nothing to separate, and
-    # landings that already meet the spacing contract. Both are checkable from the plan
-    # alone with the same numbers the entry declares.
-    step = None
-    for probe in (entry.get("invalid_probes") or []):
-        pid = str(probe.get("probe") or "")
-        if pid in ("spacing.already_satisfied", "spread.single_stage"):
-            step = (entry.get("effect_spec") or {}).get("params", {}).get("step_m") \
-                or 0.090
-            break
-    if step is not None and stages:
-        pts = [(float(s["place_pose"][0]), float(s["place_pose"][1]))
-               for s in stages if isinstance(s.get("place_pose"), (list, tuple))
-               and len(s["place_pose"]) >= 2]
-        if len(pts) < 2:
-            reasons.append("single stage: nothing to separate")
+    reasons, checked, unprobed = [], [], []
+    params = (entry.get("effect_spec") or {}).get("params") or {}
+    step = float(params.get("step_m", 0.090))
+    cluster = float(params.get("cluster_m", 0.12))
+
+    def pts():
+        return [(float(s["place_pose"][0]), float(s["place_pose"][1]))
+                for s in stages if isinstance(s.get("place_pose"), (list, tuple))
+                and len(s["place_pose"]) >= 2]
+
+    for item in (entry.get("invalid_probes") or []):
+        pid = str(item.get("probe") or "")
+        condition = str(item.get("condition") or pid)
+        if pid in ("respread.single_stage", "spread.single_stage"):
+            checked.append(pid)
+            if len(pts()) < 2:
+                reasons.append(condition)
+        elif pid == "spacing.already_satisfied":
+            checked.append(pid)
+            p = pts()
+            if len(p) >= 2:
+                sep = min(math.hypot(a[0] - b[0], a[1] - b[1])
+                          for i, a in enumerate(p) for b in p[i + 1:])
+                if sep >= step - 1e-9:
+                    reasons.append("%s (%.4f >= %.4f)" % (condition, sep, step))
+        elif pid in ("respread.narrow_bin", "spread.narrow_bin"):
+            # checkable against the declared bin radius and the plan's own target centre
+            checked.append(pid)
+            radius = float(params.get("bin_radius", 0.06))
+            p = pts()
+            if len(p) >= 2:
+                cx = sum(x for x, _ in p) / len(p)
+                cy = sum(y for _, y in p) / len(p)
+                for x, y in p:
+                    if math.hypot(x - cx, y - cy) > radius + 1e-9:
+                        reasons.append(condition)
+                        break
+        elif pid == "respread.corridor_blocked":
+            # checkable when the observation declares other objects in the corridor
+            obstacles = []
+            if isinstance(observation, dict):
+                plan = observation.get("plan") or observation
+                obstacles = [o for o in (plan.get("initial_objects") or [])
+                             if isinstance(o, dict) and o.get("position")]
+            checked.append(pid)
+            p = pts()
+            if len(p) >= 2 and obstacles:
+                cx = sum(x for x, _ in p) / len(p)
+                cy = sum(y for _, y in p) / len(p)
+                for o in obstacles:
+                    ox, oy = float(o["position"][0]), float(o["position"][1])
+                    if math.hypot(ox - cx, oy - cy) <= cluster:
+                        reasons.append(condition)
+                        break
         else:
-            sep = min(math.hypot(a[0] - b[0], a[1] - b[1])
-                      for i, a in enumerate(pts) for b in pts[i + 1:])
-            if sep >= float(step) - 1e-9:
-                reasons.append("landings already meet the spacing contract (%.4f >= %.4f)"
-                               % (sep, float(step)))
-    return {"fired": bool(reasons), "reasons": reasons}
+            # An unknown probe on a live path is UNprobed, never silently passed.
+            unprobed.append(pid)
+            reasons.append("declared invalid condition has no live probe: %s" % pid)
+    return {"fired": bool(reasons), "reasons": reasons,
+            "checked": checked, "unprobed": unprobed}
 
 
 if __name__ == "__main__":

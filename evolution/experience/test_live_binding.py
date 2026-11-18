@@ -244,6 +244,33 @@ def test_a_tampered_asset_callable_cannot_drive_the_robot(tmp_path):
     assert kwargs == {"spread_step": 0.09, "cluster_m": 0.12}
 
 
+def test_every_declared_invalid_condition_is_accounted_for_on_a_live_path(tmp_path):
+    """THE COVERAGE GAP. The live gate used to hard-code two probe ids and missed three of
+    E2's four declared invalid conditions (it even looked for spread.single_stage instead of
+    respread.single_stage). It then reported 'applicability checked' while blind to them.
+    Every declared condition must be either checked or explicitly unprobed."""
+    import misuse
+    rows = [json.loads(l) for l in open(ENTRIES, encoding="utf-8") if l.strip()]
+    entry = [r for r in rows if (r.get("version") or {}).get("label") == "E2"][-1]
+    declared = [p.get("probe") for p in (entry.get("invalid_probes") or [])]
+    obs = {"plan": {"stages": [{"place_pose": [0.20, 0.0, 0.0175]},
+                               {"place_pose": [0.256, 0.0, 0.0175]}]}}
+    verdict = live_binding._check_applicability(entry, obs, misuse)
+    assert set(verdict["checked"]) | set(verdict["unprobed"]) == set(declared)
+    assert not verdict["unprobed"]
+
+
+def test_an_unknown_declared_probe_refuses_rather_than_passes(tmp_path):
+    """A disclaimer with no live check is not a safeguard."""
+    import misuse
+    entry = {"invalid_probes": [{"probe": "totally.unknown", "condition": "x"}],
+             "effect_spec": {"params": {}}}
+    obs = {"plan": {"stages": []}}
+    verdict = live_binding._check_applicability(entry, obs, misuse)
+    assert verdict["fired"] is True
+    assert "totally.unknown" in verdict["unprobed"]
+
+
 def test_an_inapplicable_live_plan_refuses_the_parameters(tmp_path):
     """Objective step 4: check the lesson is not applied where it does not belong. The
     entry's own disclaimer "landings ALREADY meet the spacing contract" is checked against

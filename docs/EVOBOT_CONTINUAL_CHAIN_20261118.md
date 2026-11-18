@@ -57,6 +57,34 @@
 于是重试第三次被拒为"declared destination occupied"。修改为**按余量选轴**，并且两轴都不满足契约时**拒绝**而不是发出一个必然被拒的计划；
 不传 avoid 时行为与旧实现**逐字节相同**，11/11 `benchmark/tests/test_recovery_driver.py` 仍通过。
 
+## 4.01 适用性门只查了**条目 4 个失效条件里的 1 个**
+
+上一轮加了"按真实计划检查适用条件"，验证器也在报"已检查"。但仔细核对：
+
+| E2 声明的探针 | live 门是否检查 |
+| --- | --- |
+| `respread.single_stage` | **否**——门里写的是 `spread.single_stage`，**拼错了名字** |
+| `respread.narrow_bin` | **否** |
+| `respread.corridor_blocked` | **否** |
+| `spacing.already_satisfied` | 是 |
+
+**门在报告"适用性已检查"，却对 3 个声明的失效条件完全失明。** 其中一个是拼写错误——
+这是硬编码探针 ID 的典型代价。
+
+### 修法：逐条遍历声明，不做硬编码子集
+
+现在 `_check_applicability` 遍历**条目的每一个** `invalid_probes`：
+
+- 能在真实计划上检查的 → **检查**，记入 `checked`
+- 不认识的探针 ID → 记入 `unprobed`，**整门拒绝**（"没有 live 检查的免责声明不是保障"）
+
+回到门本身：`unprobed` 非空 → **回退默认值**，而不是放行。
+
+### 结果
+
+E2 的 4 个声明现在 `checked=4, unprobed=0`。测试固定"声明集合 == 被检查集合 + 未探测集合"，
+和一个未知探针**必须拒绝**的情形。
+
 ## 4.02 审核也可能**早于条目生成**——时序绑定补上
 
 `entry_id` 是条目正文的摘要，而正文是**可预测的**。所以一个"审核者"可以：
@@ -1135,7 +1163,7 @@ python3 evolution/experience/demo_continual.py
 python3 -m pytest evolution/experience/test_continual_chain.py -q
 ```
 
-verifier 会**重新执行**整条链并断言 **149 项检查**，不读取 SUMMARY 里的自述。其中关键几项：
+verifier 会**重新执行**整条链并断言 **150 项检查**，不读取 SUMMARY 里的自述。其中关键几项：
 
 - 规划侧不生效（NO_CHANGE）、执行侧生效（CHANGED）；
 - 启用前后检索分别为 0 与 1；
@@ -1150,6 +1178,7 @@ verifier 会**重新执行**整条链并断言 **149 项检查**，不读取 SUM
 - **至少一条条目来自归档自动生成**，生成器拒绝了一个 UNROUTED 签名，且**没有任何生成记录在无具名审阅者时被 ACCEPT**；
 - **每条条目都声明了自己的证据 split**；开发集确实产出了条目（不是零）；没有任何被标为 `dev` 的条目引用封存实例；
 - **两个不同消费者都能生效**（executor_recovery 与 harness），且 ACTIVE 条目**覆盖两种 split**；
+- **适用性门覆盖全部声明**：E2 的 4 个失效条件从「只查 1 个（还拼错 1 个名字）」变为 `checked=4, unprobed=0`；未知探针**整门拒绝**；
 - **审核必须锚定条目链哈希**：防止在条目写入**之前**预生成 ACCEPT；同时如实声明攻击者若控制整条链仍可构造，那是签名要解决的问题；
 - **第 5 步在 live 边界接通**：实际应用写 RETRIEVED/APPLIED/OUTCOME 三行（带 run_id），回退到默认**一行不写**——防止「只记成功」偏差复发；
 - **live 门按真实计划检查适用条件**：已符合契约（90 mm）或单个落点的计划**拒绝**参数，低于契约（56 mm）才放行；阈值来自**条目自己的声明**而非新标准；

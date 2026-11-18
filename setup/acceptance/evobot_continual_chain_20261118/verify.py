@@ -844,6 +844,15 @@ def main():
             wire.get("applicability_checked_on_the_real_plan") is True)
         checks["the_driver_supplies_the_real_plan_to_the_gate"] = (
             "experience_observation" in drv_src)
+        # 41 -- FULL PROBE COVERAGE. The live gate used to hard-code two probe ids and was
+        # blind to three of E2's four declared invalid conditions, including a spelling
+        # mismatch (respread.single_stage vs spread.single_stage). Every declared condition
+        # must now be CHECKED or explicitly UNPROBED — never silently passed.
+        lb_src = (WT / "evolution" / "experience" / "live_binding.py").read_text(
+            encoding="utf-8")
+        checks["every_declared_probe_is_accounted_for_not_hardcoded_subset"] = (
+            'unprobed' in lb_src and 'respread.corridor_blocked' in lb_src
+            and 'respread.narrow_bin' in lb_src)
         # 39 -- STEP 5 AT THE LIVE BOUNDARY. The driver used to apply an entry's parameters
         # and record NOTHING about it: "which task used this entry" was unanswerable for the
         # only path that runs a robot. It now writes RETRIEVED/APPLIED/OUTCOME with the run
