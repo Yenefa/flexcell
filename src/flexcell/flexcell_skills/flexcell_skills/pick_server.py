@@ -57,6 +57,16 @@ PHASES = {
 }
 
 
+
+def rotate_by_quaternion(quat, vec):
+    x, y, z, w = quat
+    vx, vy, vz = vec
+    tx = 2.0 * (y * vz - z * vy)
+    ty = 2.0 * (z * vx - x * vz)
+    tz = 2.0 * (x * vy - y * vx)
+    return (vx + w * tx + (y * tz - z * ty),
+            vy + w * ty + (z * tx - x * tz),
+            vz + w * tz + (x * ty - y * tx))
 class PickServer(Node):
 
     def __init__(self):
@@ -68,6 +78,7 @@ class PickServer(Node):
         self.declare_parameter('gripper_close_position', -0.011)
         self.declare_parameter('approach_hover_m', 0.22)
         self.declare_parameter('grasp_dz_m', 0.16)
+        self.declare_parameter('grasp_dx_m', 0.0)
         self.declare_parameter('grasp_raise_m', 0.10)
         self.declare_parameter('attach_radius_m', 0.20)
         self.declare_parameter('carry_start_topic', '/flexcell/carry_start')
@@ -110,6 +121,7 @@ class PickServer(Node):
         self._gripper_close = float(gp('gripper_close_position').value)
         self._hover = float(gp('approach_hover_m').value)
         self._grasp_dz = float(gp('grasp_dz_m').value)
+        self._grasp_dx = float(gp('grasp_dx_m').value)
         self._raise = float(gp('grasp_raise_m').value)
         self._attach_radius = float(gp('attach_radius_m').value)
         self._carry_start = self.create_publisher(
@@ -289,6 +301,13 @@ class PickServer(Node):
             errors.append('planning-scene cleanup: %s' % (scene_error or 'rejected'))
         return not errors, '; '.join(errors)
 
+    def _grasp_point(self, box_pos, box_quat):
+        x, y, z, w = box_quat
+        yaw = math.atan2(2.0 * (w * z + x * y), 1.0 - 2.0 * (y * y + z * z))
+        # Only the yaw rotates the stand-off: rotating by the full attitude put
+        # the target below the table and the arm could not reach it.
+        off = [math.cos(yaw) * self._grasp_dx, math.sin(yaw) * self._grasp_dx, self._grasp_dz]
+        return [box_pos[i] + off[i] for i in range(3)]
     def _engage_carry(self, object_id, offset):
         if not self._carry_engage.wait_for_service(timeout_sec=2.0):
             return False, 'carry engage service unavailable'
@@ -473,7 +492,7 @@ class PickServer(Node):
                                   cancel_check=cancel_requested)
                 if r1[0] is None or int(r1[0].outcome) != R.OUTCOME_SUCCEEDED:
                     return r1
-                grasp_t = [box_pos[0], box_pos[1], box_pos[2] + self._grasp_dz]
+                grasp_t = self._grasp_point(box_pos, box_quat)
                 return self._motion(grasp_t, profile, rid + '-grasp',
                                     cancel_check=cancel_requested)
 
@@ -493,7 +512,7 @@ class PickServer(Node):
                 return finish(R.OUTCOME_FAILED, R.ERR_MOTION_FAILED,
                               'approach failed: %s' % detail,
                               motion_err=merr_code)
-            grasp = [box_pos[0], box_pos[1], box_pos[2] + self._grasp_dz]
+            grasp = self._grasp_point(box_pos, box_quat)
 
             # ---------- GRASPING ----------
             self._feedback(goal_handle, 'GRASPING', t0)
