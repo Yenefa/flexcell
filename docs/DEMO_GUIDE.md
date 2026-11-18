@@ -54,6 +54,15 @@ unset LIBGL_ALWAYS_SOFTWARE
   one this guide's script uses; on a host where it does not help, fall back to
   `LIBGL_ALWAYS_SOFTWARE=1` and expect the CPU cost. TODO: record which GPU vendor
   each demo machine uses.
+- `scripts/demo_serve.sh` takes `DEMO_GUI=gpu|soft` (default `soft`). `gpu` uses the
+  D3D12 variables above; `soft` forces llvmpipe. The D3D12 GUI segfaulted in the
+  NVIDIA driver on 2026-11-18, then ran stably later the same day, so treat GPU as
+  preferred with `soft` as the fallback for recording.
+- **One GPU GUI per WSL session.** After a GPU GUI exits, a second `gz sim -g` in the
+  same session can log `D3D12: Removing Device` and abort with `Failed to create
+  OpenGL context`. Run `wsl --shutdown` before the next GPU recording session (or use
+  `-Gui soft`). Verified on 2026-11-18: the first GUI after a restart rendered and
+  recorded; the next one in the same session aborted.
 
 ### `GZ_PARTITION` must match everywhere
 
@@ -207,12 +216,14 @@ Record from the Windows host and crop to the Gazebo window:
 ```powershell
 powershell -ExecutionPolicy Bypass -File scripts/record_gazebo.ps1 `
   -SourceRun /tmp/carry-window3/out/NORMAL_1/run-7c231a57a747 `
-  -Out D:\demo\gazebo.mp4 -Seconds 60 -Cycles 1
+  -Out D:\demo\gazebo.mp4 -Seconds 60 -Cycles 1 -Gui gpu
 ```
+
+`-Gui gpu` selects the D3D12 path; `-Gui soft` (default) forces llvmpipe.
 
 The script:
 
-1. starts `scripts/demo_serve.sh` in WSL (stack + software-rendered GUI),
+1. starts `scripts/demo_serve.sh` in WSL (stack + GUI, `-Gui gpu|soft`),
 2. waits for `/tmp/demo-ready`,
 3. finds the window titled `Gazebo Sim`, maximizes it, reads its client rectangle,
 4. records exactly that rectangle with Windows `gdigrab`,
@@ -229,11 +240,13 @@ ffmpeg -f gdigrab -framerate 30 -offset_x <x> -offset_y <y> `
 - `-offset_x`, `-offset_y` and `-video_size` come from the window's **client**
   rectangle (`GetClientRect` + `ClientToScreen`), not the outer frame, so the title
   bar and the desktop are not recorded.
-- If the D3D12 GUI segfaults in the NVIDIA driver (seen 2026-11-18), start the GUI
-  with `LIBGL_ALWAYS_SOFTWARE=1` and unset `GALLIUM_DRIVER` /
-  `MESA_D3D12_DEFAULT_ADAPTER_NAME`. `scripts/demo_serve.sh` does that.
+- If the D3D12 GUI segfaults in the NVIDIA driver (seen 2026-11-18), use
+  `-Gui soft` or start the GUI with `LIBGL_ALWAYS_SOFTWARE=1` and unset
+  `GALLIUM_DRIVER` / `MESA_D3D12_DEFAULT_ADAPTER_NAME`. `scripts/demo_serve.sh`
+  does that for `soft`.
 - Verified output on this host: 1536x816, 30 fps, 60 s, one full `RunDemo` cycle
-  (6/6 steps OK), level horizon, robot and both boxes inside the frame.
+  (6/6 steps OK), level horizon, robot and both boxes inside the frame. A GPU
+  two-run recording measured 1536x864, 71.97 s (§7).
 
 ## 7. Output layout
 
@@ -267,6 +280,34 @@ expects a runner result object (`status` + `task`) with `skills/place.jsonl` and
 Naming the session directory `demo-<date>` (as above) keeps cycles of one session
 together; give each session its own directory rather than appending to an old one.
 
+### Two runs in one video
+
+Two cycles in one stack are not reliable while the GUI and the encoder are active:
+the between-cycle `flexcell_admin reset` can exceed its planning timeout, and
+`run_demo_cycles.py` stops after a failed reset. Record one cycle per stack and
+concatenate:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts/record_gazebo.ps1 -Gui gpu `
+  -SourceRun <run-dir> -Out runA.mp4 -Seconds 60 -Cycles 1
+wsl --shutdown
+powershell -ExecutionPolicy Bypass -File scripts/record_gazebo.ps1 -Gui gpu `
+  -SourceRun <run-dir> -Out runB.mp4 -Seconds 60 -Cycles 1
+
+ffmpeg -ss 4.5 -i runA.mp4 -t 34 -vf fps=30 -c:v libx264 -pix_fmt yuv420p A.mp4
+ffmpeg -ss 3.5 -i runB.mp4 -t 33 -vf fps=30 -c:v libx264 -pix_fmt yuv420p B.mp4
+"file 'A.mp4'" | Out-File -Encoding ascii list.txt
+"file 'B.mp4'" | Out-File -Encoding ascii -Append list.txt
+ffmpeg -f concat -safe 0 -i list.txt -c copy two-runs.mp4
+```
+
+For `-Gui gpu`, shut WSL down between the two recordings: the second GPU GUI in one
+session can lose the D3D12 device (§1). Headless multi-cycle data collection is fine
+(`--cycles 3`); the reset retry in `run_demo_cycles.py` (240 s, two attempts) covers
+slow runs, but the GUI path should use one stack per recording. Verified on this
+host: **1536x816, 66.97 s, 1.3 MB**, two GPU-rendered runs back-to-back, 6/6 steps
+OK in each.
+
 ## 8. One command for the whole thing
 
 On WSLg, use the Windows recorder from §6. It starts the stack, opens the GUI,
@@ -295,7 +336,8 @@ while the manual session in this guide uses `pp-manual`.
 | ffmpeg "Cannot open display" | wrong `DISPLAY` or no X socket | `echo $DISPLAY`; re-run with that value |
 | recorded video is black | `x11grab` cannot see WSLg Wayland windows | use `scripts/record_gazebo.ps1` (§6), check a frame's `YAVG` |
 | horizon is tilted | `camera_pose` field order is `x y z roll pitch yaw`; a yaw value in the roll slot | set roll to 0 (§4) |
-| GUI segfaults in `libnvwgf2umx.so` / `libd3d12core.so` | D3D12 driver path | start the GUI with `LIBGL_ALWAYS_SOFTWARE=1` (`scripts/demo_serve.sh`) |
+| GUI segfaults in `libnvwgf2umx.so` / `libd3d12core.so` | D3D12 driver path | record with `-Gui soft`, or start the GUI with `LIBGL_ALWAYS_SOFTWARE=1` (`scripts/demo_serve.sh`) |
+| reset between cycles fails while recording | GUI + encoder leave too little time for the 90 s planning step | record one cycle per stack (§7) |
 
 ## 10. TODO (unverified here)
 
