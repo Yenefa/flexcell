@@ -401,7 +401,39 @@ capability is what makes that visible instead of leaving it to an audit.
     grader verdict"* is still an unmeasured claim, and preventing exactly that is this
     module's purpose. They are now `UNMEASURED` with a hypothesis attached, labelled.
 
-`verify.py` asserts **124 checks**, including that both gates really ran, that the asset
+31. **a capable module can exist and the archive still cannot measure it.** Last round split
+    UNROUTED into *already correct* and *not yet measured*. **A third answer was missing.**
+
+    `graded_push` — **23 failures across 9 instances, the largest unrouted signature** — is not
+    a case with no module. `push_recover` is a real closed-loop retry policy: when a push
+    reports contact lost with the object short, it asks for the remainder. Its batch records a
+    **with/without comparison**:
+
+    | configuration | terminal pass |
+    | --- | --- |
+    | single-shot PushObject (baseline) | **2/5** |
+    | closed-loop recovery | **4/5** |
+
+    **The capability and the evidence both exist. So why can it not be measured here?**
+
+    > **The recorded attempt sequences were produced BY the policy under test.** Replaying a
+    > policy over its own output cannot show what the policy changed — the attempts already
+    > contain its decisions. **That is a selection effect, not a null result.**
+
+    All three of the tempting answers are wrong:
+
+    | if reported as | what is wrong |
+    | --- | --- |
+    | "no capable module" | **one exists** |
+    | "already correct" | **not measured** |
+    | "still wrong" | **not measured either** — and would hatch a "fix" for an unproven defect |
+
+    It is reported as **UNMEASURED + `module_found: true`**, with the selection effect named in
+    the reason. The replay itself **reproduces the recorded verdict in 5 of 5 trials** — a
+    **correctness check on the replay, not an effect measurement**, and conflating the two
+    would turn this back into "we measured it".
+
+`verify.py` asserts **127 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -424,8 +456,9 @@ one by one with a declared-but-empty destination not counted as covered**, that 
 live in a code path without an entry admitted for it**, that **the committed evidence
 ids, numbers and file set match a fresh run to the byte**, that **the development
 routing renders a candidate that does not claim PROPOSED and names its own missing tests**,
-and that **every unrouted signature states what is actually known rather than being
-dismissed with one sentence**.
+that **every unrouted signature states what is actually known rather than being dismissed
+with one sentence**, and that **a capable module with an unmeasurable archive is reported as
+a selection effect rather than as any of the three tempting answers**.
 
 ---
 

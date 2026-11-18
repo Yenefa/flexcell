@@ -716,6 +716,22 @@ def main():
         checks["the_measured_signature_is_reported_as_measured"] = (
             states.get("placement_clause_failed") in ("ALREADY_CORRECT",
                                                       "FAILED_INSTANCES"))
+        # 31 -- A MODULE CAN EXIST AND THE ARCHIVE STILL CANNOT MEASURE IT. push_recover is
+        # a real closed-loop retry policy with a recorded 2/5 -> 4/5 comparison, so
+        # graded_push HAS a capable module - but its recorded attempts were produced BY that
+        # policy, and replaying a policy over its own output cannot show what it changed.
+        # That is a selection effect, and reporting it as "no capable module" or as a
+        # measured null result would both be answers the data cannot support.
+        push = next((r for r in unrouted["unrouted"] if r["signature"] == "graded_push"), {})
+        checks["a_capable_module_with_an_unmeasurable_archive_is_called_out"] = (
+            push.get("module_found") is True and push.get("state") == "UNMEASURED")
+        checks["the_selection_effect_is_named_not_reported_as_a_null_result"] = (
+            "selection effect" in (push.get("why") or "")
+            or "replaying it over them cannot measure" in (push.get("why") or ""))
+        # the replay itself must be CORRECT, or the note above is about a broken replay
+        probe = push.get("probe") or {}
+        checks["the_policy_replay_reproduces_the_recorded_verdicts"] = (
+            probe.get("verdicts_reproduced") == len(probe.get("trials") or []) > 0)
         # ... and an unmeasured one must NOT claim a verdict. This is the assertion that
         # caught this module's own first version, which asserted "no capable module" for six
         # signatures on the strength of their names alone.
@@ -724,9 +740,12 @@ def main():
             if row["signature"] not in unrouted.get("probed", {}) and
             not row.get("probe"))
         # a hypothesis must be labelled as one, never cited as a measurement
+        # a label is required only where a GUESS is being offered. A signature whose module
+        # was actually found carries a probe, not a hypothesis.
         checks["a_candidate_consumer_is_labelled_a_hypothesis"] = all(
             "NOT a measurement" in (row.get("probe_is") or "")
-            for row in unrouted["unrouted"] if row["state"] == "UNMEASURED")
+            for row in unrouted["unrouted"]
+            if row["state"] == "UNMEASURED" and not row.get("module_found"))
 
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",

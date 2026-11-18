@@ -125,10 +125,79 @@ def probe_planner_object_set(instances, acceptance):
 # earlier version of this file also asserted "no capable module" for six signatures on the
 # strength of their names, which is exactly the kind of unmeasured claim this module exists
 # to stop.
-PROBES = {
-    # the wrong-bin failure: the planner decides object->zone, so it is the first candidate
-    "placement_clause_failed": probe_planner_object_set,
-}
+def probe_push_recovery(instances, acceptance):
+    """Can push_recover act on a failed push, and can THIS ARCHIVE show it?
+
+    push_recover is a real closed-loop retry policy: after PushObject reports contact lost
+    with the object short of the requested distance, it asks for the remainder. Its batch
+    records a with/without comparison - single shot 2/5 terminal pass, closed loop 4/5 - and
+    diagnoses the residue (the object is flicked BACKWARD by contact geometry, which a retry
+    policy cannot fix).
+
+    So a capable module exists. What this probe reports is that THE ARCHIVE ALREADY HERE
+    CANNOT MEASURE ITS EFFECT, for a reason worth naming:
+
+        the recorded attempts were produced BY the policy under test. Replaying a policy
+        against its own output cannot show what the policy changed - the attempts already
+        contain its decisions. That is a selection effect, not a null result.
+
+    Measured: replaying the shipped policy over the recorded attempts reproduces the
+    recorded verdict in 5 of 5 trials, which is a CORRECTNESS check on the replay, not an
+    effect measurement. Re-running the same attempts with the pre-fix magnitude reading
+    changes no outcome either, because those attempts were generated under the fix.
+    """
+    attempts_total, verdicts_matched, usable = 0, 0, []
+    push_recover = _load_push_recover()
+    if push_recover is None:
+        return {"consumer": "executor_recovery", "action_kind": "recovery_action",
+                "instances_checked": 0, "instances_wrong": 0, "wrong": [],
+                "module_available": False,
+                "why": "push_recover is not importable from this checkout"}
+    batch = os.path.join(acceptance, "evobot_push_recover_20261112", "evidence")
+    for trial in range(1, 6):
+        path = os.path.join(batch, "recovery_t%d.json" % trial)
+        if not os.path.exists(path):
+            continue
+        try:
+            record = json.load(open(path, encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        attempts = record.get("attempts") or []
+        recorded = (record.get("verdict") or {}).get("outcome")
+        if not attempts:
+            continue
+        attempts_total += len(attempts)
+        try:
+            replay = push_recover.accumulate(attempts, 0.09)
+        except Exception:  # noqa: BLE001 - a replay failure is data
+            continue
+        if replay.get("outcome") == recorded:
+            verdicts_matched += 1
+        usable.append({"trial": trial, "attempts": len(attempts),
+                       "recorded_outcome": recorded,
+                       "replayed_outcome": replay.get("outcome")})
+    return {"consumer": "executor_recovery", "action_kind": "recovery_action",
+            # NOT instances_wrong: a selection effect is not a module failure, and reporting
+            # it as one would have this signature classified FAILED_INSTANCES on no evidence
+            "instances_checked": 0, "instances_wrong": 0, "wrong": [],
+            "module_available": True, "attempts_replayed": attempts_total,
+            "verdicts_reproduced": verdicts_matched, "trials": usable,
+            "selection_effect": (
+                "the recorded attempts were produced by the policy under test, so replaying "
+                "it over them cannot measure what it changed; a with/without comparison "
+                "needs attempts recorded WITHOUT the policy")}
+
+
+def _load_push_recover():
+    path = os.path.join(WT, "src", "flexcell", "flexcell_skills", "flexcell_skills",
+                        "contracts")
+    if path not in sys.path:
+        sys.path.insert(0, path)
+    try:
+        import push_recover
+        return push_recover
+    except Exception:  # noqa: BLE001 - an unimportable module is a fact, not a crash
+        return None
 
 # Which consumers PLAUSIBLY map to a signature, so the gap is actionable rather than a shrug.
 # This is a hypothesis to test, NOT a measurement, and it is reported as such.
@@ -143,6 +212,14 @@ CANDIDATE_CONSUMERS = {
 }
 
 
+PROBES = {
+    # the wrong-bin failure: the planner decides object->zone, so it is the first candidate
+    "placement_clause_failed": probe_planner_object_set,
+    # the push failure: push_recover decides whether to retry - see probe_push_recovery
+    "graded_push": probe_push_recovery,
+}
+
+
 def classify(signature, instances, acceptance):
     """State what is actually known about one unrouted signature."""
     probe = PROBES.get(signature)
@@ -154,6 +231,15 @@ def classify(signature, instances, acceptance):
                 "probe_is": ("a hypothesis to test; it is NOT a measurement and must not be "
                              "cited as one")}
     result = probe(instances, acceptance)
+    if result.get("selection_effect"):
+        # A MODULE EXISTS BUT THIS ARCHIVE CANNOT MEASURE IT. That is neither "already
+        # correct" nor "wrong somewhere", and collapsing it into either would be a made-up
+        # answer to a question the data cannot settle.
+        return {"state": UNMEASURED,
+                "why": ("a capable module exists (%s) but the archive cannot measure its "
+                        "effect: %s" % (result.get("consumer"), result["selection_effect"])),
+                "probe": result, "module_found": True,
+                "candidate_consumers": [result.get("consumer")]}
     if not result["instances_checked"]:
         return {"state": UNMEASURED, "why": "the probe found no scoreable instance",
                 "probe": result}

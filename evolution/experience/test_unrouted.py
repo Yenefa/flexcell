@@ -121,9 +121,44 @@ def test_every_unrouted_signature_is_itemised(report):
         assert row["generator_said"].startswith("UNROUTED")
 
 
-def test_the_measured_signature_is_the_one_with_a_probe(report):
+def test_only_the_scoreable_signature_is_given_a_verdict(report):
+    """A selection effect must not become a verdict, so exactly one signature is measured."""
     measured = [r for r in report["unrouted"] if r["state"] != unrouted.UNMEASURED]
     assert [r["signature"] for r in measured] == ["placement_clause_failed"]
+
+
+def test_a_capable_module_with_an_unmeasurable_archive_is_reported_as_such(report):
+    """push_recover is a real policy with a recorded 2/5 -> 4/5 comparison, so graded_push
+    HAS a capable module. Its recorded attempts were produced BY that policy, and replaying a
+    policy over its own output cannot show what it changed. Three answers would be wrong:
+    'no capable module' (one exists), 'already correct' (not measured), 'still wrong' (not
+    measured either). It is a selection effect."""
+    push = next(r for r in report["unrouted"] if r["signature"] == "graded_push")
+    assert push["state"] == unrouted.UNMEASURED
+    assert push["module_found"] is True
+    assert push["candidate_consumers"] == ["executor_recovery"]
+
+
+def test_the_selection_effect_is_named(report):
+    push = next(r for r in report["unrouted"] if r["signature"] == "graded_push")
+    assert "cannot measure" in push["why"] or "selection" in push["why"]
+    assert push["probe"]["selection_effect"]
+
+
+def test_the_policy_replay_is_correct(report):
+    """The selection-effect note would be meaningless if the replay itself were broken."""
+    push = next(r for r in report["unrouted"] if r["signature"] == "graded_push")
+    probe = push["probe"]
+    assert probe["verdicts_reproduced"] == len(probe["trials"]) > 0
+    assert probe["attempts_replayed"] > 0
+
+
+def test_a_selection_effect_is_not_scored_as_a_wrong_instance(report):
+    """Counting it as instances_wrong would classify the signature FAILED_INSTANCES on no
+    evidence, and produce a 'fix' for a defect nobody has shown exists."""
+    push = next(r for r in report["unrouted"] if r["signature"] == "graded_push")
+    assert push["probe"]["instances_wrong"] == 0
+    assert push["probe"]["instances_checked"] == 0
 
 
 def test_an_unprobed_signature_does_not_claim_a_verdict(report):
@@ -131,15 +166,21 @@ def test_an_unprobed_signature_does_not_claim_a_verdict(report):
     "no capable module" for six signatures on the strength of their names, which is the
     unmeasured claim the module exists to prevent."""
     for row in report["unrouted"]:
-        if row["state"] == unrouted.UNMEASURED:
-            assert "probe" not in row or not row.get("probe")
+        if row["state"] == unrouted.UNMEASURED and not row.get("module_found"):
+            assert not row.get("probe")
             assert "no probe has been written" in row["why"]
 
 
 def test_a_candidate_consumer_is_labelled_a_hypothesis(report):
+    """A label is required exactly where a GUESS is offered. A signature whose module was
+    actually found carries a probe, not a hypothesis, so demanding the label there would
+    force a false one."""
+    labelled = 0
     for row in report["unrouted"]:
-        if row["state"] == unrouted.UNMEASURED and row.get("candidate_consumers"):
-            assert "NOT a measurement" in row["probe_is"]
+        if row["state"] == unrouted.UNMEASURED and not row.get("module_found"):
+            assert "NOT a measurement" in (row.get("probe_is") or "")
+            labelled += 1
+    assert labelled > 0
 
 
 def test_the_claim_does_not_overstate_what_unrouted_means(report):

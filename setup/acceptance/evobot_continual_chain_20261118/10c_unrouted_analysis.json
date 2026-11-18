@@ -13,11 +13,54 @@
       ],
       "generator_said": "UNROUTED: no consumer in this stack declares a change for 'graded_push', so the knowledge would be stored and unable to act",
       "instances": 9,
+      "module_found": true,
       "occurrences": 23,
-      "probe_is": "a hypothesis to test; it is NOT a measurement and must not be cited as one",
+      "probe": {
+        "action_kind": "recovery_action",
+        "attempts_replayed": 11,
+        "consumer": "executor_recovery",
+        "instances_checked": 0,
+        "instances_wrong": 0,
+        "module_available": true,
+        "selection_effect": "the recorded attempts were produced by the policy under test, so replaying it over them cannot measure what it changed; a with/without comparison needs attempts recorded WITHOUT the policy",
+        "trials": [
+          {
+            "attempts": 3,
+            "recorded_outcome": 2,
+            "replayed_outcome": 2,
+            "trial": 1
+          },
+          {
+            "attempts": 3,
+            "recorded_outcome": 2,
+            "replayed_outcome": 2,
+            "trial": 2
+          },
+          {
+            "attempts": 1,
+            "recorded_outcome": 1,
+            "replayed_outcome": 1,
+            "trial": 3
+          },
+          {
+            "attempts": 1,
+            "recorded_outcome": 1,
+            "replayed_outcome": 1,
+            "trial": 4
+          },
+          {
+            "attempts": 3,
+            "recorded_outcome": 2,
+            "replayed_outcome": 2,
+            "trial": 5
+          }
+        ],
+        "verdicts_reproduced": 5,
+        "wrong": []
+      },
       "signature": "graded_push",
       "state": "UNMEASURED",
-      "why": "no probe has been written for this signature, so whether a module could act on it is unknown - not answered"
+      "why": "a capable module exists (executor_recovery) but the archive cannot measure its effect: the recorded attempts were produced by the policy under test, so replaying it over them cannot measure what it changed; a with/without comparison needs attempts recorded WITHOUT the policy"
     },
     {
       "candidate_consumers": [
