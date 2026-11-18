@@ -240,6 +240,7 @@ def main():
         out['fsm_trace'] = list(r.fsm_trace)
         out['object_a_at_zone'] = bool(r.object_a_at_zone)
         out['object_b_at_zone'] = bool(r.object_b_at_zone)
+        out['residual_carry'] = bool(r.residual_carry)
         out['zone_a_error_m'] = r.zone_a_error_m
         out['zone_b_error_m'] = r.zone_b_error_m
         out['run_id'] = r.run_id
@@ -255,6 +256,7 @@ def main():
     if args.action == 'task':
         out['fsm_trace'] = list(r.fsm_trace)
         out['object_at_place'] = bool(r.object_at_place)
+        out['residual_carry'] = bool(r.residual_carry)
         out['final_position_error_m'] = r.final_position_error_m
     out.update(extra)
     print('RESULT ' + json.dumps(json_safe(out), indent=2,

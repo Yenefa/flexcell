@@ -91,6 +91,25 @@ def test_child_forwards_cancel_without_terminating_parent():
     h.canceled.assert_not_called();h.succeed.assert_not_called()
 
 
+def test_carry_snapshot_reports_residual_carry():
+    from concurrent.futures import Future
+    from flexcell_interfaces.srv import QueryCarry
+    n=TaskFsmServer.__new__(TaskFsmServer)
+    reply=QueryCarry.Response();reply.success=True;reply.state.engaged=True;reply.detail='held'
+    future=Future();future.set_result(reply)
+    n._carry_query=SimpleNamespace(wait_for_service=lambda **kw: True,
+                                   call_async=lambda req: future,
+                                   remove_pending_request=lambda f: None)
+    assert n._carry_engaged_snapshot()==(True,'held')
+
+
+def test_carry_snapshot_unavailable_is_unknown():
+    from types import SimpleNamespace
+    n=TaskFsmServer.__new__(TaskFsmServer)
+    n._carry_query=SimpleNamespace(wait_for_service=lambda **kw: False)
+    assert n._carry_engaged_snapshot()==(None,'carry snapshot service unavailable')
+
+
 def test_receipt_open_failure_is_typed_failure(tmp_path):
     n=server(tmp_path);p=tmp_path/'file';p.write_text('cannot be directory');n._composite_dir=str(p)
     h=goal();r=n._execute_composite(h)

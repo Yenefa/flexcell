@@ -42,8 +42,10 @@ from flexcell_interfaces.action import (
     Observe, PickObject, PlaceObject, RunComposite, RunDemo, RunPickPlace,
     VerifyObject)
 from flexcell_interfaces.msg import ZoneState
+from flexcell_interfaces.srv import QueryCarry
 
-from flexcell_skills.common import JsonlLog, crash_detail, new_evidence
+from flexcell_skills.common import (
+    JsonlLog, crash_detail, new_evidence, wait_future)
 from flexcell_skills.skill_contract import (
     check_pick, check_place, check_verify)
 from flexcell_skills.canonical_state import serialize_envelope
@@ -184,6 +186,7 @@ class TaskFsmServer(Node):
         self.declare_parameter('demo_log_file', 'demo_runs.jsonl')
         self.declare_parameter('episode_dir', '~/.ros/flexcell/episodes')
         self.declare_parameter('task_state_topic', '/flexcell/task_state')
+        self.declare_parameter('carry_query_service', '/flexcell/carry_snapshot')
         self.declare_parameter('decision_policy', 'fsm')
         self.declare_parameter('resume_completed_objects', False)
         self.declare_parameter('jev_backend', 'local')
@@ -251,6 +254,9 @@ class TaskFsmServer(Node):
         qos.reliability = QoSReliabilityPolicy.RELIABLE
         self._state_pub = self.create_publisher(
             StringMsg, gp2('task_state_topic').value, qos)
+        self._carry_query = self.create_client(
+            QueryCarry, gp2('carry_query_service').value,
+            callback_group=ReentrantCallbackGroup())
         self._publish_task_state('IDLE')
 
         self._demo_server = ActionServer(
@@ -276,6 +282,23 @@ class TaskFsmServer(Node):
 
     def _publish_task_state(self, state):
         self._state_pub.publish(StringMsg(data=state))
+
+    def _carry_engaged_snapshot(self, timeout=2.0):
+        """Read the carry state for the terminal report; None means unknown."""
+        client = getattr(self, '_carry_query', None)
+        if client is None:
+            return None, 'carry snapshot client unavailable'
+        if not client.wait_for_service(timeout_sec=timeout):
+            return None, 'carry snapshot service unavailable'
+        future = client.call_async(QueryCarry.Request())
+        if wait_future(future, timeout) != 'done':
+            client.remove_pending_request(future)
+            return None, 'carry snapshot timed out'
+        response = future.result()
+        if response is None or not response.success:
+            return None, 'carry snapshot rejected: %s' % getattr(
+                response, 'detail', 'no reply')
+        return bool(response.state.engaged), response.detail
 
     def _call_skill(self, cli, goal, state, trace, rec, deadline_s, goal_handle=None, t0=None):
         """Call one skill; returns (result, None) or (None, detail)."""
@@ -612,11 +635,21 @@ class TaskFsmServer(Node):
         def finish(outcome, error, detail):
             res.outcome, res.error_code = outcome, error
             res.detail, res.fsm_trace, res.evidence_id = detail, trace, evidence
+            residual_carry = False
+            if outcome == result_type.OUTCOME_CANCELED:
+                engaged, carry_detail = self._carry_engaged_snapshot()
+                if engaged:
+                    residual_carry = True
+                    res.residual_carry = True
+                    detail = ('%s; residual carry engaged (%s); arm not returned '
+                              'home' % (detail, carry_detail or 'carry held'))
+                    res.detail = detail
             duration_s = time.monotonic() - t0
             final = {
                 'outcome': str(outcome), 'error_code': int(error),
                 'detail': detail, 'fsm_trace': list(trace),
                 'duration_s': duration_s, 'evidence_id': evidence,
+                'residual_carry': bool(residual_carry),
                 'safety': safety_metrics(safety_evaluated, safety_rejected),
             }
             ros_goal = getattr(goal_handle, 'goal_id', None)
@@ -666,8 +699,11 @@ class TaskFsmServer(Node):
             else:
                 self._demo_log.write(log_record)
             if owns_arm:
-                self._publish_task_state(
-                    'BUSY' if self._has_pending_skill_goal() else 'IDLE')
+                if residual_carry:
+                    self._publish_task_state('RESIDUAL_CARRY')
+                else:
+                    self._publish_task_state(
+                        'BUSY' if self._has_pending_skill_goal() else 'IDLE')
             if outcome == result_type.OUTCOME_SUCCEEDED:
                 goal_handle.succeed()
             elif outcome == result_type.OUTCOME_CANCELED:

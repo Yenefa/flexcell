@@ -20,6 +20,7 @@ uint16 ERR_CANCELED=32
 uint16 error_code
 string[] fsm_trace                 # ordered state names visited
 bool object_at_place
+bool residual_carry              # canceled while carry was still engaged
 float64 final_position_error_m
 string evidence_id
 string detail
