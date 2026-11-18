@@ -178,23 +178,35 @@ See DAY1_REPORT.md for the full environment, every problem hit, and the fixes.
 
 ## Reproduce
 
-    mkdir -p ~/agentic_workcell_ws/src && cd ~/agentic_workcell_ws
+    cd ~
+    git clone https://github.com/Yenefa/flexcell.git agentic_workcell_ws
+    cd ~/agentic_workcell_ws
     vcs import src < agentic_workcell.repos
     source /opt/ros/jazzy/setup.bash
     rosdep install --from-paths src --ignore-src -r -y
-    colcon build --symlink-install \
-      --packages-up-to open_manipulator_bringup open_manipulator_moveit_config
+    colcon build --symlink-install
+    source setup/104_mainline_env.sh
 
 ## Run
 
-    # Terminal 1 - Gazebo
-    ros2 launch open_manipulator_bringup open_manipulator_x_gazebo.launch.py
+    cd ~/agentic_workcell_ws
+    ./setup/flexcell start
+    ./setup/flexcell health
 
-    # Terminal 2 - MoveIt 2 + RViz
+`./setup/flexcell start` loads this checkout's `install/` and the project world
+(`worlds/flexcell_world.sdf`) and starts the FSM, MoveIt and skill servers. Use
+`./setup/flexcell` for the full stack; the upstream Gazebo/MoveIt launches below
+are only for debugging the robot description, not for `/run_demo`:
+
+    ros2 launch open_manipulator_bringup open_manipulator_x_gazebo.launch.py
     ros2 launch open_manipulator_moveit_config open_manipulator_x_moveit.launch.py use_sim:=true
 
-    # Terminal 3 - Plan & Execute (optional joint target)
-    python3 plan_execute.py 0.6 -0.9 0.9 0.5
+## Test
+
+    colcon test --packages-select flexcell_skills
+    colcon test-result --verbose
+
+See `REPRODUCE.md` for the offline ladder and the current measured test counts.
 
 ## Known limitations
 

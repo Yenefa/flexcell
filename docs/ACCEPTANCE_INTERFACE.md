@@ -218,6 +218,10 @@ started in another terminal without those exports will not see the action server
 Examples, all verified against the client's argparse and goal mapping:
 
 ```bash
+# Always source the project env first: ROS_DOMAIN_ID=45 + rmw_cyclonedds_cpp.
+# Without it the client can see no action while `health` still reports OK.
+source setup/104_mainline_env.sh
+
 # continuous two-object demo
 python3 src/flexcell/flexcell_skills/test/w1_client.py --action demo --scenario week1_demo_v1
 

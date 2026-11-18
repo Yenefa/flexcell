@@ -10,6 +10,7 @@ Usage:
 """
 import argparse
 import json
+import os
 import sys
 import time
 import uuid
@@ -22,6 +23,7 @@ from std_msgs.msg import String as StringMsg
 
 from flexcell_interfaces.action import (
     Observe, PickObject, PlaceObject, RunDemo, RunPickPlace, VerifyObject)
+from flexcell_skills.common import json_safe
 
 SPEC = {
     'observe': (Observe, '/observe'),
@@ -130,7 +132,14 @@ def main():
     cli = ActionClient(n, cls, act)
 
     if not cli.wait_for_server(timeout_sec=30.0):
-        print(json.dumps({'client_error': 'action %s unavailable' % act}))
+        print(json.dumps({
+            'client_error': 'action %s unavailable' % act,
+            'ros_domain_id': os.environ.get('ROS_DOMAIN_ID'),
+            'rmw_implementation': os.environ.get('RMW_IMPLEMENTATION'),
+            'hint': ('source setup/104_mainline_env.sh in this shell '
+                     '(ROS_DOMAIN_ID=45 + rmw_cyclonedds_cpp) and check that '
+                     'the stack was started from the same workspace'),
+        }))
         return 2
 
     g = cls.Goal()
@@ -248,7 +257,8 @@ def main():
         out['object_at_place'] = bool(r.object_at_place)
         out['final_position_error_m'] = r.final_position_error_m
     out.update(extra)
-    print('RESULT ' + json.dumps(out, indent=2), flush=True)
+    print('RESULT ' + json.dumps(json_safe(out), indent=2,
+                                 allow_nan=False), flush=True)
 
     success_vals = {0}
     for attr in ('OUTCOME_SUCCEEDED', 'OUTCOME_VERIFIED'):

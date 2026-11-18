@@ -72,8 +72,12 @@ def cell_of(record):
     return arm + ' @ ' + label + ' / runtime=' + profile
 
 
-def load_episodes(store, batch):
-    """Return [(path, record)] - filtered to one batch when given."""
+def load_episodes(store, batch, problems=None):
+    """Return [(path, record)] - filtered to one batch when given.
+
+    Unreadable records are reported to stderr and appended to `problems` so the
+    caller can fail the verdict instead of shrinking the denominator silently.
+    """
     if batch:
         paths = []
         batch_rows = {}
@@ -98,14 +102,17 @@ def load_episodes(store, batch):
                     rec['benchmark_cell'] = batch_rows[p]['scenario']
                 out.append((p, rec))
         except (OSError, ValueError) as exc:
-            print('WARN: unreadable episode %s: %s' % (p, exc), file=sys.stderr)
+            message = 'unreadable episode %s: %s' % (p, exc)
+            print('WARN: ' + message, file=sys.stderr)
+            if problems is not None:
+                problems.append(message)
     return out
 
 
-def episode_rows(episodes, model_replay=None):
+def episode_rows(episodes, model_replay=None, problems=None):
     """Group episodes into cells + compute per-episode facts."""
     cells = {}
-    problems = []
+    problems = list(problems or [])
     for path, rec in episodes:
         scenario = rec.get('scenario_id', 'unknown')
         cell = cell_of(rec)
@@ -174,8 +181,8 @@ def episode_rows(episodes, model_replay=None):
     return cells, problems
 
 
-def report(episodes, min_cell, model_replay=None):
-    cells, problems = episode_rows(episodes, model_replay)
+def report(episodes, min_cell, model_replay=None, problems=None):
+    cells, problems = episode_rows(episodes, model_replay, problems)
     lines = ['# FlexCell benchmark metrics report', '',
              'generated from the replay store; every number regenerates - '
              'no hand-written PASS lines.', '']
@@ -276,7 +283,8 @@ def main():
     ap.add_argument('--model-replay-results', help='119_policy_eval same frozen model replay JSON')
     args = ap.parse_args()
 
-    episodes = load_episodes(args.store, args.batch)
+    load_problems = []
+    episodes = load_episodes(args.store, args.batch, problems=load_problems)
     if not episodes:
         print('REPORT: FAIL (no episodes found in %s)' % args.store)
         return 2
@@ -290,7 +298,7 @@ def main():
         if hashlib.sha256(json.dumps(freeze, sort_keys=True).encode()).hexdigest() != identity:
             raise ValueError('invalid frozen backend digest')
         model_replay = {r['episode_sha256']: dict(r, freeze_identity=identity) for r in data['episodes']}
-    text, verdict = report(episodes, args.min_cell, model_replay)
+    text, verdict = report(episodes, args.min_cell, model_replay, load_problems)
     print(text)
     if args.out:
         with open(args.out, 'w') as fh:
