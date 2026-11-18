@@ -433,6 +433,15 @@ capability is what makes that visible instead of leaving it to an audit.
     **correctness check on the replay, not an effect measurement**, and conflating the two
     would turn this back into "we measured it".
 
+53. **RETIREMENT ACTUALLY TAKING EFFECT WAS ONLY A CLAIM.** `live_binding`'s docstring
+    promised that a RETIRED or REVISED asset cannot drive the robot, but no test proved it --
+    the check was re-derived from the store at call time, yet nobody showed a superseded asset
+    being refused. `test_retirement_enforcement.py` now proves it with a BASELINE (asset drives
+    the call while its entry is the latest) and two refusals: a RETIRED successor and a newer
+    ACTIVE (revised) successor on the same lineage each make `resolve()` return `{}`. The
+    strongest case uses the REAL `lifecycle.retire` (which keeps the label), not a hand-built
+    successor.
+
 52. **A COST TIE RESOLVED BY INSERTION ORDER IS NOT A SELECTION.** The board declares
     "feasibility filter + cost minimisation", but the incumbent `respread/step=0.090` and
     `respread/step=0.090/cm=0.060` cost EXACTLY the same (0.0475 m, 33 fixed). Python's stable
