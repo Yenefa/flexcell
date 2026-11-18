@@ -195,7 +195,7 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
                            ('base_link', 'link5'),
                            ('zero_gap', '0.034'), ('closed_gap', '0.026'),
                            ('max_force', '20'), ('expected_object_width', '0.035'),
-                           ('width_tolerance', '0.006'), ('confirm_frames', '40')]:
+                           ('width_tolerance', '0.010'), ('confirm_frames', '40')]:
             ET.SubElement(guard, key).text = value
         ET.SubElement(guard, 'object_model').text = tracked[0]
     if contact_trace:

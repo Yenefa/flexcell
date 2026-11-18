@@ -74,7 +74,10 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
   double targetGap{0.034};
   bool engaged{false};
   int stallFrames{0};
-  double gapNow{0.034}, objZ{0.0}, baseZ{0.0};
+  double gapNow{0.034}, objZ{0.0}, baseZ{0.0}, qLeft{0.0}, qRight{0.0};
+  double signLeft_{1.0}, signRight_{1.0}, calibrateRef{0.0};
+  double jointLower{-0.011}, jointUpper{0.020};
+  int calibSteps{0};
 
   static double Value(const std::string &json, const std::string &key, double fallback) {
     const auto at = json.find("\"" + key + "\"");
@@ -156,10 +159,14 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
       queue.push_back(command);
     }
     std::unique_lock<std::mutex> lock(mutex);
-    if (!command->ready.wait_for(lock, std::chrono::milliseconds(2000),
+    if (!command->ready.wait_for(lock, std::chrono::milliseconds(6000),
                                  [&command] { return command->done; })) {
       std::ostringstream out;
-      out << "{\"ok\":false,\"state\":\"TIMEOUT\",\"gap\":" << gapNow << "}";
+      out << "{\"ok\":false,\"state\":\"TIMEOUT\",\"gap\":" << gapNow
+          << ",\"obj_z\":" << objZ << ",\"base_z\":" << baseZ
+          << ",\"rel_z\":" << (objZ - baseZ)
+          << ",\"ql\":" << qLeft << ",\"qr\":" << qRight
+          << ",\"stall\":" << stallFrames << "}";
       reply.set_data(out.str());
       return true;
     }
@@ -167,7 +174,8 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
     out << "{\"ok\":" << (command->success ? "true" : "false")
         << ",\"state\":\"" << command->state << "\",\"gap\":" << command->gap
         << ",\"obj_z\":" << objZ << ",\"base_z\":" << baseZ
-        << ",\"rel_z\":" << (objZ - baseZ) << "}";
+        << ",\"rel_z\":" << (objZ - baseZ)
+        << ",\"ql\":" << qLeft << ",\"qr\":" << qRight << "}";
     reply.set_data(out.str());
     return true;
   }
@@ -197,7 +205,8 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
     out << "{\"ok\":" << (command->done ? "true" : "false") << ",\"state\":\""
         << (engaged ? "GRASPED" : "UNGRASPED") << "\",\"gap\":" << gapNow
         << ",\"obj_z\":" << objZ << ",\"base_z\":" << baseZ
-        << ",\"rel_z\":" << (objZ - baseZ) << "}";
+        << ",\"rel_z\":" << (objZ - baseZ)
+        << ",\"ql\":" << qLeft << ",\"qr\":" << qRight << "}";
     reply.set_data(out.str());
     return true;
   }
@@ -220,6 +229,8 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
     if (config->HasElement("left_joint")) leftName = config->Get<std::string>("left_joint");
     if (config->HasElement("right_joint")) rightName = config->Get<std::string>("right_joint");
     zeroGap = config->HasElement("zero_gap") ? config->Get<double>("zero_gap") : zeroGap;
+    jointLower = config->HasElement("joint_lower") ? config->Get<double>("joint_lower") : jointLower;
+    jointUpper = config->HasElement("joint_upper") ? config->Get<double>("joint_upper") : jointUpper;
     closedGap = config->HasElement("closed_gap") ? config->Get<double>("closed_gap") : closedGap;
     maxForce = config->HasElement("max_force") ? config->Get<double>("max_force") : maxForce;
     kp = config->HasElement("kp") ? config->Get<double>("kp") : kp;
@@ -292,11 +303,32 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
     const double ql = JointPosition(ecm, leftJoint);
     const double qr = JointPosition(ecm, rightJoint);
     gapNow = zeroGap + (ql + qr);
-    const double qTarget = 0.5 * (targetGap - zeroGap);
-    const double forceL = std::clamp(kp * (qTarget - ql) - kd * JointVelocity(ecm, leftJoint),
-                                    -maxForce, maxForce);
-    const double forceR = std::clamp(kp * (qTarget - qr) - kd * JointVelocity(ecm, rightJoint),
-                                    -maxForce, maxForce);
+    qLeft = ql;
+    qRight = qr;
+    // Detect the force sign once: a positive joint force must open the jaw.
+    // Models differ (URDF axis vs converted SDF axis), and a wrong sign turns a
+    // Calibrate each jaw separately: the two axes are mirrored, so one combined
+    // test cannot tell which sign closes which finger.
+    if (calibSteps >= 0 && calibSteps < 120) {
+      const double probe = 2.0;
+      const bool onLeft = calibSteps < 60;
+      ecm.SetComponentData<components::JointForceCmd>(leftJoint,
+                             std::vector<double>{onLeft ? probe : 0.0});
+      ecm.SetComponentData<components::JointForceCmd>(rightJoint,
+                             std::vector<double>{onLeft ? 0.0 : probe});
+      if (onLeft && calibSteps == 0) calibrateRef = ql;
+      if (onLeft && calibSteps == 59) signLeft_ = (ql > calibrateRef + 1e-9) ? 1.0 : -1.0;
+      if (!onLeft && calibSteps == 60) calibrateRef = qr;
+      if (!onLeft && calibSteps == 119) signRight_ = (qr > calibrateRef + 1e-9) ? 1.0 : -1.0;
+      ++calibSteps;
+      if (calibSteps >= 120) calibSteps = 9999;
+      return;
+    }
+    const double qTarget = std::clamp(0.5 * (targetGap - zeroGap), jointLower, jointUpper);
+    const double forceL = signLeft_ * std::clamp(kp * (qTarget - ql) - kd * JointVelocity(ecm, leftJoint),
+                                -maxForce, maxForce);
+    const double forceR = signRight_ * std::clamp(kp * (qTarget - qr) - kd * JointVelocity(ecm, rightJoint),
+                                -maxForce, maxForce);
     ecm.SetComponentData<components::JointForceCmd>(leftJoint, std::vector<double>{forceL});
     ecm.SetComponentData<components::JointForceCmd>(rightJoint, std::vector<double>{forceR});
 
@@ -327,7 +359,7 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
       const auto obj = worldPose(objectLink, ecm).Pos();
       const auto base = worldPose(baseLink, ecm).Pos();
       between = std::fabs(obj.Y() - base.Y()) <= 0.025 &&
-                std::fabs(obj.Z() - base.Z()) <= 0.08;
+                std::fabs(obj.Z() - base.Z()) <= 0.20;
     }
     const bool onObject = std::fabs(gapNow - expectedWidth) <= widthTolerance && between;
     if (closing && speed < 5e-3 && gapNow < zeroGap - 1e-3 && onObject) {

@@ -47,6 +47,21 @@ def launch_stack(context):
                 ET.SubElement(plugin, kind + '_topic').text = '/flexcell/detachable/%s/%s' % (
                     object_name, 'state' if kind == 'output' else kind)
         robot = ET.tostring(urdf, encoding='unicode')
+    if config['carry_server']['ros__parameters']['carry_backend'] == 'contact_grasp':
+        # ros2_control owns every joint it declares and rewrites the command each
+        # cycle, so a world plugin cannot drive a joint that is still listed
+        # there. Hand the two jaw joints to the contact guard, and drop the mimic
+        # (DART does not support it, which left the right finger frozen).
+        urdf = ET.fromstring(robot)
+        for joint in urdf.findall('joint'):
+            if joint.get('name') == 'gripper_right_joint':
+                for mimic in joint.findall('mimic'):
+                    joint.remove(mimic)
+        for block in urdf.findall('ros2_control'):
+            for joint in list(block.findall('joint')):
+                if joint.get('name', '').startswith('gripper_'):
+                    block.remove(joint)
+        robot = ET.tostring(urdf, encoding='unicode')
     spawn = Node(package='ros_gz_sim', executable='create', output='screen',
                  arguments=['-string', robot, '-name', 'open_manipulator_x',
                             '-allow_renaming', 'false', '-z', '0.0'])
