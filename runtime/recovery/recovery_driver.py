@@ -34,11 +34,36 @@ def execution_evidence(task_out):
             "completed_stage_ids": result.get("completed_stage_ids") or []}
 
 
+def _experience_kwargs(args):
+    """Resolve reviewed live parameters, WITHOUT importing the experience package at module
+    load. Failure is a refusal ({}), never an exception: a broken experience lookup must not
+    take down a recovering robot."""
+    if not (args.experience_asset and args.experience_entries):
+        return {}, "no --experience-asset/--experience-entries: frozen baseline defaults"
+    try:
+        root = str(WT)
+        if root not in sys.path:
+            sys.path.insert(0, root)
+        from evolution.experience.live_binding import resolve
+        return resolve(args.experience_asset, "executor_recovery",
+                       args.experience_entries)
+    except Exception as exc:  # noqa: BLE001 - fail closed, keep the defaults
+        return {}, "experience binding unavailable: %s" % exc
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--run", required=True)
     ap.add_argument("--attempt", type=int, default=1)
     ap.add_argument("--ground-truth")
+    # OPT-IN live experience binding. With no --experience-asset/--experience-entries the
+    # call below is byte-identical to the frozen baseline: apply_respread uses its defaults.
+    # When both are supplied, live_binding.resolve() re-checks the chain, ACTIVE+latest
+    # status, an INDEPENDENT ACCEPT and a numeric callable from the ENTRY (not the asset's
+    # cached fields). Any gate failure returns {} and the defaults are used. A refusal can
+    # therefore never break a run or drive a robot from an unreviewed artifact.
+    ap.add_argument("--experience-asset")
+    ap.add_argument("--experience-entries")
     args = ap.parse_args(argv)
     run = Path(args.run)
     ev = execution_evidence(run / "task.out")
@@ -143,7 +168,13 @@ def main(argv=None):
             # retry put a landing point 46 mm from box_b and was refused as occupied.
             avoid = [o["position"][:2] for o in plan.get("initial_objects", [])
                      if o.get("position")]
-            retried = recover.apply_respread(plan, avoid=avoid)
+            # The reviewed experience parameters, if any. resolve() is fail-closed and
+            # OPT-IN: with no flags it returns {} and the call keeps its original defaults.
+            kwargs, binding_why = _experience_kwargs(args)
+            (run / "experience_binding.json").write_text(json.dumps(
+                {"consumer": "executor_recovery", "kwargs": kwargs,
+                 "why": binding_why}, indent=2) + "\n", encoding="utf-8")
+            retried = recover.apply_respread(plan, avoid=avoid, **kwargs)
         except ValueError as exc:
             (run / "recovery_blocked.txt").write_text(str(exc), encoding="utf-8")
             print("respread refused:", exc)

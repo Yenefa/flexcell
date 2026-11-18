@@ -433,6 +433,32 @@ capability is what makes that visible instead of leaving it to an audit.
     **correctness check on the replay, not an effect measurement**, and conflating the two
     would turn this back into "we measured it".
 
+35. **"CONSUMER NEVER READS AN ENTRY" NOW HAS A REAL WIRE — OPT-IN AND FAIL-CLOSED.**
+    `recovery_driver.py` accepts optional `--experience-asset` / `--experience-entries`;
+    `live_binding.resolve()` re-checks FOUR gates before any parameter reaches
+    `apply_respread`:
+
+        chain intact -> ACTIVE + latest (by store order, not a missing version field)
+                      -> INDEPENDENT ACCEPT (chain-demo-reviewer is refused)
+                      -> numeric, finite callable kwargs derived from the ENTRY
+
+    Any gate failure returns `{}` and the call site uses its original defaults. No exception
+    escapes: a broken experience lookup cannot stop a recovering robot.
+
+    | invariant | why |
+    | --- | --- |
+    | no flags => frozen baseline byte-identical | the default path keeps apply_respread's signature |
+    | kwargs derived from the ENTRY, not the asset's cached callable | an asset is a derivative; editing an artifact must not steer a robot |
+    | self-reviewed entry cannot drive the live call | the reviewer must be independent of the run that made the entry |
+
+    Measured now: no flags => `{}`; this chain's self-reviewed entry => `{}` (**refused by
+    the independent-review gate**); a copy with an independent reviewer =>
+    `{spread_step: 0.09, cluster_m: 0.12}` — **the parameters really reach the call site.**
+
+    **The wire is live; the current entries still cannot drive the robot because they carry
+    only a self-review.** That is not a wiring failure — **it is the gate doing its job.**
+    Letting an entry through needs a real external review, not a weaker gate.
+
 34. **THE SECOND DIAGNOSIS WAS ALSO WRONG, AND IT IS CORRECTED HERE.** The previous round
     claimed the live path had NO harness/executor consumer. That scan looked only at
     `experiments/baselines/run_*.py` and missed the SHELL runner:
@@ -511,7 +537,7 @@ capability is what makes that visible instead of leaving it to an audit.
     visible.** The artifact reports the numbers and both options, and **does not pretend the
     loop is closed.**
 
-`verify.py` asserts **136 checks**, including that both gates really ran, that the asset
+`verify.py` asserts **139 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -539,7 +565,7 @@ with one sentence**, and that **a capable module with an unmeasurable archive is
 a selection effect rather than as any of the three tempting answers**, and that **the
 chain's connection to the live planning path is measured and reported as unplugged, with the
 cost of both ways to close it**, that **a schema bridge cannot rescue these entries**, and
-that **the executor consumer exists in the shell runner yet never reads an experience entry**.
+that **the executor consumer exists in the shell runner**, that **the new opt-in wire leaves the no-flag path at its defaults**, and that **a self-reviewed entry cannot drive the live call**.
 
 ---
 

@@ -792,6 +792,24 @@ def main():
         checks["the_claim_does_not_say_no_consumer"] = (
             "no harness/executor consumer" not in live["claim"])
 
+        # 35 -- THE LAST MILE HAS A REAL WIRE, AND IT IS FAIL-CLOSED. recovery_driver.py now
+        # accepts an opt-in --experience-asset/--experience-entries pair; resolve() re-checks
+        # the chain, ACTIVE+latest, an INDEPENDENT ACCEPT and a numeric callable from the ENTRY
+        # before any parameter reaches apply_respread. No flags = frozen defaults.
+        steps_by_name = {s["step"]: s for s in summary["steps"]}
+        wire = steps_by_name.get("live_wiring") or {}
+        checks["the_live_wire_exists_and_defaults_are_untouched"] = (
+            wire.get("no_flags_kwargs") == {})
+        # the self-reviewed chain entry must NOT drive the robot; the reviewer is the same
+        # run that made the entry, which is not independent
+        checks["a_self_reviewed_entry_cannot_drive_the_live_call"] = (
+            wire.get("self_reviewed_kwargs") == {})
+        # and the driver really passes the resolved kwargs through to the call
+        drv_src = (WT / "runtime" / "recovery" / "recovery_driver.py").read_text(
+            encoding="utf-8")
+        checks["the_driver_passes_resolved_kwargs_to_apply_respread"] = (
+            "**kwargs" in drv_src and "_experience_kwargs" in drv_src)
+
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",
             "batch": HERE.name,

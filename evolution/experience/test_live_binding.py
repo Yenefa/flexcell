@@ -1,0 +1,159 @@
+#!/usr/bin/env python3
+"""Tests for the fail-closed live binding: reviewed experience -> live call parameters.
+
+WHY THIS EXISTS
+    The live executor consumer exists (run_batch.sh:107 -> recovery_driver.py:146 ->
+    apply_respread) but used the function's DEFAULT kwargs and never looked up an entry. So a
+    REVISED entry could never reach the robot. resolve() lets the live call read parameters
+    from a compiled asset, but ONLY when every gate re-checks at call time.
+
+    The default path must stay byte-identical: resolve() is opt-in and every refusal returns
+    {} so the caller uses exactly the defaults it always used.
+"""
+import json
+import os
+import sys
+
+import pytest
+
+WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(WT, "evolution", "experience"))
+
+import live_binding  # noqa: E402
+import store  # noqa: E402
+
+ASSETS = os.path.join(WT, "setup", "acceptance", "evobot_continual_chain_20261118",
+                      "skill_assets.jsonl")
+ENTRIES = os.path.join(WT, "setup", "acceptance", "evobot_continual_chain_20261118",
+                       "records_v2.jsonl")
+
+
+def _rebuilt(tmp_path, reviewer="independent-reviewer"):
+    """A fresh store with the same rows, one reviewer field changed, chain rebuilt."""
+    path = tmp_path / "records.jsonl"
+    rows = [json.loads(line) for line in open(ENTRIES, encoding="utf-8") if line.strip()]
+    for i, row in enumerate(rows):
+        if (row.get("version") or {}).get("label") == "E2":
+            row["validation"]["reviewed_by"] = reviewer
+        row["_nonce"] = i
+        for key in ("chain_sha256", "record_sha256", "prev_sha256"):
+            row.pop(key, None)
+        row["record_sha256"] = store._hash(row)
+        store.append(str(path), row)
+    assert store.verify_chain(str(path))[0]
+    return str(path)
+
+
+def test_no_asset_path_refuses(tmp_path):
+    kwargs, why = live_binding.resolve(None, "executor_recovery", ENTRIES)
+    assert kwargs == {}
+    assert "defaults" in why
+
+
+def test_missing_asset_file_refuses(tmp_path):
+    kwargs, why = live_binding.resolve(str(tmp_path / "none"), "executor_recovery", ENTRIES)
+    assert kwargs == {}
+
+
+def test_a_self_reviewed_entry_is_refused():
+    """chain-demo-reviewer is the same run that made the entry: not independent."""
+    kwargs, why = live_binding.resolve(ASSETS, "executor_recovery", ENTRIES)
+    assert kwargs == {}
+    assert "defaults" in why
+
+
+def test_an_independent_accept_yields_the_asset_kwargs(tmp_path):
+    path = _rebuilt(tmp_path)
+    kwargs, why = live_binding.resolve(ASSETS, "executor_recovery", path)
+    assert kwargs == {"spread_step": 0.09, "cluster_m": 0.12}
+    assert "accepted" in why
+
+
+def test_a_rejected_entry_is_refused(tmp_path):
+    path = _rebuilt(tmp_path)
+    rows = [json.loads(l) for l in open(path, encoding="utf-8") if l.strip()]
+    p2 = tmp_path / "rejected.jsonl"
+    for row in rows:
+        if (row.get("version") or {}).get("label") == "E2":
+            row["validation"]["review_verdict"] = "REJECT"
+        for key in ("chain_sha256", "record_sha256", "prev_sha256"):
+            row.pop(key, None)
+        row["record_sha256"] = store._hash(row)
+        store.append(str(p2), row)
+    assert live_binding.resolve(ASSETS, "executor_recovery", str(p2))[0] == {}
+
+
+def test_a_broken_chain_is_refused(tmp_path):
+    path = _rebuilt(tmp_path)
+    lines = open(path, encoding="utf-8").readlines()
+    # tamper a field that actually EXISTS in the record body; changing a key that is not
+    # there would leave the hash intact and the test would silently pass for the wrong
+    # reason. The effect_spec is part of the hashed body.
+    last = json.loads(lines[-1])
+    last["effect_spec"]["params"]["cluster_m"] = 999
+    lines[-1] = json.dumps(last) + "\n"
+    broken = tmp_path / "broken.jsonl"
+    broken.write_text("".join(lines), encoding="utf-8")
+    assert store.verify_chain(str(broken))[0] is False
+    kwargs, why = live_binding.resolve(ASSETS, "executor_recovery", str(broken))
+    assert kwargs == {}
+    assert "chain" in why
+
+
+def test_wrong_consumer_is_refused(tmp_path):
+    path = _rebuilt(tmp_path)
+    assert live_binding.resolve(ASSETS, "planner", path)[0] == {}
+
+
+def test_a_non_numeric_kwarg_is_refused(tmp_path):
+    """A string where a distance belongs must not reach a live robot call.
+
+    The gate derives kwargs from the ENTRY, not from the compiled asset's cached callable —
+    the entry is the reviewed source of truth. So tamper the entry, and rebuild its chain.
+    A tampered asset callable alone must NOT change behaviour: that is deliberate, because
+    an asset is a derivative and must not be trusted over its entry.
+    """
+    path = tmp_path / "bad_records.jsonl"
+    rows = [json.loads(l) for l in open(ENTRIES, encoding="utf-8") if l.strip()]
+    for i, row in enumerate(rows):
+        if (row.get("version") or {}).get("label") == "E2":
+            row["validation"]["reviewed_by"] = "independent-reviewer"
+            row["effect_spec"]["params"]["step_m"] = "0.09"
+        row["_nonce"] = i
+        for key in ("chain_sha256", "record_sha256", "prev_sha256"):
+            row.pop(key, None)
+        row["record_sha256"] = store._hash(row)
+        store.append(str(path), row)
+    assert store.verify_chain(str(path))[0]
+    assert live_binding.resolve(ASSETS, "executor_recovery", str(path))[0] == {}
+
+
+def test_a_tampered_asset_callable_cannot_drive_the_robot(tmp_path):
+    """Deliberate: the asset is a derivative. Its cached kwargs must never override the
+    reviewed entry, or editing an artifact file would change a live robot call."""
+    path = _rebuilt(tmp_path)
+    a2 = tmp_path / "assets.jsonl"
+    rows = [json.loads(l) for l in open(ASSETS, encoding="utf-8") if l.strip()]
+    rows[0]["callable"]["kwargs"]["spread_step"] = 999
+    a2.write_text("\n".join(json.dumps(r) for r in rows) + "\n", encoding="utf-8")
+    kwargs, _ = live_binding.resolve(str(a2), "executor_recovery", path)
+    assert kwargs == {"spread_step": 0.09, "cluster_m": 0.12}
+
+
+def test_the_default_function_kwargs_are_unchanged():
+    """resolve() never edits the function signature; the fallback is the original default."""
+    sys.path.insert(0, os.path.join(WT, "runtime", "recovery"))
+    import recover
+    import inspect
+    sig = inspect.signature(recover.apply_respread)
+    assert sig.parameters["spread_step"].default == 0.09
+    assert sig.parameters["cluster_m"].default == 0.12
+
+
+def test_refusal_never_raises(tmp_path):
+    """A live path must not die because an experience lookup failed."""
+    for consumer in (None, "", "unknown", "executor_recovery"):
+        kwargs, why = live_binding.resolve(
+            str(tmp_path / "gone"), consumer, str(tmp_path / "gone"))
+        assert kwargs == {}
+        assert isinstance(why, str)

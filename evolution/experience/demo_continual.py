@@ -689,6 +689,21 @@ def run(dest=OUT):
                   "live_consumers": {k: v["has_a_live_consumer"]
                                      for k, v in live["consumers_in_live_path"].items()}})
 
+    # 10e -- IS THERE A REAL WIRE FROM AN ENTRY TO THE LIVE CALL? The executor consumer
+    # exists (run_batch.sh:107 -> recovery_driver.py:146), but historically used the function
+    # defaults and never looked up an entry. The driver now has an OPT-IN fail-closed binding.
+    # Probe both directions: no flags -> defaults; reviewed entry -> the asset's kwargs.
+    import live_binding as lb
+    wire_defaults, why_defaults = lb.resolve("", "executor_recovery", store_path)
+    wire_reviewed, why_reviewed = lb.resolve(
+        os.path.join(dest, "skill_assets.jsonl"), "executor_recovery", store_path)
+    steps.append({"step": "live_wiring",
+                  "no_flags_kwargs": wire_defaults,
+                  "self_reviewed_kwargs": wire_reviewed,
+                  "note": ("opt-in and fail-closed: the frozen baseline default path is "
+                           "unchanged; a REVISED entry with an independent ACCEPT would "
+                           "supply these kwargs to apply_respread")})
+
     # 11 -- the store's own curation report, computed from the records on disk
     report = curate.curate(store.read(store_path))
     _write(os.path.join(dest, "09_store_report.json"), report)
