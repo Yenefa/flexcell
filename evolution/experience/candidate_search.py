@@ -210,7 +210,34 @@ def search(acceptance=None, plans=None):
     board.sort(key=lambda r: (not r["admissible"],
                               r["mean_displacement_m"] if r["mean_displacement_m"] is not None
                               else 9e9))
-    selected = board[0] if board and board[0]["admissible"] else None
+    chosen = board[0] if board and board[0]["admissible"] else None
+    selected = chosen
+    # Execute the tie-break, don't just describe it: among admissible candidates at the
+    # LOWEST cost, prefer the incumbent. Sort stability alone would pick whichever happens
+    # to be first in CANDIDATES -- an implementation accident, not a decision. Making it
+    # explicit means reordering the dict cannot silently change the chosen parameter.
+    if chosen is not None:
+        best = chosen.get("mean_displacement_m")
+        at_best = [r for r in board
+                   if r.get("admissible") and r.get("mean_displacement_m") == best]
+        incumbent = next((r for r in at_best
+                          if str(r.get("intent", "")).startswith("the incumbent")), None)
+        if incumbent is not None and incumbent is not chosen:
+            selected = incumbent
+    # A "cost-minimising search" that silently resolves a tie by dict insertion order is
+    # not a selection -- it is an accident of how CANDIDATES was written. On this board the
+    # incumbent and the tighter-clustering candidate tie exactly (both 0.0475 m, 33 fixed).
+    # Record the tie and the TIE-BREAK PRINCIPLE explicitly: when feasible candidates cost
+    # the same, keep the incumbent, because a CHANGE needs a reason whereas staying does not.
+    # This makes the decision auditable instead of hiding it behind sort stability.
+    if selected is not None:
+        best_cost = selected.get("mean_displacement_m")
+        ties = [r["candidate"] for r in board
+                if r.get("admissible") and r.get("mean_displacement_m") == best_cost]
+        selected["cost_ties"] = ties
+        selected["tie_break"] = (
+            "keep the incumbent among equal-cost feasible candidates; a change needs a "
+            "reason, staying does not" if len(ties) > 1 else "unique lowest cost")
     return selected, board
 
 

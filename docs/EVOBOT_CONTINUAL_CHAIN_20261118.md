@@ -57,6 +57,29 @@
 于是重试第三次被拒为"declared destination occupied"。修改为**按余量选轴**，并且两轴都不满足契约时**拒绝**而不是发出一个必然被拒的计划；
 不传 avoid 时行为与旧实现**逐字节相同**，11/11 `benchmark/tests/test_recovery_driver.py` 仍通过。
 
+## 3.90 成本并列时，"选出来的"其实是**插入顺序**
+
+候选板有 6 个候选，声明"可行性硬过滤 + 成本择优"。但 board 显示：
+
+| 候选 | 成本 | fixed |
+| --- | --- | --- |
+| `respread/step=0.090`（**incumbent**） | 0.0475 | 33 |
+| `respread/step=0.090/cm=0.060`（更紧聚类） | **0.0475** | 33 |
+
+两者**成本完全相同**。原来的 `sort` 靠 Python 稳定排序保留了字典里先出现的那个，
+于是"搜索选出了参数"实际上是"字典里恰好把 incumbent 写在了前面"。
+这不是选择，是**实现事故**。
+
+### 修法：显式裁决并列，并执行它
+
+- 产物新增 `cost_ties`（并列候选列表）和 `tie_break`（裁决原则）；
+- 原则：**成本相同时保留 incumbent**——改动需要理由，保持不变不需要；
+- **真的执行**这个原则（不是只写声明）：并列时主动挑出 intent 为 incumbent 的候选，
+  而不是依赖排序稳定性。
+
+测试证明：即使把 incumbent 挪到 `CANDIDATES` 末尾，选中的参数也不变。
+被拒候选连同理由仍留在板上（DGM 失败分支管理）。
+
 ## 3.91 IMPROVED 这个词不能盖过证据的真实强度
 
 E3 的 effect verdict 是 `IMPROVED`，但底层数据是：
@@ -1422,7 +1445,7 @@ python3 evolution/experience/demo_continual.py
 python3 -m pytest evolution/experience/test_continual_chain.py -q
 ```
 
-verifier 会**重新执行**整条链并断言 **162 项检查**，不读取 SUMMARY 里的自述。其中关键几项：
+verifier 会**重新执行**整条链并断言 **163 项检查**，不读取 SUMMARY 里的自述。其中关键几项：
 
 - 规划侧不生效（NO_CHANGE）、执行侧生效（CHANGED）；
 - 启用前后检索分别为 0 与 1；

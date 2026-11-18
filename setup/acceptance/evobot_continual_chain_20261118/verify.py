@@ -300,6 +300,16 @@ def main():
         rows = board["board"]
         checks["several_candidates_were_compared"] = len(rows) >= 4
         checks["a_candidate_was_selected"] = board.get("selected") is not None
+        # Cost-minimisation over a board with an exact tie is NOT a selection if the winner
+        # is decided by dict insertion order. The selection must record the tie and an
+        # explicit tie-break principle (prefer the incumbent on equal cost), so the choice
+        # is auditable and reordering CANDIDATES cannot silently change the parameter.
+        sel0 = board.get("selected") or {}
+        tied = [r for r in rows if r.get("admissible")
+                and r.get("mean_displacement_m") == sel0.get("mean_displacement_m")]
+        checks["a_cost_tie_is_broken_explicitly_not_by_insertion_order"] = (
+            (len(tied) < 2) or ("cost_ties" in sel0 and "incumbent" in sel0.get("tie_break", ""))
+        )
         # the board must KEEP the losers, or it cannot show that anything was compared
         checks["the_board_keeps_the_rejected_candidates"] = any(
             not r["admissible"] for r in rows)

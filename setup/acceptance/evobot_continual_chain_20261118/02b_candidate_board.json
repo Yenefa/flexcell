@@ -4,11 +4,16 @@
       "admissible": true,
       "candidate": "respread/step=0.090",
       "clearance_violations": 0,
+      "cost_ties": [
+        "respread/step=0.090",
+        "respread/step=0.090/cm=0.060"
+      ],
       "fixed": 33,
       "intent": "the incumbent",
       "mean_displacement_m": 0.0475,
       "plans": 33,
       "refused": 0,
+      "tie_break": "keep the incumbent among equal-cost feasible candidates; a change needs a reason, staying does not",
       "untouched": 0,
       "why": "admissible",
       "worse": 0
@@ -83,11 +88,16 @@
     "admissible": true,
     "candidate": "respread/step=0.090",
     "clearance_violations": 0,
+    "cost_ties": [
+      "respread/step=0.090",
+      "respread/step=0.090/cm=0.060"
+    ],
     "fixed": 33,
     "intent": "the incumbent",
     "mean_displacement_m": 0.0475,
     "plans": 33,
     "refused": 0,
+    "tie_break": "keep the incumbent among equal-cost feasible candidates; a change needs a reason, staying does not",
     "untouched": 0,
     "why": "admissible",
     "worse": 0

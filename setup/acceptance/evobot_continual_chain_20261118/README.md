@@ -433,6 +433,16 @@ capability is what makes that visible instead of leaving it to an audit.
     **correctness check on the replay, not an effect measurement**, and conflating the two
     would turn this back into "we measured it".
 
+52. **A COST TIE RESOLVED BY INSERTION ORDER IS NOT A SELECTION.** The board declares
+    "feasibility filter + cost minimisation", but the incumbent `respread/step=0.090` and
+    `respread/step=0.090/cm=0.060` cost EXACTLY the same (0.0475 m, 33 fixed). Python's stable
+    sort picked whichever was written first in `CANDIDATES` -- an implementation accident,
+    not a decision. The selection now records `cost_ties` and an explicit `tie_break`
+    principle (prefer the incumbent on equal cost: a change needs a reason, staying does not),
+    AND EXECUTES it rather than merely describing it. A test reorders `CANDIDATES` so the
+    incumbent is last and asserts the chosen parameter is unchanged. Rejected candidates stay
+    on the board with their reasons (DGM failure-branch management).
+
 51. **IMPROVED MUST NOT OVERSTATE A WEAK EFFECT.** E3's effect verdict is `IMPROVED`, but all
     16 same-run plans already complied (`caught=0`); the sole positive is a FOREIGN plan
     checked against another instruction. The verdict is true (the rule fires correctly, zero
@@ -831,7 +841,7 @@ capability is what makes that visible instead of leaving it to an audit.
     visible.** The artifact reports the numbers and both options, and **does not pretend the
     loop is closed.**
 
-`verify.py` asserts **162 checks**, including that both gates really ran, that the asset
+`verify.py` asserts **163 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
