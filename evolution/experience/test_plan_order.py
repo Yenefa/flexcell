@@ -23,6 +23,7 @@ WT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(WT, "runtime", "planner"))
 sys.path.insert(0, os.path.join(WT, "evolution", "experience"))
 
+import order_fire  # noqa: E402
 import agent_planner  # noqa: E402
 import effect  # noqa: E402
 
@@ -197,3 +198,11 @@ def test_the_bin_is_resolved_from_the_observation_not_from_the_answer():
 
 def test_the_pass_through_rule_is_still_gated_by_an_admitted_entry():
     assert agent_planner.order_rule_admitted(PASS_THROUGH_OBS) is False
+
+
+# THE GATE ACTUALLY FIRES: a measured rule that has never been seen firing is a claim.
+def test_the_delivered_order_entry_actually_fires_the_rule():
+    r = order_fire.demonstrate()
+    assert r["gate_fired"] is True
+    assert not r["reversed_plan_without_entry"][1]
+    assert any("right bin first" in p for p in r["reversed_plan_with_entry"][1])

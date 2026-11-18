@@ -867,6 +867,17 @@ def main():
         checks["the_rule_is_still_gated_by_an_admitted_entry"] = (
             "order_rule_admitted" in
             (WT / "runtime" / "planner" / "agent_planner.py").read_text(encoding="utf-8"))
+        # 43 -- FIRE THE RULE THROUGH THE REAL DELIVERY CHANNEL. All 44 experience-bearing
+        # archive observations carry legacy items with _entry_id = None, so the rule above
+        # was measured but never observed firing. A rule nobody has seen fire is a claim.
+        fired = steps_by_name.get("planner_order_fired") or {}
+        checks["the_order_rule_actually_fires_when_an_entry_is_delivered"] = (
+            fired.get("gate_fired") is True)
+        checks["the_reversed_plan_is_clean_without_the_entry"] = (
+            fired.get("without_entry_problems") == 0)
+        checks["the_firing_uses_the_real_delivery_channel"] = (
+            "deliver_planner" in
+            (WT / "evolution" / "experience" / "order_fire.py").read_text(encoding="utf-8"))
         # 39 -- STEP 5 AT THE LIVE BOUNDARY. The driver used to apply an entry's parameters
         # and record NOTHING about it: "which task used this entry" was unanswerable for the
         # only path that runs a robot. It now writes RETRIEVED/APPLIED/OUTCOME with the run

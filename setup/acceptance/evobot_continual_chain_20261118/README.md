@@ -433,6 +433,21 @@ capability is what makes that visible instead of leaving it to an audit.
     **correctness check on the replay, not an effect measurement**, and conflating the two
     would turn this back into "we measured it".
 
+43. **THE RULE WAS MEASURED AND GATED BUT HAD NEVER BEEN SEEN FIRING.** Checking every
+    archived observation: all 44 that carry an `experience` list hold LEGACY items with
+    `_entry_id = None`. Since `order_rule_admitted` requires an `_entry_id`, the rule from
+    item 42 **never fired on a single real observation**. A rule nobody has seen fire is a
+    claim, not a capability.
+
+    Now an admitted order entry is rendered through the REAL `delivery.deliver_planner()`
+    channel (which writes `_entry_id`) and the same reversed plan is validated twice:
+
+        observation WITHOUT the delivered entry -> reversed plan validates CLEANLY
+        observation WITH the delivered entry    -> reversed plan is REFUSED
+
+    **The same plan changes verdict only because an experience was delivered.** The rule is
+    not dead code: it is a capability an entry authorises, reviews and retires.
+
 42. **AN "UNROUTED" SIGNATURE WAS ACTUALLY A ROUTABLE PLANNER RULE.** The objective routes
     operation-order lessons to the planner. `graded_visit` was called UNROUTED for lacking an
     executable probe — but inspecting the archive showed a concrete order error:
@@ -696,7 +711,7 @@ capability is what makes that visible instead of leaving it to an audit.
     visible.** The artifact reports the numbers and both options, and **does not pretend the
     loop is closed.**
 
-`verify.py` asserts **154 checks**, including that both gates really ran, that the asset
+`verify.py` asserts **157 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -724,7 +739,7 @@ with one sentence**, and that **a capable module with an unmeasurable archive is
 a selection effect rather than as any of the three tempting answers**, and that **the
 chain's connection to the live planning path is measured and reported as unplugged, with the
 cost of both ways to close it**, that **a schema bridge cannot rescue these entries**, and
-that **the executor consumer exists in the shell runner**, that **the new opt-in wire leaves the no-flag path at its defaults**, that **a self-reviewed entry cannot drive the live call**, that **an ACCEPT for a different claim on the same evidence cannot drive it either**, that **the review ledger is chained and its integrity limits are stated honestly**, that **applicability is checked on the real run plan, refusing a lesson where its own declared invalid condition fires**, that **a live application writes RETRIEVED/APPLIED/OUTCOME with a run id while a fallback writes nothing**, that **a review is anchored to the entry's chain hash so it cannot be pre-generated before the entry exists**, that **every declared invalid condition is accounted for — unknown probes refuse rather than silently pass**, and that **a previously-unroutable order signature is now a measured, zero-false-positive planner rule still gated by an admitted entry**.
+that **the executor consumer exists in the shell runner**, that **the new opt-in wire leaves the no-flag path at its defaults**, that **a self-reviewed entry cannot drive the live call**, that **an ACCEPT for a different claim on the same evidence cannot drive it either**, that **the review ledger is chained and its integrity limits are stated honestly**, that **applicability is checked on the real run plan, refusing a lesson where its own declared invalid condition fires**, that **a live application writes RETRIEVED/APPLIED/OUTCOME with a run id while a fallback writes nothing**, that **a review is anchored to the entry's chain hash so it cannot be pre-generated before the entry exists**, that **every declared invalid condition is accounted for — unknown probes refuse rather than silently pass**, that **a previously-unroutable order signature is now a measured, zero-false-positive planner rule still gated by an admitted entry**, and that **the rule was actually seen firing through the real delivery channel — the same reversed plan flips from clean to refused when the entry is delivered**.
 
 ---
 

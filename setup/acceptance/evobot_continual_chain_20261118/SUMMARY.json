@@ -451,6 +451,16 @@
       "true_positives": 21
     },
     {
+      "entry_id": "E3-order-pass-through-first",
+      "gate_fired": true,
+      "note": "the rule is not dead code: an admitted entry delivered through the real channel is required to refuse the reversed plan",
+      "step": "planner_order_fired",
+      "with_entry_problems": [
+        "instruction requires passing through the right bin first, but the plan starts at 'zone_1'"
+      ],
+      "without_entry_problems": 0
+    },
+    {
       "chains": 3,
       "conflicts": 0,
       "duplicates": 0,

@@ -44,6 +44,7 @@ import retrieve  # noqa: E402
 import reuse  # noqa: E402
 import routing_coverage  # noqa: E402
 import order_measure  # noqa: E402
+import order_fire  # noqa: E402
 import unrouted as unrouted_mod  # noqa: E402
 import live_path  # noqa: E402
 import delivery  # noqa: E402
@@ -740,6 +741,22 @@ def run(dest=OUT):
                   "checked": order["checked"],
                   "note": ("a rule that refuses a CORRECT plan is worse than one that "
                            "misses a wrong one; zero false positives is the bar")})
+
+    # 10f -- FIRE THE RULE THROUGH THE REAL DELIVERY CHANNEL. The measurement above shows
+    # the rule WOULD catch reversals, and the gate keeps it inert by default — but all 44
+    # experience-bearing archive observations carry legacy items with _entry_id = None, so
+    # nothing had ever been seen actually firing it. Render an admitted entry through
+    # delivery.deliver_planner and check the SAME reversed plan is refused only then.
+    fired = order_fire.demonstrate()
+    _write(os.path.join(dest, "10f_order_fired.json"), fired)
+    steps.append({"step": "planner_order_fired",
+                  "entry_id": fired["entry_id"],
+                  "gate_fired": fired["gate_fired"],
+                  "without_entry_problems": len(fired["reversed_plan_without_entry"][1]),
+                  "with_entry_problems": [p for p in fired["reversed_plan_with_entry"][1]
+                                          if "right bin first" in p],
+                  "note": ("the rule is not dead code: an admitted entry delivered through "
+                           "the real channel is required to refuse the reversed plan")})
 
     # 11 -- the store's own curation report, computed from the records on disk
     report = curate.curate(store.read(store_path))
