@@ -79,6 +79,16 @@ def launch_stack(context):
         # fingers at a default pose and refused it (ERR_NO_COLLISION_FREE_PLAN).
         # Without a command_interface nothing writes to the joints, so the guard
         # stays the only thing driving them.
+        # The GazeboSimSystem hardware follows position commands with a fixed
+        # proportional gain of 0.1, so a wrist carrying real finger mass lags and
+        # arrives with a large orientation error (measured 1.0 rad on a side target).
+        # A stiffer loop is what a physical jaw would need anyway.
+        for plugin in urdf.iter('plugin'):
+            if plugin.get('filename', '').startswith('gz_ros2_control'):
+                gain = plugin.find('position_proportional_gain')
+                if gain is None:
+                    gain = ET.SubElement(plugin, 'position_proportional_gain')
+                gain.text = '0.60'
         for block in urdf.findall('ros2_control'):
             for joint in list(block.findall('joint')):
                 if joint.get('name', '').startswith('gripper_'):

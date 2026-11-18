@@ -302,11 +302,9 @@ class PickServer(Node):
         return not errors, '; '.join(errors)
 
     def _grasp_point(self, box_pos, box_quat):
-        x, y, z, w = box_quat
-        yaw = math.atan2(2.0 * (w * z + x * y), 1.0 - 2.0 * (y * y + z * z))
-        # Only the yaw rotates the stand-off: rotating by the full attitude put
-        # the target below the table and the arm could not reach it.
-        off = [math.cos(yaw) * self._grasp_dx, math.sin(yaw) * self._grasp_dx, self._grasp_dz]
+        # Full rotation: the pads extend along the tool axis, so the stand-off has
+        # to follow the wrist attitude that was actually reached.
+        off = rotate_by_quaternion(box_quat, [self._grasp_dx, 0.0, self._grasp_dz])
         return [box_pos[i] + off[i] for i in range(3)]
     def _engage_carry(self, object_id, offset):
         if not self._carry_engage.wait_for_service(timeout_sec=2.0):
@@ -492,7 +490,14 @@ class PickServer(Node):
                                   cancel_check=cancel_requested)
                 if r1[0] is None or int(r1[0].outcome) != R.OUTCOME_SUCCEEDED:
                     return r1
-                grasp_t = self._grasp_point(box_pos, box_quat)
+                # The kinematics solver here is position-only, so the wrist yaw at
+                # the hover pose is whatever the planner picked. Measure it and
+                # express the stand-off in that frame instead of assuming a yaw.
+                ee_sample, ee_err = sample_gz_pose(self._ee, max_age_s=1.0)
+                ee_quat = ee_sample[1] if ee_sample is not None else box_quat
+                if ee_sample is None:
+                    rec['ee_pose_at_approach'] = 'unavailable: %s' % ee_err
+                grasp_t = self._grasp_point(box_pos, ee_quat)
                 return self._motion(grasp_t, profile, rid + '-grasp',
                                     cancel_check=cancel_requested)
 

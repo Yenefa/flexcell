@@ -183,8 +183,8 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
         # contact grasp cannot do: the jaw has to straddle the box. Declare the
         # measured stand-off explicitly instead of inheriting the hover value.
         config.setdefault('pick_server', {}).setdefault('ros__parameters', {})[
-            'grasp_dz_m'] = -0.01
-        config['pick_server']['ros__parameters']['grasp_dx_m'] = -0.060
+            'grasp_dz_m'] = 0.0
+        config['pick_server']['ros__parameters']['grasp_dx_m'] = 0.023
         # Carrying the box at the fingers makes the transport plan harder than a
         # bare arm move; give the planner the time it needs instead of failing at
         # the 5 s default.
