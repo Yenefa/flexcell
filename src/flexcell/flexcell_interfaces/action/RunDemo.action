@@ -24,6 +24,8 @@ string run_id
 string[] fsm_trace                   # e.g. PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED / RECOVERY:REOBSERVE+RETRY
 bool object_a_at_zone
 bool object_b_at_zone
+bool residual_carry              # canceled while carry was still engaged
+bool carry_state_unknown         # cancel cleanup could not read carry state
 float64 zone_a_error_m
 float64 zone_b_error_m
 float64 duration_s

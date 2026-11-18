@@ -65,9 +65,11 @@ Sequence per run (`RunDemo.action:1-6`): `OBSERVE_A -> PICK_A -> PLACE_A -> VERI
 | Field | Type | Meaning |
 | --- | --- | --- |
 | `outcome` | `uint8` | `0` SUCCEEDED, `1` FAILED, `2` CANCELED. |
-| `error_code` | `uint16` | `0` NONE, `21` OBJECT_UNKNOWN, `32` CANCELED, `41` RESOURCE_BUSY, `50` SKILL_FAILED, `51` RECOVERY_EXHAUSTED, `52` SKILL_CONTRACT_VIOLATION, `53` SAFETY_REJECTED. |
+| `error_code` | `uint16` | `0` NONE, `21` OBJECT_NOT_FOUND, `32` CANCELED, `41` RESOURCE_BUSY, `50` SKILL_FAILED, `51` RECOVERY_EXHAUSTED, `52` SKILL_CONTRACT_VIOLATION, `53` SAFETY_REJECTED. |
 | `fsm_trace` | `string[]` | Ordered state names, e.g. `OBSERVE_A`, `PICK_A(attempt=1):OK`, `PLACE_A:OK`, `VERIFY_A(attempt=1):OK`. |
 | `object_at_place` | `bool` | `true` iff the matching VERIFY result was `OUTCOME_VERIFIED` (`task_fsm_server.py:958-963`). With `skip_verify=true` it is faked from PLACE — see §4.3. |
+| `residual_carry` | `bool` | `true` when the task was canceled while carry was still engaged; the arm is not safe to reuse until reset. |
+| `carry_state_unknown` | `bool` | `true` when a cancel could not read `/flexcell/carry_snapshot`; treated as unsafe, not as `IDLE`. |
 | `final_position_error_m` | `float64` | `VerifyObject.position_error_m` of the last verify; `NaN` when no measured pose exists. |
 | `evidence_id` | `string` | Task-level evidence id, `<scenario>-<8 hex>` (`common.py:325-327`). |
 | `detail` | `string` | Human-readable terminal reason. |
@@ -87,6 +89,8 @@ result; completion is structural, not a policy opinion (`task_fsm_server.py:1078
 | `fsm_trace` | `string[]` | As above, e.g. `PICK_B(attempt=1):FAIL:ERR_GRASP_FAILED`, `RECOVERY:REOBSERVE+RETRY`. |
 | `object_a_at_zone` | `bool` | `true` iff the `VERIFY_A` result was `OUTCOME_VERIFIED` (`task_fsm_server.py:968-979`). |
 | `object_b_at_zone` | `bool` | Same for B. |
+| `residual_carry` | `bool` | `true` when cancelled while carry was still engaged; do not start another task until reset. |
+| `carry_state_unknown` | `bool` | `true` when the cancel cleanup could not read carry state; treat as unsafe. |
 | `zone_a_error_m` | `float64` | `VERIFY_A.position_error_m`; `NaN` if unmeasured. |
 | `zone_b_error_m` | `float64` | Same for B. |
 | `duration_s` | `float64` | Monotonic wall time for the whole run. |
@@ -242,9 +246,12 @@ success constant, `1` when it is not, `2` when the action server is unavailable,
 when the goal is rejected, `4` on a client timeout or an unknown terminal result
 (`w1_client.py:132-134, 176-183, 193-201, 253-259`).
 
-Task-state values published on `/flexcell/task_state` are `IDLE`, `BUSY` and
-`QUARANTINED` (`task_fsm_server.py:289-294` and the publish calls). A quarantined arm
-refuses motion until `/reset_motion_quarantine` succeeds.
+Task-state values published on `/flexcell/task_state` are `IDLE`, `BUSY`,
+`RESIDUAL_CARRY`, `RESIDUAL_UNKNOWN` and `QUARANTINED`
+(`task_fsm_server.py:289-294` and the publish calls). `RESIDUAL_CARRY` means a
+cancelled task left the carry engaged; `RESIDUAL_UNKNOWN` means the cancel path
+could not read it. Run reset before the next task. A quarantined arm refuses motion
+until `/reset_motion_quarantine` succeeds.
 
 ## 6. `scripts/accept_run.py` — the per-run gate
 
