@@ -853,6 +853,20 @@ def main():
         checks["every_declared_probe_is_accounted_for_not_hardcoded_subset"] = (
             'unprobed' in lb_src and 'respread.corridor_blocked' in lb_src
             and 'respread.narrow_bin' in lb_src)
+
+        # 42 -- PLANNER-SIDE ORDER CLAUSE. The objective routes operation-order lessons to
+        # the planner. Its rule only knew "the X block must be put there FIRST"; the phrase
+        # "passing through the RIGHT bin first" appears in 24 archived instructions and was
+        # invisible. 21 planned the wrong bin first while their why-text claimed otherwise.
+        # ZERO false positives is the bar: refusing a correct plan changes good runs.
+        order = steps_by_name.get("planner_order_clause") or {}
+        checks["the_planner_order_clause_is_measured"] = order.get("checked", 0) >= 20
+        checks["the_order_clause_has_no_false_positives"] = (
+            order.get("false_positives") == 0)
+        checks["a_reversed_route_is_actually_caught"] = order.get("true_positives", 0) > 0
+        checks["the_rule_is_still_gated_by_an_admitted_entry"] = (
+            "order_rule_admitted" in
+            (WT / "runtime" / "planner" / "agent_planner.py").read_text(encoding="utf-8"))
         # 39 -- STEP 5 AT THE LIVE BOUNDARY. The driver used to apply an entry's parameters
         # and record NOTHING about it: "which task used this entry" was unanswerable for the
         # only path that runs a robot. It now writes RETRIEVED/APPLIED/OUTCOME with the run

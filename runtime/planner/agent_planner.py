@@ -99,6 +99,11 @@ def parse_reply(text):
 # reversed a required order; it was found only after a full run, because validate_plan only
 # looked at whether the names were known.
 _ORDER_FIRST = re.compile(r"the (\w+) block must be put there FIRST", re.I)
+# A SECOND order clause, found in 24 archived instructions (21 with the first move wrong):
+# "Move the blue block to the left bin, passing through the right bin first."
+# The object-level regex above only catches "the X block must be put there FIRST", so this
+# clause was invisible and check_plan_order returned None while the plan reversed the route.
+_PASS_THROUGH_FIRST = re.compile(r"passing through the (\w+) bin first", re.I)
 
 
 def _required_first(observation):
@@ -112,6 +117,32 @@ def _required_first(observation):
         if str(obj.get("color", "")).lower() == colour:
             return obj.get("name")
     return None
+
+
+def _required_first_zone(observation):
+    """Which BIN the instruction requires as the FIRST move, or None.
+
+    Resolves "passing through the RIGHT bin first" to the zone with the largest x, and
+    "left" to the smallest — from the observation's measured zones, never from the
+    evaluator's answer. Unknown bin words return None (fail closed).
+    """
+    text = str((observation or {}).get("instruction") or "")
+    match = _PASS_THROUGH_FIRST.search(text)
+    if not match:
+        return None
+    word = match.group(1).lower()
+    zones = [z for z in (observation or {}).get("zones") or []
+             if isinstance(z, dict) and isinstance(z.get("position"), (list, tuple))]
+    if len(zones) < 2:
+        return None
+    by_x = sorted(zones, key=lambda z: float(z["position"][0]))
+    if word == "left":
+        zone = by_x[0]
+    elif word == "right":
+        zone = by_x[-1]
+    else:
+        return None
+    return zone.get("name"), "instruction requires passing through the %s bin first" % word
 
 
 def order_rule_admitted(observation):
@@ -142,16 +173,25 @@ def check_plan_order(observation, moves):
     before execution, and rejecting it then costs nothing while running it costs a run.
     """
     required = _required_first(observation)
-    if not required or not moves:
-        return None
-    first = moves[0].get("object")
-    if first == required:
-        return None
-    moved = [m.get("object") for m in moves]
-    if required not in moved:
-        return None  # the required object is not moved at all; that is a different fault
-    return ("the instruction requires %r to be moved FIRST, but the plan starts with %r"
-            % (required, first))
+    if required and moves:
+        first = moves[0].get("object")
+        if first != required:
+            moved = [m.get("object") for m in moves]
+            if required in moved:
+                return ("the instruction requires %r to be moved FIRST, but the plan "
+                        "starts with %r" % (required, first))
+    # BIN-LEVEL order: "passing through the right bin first". This needs the first MOVE's
+    # ZONE, not the object. Measured on 24 archived instructions, 21 of which sent the
+    # object to the wrong bin first while their why-text claimed to follow the instruction.
+    first_zone = _required_first_zone(observation)
+    if first_zone and moves:
+        wanted, reason = first_zone
+        actual = moves[0].get("zone")
+        if actual != wanted:
+            zones_used = [m.get("zone") for m in moves]
+            if wanted in zones_used:
+                return ("%s, but the plan starts at %r" % (reason, actual))
+    return None
 
 
 def validate_plan(reply, observation):

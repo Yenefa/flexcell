@@ -441,6 +441,16 @@
       "step": "live_wiring"
     },
     {
+      "checked": 24,
+      "clause": "passing through the <left|right> bin first",
+      "false_negatives": 0,
+      "false_positives": 0,
+      "note": "a rule that refuses a CORRECT plan is worse than one that misses a wrong one; zero false positives is the bar",
+      "step": "planner_order_clause",
+      "true_negatives": 3,
+      "true_positives": 21
+    },
+    {
       "chains": 3,
       "conflicts": 0,
       "duplicates": 0,

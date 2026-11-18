@@ -43,6 +43,7 @@ import postmortem  # noqa: E402
 import retrieve  # noqa: E402
 import reuse  # noqa: E402
 import routing_coverage  # noqa: E402
+import order_measure  # noqa: E402
 import unrouted as unrouted_mod  # noqa: E402
 import live_path  # noqa: E402
 import delivery  # noqa: E402
@@ -721,6 +722,24 @@ def run(dest=OUT):
                            "unchanged; an ACCEPT from an INDEPENDENT ledger bound to this "
                            "entry id is required — a review of the same evidence for a "
                            "different claim does NOT authorise it")})
+
+    # 10e -- A PLANNER-SIDE ORDER CLAUSE THE RULE COULD NOT SEE. The objective routes
+    # "operation order" lessons to the planner. The planner's order rule only knew "the X
+    # block must be put there FIRST"; the phrase "passing through the RIGHT bin first"
+    # appears in 24 archived instructions and was invisible to it. Ground truth comes from
+    # each observation's own zone positions, never from the evaluator's verdict, so this
+    # measures the rule and not the answer key.
+    order = order_measure.measure()
+    _write(os.path.join(dest, "10e_order_clause.json"), order)
+    steps.append({"step": "planner_order_clause",
+                  "clause": order["clause"],
+                  "true_positives": order["true_positives"],
+                  "false_positives": order["false_positives"],
+                  "true_negatives": order["true_negatives"],
+                  "false_negatives": order["false_negatives"],
+                  "checked": order["checked"],
+                  "note": ("a rule that refuses a CORRECT plan is worse than one that "
+                           "misses a wrong one; zero false positives is the bar")})
 
     # 11 -- the store's own curation report, computed from the records on disk
     report = curate.curate(store.read(store_path))

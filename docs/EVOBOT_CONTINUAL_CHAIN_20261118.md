@@ -57,6 +57,37 @@
 于是重试第三次被拒为"declared destination occupied"。修改为**按余量选轴**，并且两轴都不满足契约时**拒绝**而不是发出一个必然被拒的计划；
 不传 avoid 时行为与旧实现**逐字节相同**，11/11 `benchmark/tests/test_recovery_driver.py` 仍通过。
 
+## 4.00 UNROUTED 里挖出一个真实可路由的规划器规则
+
+目标明确要求"**操作顺序经验交给规划器**"。之前把 `graded_visit` 归为 UNROUTED，
+理由是"没有可执行探针"。但逐条看归档发现：
+
+> 指令："Move the blue block to the left bin, **passing through the right bin first**."
+> 计划：`[(b,zone_1 左), (b,zone_2 右)]` —— **顺序反了**
+> `why` 文本却写着 "Pass through the right bin first as instructed"
+
+**这不是"无法测量的失败"，这是规划器能看到的顺序错误**，而且 `why` 文本与动作自相矛盾。
+
+### 测量（真相来自 observation，不是评判答案）
+
+| 项 | 数量 |
+| --- | --- |
+| 含 "passing through ... first" 的归档指令 | 24 |
+| 第一步走错 | **21** |
+| 新规则抓出（TP） | **21** |
+| 误报（FP） | **0** |
+| 正确计划放过（TN） | 3 |
+| 漏掉（FN） | 0 |
+
+**0 误报是硬指标**：一个拒绝正确计划的规则，比漏掉错误计划的规则更糟——
+它改变了本来正确运行的机器人行为。真值取自 `observation` 自己的 zone x 坐标
+（右=最大 x），**绝不读 evaluator 的判定**。
+
+### 仍按纪律门控
+
+新规则同样由 `order_rule_admitted` 门控——**没有已准入条目时默认路径逐字节不变**。
+它现在是一条可被经验授权、可被审核、可被撤回的能力，而不是写死的常量。
+
 ## 4.01 适用性门只查了**条目 4 个失效条件里的 1 个**
 
 上一轮加了"按真实计划检查适用条件"，验证器也在报"已检查"。但仔细核对：
@@ -1163,7 +1194,7 @@ python3 evolution/experience/demo_continual.py
 python3 -m pytest evolution/experience/test_continual_chain.py -q
 ```
 
-verifier 会**重新执行**整条链并断言 **150 项检查**，不读取 SUMMARY 里的自述。其中关键几项：
+verifier 会**重新执行**整条链并断言 **154 项检查**，不读取 SUMMARY 里的自述。其中关键几项：
 
 - 规划侧不生效（NO_CHANGE）、执行侧生效（CHANGED）；
 - 启用前后检索分别为 0 与 1；
@@ -1178,6 +1209,7 @@ verifier 会**重新执行**整条链并断言 **150 项检查**，不读取 SUM
 - **至少一条条目来自归档自动生成**，生成器拒绝了一个 UNROUTED 签名，且**没有任何生成记录在无具名审阅者时被 ACCEPT**；
 - **每条条目都声明了自己的证据 split**；开发集确实产出了条目（不是零）；没有任何被标为 `dev` 的条目引用封存实例；
 - **两个不同消费者都能生效**（executor_recovery 与 harness），且 ACTIVE 条目**覆盖两种 split**；
+- **UNROUTED 挖出可路由的规划器顺序规则**：24 条指令 21 个第一步走错，新规则 21 抓出 / 0 误报，真值取自 observation 而非评判答案，仍由已准入条目门控；
 - **适用性门覆盖全部声明**：E2 的 4 个失效条件从「只查 1 个（还拼错 1 个名字）」变为 `checked=4, unprobed=0`；未知探针**整门拒绝**；
 - **审核必须锚定条目链哈希**：防止在条目写入**之前**预生成 ACCEPT；同时如实声明攻击者若控制整条链仍可构造，那是签名要解决的问题；
 - **第 5 步在 live 边界接通**：实际应用写 RETRIEVED/APPLIED/OUTCOME 三行（带 run_id），回退到默认**一行不写**——防止「只记成功」偏差复发；

@@ -161,3 +161,39 @@ def test_the_order_lesson_is_still_refused_for_lack_of_occurrences():
     report = postmortem.generate()[1]["signatures"]
     if "order_clause_violated" in report:
         assert report["order_clause_violated"]["built"] is False
+
+
+PASS_THROUGH_OBS = {'instruction': ('Move the blue block to the left bin, passing '
+                                  'through the right bin first.'),
+                    'objects': [{'name': 'b', 'color': 'blue'}],
+                    'zones': [{'name': 'zone_1', 'position': [0.12, -0.15, 0.0175]},
+                              {'name': 'zone_2', 'position': [0.25, 0.05, 0.0175]}]}
+WRONG_ROUTE = [{'object': 'b', 'zone': 'zone_1'},
+               {'object': 'b', 'zone': 'zone_2'}]
+RIGHT_ROUTE = [{'object': 'b', 'zone': 'zone_2'},
+               {'object': 'b', 'zone': 'zone_1'}]
+
+
+def test_a_reversed_pass_through_route_is_caught():
+    problem = agent_planner.check_plan_order(PASS_THROUGH_OBS, WRONG_ROUTE)
+    assert problem and 'right bin first' in problem
+
+
+def test_a_correct_pass_through_route_is_not_flagged():
+    assert agent_planner.check_plan_order(PASS_THROUGH_OBS, RIGHT_ROUTE) is None
+
+
+def test_an_unknown_bin_word_is_not_guessed():
+    obs = dict(PASS_THROUGH_OBS)
+    obs['instruction'] = 'passing through the middle bin first'
+    assert agent_planner._required_first_zone(obs) is None
+
+
+def test_the_bin_is_resolved_from_the_observation_not_from_the_answer():
+    zone, why = agent_planner._required_first_zone(PASS_THROUGH_OBS)
+    assert zone == 'zone_2'
+    assert 'right bin' in why
+
+
+def test_the_pass_through_rule_is_still_gated_by_an_admitted_entry():
+    assert agent_planner.order_rule_admitted(PASS_THROUGH_OBS) is False
