@@ -572,8 +572,12 @@ class PickServer(Node):
                               follow_failure_detail(follow.problem()))
             # A contact grasp leaves the fingers ON the box, so the attach must
             # declare them as touch links or the lift plan starts in collision.
-            touch = (('gripper_left_link', 'gripper_right_link', 'link5',
-                      'end_effector_link')
+            # A contact grasp carries the box right at the fingers, so during
+            # transport it sweeps past the whole arm, not just the jaw. Every
+            # arm link has to be a declared touch link or the place plan is
+            # rejected with ERR_NO_COLLISION_FREE_PLAN.
+            touch = (('link1', 'link2', 'link3', 'link4', 'link5',
+                      'end_effector_link', 'gripper_left_link', 'gripper_right_link')
                      if self._carry_backend == 'contact_grasp' else ())
             sok, serr = self._scene.attach(goal.object_name, touch_links=touch)
             if not sok:

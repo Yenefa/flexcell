@@ -18,6 +18,9 @@
 #include <gz/sim/Model.hh>
 #include <gz/sim/components/ContactSensorData.hh>
 #include <gz/sim/components/Collision.hh>
+#include <gz/sim/components/Geometry.hh>
+#include <sdf/Geometry.hh>
+#include <sdf/Box.hh>
 #include <gz/sim/components/JointForceCmd.hh>
 #include <gz/sim/components/JointPosition.hh>
 #include <gz/sim/components/JointVelocity.hh>
@@ -75,6 +78,7 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
   double targetGap{0.034};
   bool engaged{false};
   int stallFrames{0};
+  double measuredWidth{0.0};
   double gapNow{0.034}, objZ{0.0}, baseZ{0.0}, qLeft{0.0}, qRight{0.0};
   double signLeft_{1.0}, signRight_{1.0}, calibrateRef{0.0};
   double offX{0.0}, offY{0.0}, offZ{0.0}, jawSpeed{0.0};
@@ -140,6 +144,19 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
     if (objectModel != kNullEntity)
       objectLink = ecm.EntityByComponents(components::Link(), components::Name("link"),
                                           components::ParentEntity(objectModel));
+    if (objectLink != kNullEntity) {
+      // Take the jaw-relevant dimension from the object's own collision box so a
+      // 50 mm box is not judged against a 35 mm constant.
+      for (const auto collision : ecm.ChildrenByComponents(objectLink, components::Collision())) {
+        const auto geometry = ecm.Component<components::Geometry>(collision);
+        if (geometry == nullptr) continue;
+        const auto &shape = geometry->Data();
+        if (shape.Type() != sdf::GeometryType::BOX) continue;
+        const auto &size = shape.BoxShape()->Size();
+        measuredWidth = std::min(size.X(), size.Y());
+        break;
+      }
+    }
     baseLink = ecm.EntityByComponents(components::Link(), components::Name(baseName),
                                       components::ParentEntity(gripper));
     eeLink = ecm.EntityByComponents(components::Link(), components::Name("end_effector_link"),
