@@ -1,5 +1,8 @@
 """Inventory real Git worktrees, including dirty and missing checkouts."""
+import contextlib
 import importlib.util
+import io
+import json
 import os
 from pathlib import Path
 import shutil
@@ -35,6 +38,21 @@ class WorktreeInventoryTest(unittest.TestCase):
         return subprocess.run(['git', '-C', str(self.root), *args], check=True,
                               capture_output=True, text=True).stdout
 
+    def write_config(self, payload, commit=False):
+        path = self.root / 'config' / 'development_branches.json'
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(payload))
+        if commit:
+            self.command('add', 'config/development_branches.json')
+            self.command('commit', '-qm', 'config')
+        return path
+
+    def run_main(self, *extra):
+        with contextlib.redirect_stdout(io.StringIO()), \
+                contextlib.redirect_stderr(io.StringIO()) as err:
+            code = inventory.main(['--root', str(self.root), *extra])
+        return code, err.getvalue()
+
     def test_dirty_worktree_and_space_in_path_are_reported_without_mutation(self):
         (self.other / 'tracked').write_text('edit\n')
         before = self.command('worktree', 'list', '--porcelain')
@@ -67,6 +85,46 @@ class WorktreeInventoryTest(unittest.TestCase):
             report = inventory.collect(self.root, self.config)
         self.assertEqual(len(report['worktrees']), 2)
         self.assertTrue(all(not t['dirty'] for t in report['worktrees']))
+
+    def test_load_config_rejects_missing_or_bad_workstreams(self):
+        for payload in ({}, {'workstreams': []},
+                        {'workstreams': [{'id': 'x', 'status': 'ACTIVE'}]},
+                        {'workstreams': [{'id': 'x', 'branch': 1, 'status': 'ACTIVE'}]}):
+            with self.subTest(payload=payload):
+                path = self.write_config(payload)
+                with self.assertRaises(inventory.UsageError):
+                    inventory.load_config(path)
+
+    def test_main_returns_2_for_invalid_config(self):
+        self.write_config({'workstreams': []})
+        code, err = self.run_main()
+        self.assertEqual(code, 2)
+        self.assertIn('workstreams', err)
+
+    def test_main_returns_2_for_non_git_root(self):
+        plain = Path(self.tmp.name) / 'plain'
+        plain.mkdir()
+        (plain / 'config').mkdir()
+        (plain / 'config' / 'development_branches.json').write_text(json.dumps(self.config))
+        with contextlib.redirect_stdout(io.StringIO()), \
+                contextlib.redirect_stderr(io.StringIO()) as err:
+            code = inventory.main(['--root', str(plain)])
+        self.assertEqual(code, 2)
+        self.assertIn('git read failed', err.getvalue())
+
+    def test_strict_returns_0_for_clean_worktrees(self):
+        self.write_config(self.config, commit=True)
+        code, err = self.run_main('--strict')
+        self.assertEqual((code, err), (0, ''))
+
+    def test_strict_returns_1_but_default_returns_0_for_missing_worktree(self):
+        self.write_config(self.config, commit=True)
+        shutil.rmtree(self.other)
+        code, err = self.run_main('--strict')
+        self.assertEqual(code, 1)
+        self.assertIn('missing/dirty/prunable', err)
+        code, err = self.run_main()
+        self.assertEqual((code, err), (0, ''))
 
 
 if __name__ == '__main__':
