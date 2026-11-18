@@ -837,6 +837,19 @@ def main():
             wire.get("applicability_checked_on_the_real_plan") is True)
         checks["the_driver_supplies_the_real_plan_to_the_gate"] = (
             "experience_observation" in drv_src)
+        # 39 -- STEP 5 AT THE LIVE BOUNDARY. The driver used to apply an entry's parameters
+        # and record NOTHING about it: "which task used this entry" was unanswerable for the
+        # only path that runs a robot. It now writes RETRIEVED/APPLIED/OUTCOME with the run
+        # id - and writes NOTHING when it fell back to defaults, because a fallback is not
+        # an application.
+        checks["the_driver_records_a_live_application"] = (
+            "experience_usage_ledger" in drv_src and "RETRIEVED" in drv_src)
+        checks["a_live_fallback_is_not_recorded_as_an_application"] = (
+            "and kwargs" in drv_src or "if ledger_path and entry_id_used and kwargs"
+            in drv_src)
+        checks["the_live_recording_is_declared"] = (
+            wire.get("applied_live_entries_are_recorded") is True
+            and wire.get("a_default_path_records_nothing") is True)
 
         verdict = {
             "record_kind": "EVOBOT_CONTINUAL_CHAIN_VERDICT",

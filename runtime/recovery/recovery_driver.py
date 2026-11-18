@@ -75,6 +75,10 @@ def main(argv=None):
     # therefore never break a run or drive a robot from an unreviewed artifact.
     ap.add_argument("--experience-asset")
     ap.add_argument("--experience-entries")
+    ap.add_argument("--experience-usage-ledger",
+                    help="append RETRIEVED/APPLIED/OUTCOME here when an entry actually ran")
+    ap.add_argument("--experience-entry-id",
+                    help="the entry id whose parameters were applied; required to log")
     ap.add_argument("--experience-observation",
                     help="the real plan.json; the entry's invalid conditions are checked "
                          "against it before its parameters are used")
@@ -198,6 +202,40 @@ def main(argv=None):
             return 1
         (run / "plan_retry.json").write_text(json.dumps(retried, indent=2) + "\n",
                                              encoding="utf-8")
+
+        # STEP 5 AT THE LIVE BOUNDARY: record what this run did with the entry. Three rows,
+        # the same shape the offline reuse audit writes:
+        #   RETRIEVED  the entry was looked up for this run
+        #   APPLIED    its parameters actually changed the call (kwargs non-empty)
+        #   OUTCOME    IMPROVED if the retry moved the plan, else UNCHANGED
+        # With defaults (kwargs == {}) NOTHING is written: a fallback is not an application,
+        # and recording one would be the same false hit rate this ledger already guards.
+        ledger_path = getattr(args, "experience_usage_ledger", None)
+        entry_id_used = getattr(args, "experience_entry_id", None)
+        if ledger_path and entry_id_used and kwargs:
+            try:
+                root = str(WT)
+                if root not in sys.path:
+                    sys.path.insert(0, root)
+                from evolution.experience import ledger as usage
+                run_id = str(run)
+                detail = {"consumer": "executor_recovery", "kwargs": kwargs,
+                          "fixture": "live_run", "binding": binding_why}
+                usage.append(ledger_path, entry_id_used, "RETRIEVED", run_id=run_id,
+                             consumer="executor_recovery", detail=detail,
+                             recorded_by="recovery_driver")
+                usage.append(ledger_path, entry_id_used, "APPLIED", run_id=run_id,
+                             consumer="executor_recovery", detail=detail, changed=True,
+                             recorded_by="recovery_driver")
+                changed = retried.get("stages") != plan.get("stages")
+                usage.append(ledger_path, entry_id_used, "OUTCOME", run_id=run_id,
+                             consumer="executor_recovery",
+                             outcome="IMPROVED" if changed else "UNCHANGED",
+                             detail=detail, changed=changed,
+                             recorded_by="recovery_driver")
+            except Exception as exc:  # noqa: BLE001 - logging must not break recovery
+                (run / "experience_ledger_error.txt").write_text(
+                    str(exc), encoding="utf-8")
     elif decision["action"] == "resume":
         pass
     elif decision["action"] in ("redispatch", "reobserve"):

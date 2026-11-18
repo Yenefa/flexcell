@@ -714,6 +714,9 @@ def run(dest=OUT):
                                            "detect tail truncation"),
                   # step 4: an already-conforming plan must not receive the lesson's params
                   "applicability_checked_on_the_real_plan": True,
+                  # step 5 at the live boundary: an applied entry is recorded with its run id
+                  "applied_live_entries_are_recorded": True,
+                  "a_default_path_records_nothing": True,
                   "note": ("opt-in and fail-closed: the frozen baseline default path is "
                            "unchanged; an ACCEPT from an INDEPENDENT ledger bound to this "
                            "entry id is required — a review of the same evidence for a "
