@@ -110,6 +110,28 @@ def test_carry_snapshot_unavailable_is_unknown():
     assert n._carry_engaged_snapshot()==(None,'carry snapshot service unavailable')
 
 
+def test_cancel_with_carry_engaged_reports_residual_state(tmp_path):
+    from flexcell_interfaces.action import RunPickPlace
+    n=server(tmp_path)
+    del n._execute_plan
+    n._seq=0;n._zones={};n._episodes=Mock();n._log=Mock();n._demo_log=Mock()
+    n._budget=1;n._tol=.01;n._demo_tol=.06
+    n.get_parameter=lambda name: SimpleNamespace(value='')
+    n._carry_engaged_snapshot=lambda: (True,'held')
+    h=SimpleNamespace(request=RunPickPlace.Goal(),
+                      goal_id=SimpleNamespace(uuid=[1]*16),
+                      is_cancel_requested=True,
+                      publish_feedback=Mock(),succeed=Mock(),
+                      abort=Mock(),canceled=Mock())
+    h.request.object_name='a'
+    result=n._execute_plan(h,single=True)
+    assert result.outcome==2 and result.residual_carry
+    assert result.error_code==32
+    assert n._publish_task_state.call_args.args==('RESIDUAL_CARRY',)
+    assert 'residual carry engaged' in result.detail
+    h.canceled.assert_called_once()
+
+
 def test_receipt_open_failure_is_typed_failure(tmp_path):
     n=server(tmp_path);p=tmp_path/'file';p.write_text('cannot be directory');n._composite_dir=str(p)
     h=goal();r=n._execute_composite(h)

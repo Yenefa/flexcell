@@ -603,6 +603,7 @@ class TaskFsmServer(Node):
         t0 = time.monotonic()
         goal = goal_handle.request
         self._seq += 1
+        terminal_residual_carry = False
         scenario = ('pick_place_v1' if single else
                     goal.scenario_id or 'week1_demo_v1')
         result_type = RunPickPlace.Result if single else RunDemo.Result
@@ -633,6 +634,7 @@ class TaskFsmServer(Node):
         planted_used = False
 
         def finish(outcome, error, detail):
+            nonlocal terminal_residual_carry
             res.outcome, res.error_code = outcome, error
             res.detail, res.fsm_trace, res.evidence_id = detail, trace, evidence
             residual_carry = False
@@ -640,6 +642,7 @@ class TaskFsmServer(Node):
                 engaged, carry_detail = self._carry_engaged_snapshot()
                 if engaged:
                     residual_carry = True
+                    terminal_residual_carry = True
                     res.residual_carry = True
                     detail = ('%s; residual carry engaged (%s); arm not returned '
                               'home' % (detail, carry_detail or 'carry held'))
@@ -1239,7 +1242,8 @@ class TaskFsmServer(Node):
         finally:
             if owns_arm:
                 self._admission.release()
-                self._publish_task_state('IDLE')
+                if not terminal_residual_carry:
+                    self._publish_task_state('IDLE')
 
 
 def main(args=None):
