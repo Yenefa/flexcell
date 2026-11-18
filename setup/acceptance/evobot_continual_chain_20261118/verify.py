@@ -878,6 +878,28 @@ def main():
         checks["the_firing_uses_the_real_delivery_channel"] = (
             "deliver_planner" in
             (WT / "evolution" / "experience" / "order_fire.py").read_text(encoding="utf-8"))
+        # 44 -- A REAL WITH/WITHOUT COMPARISON FOR PUSH RECOVERY. The unrouted probe said
+        # "this archive cannot measure the effect" because it replayed policy-generated
+        # attempts - but ignored a separate independently collected A/B batch with the same
+        # world/task/validator and preregistered order. Record it WITH its n=3 / dev-only /
+        # not-isolated limits; never turn it into a generalization claim.
+        push = steps_by_name.get("push_without_policy_comparison") or {}
+        checks["a_real_push_without_policy_comparison_is_recorded"] = (
+            push.get("is_real_comparison") is True
+            and push.get("control_passes") == 0
+            and push.get("feedback_passes") > push.get("control_passes", 0))
+        checks["the_push_comparison_states_its_honest_limits"] = (
+            any("n=3" in x for x in push.get("honest_limits") or [])
+            and any("dev instance" in x for x in push.get("honest_limits") or []))
+        # 45 -- A PROBE'S "CANNOT MEASURE" IS NOT THE REPOSITORY'S. The UNMEASURED verdict
+        # must name the independently collected comparison that lives outside the probe's
+        # path, or it overstates the absence of evidence.
+        import importlib
+        unrouted_module = importlib.import_module("unrouted")
+        ureport = unrouted_module.report()
+        checks["an_unmeasured_verdict_names_the_outside_comparison"] = any(
+            "independently collected" in (u.get("why") or "")
+            for u in ureport.get("unrouted", []))
         # 39 -- STEP 5 AT THE LIVE BOUNDARY. The driver used to apply an entry's parameters
         # and record NOTHING about it: "which task used this entry" was unanswerable for the
         # only path that runs a robot. It now writes RETRIEVED/APPLIED/OUTCOME with the run

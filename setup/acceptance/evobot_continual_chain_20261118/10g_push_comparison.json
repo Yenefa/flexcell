@@ -1,0 +1,18 @@
+{
+  "claim": "control 0/3 -> feedback 3/3 full task passes on ONE dev instance; same world/task/validator, preregistered order A1 B1 B2 A2 A3 B3. n=3 per arm; does NOT isolate one component; no generalization claim",
+  "control_passes": 0,
+  "control_runs": 3,
+  "feedback_passes": 3,
+  "feedback_runs": 3,
+  "honest_limits": [
+    "n=3 per arm",
+    "one exposed dev instance",
+    "comparison does not isolate a single component",
+    "no unseen instance",
+    "no statistical superiority"
+  ],
+  "is_real_comparison": true,
+  "measured": true,
+  "pilots_separate": true,
+  "same_world_sha256": true
+}

@@ -275,10 +275,31 @@ def report(acceptance=None):
         if not why.startswith("UNROUTED"):
             continue
         verdict = classify(signature, by_signature.get(signature, set()), acceptance)
-        out.append(dict(verdict, signature=signature,
-                        occurrences=record.get("occurrences"),
-                        instances=len(by_signature.get(signature, ())),
-                        generator_said=why))
+        row = dict(verdict, signature=signature,
+                   occurrences=record.get("occurrences"),
+                   instances=len(by_signature.get(signature, ())),
+                   generator_said=why)
+        # A probe that says "this archive cannot measure it" is a claim about the path the
+        # probe reads, NOT about the repository. evobot_push_feedback_20261112 holds an
+        # independently collected A/B batch the replay probe never looked at, so leaving
+        # the UNMEASURED verdict unqualified would overstate the absence of evidence.
+        if row.get("state") == "UNMEASURED":
+            try:
+                import push_comparison
+                external = push_comparison.measure(acceptance)
+            except Exception as exc:  # noqa: BLE001 - a missing reader is not a measurement
+                external = {"measured": False, "why": str(exc)}
+            row["external_comparison"] = external
+            if external.get("measured") and external.get("is_real_comparison"):
+                row["why"] = (row.get("why", "") +
+                              " | BUT the repo DOES hold an independently collected "
+                              "with/without batch outside this probe's path: control "
+                              "%s/%s -> feedback %s/%s (n=3, one dev instance, not "
+                              "isolated)" % (external["control_passes"],
+                                             external["control_runs"],
+                                             external["feedback_passes"],
+                                             external["feedback_runs"]))
+        out.append(row)
     counts = {}
     for row in out:
         counts[row["state"]] = counts.get(row["state"], 0) + 1

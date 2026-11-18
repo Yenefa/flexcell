@@ -433,6 +433,43 @@ capability is what makes that visible instead of leaving it to an audit.
     **correctness check on the replay, not an effect measurement**, and conflating the two
     would turn this back into "we measured it".
 
+45. **THE REPORT MUST NOT CONTRADICT THE NEW EVIDENCE.** The new probe read the real A/B batch,
+    but `unrouted.report()` still told every UNMEASURED row "cannot measure its effect /
+    needs attempts WITHOUT the policy". One artifact saying two opposite things is worse than
+    either claim alone. Each UNMEASURED row now carries `external_comparison` and its `why`
+    says: *the path this probe reads cannot measure it, BUT the repo holds a separate
+    independently collected comparison*. The old probe's verdict is NOT rewritten — it is
+    correct about its own path; the report just stops overstating the absence of evidence.
+
+44. **"CANNOT BE MEASURED" WAS AN INCOMPLETE SEARCH.** `probe_push_recovery` reported that this
+    archive cannot measure the push-recovery effect. Its reason is correct — the recorded
+    attempts were produced BY the policy under test, so replaying them is a selection effect —
+    but it only looked at ONE path (`evobot_push_recover` attempt replay) and MISSED a separate,
+    independently collected comparison already in the repo.
+
+    `evobot_push_feedback_20261112` is a genuine A/B batch:
+
+    | | |
+    | --- | --- |
+    | design | two arms, preregistered order **A1 B1 B2 A2 A3 B3** |
+    | control (A, previous recovery) | **0/3** complete task passes |
+    | feedback (B, measured feedback + bounded requests + high return) | **3/3** |
+    | held constant | same `world_sha256`, task, contact height, frozen validator |
+    | independence | `pilots_separate: true` — **not a replay** |
+
+    ### What it does NOT support
+
+    | limit | value |
+    | --- | --- |
+    | sample size | **n=3 per arm** |
+    | instances | **one exposed dev instance** |
+    | attribution | the comparison **does not isolate** a single component |
+    | unseen instances | **not run** |
+    | statistics | **no superiority claim** |
+
+    These limits are recorded beside the numbers in the artifact. **"Has a comparison" is not
+    "generalizes"; "3/3" is not "solved".**
+
 43. **THE RULE WAS MEASURED AND GATED BUT HAD NEVER BEEN SEEN FIRING.** Checking every
     archived observation: all 44 that carry an `experience` list hold LEGACY items with
     `_entry_id = None`. Since `order_rule_admitted` requires an `_entry_id`, the rule from
@@ -711,7 +748,7 @@ capability is what makes that visible instead of leaving it to an audit.
     visible.** The artifact reports the numbers and both options, and **does not pretend the
     loop is closed.**
 
-`verify.py` asserts **157 checks**, including that both gates really ran, that the asset
+`verify.py` asserts **160 checks**, including that both gates really ran, that the asset
 binds to a function that exists, that the rejected delivery produced no asset, that
 retirement still lets retrieval see nothing, that **no generated record was ever ACCEPTed
 without a named reviewer**, that **every entry declares which split its evidence came
@@ -739,7 +776,7 @@ with one sentence**, and that **a capable module with an unmeasurable archive is
 a selection effect rather than as any of the three tempting answers**, and that **the
 chain's connection to the live planning path is measured and reported as unplugged, with the
 cost of both ways to close it**, that **a schema bridge cannot rescue these entries**, and
-that **the executor consumer exists in the shell runner**, that **the new opt-in wire leaves the no-flag path at its defaults**, that **a self-reviewed entry cannot drive the live call**, that **an ACCEPT for a different claim on the same evidence cannot drive it either**, that **the review ledger is chained and its integrity limits are stated honestly**, that **applicability is checked on the real run plan, refusing a lesson where its own declared invalid condition fires**, that **a live application writes RETRIEVED/APPLIED/OUTCOME with a run id while a fallback writes nothing**, that **a review is anchored to the entry's chain hash so it cannot be pre-generated before the entry exists**, that **every declared invalid condition is accounted for — unknown probes refuse rather than silently pass**, that **a previously-unroutable order signature is now a measured, zero-false-positive planner rule still gated by an admitted entry**, and that **the rule was actually seen firing through the real delivery channel — the same reversed plan flips from clean to refused when the entry is delivered**.
+that **the executor consumer exists in the shell runner**, that **the new opt-in wire leaves the no-flag path at its defaults**, that **a self-reviewed entry cannot drive the live call**, that **an ACCEPT for a different claim on the same evidence cannot drive it either**, that **the review ledger is chained and its integrity limits are stated honestly**, that **applicability is checked on the real run plan, refusing a lesson where its own declared invalid condition fires**, that **a live application writes RETRIEVED/APPLIED/OUTCOME with a run id while a fallback writes nothing**, that **a review is anchored to the entry's chain hash so it cannot be pre-generated before the entry exists**, that **every declared invalid condition is accounted for — unknown probes refuse rather than silently pass**, that **a previously-unroutable order signature is now a measured, zero-false-positive planner rule still gated by an admitted entry**, that **the rule was actually seen firing through the real delivery channel — the same reversed plan flips from clean to refused when the entry is delivered**, and that **a real (non-replay) push with/without comparison exists, recorded with its n=3 / dev-only / not-isolated limits**.
 
 ---
 

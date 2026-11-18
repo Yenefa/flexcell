@@ -45,6 +45,7 @@ import reuse  # noqa: E402
 import routing_coverage  # noqa: E402
 import order_measure  # noqa: E402
 import order_fire  # noqa: E402
+import push_comparison  # noqa: E402
 import unrouted as unrouted_mod  # noqa: E402
 import live_path  # noqa: E402
 import delivery  # noqa: E402
@@ -757,6 +758,23 @@ def run(dest=OUT):
                                           if "right bin first" in p],
                   "note": ("the rule is not dead code: an admitted entry delivered through "
                            "the real channel is required to refuse the reversed plan")})
+
+    # 10g -- A REAL WITH/WITHOUT COMPARISON THE UNROUTED PROBE MISSED. probe_push_recovery
+    # concluded "this archive cannot measure the effect" because it replayed attempts the
+    # policy produced itself. That is true of the path it reads - but it ignored a separate,
+    # independently collected A/B batch with the same world/task/validator and a preregistered
+    # order. Read it here, with its limits, without changing the old probe's evidence.
+    push = push_comparison.measure()
+    _write(os.path.join(dest, "10g_push_comparison.json"), push)
+    steps.append({"step": "push_without_policy_comparison",
+                  "is_real_comparison": push["is_real_comparison"],
+                  "control_passes": push["control_passes"],
+                  "control_runs": push["control_runs"],
+                  "feedback_passes": push["feedback_passes"],
+                  "feedback_runs": push["feedback_runs"],
+                  "honest_limits": push["honest_limits"],
+                  "note": ("an independently collected control-vs-feedback batch, not a "
+                           "replay; n=3 on one dev instance and does not isolate one component")})
 
     # 11 -- the store's own curation report, computed from the records on disk
     report = curate.curate(store.read(store_path))
