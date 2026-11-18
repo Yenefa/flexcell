@@ -132,6 +132,29 @@ def test_cancel_with_carry_engaged_reports_residual_state(tmp_path):
     h.canceled.assert_called_once()
 
 
+def test_cancel_with_unknown_carry_state_is_not_idle(tmp_path):
+    from flexcell_interfaces.action import RunPickPlace
+    n=server(tmp_path)
+    del n._execute_plan
+    n._seq=0;n._zones={};n._episodes=Mock();n._log=Mock();n._demo_log=Mock()
+    n._budget=1;n._tol=.01;n._demo_tol=.06
+    n.get_parameter=lambda name: SimpleNamespace(value='')
+    n._carry_query=object()
+    n._carry_engaged_snapshot=lambda: (None,'snapshot timeout')
+    h=SimpleNamespace(request=RunPickPlace.Goal(),
+                      goal_id=SimpleNamespace(uuid=[1]*16),
+                      is_cancel_requested=True,
+                      publish_feedback=Mock(),succeed=Mock(),
+                      abort=Mock(),canceled=Mock())
+    h.request.object_name='a'
+    result=n._execute_plan(h,single=True)
+    assert result.outcome==2 and result.carry_state_unknown
+    assert not result.residual_carry
+    assert n._publish_task_state.call_args.args==('RESIDUAL_UNKNOWN',)
+    assert 'carry state unknown' in result.detail
+    h.canceled.assert_called_once()
+
+
 def test_receipt_open_failure_is_typed_failure(tmp_path):
     n=server(tmp_path);p=tmp_path/'file';p.write_text('cannot be directory');n._composite_dir=str(p)
     h=goal();r=n._execute_composite(h)

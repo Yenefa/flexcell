@@ -638,9 +638,17 @@ class TaskFsmServer(Node):
             res.outcome, res.error_code = outcome, error
             res.detail, res.fsm_trace, res.evidence_id = detail, trace, evidence
             residual_carry = False
+            carry_state_unknown = False
             if outcome == result_type.OUTCOME_CANCELED:
                 engaged, carry_detail = self._carry_engaged_snapshot()
-                if engaged:
+                if engaged is None and getattr(self, '_carry_query', None) is not None:
+                    carry_state_unknown = True
+                    terminal_residual_carry = True
+                    res.carry_state_unknown = True
+                    detail = ('%s; carry state unknown after cancel; treating arm '
+                              'as unsafe (%s)' % (detail, carry_detail or 'no snapshot'))
+                    res.detail = detail
+                elif engaged:
                     residual_carry = True
                     terminal_residual_carry = True
                     res.residual_carry = True
@@ -653,6 +661,7 @@ class TaskFsmServer(Node):
                 'detail': detail, 'fsm_trace': list(trace),
                 'duration_s': duration_s, 'evidence_id': evidence,
                 'residual_carry': bool(residual_carry),
+                'carry_state_unknown': bool(carry_state_unknown),
                 'safety': safety_metrics(safety_evaluated, safety_rejected),
             }
             ros_goal = getattr(goal_handle, 'goal_id', None)
@@ -704,6 +713,8 @@ class TaskFsmServer(Node):
             if owns_arm:
                 if residual_carry:
                     self._publish_task_state('RESIDUAL_CARRY')
+                elif carry_state_unknown:
+                    self._publish_task_state('RESIDUAL_UNKNOWN')
                 else:
                     self._publish_task_state(
                         'BUSY' if self._has_pending_skill_goal() else 'IDLE')

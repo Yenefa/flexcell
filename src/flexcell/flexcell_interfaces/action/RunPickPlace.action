@@ -21,6 +21,7 @@ uint16 error_code
 string[] fsm_trace                 # ordered state names visited
 bool object_at_place
 bool residual_carry              # canceled while carry was still engaged
+bool carry_state_unknown         # cancel cleanup could not read carry state
 float64 final_position_error_m
 string evidence_id
 string detail
