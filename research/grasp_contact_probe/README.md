@@ -22,7 +22,7 @@
 source /opt/ros/jazzy/setup.bash
 cd research/grasp_contact_probe
 
-python3 scripts/run_probe.py --stage acceptance --out results/acceptance-v2 --rebuild
+python3 scripts/run_probe.py --stage acceptance --out results/acceptance-v4 --rebuild
 python3 scripts/run_probe.py --stage stress     --out results/stress-v3
 python3 scripts/run_probe.py --stage magnet     --out results/magnet-v1   # 磁吸基线
 
@@ -31,9 +31,9 @@ python3 scripts/analyze.py --run-dir results/acceptance-v4 \
     --md-out   results/acceptance-v4/REPORT.md
 
 # 探索性对照（只出指标与摩擦锥核对，不给 PASS/FAIL）
-python3 scripts/analyze.py --run-dir results/stress-v2 --stage stress \
-    --json-out results/stress-v2/summary.json \
-    --md-out   results/stress-v2/REPORT.md
+python3 scripts/analyze.py --run-dir results/stress-v3 --stage stress \
+    --json-out results/stress-v3/summary.json \
+    --md-out   results/stress-v3/REPORT.md
 ```
 
 ## 世界契约（不要"顺手"改）
