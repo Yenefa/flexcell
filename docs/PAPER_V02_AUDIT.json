@@ -1,0 +1,387 @@
+[
+  {
+    "claim_id": "A01",
+    "paper_value": "五个协议共 17 条 result 记录（E2 3 / E2b 3 / E2c 2 / E2d 6 / E2e 3）",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2{,b,c,d,e}-20261109/**/result.json",
+    "measured": "实际 17 个 result.json：3/3/2/6/3，无缺无多",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "A02",
+    "paper_value": "E2 通过 0／3",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2-20261109/aggregate.json",
+    "measured": "aggregate 无 success 字段，status=BLOCKED、n=3；3 条 result.json 全 success=false、verdict.passed=false → 0/3",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "A03",
+    "paper_value": "E2b 通过 3／3",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2b-20261109/aggregate.json",
+    "measured": "success=3；三行 target/regression 均 PASS，config_ok=true",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "A04",
+    "paper_value": "E2c 通过 0／2",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2c-20261109/aggregate.json",
+    "measured": "success=0；两行 target=ROBOT_FAILURE、reg_normal/reg_regrasp=PASS、wrote=false",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "A05",
+    "paper_value": "E2d 通过 6／6",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2d-20261109/aggregate.json",
+    "measured": "success=6；六行三门全 PASS；模型 chat×4 + v4-pro + flash",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "A06",
+    "paper_value": "E2e 通过 3／3",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2e-20261109/aggregate.json",
+    "measured": "success=3；三行三门全 PASS；模型 chat×2 + flash",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "B01",
+    "paper_value": "E2d-1 chat / 3 轮 / 3,089 tokens / 三门通过",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2d-20261109/rep1/result.json; rep1/verdict.json",
+    "measured": "iterations=3；tokens=3089；target/regression_normal/regression_regrasp 全 PASS",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "B02",
+    "paper_value": "E2d-2 chat / 2 轮 / 1,999 tokens",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2d-20261109/rep2/result.json",
+    "measured": "iterations=2；tokens=1999；三门 PASS",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "B03",
+    "paper_value": "E2d-3 chat / 2 轮 / 1,983 tokens",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2d-20261109/rep3/result.json",
+    "measured": "iterations=2；tokens=1983；三门 PASS",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "B04",
+    "paper_value": "E2d-4 chat / 3 轮 / 3,069 tokens",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2d-20261109/rep4/result.json",
+    "measured": "iterations=3；tokens=3069；三门 PASS",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "B05",
+    "paper_value": "E2d-5 v4-pro / 3 轮 / 3,511 tokens",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2d-20261109/rep5-v4pro/result.json",
+    "measured": "iterations=3；tokens=3511；meta.model=deepseek-v4-pro；三门 PASS",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "B06",
+    "paper_value": "E2d-6 flash / 3 轮 / 3,132 tokens",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2d-20261109/rep6-flash/result.json",
+    "measured": "iterations=3；tokens=3132；meta.model=deepseek-flash；三门 PASS",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "B07",
+    "paper_value": "E2e-1 chat / 4 轮 / 4,063 tokens",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2e-20261109/rep1/result.json",
+    "measured": "iterations=4；tokens=4063；三门 PASS",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "B08",
+    "paper_value": "E2e-2 chat / 4 轮 / 4,060 tokens",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2e-20261109/rep2/result.json",
+    "measured": "iterations=4；tokens=4060；三门 PASS",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "B09",
+    "paper_value": "E2e-3 flash / 4 轮 / 4,321 tokens",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2e-20261109/rep3-flash/result.json",
+    "measured": "iterations=4；tokens=4321；三门 PASS（该目录无 execution.log）",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "B10",
+    "paper_value": "最终 verdict 的目标、normal、regrasp 均 PASS",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2[de]-20261109/*/verdict.json",
+    "measured": "值全 PASS；但 verdict.json 键名为 target/regression_normal/regression_regrasp，aggregate.json 才用 normal/regrasp",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "B11",
+    "paper_value": "E2d 交互轮次 2–3，中位数 3",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2d-20261109/aggregate.json",
+    "measured": "iters=[3,2,2,3,3,3] → min 2 / max 3 / 中位数 (3+3)/2=3",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "B12",
+    "paper_value": "E2d token 1,983–3,511，中位数 3,079",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2d-20261109/aggregate.json",
+    "measured": "排序 1983,1999,3069,3089,3132,3511 → 中位数 (3069+3089)/2=3079",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "B13",
+    "paper_value": "E2e token 4,060–4,321，中位数 4,063；轮次均为 4",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2e-20261109/aggregate.json",
+    "measured": "4060,4063,4321 → 中位数 4063；iters 全为 4",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "C01",
+    "paper_value": "E2 每条实际运行 4 轮",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2-20261109/aggregate.json; experiments/pilot-001/manifest.json",
+    "measured": "记录 iterations=4/4/4，manifest task_budget.T-W5E2.max_iterations=4；但 E2 aggregate 的 reason 自述 caps iterations at <=3，与 manifest/记录矛盾",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "C02",
+    "paper_value": "E2b 6 轮；最小配置覆盖；提示无需查看 gate；双门",
+    "evidence_path": "experiments/pilot-001/manifest.json; experiments/pilot-001/pilot/w5e2.py build_t_w5e2b",
+    "measured": "task_budget.T-W5E2B.max_iterations=6；week1.yaml 只覆盖 zone_2_* 三行；task.md 写 gate/ 不需要检查；ACCEPT= dual_object+normal；实际 iters 5/3/3",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "C03",
+    "paper_value": "E2c 6 轮；回归增加 regrasp；无成功写入",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2c-20261109/aggregate.json; pilot/w5e2.py ACCEPT_C; rep{1,2}/events.jsonl",
+    "measured": "iters=6/6；wrote=false；reg_regrasp=PASS；三门脚本 dual_object+normal+regrasp；末轮累计调用 0 次写",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "C04",
+    "paper_value": "E2d 6 轮；提示给出操作顺序与可用数值范围；三门；原协议最多 2 次后扩到 6",
+    "evidence_path": "docs/W5E2D_PREREGISTRATION.md; pilot/w5e2.py build_t_w5e2d",
+    "measured": "预注册“最多 2 次试点”+附录“4/4（后续补 2 次）3/2/2/3、3089/1999/1983/3069”；task.md “First run the target scenario once…0.20-0.25”；ACCEPT_C 三门",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "C05",
+    "paper_value": "E2e 6 轮；对象注册缺失且键名已告知；三门；先 2 次 chat 后加 flash；探测不进分母",
+    "evidence_path": "docs/W5E2E_PREREGISTRATION.md; runs/p1.5-w5e2e-20261109/probe.json; aggregate.json",
+    "measured": "预注册“先用 deepseek-chat 2 次”、附录 3/3 与 4/4/4、4063/4060/4321；probe.json= ERR_SAFETY_REJECTED/target_not_available 且注明 not part of statistics；aggregate n=3",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "C06",
+    "paper_value": "E2b–E2e 预算最多 6 次交互、20,000 tokens，token 在 step 返回后检查",
+    "evidence_path": "experiments/pilot-001/manifest.json task_budget; experiments/pilot-001/pilot/runner.py:106-109",
+    "measured": "四项 max_iterations=6、max_tokens=20000；runner 在 agent.step() 后累加并判超限",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "C07",
+    "paper_value": "zone_2_x 缺陷=0.45 m；E2d 提示要求设入 0.20–0.25 m",
+    "evidence_path": "experiments/pilot-001/pilot/w5e2.py（OVERLAY zone_2_x:0.45；build_t_w5e2d task.md）",
+    "measured": "0.45 与 0.20-0.25 逐字命中",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "C08",
+    "paper_value": "对象缺陷使 tracked_objects 只保留对象 A",
+    "evidence_path": "experiments/pilot-001/pilot/w5e2.py E2E_OVERLAY",
+    "measured": "tracked_objects: [\"target_box_a\"]",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "C09",
+    "paper_value": "E2 三条与 E2c 两条无写操作；E2b/E2d/E2e 各一次成功写入（按 events 末轮累计调用重算）",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2*/*events.jsonl",
+    "measured": "E2 0/0/0 次写；E2c 0/0 次写；E2b 3 条、E2d 6 条、E2e 3 条各恰好 1 次 [\"edit_file\",\"config/week1.yaml\"]，无 REFUSED_PROTECTED",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "C10",
+    "paper_value": "E2c 中 normal 与 regrasp 通过而目标失败",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2c-20261109/rep{1,2}/verdict.json",
+    "measured": "target=ROBOT_FAILURE；regression_normal/regression_regrasp=PASS",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "C11",
+    "paper_value": "FCAgent.step 总是返回 claim_success=False，故 false_success=0 无信息量",
+    "evidence_path": "experiments/pilot-001/pilot/agent_fc.py:59,:97; 17 份 result.json",
+    "measured": "两个 return 均写 \"claim_success\": False；17 条记录 claim_success/false_success 全为 false",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "D01",
+    "paper_value": "落点间距 56 mm → 90 mm",
+    "evidence_path": "779251f5:setup/acceptance/evobot_continual_chain_20261118/03_effect_E2.json",
+    "measured": "baseline_min_separation_m=0.056（56.0 mm）→ applied_min_separation_m=0.09（90.0 mm）",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "D02",
+    "paper_value": "最小间隙 60 mm → 81.4 mm",
+    "evidence_path": "779251f5:setup/acceptance/evobot_continual_chain_20261118/03_effect_E2.json",
+    "measured": "baseline_min_clearance_m=0.06003332407921455（60.03 mm）→ applied_min_clearance_m=0.08139410298049855（81.39 mm）",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "D03",
+    "paper_value": "满足 90 mm 契约",
+    "evidence_path": "779251f5:…/03_effect_E2.json（expectations.applied_min_separation_m_gte=true）; SUMMARY.json selected=respread/step=0.090; verify_result.json checks.applied_spacing_at_least_90mm=true",
+    "measured": "契约阈值 0.090 m；选中参数 step=0.090",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "D04",
+    "paper_value": "仍满足 50 mm 下限",
+    "evidence_path": "779251f5:…/03_effect_E2.json（applied_min_clearance_m_gte=true）; evolution/experience/test_continual_chain.py:137; verify_result.json checks.applied_clearance_at_least_50mm=true",
+    "measured": "下限 0.05 m；实测 0.0814 > 0.05",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "D05",
+    "paper_value": "同一份归档计划、同一条落点间距教训投给两个消费模块",
+    "evidence_path": "779251f5:…/03_effect_E1.json 与 03_effect_E2.json",
+    "measured": "两者 fixture=t13_two_boxes_one_bin、baseline_sha=0ae97180f0d2af48 完全相同",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "D06",
+    "paper_value": "投给规划器 NO_CHANGE；投给执行器 CHANGED",
+    "evidence_path": "779251f5:…/03_effect_E1.json（consumer=spread_policy, NO_CHANGE）; 03_effect_E2.json（consumer=executor_recovery, CHANGED）; verify_result.json measured.deliveries",
+    "measured": "E1 NO_CHANGE（applied_sha 同 baseline）；E2 CHANGED；两个判定都成立",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "D07",
+    "paper_value": "109 个实例修 7 个，命中率 6.4%",
+    "evidence_path": "779251f5:…/09b_reuse_audit.json",
+    "measured": "instances_offered=109；total_instances_fixed=7；instance_hit_rate=0.0642；total_made_worse=0",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "D08",
+    "paper_value": "294 份计划文件改 7 份，命中率 2.4%",
+    "evidence_path": "779251f5:…/SUMMARY.json（reuse_audit 步）; 09b_reuse_audit.json",
+    "measured": "plans_offered=294；plans_correctly_untouched=287 → 改动 7；7/294=2.381%",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "D09",
+    "paper_value": "没有任何实例被改差",
+    "evidence_path": "779251f5:…/09b_reuse_audit.json（total_made_worse=0）; verify_result.json checks.the_skill_made_no_task_worse=true",
+    "measured": "0",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "D10",
+    "paper_value": "九个此类探针逐一执行，任一未覆盖即整门拒绝",
+    "evidence_path": "779251f5:evolution/experience/demo_continual.py（_PLANNER_PROBES 4 + _EXECUTOR_PROBES 4 + order 1）; 779251f5:…/records_v2.jsonl（E1 REJECT 无 misuse_check；E2 probed=4；order probed=1；harness probed=2）; 779251f5:docs/EVOBOT_CONTINUAL_CHAIN_20261118.md:1434（写“8 个探针”）",
+    "measured": "声明 9 条（spread 4 + respread 4 + order 1）；归档实际执行并记录 7 条（2+4+1），spread 条目审核阶段被 REJECT 未进启用门；项目报告自述探针实现 8 个",
+    "verdict": "不一致"
+  },
+  {
+    "claim_id": "D11",
+    "paper_value": "验收脚本断言 163 项检查，不读汇总自述",
+    "evidence_path": "779251f5:setup/acceptance/evobot_continual_chain_20261118/verify_result.json",
+    "measured": "checks_total=163；checks_passed=163；checks 字典恰 163 键（162 true + 1 个 [true,说明]）",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "D12",
+    "paper_value": "目标点名的四条路由只有两条送达",
+    "evidence_path": "779251f5:…/10b_routing_coverage.json",
+    "measured": "named=4、carried=2；order(planner)=CARRIED by E3、recovery(executor_recovery)=CARRIED by E2、spread(spread_policy)=NO_ENTRY、ROS launch(development)=NO_ENTRY",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "D13",
+    "paper_value": "两段锚定不同快照：配置修复 ebe27f07、经验链 779251f5 的 evolution/experience",
+    "evidence_path": "ebe27f07（无 evolution/）; 779251f5（evolution/experience 80 文件；setup/acceptance/evobot_continual_chain_20261118 52 文件）",
+    "measured": "两处内容各自存在，符合“不同快照”陈述",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "D14",
+    "paper_value": "两处证据均可独立核查",
+    "evidence_path": "git branch -a --contains 779251f5 / for-each-ref --contains / rev-list --all / log --all -- docs/EVOBOT_CONTINUAL_CHAIN_20261118.md（全为空）; ebe27f07 是 origin/main 祖先",
+    "measured": "ebe27f07 可定位；779251f5 在本克隆为悬空提交，经验链归档不在任何可达分支（GitHub 端可达性未联网验证）",
+    "verdict": "无法判定"
+  },
+  {
+    "claim_id": "E01",
+    "paper_value": "主试验九份 result.json 在 Git 中使用 LF",
+    "evidence_path": "runs/p1.5-w5e2d-20261109/rep{1..6}/result.json; runs/p1.5-w5e2e-20261109/rep{1,2,3-flash}/result.json; .gitattributes",
+    "measured": "9/9 不含 CRLF（各 66 个 LF）；.gitattributes 为 * text=auto eol=lf、*.json text eol=lf",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "E02",
+    "paper_value": "历史摘要对应 CRLF；直接 SHA-256 不同，按 CRLF 表达后与历史摘要相符",
+    "evidence_path": "aggregate.json rows[].sha（E2b 3 + E2d 6 + E2e 3）+ 各 result.json 原始字节",
+    "measured": "12/12 条 raw-LF 哈希≠记录值、CRLF 归一哈希=记录值（rep1：raw 150dfc1d…，CRLF 655de595…）",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "E03",
+    "paper_value": "本版分别记录两种摘要",
+    "evidence_path": "全仓检索：aggregate.json 与 runs/*/verify.py 只登记 CRLF 形式摘要；无任何 LF 形式摘要记录（git grep 150dfc1d / 44df1675 均为空）",
+    "measured": "只记录了一种（CRLF）；LF 摘要无落盘",
+    "verdict": "不一致"
+  },
+  {
+    "claim_id": "E04",
+    "paper_value": "随文保留逐条数据、统计脚本与文件来源，支持重算表格",
+    "evidence_path": "experiments/pilot-001/runs/p1.5-w5e2{b,d,e}-20261109/verify.py",
+    "measured": "三个脚本在本检出全部失败：AssertionError: rep1 drifted（exit 1），因其用 CRLF 摘要比对原始字节 sha256（w5e2d/verify.py:22）",
+    "verdict": "不一致"
+  },
+  {
+    "claim_id": "E05",
+    "paper_value": "源码快照 ebe27f07881200ab0fc74dfaa5490208023bf9d9 可解析",
+    "evidence_path": "git cat-file -t ebe27f07; merge-base --is-ancestor ebe27f07 origin/main; cat-file 检查 12 个被引路径",
+    "measured": "可解析（commit），为 origin/main 祖先；论文引用的 5 个 aggregate、manifest、两份预注册、runner/hash_guard/w5e2/agent_fc 在该提交中均为 blob",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "E06",
+    "paper_value": "经验链快照 779251f5e307e826213adbb8ad1075a130c293ef 可解析",
+    "evidence_path": "git cat-file -t 779251f5; git ls-tree -r 779251f5 -- evolution; -- setup/acceptance",
+    "measured": "可解析（commit）；evolution 80 文件、链路归档包存在（可达性见 D14）",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "E07",
+    "paper_value": "三门场景集合 S={dual_object, normal, regrasp}",
+    "evidence_path": "experiments/pilot-001/pilot/w5e2.py ACCEPT_C",
+    "measured": "run(\"dual_object\")、run(\"normal\")、run(\"regrasp\")，all(status==\"PASS\")",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "E08",
+    "paper_value": "双门条件只含前两项",
+    "evidence_path": "experiments/pilot-001/pilot/w5e2.py ACCEPT",
+    "measured": "target=dual_object + regression=normal，无 regrasp",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "E09",
+    "paper_value": "接受需 J(c)=0（验收程序退出码）",
+    "evidence_path": "pilot/w5e2.py（两个 ACCEPT 均 sys.exit(0/1)）; pilot/judge.py:39; pilot/runner.py:149",
+    "measured": "verdict.passed = payload.passed and returncode==0；success = passed and violation is None，与式(1) 同构",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "E10",
+    "paper_value": "保护通过工具写入拒绝 + 运行结束后摘要复核实现",
+    "evidence_path": "pilot/hash_guard.py; pilot/toolbox.py:52,63; pilot/runner.py:128-136; run_pilot.py:260,286,313,340,371",
+    "measured": "双机制齐备；但这 17 条运行实际传入 protected=[\"gate/acceptance.py\"] 单文件，manifest 的 4 文件保护集未用于这些运行",
+    "verdict": "一致"
+  },
+  {
+    "claim_id": "E11",
+    "paper_value": "17 条记录来自同一归档日期 2026-11-09",
+    "evidence_path": "五个 runs 目录名（-20261109）; experiments/pilot-001/manifest.json revised_at",
+    "measured": "命中",
+    "verdict": "一致"
+  }
+]
