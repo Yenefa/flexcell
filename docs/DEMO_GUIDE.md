@@ -328,8 +328,8 @@ while the manual session in this guide uses `pp-manual`.
 | ffmpeg "Cannot open display" | wrong `DISPLAY` or no X socket | `echo $DISPLAY`; re-run with that value |
 | recorded video is black | `x11grab` cannot see WSLg Wayland windows | use `scripts/record_gazebo.ps1` (§6), check a frame's `YAVG` |
 | horizon is tilted | `camera_pose` field order is `x y z roll pitch yaw`; a yaw value in the roll slot | set roll to 0 (§4) |
-| GUI segfaults in `libnvwgf2umx.so` / `libd3d12core.so` | D3D12 driver path | start the GUI with `LIBGL_ALWAYS_SOFTWARE=1` (`scripts/demo_serve.sh`) |
-| reset between cycles fails while recording | GUI + encoder leave too little time for the 90 s planning step | record one cycle per stack (§6) |
+| GUI segfaults in `libnvwgf2umx.so` / `libd3d12core.so` | D3D12 driver path | record with `-Gui soft`, or start the GUI with `LIBGL_ALWAYS_SOFTWARE=1` (`scripts/demo_serve.sh`) |
+| reset between cycles fails while recording | GUI + encoder leave too little time for the 90 s planning step | record one cycle per stack (§7) |
 
 ## 10. TODO (unverified here)
 
