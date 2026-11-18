@@ -6,8 +6,8 @@
 > 磁吸真正买到的东西不是"能抓"，而是**把这条摩擦力边界从系统里删掉**。
 
 - 分支：`research/grasp-contact-probe-20261119`
-- 原始数据：`results/acceptance-v3/`（10 trial）、`results/stress-v3/`（10 个对照，含载荷阶梯）、`results/magnet-v1/`（磁吸基线 7 档）
-- 预注册判据：`results/acceptance-v3/protocol.json`（sha256 见 summary.json）
+- 原始数据：`results/acceptance-v4/`（10 trial）、`results/stress-v3/`（10 个对照，含载荷阶梯）、`results/magnet-v1/`（磁吸基线 7 档）
+- 预注册判据：`results/acceptance-v4/protocol.json`（sha256 见 summary.json）
 - 对抗性评审：`REVIEW.md`（分析员撰写，未及落盘）；评审记录与落实：`REVIEW_NOTES.md`
 
 ## 1. 探针是什么
@@ -38,6 +38,10 @@
 
 另有一次纯日志修复（v2 → v3）：接触伙伴名带作用域前缀（`model::link::collision`），
 导致对地接触恒判 0；修正为后缀匹配后重跑。物理数值 v2/v3 **逐位相同**，说明该修复只影响观测，不影响仿真。
+
+最后又跑了一次 v4：加入磁吸后端后，用**最终提交的插件**重跑同一协议，确认接触路径没有被新代码影响
+（逐 trial 漂移与 v3 的最大差 1.3e-15 mm，仅浮点噪声；日志多出 `mode` / `attached` 两个字段）。
+提交里的 `results/acceptance-v4/` 与提交里的插件二进制一一对应。
 
 ## 3. 验收结果（预注册：10/10 全过、漂移 < 2 mm、旋转 < 5°、不掉）
 

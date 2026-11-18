@@ -1,0 +1,36 @@
+{
+  "command": [
+    "gz",
+    "sim",
+    "-s",
+    "-r",
+    "--iterations",
+    "1701",
+    "results/acceptance-v4/box_a-01/world.sdf"
+  ],
+  "dartsim_loaded": false,
+  "engine_libraries": {
+    "/opt/ros/jazzy/opt/gz_sim_vendor/lib/gz-sim-8/plugins/libgz-sim8-physics-system.so.8.15.0": "3b375a1f93e6cfd7794165df9229acd1bfdec2812e1b92cdb2e7a5399f4fad91",
+    "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gui.so.8.15.0": "b6205045d4a7d5df123e50267235aad10b2eac2057ab3b342659f2db8b63cc1d",
+    "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8-gz.so.8.15.0": "03ca2b7142fb4143eb188226aa2f146bf472d719193af463e31ea8efd4088d0f",
+    "/opt/ros/jazzy/opt/gz_sim_vendor/lib/libgz-sim8.so.8.15.0": "a348e4d28376de4e59ba58402142d0ce9e2abd7852ab76e721a34bafa569ef19"
+  },
+  "exit_code": 0,
+  "group": "acceptance",
+  "jitter": {
+    "x": 0.0,
+    "y": 0.0,
+    "yaw_deg": 0.0
+  },
+  "lift_s": 0.5,
+  "mass_kg": 0.05,
+  "mu": 1.0,
+  "object_name": "box_a",
+  "plugin_sha256": "d40c932fdffe4e561c94f57c74f9f65a59d30fa17d657dbea3a2d9f29eb8b9fb",
+  "size_m": 0.035,
+  "steps_bytes": 1843322,
+  "steps_sha256": "fdd9b132be1842c05d5408676dec5407bd8a4bc989a9b49f94e03de1a7b0282e",
+  "trial": "box_a-01",
+  "wall_s": 3.945,
+  "world_sha256": "74c94efe151b3e7697b59affc7d254b4c498c4be6ac14d2714c564181612f57d"
+}

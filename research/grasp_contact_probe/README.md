@@ -26,9 +26,9 @@ python3 scripts/run_probe.py --stage acceptance --out results/acceptance-v2 --re
 python3 scripts/run_probe.py --stage stress     --out results/stress-v3
 python3 scripts/run_probe.py --stage magnet     --out results/magnet-v1   # 磁吸基线
 
-python3 scripts/analyze.py --run-dir results/acceptance-v3 \
-    --json-out results/acceptance-v3/summary.json \
-    --md-out   results/acceptance-v3/REPORT.md
+python3 scripts/analyze.py --run-dir results/acceptance-v4 \
+    --json-out results/acceptance-v4/summary.json \
+    --md-out   results/acceptance-v4/REPORT.md
 
 # 探索性对照（只出指标与摩擦锥核对，不给 PASS/FAIL）
 python3 scripts/analyze.py --run-dir results/stress-v2 --stage stress \
