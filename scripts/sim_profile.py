@@ -183,6 +183,8 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
         # contact grasp cannot do: the jaw has to straddle the box. Declare the
         # measured stand-off explicitly instead of inheriting the hover value.
         config.setdefault('pick_server', {}).setdefault('ros__parameters', {})[
+            # Measured: raising the tool point to +12 mm did not help (the lift still
+            # reported rise 0.000), so the cube-centre height stays.
             'grasp_dz_m'] = 0.0
         config['pick_server']['ros__parameters']['grasp_dx_m'] = 0.023
         # Carrying the box at the fingers makes the transport plan harder than a
