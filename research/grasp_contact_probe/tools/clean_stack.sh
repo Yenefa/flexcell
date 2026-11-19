@@ -11,7 +11,11 @@ pkill -9 -f sim_window.py 2>/dev/null
 pkill -9 -f 'gz sim' 2>/dev/null
 pkill -9 -f move_group 2>/dev/null
 pkill -9 -f ros2_control_node 2>/dev/null
-for node in carry_server task_server pick_server place_server observe_server \
+# NOTE: the FSM executable is task_fsm_server. An earlier version of this list
+# said "task_server", which matches nothing: a leftover FSM then became a SECOND
+# run_pick_place action server, so a client could send its goal to one instance
+# and read the result from another (CLIENT_RESULT_UNKNOWN after a few seconds).
+for node in carry_server task_fsm_server pick_server place_server observe_server \
             verify_server move_to_pose_server run_demo_server \
             parameter_bridge robot_state_publisher; do
     pkill -9 -f "$node" 2>/dev/null
