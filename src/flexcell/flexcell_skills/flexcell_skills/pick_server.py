@@ -400,7 +400,9 @@ class PickServer(Node):
         # A previous goal that is still unwinding (cancel, abort) briefly holds the
         # admission lock; failing instantly turned that into ERR_RESOURCE_BUSY on
         # the very first attempt of a run.
-        if not self._admission.acquire(timeout=8.0):
+        # Serialize instead of failing: an overlapping dispatch used to abort the
+        # whole episode with ERR_RESOURCE_BUSY on the first attempt.
+        if not self._admission.acquire(timeout=120.0):
             return finish(R.OUTCOME_FAILED, R.ERR_RESOURCE_BUSY,
                           'another pick goal is active')
         try:

@@ -232,7 +232,7 @@ class PlaceServer(Node):
             return res
 
         # ---------- admission ----------
-        if not self._admission.acquire(timeout=8.0):
+        if not self._admission.acquire(timeout=120.0):
             return finish(R.OUTCOME_FAILED, R.ERR_RESOURCE_BUSY,
                           'another place goal is active')
         try:
