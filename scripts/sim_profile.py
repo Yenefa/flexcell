@@ -192,6 +192,12 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
             'planning_timeout_s'] = 15.0
         # demo_veryslow measured no better than the default and doubles runtime,
         # so the profile stays at the harness default (demo_slow).
+        # The FSM's shipped skill budgets assume a magnetic carry that engages in
+        # milliseconds; a contact grasp confirms over seconds.
+        config.setdefault('task_fsm_server', {}).setdefault('ros__parameters', {})[
+            'pick_deadline_s'] = 240.0
+        config['task_fsm_server']['ros__parameters']['place_deadline_s'] = 240.0
+        config['task_fsm_server']['ros__parameters']['observe_deadline_s'] = 60.0
     if backend == 'contact_grasp' and not perception_only:
         # Contact carry: the jaw is driven by the guard, the object is held by
         # friction only. No DetachableJoint plugin is added to this world.

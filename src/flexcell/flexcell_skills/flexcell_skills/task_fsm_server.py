@@ -178,6 +178,11 @@ class TaskFsmServer(Node):
         self.declare_parameter('zone_2_y', 0.05)
         self.declare_parameter('zone_2_z', 0.0175)
         self.declare_parameter('recovery_budget', 1)
+        # A contact grasp confirms over several seconds and waits for an engage
+        # acknowledgement, so the shipped 90 s/30 s budgets expire mid-skill.
+        self.declare_parameter('pick_deadline_s', 90.0)
+        self.declare_parameter('place_deadline_s', 90.0)
+        self.declare_parameter('observe_deadline_s', 30.0)
         self.declare_parameter('demo_verify_tolerance_m', 0.06)
         self.declare_parameter('demo_log_file', 'demo_runs.jsonl')
         self.declare_parameter('episode_dir', '~/.ros/flexcell/episodes')
@@ -202,6 +207,9 @@ class TaskFsmServer(Node):
                        float(gp2('zone_2_z').value)),
         }
         self._budget = int(gp2('recovery_budget').value)
+        self._pick_deadline = float(gp2('pick_deadline_s').value)
+        self._place_deadline = float(gp2('place_deadline_s').value)
+        self._observe_deadline = float(gp2('observe_deadline_s').value)
         self._demo_tol = float(gp2('demo_verify_tolerance_m').value)
         self._demo_log = JsonlLog(self, gp2('log_dir').value,
                                   gp2('demo_log_file').value)
@@ -883,7 +891,7 @@ class TaskFsmServer(Node):
                     og = Observe.Goal()
                     og.refresh = True
                     r, err = self._demo_call(self._cli_observe, og, label,
-                                             goal_handle, t0, 30.0)
+                                             goal_handle, t0, self._observe_deadline)
                     record_skill_evidence(ACTION_OBSERVE, r, err)
                     o_outcome = int(r.outcome) if r is not None else 255
                     o_evidence = getattr(r, 'evidence_id', '') if r else ''
@@ -948,7 +956,7 @@ class TaskFsmServer(Node):
                     pg.object_name = decision.target
                     pg.motion_profile_id = constraints.motion_profile_id
                     r, err = self._demo_call(self._cli_pick, pg, label,
-                                             goal_handle, t0, 90.0)
+                                             goal_handle, t0, self._pick_deadline)
                     record_skill_evidence(ACTION_PICK, r, err)
                     pick_ok = (err is None and r is not None and
                                int(r.outcome) == PickObject.Result.OUTCOME_SUCCEEDED)
@@ -1024,7 +1032,7 @@ class TaskFsmServer(Node):
                     pg.place_pose = zone_pose
                     pg.motion_profile_id = constraints.motion_profile_id
                     r, err = self._demo_call(self._cli_place, pg, label,
-                                             goal_handle, t0, 90.0)
+                                             goal_handle, t0, self._place_deadline)
                     record_skill_evidence(ACTION_PLACE, r, err)
                     place_ok = (err is None and r is not None and
                                 int(r.outcome) == PlaceObject.Result.OUTCOME_SUCCEEDED)
