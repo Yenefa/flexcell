@@ -211,6 +211,13 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
                            ('max_force', '1.0'), ('kp', '120'), ('kd', '4'), ('squeeze_force', '2.0'), ('squeeze_gap', '0.020'), ('expected_object_width', '0.035'),
                            ('width_tolerance', '0.012'), ('confirm_frames', '40')]:
             ET.SubElement(guard, key).text = value
+        # DART's ODE collision detector dies on the ODE trimesh assertion
+        # (collision_trimesh_trimesh.cpp:285) once the jaw carries a flat pad and
+        # takes gz sim down at spawn. DART also ships a Bullet detector; select it.
+        physics_plugin = world.find("plugin[@name='gz::sim::systems::Physics']")
+        if physics_plugin is not None:
+            dart = ET.SubElement(physics_plugin, 'dart')
+            ET.SubElement(dart, 'collision_detector').text = 'bullet'
         # No default object: the guard must resolve whichever object the grasp
     # request names. A startup default silently kept the first object's link and
     # made every later object measure the wrong body.
@@ -219,6 +226,12 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
     if contact_trace:
         physics = world.find("plugin[@name='gz::sim::systems::Physics']")
         ET.SubElement(physics, 'contacts_entity_names').text = 'true'
+        # DART's default ODE collision detector dies on the ODE trimesh assertion
+        # (collision_trimesh_trimesh.cpp:285) once the jaw carries a flat pad, and
+        # it takes gz sim down at spawn. DART ships a Bullet detector; use it.
+        if backend == 'contact_grasp':
+            dart = ET.SubElement(physics, 'dart')
+            ET.SubElement(dart, 'collision_detector').text = 'bullet'
         observer = ET.SubElement(world, 'plugin', name='flexcell::ContactTrace', filename='libflexcell_contact_trace.so')
         watches = [(name, 'col') for name in tracked] + [('ground_plane', 'collision')]
         for name, collision in watches:
