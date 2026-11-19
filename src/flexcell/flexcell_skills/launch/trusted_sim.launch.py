@@ -80,8 +80,14 @@ def launch_stack(context):
         # slides down 12-25 mm). Substitute a plain parallel pad for CONTACT ONLY, so
         # the friction grasp is tested against the model's design intent (34 mm free
         # gap at q=0) instead of against a decorative surface.
+        # FLEXCELL_PARALLEL_PADS=0 keeps the shipped mesh (the window then starts but
+        # the box slides out of the wedge); =1 gives the flat pads, which grasp 4 of
+        # 5 but make gz sim die on an ODE trimesh assertion when the window loads.
+        # Both are kept switchable so either measurement is reproducible.
         for link in urdf.findall('link'):
             name = link.get('name')
+            if os.environ.get('FLEXCELL_PARALLEL_PADS', '1') == '0':
+                break
             if name not in ('gripper_left_link', 'gripper_right_link'):
                 continue
             for collision in list(link.findall('collision')):
@@ -94,6 +100,9 @@ def launch_stack(context):
             origin.set('rpy', '0 0 0')
             geometry = ET.SubElement(pad, 'geometry')
             box = ET.SubElement(geometry, 'box')
+            # Measured: a 30 mm pad is too short to reach the cube (grasp never
+            # confirms); 50 x 58 mm grabs 4 of 5. The larger pad occasionally trips
+            # an ODE trimesh assertion at spawn, which is an engine-level bug.
             box.set('size', '0.050 0.004 0.058')
             surface = ET.SubElement(pad, 'surface')
             friction = ET.SubElement(surface, 'friction')
