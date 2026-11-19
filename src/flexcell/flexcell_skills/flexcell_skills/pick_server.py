@@ -558,8 +558,10 @@ class PickServer(Node):
                 rec['carry_engage_confirmed'] = confirmed
                 if not confirmed:
                     cleaned, cleanup_error = self._release_everything(goal.object_name)
-                    return finish(R.OUTCOME_FAILED,
-                                  R.ERR_GRASP_FAILED if cleaned else R.ERR_INTERNAL,
+                    # The grasp is what failed; a scene-cleanup hiccup must not
+                    # upgrade it to ERR_INTERNAL, which the FSM treats as
+                    # non-recoverable and refuses to retry.
+                    return finish(R.OUTCOME_FAILED, R.ERR_GRASP_FAILED,
                                   message if cleaned else
                                   message + '; cleanup failed: ' + cleanup_error)
                 if self._carry_backend == 'detachable_joint':
