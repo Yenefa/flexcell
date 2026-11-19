@@ -547,10 +547,36 @@ class CarryServer(Node):
     def _loop(self, object_id, offset, stop_evt, session):
         if self._backend == 'contact_grasp':
             # Nothing to pin: the object is held by the jaw through contact. The
-            # thread exists so the session/stop semantics stay identical.
+            # thread follows the measured object-to-gripper distance so a slip is
+            # observed while it happens instead of at the place check.
             self._log.write({'event': 'contact_hold', 'object': object_id, 'session': session})
+            baseline = None
             while not stop_evt.is_set():
                 stop_evt.wait(self._period)
+                if stop_evt.is_set():
+                    break
+                ok, reply = self._contact_request('status', {})
+                try:
+                    body = json.loads(reply)
+                except ValueError:
+                    continue
+                rel = body.get('rel_z')
+                gap = body.get('gap')
+                if rel is None:
+                    continue
+                if baseline is None:
+                    baseline = rel
+                drift = rel - baseline
+                self._log.write({'event': 'contact_follow', 'object': object_id,
+                                 'session': session, 'rel_z': rel, 'drift': drift,
+                                 'gap': gap, 'engaged': bool(body.get('ok'))})
+                if abs(drift) > 0.010:
+                    self._log.write({'event': 'contact_slip', 'object': object_id,
+                                     'session': session, 'drift': drift})
+                    self.get_logger().error(
+                        'contact slip detected: object moved %.3fm in the jaw' % drift)
+                    self._on_stop(None, cause='contact_slip')
+                    return
             return
         consecutive_fail = 0
         # Thread-local observations: replacement cannot give the old worker

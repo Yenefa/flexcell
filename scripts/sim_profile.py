@@ -190,6 +190,10 @@ def profile(out, backend='velocity_servo', camera=False, skill_backend='legacy',
         # the 5 s default.
         config.setdefault('move_to_pose_server', {}).setdefault('ros__parameters', {})[
             'planning_timeout_s'] = 15.0
+        # A box held only by friction cannot survive the acceleration spikes of
+        # the default profile; slow every move down and it stays in the jaw.
+        config['move_to_pose_server']['ros__parameters'][
+            'default_motion_profile'] = 'demo_veryslow'
     if backend == 'contact_grasp' and not perception_only:
         # Contact carry: the jaw is driven by the guard, the object is held by
         # friction only. No DetachableJoint plugin is added to this world.
