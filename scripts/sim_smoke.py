@@ -398,10 +398,15 @@ def main():
         result['goal_pose'] = [float(value) for value in pose]
         result['zone_2_pose'] = (None if args.zone_2_pose is None else [float(v) for v in args.zone_2_pose])
         result['config_override'] = args.config_override
+        # The contact backend confirms each grasp over several seconds and adds an
+        # engage acknowledgement, so the 150 s client budget expired mid-task and
+        # the episode ended as ACTION_TERMINAL_UNKNOWN.
+        task_budget = 300 if args.backend == 'contact_grasp' else 150
         rc = command([sys.executable, str(ROOT / 'src/flexcell/flexcell_skills/test/w1_client.py'),
                       '--action', 'demo' if args.case == 'dual_object' else 'task',
                       '--object', args.object, '--pose', *pose,
-                      '--timeout', '150'], out / 'task', timeout=170)
+                      '--timeout', str(task_budget)],
+                     out / 'task', timeout=task_budget + 30)
         task_output = (out / 'task.stdout').read_text()
         result['task_end_monotonic_ns'] = time.monotonic_ns()
         if args.camera and args.case != 'regrasp':
