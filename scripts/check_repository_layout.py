@@ -3,6 +3,7 @@
 import argparse
 from collections import Counter
 import json
+import math
 from pathlib import Path
 import re
 import subprocess
@@ -43,10 +44,18 @@ def load_layout(path):
     for key in ('archive_roots','modules'):
         if not isinstance(layout.get(key),list):
             raise UsageError('%s needs a %s list'%(path,key))
+    for index,archive in enumerate(layout['archive_roots']):
+        if not isinstance(archive,str) or not archive:
+            raise UsageError('%s archive_roots[%d] must be a non-empty string'
+                             %(path,index))
     for index,module in enumerate(layout['modules']):
         if not isinstance(module,dict) or not isinstance(module.get('paths'),list) \
                 or not module['paths']:
             raise UsageError('%s modules[%d] needs a non-empty paths list'%(path,index))
+        for path_index,module_path in enumerate(module['paths']):
+            if not isinstance(module_path,str) or not module_path:
+                raise UsageError('%s modules[%d].paths[%d] must be a non-empty string'
+                                 %(path,index,path_index))
     return layout
 
 
@@ -65,8 +74,11 @@ def load_baselines(path):
 def tracked_manifests(root):
     # Container checkouts can have a different filesystem owner. Trust only
     # this explicitly selected checkout for this read, never all directories.
-    process=subprocess.run(['git','-c','safe.directory='+str(root),'-C',str(root),
-                            'ls-files','-z','--','**/package.xml'],capture_output=True)
+    try:
+        process=subprocess.run(['git','-c','safe.directory='+str(root),'-C',str(root),
+                                'ls-files','-z','--','**/package.xml'],capture_output=True)
+    except OSError as exc:
+        raise RuntimeError('git ls-files failed: '+str(exc))
     if process.returncode:
         raise RuntimeError('git ls-files failed: '+process.stderr.decode(errors='replace').strip())
     return [p.decode() for p in process.stdout.split(b'\0') if p]
@@ -74,7 +86,8 @@ def tracked_manifests(root):
 
 def audit(root,layout,manifests):
     root=Path(root);problems=[];packages=[];ignored=[]
-    expected={str(Path(path)/'package.xml'):name for name,path in layout['ros_packages'].items()}
+    expected={(Path(path)/'package.xml').as_posix():name
+              for name,path in layout['ros_packages'].items()}
     for archive in layout['archive_roots']:
         if not (root/archive/'COLCON_IGNORE').is_file():
             problems.append('archive lacks COLCON_IGNORE: '+archive)
@@ -126,8 +139,8 @@ def main(argv=None):
                         help='seconds before colcon discovery is reported as failed (default: 90)')
     parser.add_argument('--out',type=Path)
     args=parser.parse_args(argv);root=args.root.resolve()
-    if args.colcon_timeout<=0:
-        print('ERROR: --colcon-timeout must be positive',file=sys.stderr)
+    if not math.isfinite(args.colcon_timeout) or args.colcon_timeout<=0:
+        print('ERROR: --colcon-timeout must be positive and finite',file=sys.stderr)
         return 2
     try:
         layout=load_layout(root/'config/repository_layout.json')
@@ -138,7 +151,8 @@ def main(argv=None):
         return 2
     for key,checkpoint in versions['checkpoints'].items():
         for field in ('executed_source_commit','evidence_commit'):
-            if not re.fullmatch(r'[0-9a-f]{40}',checkpoint.get(field,'')):
+            value=checkpoint.get(field,'')
+            if not isinstance(value,str) or not re.fullmatch(r'[0-9a-f]{40}',value):
                 result['problems'].append('invalid checkpoint commit: '+key+'/'+field)
         if not (root/checkpoint['report']).is_file():
             result['problems'].append('checkpoint report missing: '+key)

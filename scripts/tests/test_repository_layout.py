@@ -70,6 +70,12 @@ class RepositoryLayoutTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError,'git ls-files failed:'):
             module.tracked_manifests(self.root)
 
+    def test_git_unavailable_keeps_diagnostic(self):
+        with patch.object(module.subprocess,'run',
+                          side_effect=FileNotFoundError(2,'No such file','git')):
+            with self.assertRaisesRegex(RuntimeError,'git ls-files failed:'):
+                module.tracked_manifests(self.root)
+
     def test_real_discovery_accepts_registry_mapping_keys_as_names(self):
         reply=SimpleNamespace(returncode=0,stdout='skill\n',stderr='')
         with patch.object(module.subprocess,'run',return_value=reply):
@@ -88,7 +94,11 @@ class RepositoryLayoutTest(unittest.TestCase):
     def test_malformed_layout_exits_2(self):
         for layout in ({}, {'ros_packages':{}}, {'ros_packages':{'skill':''}},
                        {'ros_packages':{'skill':'src/skill'},'archive_roots':[],
-                        'modules':[{'id':'empty','paths':[]}]}):
+                        'modules':[{'id':'empty','paths':[]}]},
+                       {'ros_packages':{'skill':'src/skill'},'archive_roots':[1],
+                        'modules':[]},
+                       {'ros_packages':{'skill':'src/skill'},'archive_roots':[],
+                        'modules':[{'paths':[1]}]}):
             with self.subTest(layout=layout):
                 self.write_configs(layout=layout)
                 code,_,err=self.run_main()
@@ -104,6 +114,14 @@ class RepositoryLayoutTest(unittest.TestCase):
         self.write_configs(baselines={'checkpoints':{'t08':{'executed_source_commit':'0'*40}}})
         code,_,err=self.run_main()
         self.assertEqual(code,2);self.assertIn('t08',err)
+
+    def test_invalid_checkpoint_commit_is_a_problem_not_a_crash(self):
+        self.write_configs(baselines={'checkpoints':{'t08':{
+            'report':'missing.md','executed_source_commit':123,'evidence_commit':None}}})
+        code,out,err=self.run_main()
+        self.assertEqual((code,err),(1,''))
+        report=json.loads(out)
+        self.assertTrue(any('invalid checkpoint commit' in p for p in report['problems']))
 
     def test_git_enumeration_failure_exits_2_with_diagnostic(self):
         self.write_configs()
@@ -133,10 +151,12 @@ class RepositoryLayoutTest(unittest.TestCase):
         self.assertIn('timed out',report['colcon_check']['error'])
         self.assertTrue(any('colcon package discovery' in p for p in report['problems']))
 
-    def test_non_positive_colcon_timeout_exits_2(self):
+    def test_non_positive_or_nonfinite_colcon_timeout_exits_2(self):
         self.write_configs()
-        code,_,err=self.run_main('--colcon-timeout','0')
-        self.assertEqual(code,2);self.assertIn('--colcon-timeout',err)
+        for value in ('0','-1','nan','inf'):
+            with self.subTest(value=value):
+                code,_,err=self.run_main('--colcon-timeout',value)
+                self.assertEqual(code,2);self.assertIn('--colcon-timeout',err)
 
     def test_unwritable_out_exits_2(self):
         self.write_configs()
