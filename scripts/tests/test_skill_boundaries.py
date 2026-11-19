@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import tempfile
 import unittest
+from unittest.mock import patch
 
 SPEC = importlib.util.spec_from_file_location('skill_boundaries', Path(__file__).parents[1] / 'check_skill_boundaries.py')
 module = importlib.util.module_from_spec(SPEC)
@@ -126,6 +127,21 @@ class SkillBoundariesTest(unittest.TestCase):
                 path.write_text(json.dumps(payload))
                 with self.assertRaises(module.UsageError):
                     module.load_config(path)
+
+    def test_load_config_rejects_roots_outside_repository(self):
+        for root in (str(self.root), '..', '../runtime', 'runtime/../runtime'):
+            with self.subTest(root=root):
+                self.write_config({'rules': [{'id': 'runtime', 'roots': [root]}]})
+                with self.assertRaises(module.UsageError):
+                    module.load_config(self.root / 'config' / 'skill_boundaries.json')
+
+    def test_scan_reports_paths_outside_root(self):
+        outside = self.root.parent / 'outside.py'
+        outside.write_text('import json\n')
+        with patch.object(Path, 'rglob', return_value=iter([outside])):
+            report = module.audit(self.root, self.config)
+        self.assertFalse(report['passed'])
+        self.assertEqual(report['violations'][0]['kind'], 'outside_root')
 
     def test_load_config_rejects_malformed_legacy_exceptions(self):
         base = dict(rules=[{'id': 'runtime', 'roots': ['runtime']}])

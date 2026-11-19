@@ -38,6 +38,12 @@ def load_config(path):
         if not isinstance(roots, list) or not roots \
                 or any(not isinstance(root, str) or not root for root in roots):
             raise UsageError('rules[%d].roots must be non-empty strings' % index)
+        for root in roots:
+            candidate = Path(root)
+            if candidate.is_absolute() or candidate.drive or candidate.root \
+                    or '..' in candidate.parts:
+                raise UsageError('rules[%d].roots must stay inside the repository: %s'
+                                 % (index, root))
         for key in ('forbidden_imports', 'allowed_external_imports', 'forbidden_path_parts'):
             values = rule.get(key, [])
             if not isinstance(values, list) or any(not isinstance(value, str) or not value
@@ -114,7 +120,12 @@ def scan(root, config):
                 violations.append(dict(rule=rule['id'], path=relative, kind='missing_root', expression=relative, line=0))
                 continue
             for path in sorted(directory.rglob('*.py')):
-                source = path.relative_to(root).as_posix()
+                try:
+                    source = path.relative_to(root).as_posix()
+                except ValueError:
+                    violations.append(dict(rule=rule['id'], path=str(path),
+                                           kind='outside_root', expression=str(path), line=0))
+                    continue
                 scanned.add(source)
                 try:
                     tree = ast.parse(path.read_text(encoding='utf-8'))
