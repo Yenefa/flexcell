@@ -287,7 +287,9 @@ def main():
                                  stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
         remember_owned(out, stack)
         ready = False
-        for attempt in range(1, 7):
+        # The contact stack needs the spawners to finish; 6 x 3 s expired while
+        # arm_controller was still NOT_ACTIVE, which the strict gate rejects.
+        for attempt in range(1, 21):
             if stack.poll() is not None:
                 raise RuntimeError('owned launch exited during startup')
             time.sleep(3)
