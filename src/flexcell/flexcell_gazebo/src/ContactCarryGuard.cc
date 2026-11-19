@@ -387,10 +387,15 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
       squeezeMode = true;
     }
     if (squeezeMode) {
-      ecm.SetComponentData<components::JointForceCmd>(leftJoint,
-                            std::vector<double>{-signLeft_ * squeezeForce});
-      ecm.SetComponentData<components::JointForceCmd>(rightJoint,
-                            std::vector<double>{-signRight_ * squeezeForce});
+      // Never push past the joint range: MoveIt rejects every plan whose start
+      // state is out of bounds ("CheckStartStateBounds: Start state out of
+      // bounds"), which killed the lift on a random subset of runs.
+      double fL = -signLeft_ * squeezeForce;
+      double fR = -signRight_ * squeezeForce;
+      if ((fL < 0.0 && ql <= jointLower + 2e-4) || (fL > 0.0 && ql >= jointUpper - 2e-4)) fL = 0.0;
+      if ((fR < 0.0 && qr <= jointLower + 2e-4) || (fR > 0.0 && qr >= jointUpper - 2e-4)) fR = 0.0;
+      ecm.SetComponentData<components::JointForceCmd>(leftJoint, std::vector<double>{fL});
+      ecm.SetComponentData<components::JointForceCmd>(rightJoint, std::vector<double>{fR});
     } else {
       // Stiffness law sized for the corrected 40 g finger: kd = 2*sqrt(kp*m)
       // puts the jaw at critical damping instead of the chatter a lighter finger
