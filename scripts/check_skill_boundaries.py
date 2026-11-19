@@ -11,6 +11,62 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 
 
+class UsageError(Exception):
+    """Bad input or bad configuration: exit 2, never a partial report."""
+
+
+def load_config(path):
+    try:
+        raw = Path(path).read_text(encoding='utf-8')
+    except (OSError, UnicodeDecodeError) as exc:
+        raise UsageError('cannot read config %s: %s' % (path, exc))
+    try:
+        config = json.loads(raw)
+    except json.JSONDecodeError as exc:
+        raise UsageError('config %s is not valid JSON: %s' % (path, exc))
+    if not isinstance(config, dict):
+        raise UsageError('config %s must be a JSON object' % path)
+    rules = config.get('rules')
+    if not isinstance(rules, list) or not rules:
+        raise UsageError('config %s needs a non-empty rules list' % path)
+    for index, rule in enumerate(rules):
+        if not isinstance(rule, dict):
+            raise UsageError('rules[%d] must be an object' % index)
+        if not isinstance(rule.get('id'), str) or not rule['id']:
+            raise UsageError('rules[%d].id must be a non-empty string' % index)
+        roots = rule.get('roots')
+        if not isinstance(roots, list) or not roots \
+                or any(not isinstance(root, str) or not root for root in roots):
+            raise UsageError('rules[%d].roots must be non-empty strings' % index)
+        for root in roots:
+            candidate = Path(root)
+            if candidate.is_absolute() or candidate.drive or candidate.root \
+                    or '..' in candidate.parts:
+                raise UsageError('rules[%d].roots must stay inside the repository: %s'
+                                 % (index, root))
+        for key in ('forbidden_imports', 'allowed_external_imports', 'forbidden_path_parts'):
+            values = rule.get(key, [])
+            if not isinstance(values, list) or any(not isinstance(value, str) or not value
+                                                   for value in values):
+                raise UsageError('rules[%d].%s must be strings' % (index, key))
+        if not isinstance(rule.get('forbid_python_path_changes', False), bool):
+            raise UsageError('rules[%d].forbid_python_path_changes must be a boolean' % index)
+    exceptions = config.get('legacy_exceptions', [])
+    if not isinstance(exceptions, list):
+        raise UsageError('config %s needs a legacy_exceptions list' % path)
+    for index, exception in enumerate(exceptions):
+        if not isinstance(exception, dict):
+            raise UsageError('legacy_exceptions[%d] must be an object' % index)
+        for key in ('rule', 'path', 'kind', 'expression'):
+            if not isinstance(exception.get(key), str) or not exception[key]:
+                raise UsageError('legacy_exceptions[%d].%s must be a non-empty string'
+                                 % (index, key))
+        count = exception.get('count')
+        if not isinstance(count, int) or isinstance(count, bool) or count <= 0:
+            raise UsageError('legacy_exceptions[%d].count must be a positive integer' % index)
+    return config
+
+
 def qualified(node, aliases):
     if isinstance(node, ast.Name):
         return aliases.get(node.id, node.id)
@@ -64,11 +120,16 @@ def scan(root, config):
                 violations.append(dict(rule=rule['id'], path=relative, kind='missing_root', expression=relative, line=0))
                 continue
             for path in sorted(directory.rglob('*.py')):
-                source = path.relative_to(root).as_posix()
+                try:
+                    source = path.relative_to(root).as_posix()
+                except ValueError:
+                    violations.append(dict(rule=rule['id'], path=str(path),
+                                           kind='outside_root', expression=str(path), line=0))
+                    continue
                 scanned.add(source)
                 try:
                     tree = ast.parse(path.read_text(encoding='utf-8'))
-                except (OSError, SyntaxError) as exc:
+                except (OSError, SyntaxError, UnicodeDecodeError) as exc:
                     violations.append(dict(rule=rule['id'], path=source, kind='parse_error', expression=str(exc), line=0))
                     continue
                 for node, kind, expression in dependencies(tree):
@@ -116,16 +177,24 @@ def audit(root, config):
                 legacy_dependencies=[v for v in found if fingerprint(v) in expected])
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--root', type=Path, default=ROOT)
     parser.add_argument('--out', type=Path)
-    args = parser.parse_args()
-    config = json.loads((args.root / 'config/skill_boundaries.json').read_text())
-    report = audit(args.root, config)
+    args = parser.parse_args(argv)
+    try:
+        config = load_config(args.root / 'config/skill_boundaries.json')
+        report = audit(args.root, config)
+    except UsageError as exc:
+        print('ERROR: ' + str(exc), file=sys.stderr)
+        return 2
     encoded = json.dumps(report, indent=2) + '\n'
     if args.out:
-        args.out.write_text(encoded)
+        try:
+            args.out.write_text(encoded)
+        except OSError as exc:
+            print('ERROR: cannot write %s: %s' % (args.out, exc), file=sys.stderr)
+            return 2
     print(encoded, end='')
     return 0 if report['passed'] else 1
 
