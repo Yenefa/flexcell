@@ -68,10 +68,6 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
   std::deque<std::shared_ptr<Command>> queue;
   std::shared_ptr<Command> pendingGrasp, pendingRelease;
   double pendingSince{-1.0};
-  // Grasp opens the jaw wide for openHoldS so the pads clear the cube, then closes.
-  double openExtra{0.020};
-  double openHoldS{0.60};
-  double openUntil{0.0};
 
   std::string objectName{"target_box_a"}, gripperModel{"open_manipulator_x"};
   std::string leftName{"gripper_left_joint"}, rightName{"gripper_right_joint"};
@@ -289,10 +285,6 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
     confirmFrames = config->HasElement("confirm_frames") ? config->Get<int>("confirm_frames") : confirmFrames;
     expectedWidth = config->HasElement("expected_object_width") ? config->Get<double>("expected_object_width") : expectedWidth;
     widthTolerance = config->HasElement("width_tolerance") ? config->Get<double>("width_tolerance") : widthTolerance;
-    // Rest wide open: the free gap (34 mm) is narrower than the 35 mm cube, so a
-    // closed jaw on the way down meets the cube with its fingers and shoves it.
-    targetGap = zeroGap + openExtra;
-    openUntil = 0.0;
     if (config->HasElement("base_link")) baseName = config->Get<std::string>("base_link");
     if (config->HasElement("lift_joint")) liftName = config->Get<std::string>("lift_joint");
     if (config->HasElement("lift_height")) liftHeight = config->Get<double>("lift_height");
@@ -326,25 +318,14 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
           objectModel = kNullEntity;
           objectLink = kNullEntity;
         }
-        // The free jaw gap (34 mm) is NARROWER than the 35 mm task cube, so a
-        // grasp that starts closing immediately lands on the cube's top edge and
-        // shoves it aside ("box did not follow the lift", measured). Open wide
-        // first, let the pads straddle the cube, then close.
-        // Only the first command of a grasp opens the jaw: the carry client
-        // re-sends the grasp while it waits, and re-arming the open phase kept
-        // the jaw wide open until the window expired (measured gap 0.054).
-        if (pendingGrasp == nullptr) {
-          targetGap = zeroGap + openExtra;
-          openUntil = nowT + openHoldS;
-        }
+        targetGap = closedGap;
         stallFrames = 0;
         engaged = false;
         pendingGrasp = command;
         pendingSince = nowT;
         continue;
       } else if (command->kind == Kind::Release) {
-        targetGap = zeroGap + openExtra;
-        openUntil = 0.0;
+        targetGap = zeroGap;
         engaged = false;
         stallFrames = 0;
         squeezeMode = false;
@@ -390,11 +371,6 @@ class ContactCarryGuard final : public System, public ISystemConfigure,
       ++calibSteps;
       if (calibSteps >= 120) calibSteps = 9999;
       return;
-    }
-    if (openUntil > 0.0 && nowT >= openUntil) {
-      // The wide-open phase is over: close onto the cube.
-      targetGap = closedGap;
-      openUntil = 0.0;
     }
     const double qTarget = std::clamp(0.5 * (targetGap - zeroGap), jointLower, jointUpper);
     // Velocity servo: a 1 g finger with a stiffness law chatters (measured
