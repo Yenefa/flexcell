@@ -292,7 +292,10 @@ def main():
                 raise RuntimeError('owned launch exited during startup')
             time.sleep(3)
             target = out / ('health_before_%d' % attempt)
-            if command([sys.executable, str(ROOT / 'setup/flexcell_admin.py'), 'health'], target, timeout=40) == 0:
+            # A contact backend adds four services and a heavier world, so the
+            # 40 s budget intermittently expired mid-startup.
+            if command([sys.executable, str(ROOT / 'setup/flexcell_admin.py'), 'health'],
+                       target, timeout=90) == 0:
                 doc = json_payload(target.with_suffix('.stdout').read_text())
                 if (doc.get('ok') is True and doc.get('hard_fail') == []
                         and doc['checks'].get('task_state') == 'IDLE'
