@@ -551,6 +551,7 @@ class CarryServer(Node):
             # observed while it happens instead of at the place check.
             self._log.write({'event': 'contact_hold', 'object': object_id, 'session': session})
             baseline = None
+            slip_logged = False
             while not stop_evt.is_set():
                 stop_evt.wait(self._period)
                 if stop_evt.is_set():
@@ -570,13 +571,14 @@ class CarryServer(Node):
                 self._log.write({'event': 'contact_follow', 'object': object_id,
                                  'session': session, 'rel_z': rel, 'drift': drift,
                                  'gap': gap, 'engaged': bool(body.get('ok'))})
-                if abs(drift) > 0.010:
+                if abs(drift) > 0.010 and not slip_logged:
+                    # Record, never abort: aborting here turned a slow slide into a
+                    # hard pick failure and measured worse than carrying on.
+                    slip_logged = True
                     self._log.write({'event': 'contact_slip', 'object': object_id,
                                      'session': session, 'drift': drift})
                     self.get_logger().error(
-                        'contact slip detected: object moved %.3fm in the jaw' % drift)
-                    self._on_stop(None, cause='contact_slip')
-                    return
+                        'contact slip observed: object moved %.3fm in the jaw' % drift)
             return
         consecutive_fail = 0
         # Thread-local observations: replacement cannot give the old worker
