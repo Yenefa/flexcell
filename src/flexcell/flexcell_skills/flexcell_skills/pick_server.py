@@ -397,7 +397,10 @@ class PickServer(Node):
             return res
 
         # ---------- admission ----------
-        if not self._admission.acquire(blocking=False):
+        # A previous goal that is still unwinding (cancel, abort) briefly holds the
+        # admission lock; failing instantly turned that into ERR_RESOURCE_BUSY on
+        # the very first attempt of a run.
+        if not self._admission.acquire(timeout=8.0):
             return finish(R.OUTCOME_FAILED, R.ERR_RESOURCE_BUSY,
                           'another pick goal is active')
         try:
