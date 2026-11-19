@@ -74,6 +74,32 @@ def launch_stack(context):
                                            ('izz', '2.0e-05'), ('ixy', '0'), ('ixz', '0'),
                                            ('iyz', '0')):
                             inertia.set(key, value)
+        # The shipped finger collision is the sculpted palm mesh: its inner surface
+        # runs from -12 mm to +5 mm along the tool axis, so closing the jaw acts as a
+        # wedge and pushes a cube out (measured: the pads stay closed while the box
+        # slides down 12-25 mm). Substitute a plain parallel pad for CONTACT ONLY, so
+        # the friction grasp is tested against the model's design intent (34 mm free
+        # gap at q=0) instead of against a decorative surface.
+        for link in urdf.findall('link'):
+            name = link.get('name')
+            if name not in ('gripper_left_link', 'gripper_right_link'):
+                continue
+            for collision in list(link.findall('collision')):
+                link.remove(collision)
+            side = 1.0 if name == 'gripper_left_link' else -1.0
+            pad = ET.SubElement(link, 'collision')
+            pad.set('name', 'pad')
+            origin = ET.SubElement(pad, 'origin')
+            origin.set('xyz', '0.045 %.4f 0.0' % (side * 0.0195))
+            origin.set('rpy', '0 0 0')
+            geometry = ET.SubElement(pad, 'geometry')
+            box = ET.SubElement(geometry, 'box')
+            box.set('size', '0.050 0.004 0.058')
+            surface = ET.SubElement(pad, 'surface')
+            friction = ET.SubElement(surface, 'friction')
+            ode = ET.SubElement(friction, 'ode')
+            for tag in ('mu', 'mu2'):
+                ET.SubElement(ode, tag).text = '1.5'
         # Keep the jaw joints declared for STATE only: dropping them entirely also
         # dropped their joint_states, and MoveIt then planned the lift with the
         # fingers at a default pose and refused it (ERR_NO_COLLISION_FREE_PLAN).
